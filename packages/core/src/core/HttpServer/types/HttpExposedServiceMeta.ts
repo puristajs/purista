@@ -16,6 +16,8 @@ export type HttpExposedServiceMeta<ParameterType = EmptyObject> = Prettify<
 					protocol: string
 					documentationUrl?: string
 					mode?: 'stream' | 'aggregate'
+					/** Static response headers required by the declared stream protocol. */
+					responseHeaders?: Readonly<Record<string, string>>
 				}
 				openApi?: {
 					isSecure: boolean

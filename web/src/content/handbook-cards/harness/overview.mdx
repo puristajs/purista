@@ -1,0 +1,96 @@
+---
+title: Overview
+description: Decide where the Harness fits and keep responsibility boundaries explicit from the first agent.
+---
+
+## Choose the smallest useful package set
+
+The Harness is one typed runtime plus optional, explicitly selected packages.
+Start with the core package and one model provider. Add Guardrails, local
+privacy detection, Agent Plugins, MCP, or a more capable sandbox only when the
+use case needs that boundary.
+
+| Need | Install | Next step |
+| --- | --- | --- |
+| Typed agents, workflows, tools, state, streaming, and telemetry | `@purista/harness` | [Quickstart](/handbook/harness/quickstart/) |
+| A model provider | One of the four first-party provider adapters | [Models and configuration](/handbook/harness/models-and-configuration/) |
+| Scoped facts, recall, or application memory | Built-in in-memory engine or a tested `MemoryEngine` | [Memory](/handbook/harness/memory/) |
+| Content, tool, retrieval, or PII controls | `@purista/harness-guardrails` and, when required, one privacy detector | [Guardrails and governance](/handbook/harness/guardrails-governance/) |
+| Reviewed local Agent Plugins v1 | `@purista/harness-agent-plugins` | [Agent Plugins](/handbook/harness/agent-plugins/) |
+| A complete package-by-package decision map | Any first-party Harness package | [Ecosystem and packages](/handbook/harness/ecosystem-packages/) |
+
+The [Ecosystem and packages](/handbook/harness/ecosystem-packages/) page
+is the authoritative catalogue for all first-party packages, optional peers,
+minimal configuration, and the focused implementation guides.
+
+## Before you begin
+
+This chapter assumes a TypeScript application on Node.js or Bun and a package
+manager. You do not need PURISTA to use the Harness. If your application is a
+PURISTA service, command, queue consumer, or stream producer, first build the
+standalone Harness here and then attach it at the framework boundary in
+[Harness Integration](/handbook/blocks/agent-pattern/harness-integration/).
+
+## What the Harness owns
+
+The Harness runs in your process and composes typed model aliases, tools,
+skills, agents, workflows, sessions, state adapters, sandboxes, logs, and
+OpenTelemetry. Provider SDKs and optional governance or guardrail packages are
+adapters around that runtime.
+
+| Concern | Owner |
+| --- | --- |
+| Model invocation, tool loop, run events, token telemetry, memory orchestration | Harness |
+| HTTP/SSE, authentication, tenant policy, business writes | Your application |
+| Long-running transport delivery and retries | Your worker or queue integration |
+| PURISTA service contracts, commands, queues, streams | PURISTA framework |
+
+Use a direct agent for one typed conversation loop. Use a workflow for
+deterministic orchestration around one or more agents: branching, fan-out,
+review, persistence, or approval. A workflow is ordinary typed application
+code; it is not another prompt.
+
+## Choose the smallest runtime shape
+
+| Need | Start with |
+| --- | --- |
+| Extract, classify, summarize, or answer with constrained tools | One direct agent |
+| Coordinate specialists, a review, or deterministic work | One workflow with declared delegation |
+| Resume after restart with workspace state | Persistent Harness storage and a durable workspace |
+| Make external capabilities available | Typed TypeScript tool, then MCP only where a server is justified |
+| Reuse a method or file-backed guidance | Mounted skill directory and the `read` built-in |
+
+The design goal is reviewable capability. A model alias says what inference can
+do; an agent says which tools and skills it can use; a workflow says which
+agents it may call; schemas protect every data boundary.
+
+## A real-world boundary: support answer with an order lookup
+
+For a support API, keep identity and transport in the route or PURISTA handler.
+Pass only the validated business input into the session. The Harness may decide
+whether to use an allowlisted `lookup_order` tool, but the tool handler checks
+the caller's authorization before it reads an order. The application writes an
+audit record after a validated result returns.
+
+```text
+HTTP/PURISTA handler → authenticate and validate → Harness session
+Harness agent → typed lookup tool → application order service
+Harness result → application response, audit record, or queue message
+```
+
+This division prevents two common problems: putting identity claims into an
+untrusted prompt, and allowing an agent to call a provider or database SDK
+without the application's policy boundary. The next pages implement this shape
+incrementally.
+
+## Choose the next page
+
+Start at [Quickstart](/handbook/harness/quickstart/) if you need a first
+working agent. Go to [Models & Configuration](/handbook/harness/models-and-configuration/)
+when you already have a Harness and need timeouts, retries, or a second model
+alias. Go to [Memory](/handbook/harness/memory/) when you need scoped facts or recall.
+
+## Next
+
+Build one working agent in [Quickstart](/handbook/harness/quickstart/).
+Architects evaluating the platform can start with the [Harness overview](/harness/).

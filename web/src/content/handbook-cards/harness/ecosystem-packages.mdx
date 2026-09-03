@@ -1,0 +1,313 @@
+---
+title: Ecosystem & Packages
+description: Select, install, and configure every first-party AI Harness package without hidden provider, privacy, or runtime dependencies.
+---
+
+The AI Harness is deliberately modular. `@purista/harness` owns the typed
+runtime; every provider, privacy implementation, and plugin capability is an
+explicit dependency at the application composition root. This page lists the
+complete first-party package catalogue for the current release.
+
+## Start with this decision map
+
+```mermaid
+flowchart TD
+  core[@purista/harness\ntyped runtime] --> provider{Need a model provider?}
+  provider --> openai[OpenAI]
+  provider --> anthropic[Anthropic]
+  provider --> bedrock[Amazon Bedrock]
+  provider --> azure[Azure AI Foundry]
+  core --> safety{Need content or tool controls?}
+  safety --> rails[@purista/harness-guardrails]
+  rails --> privacy{Need PII detection?}
+  privacy --> presidio[Presidio sidecar]
+  privacy --> native[Native local privacy]
+  privacy --> ner[Optional local NER]
+  core --> plugins{Need reviewed Agent Plugins v1?}
+  plugins --> agentPlugins[@purista/harness-agent-plugins]
+  core --> memory{Need durable memory?}
+  memory --> sqlite[SQLite]
+  memory --> postgres[PostgreSQL + pgvector]
+  memory --> redis[Redis Search]
+  memory --> nats[NATS JetStream KV]
+  core --> peers[Optional core peers\nMCP, bash sandbox, OpenTelemetry]
+```
+
+Install only the branches your application uses. A provider adapter does not
+install Guardrails, and a privacy detector does not create a model provider or
+send data anywhere by itself.
+
+## Package catalogue
+
+| Package | Use it when | Execution boundary | Minimal next step |
+| --- | --- | --- | --- |
+| [`@purista/harness`](#core-runtime) | You need typed models, agents, workflows, tools, skills, sessions, state, sandboxes, streaming, evaluations, and telemetry. | In-process runtime; application owns transport, auth, persistence backends, and deployment. | Install it, define models before agents, then build with `defineHarness()`. |
+| [`@purista/harness-openai`](#model-providers) | Your configured model endpoint uses the OpenAI SDK or OpenAI-compatible Chat Completions / Responses API. | Provider SDK request from your application process. | Call `openai({ apiKey, api? })`, then register it under a Harness model alias. |
+| [`@purista/harness-anthropic`](#model-providers) | You use Anthropic models. | Provider SDK request from your application process. | Call `anthropic({ apiKey })`, then register it under a Harness model alias. |
+| [`@purista/harness-bedrock`](#model-providers) | You use Amazon Bedrock with the AWS credential chain. | AWS SDK request from your application process. | Call `bedrock({ region })`, then register it under a Harness model alias. |
+| [`@purista/harness-azure-foundry`](#model-providers) | You use Azure AI Foundry inference endpoints. | Azure SDK request from your application process. | Call `azureFoundry({ endpoint, apiKey or credential })`, then register it under a Harness model alias. |
+| [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Define opaque action tokens and one typed inline configuration, then set `guardrails: rails`. |
+| [`@purista/harness-guardrails-presidio`](#privacy-detectors) | You already operate Microsoft Presidio Analyzer and need its recognizers or languages. | Calls an application-owned, authenticated internal Presidio `POST /analyze` endpoint. | Inject `createPresidioDetector({ endpoint, ... })`; masking remains in the core Guardrails addon. |
+| [`@purista/harness-guardrails-native-privacy`](#privacy-detectors) | You need deterministic local detection for common identifiers without a detector network hop. | Rust Node-API prebuild, in process; no model, WASM, or network fallback. | Construct `createNativePrivacyDetector({ id })`. |
+| [`@purista/harness-guardrails-local-ner`](#privacy-detectors) | You need local model-based people, organization, location, or other mapped NER labels. | In-process Transformers.js model loaded from your reviewed local files. | Install the optional peer, provide a SHA-256 manifest and label map, then call `warmup()`. |
+| [`@purista/harness-agent-plugins`](#agent-plugins) | You accept reviewed local Agent Plugins v1 with selected skills or MCP tools. | Reads local data-only manifests; selected stdio tools run through a qualifying sandbox. | Inspect, persist the digest, explicitly trust, then bind selected components. |
+| [`@purista/harness-memory-sqlite`](#memory-engines) | A local app needs durable facts, TTL, lists, and full-text recall. | Built-in Node.js/Bun SQLite; optional explicitly loaded `sqlite-vec` peer for exact vectors. | Call `sqliteMemoryEngine({ file })`; add `vector: true` only after installing `sqlite-vec@0.1.9`. |
+| [`@purista/harness-memory-postgres`](#memory-engines) | A shared deployment already runs PostgreSQL 16+ with pgvector. | Official `pg` client and application database. | Call `postgresMemoryEngine({ connectionString })` or pass an owned pool. |
+| [`@purista/harness-memory-redis`](#memory-engines) | A shared low-latency deployment runs Redis Search. | Official `redis` client and Redis Search/vector index. | Call `redisMemoryEngine({ url, namespace })`; fix dimensions once before vector use. |
+| [`@purista/harness-memory-nats`](#memory-engines) | A shared deployment has JetStream KV but does not require relevance search. | Official modular NATS client and JetStream KV bucket. | Call `natsMemoryEngine({ servers })` or inject a caller-owned connection. |
+
+The core test utilities are exported as `@purista/harness/testing`; privacy
+and Agent Plugin packages expose their own documented testing subpaths where
+available. These are entry points, not additional packages to install.
+
+## Core runtime
+
+```sh
+npm install @purista/harness
+```
+
+`@purista/harness` is the required package. It is provider-neutral: registering
+a model alias is what connects it to one configured provider adapter. Use the
+[Quickstart](/handbook/harness/quickstart/) for the smallest runnable
+agent and [Models & configuration](/handbook/harness/models-and-configuration/)
+for capabilities, retries, model aliases, and credentials.
+
+```ts
+import { defineHarness, inMemorySandbox } from '@purista/harness'
+
+const harness = defineHarness({ name: 'support' })
+	.sandbox(inMemorySandbox())
+	.models({
+		// Register one configured provider under a stable application alias.
+	})
+	.agents({
+		// Agents refer to aliases, not provider SDKs.
+	})
+	.build()
+```
+
+### Optional core peers
+
+| Dependency | Install it when | Configuration guide |
+| --- | --- | --- |
+| `@modelcontextprotocol/client` | An agent uses MCP over Streamable HTTP or a sandboxed stdio server. | [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) |
+| `just-bash` | An agent needs the exec-capable `bashSandbox()` instead of the safer in-memory default. | [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) |
+| `@opentelemetry/api` | Your application has an OpenTelemetry context/provider and you want Harness spans to join it. | [Observability & operations](/handbook/harness/observability-operations/) |
+
+Do not add an optional peer merely because it is available. In particular,
+stdio MCP needs a sandbox with the required spawning and read-only mounting
+capabilities, and command execution deserves a separate isolation decision.
+
+## Model providers
+
+All four adapters implement the same Harness model-provider port. They differ
+only in provider SDK configuration, authentication, and model identifiers.
+The rest of the agent, workflow, tool, trace, and evaluation code remains
+provider-neutral.
+
+| Provider package | Install | Minimal provider construction | Credential ownership |
+| --- | --- | --- | --- |
+| OpenAI | `npm install @purista/harness-openai` | `openai({ apiKey, api: 'responses' })` when the selected model needs Responses API tool/reasoning support | Application environment or secret store |
+| Anthropic | `npm install @purista/harness-anthropic` | `anthropic({ apiKey })` | Application environment or secret store |
+| Amazon Bedrock | `npm install @purista/harness-bedrock` | `bedrock({ region })` | Standard AWS SDK credential chain |
+| Azure AI Foundry | `npm install @purista/harness-azure-foundry` | `azureFoundry({ endpoint, apiKey })` or an Azure credential | Application environment or Azure identity |
+
+```ts
+import { defineHarness } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+
+const harness = defineHarness().models({
+	assistant: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY!, api: 'responses' }),
+		model: 'gpt-5-mini',
+		capabilities: ['object', 'tool_use'],
+	},
+})
+```
+
+Declare only capabilities that the selected model and adapter actually support.
+The builder validates agent requirements against these declarations before a
+run starts. See [Models & configuration](/handbook/harness/models-and-configuration/)
+for a capability matrix and provider-specific options.
+
+## Guardrails
+
+```sh
+npm install @purista/harness-guardrails
+```
+
+The Guardrails addon is optional and attaches one ordered interceptor to a
+default-loop agent. One typed inline configuration selects opaque,
+application-owned action tokens; TypeScript provides the action behavior. It
+never creates a provider, reads credentials, or opens a vector store.
+
+```ts title="src/guardrails.ts: content-only action"
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { z } from 'zod'
+
+const rails = defineGuardrails({
+	config: { rails: { input: { flows: ['block secrets'] } } },
+	actions: {
+		'block secrets': defineGuardrailAction({
+			phase: 'input',
+			valueSchema: z.string(),
+			mayTransform: false,
+			evaluate: ({ value }) =>
+				containsSecret(value) ? { decision: 'block', reasonCode: 'secret_detected' } : { decision: 'allow' },
+		}),
+	},
+})
+
+const harness = defineHarness()
+	.models({ assistant: runtimeModel })
+	.agent('answer', {
+		model: 'assistant',
+		instructions: 'Answer only from approved information.',
+		guardrails: rails,
+	})
+	.build()
+```
+
+Read [Guardrails & governance](/handbook/harness/guardrails-governance/)
+for lifecycle coverage, inline action/configuration rules, model-check costs,
+and workflow/tool/skill behavior.
+
+## Privacy detectors
+
+Privacy adapters implement the same `SensitiveDataDetector` contract. Select
+one detector based on deployment and identifier coverage, then bind it through
+`createSensitiveDataActions({ detector })` in `@purista/harness-guardrails`.
+
+| Package | Choose it for | Required setup | Important limit |
+| --- | --- | --- | --- |
+| `@purista/harness-guardrails-presidio` | Existing Presidio Analyzer deployment; custom or NLP recognizers; deployment-selected languages | Internal authenticated endpoint and optional static headers | The adapter calls Analyzer `/analyze` only; it does not deploy Presidio or call its anonymizer. |
+| `@purista/harness-guardrails-native-privacy` | Local common identifiers: email, phone, card, IP, IBAN, US SSN, URL | Matching Node-API prebuild for Node.js or Bun | Unsupported entities/platforms fail; it does not fall back remotely or to WASM. |
+| `@purista/harness-guardrails-local-ner` | Local model-based labels such as person, organization, or location | Optional `@huggingface/transformers` peer, absolute model path, asset SHA-256 manifest, label map, startup `warmup()` | No bundled/downloaded model; evaluate the chosen model for each language and entity. |
+
+```ts
+import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
+import { createSensitiveDataActions } from '@purista/harness-guardrails'
+
+const detector = createNativePrivacyDetector({ id: 'local-pii' })
+const sensitiveDataActions = createSensitiveDataActions({ detector })
+```
+
+Use [Privacy detectors](/handbook/harness/privacy-detectors/) for the
+feature matrix, local NER asset verification, deployment guidance, and
+deterministic test helpers.
+
+## Agent Plugins
+
+```sh
+npm install @purista/harness-agent-plugins
+```
+
+This optional package supports the data-only Agent Plugins v1 format. It does
+not import plugin code, install dependencies, discover a marketplace, expose
+tools automatically, or accept plugin-provided credentials. The application
+inspects a local plugin directory, stores a review digest, explicitly trusts a
+source, then binds only selected skills and tools to normal local Harness IDs.
+
+```ts
+import { inspectAgentPlugin, loadAgentPlugins } from '@purista/harness-agent-plugins'
+
+const source = { root: './plugins/research' } as const
+const inspection = await inspectAgentPlugin(source)
+if (!inspection.valid || !inspection.digest) throw new Error('Invalid plugin')
+
+const [plugin] = await loadAgentPlugins({
+	plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest }],
+})
+
+const bindings = plugin?.bindings({
+	skills: { research_playbook: 'research-playbook' },
+	tools: {},
+})
+```
+
+See [Agent Plugins](/handbook/harness/agent-plugins/) for inspection,
+reviewed-digest loading, explicit binding, trusted roots, and the sandbox
+requirements for stdio.
+
+## Memory engines
+
+```sh
+npm install @purista/harness-memory-sqlite
+```
+
+All engines implement the same scoped `MemoryEngine` contract. Core keeps
+identity binding, scope construction, model-backed embeddings and summaries,
+validation, operation telemetry, and cost-bearing model spans; an engine owns
+only its storage representation and backend lifecycle.
+
+| Package | Required backend | Search capabilities | Ownership and immutable boundary |
+| --- | --- | --- | --- |
+| SQLite | Built-in SQLite with FTS5 | Text; exact semantic and hybrid only with optional `sqlite-vec@0.1.9` | One local file; first vector fixes descriptor and dimensions. |
+| PostgreSQL | PostgreSQL 16+ with pgvector | Text, semantic, hybrid | Connection string or caller-owned `pg` pool; first vector fixes descriptor and dimensions. |
+| Redis | Redis 8+ with Search | Text; semantic and hybrid when `vector: { dimensions }` is configured | URL or caller-owned official client; use a new versioned namespace for a schema/dimension change. |
+| NATS | JetStream enabled | No text, semantic, or hybrid search | Servers or caller-owned NATS connection; KV bucket persists scoped records. |
+
+### SQLite: local durable defaults
+
+```ts
+import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
+
+const memory = sqliteMemoryEngine({ file: '.purista/memory.sqlite' })
+```
+
+The base engine has no third-party runtime dependency. Exact local vectors are
+an explicit native opt-in:
+
+```sh
+npm install sqlite-vec@0.1.9
+```
+
+```ts
+const memory = sqliteMemoryEngine({
+	file: '.purista/memory.sqlite',
+	vector: true,
+})
+```
+
+Missing dependencies or blocked extension loading fail before work begins with
+an actionable `HarnessConfigError`; there is no silent text-only downgrade.
+
+### PostgreSQL, Redis, and NATS
+
+```ts
+import { postgresMemoryEngine } from '@purista/harness-memory-postgres'
+import { redisMemoryEngine } from '@purista/harness-memory-redis'
+import { natsMemoryEngine } from '@purista/harness-memory-nats'
+
+const postgres = postgresMemoryEngine({ connectionString: process.env.DATABASE_URL! })
+const redis = redisMemoryEngine({
+	url: process.env.REDIS_URL!,
+	namespace: 'claims:memory:v1',
+	vector: { dimensions: 1536 },
+})
+const nats = natsMemoryEngine({ servers: process.env.NATS_URL! })
+```
+
+Use exactly one engine per Harness. PostgreSQL and Redis search engines are
+tested both in-process/unit paths and against their real CI services. NATS is
+a deliberate durable KV choice, not a search substitute. Dapr is not a
+supported memory backend.
+
+Read [Memory](/handbook/harness/memory/) for identity scopes, typed embedding
+and summary configuration, operations, tests, and tracing.
+
+## Package selection checks
+
+Before adding a package, verify its execution boundary and test strategy:
+
+- Providers make outbound SDK calls from your application process; use the
+  Harness fake/replay provider before a live smoke test.
+- Guardrails actions and native privacy can use deterministic local fakes.
+  Presidio uses `FakePresidioSidecar`; local NER uses `FakeLocalNerRuntime`.
+- Agent Plugins require a reviewed digest and explicit trust before binding.
+  Treat plugin material as untrusted input even when it is local.
+- No package replaces your application’s identity, authorization, tenancy,
+  transport, data-retention, or incident-response policy.
+
+Continue with [Testing & evaluations](/handbook/harness/testing-and-evaluations/)
+once the smallest package set is wired.

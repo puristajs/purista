@@ -1,0 +1,190 @@
+---
+title: Generate the subscription
+description: Create a Monitoring service and match only the intended transaction result messages.
+order: 123
+kind: lesson
+status: published
+---
+
+The producer is ready. Now create the consumer as a separate capability.
+`Monitoring` observes transaction facts; it does not save transactions and
+`Transaction` does not import it.
+
+## Generate the Monitoring capability
+
+```bash title="Generate the Monitoring service" replay="project"
+npm run add:service -- monitoring \
+  --description "Derive small operational signals from business events" \
+  --non-interactive
+```
+
+Use the project-local PURISTA CLI again to create the subscription:
+
+```bash title="Generate the transaction subscription" replay="project"
+npm run add:subscription -- observe-large-debit \
+  --service monitoring --service-version 1 \
+  --event transaction.recorded.v1 \
+  --description "Observe large recorded debit transactions" \
+  --non-interactive
+```
+
+The CLI finds `transaction.recorded.v1` in `ServiceEvent`, creates the
+subscription files, and registers the definition in `monitoringV1Service.ts`.
+
+## Define the consumer-local input
+
+The Transaction event contains the complete recorded transaction. Monitoring
+only needs four fields for this reaction.
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/schema.ts" write
+import { z } from 'zod'
+
+export const monitoringV1ObserveLargeDebitInputPayloadSchema = z.object({
+	transactionId: z.uuid(),
+	accountId: z.string().trim().min(1),
+	amountCents: z.number().int().positive(),
+	direction: z.enum(['credit', 'debit']),
+})
+
+export const monitoringV1ObserveLargeDebitInputParameterSchema = z.undefined()
+```
+
+Zod removes unrelated object fields before the handler runs. This gives the
+consumer a narrow contract without changing the producer's output. A command
+success response has no command parameter, so its subscription parameter schema
+must accept `undefined`.
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/types.ts" write
+import type { z } from 'zod'
+import type {
+	monitoringV1ObserveLargeDebitInputParameterSchema,
+	monitoringV1ObserveLargeDebitInputPayloadSchema,
+} from './schema.js'
+
+export type MonitoringV1ObserveLargeDebitInputParameter = z.input<
+	typeof monitoringV1ObserveLargeDebitInputParameterSchema
+>
+export type MonitoringV1ObserveLargeDebitInputPayload = z.input<
+	typeof monitoringV1ObserveLargeDebitInputPayloadSchema
+>
+```
+
+## Make every routing condition explicit
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts" write
+import { EBMessageType } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import { monitoringV1ServiceBuilder } from '../../monitoringV1ServiceBuilder.js'
+import {
+	monitoringV1ObserveLargeDebitInputParameterSchema,
+	monitoringV1ObserveLargeDebitInputPayloadSchema,
+} from './schema.js'
+
+export const observeLargeDebitSubscriptionBuilder = monitoringV1ServiceBuilder
+	.getSubscriptionBuilder('observeLargeDebit', 'Observe large recorded debit transactions')
+	.subscribeToEvent(ServiceEvent.TransactionRecordedV1)
+	.filterForMessageType(EBMessageType.CommandSuccessResponse)
+	.filterSentFrom('Transaction', '1', 'recordTransaction', undefined)
+	.filterTenantId('tenant-example')
+	.addPayloadSchema(monitoringV1ObserveLargeDebitInputPayloadSchema)
+	.addParameterSchema(monitoringV1ObserveLargeDebitInputParameterSchema)
+	.setSubscriptionFunction(async function (_context, _payload, _parameter) {})
+```
+
+The filters are evaluated by the EventBridge before the handler runs:
+
+- `subscribeToEvent` matches the named fact.
+- `filterForMessageType` accepts only a completed command response.
+- `filterSentFrom` narrows the producer service, version, and command.
+- `filterTenantId` keeps this small standalone example inside one tenant.
+
+The hard-coded tenant is a concise tutorial fixture. A real multi-tenant
+deployment chooses an adapter and subscription strategy that preserves tenant
+isolation without creating application-wide consumers.
+
+## Test the definition and registration
+
+The generated starter test used `undefined` because the generated schema was
+empty. Replace it when you replace the schema so this checkpoint still builds:
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts" write
+import {
+	createSubscriptionContextMock,
+	getCommandSuccessMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { monitoringV1Service } from '../../monitoringV1Service.js'
+import { observeLargeDebitSubscriptionBuilder } from './observeLargeDebitSubscriptionBuilder.js'
+
+test('accepts the declared transaction payload', async () => {
+	const sandbox = createSandbox()
+	const payload = {
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		accountId: 'account-operating',
+		amountCents: 12_500,
+		direction: 'debit' as const,
+	}
+	const service = await monitoringV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const message = getCommandSuccessMessageMock(payload)
+		const mocked = createSubscriptionContextMock(observeLargeDebitSubscriptionBuilder, {
+			message,
+			sandbox,
+		})
+		const observe = safeBind(observeLargeDebitSubscriptionBuilder.getSubscriptionFunction(), service)
+		expect(await observe(mocked.context, payload, undefined)).toBeUndefined()
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitDefinition.test.ts" write
+import { EBMessageType, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import { monitoringV1Service } from '../../monitoringV1Service.js'
+import { observeLargeDebitSubscriptionBuilder } from './observeLargeDebitSubscriptionBuilder.js'
+
+test('registers one narrowly matched subscription', async () => {
+	const definition = await observeLargeDebitSubscriptionBuilder.getDefinition()
+	expect(definition.eventName).toBe(ServiceEvent.TransactionRecordedV1)
+	expect(definition.messageType).toBe(EBMessageType.CommandSuccessResponse)
+	expect(definition.sender).toEqual({
+		serviceName: 'Transaction',
+		serviceVersion: '1',
+		serviceTarget: 'recordTransaction',
+		instanceId: undefined,
+	})
+	expect(definition.tenantId).toBe('tenant-example')
+
+	const sandbox = createSandbox()
+	const bridge = getEventBridgeMock(sandbox)
+	const service = await monitoringV1Service.getInstance(bridge.mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		await service.start()
+		expect(bridge.stubs.registerSubscription.calledOnce).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Test the subscription filters" replay="project"
+npx vitest run src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitDefinition.test.ts
+npm run build
+```
+
+The handler is still empty, but the producer/consumer boundary and routing
+contract are already testable.

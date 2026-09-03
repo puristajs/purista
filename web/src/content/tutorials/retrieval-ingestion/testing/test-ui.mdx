@@ -1,0 +1,192 @@
+---
+title: Test the browser client
+description: Verify bearer authentication, standard AI stream transport, tool rendering, text deltas, and the ingestion-to-chat transition.
+order: 227
+kind: lesson
+status: draft
+---
+
+Test the chat at the React boundary. Mock AI SDK hooks and AI Elements rendering,
+then verify transport configuration, signed-in submission, retrieval status,
+and streamed text parts.
+
+```tsx title="ui/src/KnowledgeChat.test.tsx" write
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import type { PropsWithChildren } from 'react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { KnowledgeChat } from './KnowledgeChat'
+
+const { sendMessage, transports, useChat } = vi.hoisted(() => ({
+	sendMessage: vi.fn(),
+	transports: [] as Array<Record<string, unknown>>,
+	useChat: vi.fn(),
+}))
+
+vi.mock('@ai-sdk/react', () => ({ useChat }))
+vi.mock('ai', () => ({
+	DefaultChatTransport: class {
+		constructor(options: Record<string, unknown>) {
+			transports.push(options)
+		}
+	},
+}))
+vi.mock('@/components/ai-elements/conversation', () => ({
+	Conversation: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	ConversationContent: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	ConversationEmptyState: ({ title, description }: { title: string; description: string }) => (
+		<div>
+			<strong>{title}</strong>
+			<span>{description}</span>
+		</div>
+	),
+	ConversationScrollButton: () => null,
+}))
+vi.mock('@/components/ai-elements/message', () => ({
+	Message: ({ children }: PropsWithChildren) => <article>{children}</article>,
+	MessageContent: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	MessageResponse: ({ children }: PropsWithChildren) => <p>{children}</p>,
+}))
+vi.mock('@/components/ai-elements/prompt-input', () => ({
+	PromptInput: ({ children, onSubmit }: PropsWithChildren<{ onSubmit: (message: { text: string }) => void }>) => (
+		<form
+			onSubmit={(event) => {
+				event.preventDefault()
+				const form = new FormData(event.currentTarget)
+				onSubmit({ text: String(form.get('message') ?? '') })
+			}}
+		>
+			{children}
+		</form>
+	),
+	PromptInputTextarea: (properties: React.ComponentProps<'textarea'>) => <textarea name="message" {...properties} />,
+	PromptInputSubmit: ({ status: _status, ...properties }: React.ComponentProps<'button'> & { status: string }) => (
+		<button type="submit" {...properties} />
+	),
+}))
+vi.mock('@/components/ai-elements/tool', () => ({
+	Tool: ({ children }: PropsWithChildren) => <aside>{children}</aside>,
+	ToolHeader: ({ toolName, state }: { toolName: string; state: string }) => (
+		<p>
+			{toolName}: {state}
+		</p>
+	),
+	ToolContent: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	ToolInput: ({ input }: { input: unknown }) => <pre>{JSON.stringify(input)}</pre>,
+	ToolOutput: ({ output }: { output: unknown }) => <pre>{JSON.stringify(output)}</pre>,
+}))
+
+afterEach(cleanup)
+
+describe('KnowledgeChat', () => {
+	beforeEach(() => {
+		sendMessage.mockReset()
+		useChat.mockReset()
+		transports.length = 0
+		useChat.mockReturnValue({ messages: [], sendMessage, status: 'ready' })
+	})
+
+	it('uses the standard endpoint and sends the session identity in the transport', () => {
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(transports).toEqual([
+			{
+				api: '/api/v1/knowledge/chat',
+				headers: { authorization: 'Bearer session-123' },
+				body: { collectionId: 'customer-help' },
+			},
+		])
+		expect(screen.getByText('Ask Example Bank')).toBeInTheDocument()
+	})
+
+	it('prevents anonymous submission and submits a signed-in question', () => {
+		const { rerender } = render(<KnowledgeChat sessionToken="" />)
+		const anonymousInput = screen.getByRole('textbox')
+		fireEvent.change(anonymousInput, { target: { value: 'How long can a transfer stay pending?' } })
+		expect(screen.getByRole('button')).toBeDisabled()
+
+		rerender(<KnowledgeChat sessionToken="session-123" />)
+		fireEvent.submit(screen.getByRole('button').closest('form') as HTMLFormElement)
+
+		expect(sendMessage).toHaveBeenCalledWith({ text: 'How long can a transfer stay pending?' })
+	})
+
+	it('renders standard retrieval tool status and streamed text parts', () => {
+		useChat.mockReturnValue({
+			sendMessage,
+			status: 'streaming',
+			messages: [
+				{
+					id: 'assistant-1',
+					role: 'assistant',
+					parts: [
+						{
+							type: 'dynamic-tool',
+							toolCallId: 'search-1',
+							toolName: 'search_knowledge',
+							state: 'output-available',
+							input: { query: 'transfer timing' },
+							output: { matches: 1 },
+						},
+						{ type: 'text', text: 'Up to two business days.' },
+					],
+				},
+			],
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(screen.getByText('search_knowledge: output-available')).toBeInTheDocument()
+		expect(screen.getByText('Up to two business days.')).toBeInTheDocument()
+		expect(screen.getByText('The answer is streaming.')).toBeInTheDocument()
+	})
+})
+```
+
+Test the ingestion form separately and verify it calls the protected command
+before enabling retrieval.
+
+```tsx title="ui/src/KnowledgeSource.test.tsx" write
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { KnowledgeSource } from './KnowledgeSource'
+
+afterEach(() => {
+	cleanup()
+	vi.unstubAllGlobals()
+})
+
+describe('KnowledgeSource', () => {
+	it('calls the protected ingestion command before enabling retrieval', async () => {
+		const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ chunkCount: 1 }), { status: 200 }))
+		vi.stubGlobal('fetch', fetchMock)
+		const onIngested = vi.fn()
+		render(<KnowledgeSource sessionToken="session-123" onIngested={onIngested} />)
+
+		fireEvent.submit(screen.getByRole('button', { name: 'Ingest source' }).closest('form') as HTMLFormElement)
+
+		await waitFor(() => expect(onIngested).toHaveBeenCalledOnce())
+		expect(fetchMock).toHaveBeenCalledWith(
+			'/api/v1/knowledge/documents',
+			expect.objectContaining({
+				method: 'POST',
+				headers: expect.objectContaining({ authorization: 'Bearer session-123' }),
+			}),
+		)
+		expect(screen.getByText('The source is ready for retrieval.')).toBeInTheDocument()
+	})
+})
+```
+
+Run the complete fast gate.
+
+```bash title="Build, test, and lint the complete RAG example" replay="project"
+npm run build
+npm test
+npm run test:ui
+npm run lint
+```
+
+A production RAG system should add representative evaluations for chunking,
+recall, citation correctness, refusal behavior, latency, and cost. These tests
+first prove that the Framework, Harness, storage, stream protocol, and browser
+boundaries are connected correctly.

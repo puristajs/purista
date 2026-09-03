@@ -1,0 +1,185 @@
+---
+title: Create the React application shell
+description: Configure Vite, Tailwind, shadcn, aliases, and browser tests for the RAG interface.
+order: 214
+kind: lesson
+status: draft
+---
+
+Create the UI source directories.
+
+```bash title="Create the React application directories" replay="project"
+mkdir -p ui/src/test
+```
+
+Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
+
+```html title="ui/index.html" write
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Example Bank knowledge chat</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>
+```
+
+```json title="ui/tsconfig.json" write
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"jsx": "react-jsx",
+		"strict": true,
+		"skipLibCheck": true,
+		"allowJs": false,
+		"allowImportingTsExtensions": false,
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"types": ["node", "vite/client", "vitest/globals", "@testing-library/jest-dom"]
+	},
+	"include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts"]
+}
+```
+
+```json title="ui/components.json" write
+{
+	"$schema": "https://ui.shadcn.com/schema.json",
+	"style": "new-york",
+	"rsc": false,
+	"tsx": true,
+	"tailwind": {
+		"css": "src/index.css",
+		"baseColor": "neutral",
+		"cssVariables": true
+	},
+	"aliases": {
+		"components": "@/components",
+		"utils": "@/lib/utils",
+		"ui": "@/components/ui",
+		"lib": "@/lib",
+		"hooks": "@/hooks"
+	}
+}
+```
+
+```ts title="ui/vite.config.ts" write
+import { fileURLToPath, URL } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+	root: fileURLToPath(new URL('.', import.meta.url)),
+	plugins: [react(), tailwindcss()],
+	resolve: {
+		alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+	},
+	build: {
+		outDir: fileURLToPath(new URL('../public', import.meta.url)),
+		emptyOutDir: true,
+	},
+})
+```
+
+```ts title="ui/vitest.config.ts" write
+import { fileURLToPath, URL } from 'node:url'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+	plugins: [react()],
+	resolve: {
+		alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+	},
+	test: {
+		environment: 'jsdom',
+		include: ['ui/src/**/*.test.tsx'],
+		setupFiles: [fileURLToPath(new URL('./src/test/setup.ts', import.meta.url))],
+	},
+})
+```
+
+```ts title="ui/src/test/setup.ts" write
+import '@testing-library/jest-dom/vitest'
+```
+
+Create the React entry point and default theme styles.
+
+```tsx title="ui/src/main.tsx" write
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { App } from './App.js'
+import './index.css'
+
+const root = document.getElementById('root')
+if (!root) throw new Error('Missing React root element')
+
+createRoot(root).render(
+	<StrictMode>
+		<App />
+	</StrictMode>,
+)
+```
+
+```css title="ui/src/index.css" write
+@import "tailwindcss";
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-border: var(--border);
+	--color-ring: var(--ring);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+	--radius: 0.625rem;
+	--background: oklch(0.985 0.002 247);
+	--foreground: oklch(0.145 0.01 260);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0.01 260);
+	--primary: oklch(0.22 0.04 161);
+	--primary-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.96 0.006 250);
+	--muted-foreground: oklch(0.5 0.02 260);
+	--accent: oklch(0.94 0.015 155);
+	--accent-foreground: oklch(0.22 0.04 161);
+	--border: oklch(0.9 0.008 255);
+	--ring: oklch(0.52 0.11 160);
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply m-0 bg-background text-foreground antialiased;
+		font-family: "DM Sans", ui-sans-serif, sans-serif;
+	}
+}
+```
+
+```bash title="Build the empty UI shell"
+npm run build:ui
+```
+
+Continue with [Build the ingestion interface](../ingest-ui/).

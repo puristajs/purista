@@ -1,0 +1,131 @@
+---
+title: Run the deterministic tool loop
+description: Exercise real write, process, and read tools through EventBridge without credentials or Docker.
+order: 287
+kind: lesson
+status: draft
+---
+
+Use a strict scripted provider for the default demo. It requests `write`, then
+`bash`, then `read`, and finally returns the structured analysis. An unexpected
+model call makes the provider fail.
+
+```ts title="src/testing/scriptedAnalysisProvider.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+
+const usage = { inputTokens: 5, outputTokens: 3, totalTokens: 8 }
+
+export function scriptedAnalysisProvider() {
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'write-1',
+				name: 'write',
+				arguments: { path: '/workspace/transactions.csv', content: 'id,amount,country\ntx-1,1250,DE\n' },
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'bash-1',
+				name: 'bash',
+				arguments: {
+					command: `python3 -c "import json; json.dump({'flagged':['tx-1']},open('summary.json','w'))"`,
+					cwd: '/workspace',
+				},
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [{ id: 'read-1', name: 'read', arguments: { path: '/workspace/summary.json' } }],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {
+			analysisId: 'analysis-1',
+			flaggedTransactionIds: ['tx-1'],
+			summary: 'One high-value transaction was flagged for human review.',
+		},
+		usage,
+		finishReason: 'stop',
+	})
+	return provider
+}
+```
+
+Create a temporary local-directory sandbox and invoke the PURISTA command
+through the EventBridge. The local adapter enforces the configured path,
+command, and timeout policy, but it is a deterministic development adapter
+rather than a container security boundary.
+
+```ts title="src/demo.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { localDirectorySandbox } from '@purista/harness'
+import { createAnalysisService } from './createAnalysisService.js'
+import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
+
+async function main() {
+	const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-demo-'))
+	const provider = scriptedAnalysisProvider()
+	const logger = initLogger('fatal')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const service = await createAnalysisService(eventBridge, logger, {
+		analysisPolicy: { canRun: async () => true },
+		analysisModel: { provider, model: 'analysis-fake' },
+		sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+	})
+	await service.start()
+
+	try {
+		const result = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-analyst',
+				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+				payload: {
+					payload: {
+						analysisId: 'analysis-1',
+						transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+					},
+					parameter: {},
+				},
+			}),
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await service.destroy()
+		await eventBridge.destroy()
+		await rm(root, { recursive: true, force: true })
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The sandbox tool-loop demo failed.'}\n`)
+	process.exit(1)
+})
+```
+
+```bash title="Run the deterministic sandbox application" replay="project"
+npm run build
+npm run demo
+```
+
+The output is the validated analysis result. The run has exercised the mounted
+agent, both business guards, address-first routing, and the three sandbox tools.
+
+Continue with [Run with Docker and a live model](../run-live/).

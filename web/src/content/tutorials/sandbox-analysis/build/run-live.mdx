@@ -1,0 +1,75 @@
+---
+title: Run with Docker and a live model
+description: Select a live provider and a non-root Docker sandbox only in the application entry point.
+order: 288
+kind: lesson
+status: draft
+---
+
+Document the optional live settings. `PURISTA_DOCKER_SANDBOX_IMAGE` should be an
+immutable image ID or digest in production.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+PURISTA_DOCKER_SANDBOX_IMAGE=
+PURISTA_DOCKER_SANDBOX_ROOT=./runtime/sandboxes
+```
+
+Create the long-running entry point. It validates required settings before
+starting the EventBridge, binds the OpenAI provider and Docker adapter, and
+supplies an explicit example business policy.
+
+```ts title="src/index.ts" write
+import { resolve } from 'node:path'
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { dockerSandbox } from '@purista/harness-sandbox-docker'
+import { createAnalysisService } from './createAnalysisService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
+	if (!image) throw new Error('PURISTA_DOCKER_SANDBOX_IMAGE is required to start the optional live example.')
+	const sandbox = dockerSandbox({
+		root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
+		image,
+		user: '10001:10001',
+	})
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const service = await createAnalysisService(eventBridge, logger, {
+		analysisPolicy: {
+			canRun: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-analyst',
+		},
+		analysisModel: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+		sandbox,
+	})
+	await service.start()
+	gracefulShutdown(logger, [service, eventBridge])
+	logger.info('Sandbox transaction analysis service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Sandbox analysis service could not start.'}\n`)
+	process.exit(1)
+})
+```
+
+Build the image from the earlier page, copy `.env.example` to `.env`, set the
+API key and image, and start the service only when you want the live path.
+
+```bash title="Start the optional live service"
+docker compose build sandbox-image
+npm start
+```
+
+The Docker adapter supplies process isolation. The agent permission policy
+still limits its logical tool surface, so both layers remain necessary.
+
+Continue with [Manage sandbox retention](../cleanup/).

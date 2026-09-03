@@ -1,0 +1,101 @@
+---
+title: Define the RAG contracts
+description: Share strict schemas across ingestion, retrieval, the native agent, the workflow, and HTTP transport.
+order: 202
+kind: lesson
+status: draft
+---
+
+Define the Knowledge service's public inputs and outputs in one place. The
+schemas cap document size, retrieval count, and chat history before model or
+database work begins.
+
+```ts title="src/service/knowledge/v1/schema.ts" write
+import { z } from 'zod'
+
+export const ingestKnowledgeInputSchema = z.object({
+	collectionId: z.string().min(1).max(64),
+	documentId: z.string().min(1).max(80),
+	revision: z.number().int().positive(),
+	title: z.string().min(1).max(120),
+	content: z.string().min(1).max(20_000),
+})
+
+export const ingestKnowledgeOutputSchema = z.object({
+	documentId: z.string().min(1),
+	revision: z.number().int().positive(),
+	chunkCount: z.number().int().positive(),
+	embeddingModel: z.string().min(1),
+})
+
+export const knowledgeMatchSchema = z.object({
+	documentId: z.string().min(1),
+	chunkIndex: z.number().int().nonnegative(),
+	content: z.string().min(1),
+	score: z.number().min(0).max(1),
+})
+
+export const searchKnowledgeInputSchema = z.object({
+	collectionId: z.string().min(1),
+	query: z.string().min(1).max(2_000),
+	limit: z.number().int().min(1).max(8).default(4),
+})
+
+export const searchKnowledgeOutputSchema = z.object({
+	matches: z.array(knowledgeMatchSchema).max(8),
+})
+
+export const answerKnowledgeQuestionInputSchema = z.object({
+	collectionId: z.string().min(1),
+	question: z.string().min(1).max(2_000),
+})
+
+export const retrievedEvidenceSchema = z.object({
+	question: z.string().min(1),
+	evidence: z.array(knowledgeMatchSchema).min(1).max(8),
+})
+
+export const aiSdkTextPartSchema = z
+	.object({
+		type: z.literal('text'),
+		text: z.string(),
+	})
+	.passthrough()
+
+export const aiSdkMessageSchema = z
+	.object({
+		id: z.string().min(1).optional(),
+		role: z.enum(['system', 'user', 'assistant']),
+		parts: z.array(z.unknown()),
+	})
+	.passthrough()
+
+export const answerKnowledgeQuestionHttpInputSchema = z.object({
+	id: z.string().min(1),
+	messages: z.array(aiSdkMessageSchema).min(1),
+	collectionId: z.string().min(1).default('customer-help'),
+})
+
+export const aiSdkUiMessageSseEventSchema = z.object({
+	event: z.literal('data'),
+	data: z.unknown(),
+})
+
+export const answerKnowledgeQuestionFinalSchema = z.object({
+	status: z.literal('completed'),
+})
+
+export type SearchKnowledgeInput = z.input<typeof searchKnowledgeInputSchema>
+export type KnowledgeMatch = z.output<typeof knowledgeMatchSchema>
+```
+
+The ingestion contract carries a document revision so storage can replace a
+whole revision atomically. Search returns source identity and chunk text, which
+the answer workflow can turn into citations. The stream input follows AI SDK
+UI messages so a standard browser client can post its conversation directly.
+
+```bash title="Type-check the shared contracts"
+npm run build
+```
+
+Continue with [Authorize knowledge collections](../access-policy/).

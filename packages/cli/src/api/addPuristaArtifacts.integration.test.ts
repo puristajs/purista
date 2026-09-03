@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,6 +10,7 @@ import { addPuristaQueueWorker } from './addPuristaQueueWorker.js'
 import { addPuristaService } from './addPuristaService.js'
 import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
+import { addPuristaWorkflow } from './addPuristaWorkflow.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
@@ -37,6 +39,7 @@ const createBaseProject = () => {
 				moduleResolution: 'NodeNext',
 				skipLibCheck: true,
 				allowImportingTsExtensions: true,
+				ignoreDeprecations: '6.0',
 				baseUrl: '.',
 				paths: {
 					'@purista/core': [coreDtsPath],
@@ -177,6 +180,16 @@ describe('CLI artifact generation (e2e)', () => {
 			maxParallelHandlers: 2,
 		})
 
+		await addPuristaWorkflow({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			workflowName: 'resolve ticket',
+			workflowDescription: 'Resolve a support ticket in durable steps',
+			responseEventName: 'user.ticket_resolved',
+		})
 		await addPuristaAgent({
 			projectRootPath: TEST_DIR,
 			puristaConfig,
@@ -187,7 +200,15 @@ describe('CLI artifact generation (e2e)', () => {
 			agentDescription: 'Review tickets',
 			responseEventName: 'user.triage_completed',
 		})
-
+		await addPuristaAgent({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			agentName: 'summarize',
+			agentDescription: 'Summarize a ticket',
+		})
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
@@ -204,7 +225,6 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('streamDefinitions')
 		expect(serviceFileContent).toContain('queueDefinitions')
 		expect(serviceFileContent).toContain('queueWorkerDefinitions')
-		expect(serviceFileContent).toContain('agentDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
@@ -218,10 +238,11 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('enqueueJobCommandBuilder.getDefinition()')
-		expect(serviceFileContent).toContain('triageAgentBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
 		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
-		expect(serviceFileContent).toContain('.addAgentDefinition(...(await Promise.all(agentDefinitions)))')
+		expect(serviceFileContent).toContain('.mountHarness(userHarness, userHarnessPolicy)')
+		expect(serviceFileContent.match(/\.mountHarness\(/g)).toHaveLength(1)
+		expect(serviceFileContent).not.toMatch(/^ +\t/m)
 		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')
@@ -241,56 +262,64 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(queueBuilderContent).toContain('.getQueueBuilder("processJobs"')
 		expect(queueBuilderContent).toContain('.addPayloadSchema(userV1ProcessJobsQueuePayloadSchema)')
 
-		const agentDirPath = join(TEST_DIR, 'src', 'service', 'user', 'v1', 'agent', 'triage')
-		const agentBuilder = readFileSync(join(agentDirPath, 'triageAgent.ts'), 'utf-8')
-		expect(agentBuilder).toContain("import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'")
-		expect(agentBuilder).toContain("import { extendApi } from '@purista/core'")
-		expect(agentBuilder).not.toContain('@purista/ai')
-		expect(agentBuilder).not.toContain('@purista/harness')
-		expect(agentBuilder).toContain(".getAgentQueueBuilder('triageAgent', 'Review tickets')")
-		expect(agentBuilder).toContain('.addPayloadSchema(triageAgentPayloadSchema)')
-		expect(agentBuilder).toContain('.addParameterSchema(triageAgentParameterSchema)')
-		expect(agentBuilder).toContain('.addOutputSchema(triageAgentOutputSchema)')
-		expect(agentBuilder).toContain(".addModel('primary', {")
-		expect(agentBuilder).toContain('.setHarnessAgent(triageAgentHarnessAgent)')
-		expect(agentBuilder).toContain("capabilities: ['object']")
-		expect(agentBuilder).toContain(".setSuccessEventName('user.triage.completed')")
-		expect(agentBuilder).toContain(".setSessionPolicy({ mode: 'ephemeral' })")
-		expect(agentBuilder).toContain('.setExecutionPolicy({')
-		expect(agentBuilder).toContain("instructions: 'You are a helpful assistant for this service domain.'")
+		const harnessDirPath = join(TEST_DIR, 'src', 'harness', 'user')
+		const harnessDefinition = readFileSync(join(harnessDirPath, 'userHarness.ts'), 'utf-8')
+		expect(harnessDefinition).toContain("import { defineHarness } from '@purista/harness'")
+		expect(harnessDefinition).not.toContain('@purista/ai')
+		expect(harnessDefinition).toContain("defineHarness({ name: 'user' })")
+		expect(harnessDefinition).toContain(".requireModel('primary', { capabilities: ['object'] })")
+		expect(harnessDefinition).toContain('.use(triageAgent)')
+		expect(harnessDefinition).toContain('.use(summarizeAgent)')
+		expect(harnessDefinition).toContain('.use(resolveTicketWorkflow)')
+		expect(harnessDefinition).toContain('.define()')
+		const triageDefinition = readFileSync(join(harnessDirPath, 'agent', 'triage', 'triageAgent.ts'), 'utf-8')
+		expect(triageDefinition).toContain("defineHarnessModule<PrimaryModelState>()('user.agent.triage'")
+		expect(triageDefinition).toContain(".agent('triage', {")
+		expect(triageDefinition).toContain("updates: 'object-snapshot'")
+		expect(triageDefinition).toContain('instructions: "Review tickets"')
+		const summarizeDefinition = readFileSync(join(harnessDirPath, 'agent', 'summarize', 'summarizeAgent.ts'), 'utf-8')
+		expect(summarizeDefinition).toContain("defineHarnessModule<PrimaryModelState>()('user.agent.summarize'")
+		expect(summarizeDefinition).toContain('instructions: "Summarize a ticket"')
+		const mountContent = readFileSync(join(serviceDir, 'harness', 'userHarnessMount.ts'), 'utf-8')
+		expect(mountContent).toContain("agents: ['triage', 'summarize']")
+		expect(mountContent).toContain("workflows: ['resolve_ticket']")
+		expect(mountContent).toContain("triage: { successEvent: 'user.triage.completed' }")
+		expect(mountContent).toContain("resolve_ticket: { successEvent: 'user.ticket.resolved' }")
+		const workflowDefinition = readFileSync(
+			join(harnessDirPath, 'workflow', 'resolveTicket', 'resolveTicketWorkflow.ts'),
+			'utf-8',
+		)
+		expect(workflowDefinition).toContain("defineHarnessModule<{}>()('user.workflow.resolve_ticket'")
+		expect(workflowDefinition).toContain(".workflow('resolve_ticket', {")
+		expect(workflowDefinition).toContain("context.step('produce-output'")
+		const workflowTest = readFileSync(
+			join(harnessDirPath, 'workflow', 'resolveTicket', 'resolveTicketWorkflow.test.ts'),
+			'utf-8',
+		)
+		expect(workflowTest).toContain('runs as a standalone Harness workflow')
+		expect(workflowTest).toContain('session.workflows.resolve_ticket.run')
 		for (const term of forbiddenAgentTerms) {
-			expect(agentBuilder).not.toContain(term)
+			expect(harnessDefinition).not.toContain(term)
+			expect(triageDefinition).not.toContain(term)
 		}
-		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain(
-			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'",
-		)
+		const agentTestContent = readFileSync(join(harnessDirPath, 'agent', 'triage', 'triageAgent.test.ts'), 'utf-8')
+		expect(agentTestContent).toContain("import { FakeModelProvider } from '@purista/harness/testing'")
 		expect(agentTestContent).not.toContain('@purista/ai')
-		expect(agentTestContent).not.toContain('@purista/harness')
-		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
-		expect(agentTestContent).toContain('const model = createScriptedHarnessModel()')
+		expect(agentTestContent).toContain('runs as a standalone Harness definition')
+		expect(agentTestContent).toContain('const provider = new FakeModelProvider({ strict: true })')
 		expect(agentTestContent).toContain("object: { message: 'hello' }")
-		expect(agentTestContent).toContain('provider: model')
-		expect(agentTestContent).toContain("model: 'gpt-4.1-mini'")
-		expect(agentTestContent).toContain("capabilities: ['object']")
-		expect(agentTestContent).toContain(
-			'const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {',
-		)
-		expect(agentTestContent).toContain(
-			'create test bindings with createAgentSkillTestRuntime(...) and pass skills to this options object',
-		)
-		expect(agentTestContent).toContain("expect(result).toEqual({ message: 'hello' })")
-		expect(agentTestContent).not.toContain('ai: {')
-		expect(agentTestContent).not.toContain('await harness.destroy()')
+		expect(agentTestContent).toContain("primary: { provider, model: 'fake' }")
+		expect(agentTestContent).toContain('session.agents.triage.run')
+		expect(agentTestContent).toContain("expect(outcome.output).toEqual({ message: 'hello' })")
+		expect(agentTestContent).toContain('await runtime.shutdown()')
 		for (const term of forbiddenAgentTerms) {
 			expect(agentTestContent).not.toContain(term)
 		}
-		expect(agentTestContent).not.toContain('getAgentQueueBuilder: () => null as any')
 		const packageJsonContent = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf-8')) as {
 			dependencies?: Record<string, string>
 		}
 		expect(packageJsonContent.dependencies?.['@purista/ai']).toBeUndefined()
-		expect(packageJsonContent.dependencies?.['@purista/harness']).toBeUndefined()
+		expect(packageJsonContent.dependencies?.['@purista/harness']).toBe('^3.0.0')
 
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
 		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(
@@ -331,5 +360,16 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(streamTypes).toContain('UserV1SearchUsersChunkPayload')
 		expect(streamTypes).toContain('UserV1SearchUsersFinalPayload')
 		expect(readFileSync(join(streamDir, 'searchUsersStreamBuilder.ts'), 'utf-8')).toContain('searchUsersStreamBuilder')
+
+		expect(() =>
+			execFileSync(
+				join(REPO_ROOT, 'node_modules', '.bin', 'tsc'),
+				['--noEmit', '-p', join(TEST_DIR, 'tsconfig.json')],
+				{
+					cwd: TEST_DIR,
+					stdio: 'pipe',
+				},
+			),
+		).not.toThrow()
 	}, 60_000)
 })

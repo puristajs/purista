@@ -1,0 +1,76 @@
+---
+title: Initialize the project
+description: Run the PURISTA CLI, install pinned packages, and understand the generated ESM project.
+order: 10
+kind: lesson
+status: published
+---
+
+Open a terminal in the directory where you keep projects. You need Node.js
+24.15 or newer and npm.
+
+## Generate the application
+
+```bash title="Create the Example Bank project" replay="parent"
+npx --yes --package=@purista/cli@3.2.4 --package=@purista/core@3.2.4 purista init example-bank \
+  --runtime node --event-bridge default --package-manager npm \
+  --no-webserver --no-install --defaults --non-interactive
+```
+
+The command creates `example-bank`. `--event-bridge default` selects local
+in-process message delivery. `--no-webserver` keeps HTTP out of this chapter.
+`--no-install` lets us set the exact tested dependency versions first.
+
+Enter the generated project:
+
+```bash title="Enter the generated project"
+cd example-bank
+```
+
+## Use explicit compiler settings
+
+```json title="tsconfig.json" write
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"rootDir": "src",
+		"outDir": "dist",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
+```
+
+PURISTA projects use ES modules. TypeScript imports therefore end in `.js`,
+which is the extension Node will load after compilation.
+
+## Install and inspect the checkpoint
+
+```bash title="Install the tested package versions" replay="project"
+npm install --save-dev --save-exact @purista/cli@3.2.4 typescript@7.0.2
+npm install --save-exact @purista/core@3.2.4 zod@4.4.3
+npm pkg set 'scripts.test=tsc --noEmit && vitest run src'
+npm test
+npm run build
+```
+
+Expect the generated Ping service tests to pass. Keep `package-lock.json`; later
+replays use `npm ci` to install the same dependency graph.
+
+The important generated paths are:
+
+| Path | Purpose |
+| --- | --- |
+| `purista.json` | CLI naming and source-directory settings. |
+| `src/eventbridge.ts` | Creates and starts the selected EventBridge. |
+| `src/service/ping/` | A generated reference service. |
+| `package.json` | Project-local scripts such as `add:service` and `add:command`. |
+
+Next, [generate the small BankProfile capability](/tutorials/create-project/build/generate-service/).

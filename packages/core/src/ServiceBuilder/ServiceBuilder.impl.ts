@@ -1,18 +1,7 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { AgentQueueBuilder } from '../AgentQueueBuilder/AgentQueueBuilder.js'
-import {
-	bindAgentRuntimeScope,
-	createAgentRuntimeScope,
-	initializeAttachedAgentRuntimes,
-} from '../AgentQueueBuilder/runtime/scopedRuntime.js'
-import type {
-	AgentModelBinding,
-	AgentQueueBuilderTypes,
-	AgentRuntimeOptions,
-	AttachedAgentDefinition,
-} from '../AgentQueueBuilder/types.js'
+import type { HarnessDefinition, HarnessInstanceConfig } from '@purista/harness'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
 import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
@@ -65,6 +54,16 @@ import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
+import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
+import { toHarnessQueueRetry } from '../HarnessMount/queue.js'
+import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
+import type {
+	HarnessMount,
+	HarnessPublishPolicy,
+	HarnessState,
+	HarnessTargetQueueBinding,
+	MountedHarnessRuntimeConfig,
+} from '../HarnessMount/types.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
@@ -80,7 +79,7 @@ import { type Infer, type InferIn, type Schema, validate } from '../schema/index
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
 /** Runtime configuration accepted by `ServiceBuilder.getInstance(...)`. */
-export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any, any>> = Prettify<
+export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any, any, any>> = Prettify<
 	{
 		/** Log level used when no custom logger is provided. */
 		logLevel?: LogLevelName
@@ -92,9 +91,9 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		secretStore?: SecretStore
 		/** Config store used by service handlers. */
 		configStore?: ConfigStore
-		/** State store used by service handlers and attached agents. */
+		/** State store used by service handlers. */
 		stateStore?: StateStore
-		/** Queue bridge used by queue definitions and attached agents. */
+		/** Queue bridge used by queue definitions. */
 		queueBridge?: QueueBridge
 		/** Optional queue job store for queue bridge implementations that use one. */
 		queueJobStore?: QueueJobStore
@@ -102,8 +101,10 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		metrics?: PuristaMetricsRuntimeOptions
 		/** Low-level metrics recorder override. */
 		metricsRecorder?: PuristaMetricsRecorder
-		/** Runtime model/provider bindings for attached agents. */
-		ai?: AgentRuntimeOptions<Record<string, AgentModelBinding>>
+		/** Runtime bindings required by mounted Harness definitions. */
+		ai?: S['Harnesses'] extends readonly [infer D extends HarnessDefinition<any>]
+			? MountedHarnessRuntimeConfig<D>
+			: never
 	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
 >
@@ -113,7 +114,7 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
  *
  * @group Service
  */
-export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, any> = ServiceBuilderTypes> {
+export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, any, any> = ServiceBuilderTypes> {
 	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
 	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
@@ -121,7 +122,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
 	private scheduleDefinitionList: ScheduleDefinition[] = []
 	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
-	private agentDefinitionList: AttachedAgentDefinition<any>[] = []
+	private harnessMount?: HarnessMount
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
@@ -242,43 +243,125 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	}
 
 	/**
-	 * Add one or more attached agent definitions to this service.
+	 * Mount a provider-neutral Harness definition on this service.
 	 *
-	 * The attached agent is expanded into normal queue, queue worker, command,
-	 * and stream definitions so the rest of core can treat it like any other
-	 * declared PURISTA boundary.
+	 * Only targets listed in `publish` receive versioned PURISTA addresses. The
+	 * same definition remains directly runnable with `definition.getInstance`.
+	 * A service accepts one mount; compose additional agents, workflows, tools,
+	 * and Skills into that definition with native Harness modules.
 	 *
 	 * @example
 	 * ```ts
-	 * const triage = await service
-	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-	 *   .setRunFunction(async context => ({ priority: 'normal' }))
-	 *   .getDefinition()
-	 *
-	 * service.addAgentDefinition(triage)
+	 * const support = supportServiceBuilder.mountHarness(supportHarness, {
+	 *   publish: { agents: ['triage_ticket'] },
+	 * })
 	 * ```
 	 */
-	addAgentDefinition<const Definition extends AttachedAgentDefinition<any>>(...definitions: Definition[]) {
+	mountHarness<const D extends HarnessDefinition<any>>(
+		definition: D,
+		policy: S['Harnesses'] extends readonly [] ? HarnessPublishPolicy<HarnessState<D>, S['Resources']> : never,
+	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
-				'You can not add agents after resolveDefinitions is called.',
+				'You can not mount a Harness after resolveDefinitions is called.',
 			)
 		}
+		if (this.harnessMount) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Only one Harness definition can be mounted on a service. Compose additional capabilities with native Harness modules.',
+			)
+		}
+		this.addHarnessQueueBindings(definition, policy)
+		this.harnessMount = Object.freeze({ definition, policy }) as HarnessMount
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
+	}
 
-		this.agentDefinitionList.push(...definitions)
-
-		for (const definition of definitions) {
-			this.queueDefinitionList.push(definition.queue as never)
-			this.queueWorkerDefinitionList.push(definition.worker as never)
-			this.commandDefinitionList.push(definition.command as never)
-			this.streamDefinitionList.push(definition.stream as never)
-			for (const [metricName, metricDefinition] of Object.entries(definition.metricDefinitions ?? {})) {
-				this.customMetricDefinitions[metricName] = metricDefinition
+	private addHarnessQueueBindings<D extends HarnessDefinition<any>>(
+		definition: D,
+		policy: HarnessPublishPolicy<HarnessState<D>, S['Resources']>,
+	) {
+		const queueNames = new Set<string>()
+		for (const kind of ['agents', 'workflows'] as const) {
+			const published = new Set((policy.publish[kind] ?? []) as readonly string[])
+			const contracts = definition.contracts[kind] as Record<
+				string,
+				import('@purista/harness').HarnessTargetContract<any>
+			>
+			const targets = policy.targets?.[kind] as
+				| Record<string, { queue?: HarnessTargetQueueBinding<import('@purista/harness').HarnessTargetContract<any>> }>
+				| undefined
+			for (const [target, targetPolicy] of Object.entries(targets ?? {})) {
+				const binding = targetPolicy.queue
+				if (!binding) continue
+				const queue = binding.queue as QueueDefinitionBuilder
+				const queueWorker = binding.worker as QueueWorkerBuilder
+				if (!published.has(target)) {
+					throw new TypeError(`Harness ${kind.slice(0, -1)} "${target}" must be published before it can bind a queue.`)
+				}
+				const contract = contracts[target]
+				if (!contract || binding.targetContract !== contract) {
+					throw new TypeError(
+						`Harness queue binding for ${kind.slice(0, -1)} "${target}" uses another target contract.`,
+					)
+				}
+				if (queueNames.has(queue.queueName)) {
+					throw new TypeError(`Harness queue "${queue.queueName}" is bound to more than one target.`)
+				}
+				queueNames.add(queue.queueName)
+				queue.addPayloadSchema(contract.input)
+				const worker =
+					kind === 'agents'
+						? queueWorker.canInvokeAgent(
+								this.info.serviceName,
+								this.info.serviceVersion,
+								target,
+								contract as import('@purista/harness').HarnessTargetContract<'agent'>,
+							)
+						: queueWorker.canInvokeWorkflow(
+								this.info.serviceName,
+								this.info.serviceVersion,
+								target,
+								contract as import('@purista/harness').HarnessTargetContract<'workflow'>,
+							)
+				worker.setHandler(async (context, message) => {
+					try {
+						const clients = kind === 'agents' ? context.agent : context.workflow
+						const client = (clients as any)[this.info.serviceName][this.info.serviceVersion][target]
+						const outcome = await client.run(message.payload, message.parameter)
+						return {
+							status: 'success' as const,
+							output: outcome.status === 'completed' ? outcome.output : outcome,
+						}
+					} catch (error) {
+						const retry = toHarnessQueueRetry(error)
+						if (retry) return retry
+						throw error
+					}
+				})
+				this.addQueueDefinition(queue.getDefinition())
+				this.addQueueWorkerDefinition(worker.getDefinition())
 			}
 		}
+	}
 
-		return this
+	/**
+	 * Create a typed function binding for one native Harness host-tool contract.
+	 *
+	 * @example
+	 * ```ts
+	 * const lookup = serviceBuilder
+	 *   .getHarnessHostToolBuilder(supportAi.catalog.hostTools.lookupAccount)
+	 *   .canInvoke('Account', '1', 'lookup', outputSchema, payloadSchema, parameterSchema)
+	 *   .setHandler(async (context, input) =>
+	 *     context.service.Account['1'].lookup(input, { idempotencyKey: context.idempotencyKey }))
+	 *   .getDefinition()
+	 * ```
+	 */
+	getHarnessHostToolBuilder<Contract extends Readonly<{ input: Schema; output: Schema }>>(contract: Contract) {
+		void contract
+		return new HarnessHostToolBuilder<Infer<Contract['input']>, InferIn<Contract['output']>, S['Resources']>()
 	}
 
 	/** Add one or more schedule contracts to this service. */
@@ -342,11 +425,19 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			}
 		}
 
-		this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
-		this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
-		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
-		this.queueDefinitionListResolved = await Promise.all(this.queueDefinitionList)
-		this.queueWorkerDefinitionListResolved = await Promise.all(this.queueWorkerDefinitionList)
+		const [commands, subscriptions, streams, queues, queueWorkers] = await Promise.all([
+			Promise.all(this.commandDefinitionList),
+			Promise.all(this.subscriptionDefinitionList),
+			Promise.all(this.streamDefinitionList),
+			Promise.all(this.queueDefinitionList),
+			Promise.all(this.queueWorkerDefinitionList),
+		])
+
+		this.commandDefinitionListResolved = commands
+		this.subscriptionDefinitionListResolved = subscriptions
+		this.streamDefinitionListResolved = streams
+		this.queueDefinitionListResolved = queues
+		this.queueWorkerDefinitionListResolved = queueWorkers
 		this.scheduleDefinitionListResolved = this.scheduleDefinitionList
 		this.eventToQueueBindingListResolved = this.eventToQueueBindingList
 
@@ -424,18 +515,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
-		const agentRuntimeScope = createAgentRuntimeScope()
-		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
-			agentRuntimeScope,
-			this.agentDefinitionList,
-			options?.ai
-				? {
-						...options.ai,
-						logger: options.ai.logger ?? logger,
-					}
-				: undefined,
-		)
-
 		const cfg: S['ConfigInputType'] = {
 			...this.defaultConfig,
 			...options?.serviceConfig,
@@ -487,10 +566,39 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 
 		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
 			await this.resolveDefinitions()
+		const mountedTargets = this.harnessMount
+			? [...(this.harnessMount.policy.publish.agents ?? []), ...(this.harnessMount.policy.publish.workflows ?? [])]
+			: []
+		const commandTargets = new Set(commands.map(command => command.commandName))
+		const streamTargets = new Set(streams.map(stream => stream.streamName))
+		const occupiedMountedTargets = new Set<string>()
+		for (const target of mountedTargets) {
+			if (occupiedMountedTargets.has(target)) {
+				throw new UnhandledError(
+					StatusCode.InternalServerError,
+					`Harness target address "${target}" is published more than once.`,
+				)
+			}
+			occupiedMountedTargets.add(target)
+		}
+		const commandCollision = mountedTargets.find(target => commandTargets.has(target))
+		if (commandCollision) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				`Harness target address "${commandCollision}" conflicts with a command address.`,
+			)
+		}
+		const streamCollision = mountedTargets.find(target => streamTargets.has(target))
+		if (streamCollision) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				`Harness target address "${streamCollision}" conflicts with a stream address.`,
+			)
+		}
 
 		const C = this.getCustomClass()
 
-		const service = new C({
+		const service: InstanceType<typeof C> = new C({
 			logger,
 			eventBridge,
 			info: this.info,
@@ -513,16 +621,48 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
-		bindAgentRuntimeScope(service, agentRuntimeScope)
 
-		if (this.agentDefinitionList.length > 0) {
+		let harnessMountRuntime: HarnessMountRuntime | undefined
+		if (this.harnessMount) {
+			if (!options?.ai) {
+				await service.destroy()
+				throw new UnhandledError(
+					StatusCode.InternalServerError,
+					'This service mounts a Harness and requires ai runtime configuration.',
+				)
+			}
+			harnessMountRuntime = new HarnessMountRuntime(
+				this.info.serviceName,
+				this.info.serviceVersion,
+				eventBridge,
+				logger,
+				this.harnessMount,
+				options.ai as unknown as HarnessInstanceConfig<any>,
+				(options.resources ?? {}) as Record<string, unknown>,
+				(definition, context) => service.createHarnessHostToolContext(definition, context),
+			)
+			const runtime = harnessMountRuntime
+			service.bindHarnessModelResolver((definition: HarnessDefinition<any>, alias: string) =>
+				runtime.getModel(definition, alias),
+			)
+			const start = service.start.bind(service)
+			service.start = async () => {
+				try {
+					await runtime.start()
+					await start()
+				} catch (error) {
+					await service.destroy()
+					throw error
+				}
+			}
+		}
+
+		if (harnessMountRuntime) {
 			const destroy = service.destroy.bind(service)
 			service.destroy = async () => {
 				try {
-					await agentRuntimeShutdown.shutdown()
+					await harnessMountRuntime?.shutdown()
 				} finally {
-					// Always release core resources (bridges, stores) even if agent
-					// runtime shutdown fails, so a failing executor cannot leak them.
 					await destroy()
 				}
 			}
@@ -613,41 +753,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				QueueInvokeList
 			>
 		>(streamName, description, finalEventName, this.deprecated)
-	}
-
-	/**
-	 * Create a native core builder for a queue-backed PURISTA agent.
-	 *
-	 * The returned builder preserves this service builder's resource type and
-	 * cascades payload, parameter, output, model, command-tool, and child-agent
-	 * declarations into the agent handler context.
-	 *
-	 * @example
-	 * ```ts
-	 * const triage = service
-	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
-	 * ```
-	 */
-	getAgentQueueBuilder<const AgentName extends string>(agentName: NonEmptyString<AgentName>, description: string) {
-		return new AgentQueueBuilder(
-			this.info.serviceName,
-			this.info.serviceVersion,
-			agentName,
-			description,
-		) as AgentQueueBuilder<
-			AgentQueueBuilderTypes<
-				Schema,
-				Schema,
-				Schema,
-				S['Resources'] extends Record<string, unknown> ? S['Resources'] : Record<string, never>,
-				Record<never, never>,
-				Record<never, never>,
-				Record<never, never>,
-				undefined,
-				S['Metrics']
-			>
-		>
 	}
 
 	/** Return resolved command definitions after `resolveDefinitions()` has completed. */

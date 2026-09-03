@@ -1,0 +1,98 @@
+---
+title: Invoke the agent from a command
+description: Generate an application command, declare the mounted agent address, and return its completed structured result.
+order: 184
+kind: lesson
+status: draft
+---
+
+The mounted agent is a PURISTA capability, but mounting it does not create an
+HTTP endpoint or application-specific API. Add a normal Support command as the
+entry point for callers that need one aggregate classification.
+
+## Generate the command
+
+Use the project-local CLI. It creates the builder, placeholder schemas, inferred
+types, test, and service registration.
+
+```bash title="Generate the classification command" replay="project"
+npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the mounted agent" --non-interactive
+```
+
+The command and agent share the same input and output contracts, so remove the
+unused command-local placeholders. The command builder will import the native
+Harness schemas directly.
+
+```bash title="Remove unused command schema placeholders" replay="project"
+rm src/service/support/v1/command/classifySupportMessage/schema.ts
+rm src/service/support/v1/command/classifySupportMessage/types.ts
+```
+
+## Declare and call the agent address
+
+Replace the generated command builder with the complete file below.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
+import {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from '../../../../../harness/support/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportHarness } from '../../../../../harness/support/supportHarness.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the mounted agent')
+	.addPayloadSchema(classifySupportMessageInputSchema)
+	.addOutputSchema(classifySupportMessageOutputSchema)
+	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
+		})
+		if (outcome.status !== 'completed') {
+			throw new Error('Message classification was interrupted unexpectedly.')
+		}
+		return outcome.output
+	})
+```
+`canInvokeAgent(...)` declares the versioned target and adds only that call to
+`context.agent`. `.run(...)` asks for one aggregate `RunOutcome`; it still
+crosses EventBridge when the command and agent live in the same process.
+
+The command guard authorizes the normal entry point. The mount guard from the
+previous page protects direct target invocations. The classifier has no
+approval or external wait, so an interrupted outcome is unexpected and must not
+be returned as a successful classification.
+
+## Register the command and mount once
+
+Replace the service file. Keep one mount for the composed Support Harness.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+No HTTP metadata is needed for this terminal example. If you later expose the
+command through Hono, it remains protected unless the builder explicitly calls
+`makeEndpointPublic()`.
+
+```bash title="Verify the command and mount composition" replay="project"
+npm run build
+```
+
+Continue with [Compose the classification runtime](../compose-runtime/).

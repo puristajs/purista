@@ -1,0 +1,111 @@
+---
+title: Add retries and checkpoints
+description: Sequence the generated agents, commit named stage outputs, and retry only transient planning failures.
+order: 273
+kind: lesson
+status: draft
+---
+
+The two generated agents now have independent typed contracts. Replace the
+generated workflow module to run them in sequence. Named `context.step(...)`
+calls are the durable boundaries: Harness can restore a completed value instead
+of calling that stage again.
+
+## Implement the workflow
+
+```ts title="src/harness/support/workflow/resolveSupportCase/resolveSupportCaseWorkflow.ts" write
+import { type AgentDefinition, type BuilderState, defineHarnessModule, isHarnessError } from '@purista/harness'
+import {
+	type resolutionPlanInputSchema,
+	resolutionPlanSchema,
+	supportClassificationSchema,
+	supportResolutionInputSchema,
+	supportResolutionOutputSchema,
+} from '../../supportResolutionSchemas.js'
+
+type ResolutionWorkflowState = BuilderState & {
+	agents: {
+		classify_support_case: AgentDefinition<any, typeof supportResolutionInputSchema, typeof supportClassificationSchema>
+		plan_support_resolution: AgentDefinition<any, typeof resolutionPlanInputSchema, typeof resolutionPlanSchema>
+	}
+}
+
+export const resolveSupportCaseWorkflow = defineHarnessModule<ResolutionWorkflowState>()(
+	'support.workflow.resolve_support_case',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.workflow('resolve_support_case', {
+				input: supportResolutionInputSchema,
+				output: supportResolutionOutputSchema,
+				delegation: {
+					agents: ['classify_support_case', 'plan_support_resolution'],
+					maxChildAgentCalls: 3,
+					maxParallelChildAgentCalls: 1,
+				},
+				handler: async (context) => {
+					const classification = supportClassificationSchema.parse(
+						await context.step('classify-case-v1', () => context.agents.classify_support_case(context.input)),
+					)
+					const plan = resolutionPlanSchema.parse(
+						await context.step(
+							'plan-resolution-v1',
+							() => context.agents.plan_support_resolution({ ...context.input, classification }),
+							{
+								retry: {
+									maxAttempts: 2,
+									minDelayMs: 100,
+									maxDelayMs: 1_000,
+									backoff: 'exponential',
+									shouldRetry: (error) => isHarnessError(error) && error.retriable,
+								},
+							},
+						),
+					)
+					return { caseId: context.input.caseId, classification, plan }
+				},
+			})
+		},
+	},
+)
+```
+
+The classification step has no local retry policy. The planning step retries
+only errors Harness marks as retriable. A schema-validation failure is
+permanent and does not consume another model call.
+
+`maxAttempts: 2` allows the first planning call plus one retry.
+`maxChildAgentCalls: 3` budgets one classification call and two planning calls.
+`maxParallelChildAgentCalls: 1` documents that the stages are sequential.
+
+The step names are persisted contract keys. Change them deliberately because a
+new name creates a new checkpoint rather than reading the old one.
+
+## Compose the service Harness
+
+Install the three generated modules in dependency order. Keeping composition in
+this file avoids cyclic imports between agents and workflow.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { classifySupportCaseAgent } from './agent/classifySupportCase/classifySupportCaseAgent.js'
+import { planSupportResolutionAgent } from './agent/planSupportResolution/planSupportResolutionAgent.js'
+import { resolveSupportCaseWorkflow } from './workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
+
+export const supportHarness = defineHarness({ name: 'support-resolution' })
+	.requireModel('classification_model', { capabilities: ['object'] })
+	.requireModel('resolution_model', { capabilities: ['object'] })
+	.use(classifySupportCaseAgent)
+	.use(planSupportResolutionAgent)
+	.use(resolveSupportCaseWorkflow)
+	.define()
+```
+
+After a process restart, the same session and run id let Harness restore the
+committed classification instead of asking the first agent again.
+
+```bash title="Verify the checkpointed workflow" replay="project"
+npm run build
+```
+
+Continue with [Publish the durable workflow](../publish-workflow/).

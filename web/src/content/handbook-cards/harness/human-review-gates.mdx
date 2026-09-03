@@ -1,0 +1,151 @@
+---
+title: Human Review Gates
+description: Pause a durable AI workflow for an authenticated, application-owned decision without losing checkpoints or re-running side effects.
+---
+
+## What this capability does
+
+Harness provides a small, provider-neutral checkpoint-and-signal primitive. It
+does **not** provide a reviewer UI, identity system, database table, HTTP
+endpoint, notification channel, or domain authorization policy. Your PURISTA
+application owns those concerns; Harness owns safe suspension and replay.
+
+```mermaid
+sequenceDiagram
+  participant W as Durable workflow
+  participant H as Harness runtime
+  participant R as App review task
+  participant U as Authorized reviewer
+  W->>H: ctx.step("prepare", ...)
+  H-->>W: checkpointed result
+  W->>R: create task (business-key idempotent)
+  W->>H: ctx.externalWait.wait(safe reference)
+  H-->>W: ExternalWaitPendingError; run status waiting
+  U->>R: guarded compare-and-set decision
+  R->>H: signal(waitId, eventId, outcome)
+  W->>H: invoke same durable runId
+  H-->>W: replay prepare; return terminal outcome
+  W->>R: bind action, reauthorize, atomically claim execution
+  W->>R: execute immutable claim with stable idempotency key
+  W->>R: persist receipt; reuse on recovery
+```
+
+The workflow never holds a Promise or trace open while waiting. A later worker
+invokes the same `durable.runId`; completed `ctx.step(...)` work replays from
+the durable checkpoint.
+
+## Smallest secure setup
+
+Production deployments supply one shared `HarnessStorage`. It owns
+conversation history, run records, durable checkpoints, leases, and opaque
+external waits in the same transactional backing system. Passing it to
+`.storage(store)` derives the runtime/checkpoint/wait facets automatically.
+
+`SqliteHarnessStorage` and `localDurableExecution()` remain zero-dependency,
+single-host Node.js/Bun choices for development, demos, and restart tests—not
+for replicated PURISTA services.
+
+```ts title="src/bootstrap.ts: durable storage composition"
+const storage: HarnessStorage = createProductionHarnessStorage()
+
+const harness = defineHarness({ name: 'payment-review' })
+	.storage(storage)
+	.requires(['storage.persistent', 'storage.external_wait'])
+	// models, agents, and workflow definitions
+	.build()
+```
+
+Inside the workflow, create the **application review task first** using a
+stable business key. Its immutable descriptor must include the action schema,
+policy/definition version, target revision, expiry, delivery idempotency key,
+and canonical action digest. Store question text, proposed values, and reviewer
+comments only in the application task record—not in the Harness wait request.
+
+The [executable payment-review workflow](https://github.com/puristajs/harness/tree/main/examples/durable-human-review)
+creates and validates the application task before registering this wait:
+
+```ts title="payment-review.ts: safe external wait"
+const outcome = await ctx.externalWait.wait({
+  waitId: task.waitId,
+  kind: 'human_review',
+  schemaVersion: 'payment-review-v1',
+  definitionVersion: task.descriptor.definitionVersion,
+  deadline: task.descriptor.expiresAt
+})
+
+if (outcome.status !== 'approved') return { status: outcome.status }
+```
+
+An approved wait alone does not authorize a payment. The reference binds the
+task and invocation outside replay-skipped steps, then atomically claims one
+immutable execution after authorization, action/revision/version, and expiry
+checks. The executor receives the claimed action and stable execution ID;
+the application records its receipt. A separate read of approval followed by
+execution races with concurrent resumes and must not be used.
+
+On the first pending result, `wait()` throws `ExternalWaitPendingError`. Treat
+that as successful queue handling: persist/publish the task through your normal
+outbox, then stop the delivery. Do not convert it into a failed business action
+or leave a worker blocked. Once an authenticated reviewer commits a compare-and
+set decision, deliver exactly one terminal signal:
+
+```ts title="Review decision outbox: signal the committed outcome"
+const result = await storage.signalWait({
+	waitId: task.waitId,
+	eventId: decision.outboxEventId,
+	outcome: decision.outcome, // approved | rejected | expired | cancelled
+})
+// applied, duplicate, already_terminal, or not_found: all are deterministic.
+```
+
+For a wrapped PURISTA attached Harness workflow, declare `.setDurability(...)`
+and pass `ai.onSuspended`. That callback is the explicit delivery
+acknowledgement point: commit or publish the already-created application task
+and return an output that your agent schema models as `waiting`. Without it,
+the pending error intentionally propagates instead of being mistaken for a
+successful queue completion.
+
+## Rules that keep approval meaningful
+
+1. Authenticate and authorize the reviewer in a normal PURISTA command or
+   subscription guard. The adapter never authenticates a signal.
+2. Decide with compare-and-set against the pending task revision. Return typed
+   stale, already-decided, expired, and not-found outcomes.
+3. Before a new claim, reauthorize and compare the approved revision, canonical
+   action digest, target revision, definition version, and expiry. Bind current
+   invocation data outside replay-skipped steps. Any mismatch fails closed.
+4. Atomically claim the immutable action, execute with the claim's stable
+   idempotency key, and persist its receipt. Concurrent resumes converge on the
+   same claim; do not mark a task consumed before success.
+5. Recovery reuses a recorded receipt or reconciles an uncertain effect with
+   the same execution ID. Once admitted, a claim is not revoked by later expiry
+   or decision changes. Durable checkpoints do not make an external side effect
+   universally exactly-once.
+
+For approval of a model tool call, permission and policy can demand
+`require_approval`. Harness returns a `ToolApprovalInterrupt`; the application
+persists and authorizes the review and resumes the same run with a
+`ToolApprovalResume`. Use a workflow external wait when the business process,
+rather than one prepared tool batch, pauses for an external event. Content
+rails return `allow`, `block`, or a phase transform and never request approval.
+
+## Operations and tests
+
+Harness emits `external_wait.requested`, `external_wait.waiting`, and
+`external_wait.resolved` events. Its short OpenTelemetry spans include workflow
+and run correlation plus kind, schema/definition version, deadline state, and
+terminal outcome. They intentionally exclude review content, tool arguments,
+comments, and reviewer identity; do not add those values as metric dimensions.
+
+Use `InMemoryHarnessStorage` in deterministic tests. Cover: pending suspension,
+restart/replay, approved/rejected/expired/
+cancelled outcomes, duplicate and late delivery, stale task revision, changed
+action digest, concurrent claims, and crashes before/after the external effect
+and receipt. Verify recovery reuses the immutable action and idempotency key.
+The Harness adapter test does
+not replace application authorization or review-task tests.
+
+The repository’s executable `examples/durable-human-review` reference contains
+the application-side task store, revision CAS, action descriptor, execution
+claim, receipt, terminal signal, resume path, and focused tests. It is a reference pattern,
+not a framework-owned review subsystem.

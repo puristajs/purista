@@ -7,6 +7,8 @@ Use this checklist when creating or updating a skill.
 - Current implementation paths verified in `purista/`
 - Public handbook/API docs checked when behavior is documented for users
 - Neighboring skills reviewed for overlap
+- Documentation work routed to `purista-docs-maintainer` instead of expanding the user-facing framework skill
+- Worked Framework tutorials and their examples routed to `purista-tutorial-maintainer`, reusing docs-maintainer formatting and verification conventions
 - Downstream repos checked when capability changes affect generated or default behavior
 - The framework knowledge required by an otherwise untrained model has been identified explicitly
 - Older planning notes checked for stale assumptions before copying package names, protocols, or API shapes into skills
@@ -37,8 +39,9 @@ Use this checklist when creating or updating a skill.
 - “Decision rules” help choose the right PURISTA primitive
 - The PURISTA concept is taught, not only referenced
 - The builder role is clear where relevant: definition, implementation, configuration, instantiation
+- Documentation-maintainer guidance distinguishes default, opt-in, separately installed, peer, package-manager optional, development-only, and external-service prerequisites
 - Schema guidance reinforces boundary-local consumer schemas instead of one oversized shared cross-service schema
-- Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)` and `AgentQueueBuilder.defineMetric(...)`
+- Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)`; Harness owns its native runtime metrics
 - Handler guidance uses typed `context.metrics` and does not expose raw metric recording
 - AI guidance states that `@purista/harness` owns GenAI, model, token, and tool metrics
 - CLI, starter, and `create-purista` guidance treats generated PURISTA apps as ESM-only and contains no CommonJS scaffold option, template, or docs
@@ -59,6 +62,14 @@ Use this checklist when creating or updating a skill.
 - Repeatedly brittle checks are moved into `scripts/`
 - Known edge cases or gotchas are captured in the skill or a reference file
 - Verification checks that outputs respect PURISTA builder patterns, not just generic code correctness
+- Persistence guidance classifies operational state versus domain records by
+  ownership and meaning, not by current CRUD method count
+- Hono guidance uses generated command/stream endpoints and the endpoint security
+  metadata before permitting a custom route
+- Lifecycle guidance distinguishes Hono readiness shutdown from the host runtime
+  listener that the application opened
+- Tutorial navigation and chapter titles are capability-first; the continuous
+  example remains a small fixture and demo rather than the course architecture
 - `npm run audit:skills` passes
 
 ## 6. Drift check
@@ -66,13 +77,11 @@ Use this checklist when creating or updating a skill.
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
 - ESM-only scaffolding stays aligned across `purista`, `starter`, `create-purista`, public docs, and installed skill mirrors
-- `voyage` aligned when framework capability assumptions changed
 - Public docs updated when guidance or migration expectations changed
 - Known planning-doc drift is documented outside the skill when an old draft disagrees with implemented public APIs
 - Observability handbook, metric catalog, examples, and skills agree on metric names, attributes, and ownership boundaries
 - Security/privacy handbook pages, AI docs, examples, generated templates, and skills agree on tenant/principal propagation, guard placement, secret-store usage, redaction, sandboxing, and sensitive telemetry rules
 - Public handbook and published LLM knowledge files point to the canonical single skill path
-- Voyage still works correctly with one shared framework skill plus local overlays
 
 ## 7. Quality check
 - No generic filler

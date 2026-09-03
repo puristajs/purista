@@ -71,8 +71,8 @@ Secrets include API keys, tokens, passwords, private certificates, provider cred
 
 Rules:
 - never put secret values in source code, examples, config stores, generated fixtures, events, queues, logs, metrics, traces, prompts, completions, or screenshots
-- use secret stores for business/application secrets
-- deployment-time credentials may be injected by the platform, but only into bootstrap/runtime wiring or secret-store/provider setup
+- use secret stores for sensitive values whose lifecycle is part of application or business behavior, such as tenant/principal credentials created, rotated, revoked, or resolved at runtime
+- use platform secret delivery or workload identity for fixed deployment-time credentials needed to bootstrap adapters, resources, or a secret-store provider; keep them in composition-root/runtime wiring rather than general handler configuration
 - config stores are for non-secret values such as URLs, feature flags, regions, and timeouts
 - resources should consume secrets and expose narrow methods to handlers; handlers should not pass raw secrets around unless unavoidable
 
@@ -91,7 +91,7 @@ Unsafe attributes usually include:
 - tokens, API keys, passwords, provider request/response bodies
 - payload data, PII, user ids, email addresses, tenant ids, document text, medical or financial data
 
-Custom metrics must use `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record through typed `context.metrics`, use `app.*` names, and keep attributes low-cardinality and non-sensitive.
+Custom metrics must use `ServiceBuilder.defineMetric(...)`, record through typed `context.metrics`, use `app.*` names, and keep attributes low-cardinality and non-sensitive.
 
 ## AI And Model Safety
 Agents must not become an unbounded data exfiltration path.
@@ -145,7 +145,7 @@ Avoid storing confidential content in audit logs unless a product/legal policy r
 - Boundary schemas are minimized and consumer-local.
 - Events and queues do not broadcast confidential records unnecessarily.
 - Resources enforce tenant scoping and least privilege.
-- Secrets are in secret stores or deployment secret injection, not config stores or logs.
+- Runtime-managed business secrets are in secret stores; fixed technical bootstrap credentials use deployment secret delivery or workload identity. Neither belongs in config stores, logs, or message contracts.
 - Logs, metrics, traces, OpenAPI examples, generated fixtures, events, streams, and queue metadata are free of secrets and PII.
 - AI prompts receive only approved, minimized, redacted context.
 - AI telemetry does not capture prompt/completion content by default.
@@ -158,4 +158,4 @@ Avoid storing confidential content in audit logs unless a product/legal policy r
 - Model output is schema-validated and applied by deterministic service logic.
 - Queue retries, DLQ handling, idempotency keys, and timeout budgets are defined for sensitive side effects.
 - Audit records capture actor, tenant, operation, resource, decision, and correlation without leaking confidential content.
-- Deployment topology has production-grade event bridge, queue bridge, state store, secret store, health checks, and observability.
+- Deployment topology has production-grade event bridge, queue bridge, Harness storage, secret store, health checks, and observability.

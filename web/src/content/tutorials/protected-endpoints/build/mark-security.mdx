@@ -1,0 +1,123 @@
+---
+title: Declare public and protected endpoints
+description: Use command-builder metadata to keep one endpoint public and protect transaction commands by default.
+order: 10
+kind: lesson
+status: published
+---
+
+PURISTA command endpoints are protected by default. A command becomes public
+only when its builder calls `makeEndpointPublic()`.
+
+We reuse the commands from the previous chapter, so no CLI command is needed on
+this page. Mark the profile command as public explicitly. This call is the
+difference between the anonymous profile route and the protected transaction
+routes.
+
+```ts title="src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts" write
+import { bankProfileV1ServiceBuilder } from '../../bankProfileV1ServiceBuilder.js'
+import {
+	bankProfileV1GetProfileInputParameterSchema,
+	bankProfileV1GetProfileInputPayloadSchema,
+	bankProfileV1GetProfileOutputPayloadSchema,
+} from './schema.js'
+
+export const getProfileCommandBuilder = bankProfileV1ServiceBuilder
+	.getCommandBuilder('getProfile', 'Describe the fictional bank')
+	.addPayloadSchema(bankProfileV1GetProfileInputPayloadSchema)
+	.addParameterSchema(bankProfileV1GetProfileInputParameterSchema)
+	.addOutputSchema(bankProfileV1GetProfileOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'profile')
+	.makeEndpointPublic()
+	.setCommandFunction(async function () {
+		return { name: 'Example Bank', currency: 'EUR' }
+	})
+```
+
+Do not call `makeEndpointPublic()` on either `Transaction` command builder.
+Protected is the default, so those builders need no security call.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record a synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('POST', 'transactions')
+	.setCommandFunction(async function (context, payload) {
+		return context.resources.transactionRepository.save(payload)
+	})
+```
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1GetTransactionInputParameterSchema,
+	transactionV1GetTransactionInputPayloadSchema,
+	transactionV1GetTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const getTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('getTransaction', 'Get a transaction by ID')
+	.addPayloadSchema(transactionV1GetTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1GetTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1GetTransactionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'transactions/:transactionId')
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const transaction = await context.resources.transactionRepository.findById(parameter.transactionId)
+		if (!transaction) {
+			throw new HandledError(StatusCode.NotFound, 'Transaction not found', {
+				transactionId: parameter.transactionId,
+			})
+		}
+		return transaction
+	})
+```
+
+The handler logic did not change. Security is endpoint metadata, so Hono can
+decide whether to run protection middleware before it invokes a command.
+
+Add a focused metadata test:
+
+```ts title="src/endpointSecurity.test.ts" write
+import { isHttpExposedServiceMeta } from '@purista/core'
+import { describe, expect, test } from 'vitest'
+import { getProfileCommandBuilder } from './service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.js'
+import { getTransactionCommandBuilder } from './service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.js'
+import { recordTransactionCommandBuilder } from './service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.js'
+
+describe('generated endpoint security metadata', () => {
+	test('keeps the profile public and transaction commands protected', async () => {
+		const profile = await getProfileCommandBuilder.getDefinition()
+		const getTransaction = await getTransactionCommandBuilder.getDefinition()
+		const recordTransaction = await recordTransactionCommandBuilder.getDefinition()
+
+		if (
+			!isHttpExposedServiceMeta(profile.metadata)
+			|| !isHttpExposedServiceMeta(getTransaction.metadata)
+			|| !isHttpExposedServiceMeta(recordTransaction.metadata)
+		) {
+			throw new Error('Expected generated HTTP endpoint metadata')
+		}
+
+		expect(profile.metadata.expose.http.openApi?.isSecure).toBe(false)
+		expect(getTransaction.metadata.expose.http.openApi?.isSecure).toBe(true)
+		expect(recordTransaction.metadata.expose.http.openApi?.isSecure).toBe(true)
+	})
+})
+```
+
+Run the server tests. The old HTTP tests still call transaction endpoints
+without credentials, so they will be updated after the middleware is added.
+
+```bash title="Type-check the endpoint metadata" replay="project"
+npx tsc --noEmit
+```

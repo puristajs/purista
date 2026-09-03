@@ -1,4 +1,5 @@
-import type { AgentInvokeMap, AllowedAgentDefinition } from '../../../AgentQueueBuilder/types.js'
+import type { HarnessInvocationClients } from '../../../HarnessMount/invocation.js'
+import type { HarnessModelClients } from '../../../HarnessMount/model.js'
 import type { Schema } from '../../../schema/index.js'
 import type { QueueRetryRequest } from '../../QueueBridge/types/QueueRetryRequest.js'
 import type { ContextBase } from '../ContextBase.js'
@@ -53,7 +54,6 @@ export type QueueJobContext<
 	EmitList extends Record<string, Schema> = Record<string, never>,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
-	AgentInvokes extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 > = ContextBase<Metrics> &
 	PuristaMetricContextProperty<Metrics> & {
 		/** Immutable queue message for this lease. */
@@ -68,10 +68,14 @@ export type QueueJobContext<
 		service: Invokes
 		/** Typed stream invocation clients. */
 		stream: StreamInvokes
+		/** Address-first clients for declared Harness agents. */
+		agent: HarnessInvocationClients<Invokes, 'agent'>
+		/** Address-first clients for declared Harness workflows. */
+		workflow: HarnessInvocationClients<Invokes, 'workflow'>
+		/** Deterministic model handles explicitly declared with `canUseHarnessModel`. */
+		model: HarnessModelClients<Invokes>
 		/** Typed queue enqueue and schedule clients. */
 		queue: QueueContext<QueueInvokes>
-		/** Typed same-service agent invocation clients. */
-		agent: AgentInvokeMap<AgentInvokes>
 		/** Runtime resources supplied to the service. */
 		resources: Resources
 	}

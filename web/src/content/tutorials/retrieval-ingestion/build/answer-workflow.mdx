@@ -1,0 +1,89 @@
+---
+title: Build the answer workflow
+description: Run retrieval first, then stream a cited answer while forwarding native agent and model events.
+order: 209
+kind: lesson
+status: draft
+---
+
+Fill the generated workflow. It invokes the retrieval agent, handles its typed
+outcome, and streams a grounded answer from the primary model.
+
+```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.ts" write
+import { type AgentDefinition, type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import {
+	answerKnowledgeQuestionInputSchema,
+	type retrievedEvidenceSchema,
+} from '../../../../service/knowledge/v1/schema.js'
+
+type AnswerKnowledgeQuestionState = BuilderState & {
+	models: { primary: ModelAlias }
+	agents: {
+		retrieve_evidence: AgentDefinition<any, typeof answerKnowledgeQuestionInputSchema, typeof retrievedEvidenceSchema>
+	}
+}
+
+export const answerKnowledgeQuestionWorkflow = defineHarnessModule<AnswerKnowledgeQuestionState>()(
+	'knowledge.workflow.answer-knowledge-question',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.workflow('answer_knowledge_question', {
+				input: answerKnowledgeQuestionInputSchema,
+				output: answerKnowledgeQuestionInputSchema.shape.question,
+				updates: 'text-delta',
+				delegation: { agents: ['retrieve_evidence'] },
+				handler: async (context) => {
+					const research = await context.agents.retrieve_evidence(context.input)
+					let answer = ''
+					for await (const chunk of context.models.primary.textStream(
+						{
+							messages: [
+								{
+									role: 'system',
+									content:
+										'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
+								},
+								{ role: 'user', content: JSON.stringify(research) },
+							],
+						},
+						context.signal,
+						{ emitRunEvents: true },
+					)) {
+						if (chunk.kind === 'delta') answer += chunk.text
+					}
+					return answer
+				},
+			})
+		},
+	},
+)
+```
+
+Compose tool, agent, and workflow modules into one Knowledge harness and declare
+the primary and embedding model capabilities it requires.
+
+```ts title="src/harness/knowledge/knowledgeHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
+import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
+import { answerKnowledgeQuestionWorkflow } from './workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.js'
+
+export const knowledgeHarness = defineHarness({ name: 'knowledge' })
+	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
+	.requireModel('embedding', { capabilities: ['embeddings'] })
+	.use(searchKnowledgeTool)
+	.use(retrieveEvidenceAgent)
+	.use(answerKnowledgeQuestionWorkflow)
+	.define()
+```
+
+The workflow forwards native retrieval events before answer text. The HTTP
+stream adapter can therefore expose tool status and real text deltas without
+inventing a second event model.
+
+```bash title="Type-check the answer workflow"
+npm run build
+```
+
+Continue with [Bind the search tool and publish targets](../mount-harness/).

@@ -1,0 +1,124 @@
+import { Pool, type PoolClient } from 'pg'
+import { type KnowledgeRepository, StaleKnowledgeRevisionError } from '../service/knowledge/v1/KnowledgeResources.js'
+
+function vectorLiteral(vector: number[], dimensions: number) {
+	if (vector.length !== dimensions || !vector.every(Number.isFinite)) {
+		throw new Error(`Expected ${dimensions} finite embedding values`)
+	}
+	return `[${vector.join(',')}]`
+}
+
+async function currentRevision(
+	client: PoolClient,
+	input: { tenantId: string; collectionId: string; documentId: string },
+) {
+	const result = await client.query(
+		`SELECT revision
+		 FROM knowledge_documents
+		 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3
+		 FOR UPDATE`,
+		[input.tenantId, input.collectionId, input.documentId],
+	)
+	return (result.rows[0] as { revision: number } | undefined)?.revision
+}
+
+export class PgKnowledgeRepository implements KnowledgeRepository {
+	public readonly name = 'pgKnowledgeRepository'
+	private readonly pool: Pool
+
+	public constructor(
+		connectionString: string,
+		private readonly embeddingDimensions: number,
+	) {
+		this.pool = new Pool({ connectionString, max: 4 })
+	}
+
+	public async replaceRevision(input: Parameters<KnowledgeRepository['replaceRevision']>[0], signal?: AbortSignal) {
+		signal?.throwIfAborted()
+		const client = await this.pool.connect()
+		try {
+			await client.query('BEGIN')
+			const revision = await currentRevision(client, input)
+			if (revision !== undefined && input.revision <= revision) throw new StaleKnowledgeRevisionError()
+			await client.query(
+				`INSERT INTO knowledge_documents (
+				   tenant_id, collection_id, document_id, revision, title, status, embedding_model
+				 ) VALUES ($1, $2, $3, $4, $5, 'active', $6)
+				 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
+				   revision = EXCLUDED.revision,
+				   title = EXCLUDED.title,
+				   status = 'active',
+				   embedding_model = EXCLUDED.embedding_model,
+				   updated_at = now()`,
+				[input.tenantId, input.collectionId, input.documentId, input.revision, input.title, input.embeddingModel],
+			)
+			await client.query(
+				`DELETE FROM knowledge_chunks
+				 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+				[input.tenantId, input.collectionId, input.documentId],
+			)
+			for (const chunk of input.chunks) {
+				signal?.throwIfAborted()
+				await client.query(
+					`INSERT INTO knowledge_chunks (
+					   tenant_id, collection_id, document_id, revision,
+					   chunk_index, content, embedding_model, embedding
+					 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector)`,
+					[
+						input.tenantId,
+						input.collectionId,
+						input.documentId,
+						input.revision,
+						chunk.index,
+						chunk.content,
+						input.embeddingModel,
+						vectorLiteral(chunk.embedding, this.embeddingDimensions),
+					],
+				)
+			}
+			await client.query('COMMIT')
+		} catch (error) {
+			await client.query('ROLLBACK')
+			throw error
+		} finally {
+			client.release()
+		}
+	}
+
+	public async search(input: Parameters<KnowledgeRepository['search']>[0]) {
+		input.signal?.throwIfAborted()
+		const result = await this.pool.query(
+			`SELECT c.document_id, c.chunk_index, c.content,
+			        1 - (c.embedding <=> $4::vector) AS score
+			 FROM knowledge_chunks c
+			 JOIN knowledge_documents d
+			   ON d.tenant_id = c.tenant_id
+			  AND d.collection_id = c.collection_id
+			  AND d.document_id = c.document_id
+			  AND d.revision = c.revision
+			 WHERE c.tenant_id = $1
+			   AND c.collection_id = $2
+			   AND c.embedding_model = $3
+			   AND d.status = 'active'
+			 ORDER BY c.embedding <=> $4::vector, c.document_id, c.chunk_index
+			 LIMIT $5`,
+			[
+				input.tenantId,
+				input.collectionId,
+				input.embeddingModel,
+				vectorLiteral(input.queryEmbedding, this.embeddingDimensions),
+				input.limit,
+			],
+		)
+		return result.rows.map((row) => ({
+			documentId: String(row.document_id),
+			chunkIndex: Number(row.chunk_index),
+			content: String(row.content),
+			score: Number(row.score),
+		}))
+	}
+
+	public async destroy() {
+		await this.pool.end()
+	}
+}

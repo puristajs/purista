@@ -1,0 +1,201 @@
+---
+title: Test the small agent-tool boundaries
+description: Test native model tool selection and the PURISTA command-to-agent invocation without starting the complete application.
+order: 239
+kind: lesson
+status: draft
+---
+
+The Transaction command already has a focused test for its business guard and
+resource. Two small boundaries remain:
+
+1. Does native Harness give the tool to the model and execute the selected
+   host function?
+2. Does the Support command invoke only its declared agent address and handle
+   the aggregate outcome correctly?
+
+These tests use injected fakes. They make no network request and do not start an
+EventBridge.
+
+## Test native Harness tool selection
+
+Replace the test generated beside the agent with the complete file below.
+
+```ts title="src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
+
+const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
+
+describe('supportHarness', () => {
+	it('lets the model choose the declared transaction lookup tool', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {},
+			toolCalls: [
+				{
+					id: 'lookup-1',
+					name: 'lookup_transaction',
+					arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+				},
+			],
+			usage,
+			finishReason: 'tool_calls',
+		})
+		provider.enqueueObject({
+			object: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+			usage,
+			finishReason: 'stop',
+		})
+		const lookupTransaction = vi.fn(async () => ({
+			transactionId: 'tx-100',
+			accountId: 'account-operating',
+			status: 'pending' as const,
+			amount: 42,
+			currency: 'EUR',
+		}))
+		const harness = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-support' } },
+			hostTools: { lookup_transaction: lookupTransaction },
+		})
+
+		try {
+			const session = await harness.getSession('support-question:question-1')
+			const outcome = await session.agents.answer_transaction_question.run(
+				{
+					questionId: 'question-1',
+					accountId: 'account-operating',
+					transactionId: 'tx-100',
+					question: 'What is the status?',
+				},
+				{ hostContext: { identity: { tenantId: 'tenant-example', principalId: 'principal-alex' } } },
+			)
+
+			expect(lookupTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ agentId: 'answer_transaction_question' }),
+				{
+					accountId: 'account-operating',
+					transactionId: 'tx-100',
+				},
+			)
+			expect(outcome).toMatchObject({
+				status: 'completed',
+				output: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+			})
+			provider.assertExhausted()
+		} finally {
+			await harness.shutdown()
+		}
+	})
+})
+```
+The first queued model response requests `lookup_transaction`. Harness validates
+its arguments and calls the injected function. The second response sees the
+tool result and returns the final structured answer. `strict: true` fails if the
+agent makes an unexpected model request.
+
+## Test the PURISTA command helper
+
+Replace the generated Support command test. `createCommandContextMock` reads
+the builder's `canInvokeAgent(...)` declaration and creates the corresponding
+typed invocation stub.
+
+```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportQuestionSessionId } from '../../requireSupportQuestion.js'
+import { answerTransactionQuestionCommandBuilder } from './answerTransactionQuestionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('answerTransactionQuestion command', () => {
+	it('invokes the mounted agent through its declared PURISTA address', async () => {
+		const payload = {
+			questionId: 'question-1',
+			accountId: 'account-operating',
+			transactionId: 'tx-100',
+			question: 'What is the status?',
+		}
+		const supportQuestionPolicy = { canAsk: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportQuestionPolicy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const run = (stubs.agent as any).Support['1'].answer_transaction_question.run
+		run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output: { answer: 'It is pending.', transactionIds: ['tx-100'] },
+		})
+
+		await expect(
+			answerTransactionQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ answer: 'It is pending.', transactionIds: ['tx-100'] })
+		expect(
+			run.calledOnceWith(payload, { sessionId: supportQuestionSessionId(context.message, payload.questionId) }),
+		).toBe(true)
+		expect(
+			supportQuestionPolicy.canAsk.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+			}),
+		).toBe(true)
+	})
+
+	it('does not return an interrupted agent run as a command success', async () => {
+		const payload = {
+			questionId: 'question-2',
+			accountId: 'account-operating',
+			transactionId: 'tx-100',
+			question: 'What is the status?',
+		}
+		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportQuestionPolicy: { canAsk: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		;(stubs.agent as any).Support['1'].answer_transaction_question.run.resolves({
+			status: 'interrupted',
+			runId: 'run-2',
+			interrupt: { kind: 'approval', approvalId: 'approval-1' },
+		})
+
+		await expect(
+			answerTransactionQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('The support answer was interrupted unexpectedly.')
+	})
+})
+```
+The second case matters because an interrupted Harness run is a typed control
+state, not a successful command output. This aggregate command does not expose
+an approval flow, so it rejects the unexpected state. The human-review tutorial
+shows how to map an expected interruption to an application response.
+
+Run all three focused command and Harness tests.
+
+```bash title="Run the focused boundary tests" replay="project"
+npm test -- src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts
+```
+
+These tests prove each function in isolation. They do not yet prove that
+identity crosses both EventBridge calls.
+
+Continue with [Test the complete EventBridge path](../test-eventbridge/).

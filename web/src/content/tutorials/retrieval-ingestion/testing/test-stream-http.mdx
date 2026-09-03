@@ -1,0 +1,152 @@
+---
+title: Test streaming and authentication
+description: Verify address-first workflow invocation, standard SSE conversion, public login, and protected endpoints.
+order: 225
+kind: lesson
+status: draft
+---
+
+Test the PURISTA stream with a mocked generated workflow client. Verify business
+authorization, scoped session identity, and AI SDK UI Message Stream conversion.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts" write
+import { createStreamContextMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { answerKnowledgeQuestionStreamBuilder } from './answerKnowledgeQuestionStreamBuilder.js'
+
+const sandbox = createSandbox()
+
+afterEach(() => sandbox.restore())
+
+async function* executionEvents() {
+	yield { type: 'run.started' as const, runId: 'run-1', at: '2026-09-03T10:00:00.000Z' }
+	yield { type: 'output.text.delta' as const, runId: 'run-1', id: 'text-1', delta: 'Grounded answer.' }
+	yield {
+		type: 'run.finished' as const,
+		runId: 'run-1',
+		at: '2026-09-03T10:00:01.000Z',
+		outcome: { status: 'completed' as const, runId: 'run-1', output: 'Grounded answer.' },
+	}
+}
+
+describe('answerKnowledgeQuestionStreamBuilder', () => {
+	it('adapts the address-first Harness stream to AI SDK UI Message Stream v1 events', async () => {
+		const payload = {
+			id: 'conversation-1',
+			collectionId: 'customer-help',
+			messages: [{ role: 'user' as const, parts: [{ type: 'text', text: 'What is the transfer delay?' }] }],
+		}
+		const test = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, {
+			payload,
+			parameter: {},
+			sandbox,
+		})
+		const remote = Object.assign(executionEvents(), { cancel: sandbox.stub().resolves() })
+		;(test.stubs.workflow as any).Knowledge['1'].answer_knowledge_question.stream.resolves(remote)
+
+		await answerKnowledgeQuestionStreamBuilder
+			.getStreamFunction()
+			.call({} as never, test.context, payload, {}, test.writer)
+
+		expect(
+			(test.stubs.workflow as any).Knowledge['1'].answer_knowledge_question.stream.calledOnceWith(
+				{ collectionId: 'customer-help', question: 'What is the transfer delay?' },
+				{ sessionId: 'knowledge-chat:conversation-1' },
+			),
+		).toBe(true)
+		expect(test.chunks.at(0)).toMatchObject({ event: 'data', data: { type: 'start', messageId: 'run-1' } })
+		expect(test.chunks).toContainEqual(
+			expect.objectContaining({
+				event: 'data',
+				data: expect.objectContaining({ type: 'text-delta', delta: 'Grounded answer.' }),
+			}),
+		)
+		expect(test.chunks.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
+		expect(test.finalValue).toEqual({ status: 'completed' })
+	})
+})
+```
+
+Then start the composed application and exercise Hono. Login must remain public;
+ingestion and chat must reject missing credentials; a valid opaque session must
+place the resolved identity on downstream messages.
+
+```ts title="src/application.test.ts" write
+import { initDefaultStateStore, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+
+async function fixture() {
+	const logger = initLogger('fatal')
+	const repository = {
+		name: 'mockKnowledgeRepository',
+		replaceRevision: vi.fn(),
+		search: vi.fn(),
+		destroy: vi.fn().mockResolvedValue(undefined),
+	}
+	const provider = new FakeModelProvider({ strict: true })
+	const application = await createKnowledgeApplication(logger, {
+		stateStore: initDefaultStateStore({ logger }),
+		repository,
+		models: {
+			primary: { provider, model: 'fake-knowledge' },
+			embedding: { provider, model: 'fake-embedding' },
+		},
+		embeddingDimensions: 4,
+	})
+	return { application, repository, provider }
+}
+
+async function destroy(application: Awaited<ReturnType<typeof createKnowledgeApplication>>) {
+	await new Promise<void>((resolve) => setImmediate(resolve))
+	await application.http.prepareDestroy().destroy()
+	await application.http.destroy()
+	await application.knowledge.destroy()
+	await application.identity.destroy()
+	await application.repository.destroy()
+	await application.stateStore.destroy()
+	await application.eventBridge.destroy()
+}
+
+describe('knowledge HTTP application', () => {
+	it('keeps login public and blocks the protected stream before retrieval', async () => {
+		const { application, repository, provider } = await fixture()
+		try {
+			const login = await application.http.app.request('/api/v1/session/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ username: 'alex@example.test', password: 'demo-password' }),
+			})
+			expect(login.status).toBe(200)
+			expect(await login.json()).toMatchObject({ displayName: 'Alex Example' })
+
+			const denied = await application.http.app.request('/api/v1/knowledge/chat', {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					'x-tenant-id': 'tenant-example',
+					'x-principal-id': 'principal-alex',
+				},
+				body: JSON.stringify({
+					id: 'chat-1',
+					collectionId: 'customer-help',
+					messages: [{ role: 'user', parts: [{ type: 'text', text: 'How long are transfers pending?' }] }],
+				}),
+			})
+			expect(denied.status).toBe(401)
+			expect(repository.search).not.toHaveBeenCalled()
+			provider.assertExhausted()
+		} finally {
+			await destroy(application)
+		}
+	})
+})
+```
+
+```bash title="Run stream and HTTP tests" replay="project"
+npx vitest run src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts src/application.test.ts
+```
+
+Continue with [Test pgvector storage](../test-storage/).

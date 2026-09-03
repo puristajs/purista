@@ -1,0 +1,24 @@
+name: example-bank-distributed
+
+services:
+  nats:
+    image: nats:2.10.29-alpine
+    command: ["-js", "-m", "8222", "--store_dir", "/data"]
+    ports:
+      - "127.0.0.1:${EXAMPLE_BANK_NATS_PORT:-4222}:4222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8222/healthz"]
+      interval: 1s
+      timeout: 500ms
+      retries: 30
+    networks: [bank-runtime]
+
+networks:
+  bank-runtime:
+    name: example-bank-runtime
+
+volumes:
+  nats-data:
+    name: example-bank-nats-data

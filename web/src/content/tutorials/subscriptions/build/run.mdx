@@ -1,0 +1,168 @@
+---
+title: Start producer and consumer
+description: Compose Transaction and Monitoring with one EventBridge, database resource, and StateStore.
+order: 125
+kind: lesson
+status: published
+---
+
+The two services are independent but run in one process for this lesson. They
+share an EventBridge. Transaction receives its database resource; Monitoring
+receives its operational StateStore.
+
+First make the generated subscription registration explicit:
+
+```ts title="src/service/monitoring/v1/monitoringV1Service.ts" write
+import { monitoringV1ServiceBuilder } from './monitoringV1ServiceBuilder.js'
+import { observeLargeDebitSubscriptionBuilder } from './subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.js'
+
+export const monitoringV1Service = monitoringV1ServiceBuilder.addSubscriptionDefinition(
+	observeLargeDebitSubscriptionBuilder.getDefinition(),
+)
+```
+
+## Compose the application
+
+```ts title="src/application.ts" write
+import { initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { monitoringV1Service } from './service/monitoring/v1/monitoringV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository = new SqliteTransactionRepository(':memory:'),
+	monitoringStateStore: StateStore = initDefaultStateStore({ logger }),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const monitoring = await monitoringV1Service.getInstance(eventBridge, {
+		logger,
+		stateStore: monitoringStateStore,
+	})
+
+	await transaction.start()
+	await monitoring.start()
+
+	return {
+		eventBridge,
+		transaction,
+		transactionRepository,
+		monitoring,
+		monitoringStateStore,
+	}
+}
+```
+
+`createApplication` is the composition root. Neither service imports the other.
+The event name and filters are their only connection.
+
+```ts title="src/index.ts" write
+import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { createApplication } from './application.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+async function main() {
+	const logger = initLogger()
+	const transactionRepository = new SqliteTransactionRepository('var/example-bank.sqlite')
+	const monitoringStateStore = initDefaultStateStore({ logger })
+	const app = await createApplication(logger, transactionRepository, monitoringStateStore)
+
+	gracefulShutdown(logger, [
+		app.monitoring,
+		app.transaction,
+		app.monitoringStateStore,
+		app.transactionRepository,
+		app.eventBridge,
+	])
+	logger.info('Transaction and Monitoring services started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank could not start.\n')
+	process.exit(1)
+})
+```
+
+The application owns each runtime object once. There is no HTTP listener in
+this isolated use case.
+
+## Prove the real message flow
+
+The integration test invokes the command through the real local EventBridge.
+PURISTA routes its named success response to Monitoring.
+
+```ts title="src/subscriptionFlow.test.ts" write
+import { getCommandMessageMock, initDefaultStateStore, initLogger } from '@purista/core'
+import { afterEach, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { latestLargeDebitSignalKey } from './service/monitoring/v1/monitoringSignal.js'
+
+let app: Awaited<ReturnType<typeof createApplication>> | undefined
+
+afterEach(async () => {
+	if (!app) return
+	await app.monitoring.destroy()
+	await app.transaction.destroy()
+	await app.monitoringStateStore.destroy()
+	await app.transactionRepository.destroy()
+	await app.eventBridge.destroy()
+	app = undefined
+})
+
+async function readSignal() {
+	for (let attempt = 0; attempt < 50; attempt++) {
+		const state = await app!.monitoringStateStore.getState(latestLargeDebitSignalKey)
+		const signal = state[latestLargeDebitSignalKey]
+		if (signal) return signal
+		await new Promise(resolve => setTimeout(resolve, 10))
+	}
+	throw new Error('Monitoring signal was not written')
+}
+
+test('routes a recorded transaction result to Monitoring', async () => {
+	const logger = initLogger('fatal')
+	app = await createApplication(
+		logger,
+		new SqliteTransactionRepository(':memory:'),
+		initDefaultStateStore({ logger }),
+	)
+
+	await app.eventBridge.invoke(getCommandMessageMock({
+		tenantId: 'tenant-example',
+		principalId: 'principal-alex',
+		receiver: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+		},
+		payload: {
+			payload: {
+				amountCents: 12_500,
+				direction: 'debit',
+				counterparty: 'Northwind Books',
+			},
+			parameter: { accountId: 'account-operating' },
+		},
+	}))
+
+	expect(await readSignal()).toMatchObject({
+		accountId: 'account-operating',
+		amountCents: 12_500,
+	})
+})
+```
+
+```bash title="Run the producer and consumer flow" replay="project"
+npx vitest run src/subscriptionFlow.test.ts
+npm test
+npm run build
+```
+
+This proves the architectural boundary: Transaction writes the domain record,
+the EventBridge routes its result, and Monitoring writes only derived state.

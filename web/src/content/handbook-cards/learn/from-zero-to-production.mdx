@@ -224,7 +224,7 @@ export const userSignUpCommandBuilder = userServiceV1ServiceBuilder
 | **Tests** | Unit tests cover happy and failure paths |
 | **Config** | Runtime config is documented and version-controlled |
 | **Observability** | Traces, logs, and metrics are visible |
-| **Security** | Secrets are in secret stores, not env vars |
+| **Security** | Runtime-managed secrets use secret stores; bootstrap credentials use approved platform secret delivery or workload identity |
 | **Shutdown** | Graceful shutdown behavior verified |
 
 ## Summary

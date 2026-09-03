@@ -1,4 +1,4 @@
-export const primaryNavLinks = [
+const corePrimaryNavLinks = [
 	{ href: '/', label: 'Explore', key: 'home' },
 	{ href: '/enterprise/', label: 'Enterprise', key: 'enterprise' },
 	{ href: '/framework/', label: 'Framework', key: 'framework' },
@@ -6,17 +6,28 @@ export const primaryNavLinks = [
 	{ href: '/handbook/', label: 'Handbook', key: 'handbook' },
 ] as const
 
-export type PrimaryNavKey = (typeof primaryNavLinks)[number]['key']
+const tutorialsPrimaryNavLink = { href: '/tutorials/', label: 'Tutorials', key: 'tutorials' } as const
+
+/**
+ * The Tutorials link is content-driven: the shell never advertises an empty
+ * section before a published Tutorials index page creates its public route.
+ */
+export function getPrimaryNavLinks(tutorialsAvailable: boolean) {
+	return tutorialsAvailable
+		? [...corePrimaryNavLinks, tutorialsPrimaryNavLink]
+		: corePrimaryNavLinks
+}
+
+export type PrimaryNavKey =
+	| (typeof corePrimaryNavLinks)[number]['key']
+	| typeof tutorialsPrimaryNavLink.key
 
 export const harnessNavLinks = [
 	{ href: '/harness/', label: 'Overview' },
-	{ href: '/harness/get-started/', label: 'Get Started' },
 	{ href: '/harness/architecture/', label: 'Architecture' },
+	{ href: '/handbook/harness/ecosystem-packages/', label: 'Packages' },
+	{ href: '/harness/guardrails/', label: 'Guardrails' },
+	{ href: '/harness/security/', label: 'Production' },
 	{ href: '/harness/use-cases/', label: 'Use Cases' },
-	{ href: '/harness/memory/', label: 'Memory' },
-	{ href: '/harness/durability/', label: 'Durability' },
-	{ href: '/harness/evaluations/', label: 'Evaluations' },
-	{ href: '/harness/testing/', label: 'Testing' },
-	{ href: '/harness/observability/', label: 'Observability' },
-	{ href: '/harness/security/', label: 'Security' },
+	{ href: '/handbook/harness/', label: 'Implementation Guide' },
 ] as const

@@ -1,0 +1,215 @@
+---
+title: Durable Workflows & Queues
+description: Resume a claims-review workflow from committed steps while keeping message delivery, idempotency, and application-owned review decisions explicit.
+---
+
+## Two kinds of durability
+
+A claims-review worker commonly consumes an application queue message, gathers
+evidence, runs a model review, and requests a human decision for high-risk
+claims. The queue and the Harness solve different failures:
+
+| Need | Owner | Mechanism |
+| --- | --- | --- |
+| Deliver a claim-review request after an outage | Application or PURISTA service | Queue, consumer retry, dead-letter handling, and delivery acknowledgment |
+| Avoid duplicating an agent answer for one redelivered message | Application calls Harness | Stable `idempotencyKey` on a direct agent invocation |
+| Resume a multi-step workflow after a process crash | Harness runtime and workspace adapters | Stable `durable.runId` plus `ctx.step(...)` checkpoints |
+| Prevent duplicate business side effects | Domain service | Idempotent command/transaction key and durable decision record |
+| Approve, reject, or request more evidence | Domain process | Typed, authenticated review/approval endpoint and audit record |
+
+Harness durable execution does not enqueue work, acknowledge a PURISTA queue
+message, or coordinate a distributed payment transaction. It records and
+replays **workflow steps**. The optional external-wait adapter can safely
+suspend a run for an application-owned terminal decision; the application still
+owns reviewer identity, review state, authorization, outbox delivery, and the
+final idempotent business command. See [Human Review Gates](/handbook/harness/human-review-gates/).
+
+## Configure a local durable claims worker
+
+For local development or a single-host worker, `localDurableExecution` provides
+one SQLite `HarnessStorage`, a local durable workspace, and a local sandbox. Command
+execution stays disabled by default.
+
+```ts
+import { defineHarness, localDurableExecution } from '@purista/harness'
+import { z } from 'zod'
+
+const durable = localDurableExecution({
+	root: '.purista/claims-review',
+	exec: false,
+})
+
+const harness = defineHarness({ name: 'claims-review-worker' })
+	.storage(durable.storage)
+	.sandbox(durable.sandbox)
+	.workspace(durable.workspace)
+	.requires([
+		'storage.persistent',
+		'storage.workspace_checkpoint',
+		'workspace.persistent',
+		'workspace.checkpoint',
+		'workspace.resume',
+	])
+	// models, agents, and workflows are declared next
+	.build()
+```
+
+`.requires(...)` is a startup contract, not documentation. It fails before a
+run starts if an adapter cannot provide a capability required by the worker. The
+in-memory storage and workspace are useful for tests but do not
+survive process exit. For a distributed deployment, implement or install
+durable adapters with leases, persistence, retention, quota, and encryption
+policies appropriate to the environment.
+
+## Mark replayable claims-review boundaries
+
+Put deterministic application work and agent calls behind named `ctx.step`
+boundaries. A committed step returns its recorded output on a retry with the
+same run ID; its callback does not run again. Make a call outside a step only
+when rerunning it is explicitly safe.
+
+```ts
+import { z } from 'zod'
+
+const ClaimReview = z.object({
+	recommendation: z.enum(['approve', 'refer']),
+	reasons: z.array(z.string()),
+})
+
+const claimsHarness = defineHarness({ name: 'claims-review-worker' })
+	.agent('assessor', {
+		model: 'reviewer',
+		input: z.object({ claimId: z.string(), evidence: z.array(z.string()) }),
+		output: ClaimReview,
+		instructions: 'Recommend approve only when the supplied evidence is sufficient; otherwise refer.',
+	})
+	.workflow('review_claim', {
+		input: z.object({ claimId: z.string(), workflowVersion: z.literal('v1') }),
+		output: ClaimReview,
+		delegation: { agents: ['assessor'], maxChildAgentCalls: 1 },
+		handler: async ctx => {
+			const evidence = await ctx.step('load-evidence-v1', () =>
+				claimsRepository.listReviewableEvidence(ctx.input.claimId),
+			)
+
+			const review = await ctx.step('assess-evidence-v1', () =>
+				ctx.agents.assessor({ claimId: ctx.input.claimId, evidence }),
+			)
+
+			await ctx.step('record-recommendation-v1', () =>
+				claimsRepository.recordRecommendation({
+					claimId: ctx.input.claimId,
+					recommendation: review,
+					idempotencyKey: ctx.runId,
+				}),
+			)
+
+			return review
+		},
+	})
+	.build()
+```
+
+The repository's `recordRecommendation` operation needs its own idempotency
+contract. Harness can replay the step output; it cannot make an external write
+exactly-once if the write succeeded just before a crash. Pass an application
+owned operation key, persist it transactionally with the claim decision, and
+make repeated use return the original result.
+
+Step identifiers are an executable compatibility boundary. Version a step when
+its output shape or side effects change. Include a workflow version in the
+input, keep prior output schemas readable for in-flight runs, or start a new
+durable run for a deliberately incompatible claim process.
+
+## Invoke from a queue worker
+
+The queue's stable delivery identifier and the Harness durable run ID serve
+different purposes. Derive each from a durable business identity, never from
+the prompt text.
+
+```ts
+async function handleClaimReview(message: { id: string; claimId: string; workflowVersion: 'v1' }): Promise<void> {
+	const session = await claimsHarness.getSession(`claim:${message.claimId}`)
+
+	try {
+		const review = await session.workflows.review_claim.run(
+			{ claimId: message.claimId, workflowVersion: message.workflowVersion },
+			{ durable: { runId: `claim-review:${message.claimId}:${message.workflowVersion}` } },
+		)
+
+		if (review.recommendation === 'refer') {
+			await claimsRepository.requestHumanReview({
+				claimId: message.claimId,
+				idempotencyKey: `review-request:${message.id}`,
+			})
+		}
+
+		await queue.ack(message.id)
+	} finally {
+		await session.release()
+	}
+}
+```
+
+Only acknowledge after every required application write has committed. On a
+retryable queue failure, do not create a new durable run ID: reopen the same
+logical review so committed steps replay. On a deliberately new business
+review (for example, evidence changed), create a new versioned run ID and link
+it to the previous run in the application record.
+
+For an at-least-once **direct agent** consumer with no workflow, use the
+delivery ID as `idempotencyKey` instead:
+
+```ts
+const result = await session.agents.assessor.run(input, {
+	idempotencyKey: message.id,
+})
+```
+
+That returns a recorded successful agent output without a second model call or
+transcript write. It is intentionally separate from workflow durability and
+does not make external tool effects exactly-once.
+
+## Keep approval outside the model loop
+
+A recommendation is not an approval. The workflow should return a typed result
+and the application should create an authenticated, auditable review task. A
+human decision endpoint validates the reviewer identity, the claim version,
+the current task state, and a request idempotency key before applying a state
+transition. Do not let the model call a payment, approval, or settlement tool.
+
+Use Harness governance only when typed tool exposure or execution needs a
+policy/approval gate. The application remains the authority for the claim
+record, approver identity, stale-decision checks, and final side effect.
+
+## Retention, checkpoints, and cleanup
+
+Workflow step outputs are the replay record. Keep them minimal and JSON-safe;
+do not put raw evidence, credentials, or prompt content in checkpoint output or
+metadata. Application process state belongs in the application database.
+
+Workspace snapshots and storage checkpoints are complementary. At a durable
+step boundary the workspace checkpoint is saved before the storage checkpoint
+references it. Configure retention, encryption, and quotas in the workspace
+adapter. A successful workflow may be cleaned automatically only when the
+workspace declares `cleanupMode: 'adapter_automatic'`; otherwise the application
+must run the documented cleanup schedule.
+
+## Test the recovery story
+
+Write deterministic tests for the exact operational promises:
+
+1. Fail after `load-evidence-v1` commits; retry with the same run ID and assert
+   the loader is not invoked again.
+2. Fail a domain write after it reaches the database; retry and assert the
+   repository idempotency key prevents a second recommendation record.
+3. Deliver the same queue message twice; assert only one review task is
+   created and the second delivery is acknowledged safely.
+4. Exercise a lease conflict with two workers; one must not execute the same
+   durable run concurrently.
+5. Verify retention/cleanup and quota-exceeded behavior with the production
+   workspace adapter's test environment.
+
+Continue with [Custom Adapters](/handbook/harness/custom-adapters/) to build a
+provider, storage, memory, sandbox, or workspace integration without
+breaking Harness lifecycle, cancellation, or telemetry behavior.

@@ -1,0 +1,51 @@
+---
+title: Add a classification agent
+description: Define, mount, invoke, and test a structured AI classifier with native Harness and PURISTA.
+order: 180
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches the smallest useful PURISTA AI boundary. You will define
+one native Harness agent that turns a support message into a typed
+classification. You will mount it on the narrow `Support` service and invoke
+it from a normal PURISTA command through EventBridge.
+
+The Example Bank text is only a small fixture. The Framework capability is the
+important part:
+
+```text title="Classification execution path"
+PURISTA command
+  -> declared Support v1 agent address
+  -> EventBridge
+  -> mounted native Harness agent
+  -> model provider supplied at application startup
+  -> validated structured result
+```
+
+The command never imports or calls an agent definition directly. The Harness
+definition contains no API key and no OpenAI client. That separation keeps the
+definition usable by native Harness and by a mounted PURISTA service.
+
+You need Node.js 24 or newer and basic TypeScript knowledge. The required path
+uses `FakeModelProvider`, so it needs no API key, HTTP server, database, or
+earlier tutorial.
+
+## What you will build
+
+You will:
+
+1. [create a project and generate Support plus its agent](./build/scaffold/);
+2. [replace the placeholder with a structured classifier](./build/define/);
+3. [authorize and mount the published agent](./build/mount/);
+4. [generate a command that invokes the agent by address](./build/invoke/);
+5. [compose the service runtime and address-first caller](./build/compose-runtime/);
+6. [run a deterministic demo and optionally bind OpenAI](./build/run-application/);
+7. [test the native agent and command helper](./testing/test-classification/); and
+8. [prove the complete EventBridge route and direct-target denial](./testing/test-eventbridge/).
+
+Every code block that creates or replaces a file contains the complete file.
+The finished source is in `examples/banking/chapters/classification-agent`.
+
+Start with [Generate the service and agent](./build/scaffold/).

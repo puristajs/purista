@@ -178,17 +178,31 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Sets middleware for endpoints marked as protected in HTTP metadata.
+	 * Sets authentication middleware for endpoints marked as protected in HTTP metadata.
 	 *
-	 * The middleware can also enrich `additionalParameter`, `principalId` and
-	 * `tenantId` Hono variables before the generated command or stream handler
-	 * calls PURISTA.
+	 * The middleware verifies and decodes the request credential, rejects failed
+	 * authentication, and sets trusted `principalId` and `tenantId` Hono
+	 * variables before the generated command or stream handler calls PURISTA.
+	 * Business authorization belongs to guards on the receiving PURISTA target.
+	 * `additionalParameter` is available for other trusted transport-derived
+	 * parameters.
 	 *
 	 * @example
 	 * ```typescript
+	 * import { HandledError, StatusCode } from '@purista/core'
+	 *
 	 * honoService.setProtectMiddleware(async function (c, next) {
-	 *   c.set('principalId', 'user-123')
-	 *   c.set('tenantId', 'tenant-a')
+	 *   const token = c.req.header('authorization')?.replace(/^Bearer\s+/i, '')
+	 *   if (!token) throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
+	 *
+	 *   let identity
+	 *   try {
+	 *     identity = await accessTokenVerifier.verifyAndDecode(token)
+	 *   } catch {
+	 *     throw new HandledError(StatusCode.Unauthorized, 'Access token is invalid or expired')
+	 *   }
+	 *   c.set('principalId', identity.principalId)
+	 *   c.set('tenantId', identity.tenantId)
 	 *   return next()
 	 * })
 	 * ```
@@ -259,7 +273,7 @@ export class HonoServiceClass<
 					}
 
 					try {
-						await this.config.healthFunction()
+						await this.config.healthFunction.call(this)
 						span.setStatus({
 							code: SpanStatusCode.OK,
 							message: 'OK',
@@ -579,6 +593,7 @@ export class HonoServiceClass<
 						return new Response(stream, {
 							status: StatusCode.OK,
 							headers: {
+								...(expose.http.stream?.responseHeaders ?? {}),
 								'content-type': `${responseContentType}; charset=${responseEncodingType}`,
 								'cache-control': 'no-cache, no-transform',
 								connection: 'keep-alive',
@@ -633,7 +648,11 @@ export class HonoServiceClass<
 					}
 
 					if (responseContentType.toLowerCase() !== 'application/json') {
-						return c.text(String(responsePayload ?? ''), statusCode as ContentfulStatusCode)
+						// `c.text()` sets `text/plain` and would overwrite the content type
+						// declared by the command exposure (for example `text/csv`). The
+						// response header was set above from that contract, so return the
+						// string body without asking Hono to replace it.
+						return c.body(String(responsePayload ?? ''), statusCode as ContentfulStatusCode)
 					}
 
 					return c.json(responsePayload, statusCode as ContentfulStatusCode)
@@ -663,7 +682,7 @@ export class HonoServiceClass<
 
 		if (method === 'get' || method === 'delete') {
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				const protectHandler = safeBind(this.config.protectHandler, this)
 				this.app[method](path, protectHandler, handler)
 			} else {
 				this.app[method](path, handler)
@@ -680,7 +699,7 @@ export class HonoServiceClass<
 			})
 
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				const protectHandler = safeBind(this.config.protectHandler, this)
 				this.app[method](path, protectHandler, limitRequestBody, handler)
 			} else {
 				this.app[method](path, limitRequestBody, handler)
@@ -758,10 +777,16 @@ export class HonoServiceClass<
 	 * @example
 	 * ```typescript
 	 * gracefulShutdown(logger, [
-	 * honoService.prepareDestroy(),
-	 * eventbridge,
-	 * ...services,
-	 * honoService
+	 *   honoService.prepareDestroy(),
+	 *   ...services.map(service => ({
+	 *     name: `${service.serviceInfo.serviceName} ${service.serviceInfo.serviceVersion}`,
+	 *     destroy: () => service.destroy(),
+	 *   })),
+	 *   {
+	 *     name: `${honoService.serviceInfo.serviceName} ${honoService.serviceInfo.serviceVersion}`,
+	 *     destroy: () => honoService.destroy(),
+	 *   },
+	 *   { name: eventbridge.name, destroy: () => eventbridge.destroy() },
 	 * ])
 	 * ```
 	 * @returns
@@ -769,7 +794,7 @@ export class HonoServiceClass<
 	prepareDestroy() {
 		return {
 			name: `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} prepare shutdown`,
-			destroy: this.setServiceUnavailable,
+			destroy: this.setServiceUnavailable.bind(this),
 		}
 	}
 

@@ -1,0 +1,105 @@
+---
+title: Define the Transaction service boundary
+description: Describe the transaction reader, account policy, command schemas, and injected resources before adding behavior.
+order: 233
+kind: lesson
+status: draft
+---
+
+The agent needs transaction data, but the Support service does not own that
+data. Before writing the tool adapter, define a small boundary on the
+Transaction service. This keeps the database and the account access rule behind
+the service that owns them.
+
+This step only declares contracts. The next step will add the guarded command
+that uses them.
+
+## Declare the injected resources
+
+Create `TransactionResources.ts` beside the generated Transaction service.
+
+```ts title="src/service/transaction/v1/TransactionResources.ts" write
+import type { z } from 'zod'
+import type { getTransactionSummaryOutputSchema } from './command/getTransactionSummary/schema.js'
+
+export type StoredTransactionSummary = z.output<typeof getTransactionSummaryOutputSchema>
+
+export interface TransactionSummaryReader {
+	getById(transactionId: string): Promise<StoredTransactionSummary | undefined>
+}
+
+export interface AccountReadPolicy {
+	canRead(input: Readonly<{ tenantId: string; principalId: string; accountId: string }>): Promise<boolean>
+}
+```
+
+`TransactionSummaryReader` is the database-facing port. It says what the
+command needs without choosing PostgreSQL, an ORM, or an in-memory
+implementation. `AccountReadPolicy` answers the business question “may this
+principal read this account?”
+
+Transaction records are business data. They belong behind a database resource,
+not in a PURISTA StateStore. A StateStore is intended for application state
+such as sessions, locks, and short-lived coordination data.
+
+## Define the command boundary with schemas
+
+Replace the generated schema file. The payload contains the two identifiers a
+caller must provide. The output includes `tenantId` because server-side code
+must verify the loaded record before anything is returned to the agent.
+
+```ts title="src/service/transaction/v1/command/getTransactionSummary/schema.ts" write
+import { z } from 'zod'
+
+export const getTransactionSummaryPayloadSchema = z.strictObject({
+	accountId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+})
+
+export const getTransactionSummaryParameterSchema = z.strictObject({})
+
+export const getTransactionSummaryOutputSchema = z.strictObject({
+	transactionId: z.string(),
+	accountId: z.string(),
+	tenantId: z.string(),
+	status: z.enum(['pending', 'booked', 'rejected']),
+	amount: z.number(),
+	currency: z.string().length(3),
+})
+```
+
+The builder will infer its TypeScript types from these Zod schemas. Remove the
+generated aliases so this command has one source of truth.
+
+```bash title="Remove unused Transaction command aliases" replay="project"
+rm src/service/transaction/v1/command/getTransactionSummary/types.ts
+```
+
+## Make the resources available to Transaction commands
+
+Replace the generated service builder. `defineResource` adds a typed property
+to the command context; it does not create the concrete implementation. The
+composition root will provide implementations later.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { AccountReadPolicy, TransactionSummaryReader } from './TransactionResources.js'
+
+export const transactionV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Transaction',
+	serviceVersion: '1',
+	serviceDescription: 'Owns transaction records and transaction business rules',
+})
+	.defineResource<'transactionSummaryReader', TransactionSummaryReader>()
+	.defineResource<'accountReadPolicy', AccountReadPolicy>()
+```
+
+At this checkpoint, the Transaction service has a typed persistence boundary,
+a typed authorization boundary, and a validated command contract. Verify that
+the project still compiles before adding behavior.
+
+```bash title="Verify the Transaction contracts" replay="project"
+npm run build
+```
+
+Continue with [Build the guarded owning command](../bind-command/).

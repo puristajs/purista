@@ -1,0 +1,209 @@
+---
+title: Prepare a command producer
+description: Generate a small Transaction service and inject its repository resource.
+order: 120
+kind: lesson
+status: published
+---
+
+This chapter can be followed on its own. Start with the project from
+[Create a PURISTA project](/tutorials/create-project/). We only need its local
+EventBridge and package setup. We do not need HTTP, login, React, or an external
+provider to learn subscriptions.
+
+The producer is a `Transaction` service. It owns the command and the transaction
+repository. The subscription we add later belongs to a separate `Monitoring`
+service.
+
+## Generate the service and command
+
+Run both commands from `example-bank`:
+
+```bash title="Generate the Transaction service" replay="project"
+npm run add:service -- transaction \
+  --description "Record synthetic transactions" --non-interactive
+```
+
+```bash title="Generate the recordTransaction command" replay="project"
+npm run add:command -- record-transaction \
+  --service transaction --service-version 1 \
+  --description "Record one synthetic transaction" --non-interactive
+```
+
+The CLI creates the service builder, service registration, schemas, types, and a
+starter command test. We will replace the placeholders with the small contract
+needed by this lesson.
+
+## Define the transaction contract
+
+```ts title="src/service/transaction/v1/transaction.ts" write
+import { z } from 'zod'
+
+export const newTransactionSchema = z.strictObject({
+	amountCents: z.number().int().positive(),
+	direction: z.enum(['credit', 'debit']),
+	counterparty: z.string().trim().min(2).max(80),
+})
+
+export const createTransactionSchema = newTransactionSchema.extend({
+	accountId: z.string().trim().min(1),
+	tenantId: z.string().trim().min(1),
+})
+
+export const transactionSchema = createTransactionSchema.extend({
+	transactionId: z.uuid(),
+	recordedAt: z.iso.datetime(),
+})
+
+export type CreateTransaction = z.input<typeof createTransactionSchema>
+export type Transaction = z.output<typeof transactionSchema>
+```
+
+The command accepts the amount, direction, and counterparty as its payload. The
+account is a parameter. The trusted tenant stays in PURISTA message metadata and
+is copied into the repository input by the command.
+
+```ts title="src/service/transaction/v1/TransactionRepository.ts" write
+import type { CreateTransaction, Transaction } from './transaction.js'
+
+export interface TransactionRepository {
+	save(input: CreateTransaction): Promise<Transaction>
+}
+```
+
+`TransactionRepository` is the resource contract the service needs. The service
+does not know which database implements it.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalTransactionServiceInfo } from '../generalTransactionServiceInfo.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionServiceV1ConfigSchema } from './transactionServiceConfig.js'
+
+export const transactionServiceInfo = {
+	serviceVersion: '1',
+	...generalTransactionServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const transactionV1ServiceBuilder = new ServiceBuilder(transactionServiceInfo)
+	.setConfigSchema(transactionServiceV1ConfigSchema)
+	.defineResource<'transactionRepository', TransactionRepository>()
+```
+
+`defineResource` makes the repository available as
+`context.resources.transactionRepository` and keeps the handler fully typed.
+
+## Implement the command
+
+```ts title="src/service/transaction/v1/command/recordTransaction/schema.ts" write
+import { z } from 'zod'
+import { newTransactionSchema, transactionSchema } from '../../transaction.js'
+
+export const transactionV1RecordTransactionInputPayloadSchema = newTransactionSchema
+export const transactionV1RecordTransactionInputParameterSchema = z.strictObject({
+	accountId: z.string().trim().min(1),
+})
+export const transactionV1RecordTransactionOutputPayloadSchema = transactionSchema
+```
+
+```ts title="src/service/transaction/v1/command/recordTransaction/types.ts" write
+import type { z } from 'zod'
+import type {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export type TransactionV1RecordTransactionInputParameter = z.input<
+	typeof transactionV1RecordTransactionInputParameterSchema
+>
+export type TransactionV1RecordTransactionInputPayload = z.input<
+	typeof transactionV1RecordTransactionInputPayloadSchema
+>
+export type TransactionV1RecordTransactionOutputPayload = z.output<
+	typeof transactionV1RecordTransactionOutputPayloadSchema
+>
+```
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record one synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.setCommandFunction(async function (context, payload, parameter) {
+		if (!context.message.tenantId) {
+			throw new HandledError(StatusCode.Unauthorized, 'Tenant metadata is required')
+		}
+		return context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId,
+		})
+	})
+```
+
+The handler performs one business action through its resource. It does not use
+StateStore for transaction records.
+
+## Test the command with a fake resource
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+test('saves a tenant-scoped transaction through the repository resource', async () => {
+	const sandbox = createSandbox()
+	const payload = { amountCents: 12_500, direction: 'debit' as const, counterparty: 'Northwind Books' }
+	const parameter = { accountId: 'account-operating' }
+	const stored = {
+		...payload,
+		...parameter,
+		tenantId: 'tenant-example',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const save = sandbox.stub().resolves(stored)
+	const repository: TransactionRepository = { save }
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: { transactionRepository: repository },
+	})
+	try {
+		const mocked = createCommandContextMock(recordTransactionCommandBuilder, {
+			payload,
+			parameter,
+			resources: { transactionRepository: repository },
+			sandbox,
+		})
+		mocked.context.message = { ...mocked.context.message, tenantId: 'tenant-example' }
+		const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+
+		expect(await command(mocked.context, payload, parameter)).toEqual(stored)
+		expect(save.calledOnceWith({ ...payload, ...parameter, tenantId: 'tenant-example' })).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Test the generated producer" replay="project"
+npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts
+npm run build
+```
+
+The producer now has a narrow service boundary and a mockable repository. Next
+we provide the real local database resource used by the runnable example.

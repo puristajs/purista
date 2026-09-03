@@ -115,6 +115,7 @@ npm run add:stream       # add stream for live updates
 npm run add:queue        # add queue for async workloads
 npm run add:queue-worker # add worker for existing queue
 npm run add:agent        # add AI agent
+npm run add:workflow     # add Harness workflow
 ```
 
 Use the matching package manager and runtime for your project: `npm run ...`, `pnpm run ...`, `yarn ...`, or `bun run ...`.
@@ -154,6 +155,12 @@ npm run add:agent -- triage \
   --service support \
   --service-version 1 \
   --description "Ticket triage agent"
+
+# Add a durable Harness workflow
+npm run add:workflow -- resolve-ticket \
+  --service support \
+  --service-version 1 \
+  --description "Resolve a ticket in explicit workflow steps"
 ```
 
 ## CLI workflow
@@ -259,8 +266,7 @@ Since version 1.12.0, PURISTA expects a `purista.json` file in the project root.
   "eventConvention": "camel",
   "linter": "biome",
   "formatter": "biome",
-  "servicePath": "src/services",
-  "agentPath": "src/agents"
+  "servicePath": "src/services"
 }
 ```
 
@@ -276,7 +282,6 @@ Since version 1.12.0, PURISTA expects a `purista.json` file in the project root.
 | `linter` | `string` | `none` | `biome`, `eslint`, `none` |
 | `formatter` | `string` | `none` | `biome`, `prettier`, `none` |
 | `servicePath` | `string` | `src/service` | Any valid relative path |
-| `agentPath` | `string` | `src/agents` | Any valid relative path |
 
 ## Next steps
 

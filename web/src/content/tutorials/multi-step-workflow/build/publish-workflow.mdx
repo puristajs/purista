@@ -1,0 +1,103 @@
+---
+title: Publish the durable workflow
+description: Add case-level authorization and expose only the composed workflow through PURISTA.
+order: 274
+kind: lesson
+status: draft
+---
+
+The native workflow can now checkpoint and retry its stages. Before publishing
+it through EventBridge, add business authorization for the support case. The
+two stage agents remain private implementation details.
+
+## Declare the case policy
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportCasePolicy {
+	canResolve(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
+}
+```
+
+Declare the policy as a typed Support resource.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support cases and resolution workflows',
+}).defineResource<'supportCasePolicy', SupportCasePolicy>()
+```
+
+Keep the authorization decision fail-closed and reusable by every reachable
+address.
+
+```ts title="src/service/support/v1/requireSupportCaseResolution.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export async function requireSupportCaseResolution(
+	policy: SupportCasePolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canResolve({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			caseId: input.caseId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case resolution is not allowed')
+	}
+}
+```
+
+## Publish only the workflow
+
+Replace the generated mount policy. The mounted target owns this guard because
+a caller may address it directly without using the wrapper command.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportCaseResolution } from '../requireSupportCaseResolution.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
+
+export { supportHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['resolve_support_case'] },
+	targets: {
+		agents: {},
+		workflows: {
+			resolve_support_case: {
+				beforeGuards: {
+					caseAccess: async (
+						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+						input: { caseId: string },
+					) => {
+						await requireSupportCaseResolution(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+`publish.agents` is empty. Callers get one stable workflow contract rather
+than addresses for its internal stages.
+
+```bash title="Verify the protected durable workflow mount" replay="project"
+npm run build
+```
+
+Continue with [Invoke the durable workflow](../invoke/).

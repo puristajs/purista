@@ -1,0 +1,85 @@
+---
+title: Authorize the workflow address
+description: Publish the workflow with a tenant-scoped business guard and an explicit cross-principal resume policy.
+order: 255
+kind: lesson
+status: draft
+---
+
+A mounted workflow is a directly addressable capability. Its own guard must
+authorize every initial run and resume; relying only on the wrapper command
+would leave another route unprotected.
+
+Load the tenant-scoped review by wait ID, verify its immutable action digest,
+and apply the correct action policy for the requester or reviewer.
+
+```ts title="src/service/support/v1/requireReviewWorkflowAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export async function requireReviewWorkflowAccess(
+	resources: Readonly<{ supportReviewPolicy: SupportReviewPolicy; supportReviewStore: SupportReviewStore }>,
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	input: ReviewWorkflowInput,
+) {
+	const { tenantId, principalId } = identity
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+
+	const record = await resources.supportReviewStore.getByWaitId(tenantId, input.waitId)
+	if (!record || record.actionDigest !== input.actionDigest) {
+		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+	}
+
+	const allowed =
+		record.principalId === principalId
+			? await resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: record.cardId })
+			: await resources.supportReviewPolicy.canReview({ tenantId, principalId, requestId: record.requestId })
+	if (!allowed) throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+}
+```
+
+Apply that guard while publishing only the intended workflow.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireReviewWorkflowAccess } from '../requireReviewWorkflowAccess.js'
+import type { SupportReviewPolicy, SupportReviewStore } from '../SupportReviewResources.js'
+
+export { supportHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['review_support_action'] },
+	targets: {
+		agents: {},
+		workflows: {
+			review_support_action: {
+				beforeGuards: {
+					reviewAccess: async (
+						context: HarnessBusinessGuardContext<{
+							supportReviewPolicy: SupportReviewPolicy
+							supportReviewStore: SupportReviewStore
+						}>,
+						input: Parameters<typeof requireReviewWorkflowAccess>[2],
+					) => {
+						await requireReviewWorkflowAccess(context.resources, context.identity, input)
+					},
+				},
+				durableResume: { identity: 'run-owner' },
+			},
+		},
+	},
+} as const
+```
+
+`durableResume.identity: 'run-owner'` explicitly allows an authorized reviewer
+to resume a run created by the requester. PURISTA still evaluates the business
+guard with the current caller and rejects another tenant. A resume must also
+carry the original input, session ID, and durable run ID.
+
+```bash title="Type-check the published workflow"
+npm run build
+```
+
+Continue with [Persist review decisions](../persist-decision/).

@@ -1,0 +1,162 @@
+---
+title: Test the small classification boundaries
+description: Test the native Harness definition and the PURISTA command helper without starting the complete service.
+order: 187
+kind: lesson
+status: draft
+---
+
+Test the two smallest boundaries before starting EventBridge:
+
+1. native Harness should validate the model's structured classification; and
+2. the PURISTA command should authorize the message and invoke only its
+   declared agent address.
+
+Both tests are deterministic and require no provider credentials.
+
+## Test the native Harness definition
+
+Replace the test generated beside the agent.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
+
+describe('classifySupportMessageAgent', () => {
+	it('runs the classification agent without PURISTA infrastructure', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {
+				category: 'account_access',
+				urgency: 'urgent',
+				reason: 'The customer is locked out before payroll closes.',
+			},
+			usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 },
+			finishReason: 'stop',
+		})
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-classifier' } },
+		})
+
+		try {
+			const session = await runtime.getSession('support-message:MSG-123')
+			const outcome = await session.agents.classify_support_message.run({
+				messageId: 'MSG-123',
+				text: 'I cannot sign in and payroll closes in one hour.',
+			})
+
+			expect(outcome.status).toBe('completed')
+			if (outcome.status !== 'completed') throw new Error('Expected a completed classification run.')
+			expect(outcome.output).toEqual({
+				category: 'account_access',
+				urgency: 'urgent',
+				reason: 'The customer is locked out before payroll closes.',
+			})
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+`FakeModelProvider` returns exactly one object. Harness validates it with the
+agent output schema. `strict: true` also rejects an unexpected extra model
+request.
+
+## Test the PURISTA command helper
+
+Replace the generated command test. `createCommandContextMock` reads
+`canInvokeAgent(...)` and creates the matching invocation stub.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
+
+const sandbox = createSandbox()
+
+afterEach(() => sandbox.restore())
+
+describe('classifySupportMessageCommandBuilder', () => {
+	it('invokes the mounted agent through its declared address', async () => {
+		const payload = {
+			messageId: 'MSG-123',
+			text: 'I cannot sign in and payroll closes in one hour.',
+		}
+		const supportClassificationPolicy = { canClassify: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const expected = {
+			category: 'account_access' as const,
+			urgency: 'urgent' as const,
+			reason: 'The customer is locked out before payroll closes.',
+		}
+		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output: expected,
+		})
+
+		await expect(
+			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(expected)
+		expect(
+			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
+			}),
+		).toBe(true)
+		expect(
+			supportClassificationPolicy.canClassify.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'MSG-123',
+			}),
+		).toBe(true)
+	})
+
+	it('does not turn an interrupted outcome into a successful command result', async () => {
+		const payload = { messageId: 'MSG-124', text: 'Please check my card.' }
+		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
+			status: 'interrupted',
+			runId: 'run-2',
+			interrupt: { kind: 'external_wait', waitId: 'review-1' },
+		})
+
+		await expect(
+			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('Message classification was interrupted unexpectedly.')
+	})
+})
+```
+The first case checks both the business policy input and the derived session id.
+The second ensures an interrupted run does not become a successful command
+response.
+
+```bash title="Run the focused classification unit tests" replay="project"
+npm test -- src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts
+```
+
+Continue with [Test the complete EventBridge route](../test-eventbridge/).

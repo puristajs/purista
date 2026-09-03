@@ -1,0 +1,67 @@
+---
+title: Define the input content rail
+description: Create a typed, fail-closed action that blocks one instruction-override pattern before provider access.
+order: 192
+kind: lesson
+status: draft
+---
+
+A guardrail action receives a value at a specific model lifecycle phase. This
+first action inspects validated agent input before Harness contacts the model
+provider.
+
+## Create the shared schemas
+
+Create a separate schema file beside the generated agent. The agent and both
+guardrail actions will use the same contracts without importing one another.
+
+```ts title="src/harness/support/agent/classifySupportMessage/schema.ts" write
+import { z } from 'zod'
+
+export const classifySupportMessageInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classifySupportMessageOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+```
+## Define the blocking action
+
+Create the complete action file. The evaluator inspects only `text` and returns
+a stable reason code without copying message content into the result.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classificationInputGuardrail.ts" write
+import { defineGuardrailAction } from '@purista/harness-guardrails'
+import { classifySupportMessageInputSchema } from './schema.js'
+
+export const blockInstructionOverride = defineGuardrailAction({
+	phase: 'input',
+	valueSchema: classifySupportMessageInputSchema,
+	mayTransform: false,
+	evaluate: ({ value }) =>
+		/ignore (all )?previous instructions/i.test(value.text)
+			? { decision: 'block', reasonCode: 'instruction_override' }
+			: { decision: 'allow' },
+})
+```
+`phase: 'input'` fixes where the action may run. `valueSchema` gives the
+evaluator a validated value. `mayTransform: false` restricts the result to
+allow or block. An evaluator exception, timeout, cancellation, invalid input,
+or invalid result fails closed when the flow runs.
+
+This deterministic expression teaches the lifecycle. It is not a general
+prompt-injection detector.
+
+```bash title="Typecheck the input action" replay="project"
+npm run build
+```
+
+The action exists but is not attached to the agent yet. The next page adds the
+output action, composes both flows, and attaches them together so every runnable
+checkpoint uses the complete final policy.
+
+Continue with [Define the output rail and attach the flow](../output/).

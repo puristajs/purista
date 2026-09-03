@@ -1,0 +1,201 @@
+---
+title: Declare and export a schedule
+description: Add provider-neutral schedule metadata to Reporting and export it with the PURISTA CLI.
+order: 151
+kind: lesson
+status: published
+---
+
+PURISTA schedules are contracts. They describe a target and timing policy. An
+external scheduler reads the exported contract and decides how to deliver each
+occurrence.
+
+Create one small occurrence schema and a stable event name. `id` identifies one
+logical occurrence. `scheduledFor` is the time supplied by the scheduler, not
+the time at which your process happens to receive the request.
+
+```ts title="src/service/reporting/v1/schedule/dailyStatementOccurrence.ts" write
+import { z } from 'zod'
+
+export const dailyStatementDueEventName = 'reporting.daily-statement.due.v1'
+
+export const dailyStatementOccurrenceSchema = z.strictObject({
+	id: z.string().trim().min(1),
+	scheduledFor: z.iso.datetime(),
+	accountId: z.string().trim().min(1),
+	transactionId: z.uuid(),
+})
+
+export type DailyStatementOccurrence = z.infer<typeof dailyStatementOccurrenceSchema>
+```
+
+Use the service builder to declare the schedule. The target is the occurrence
+event. The real statement work remains in the queue.
+
+```ts title="src/service/reporting/v1/schedule/dailyStatementSchedule.ts" write
+import { reportingV1ServiceBuilder } from '../reportingV1ServiceBuilder.js'
+import { dailyStatementDueEventName } from './dailyStatementOccurrence.js'
+
+export const dailyStatementSchedule = reportingV1ServiceBuilder
+	.getScheduleBuilder('dailyStatement', 'Emit one daily statement occurrence')
+	.emitEvent(dailyStatementDueEventName, {
+		expression: { kind: 'cron', value: '0 6 * * *' },
+		timezone: 'Europe/Berlin',
+		concurrencyPolicy: 'forbid',
+		missedRunPolicy: 'skip',
+		idempotencyKey: 'event.id',
+		enabledByDefault: false,
+	})
+```
+
+The expression means 06:00 each day in `Europe/Berlin`. `forbid` asks a
+scheduler not to overlap occurrences. `skip` asks it not to replay a missed
+time. `enabledByDefault: false` exports the schedule as suspended so deployment
+does not silently activate it.
+
+Register the schedule beside the queue and worker definitions.
+
+```ts title="src/service/reporting/v1/reportingV1Service.ts" write
+import { getStatementStatusCommandBuilder } from './command/getStatementStatus/getStatementStatusCommandBuilder.js'
+import { requestStatementCommandBuilder } from './command/requestStatement/requestStatementCommandBuilder.js'
+import { generateStatementWorkerQueueWorkerBuilder } from './queue-worker/generateStatementWorker/generateStatementWorkerQueueWorkerBuilder.js'
+import { generateStatementQueueBuilder } from './queue/generateStatement/generateStatementQueueBuilder.js'
+import { reportingV1ServiceBuilder } from './reportingV1ServiceBuilder.js'
+import { dailyStatementSchedule } from './schedule/dailyStatementSchedule.js'
+
+type QueueDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueDefinition']>[number]
+type QueueWorkerDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueWorkerDefinition']>[number]
+
+const commandDefinitions: Parameters<typeof reportingV1ServiceBuilder['addCommandDefinition']>[0][] = [
+	requestStatementCommandBuilder.getDefinition(),
+	getStatementStatusCommandBuilder.getDefinition(),
+]
+const subscriptionDefinitions: Parameters<typeof reportingV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof reportingV1ServiceBuilder['addStreamDefinition']>[0][] = []
+const queueDefinitions: QueueDefinition[] = [generateStatementQueueBuilder.getDefinition()]
+const queueWorkerDefinitions: QueueWorkerDefinition[] = [generateStatementWorkerQueueWorkerBuilder.getDefinition()]
+
+export const reportingV1Service = reportingV1ServiceBuilder
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)
+	.addStreamDefinition(...streamDefinitions)
+	.addQueueDefinition(...queueDefinitions)
+	.addQueueWorkerDefinition(...queueWorkerDefinitions)
+	.addScheduleDefinition(dailyStatementSchedule)
+```
+
+The CLI exports from a JSON service-definition file. Add a small project script
+that resolves the same service builders used by the application.
+
+```ts title="src/exportDefinitions.ts" write
+import { writeFile } from 'node:fs/promises'
+import { exportServiceDefinitions } from '@purista/core'
+import { reportingV1Service } from './service/reporting/v1/reportingV1Service.js'
+
+const definitions = await exportServiceDefinitions([reportingV1Service])
+
+await writeFile('purista.definitions.json', `${JSON.stringify(definitions, null, 2)}\n`)
+```
+
+Add separate scripts for resolving definitions and using the PURISTA CLI to
+export only the schedule contract.
+
+```json title="package.json" write
+{
+  "name": "example-bank",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hono/node-server": "2.1.0",
+    "@purista/core": "3.2.4",
+    "@purista/hono-http-server": "3.2.4",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.32.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "3.6.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@purista/cli": "3.2.4",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "latest",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@types/sinon": "latest",
+    "@vitejs/plugin-react": "5.2.0",
+    "jsdom": "30.0.1",
+    "sinon": "latest",
+    "tailwindcss": "4.3.3",
+    "tsx": "latest",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "latest"
+  },
+  "trustedDependencies": ["@biomejs/biome"],
+  "scripts": {
+    "add:service": "purista add service",
+    "add:command": "purista add command",
+    "add:subscription": "purista add subscription",
+    "add:stream": "purista add stream",
+    "add:queue": "purista add queue",
+    "add:queue-worker": "purista add queue-worker",
+    "add:agent": "purista add agent",
+    "start": "tsx src/index.ts",
+    "build": "npm run build:server && npm run build:ui",
+    "dev": "tsx watch src/index.ts",
+    "test": "npm run build:ui && npm run test:server && npm run test:ui",
+    "export:definitions": "tsx src/exportDefinitions.ts",
+    "export:schedules": "npm run export:definitions && purista export schedule-manifest --definitions purista.definitions.json --out purista.schedules.json --title \"Example Bank schedules\" --export-version 1.0.0",
+    "export:runtime": "purista export runtime-capabilities --out purista-runtime.json",
+    "lint": "npx @biomejs/biome check .",
+    "lint:fix": "npx @biomejs/biome check --write .",
+    "build:server": "tsc",
+    "build:ui": "vite build --config ui/vite.config.ts",
+    "test:server": "tsc --noEmit && vitest run --config vitest.server.config.ts",
+    "test:ui": "vitest run --config ui/vitest.config.ts"
+  }
+}
+```
+
+Export and test the contract. The test reads the CLI result, so it verifies the
+artifact an external scheduler would consume.
+
+```ts title="src/scheduleExport.test.ts" write
+import { readFile } from 'node:fs/promises'
+import { expect, test } from 'vitest'
+
+test('exports the suspended daily schedule contract', async () => {
+	const manifest = JSON.parse(await readFile('purista.schedules.json', 'utf-8'))
+	expect(manifest).toMatchObject({
+		title: 'Example Bank schedules',
+		version: '1.0.0',
+		schedules: [{
+			name: 'dailyStatement',
+			targetKind: 'event',
+			targetServiceName: 'Reporting',
+			targetServiceVersion: '1',
+			targetName: 'reporting.daily-statement.due.v1',
+			expression: { kind: 'cron', value: '0 6 * * *' },
+			timezone: 'Europe/Berlin',
+			concurrencyPolicy: 'forbid',
+			missedRunPolicy: 'skip',
+			idempotencyKey: 'event.id',
+			enabledByDefault: false,
+		}],
+	})
+})
+```
+
+```bash title="Export and test the schedule manifest" replay="project"
+npm run export:schedules
+npx vitest run src/scheduleExport.test.ts
+npm run build:server
+```
+
+The manifest is configuration data. Running this command does not wait until
+06:00 and does not start a timer.

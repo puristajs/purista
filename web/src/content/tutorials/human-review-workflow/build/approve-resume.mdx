@@ -1,0 +1,115 @@
+---
+title: Record and resume a decision
+description: Commit one authorized decision, signal the external wait, resume the same run, and invoke an approved effect.
+order: 258
+kind: lesson
+status: draft
+---
+
+Generate the command that accepts a reviewer decision.
+
+```bash title="Generate the decision command" replay="project"
+npm run add:command -- decide-card-freeze --service support --service-version 1 --description "Authorize and deliver one human review decision" --non-interactive
+```
+
+Adapt the narrow Support resource to Harness storage. The command does not need
+to know the full storage API.
+
+```ts title="src/resources/HarnessReviewWaitSignal.ts" write
+import type { HarnessStorage } from '@purista/harness'
+import type { ReviewWaitSignal } from '../service/support/v1/SupportReviewResources.js'
+
+export class HarnessReviewWaitSignal implements ReviewWaitSignal {
+	public constructor(private readonly storage: HarnessStorage) {}
+
+	public signal(input: { waitId: string; eventId: string; outcome: 'approved' | 'rejected' }) {
+		return this.storage.signalWait(input)
+	}
+}
+```
+
+The decision command first authorizes the reviewer for this request. It commits
+the decision before signalling the wait, then resumes the declared workflow
+address with the original input, session ID, and durable run ID. An unavailable
+wait is a handled conflict.
+
+Only an approved result invokes the Transaction command. The durable run ID is
+used as both approval and idempotency identity.
+
+```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import {
+	freezeCardInputSchema,
+	freezeCardOutputSchema,
+	freezeCardParameterSchema,
+} from '../../../../transaction/v1/schema.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { decideReviewInputSchema, reviewTerminalSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('decideCardFreeze', 'Authorize and deliver one human review decision')
+	.addPayloadSchema(decideReviewInputSchema)
+	.addOutputSchema(reviewTerminalSchema)
+	.canInvokeWorkflow('Support', '1', 'review_support_action', supportHarness.contracts.workflows.review_support_action)
+	.canInvoke('Transaction', '1', 'freezeCard', freezeCardOutputSchema, freezeCardInputSchema, freezeCardParameterSchema)
+	.setBeforeGuardHooks({
+		reviewerMayDecide: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.supportReviewPolicy.canReview({
+					tenantId,
+					principalId,
+					requestId: payload.requestId,
+				}))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This review decision is not allowed')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
+		const signal = await context.resources.reviewWaitSignal.signal({
+			waitId: record.waitId,
+			eventId: payload.eventId,
+			outcome: payload.outcome,
+		})
+		if (signal.kind === 'not_found') throw new HandledError(StatusCode.Conflict, 'Review wait is not available')
+		const resumed = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+			sessionId: record.sessionId,
+			durable: { runId: record.runId },
+		})
+		if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
+		if (resumed.output.status === 'approved') {
+			await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
+		}
+		return { status: resumed.output.status, requestId: record.requestId }
+	})
+```
+
+Register both Support commands and mount the guarded workflow on the service.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { decideCardFreezeCommandBuilder } from './command/decideCardFreeze/decideCardFreezeCommandBuilder.js'
+import { requestCardFreezeCommandBuilder } from './command/requestCardFreeze/requestCardFreezeCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(requestCardFreezeCommandBuilder.getDefinition())
+	.addCommandDefinition(decideCardFreezeCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+The returned states `approved`, `rejected`, `expired`, and `cancelled` are
+ordinary command results. A UI can render them without interpreting an
+exception as a pending approval.
+
+```bash title="Type-check the complete service graph"
+npm run build
+```
+
+Continue with [Compose the review runtime](../compose-runtime/).

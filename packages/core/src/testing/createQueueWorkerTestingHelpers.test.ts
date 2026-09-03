@@ -48,11 +48,6 @@ describe('queue worker testing helpers', () => {
 			.canInvoke('TicketService', '1', 'loadTicket', outputSchema, payloadSchema, parameterSchema)
 			.canEnqueue('auditQueue', payloadSchema, parameterSchema)
 			.canEmit('worker.done', z.object({ jobId: z.string() }))
-			.canInvokeAgent('triageTicket', '1', {
-				outputSchema,
-				payloadSchema,
-				parameterSchema,
-			})
 			.setHandler(async function (context) {
 				const payload = context.message.payload as { id: string }
 				const parameter = context.message.parameter as { tenantId: string }
@@ -62,13 +57,8 @@ describe('queue worker testing helpers', () => {
 				)
 				await context.queue.enqueue.auditQueue({ id: payload.id }, { tenantId: parameter.tenantId })
 				await context.emit('worker.done', { jobId: context.message.id })
-				const agentResult = await context.agent['triageTicket.1'].run(
-					{ id: payload.id },
-					{ tenantId: parameter.tenantId },
-				)
 
 				expectTypeOf(ticket.status).toEqualTypeOf<'ok'>()
-				expectTypeOf(agentResult.status).toEqualTypeOf<'ok'>()
 
 				return { status: 'success' as const }
 			})
@@ -79,10 +69,8 @@ describe('queue worker testing helpers', () => {
 			parameter: { tenantId: 'tenant-1' },
 		})
 		const service = mock.stubs.service as any
-		const agent = (mock.stubs as any).agent
 
 		service.TicketService['1'].loadTicket.resolves({ status: 'ok' })
-		agent['triageTicket.1'].run.resolves({ status: 'ok' })
 
 		const definition = await workerBuilder.getDefinition()
 		await definition.handler(mock.context as never, mock.message as never)
@@ -90,7 +78,6 @@ describe('queue worker testing helpers', () => {
 		expect(service.TicketService['1'].loadTicket.calledOnce).toBe(true)
 		expect(mock.stubs.enqueue.calledOnce).toBe(true)
 		expect((mock.stubs.emit as any)['worker.done'].calledOnce).toBe(true)
-		expect(agent['triageTicket.1'].run.calledOnce).toBe(true)
 	})
 
 	it('executes one queue worker cycle through the runtime harness', async () => {
@@ -164,16 +151,15 @@ describe('queue worker testing helpers', () => {
 		const workerBuilder = serviceBuilder
 			.getQueueWorkerBuilder('jobs', 'jobWorker')
 			.canEnqueue('auditQueue', payloadSchema, parameterSchema)
-			.canInvokeAgent('triageTicket', '1', {
-				outputSchema,
-				payloadSchema,
-				parameterSchema,
-			})
+			.canInvoke('Knowledge', '1', 'triageTicket', outputSchema, payloadSchema, parameterSchema)
 			.setHandler(async function (context) {
 				const payload = context.message.payload as { id: string }
 				const parameter = context.message.parameter as { tenantId: string }
 				await context.queue.enqueue.auditQueue({ id: payload.id }, { tenantId: parameter.tenantId })
-				const result = await context.agent['triageTicket.1'].run({ id: payload.id }, { tenantId: parameter.tenantId })
+				const result = await context.service.Knowledge['1'].triageTicket(
+					{ id: payload.id },
+					{ tenantId: parameter.tenantId },
+				)
 				expect(result.status).toBe('ok')
 				return { status: 'success' as const }
 			})

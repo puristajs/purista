@@ -1,0 +1,10 @@
+{
+	"$schema": "https://purista.dev/schemas/1.12.0/schema.json",
+	"runtime": "node",
+	"eventBridge": "default",
+	"fileConvention": "camel",
+	"eventConvention": "dot",
+	"linter": "biome",
+	"formatter": "biome",
+	"servicePath": "src/service"
+}

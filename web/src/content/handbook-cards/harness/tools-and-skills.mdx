@@ -1,0 +1,194 @@
+---
+title: Tools & Skills
+description: Give agents explicit, typed capabilities while keeping business authorization outside the model.
+---
+
+## Prerequisites
+
+Complete [Models & Configuration](/handbook/harness/models-and-configuration/).
+Use a tool only for an explicit application capability. A model instruction is
+never authorization; the handler must receive or obtain a trusted caller scope.
+
+## Define a typed tool
+
+An order-support agent needs only a narrow order-status capability. Define its
+input and output, then expose only that tool to the agent. Install and import
+Zod explicitly; the application owns that dependency and the Harness does not
+re-export it.
+
+```ts title="Register the order lookup tool"
+import { z } from 'zod'
+
+.tool('lookup_order', {
+    description: 'Look up an order that the current caller may view.',
+    input: z.object({ orderId: z.string().min(1) }),
+    output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+    handler: async (ctx, { orderId }) =>
+      orderService.lookupVisibleOrder({ sessionId: ctx.sessionId, orderId }),
+})
+  .agent('support', {
+    model: 'assistant',
+    tools: ['lookup_order'],
+    instructions: 'Use lookup_order only after the customer provides an order id.',
+  })
+```
+
+Schemas validate shape. The handler still enforces authorization, idempotency,
+rate limits, and domain rules. Return a deliberate domain-safe error or throw a
+normalized application error; do not return a raw database, HTTP, or provider
+payload for the model to inspect.
+
+## Put the caller scope in application code
+
+The session ID identifies a conversation, not an authorization principal. A
+common pattern is to resolve the caller before starting the session and make a
+short-lived authorization facade available to the tool composition root:
+
+```ts
+function createSupportHarness(authorize: (orderId: string) => Promise<void>) {
+	return defineHarness({ name: 'support' }).tool('lookup_order', {
+			description: 'Return the current status for an order visible to the caller.',
+			input: z.object({ orderId: z.string().min(1) }),
+			output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+			handler: async (_ctx, { orderId }) => {
+				await authorize(orderId)
+				return orderService.getPublicStatus(orderId)
+			},
+	})
+	// Compose models and agents as shown in the previous guides.
+}
+```
+
+Construct this Harness per trusted request scope only when the dependencies are
+cheap and request-specific; otherwise keep a process-level Harness and use an
+application-owned authorization service that checks the trusted request context.
+Never place an access token in a model message or rely on the model to select a
+permitted ID.
+
+## Make failure behavior part of the contract
+
+The handler's return value is shown to the model only after its output schema
+passes. Validate business errors before returning them and normalize unexpected
+infrastructure failures at the application boundary. A tool must respect
+`ctx.signal`: a user disconnect, timeout, or workflow cancellation must stop
+database and HTTP work rather than leave a side effect running in the
+background.
+
+For an operation that changes money, entitlements, or customer data, keep the
+tool narrow: validate input, authorize with trusted caller context, make an
+idempotent application call, and return a small result. Put approval and
+multi-step business decisions in a workflow; do not make a general-purpose
+`execute` tool and try to constrain it with prompt text.
+
+## Add a skill when the method needs reviewed files
+
+Use a skill when the agent needs a maintained method or reference that is too
+large or too changeable to embed in an instruction. Create a directory under
+your application source tree:
+
+```text
+src/skills/return-policy/
+└── SKILL.md
+```
+
+```md
+---
+name: return-policy
+description: Check return eligibility before offering a return action.
+---
+
+1. Read the order status with `lookup_order`.
+2. Explain the applicable policy in plain language.
+3. Never promise a refund; request human approval for exceptions.
+```
+
+Register the directory with explicit provenance and permit the `read` builtin:
+
+```ts title="Register the return-policy skill"
+.skills({
+  return_policy: {
+    directory: './src/skills/return-policy',
+    trust: 'trusted',
+    source: 'application',
+  },
+})
+  .agent('support', {
+    model: 'fast',
+    skills: ['return_policy'],
+    builtinTools: ['read'],
+    tools: ['lookup_order'],
+    instructions: 'Use the return-policy skill before answering return questions.',
+  })
+```
+
+The catalog describes the skill in the model context; the body is mounted and
+read on demand. This keeps large guidance out of every request and leaves a
+reviewable file boundary. Test the skill frontmatter and the model's `read`
+tool call just as you test a normal tool.
+
+Use a TypeScript tool for a business operation. Use a skill for a reusable,
+reviewed method, checklist, or file-backed reference. Use MCP only for a
+reviewed external tool server; stdio MCP needs a spawn-capable, isolating
+sandbox.
+
+## Add a reviewed Agent Plugin only when it is needed
+
+An Agent Plugin is declarative package data, not code the Harness executes.
+The optional `@purista/harness-agent-plugins` package inspects an
+already-installed directory, pins an application-reviewed digest, and creates
+only the skills and MCP tools you explicitly select. It cannot add models,
+agents, workflows, credentials, or sandbox authority.
+
+Read [Agent Plugins](/handbook/harness/agent-plugins/) for the full
+inspection → review → exact-digest loading → explicit-binding path, including
+the Streamable HTTP and stdio MCP boundaries, immutable-mount requirement, and
+deterministic tests.
+
+## Add Harness-side governance to a sensitive tool
+
+The TypeScript handler remains the final authorization and domain boundary.
+Governance gives the Harness an additional typed exposure, policy, and approval
+layer for tool use. Keep approval decisions authenticated and application-owned.
+
+```ts title="Harness composition: sensitive-tool governance"
+.governance(({ native, rule, exposureRule }) => ({
+  defaultEffect: 'allow',
+  exposure: {
+    id: 'claims-tool-exposure',
+    rules: [exposureRule({
+      id: 'hide-settlement-for-readonly', effect: 'hide', tools: ['submit_settlement'],
+      when: ({ metadata }) => metadata.plan === 'readonly'
+    })]
+  },
+  policies: [native({
+    id: 'settlement-policy',
+    rules: [rule({
+      id: 'large-settlement-review', effect: 'require_approval', tools: ['submit_settlement'],
+      when: ({ input }) => input.amount > 1_000
+    })]
+  })]
+}))
+```
+
+When the rule matches, Harness returns a `ToolApprovalInterrupt` before the
+handler starts. Persist that interrupt in application-owned review storage,
+authenticate and authorize the reviewer, and resume the same run with a
+`ToolApprovalResume`. Static `require_approval` permissions and policy demands
+share the same interruption. Reject stale revisions, expired reviews, and
+unauthorized decisions before resuming.
+
+The [composed example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
+contains executable permission and policy wiring. For rules
+selecting multiple tools, narrow on `toolId` before reading the correlated
+parsed `input`; tool-input rails run on raw JSON before the schema parses once.
+
+Exposure rules run before the model call and see safe scalar metadata; native
+tool rules receive the parsed tool input. Do not put a bearer token, customer
+message, prompt, or document body in invocation metadata. A governance approval
+is not a replacement for the domain service's idempotency, authorization, or
+transaction checks.
+
+## Next
+
+Choose direct agents or explicit orchestration in
+[Agents, Workflows & Storage](/handbook/harness/agents-workflows-storage/).

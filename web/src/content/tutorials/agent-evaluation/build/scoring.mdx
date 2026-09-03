@@ -1,0 +1,112 @@
+---
+title: Run and aggregate evaluation
+description: Execute the real portable agent for every case, aggregate observations, and apply the release gate.
+order: 298
+kind: lesson
+status: draft
+---
+
+Build a runner around the native Harness definition. It creates one runtime,
+uses a separate stable session per case, scores successful outputs, records
+failures as observations, and always shuts the runtime down.
+
+```ts title="src/runClassificationEvaluation.ts" write
+import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
+import { type ClassificationAssessment, supportClassificationDataset } from './dataset.js'
+import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+import { supportHarness } from './harness/support/supportHarness.js'
+import { categoryScorer, urgencyScorer } from './scorers.js'
+
+export async function runClassificationEvaluation(
+	provider: ModelProvider,
+	options: Readonly<{ runId?: string; model?: string }> = {},
+): Promise<EvaluationRunResult> {
+	const harness = await supportHarness.getInstance({
+		models: { primary: { provider, model: options.model ?? 'evaluation-model' } },
+	})
+	try {
+		return await runEvaluation<
+			ClassificationInput,
+			ClassificationAssessment,
+			Record<string, never>,
+			ClassificationOutput
+		>({
+			runId: options.runId ?? 'support-classification-eval-1',
+			dataset: supportClassificationDataset,
+			candidates: [{ id: 'classify-support-message', version: '1.0.0', config: {} }],
+			task: {
+				id: 'run-classification-agent',
+				version: '1.0.0',
+				async run(target) {
+					const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
+					const outcome = await session.agents.classify_support_message.run(target.input)
+					if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
+					return { output: outcome.output, correlation: { runId: outcome.runId } }
+				},
+			},
+			scorers: [categoryScorer, urgencyScorer],
+			aggregateBy: ['category', 'urgency'],
+			maxConcurrency: 1,
+			failurePolicy: 'continue',
+			timeouts: { runMs: 30_000, taskMs: 10_000, scorerMs: 1_000 },
+		})
+	} finally {
+		await harness.shutdown()
+	}
+}
+```
+
+Create a strict scripted provider for the credential-free candidate. It returns
+the expected structured outputs and fails if the runner makes an unexpected
+model call.
+
+```ts title="src/testing/scriptedClassificationProvider.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+export function passingEvaluationProvider() {
+	const provider = new FakeModelProvider({ strict: true })
+	for (const object of [
+		{ category: 'card', urgency: 'urgent', reason: 'The card is stolen and active misuse is reported.' },
+		{ category: 'transfer', urgency: 'normal', reason: 'The question concerns a scheduled transfer date.' },
+		{ category: 'account_access', urgency: 'urgent', reason: 'Essential access is blocked before a deadline.' },
+	]) {
+		provider.enqueueObject({ object, usage, finishReason: 'stop' })
+	}
+	return provider
+}
+```
+
+Add the executable that supplies candidate identity, runs the complete dataset,
+and applies the change gate.
+
+```ts title="src/runEvaluation.ts" write
+import { assertClassificationGate } from './changeGate.js'
+import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
+
+async function main() {
+	const provider = passingEvaluationProvider()
+	const result = await runClassificationEvaluation(provider, { model: 'scripted-evaluation-model' })
+	const gate = assertClassificationGate(result)
+	process.stdout.write(`${JSON.stringify({ status: result.status, gate }, null, 2)}\n`)
+	provider.assertExhausted()
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Evaluation failed.'}\n`)
+	process.exit(1)
+})
+```
+
+```bash title="Run the credential-free evaluation" replay="project"
+npm run build
+npm run evaluate
+```
+
+The output reports a completed run and a passing aggregate gate. This proves
+dataset, agent, runner, scorer, aggregate, and gate wiring; a scripted candidate
+does not measure real model quality.
+
+Continue with [Compose the evaluated service](../compose-runtime/).

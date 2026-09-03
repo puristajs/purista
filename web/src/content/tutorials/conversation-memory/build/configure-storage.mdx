@@ -1,0 +1,131 @@
+---
+title: Create the conversation project and retention policy
+description: Generate the PURISTA service and native agent, then define how Harness retains complete conversation turns.
+order: 221
+kind: lesson
+status: draft
+---
+
+Start in an empty parent directory. This chapter uses the same small Support
+capability as the other AI lessons, but it creates every required artifact so
+you can build and run it independently.
+
+```bash title="Create and enter the conversation project" replay="parent"
+npm create purista@2.2.0 support-conversations -- --runtime node --event-bridge default --non-interactive --defaults
+cd support-conversations
+```
+
+Use the complete package manifest from the runnable chapter. Harness includes
+a local SQLite storage adapter for Node 24.15 or later, so this chapter does
+not need a separate database package or Docker service.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-conversation-history",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"tsx": "4.23.12",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+Install the published packages from that manifest.
+
+```bash title="Install the conversation application dependencies" replay="project"
+npm install
+```
+
+Generate the capability owner and native agent. The CLI creates the Harness
+module, service-level composition, mount policy, and service mount.
+
+```bash title="Generate Support and the conversation agent" replay="project"
+npm run add:service -- support --description "Own support conversations" --non-interactive
+npm run add:agent -- answer-support-question --service support --service-version 1 --description "Answer one question using bounded conversation history" --non-interactive
+```
+
+Replace the generated agent with a structured default-loop definition. Harness
+automatically adds complete user and assistant turns from the same session to
+later model requests.
+
+```ts title="src/harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { z } from 'zod'
+
+export const answerSupportQuestionInputSchema = z.strictObject({
+	conversationId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	question: z.string().trim().min(1).max(2_000),
+})
+
+export const answerSupportQuestionOutputSchema = z.strictObject({
+	answer: z.string().trim().min(1).max(2_000),
+})
+
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const answerSupportQuestionAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.answer-support-question',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('answer_support_question', {
+				model: 'primary',
+				input: answerSupportQuestionInputSchema,
+				output: answerSupportQuestionOutputSchema,
+				updates: 'object-snapshot',
+				instructions: [
+					'Answer one Example Bank support question in plain language.',
+					'Use earlier messages in this conversation when they are relevant.',
+					'Do not claim that you performed an account action.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+Configure durable retention on the native Harness definition. Both limits
+apply to persisted complete turns. `historyWindow` is a different setting: it
+only limits what a model sees during one call.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+
+export const supportHarness = defineHarness({ name: 'support-conversations' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.defaults({ historyRetention: { maxTurns: 8, maxBytes: 32_000 } })
+	.use(answerSupportQuestionAgent)
+	.define()
+```
+`maxTurns` retains the newest eight complete user/assistant pairs. `maxBytes`
+adds a size bound. `historyWindow` is different: it controls only what one
+model request sees, while retention controls what remains persisted. The final
+composition page will bind SQLite once the PURISTA commands exist.
+
+Continue with [Define conversation access and identity](../define-access/).

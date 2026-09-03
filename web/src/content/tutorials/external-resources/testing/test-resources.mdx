@@ -1,0 +1,844 @@
+---
+title: Mock the resource and test the real boundary
+description: Keep command tests fast with typed fakes, then verify the adapter and generated endpoint against Docker Compose.
+order: 104
+kind: lesson
+status: published
+---
+
+Test the command with a typed fake first. This proves the PURISTA lifecycle and
+the domain effects without depending on a socket or container.
+
+The first test follows the successful path. The next tests prove that business
+denial, missing configuration, and invalid provider content stop later effects.
+The denied request cannot read the SecretStore, call the provider, or save a
+transaction.
+
+```ts title="src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.test.ts" write
+import {
+	DefaultSecretStore,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isCommandErrorResponse,
+	isCommandSuccessResponse,
+	StatusCode,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { localAccountAccessPolicy } from '../../AccountAccessPolicy.js'
+import type { LegacyTransactionClient } from '../../LegacyTransactionClient.js'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionV1Service } from '../../transactionV1Service.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const parameter = { accountId: 'account-operating', sourceId: 'provider-1001' }
+const stored = {
+	accountId: 'account-operating',
+	tenantId: 'tenant-example',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+	amountCents: 2599,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+	reference: 'Provider 1001',
+}
+
+async function setup(principalId: string, token?: string, record = 'debit|25.99|Northwind Books|Provider 1001') {
+	const fetchTransaction = sandbox.stub().resolves(record)
+	const legacyTransactionClient: LegacyTransactionClient = { fetchTransaction }
+	const save = sandbox.stub().resolves(stored)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const logger = getLoggerMock(sandbox).mock
+	const secretStore = new DefaultSecretStore({
+		logger,
+		config: token ? { legacyProviderToken: token } : {},
+	})
+	const service = await transactionV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger,
+		resources: { transactionRepository, accountAccessPolicy: localAccountAccessPolicy, legacyTransactionClient },
+		secretStore,
+	})
+	await service.start()
+	const message = getCommandMessageMock({
+		principalId,
+		tenantId: 'tenant-example',
+		receiver: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'importProviderTransaction',
+		},
+		payload: { payload: {}, parameter },
+	})
+	return { service, secretStore, message, fetchTransaction, save }
+}
+
+async function destroy(fixture: Awaited<ReturnType<typeof setup>>) {
+	await fixture.service.destroy()
+	await fixture.secretStore.destroy()
+}
+
+describe('importProviderTransaction command', () => {
+	test('uses the injected client and saves validated provider data', async () => {
+		const fixture = await setup('principal-alex', 'fixture-token')
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandSuccessResponse(response)).toBe(true)
+			expect(response.payload).toEqual(stored)
+			expect(fixture.fetchTransaction.calledOnceWith('provider-1001', 'fixture-token')).toBe(true)
+			expect(fixture.save.calledOnceWith({
+				accountId: 'account-operating',
+				tenantId: 'tenant-example',
+				amountCents: 2599,
+				direction: 'debit',
+				counterparty: 'Northwind Books',
+				reference: 'Provider 1001',
+			})).toBe(true)
+		} finally {
+			await destroy(fixture)
+		}
+	})
+
+	test('denies the business action before secrets, provider, and repository effects', async () => {
+		const fixture = await setup('principal-sam', 'fixture-token')
+		const getSecret = sandbox.spy(fixture.secretStore, 'getSecret')
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandErrorResponse(response)).toBe(true)
+			if (!isCommandErrorResponse(response)) throw new Error('Expected a command error response')
+			expect(response.payload.status).toBe(StatusCode.Forbidden)
+			expect(getSecret.called).toBe(false)
+			expect(fixture.fetchTransaction.called).toBe(false)
+			expect(fixture.save.called).toBe(false)
+		} finally {
+			await destroy(fixture)
+		}
+	})
+
+	test('does not call the provider when its token is missing', async () => {
+		const fixture = await setup('principal-alex')
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandErrorResponse(response)).toBe(true)
+			if (!isCommandErrorResponse(response)) throw new Error('Expected a command error response')
+			expect(response.payload.status).toBe(StatusCode.ServiceUnavailable)
+			expect(fixture.fetchTransaction.called).toBe(false)
+			expect(fixture.save.called).toBe(false)
+		} finally {
+			await destroy(fixture)
+		}
+	})
+
+	test('does not save malformed provider content', async () => {
+		const fixture = await setup('principal-alex', 'fixture-token', 'debit|25.99|A')
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandErrorResponse(response)).toBe(true)
+			if (!isCommandErrorResponse(response)) throw new Error('Expected a command error response')
+			expect(response.payload.status).toBe(StatusCode.BadGateway)
+			expect(fixture.save.called).toBe(false)
+		} finally {
+			await destroy(fixture)
+		}
+	})
+})
+```
+
+```bash title="Test the command with typed fakes" replay="project"
+npx vitest run src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.test.ts
+```
+
+The integration test below uses the real `HttpLegacyTransactionClient`, the
+real Hono protection boundary, the real command lifecycle, and a repository
+fake. Docker Compose owns only the external provider process.
+
+```ts title="src/legacyTransactionProvider.integration.test.ts" write
+import { initLogger } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+function repository(save = sandbox.stub()): ManagedTransactionRepository {
+	return {
+		name: 'sqliteTransactionRepository',
+		save,
+		findById: sandbox.stub(),
+		destroy: sandbox.stub().resolves(),
+	}
+}
+
+async function destroyApplication(app: Awaited<ReturnType<typeof createApplication>>) {
+	await app.http.prepareDestroy().destroy()
+	await app.http.destroy()
+	await app.transaction.destroy()
+	await app.identity.destroy()
+	await app.bankProfile.destroy()
+	await app.identityStateStore.destroy()
+	await app.secretStore.destroy()
+	await app.transactionRepository.destroy()
+	await app.eventBridge.destroy()
+}
+
+test('imports through the Compose provider and generated protected endpoint', async () => {
+	const saved = {
+		accountId: 'account-operating', tenantId: 'tenant-example', transactionId: crypto.randomUUID(),
+		amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books', reference: 'Provider 1001',
+		recordedAt: new Date().toISOString(),
+	}
+	const save = sandbox.stub().resolves(saved)
+	const app = await createApplication(initLogger('fatal'), repository(save))
+	try {
+		const login = await app.http.app.request('/api/v1/session/login', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ username: 'alex@example.test', password: 'demo-password' }),
+		})
+		expect(login.status).toBe(200)
+		const { sessionToken } = await login.json() as { sessionToken: string }
+		const response = await app.http.app.request(
+			'/api/v1/accounts/account-operating/transactions/provider/provider-1001/import',
+			{
+				method: 'POST',
+				headers: {
+					authorization: `Bearer ${sessionToken}`,
+					'content-type': 'application/json; charset=utf-8',
+				},
+				body: '{}',
+			},
+		)
+
+		expect(response.status).toBe(200)
+		expect(await response.json()).toEqual(saved)
+		expect(save.calledOnceWith({
+			accountId: 'account-operating', tenantId: 'tenant-example', amountCents: 2599,
+			direction: 'debit', counterparty: 'Northwind Books', reference: 'Provider 1001',
+		})).toBe(true)
+	} finally {
+		await destroyApplication(app)
+	}
+})
+```
+
+The UI test keeps the real Hono boundary for the existing application calls and
+stubs only the local provider result. It verifies that the browser calls the
+generated command endpoint with the bearer session and the small JSON payload.
+The command and Compose tests above cover the server-side behavior.
+
+```tsx title="ui/src/App.test.tsx" write
+import { initLogger } from '@purista/core'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { createApplication } from '../../src/application.js'
+import { App } from './App'
+
+let application: Awaited<ReturnType<typeof createApplication>>
+beforeAll(async () => { application = await createApplication(initLogger('fatal')) })
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
+afterAll(async () => {
+	await application.http.prepareDestroy().destroy()
+	await application.http.destroy()
+	await application.transaction.destroy()
+	await application.identity.destroy()
+	await application.bankProfile.destroy()
+	await application.identityStateStore.destroy()
+	await application.secretStore.destroy()
+	await application.transactionRepository.destroy()
+	await application.eventBridge.destroy()
+})
+
+function useRealHttpBoundary() {
+	const fetchMock = vi.fn((input: string | URL | Request, init?: RequestInit) => {
+		const url = typeof input === 'string' ? input : input.toString()
+		if (url.includes('/transactions/provider/provider-1001/import')) {
+			return Promise.resolve(Response.json({
+				transactionId: 'transaction-provider-1001',
+				accountId: 'account-operating',
+				amountCents: 2599,
+			}))
+		}
+		return application.http.app.request(url, init)
+	})
+	vi.stubGlobal('fetch', fetchMock)
+	return fetchMock
+}
+
+async function logIn(username = 'alex@example.test') {
+	fireEvent.change(screen.getByLabelText('Username'), { target: { value: username } })
+	fireEvent.submit(screen.getByRole('form', { name: 'Local login' }))
+	return screen.findByText(username.startsWith('alex') ? 'Alex Example' : 'Sam Example')
+}
+
+describe('Example Bank external-resource UI', () => {
+	test('shows public data and asks for login before protected work', async () => {
+		useRealHttpBoundary(); render(<App />)
+		expect(await screen.findByRole('heading', { name: 'Example Bank' })).toBeInTheDocument()
+		expect(screen.getByText('Log in to call protected commands.')).toBeInTheDocument()
+	})
+
+	test('sends exact plain text and displays the returned CSV', async () => {
+		const fetchMock = useRealHttpBoundary(); render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' }); await logIn()
+		fireEvent.submit(screen.getByRole('form', { name: 'Import legacy transaction' }))
+		expect(await screen.findByText('Imported transaction for account-operating')).toBeInTheDocument()
+		const importCall = fetchMock.mock.calls.find(call =>
+			call[0] === '/api/v1/accounts/account-operating/transactions/import')
+		expect(new Headers(importCall?.[1]?.headers).get('content-type')).toBe('text/plain; charset=utf-8')
+		expect(importCall?.[1]?.body).toBe('debit|25.99|Northwind Books|Order 1042')
+
+		fireEvent.click(screen.getByRole('button', { name: 'Export as CSV' }))
+		const output = await screen.findByLabelText('CSV export')
+		expect(output.textContent).toContain('transactionId,accountId,recordedAt,direction,amountCents,counterparty,reference')
+		expect(output.textContent).not.toContain('tenant-example')
+	})
+
+	test('shows a business denial after a valid text transform', async () => {
+		useRealHttpBoundary(); render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' }); await logIn('sam@example.test')
+		fireEvent.submit(screen.getByRole('form', { name: 'Import legacy transaction' }))
+		expect(await screen.findByText('You are signed in, but this account action is not allowed.')).toBeInTheDocument()
+	})
+
+	test('calls the provider import command with a small JSON request', async () => {
+		const fetchMock = useRealHttpBoundary(); render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' }); await logIn()
+		fireEvent.submit(screen.getByRole('form', { name: 'Import provider transaction' }))
+		expect(await screen.findByText('transaction-provider-1001')).toBeInTheDocument()
+		const providerCall = fetchMock.mock.calls.find(call =>
+			call[0] === '/api/v1/accounts/account-operating/transactions/provider/provider-1001/import')
+		expect(providerCall?.[1]?.method).toBe('POST')
+		expect(new Headers(providerCall?.[1]?.headers).get('content-type')).toBe('application/json; charset=utf-8')
+		expect(new Headers(providerCall?.[1]?.headers).get('authorization')).toMatch(/^Bearer /)
+		expect(providerCall?.[1]?.body).toBe('{}')
+	})
+
+	test('logs out through the protected command and clears local results', async () => {
+		useRealHttpBoundary(); render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' }); await logIn()
+		fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
+		expect(await screen.findByRole('form', { name: 'Local login' })).toBeInTheDocument()
+		expect(screen.getByText('Log in to call protected commands.')).toBeInTheDocument()
+	})
+})
+```
+
+Use a small runner so Compose is removed even when the integration test fails.
+
+```javascript title="scripts/verifyLegacyProvider.mjs" write
+import { spawn } from 'node:child_process'
+
+function run(command, args) {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, { stdio: 'inherit' })
+		child.once('error', reject)
+		child.once('exit', (code, signal) => {
+			if (code === 0) resolve()
+			else reject(new Error(`${command} ${args.join(' ')} failed (${code ?? signal})`))
+		})
+	})
+}
+
+const compose = ['compose', '-p', 'example-bank-provider']
+await run('docker', [...compose, 'up', '-d', '--wait'])
+try {
+	await run('npx', ['vitest', 'run', 'src/legacyTransactionProvider.integration.test.ts'])
+} finally {
+	await run('docker', [...compose, 'down', '--volumes'])
+}
+```
+
+`legacyTransactionClient` is a required Transaction resource, so existing
+command tests must provide it too. Keep that repetitive setup in one typed test
+helper. Tests that unexpectedly call it fail immediately.
+
+```ts title="src/service/transaction/v1/testing/transactionTestResources.ts" write
+import { localAccountAccessPolicy } from '../AccountAccessPolicy.js'
+import type { LegacyTransactionClient } from '../LegacyTransactionClient.js'
+import type { TransactionRepository } from '../TransactionRepository.js'
+import { unavailableLegacyTransactionClient } from './unavailableLegacyTransactionClient.js'
+
+export function transactionTestResources(
+	transactionRepository: TransactionRepository,
+	legacyTransactionClient: LegacyTransactionClient = unavailableLegacyTransactionClient,
+) {
+	return {
+		transactionRepository,
+		accountAccessPolicy: localAccountAccessPolicy,
+		legacyTransactionClient,
+	}
+}
+```
+
+Update the existing read-command tests to use the complete resource set. Their
+business assertions remain unchanged.
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { getTransactionCommandBuilder } from './getTransactionCommandBuilder.js'
+
+test('returns an authorized transaction from the repository resource', async () => {
+	const sandbox = createSandbox()
+	const stored = {
+		accountId: 'account-operating',
+		tenantId: 'tenant-example',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		amountCents: 2599,
+		direction: 'debit' as const,
+		counterparty: 'Northwind Books',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const parameter = { accountId: stored.accountId, transactionId: stored.transactionId }
+	const transactionRepository: TransactionRepository = {
+		save: sandbox.stub(),
+		findById: sandbox.stub().resolves(stored),
+	}
+	const resources = transactionTestResources(transactionRepository)
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	try {
+		const { context } = createCommandContextMock(getTransactionCommandBuilder, {
+			payload: undefined,
+			parameter,
+			resources,
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			principalId: 'principal-alex',
+			tenantId: 'tenant-example',
+			payload: { payload: undefined, parameter },
+		})
+		const command = safeBind(getTransactionCommandBuilder.getCommandFunction(), service)
+		expect(await command(context, undefined, parameter)).toEqual(stored)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionSchema } from '../../transaction.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { getTransactionCommandBuilder } from './getTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const parameter = {
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+
+async function setup() {
+	const transactionRepository: TransactionRepository = {
+		save: sandbox.stub(),
+		findById: sandbox.stub(),
+	}
+	const resources = transactionTestResources(transactionRepository)
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	const mocked = createCommandContextMock(getTransactionCommandBuilder, {
+		payload: undefined,
+		parameter,
+		resources,
+		sandbox,
+	})
+	mocked.context.message = getCommandMessageMock({
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		payload: { payload: undefined, parameter },
+	})
+	const hook = getTransactionCommandBuilder.getAfterGuardHook('returnedTransactionScope')
+	if (!hook) throw new Error('Expected returnedTransactionScope guard')
+	return { guard: safeBind(hook, service), context: mocked.context, service }
+}
+
+const transaction = transactionSchema.parse({
+	accountId: 'account-operating',
+	tenantId: 'tenant-example',
+	transactionId: parameter.transactionId,
+	amountCents: 2599,
+	direction: 'debit',
+	counterparty: 'Northwind Books',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+})
+
+describe('getTransaction after guard', () => {
+	test('accepts the requested account and trusted tenant', async () => {
+		const fixture = await setup()
+		try {
+			await expect(fixture.guard(fixture.context, transaction, undefined, parameter)).resolves.toBeUndefined()
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('denies a schema-valid transaction from another account', async () => {
+		const fixture = await setup()
+		try {
+			const foreign = transactionSchema.parse({ ...transaction, accountId: 'account-review' })
+			await expect(fixture.guard(fixture.context, foreign, undefined, parameter))
+				.rejects.toThrow('Account action is not allowed')
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})
+```
+
+Update the record command and its business-guard test in the same way.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+const input = { amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books' }
+const parameter = { accountId: 'account-operating' }
+
+function setAlexMessage(
+	context: ReturnType<typeof createCommandContextMock<typeof recordTransactionCommandBuilder>>['context'],
+) {
+	context.message = getCommandMessageMock({
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		payload: { payload: input, parameter },
+	})
+}
+
+test('records validated input with trusted account scope', async () => {
+	const sandbox = createSandbox()
+	const stored = {
+		...input,
+		...parameter,
+		tenantId: 'tenant-example',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const save = sandbox.stub().resolves(stored)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const resources = transactionTestResources(transactionRepository)
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	try {
+		const { context } = createCommandContextMock(recordTransactionCommandBuilder, {
+			payload: input,
+			parameter,
+			resources,
+			sandbox,
+		})
+		setAlexMessage(context)
+		const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+		expect(await command(context, input, parameter)).toEqual(stored)
+		expect(save.calledOnceWith({ ...input, ...parameter, tenantId: 'tenant-example' })).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+
+test('does not return success when the repository fails', async () => {
+	const sandbox = createSandbox()
+	const failure = new Error('database unavailable')
+	const transactionRepository: TransactionRepository = {
+		save: sandbox.stub().rejects(failure),
+		findById: sandbox.stub(),
+	}
+	const resources = transactionTestResources(transactionRepository)
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	try {
+		const { context } = createCommandContextMock(recordTransactionCommandBuilder, {
+			payload: input,
+			parameter,
+			resources,
+			sandbox,
+		})
+		setAlexMessage(context)
+		const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+		await expect(command(context, input, parameter)).rejects.toBe(failure)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const payload = {
+	amountCents: 2599,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+}
+const parameter = { accountId: 'account-operating' }
+
+async function runAs(principalId: string) {
+	const stored = {
+		...payload,
+		...parameter,
+		tenantId: 'tenant-example',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const save = sandbox.stub().resolves(stored)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const resources = transactionTestResources(transactionRepository)
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	const mocked = createCommandContextMock(recordTransactionCommandBuilder, {
+		payload,
+		parameter,
+		resources,
+		sandbox,
+	})
+	mocked.context.message = getCommandMessageMock({
+		principalId,
+		tenantId: 'tenant-example',
+		payload: { payload, parameter },
+	})
+	const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+	return { command, context: mocked.context, save, service, stored }
+}
+
+describe('recordTransaction before guard', () => {
+	test('allows Alex and supplies trusted scope to the repository', async () => {
+		const fixture = await runAs('principal-alex')
+		try {
+			expect(await fixture.command(fixture.context, payload, parameter)).toEqual(fixture.stored)
+			expect(fixture.save.calledOnceWith({
+				...payload,
+				accountId: 'account-operating',
+				tenantId: 'tenant-example',
+			})).toBe(true)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('denies Sam before the repository effect', async () => {
+		const fixture = await runAs('principal-sam')
+		try {
+			await expect(fixture.command(fixture.context, payload, parameter))
+				.rejects.toThrow('Account action is not allowed')
+			expect(fixture.save.called).toBe(false)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})
+```
+
+Finally, keep the transform lifecycle test on the complete resource set. It
+starts the service before calling `executeCommand`, because PURISTA registers
+its command map during service startup.
+
+```ts title="src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts" write
+import {
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isCommandErrorResponse,
+	isCommandSuccessResponse,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { parseLegacyTransaction } from '../../legacyTransaction.js'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1Service } from '../../transactionV1Service.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('legacy transaction input transform', () => {
+	test('parses one cent without floating-point rounding', () => {
+		expect(parseLegacyTransaction('credit|0.01|Coffee Shop')).toEqual({
+			amountCents: 1,
+			direction: 'credit',
+			counterparty: 'Coffee Shop',
+		})
+	})
+
+	test('rejects malformed and overflowing decimal text', () => {
+		expect(() => parseLegacyTransaction('debit|25,99|Northwind Books')).toThrow('Legacy transaction record is invalid')
+		expect(() => parseLegacyTransaction('debit|90071992547410.00|Northwind Books')).toThrow('Legacy transaction record is invalid')
+	})
+
+	test('runs normal domain validation before the guard and handler', async () => {
+		const save = sandbox.stub()
+		const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+		const eventBridge = getEventBridgeMock(sandbox).mock
+		const service = await transactionV1Service.getInstance(eventBridge, {
+			logger: getLoggerMock(sandbox).mock,
+			resources: transactionTestResources(transactionRepository),
+		})
+		await service.start()
+		try {
+			const response = await service.executeCommand(getCommandMessageMock({
+				principalId: 'principal-alex',
+				tenantId: 'tenant-example',
+				contentType: 'text/plain',
+				receiver: {
+					serviceName: 'Transaction',
+					serviceVersion: '1',
+					serviceTarget: 'importLegacyTransaction',
+				},
+				payload: {
+					payload: 'debit|1.00|A',
+					parameter: { accountId: 'account-operating' },
+				},
+			}))
+			expect(isCommandErrorResponse(response)).toBe(true)
+			expect(isCommandSuccessResponse(response)).toBe(false)
+			expect(save.called).toBe(false)
+		} finally {
+			await service.destroy()
+		}
+	})
+})
+```
+
+Add the separate integration command. The ordinary `npm test` path continues
+to use typed fakes and does not require Docker.
+
+```json title="package.json" write
+{
+  "name": "example-bank",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hono/node-server": "2.1.0",
+    "@purista/core": "3.2.4",
+    "@purista/hono-http-server": "3.2.4",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.32.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "3.6.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@purista/cli": "3.2.4",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "latest",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@types/sinon": "latest",
+    "@vitejs/plugin-react": "5.2.0",
+    "jsdom": "30.0.1",
+    "sinon": "latest",
+    "tailwindcss": "4.3.3",
+    "tsx": "latest",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "latest"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ],
+  "scripts": {
+    "add:service": "purista add service",
+    "add:command": "purista add command",
+    "add:subscription": "purista add subscription",
+    "add:stream": "purista add stream",
+    "add:queue": "purista add queue",
+    "add:queue-worker": "purista add queue-worker",
+    "add:agent": "purista add agent",
+    "start": "tsx src/index.ts",
+    "build": "npm run build:server && npm run build:ui",
+    "dev": "tsx watch src/index.ts",
+    "test": "npm run build:ui && npm run test:server && npm run test:ui",
+    "test:provider": "node scripts/verifyLegacyProvider.mjs",
+    "export:runtime": "purista export runtime-capabilities --out purista-runtime.json",
+    "lint": "npx @biomejs/biome check .",
+    "lint:fix": "npx @biomejs/biome check --write .",
+    "build:server": "tsc",
+    "build:ui": "vite build --config ui/vite.config.ts",
+    "test:server": "tsc --noEmit && vitest run --config vitest.server.config.ts --exclude src/legacyTransactionProvider.integration.test.ts",
+    "test:ui": "vitest run --config ui/vitest.config.ts"
+  }
+}
+```
+
+Run the ordinary tests first, then the explicitly named provider integration.
+
+```bash title="Install the updated lockfile and run ordinary tests" replay="project"
+npm install
+npm test
+```
+
+```bash title="Run the Compose-backed provider integration" replay="project"
+npm run test:provider
+```
+
+The two results answer different questions. Typed fakes prove business order
+and failure effects quickly. The Compose test proves that the concrete adapter,
+secret, Hono endpoint, and provider protocol agree over a real socket.

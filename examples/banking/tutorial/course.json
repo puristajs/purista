@@ -1,0 +1,986 @@
+{
+  "plannedChapters": 28,
+  "forbiddenServiceNames": [
+    "Banking",
+    "BankingService",
+    "ExampleBank",
+    "ExampleBankService"
+  ],
+  "allowedServiceNames": [
+    "BankProfile",
+    "Identity",
+    "Transaction",
+    "Monitoring",
+    "Analysis",
+    "Reporting",
+    "Support",
+    "Knowledge"
+  ],
+  "scaffoldServiceNames": [
+    "Ping"
+  ],
+  "chapters": [
+    {
+      "id": "create-project",
+      "title": "Create a PURISTA project",
+      "status": "published",
+      "requires": [],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "BankProfile service started"
+      },
+      "pages": [
+        "create-project/build/initialize",
+        "create-project/build/generate-service",
+        "create-project/testing/test-command"
+      ]
+    },
+    {
+      "id": "hono-webserver",
+      "title": "Use the Hono webserver",
+      "status": "published",
+      "requires": [
+        "create-project"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "hono-webserver/build/install",
+        "hono-webserver/build/register",
+        "hono-webserver/build/shutdown",
+        "hono-webserver/testing/test-http"
+      ]
+    },
+    {
+      "id": "static-website",
+      "title": "Serve a static React website",
+      "status": "published",
+      "requires": [
+        "hono-webserver"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "static-website/build/create-ui",
+        "static-website/build/serve-assets",
+        "static-website/build/connect-read",
+        "static-website/testing/test-static"
+      ]
+    },
+    {
+      "id": "rest-endpoints",
+      "title": "Expose commands as REST endpoints",
+      "status": "published",
+      "requires": [
+        "static-website"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "rest-endpoints/build/model-contract",
+        "rest-endpoints/build/generate-commands",
+        "rest-endpoints/build/connect-ui",
+        "rest-endpoints/testing/test-endpoints"
+      ]
+    },
+    {
+      "id": "database-resource",
+      "title": "Persist data with a database resource",
+      "status": "published",
+      "requires": [
+        "rest-endpoints"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "database-resource/build/implement-sqlite",
+        "database-resource/build/wire-resource",
+        "database-resource/build/own-lifecycle",
+        "database-resource/testing/test-resource"
+      ]
+    },
+    {
+      "id": "protected-endpoints",
+      "title": "Protect generated HTTP endpoints",
+      "status": "published",
+      "requires": [
+        "database-resource"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "protected-endpoints/build/mark-security",
+        "protected-endpoints/build/protect-handler",
+        "protected-endpoints/build/connect-ui",
+        "protected-endpoints/testing/test-protection"
+      ]
+    },
+    {
+      "id": "sessions",
+      "title": "Handle sessions with StateStore",
+      "status": "published",
+      "requires": [
+        "protected-endpoints"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "sessions/build/generate-identity",
+        "sessions/build/store-session",
+        "sessions/build/protect-with-session",
+        "sessions/build/connect-ui",
+        "sessions/testing/test-sessions"
+      ]
+    },
+    {
+      "id": "business-guards",
+      "title": "Authorize actions with guards",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "business-guards/build/define-policy",
+        "business-guards/build/add-before-guards",
+        "business-guards/build/add-output-guard",
+        "business-guards/testing/test-guards"
+      ]
+    },
+    {
+      "id": "command-transforms",
+      "title": "Transform command input and output",
+      "status": "published",
+      "requires": [
+        "business-guards"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "command-transforms/build/input",
+        "command-transforms/build/output",
+        "command-transforms/build/connect-http",
+        "command-transforms/testing/test-transforms"
+      ]
+    },
+    {
+      "id": "external-resources",
+      "title": "Call an external HTTP provider",
+      "status": "published",
+      "requires": [
+        "command-transforms"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "verification": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "test:provider"
+          ]
+        }
+      ],
+      "pages": [
+        "external-resources/build/declare",
+        "external-resources/build/implement",
+        "external-resources/build/use",
+        "external-resources/testing/test-resources"
+      ]
+    },
+    {
+      "id": "command-result-events",
+      "title": "Publish command results as events",
+      "status": "published",
+      "requires": [
+        "external-resources"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "command-result-events/build/name-result",
+        "command-result-events/build/observe-message",
+        "command-result-events/build/contrast-manual",
+        "command-result-events/testing/test-events"
+      ]
+    },
+    {
+      "id": "subscriptions",
+      "title": "React to events with subscriptions",
+      "status": "published",
+      "requires": [
+        "command-events"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "pages": [
+        "subscriptions/build/generate",
+        "subscriptions/build/handle",
+        "subscriptions/build/run",
+        "subscriptions/testing/test-subscription"
+      ]
+    },
+    {
+      "id": "streams",
+      "title": "Stream incremental results",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "streams/build/generate",
+        "streams/build/implement",
+        "streams/build/expose",
+        "streams/testing/test-streams"
+      ]
+    },
+    {
+      "id": "queue-processing",
+      "title": "Process work with queues",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "queue-processing/build/generate",
+        "queue-processing/build/enqueue",
+        "queue-processing/build/work",
+        "queue-processing/testing/test-queue"
+      ]
+    },
+    {
+      "id": "schedules",
+      "title": "Declare scheduled work",
+      "status": "published",
+      "requires": [
+        "queue-processing"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "schedules/build/declare",
+        "schedules/build/trigger",
+        "schedules/build/bind",
+        "schedules/testing/test-schedule"
+      ]
+    },
+    {
+      "id": "observability",
+      "title": "Add metrics and tracing",
+      "status": "published",
+      "requires": [
+        "subscriptions"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "pages": [
+        "observability/build/declare",
+        "observability/build/wire",
+        "observability/build/follow",
+        "observability/testing/test-observability"
+      ]
+    },
+    {
+      "id": "distributed-runtime",
+      "title": "Run services across processes and adapters",
+      "status": "published",
+      "requires": [
+        "observability"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "verification": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "test:distribution"
+          ]
+        }
+      ],
+      "pages": [
+        "distributed-runtime/build/split",
+        "distributed-runtime/build/adapters",
+        "distributed-runtime/build/operate",
+        "distributed-runtime/testing/test-distribution"
+      ]
+    },
+    {
+      "id": "classification-agent",
+      "title": "Add a classification agent",
+      "status": "draft",
+	  "projectDirectory": "support-classification",
+	  "replayRequires": [],
+	  "constructionSourceAligned": true,
+	  "requiredWrittenFiles": [
+		".env.example",
+		"package.json",
+		"src/createSupportService.ts",
+		"src/demo.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts",
+		"src/harness/support/supportHarness.ts",
+		"src/index.ts",
+		"src/invokeClassification.ts",
+		"src/service/support/v1/SupportResources.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+		"src/service/support/v1/harness/supportHarnessMount.ts",
+		"src/service/support/v1/requireSupportClassification.ts",
+		"src/service/support/v1/supportV1Service.test.ts",
+		"src/service/support/v1/supportV1Service.ts",
+		"src/service/support/v1/supportV1ServiceBuilder.ts"
+	  ],
+      "requires": [
+        "create-project"
+      ],
+      "pages": [
+        "classification-agent/build/scaffold",
+        "classification-agent/build/define",
+		"classification-agent/build/mount",
+        "classification-agent/build/invoke",
+		"classification-agent/build/compose-runtime",
+		"classification-agent/build/run-application",
+		"classification-agent/testing/test-classification",
+		"classification-agent/testing/test-eventbridge"
+      ]
+    },
+    {
+      "id": "ai-guardrails",
+      "title": "Apply AI guardrails",
+      "status": "draft",
+	  "projectDirectory": "guarded-classification",
+	  "replayRequires": [],
+	  "constructionSourceAligned": true,
+	  "requiredWrittenFiles": [
+		".env.example",
+		"package.json",
+		"src/createSupportService.ts",
+		"src/demo.ts",
+		"src/harness/support/agent/classifySupportMessage/classificationGuardrails.ts",
+		"src/harness/support/agent/classifySupportMessage/classificationInputGuardrail.ts",
+		"src/harness/support/agent/classifySupportMessage/classificationOutputGuardrail.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts",
+		"src/harness/support/agent/classifySupportMessage/schema.ts",
+		"src/index.ts",
+		"src/invokeClassification.ts",
+		"src/service/support/v1/SupportResources.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+		"src/service/support/v1/harness/supportHarnessMount.ts",
+		"src/service/support/v1/requireSupportClassification.ts",
+		"src/service/support/v1/supportV1Service.test.ts",
+		"src/service/support/v1/supportV1Service.ts",
+		"src/service/support/v1/supportV1ServiceBuilder.ts"
+	  ],
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+        "ai-guardrails/build/install",
+		"ai-guardrails/build/input",
+		"ai-guardrails/build/output",
+		"ai-guardrails/build/integrate",
+		"ai-guardrails/build/invoke",
+		"ai-guardrails/build/compose-runtime",
+		"ai-guardrails/build/run-application",
+		"ai-guardrails/testing/test-guardrails",
+		"ai-guardrails/testing/test-eventbridge"
+      ]
+    },
+    {
+      "id": "retrieval-ingestion",
+      "title": "Build a complete RAG pipeline",
+      "status": "draft",
+      "projectDirectory": "example-rag",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "compose.yaml",
+        "database/knowledge.sql",
+        "package.json",
+        "src/application.test.ts",
+        "src/createKnowledgeApplication.ts",
+        "src/demo.ts",
+        "src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.test.ts",
+        "src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.ts",
+        "src/harness/knowledge/knowledgeHarness.ts",
+        "src/harness/knowledge/tool/searchKnowledgeTool.ts",
+        "src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.test.ts",
+        "src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.ts",
+        "src/index.ts",
+        "src/nodeHttpListener.ts",
+        "src/resources/PgKnowledgeRepository.postgres.test.ts",
+        "src/resources/PgKnowledgeRepository.ts",
+        "src/service/identity/v1/command/login/loginCommandBuilder.ts",
+        "src/service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.ts",
+        "src/service/identity/v1/identityV1Service.ts",
+        "src/service/identity/v1/identityV1ServiceBuilder.ts",
+        "src/service/identity/v1/session.ts",
+        "src/service/knowledge/v1/KnowledgeResources.ts",
+        "src/service/knowledge/v1/chunkKnowledgeText.ts",
+        "src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts",
+        "src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts",
+        "src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.test.ts",
+        "src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts",
+        "src/service/knowledge/v1/harness/knowledgeHarnessMount.ts",
+        "src/service/knowledge/v1/knowledgeV1Service.ts",
+        "src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts",
+        "src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts",
+        "src/service/knowledge/v1/schema.ts",
+        "src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts",
+        "src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts",
+        "src/service/knowledge/v1/stream/answerKnowledgeQuestion/latestUserText.ts",
+        "src/sessionProtectMiddleware.ts",
+        "src/staticWebsite.ts",
+        "ui/components.json",
+        "ui/index.html",
+        "ui/src/App.tsx",
+        "ui/src/KnowledgeChat.test.tsx",
+        "ui/src/KnowledgeChat.tsx",
+        "ui/src/KnowledgeSource.test.tsx",
+        "ui/src/KnowledgeSource.tsx",
+        "ui/src/index.css",
+        "ui/src/main.tsx",
+        "ui/src/test/setup.ts",
+        "ui/tsconfig.json",
+        "ui/vite.config.ts",
+        "ui/vitest.config.ts"
+      ],
+      "requires": [
+        "create-project"
+      ],
+      "pages": [
+        "retrieval-ingestion/setup/scaffold",
+        "retrieval-ingestion/build/configure-harness",
+        "retrieval-ingestion/build/access-policy",
+        "retrieval-ingestion/build/ingest",
+        "retrieval-ingestion/build/store",
+        "retrieval-ingestion/build/repository",
+        "retrieval-ingestion/build/retrieve",
+        "retrieval-ingestion/build/agent",
+        "retrieval-ingestion/build/answer-workflow",
+        "retrieval-ingestion/build/mount-harness",
+        "retrieval-ingestion/build/stream-ui",
+        "retrieval-ingestion/build/identity-sessions",
+        "retrieval-ingestion/build/authenticate-http",
+        "retrieval-ingestion/build/ui-shell",
+        "retrieval-ingestion/build/ingest-ui",
+        "retrieval-ingestion/build/ui",
+        "retrieval-ingestion/build/assemble-ui",
+        "retrieval-ingestion/build/compose-runtime",
+        "retrieval-ingestion/build/serve-ui",
+        "retrieval-ingestion/build/run",
+        "retrieval-ingestion/build/deterministic-demo",
+        "retrieval-ingestion/testing/test-rag",
+        "retrieval-ingestion/testing/test-agent",
+        "retrieval-ingestion/testing/test-workflow",
+        "retrieval-ingestion/testing/test-stream-http",
+        "retrieval-ingestion/testing/test-storage",
+        "retrieval-ingestion/testing/test-ui"
+      ]
+    },
+    {
+      "id": "conversation-memory",
+      "title": "Persist and manage conversation history",
+      "status": "draft",
+      "projectDirectory": "support-conversations",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts",
+        "src/harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/resources/HarnessConversationHistory.ts",
+        "src/service/support/v1/SupportConversationHistory.ts",
+        "src/service/support/v1/SupportConversationPolicy.ts",
+        "src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts",
+        "src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts",
+        "src/service/support/v1/command/conversationCommands.test.ts",
+        "src/service/support/v1/command/getConversationHistory/getConversationHistoryCommandBuilder.ts",
+        "src/service/support/v1/conversationSessionId.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportConversationAccess.ts",
+        "src/service/support/v1/schema.ts",
+        "src/service/support/v1/supportServiceConfig.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
+      "requires": [
+        "classification-agent"
+      ],
+		"pages": [
+			"conversation-memory/build/configure-storage",
+			"conversation-memory/build/define-access",
+			"conversation-memory/build/use-session",
+			"conversation-memory/build/export-and-clear",
+			"conversation-memory/build/compose-runtime",
+			"conversation-memory/build/run-application",
+			"conversation-memory/testing/test-history",
+			"conversation-memory/testing/test-commands",
+			"conversation-memory/testing/test-eventbridge"
+		]
+    },
+    {
+      "id": "agent-tools",
+      "title": "Use PURISTA commands as agent tools",
+      "status": "draft",
+	  "projectDirectory": "support-agent-tools",
+	  "replayRequires": [],
+	  "constructionSourceAligned": true,
+	  "requiredWrittenFiles": [
+		".env.example",
+		"package.json",
+		"src/agentTools.integration.test.ts",
+		"src/createSupportApplication.ts",
+		"src/demo.ts",
+		"src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts",
+		"src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts",
+		"src/harness/support/supportHarness.ts",
+		"src/index.ts",
+		"src/invokeSupportQuestion.ts",
+		"src/service/support/v1/SupportResources.ts",
+		"src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts",
+		"src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.ts",
+		"src/service/support/v1/harness/supportHarnessMount.ts",
+		"src/service/support/v1/requireSupportQuestion.ts",
+		"src/service/support/v1/supportV1Service.ts",
+		"src/service/support/v1/supportV1ServiceBuilder.ts",
+		"src/service/transaction/v1/TransactionResources.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/schema.ts",
+		"src/service/transaction/v1/transactionV1Service.ts",
+		"src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+	  ],
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+		"agent-tools/setup/scaffold",
+        "agent-tools/build/declare-host-tool",
+		"agent-tools/build/transaction-resource",
+        "agent-tools/build/bind-command",
+		"agent-tools/build/mount-tool",
+		"agent-tools/build/invoke-agent",
+		"agent-tools/build/compose-runtime",
+		"agent-tools/build/run-application",
+		"agent-tools/testing/test-tools",
+		"agent-tools/testing/test-eventbridge"
+      ]
+    },
+    {
+      "id": "agent-skills",
+      "title": "Load Agent Skills on demand",
+      "status": "draft",
+      "projectDirectory": "support-skills",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "skills/support-methods/SKILL.md",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts",
+        "src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/invokeProcedureAnswer.ts",
+        "src/service/support/v1/SupportProcedurePolicy.ts",
+        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts",
+        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportProcedureAccess.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
+      "requires": [
+        "agent-tools"
+      ],
+      "pages": [
+			"agent-skills/build/create-skill",
+			"agent-skills/build/bind-skill",
+			"agent-skills/build/secure-content",
+			"agent-skills/build/invoke-agent",
+			"agent-skills/build/compose-runtime",
+			"agent-skills/build/run-application",
+			"agent-skills/testing/test-skills",
+			"agent-skills/testing/test-routing"
+		]
+    },
+    {
+      "id": "human-review-workflow",
+      "title": "Pause a workflow for human review",
+      "status": "draft",
+      "projectDirectory": "human-review-workflow",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        "package.json",
+        "src/createReviewApplication.ts",
+        "src/demo.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts",
+        "src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.ts",
+        "src/humanReview.integration.test.ts",
+        "src/index.ts",
+        "src/resources/HarnessReviewWaitSignal.ts",
+        "src/resources/InMemorySupportReviewStore.ts",
+        "src/resources/SqliteSupportReviewStore.ts",
+        "src/service/support/v1/SupportReviewResources.ts",
+        "src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts",
+        "src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts",
+        "src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireReviewWorkflowAccess.ts",
+        "src/service/support/v1/reviewIdentity.ts",
+        "src/service/support/v1/schema.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts",
+        "src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts",
+        "src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.ts",
+        "src/service/transaction/v1/schema.ts",
+        "src/service/transaction/v1/transactionV1Service.ts",
+        "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+      ],
+      "requires": [
+        "agent-tools"
+      ],
+      "pages": [
+        "human-review-workflow/setup/scaffold",
+        "human-review-workflow/build/define-workflow",
+        "human-review-workflow/build/model-review",
+        "human-review-workflow/build/request-review",
+        "human-review-workflow/build/authorize-workflow",
+        "human-review-workflow/build/persist-decision",
+        "human-review-workflow/build/protect-effect",
+        "human-review-workflow/build/approve-resume",
+        "human-review-workflow/build/compose-runtime",
+        "human-review-workflow/build/run-application",
+        "human-review-workflow/testing/test-workflow",
+        "human-review-workflow/testing/test-commands",
+        "human-review-workflow/testing/test-review"
+      ]
+    },
+    {
+      "id": "parallel-agents",
+      "title": "Run specialist agents in parallel",
+      "status": "draft",
+      "projectDirectory": "parallel-agent-workflow",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts",
+        "src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.ts",
+        "src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts",
+        "src/harness/support/agent/planSupportResponse/planSupportResponseAgent.ts",
+        "src/harness/support/supportCaseSchemas.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts",
+        "src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.ts",
+        "src/index.ts",
+        "src/parallelAgents.integration.test.ts",
+        "src/service/support/v1/SupportResources.ts",
+        "src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts",
+        "src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportCaseAnalysis.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
+      "requires": [
+        "classification-agent"
+      ],
+		"pages": [
+			"parallel-agents/setup/scaffold",
+			"parallel-agents/build/define-specialists",
+			"parallel-agents/build/fan-out",
+			"parallel-agents/build/merge-evidence",
+			"parallel-agents/build/invoke-workflow",
+			"parallel-agents/build/compose-runtime",
+			"parallel-agents/build/run-application",
+			"parallel-agents/testing/test-parallel",
+			"parallel-agents/testing/test-routing"
+		]
+    },
+    {
+      "id": "multi-step-workflow",
+      "title": "Build a multi-step agent workflow",
+      "status": "draft",
+      "projectDirectory": "multi-step-support-workflow",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.test.ts",
+        "src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.ts",
+        "src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.test.ts",
+        "src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/harness/support/supportResolutionSchemas.ts",
+        "src/harness/support/workflow/resolveSupportCase/resolveSupportCaseWorkflow.test.ts",
+        "src/harness/support/workflow/resolveSupportCase/resolveSupportCaseWorkflow.ts",
+        "src/index.ts",
+        "src/multiStepWorkflow.integration.test.ts",
+        "src/service/support/v1/SupportResources.ts",
+        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts",
+        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts",
+        "src/service/support/v1/durableIdentity.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportCaseResolution.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
+      "requires": [
+        "human-review-workflow",
+        "parallel-agents"
+      ],
+		"pages": [
+			"multi-step-workflow/build/define-workflow",
+			"multi-step-workflow/build/define-agents",
+			"multi-step-workflow/build/retry-checkpoint",
+			"multi-step-workflow/build/publish-workflow",
+			"multi-step-workflow/build/invoke",
+			"multi-step-workflow/build/compose-runtime",
+			"multi-step-workflow/build/run-application",
+			"multi-step-workflow/testing/test-agents",
+			"multi-step-workflow/testing/test-workflow",
+			"multi-step-workflow/testing/test-routing"
+		]
+    },
+    {
+      "id": "sandbox-analysis",
+      "title": "Run analysis in a sandbox",
+      "status": "draft",
+      "projectDirectory": "sandbox-analysis",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "compose.yaml",
+        "package.json",
+        "sandbox.Dockerfile",
+        "src/createAnalysisService.ts",
+        "src/demo.ts",
+        "src/harness/analysis/agent/analyzeTransactions/analyzeTransactionsAgent.test.ts",
+        "src/harness/analysis/agent/analyzeTransactions/analyzeTransactionsAgent.ts",
+        "src/harness/analysis/analysisHarness.ts",
+        "src/harness/analysis/analysisSchemas.ts",
+        "src/index.ts",
+        "src/sandboxAnalysis.docker.integration.test.ts",
+        "src/sandboxAnalysis.integration.test.ts",
+        "src/service/analysis/v1/AnalysisResources.ts",
+        "src/service/analysis/v1/analysisV1Service.ts",
+        "src/service/analysis/v1/analysisV1ServiceBuilder.ts",
+        "src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.test.ts",
+        "src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts",
+        "src/service/analysis/v1/harness/analysisHarnessMount.ts",
+        "src/service/analysis/v1/requireTransactionAnalysis.ts",
+        "src/testing/scriptedAnalysisProvider.ts"
+      ],
+      "requires": [
+        "multi-step-workflow"
+      ],
+      "pages": [
+        "sandbox-analysis/setup/scaffold",
+        "sandbox-analysis/build/configure",
+        "sandbox-analysis/build/define-agent",
+        "sandbox-analysis/build/authorize-agent",
+        "sandbox-analysis/build/invoke-agent",
+        "sandbox-analysis/build/compose-runtime",
+        "sandbox-analysis/build/run-application",
+        "sandbox-analysis/build/run-live",
+        "sandbox-analysis/build/cleanup",
+        "sandbox-analysis/testing/test-agent",
+        "sandbox-analysis/testing/test-routing",
+        "sandbox-analysis/testing/test-docker"
+      ]
+    },
+    {
+      "id": "agent-evaluation",
+      "title": "Evaluate agent behavior",
+      "status": "draft",
+      "projectDirectory": "agent-evaluation",
+      "replayRequires": [],
+      "constructionSourceAligned": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/agentEvaluation.test.ts",
+        "src/changeGate.ts",
+        "src/createSupportService.ts",
+        "src/dataset.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts",
+        "src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts",
+        "src/harness/support/supportClassificationSchemas.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/runClassificationEvaluation.ts",
+        "src/runEvaluation.ts",
+        "src/runLiveEvaluation.ts",
+        "src/scorers.ts",
+        "src/service/support/v1/SupportResources.ts",
+        "src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
+        "src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportClassification.ts",
+        "src/service/support/v1/supportServiceConfig.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts",
+        "src/testing/scriptedClassificationProvider.ts"
+      ],
+      "requires": [
+        "ai-guardrails",
+        "retrieval-ingestion",
+        "multi-step-workflow"
+      ],
+      "pages": [
+        "agent-evaluation/setup/scaffold",
+        "agent-evaluation/build/dataset",
+        "agent-evaluation/build/define-agent",
+        "agent-evaluation/build/authorize-agent",
+        "agent-evaluation/build/invoke-agent",
+        "agent-evaluation/build/deterministic-checks",
+        "agent-evaluation/build/change-gate",
+        "agent-evaluation/build/scoring",
+        "agent-evaluation/build/compose-runtime",
+        "agent-evaluation/build/run-application",
+        "agent-evaluation/build/run-live",
+        "agent-evaluation/testing/test-evaluation",
+        "agent-evaluation/testing/test-framework"
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "id": "command-events",
+      "title": "Database-backed command result events",
+      "status": "published",
+      "requires": [
+        "create-project"
+      ],
+      "pages": [
+        "subscriptions/setup/create-producer",
+        "subscriptions/setup/add-database",
+        "subscriptions/setup/name-result"
+      ]
+    },
+    {
+      "id": "authenticated-http",
+      "title": "Generated session commands and protected Hono endpoints",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "pages": []
+    }
+  ]
+}

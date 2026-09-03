@@ -1,0 +1,58 @@
+---
+title: Add deterministic scorers
+description: Measure exact structured behavior with small, versioned scorer adapters before introducing model judges.
+order: 296
+kind: lesson
+status: draft
+---
+
+Start with deterministic checks for fields that have an objective expected
+value. Each scorer returns a stable name, version, numeric score, and readable
+reason.
+
+```ts title="src/scorers.ts" write
+import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
+import type { ClassificationAssessment } from './dataset.js'
+import type { ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+
+export const categoryScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
+	id: 'classification-category',
+	version: '1.0.0',
+	dimension: { id: 'category_exact', kind: 'boolean' },
+	evaluate: (observation) => {
+		const passed = observation.assessment?.category === observation.output.category
+		return { outcome: 'scored', dimensionId: 'category_exact', kind: 'boolean', value: passed, passed }
+	},
+})
+
+export const urgencyScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
+	id: 'classification-urgency',
+	version: '1.0.0',
+	dimension: { id: 'urgency_exact', kind: 'boolean' },
+	evaluate: (observation) => {
+		const passed = observation.assessment?.urgency === observation.output.urgency
+		return { outcome: 'scored', dimensionId: 'urgency_exact', kind: 'boolean', value: passed, passed }
+	},
+})
+
+export function passRate(result: EvaluationRunResult, dimensionId: string) {
+	const aggregate = result.dimensionAggregates.find(
+		(item) => item.dimensionId === dimensionId && item.scope.kind === 'all',
+	)
+	if (!aggregate) throw new Error(`Missing evaluation aggregate ${dimensionId}`)
+	return aggregate.passCounts?.rate ?? 0
+}
+```
+
+Scorer versions change only when scoring semantics change. This keeps a score
+series interpretable and avoids silently comparing two different metrics.
+
+Model judges can be added later for tone or explanation quality, but they need
+provider configuration, calibration examples, and their own versioning. Exact
+category and urgency fields do not need that extra uncertainty.
+
+```bash title="Type-check the scorers"
+npm run build
+```
+
+Continue with [Define the change gate](../change-gate/).

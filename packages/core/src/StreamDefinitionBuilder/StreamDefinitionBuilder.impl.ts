@@ -1,3 +1,4 @@
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
@@ -21,10 +22,24 @@ import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGua
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
+import {
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
+
+const RESERVED_STREAM_RESPONSE_HEADERS = new Set([
+	'cache-control',
+	'connection',
+	'content-length',
+	'content-type',
+	'transfer-encoding',
+])
 
 /**
  * Builds a stream definition for incremental output or aggregate stream results.
@@ -72,6 +87,7 @@ export class StreamDefinitionBuilder<
 	private isSecure = true
 	private errorStatusCodes: StatusCode[] = []
 	private httpStreamProtocol?: { protocol: string; documentationUrl?: string }
+	private httpResponseHeaders?: Readonly<Record<string, string>>
 	private httpStreamingMode: 'stream' | 'aggregate' = 'stream'
 
 	private durable = false
@@ -205,6 +221,94 @@ export class StreamDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	canInvokeAgent<
+		Contract extends HarnessTargetContract<'agent', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	canInvokeWorkflow<
+		Contract extends HarnessTargetContract<'workflow', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				C['EmitList'],
 				C['QueueInvokes']
 			>
@@ -603,6 +707,35 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	/**
+	 * Set static response headers required by this HTTP stream protocol.
+	 *
+	 * The HTTP server retains control of transport headers such as
+	 * `content-type`, `cache-control`, and `connection`.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.setHttpResponseHeaders({
+	 *   'x-vercel-ai-ui-message-stream': 'v1',
+	 * })
+	 * ```
+	 */
+	setHttpResponseHeaders(headers: Readonly<Record<string, string>>) {
+		const normalized: Record<string, string> = {}
+		for (const [name, value] of Object.entries(headers)) {
+			const lowerName = name.toLowerCase()
+			if (RESERVED_STREAM_RESPONSE_HEADERS.has(lowerName)) {
+				throw new Error(`HTTP stream response header "${name}" is managed by the server.`)
+			}
+			if (!/^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(name) || /[\r\n]/.test(value)) {
+				throw new Error(`Invalid HTTP stream response header "${name}".`)
+			}
+			normalized[lowerName] = value
+		}
+		this.httpResponseHeaders = Object.freeze(normalized)
+		return this
+	}
+
 	/** Choose whether HTTP exposure returns chunks or an aggregate JSON response. */
 	setHttpStreamingMode(mode: 'stream' | 'aggregate') {
 		this.httpStreamingMode = mode
@@ -760,11 +893,15 @@ export class StreamDefinitionBuilder<
 			metadata.expose.http = this.httpMetadata.expose.http
 			if (metadata.expose.http) {
 				if (this.httpStreamProtocol) {
-					metadata.expose.http.stream = this.httpStreamProtocol
+					metadata.expose.http.stream = {
+						...this.httpStreamProtocol,
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
+					}
 				}
 				if (!metadata.expose.http.stream) {
 					metadata.expose.http.stream = {
 						protocol: 'purista',
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
 					}
 				}
 				if (metadata.expose.http.stream) {

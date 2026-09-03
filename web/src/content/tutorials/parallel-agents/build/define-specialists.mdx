@@ -1,0 +1,110 @@
+---
+title: Define the specialist agents
+description: Give each generated agent one responsibility, one model alias, and one schema-validated result.
+order: 262
+kind: lesson
+status: draft
+---
+
+The CLI generated two agent modules. Keep them separate because they solve
+different tasks and may use different models in production. Put only their
+shared input and result schemas in one nearby file.
+
+## Define the shared contracts
+
+```ts title="src/harness/support/supportCaseSchemas.ts" write
+import { z } from 'zod'
+
+export const supportCaseInputSchema = z.strictObject({
+	caseId: z.string().trim().min(1).max(80),
+	message: z.string().trim().min(1).max(2_000),
+})
+
+export const riskAssessmentSchema = z.strictObject({
+	level: z.enum(['low', 'medium', 'high']),
+	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
+})
+
+export const responsePlanSchema = z.strictObject({
+	customerReply: z.string().trim().min(1).max(500),
+	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
+})
+
+export const supportCaseAnalysisOutputSchema = z.strictObject({
+	caseId: z.string(),
+	risk: riskAssessmentSchema,
+	response: responsePlanSchema,
+})
+```
+
+Both agents receive the same case. Their outputs stay different so the
+workflow can merge typed evidence without another model call.
+
+## Implement the risk specialist
+
+Replace the first generated agent. Its only job is to assess risk and return
+short evidence through the `risk_model` alias.
+
+```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { riskAssessmentSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+type RiskModelState = BuilderState & { models: { risk_model: ModelAlias } }
+
+export const assessSupportRiskAgent = defineHarnessModule<RiskModelState>()('support.agent.assess_support_risk', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.agent('assess_support_risk', {
+			model: 'risk_model',
+			input: supportCaseInputSchema,
+			output: riskAssessmentSchema,
+			instructions: [
+				'Assess security and financial risk in one Example Bank support message.',
+				'Use only facts present in the message and list short evidence statements.',
+			].join(' '),
+		})
+	},
+})
+```
+
+The alias is a portable requirement. The application composition decides
+which provider and model satisfy it.
+
+## Implement the response specialist
+
+Replace the second generated module. It proposes a response and next action;
+it cannot perform that action.
+
+```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { responsePlanSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+type ResponseModelState = BuilderState & { models: { response_model: ModelAlias } }
+
+export const planSupportResponseAgent = defineHarnessModule<ResponseModelState>()(
+	'support.agent.plan_support_response',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('plan_support_response', {
+				model: 'response_model',
+				input: supportCaseInputSchema,
+				output: responsePlanSchema,
+				instructions: [
+					'Plan a concise Example Bank support response.',
+					'Do not claim an action happened. Select the next action that a service should perform.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+
+Run a typecheck before composing the workflow. This verifies both generated
+modules against their aliases and schemas.
+
+```bash title="Verify the specialist agent modules" replay="project"
+npm run build
+```
+
+Continue with [Build the bounded parallel workflow](../fan-out/).

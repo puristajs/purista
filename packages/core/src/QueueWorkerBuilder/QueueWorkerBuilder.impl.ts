@@ -1,4 +1,4 @@
-import type { AllowedAgentDefinition } from '../AgentQueueBuilder/types.js'
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import {
 	getNamedHook,
 	mergeNamedHooks,
@@ -15,6 +15,12 @@ import type {
 	QueueWorkerHandler,
 	QueueWorkerMode,
 } from '../core/types/queue/QueueWorkerDefinition.js'
+import {
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
 
@@ -45,8 +51,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 		S['StreamInvokes'],
 		S['EmitList'],
 		S['QueueInvokes'],
-		EmptyObject,
-		S['AgentInvokes']
+		EmptyObject
 	>
 	private beforeGuards: Record<string, QueueWorkerBeforeGuardHook> = {}
 	private afterGuards: Record<string, QueueWorkerAfterGuardHook> = {}
@@ -54,10 +59,9 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 	private streamInvokes: S['StreamInvokes'] = {}
 	private emitList: S['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
-	private agentInvokes: AllowedAgentDefinition[] = []
 
 	constructor(
-		private readonly queueName: string,
+		public readonly queueName: string,
 		private readonly workerName: string,
 	) {}
 
@@ -89,8 +93,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			S['StreamInvokes'],
 			S['EmitList'],
 			S['QueueInvokes'],
-			EmptyObject,
-			S['AgentInvokes']
+			EmptyObject
 		>,
 	) {
 		this.handler = handler
@@ -146,8 +149,86 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 					>,
 				S['StreamInvokes'],
 				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes']
+				S['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as S['Invokes']
+		return this as unknown as QueueWorkerBuilder<
+			QueueWorkerBuilderTypes<
+				S['PayloadSchema'],
+				S['ParamsSchema'],
+				S['Resources'],
+				S['Invokes'] & HarnessModelDeclaration<D, Alias>,
+				S['StreamInvokes'],
+				S['EmitList'],
+				S['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	canInvokeAgent<
+		Contract extends HarnessTargetContract<'agent', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as S['Invokes']
+		this.streamInvokes = registered.streamInvokes as S['StreamInvokes']
+		return this as unknown as QueueWorkerBuilder<
+			QueueWorkerBuilderTypes<
+				S['PayloadSchema'],
+				S['ParamsSchema'],
+				S['Resources'],
+				S['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				S['EmitList'],
+				S['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	canInvokeWorkflow<
+		Contract extends HarnessTargetContract<'workflow', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as S['Invokes']
+		this.streamInvokes = registered.streamInvokes as S['StreamInvokes']
+		return this as unknown as QueueWorkerBuilder<
+			QueueWorkerBuilderTypes<
+				S['PayloadSchema'],
+				S['ParamsSchema'],
+				S['Resources'],
+				S['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				S['EmitList'],
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -222,8 +303,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 						>
 					>,
 				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes']
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -253,8 +333,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['Invokes'],
 				S['StreamInvokes'],
 				S['EmitList'],
-				S['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>,
-				S['AgentInvokes']
+				S['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
@@ -273,44 +352,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['Invokes'],
 				S['StreamInvokes'],
 				S['EmitList'] & Record<EventName, InferIn<T>>,
-				S['QueueInvokes'],
-				S['AgentInvokes']
-			>
-		>
-	}
-
-	/**
-	 * Declare a same-service agent this worker handler may invoke through `context.agent`.
-	 */
-	canInvokeAgent<
-		Output extends Schema,
-		Payload extends Schema,
-		Parameter extends Schema,
-		AgentName extends string,
-		Version extends string,
-	>(
-		agentName: AgentName,
-		serviceVersion: Version,
-		schemas?: { outputSchema?: Output; payloadSchema?: Payload; parameterSchema?: Parameter },
-	) {
-		this.agentInvokes.push({
-			agentName,
-			serviceVersion,
-			outputSchema: schemas?.outputSchema,
-			payloadSchema: schemas?.payloadSchema,
-			parameterSchema: schemas?.parameterSchema,
-		})
-
-		return this as unknown as QueueWorkerBuilder<
-			QueueWorkerBuilderTypes<
-				S['PayloadSchema'],
-				S['ParamsSchema'],
-				S['Resources'],
-				S['Invokes'],
-				S['StreamInvokes'],
-				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes'] & Record<`${AgentName}.${Version}`, AllowedAgentDefinition<Output, Payload, Parameter>>
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -351,8 +393,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			S['StreamInvokes'],
 			S['EmitList'],
 			S['QueueInvokes'],
-			EmptyObject,
-			S['AgentInvokes']
+			EmptyObject
 		>
 	> {
 		if (!this.handler) {
@@ -372,7 +413,6 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
-			agentInvokes: this.agentInvokes,
 		}
 	}
 }

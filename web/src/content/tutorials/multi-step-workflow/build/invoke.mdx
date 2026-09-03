@@ -1,0 +1,96 @@
+---
+title: Invoke the durable workflow
+description: Derive stable caller-scoped run identity and call the mounted workflow from a normal PURISTA command.
+order: 275
+kind: lesson
+status: draft
+---
+
+The workflow is published and protected. The application command now needs
+stable session and run ids so a repeated request resumes the same durable work.
+
+## Derive durable identity from trusted values
+
+Create one helper that hashes tenant, principal, case, and contract version.
+An application retry for the same case will derive the same ids.
+
+```ts title="src/service/support/v1/durableIdentity.ts" write
+import { createHash } from 'node:crypto'
+
+export function durableResolutionIdentity(tenantId: string, principalId: string, caseId: string) {
+	const digest = createHash('sha256').update(`${tenantId}:${principalId}:${caseId}:support-resolution-v1`).digest('hex')
+	return {
+		sessionId: `support-resolution:${digest}`,
+		runId: `support-resolution-run:${digest}`,
+	}
+}
+```
+
+The ids correlate and resume work. They do not authorize it; the command and
+mounted-target guards still evaluate the current request.
+
+## Invoke the workflow by address
+
+Replace the generated command. It declares the exact workflow contract and
+uses identity from the PURISTA message, never from the payload.
+
+```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import {
+	supportResolutionInputSchema,
+	supportResolutionOutputSchema,
+} from '../../../../../harness/support/supportResolutionSchemas.js'
+import { durableResolutionIdentity } from '../../durableIdentity.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
+	.addPayloadSchema(supportResolutionInputSchema)
+	.addOutputSchema(supportResolutionOutputSchema)
+	.canInvokeWorkflow('Support', '1', 'resolve_support_case', supportHarness.contracts.workflows.resolve_support_case)
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
+		const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
+			sessionId: identity.sessionId,
+			durable: { runId: identity.runId },
+		})
+		if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+		return outcome.output
+	})
+```
+
+`canInvokeWorkflow(...)` creates the typed workflow client. The EventBridge
+call carries trace and trusted identity. The durable option tells Harness to
+use the stable run record and its named checkpoints.
+
+Register the command and mount once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { resolveSupportCaseCommandBuilder } from './command/resolveSupportCase/resolveSupportCaseCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(resolveSupportCaseCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+```bash title="Verify the durable command invocation" replay="project"
+npm run build
+```
+
+Continue with [Compose the durable runtime](../compose-runtime/).

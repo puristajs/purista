@@ -1,9 +1,25 @@
+import {
+	guardrailsBuildGuarantee,
+	guardrailsInlineConfigurationGuarantee,
+	guardrailsOutputRailGuarantee,
+	guardrailsPhases,
+	guardrailsStageGuarantees,
+} from './guardrails-content.ts'
+
 export type HarnessMarkdownPage = {
 	id: string
 	title: string
 	description: string
 	body: string
 }
+
+const guardrailsPhaseMarkdown = guardrailsPhases
+	.map(phase => `- \`${phase.id}\`: ${phase.value}. ${phase.timing}. Transform target: \`${phase.transformTarget}\`.`)
+	.join('\n')
+
+const guardrailsStageGuaranteeMarkdown = guardrailsStageGuarantees
+	.map(guarantee => `| ${guarantee.stage} | ${guarantee.guarantees} | ${guarantee.doesNotGuarantee} |`)
+	.join('\n')
 
 export const harnessMarkdownPages: HarnessMarkdownPage[] = [
 	{
@@ -40,7 +56,9 @@ Use it when an application needs typed tool boundaries, model capability routing
 		body: `A harness starts from explicit runtime definitions. Keep the first version small: one model, one or two tools, and one agent with a clear business purpose.
 
 \`\`\`typescript
-import { defineHarness, openai } from '@purista/harness'
+import { defineHarness } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { z } from 'zod'
 
 const harness = defineHarness({ name: 'support' })
   .models({
@@ -51,20 +69,18 @@ const harness = defineHarness({ name: 'support' })
       retry: true,
     },
   })
-  .tools({
-    searchDocs: {
+  .tools(({ tool }) => ({
+    searchDocs: tool({
       description: 'Search approved internal documentation.',
       input: z.object({ query: z.string() }),
       output: z.object({ results: z.array(z.string()) }),
-      run: async ({ query }) => searchDocs(query),
-    },
-  })
-  .agents({
-    supportAgent: {
-      model: 'fast',
-      tools: ['searchDocs'],
-      instructions: 'Answer only from approved documentation.',
-    },
+      handler: async (_ctx, { query }) => ({ results: await searchDocs(query) }),
+    }),
+  }))
+  .agent('supportAgent', {
+    model: 'fast',
+    tools: ['searchDocs'],
+    instructions: 'Answer only from approved documentation.',
   })
 \`\`\`
 
@@ -82,12 +98,165 @@ Prefer a narrow first agent over a generic assistant. The harness should make th
 - Tools expose controlled business operations.
 - Agents combine instructions, model selection, tools, memory, and policy.
 - Runtime adapters connect agents to HTTP, queues, jobs, or application flows.
-- Optional durable runtime adapters checkpoint workflow progress locally and resume from the last committed step.
+- Persistent Harness storage checkpoints workflow progress and resumes from the last committed step.
 - Evaluation and observability close the production feedback loop.
 
 ## Design Rule
 
 Keep every boundary explicit. A model should not decide which private system it can call; the agent definition and tool registry decide that.`,
+	},
+	{
+		id: 'guardrails',
+		title: 'Guardrails | AI Harness',
+		description: 'Add typed, observable input, output, retrieval, tool, and sensitive-data guardrails to Harness default-loop agents.',
+		body: `@purista/harness-guardrails is an optional addon for the Harness default agent loop. ${guardrailsInlineConfigurationGuarantee} It keeps providers, credentials, vector stores, authorization, and business rules application-owned.
+
+## Sensitive data
+
+Use inline \`sensitiveData\` with exact \`entities\`, \`maskToken\`, and \`scoreThreshold\` values, then bind an injected \`SensitiveDataDetector\` through \`createSensitiveDataActions({ detector })\`.
+
+- \`@purista/harness-guardrails-presidio\` calls original Presidio \`POST /analyze\` only through an application-owned authenticated internal HTTP(S) gateway. It supports Presidio deployment-side recognizers and converts Python code-point offsets to JavaScript UTF-16 indexes.
+- \`@purista/harness-guardrails-native-privacy\` is local Rust/Node-API recognition for \`EMAIL_ADDRESS\`, \`PHONE_NUMBER\`, \`CREDIT_CARD\`, \`IP_ADDRESS\` (IPv4/IPv6 syntax), \`IBAN_CODE\`, \`US_SSN\`, and \`URL\`. Its prebuilds are tested under Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail without a fallback.
+- \`@purista/harness-guardrails-local-ner\` is an optional local model-based detector. Install its optional \`@huggingface/transformers\` peer only where needed, provide a pinned absolute local model directory, SHA-256 asset manifest, and explicit label mapping, and call \`warmup()\` during startup. It never downloads model files or calls a model registry.
+
+Sensitive-data inspection is content-free and fail-closed. It creates a nested \`harness.sensitive_data.inspect\` GUARDRAIL span and inspection/duration metrics, but no model, token, or cost attributes. A nested standard LLM span remains the authoritative token/cost record for a model-backed check.
+
+## What can I do with each detector?
+
+“Deployment recognizer dependent” means the application-owned Presidio Analyzer deployment must already contain the relevant recognizer or model; the Harness adapter does not install or configure it.
+
+| I want to… | Presidio sidecar | Native privacy | Local NER |
+| --- | --- | --- | --- |
+| Block PII before an agent, model, tool, or retrieval boundary | Yes | Yes | Yes |
+| Replace or remove a detected whole value with the configured mask token | Yes | Yes | Yes |
+| Detect email, phone, payment-card, IPv4, IPv6, IBAN, or US SSN values | Deployment recognizer dependent | Built in; validation depth varies by entity | Model/label dependent; not built in |
+| Detect HTTP(S) URLs | Deployment recognizer dependent | Built in, HTTP(S) only | Model/label dependent; not built in |
+| Detect names, locations, organizations, medical, or other NER/model entities | Deployment recognizer/model dependent | Not supplied | Yes, only selected local model labels |
+| Detect application-specific identifiers | Custom recognizer dependent | Not supplied | Not supplied; inject a dedicated detector |
+| Choose a detection language | One fixed composition-root language per detector | No NLP language model | Selected local model and label mapping |
+| Keep detection in-process without a network hop | Not supplied | Yes | Yes, with an installed local model |
+| Protect reviewed structured tool fields | Yes, explicit codec | Yes, explicit codec | Yes, explicit codec |
+| Script deterministic tests | \`FakePresidioSidecar\` | \`FakeSensitiveDataDetector\` | \`FakeLocalNerRuntime\` |
+
+None of these options generates realistic replacement data, applies per-entity replacements, partially masks, hashes/encrypts values, processes full CSV/JSON data, redacts image/PDF OCR, or provides batch APIs. The adapter calls Presidio Analyzer detection only, not Presidio Anonymizer.
+
+For local NER, call \`warmup()\` before accepting traffic. A missing optional peer or local-model failure remains fail-closed and emits only the stable \`harness.sensitive_data.failure_kind\` / \`sensitive_data_failure_kind\`; inspected text, local paths, model output, and credentials are never logged.
+
+## Deterministic testing
+
+Use \`FakeSensitiveDataDetector\` from \`@purista/harness-guardrails/testing\` to script findings, results, or errors for unit, workflow, and tool tests. Use \`FakePresidioSidecar\` from \`@purista/harness-guardrails-presidio/testing\` as the injected fetch implementation to script \`POST /analyze\` responses and transport faults. It validates the wire contract without imitating Presidio recognizers or NLP. Both helpers retain test-only in-memory request records; never copy those records to logs, snapshots, or telemetry.
+
+## What it protects
+
+${guardrailsPhaseMarkdown}
+
+${guardrailsOutputRailGuarantee}
+
+## Composition guarantees
+
+${guardrailsBuildGuarantee}
+
+| Stage | Guarantees | Does not guarantee |
+| --- | --- | --- |
+${guardrailsStageGuaranteeMarkdown}
+
+## Default setup
+
+\`\`\`typescript title="src/guardrails.ts: content-only action"
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { z } from 'zod'
+
+const rails = defineGuardrails({
+  config: { rails: { input: { flows: ['remove-secret-marker'] } } },
+  actions: {
+    'remove-secret-marker': defineGuardrailAction({
+      phase: 'input',
+      valueSchema: z.string(),
+      evaluate: ({ value }) => typeof value === 'string'
+        ? {
+            decision: 'transform',
+            target: 'user_message',
+            value: value.replaceAll('[internal]', ''),
+            reasonCode: 'internal_marker_removed',
+          }
+        : { decision: 'block', reasonCode: 'invalid_input' },
+    }),
+  },
+})
+
+const harness = defineHarness()
+  .models({ assistant: runtimeModel })
+  .agent('guardedSupport', {
+    model: 'assistant',
+    instructions: 'Help safely.',
+    tools: ['transfer_money'],
+    guardrails: rails,
+  })
+  .build()
+\`\`\`
+
+Each action declares its exact phase. A narrower value type supplies a
+\`valueSchema\` that validates without transforming JSON. The executable
+[composed Guardrails example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
+adds input/tool/final-output rails and a durable approval interruption.
+
+## Choose the decision boundary
+
+| Boundary | Result |
+| --- | --- |
+| Content rail | \`allow\`, \`block\`, phase-specific \`transform\` |
+| Permission or policy | \`allow\`, \`deny\`, \`require_approval\`; policy also \`audit\` |
+| Tool approval | \`ToolApprovalInterrupt\`, then \`ToolApprovalResume\` |
+| Workflow business review | \`ExternalWaitOutcome\`, then an application execution claim/receipt |
+
+A content block never requests approval or suspends a workflow. Permission and
+policy demands for one tool call are combined in one \`ToolApprovalInterrupt\`.
+The application persists and authorizes the decision, then resumes the same run
+with a \`ToolApprovalResume\`. Narrow multi-tool policy input by \`toolId\`, and
+keep authorization in the application.
+
+For a review that outlives a worker, use
+[durable human review](/handbook/harness/orchestrate-work/human-review/).
+Bind the approved action, atomically claim its immutable execution, execute
+with the claim's stable idempotency key, and persist/reuse its receipt.
+Do not read approval and then execute separately, or mark consumed before
+success. An admitted execution is not revoked after the side effect starts.
+
+## Workflow, tool, and skill boundary
+
+A workflow gets automatic protection whenever it delegates to an attached default-loop agent. Retrieval remains application-owned, so filter chunks explicitly before giving them to an agent. Skills are mounted files; when an agent opens a skill through the built-in \`read\` tool, normal tool rails apply. The addon intentionally rejects custom-handler agents and does not intercept direct model calls, because those callers own their own model and tool lifecycle.
+
+\`\`\`typescript title="Workflow handler: filter retrieved chunks"
+const chunks = await searchApprovedKnowledge(ctx.input.question)
+const safeChunks = await rails.filterRetrievedChunks(chunks, {
+  workflowId: ctx.workflowId,
+  runId: ctx.runId,
+  sessionId: ctx.sessionId,
+  models: ctx.models,
+  signal: ctx.signal,
+  logger: ctx.logger,
+})
+
+return ctx.agents.support({ question: ctx.input.question, context: safeChunks })
+\`\`\`
+
+## Observable by default
+
+Each evaluation creates an \`evaluate_guardrail {id}\` OpenInference \`GUARDRAIL\` span plus a decision counter and duration histogram. Block is a successful control decision; an invalid action or timeout is an error. A model-backed check creates a nested standard LLM span containing provider, model, and reported input/output/total token usage. This makes safety-model spend attributable without recording content or inventing token counts or prices.
+
+Use core \`DecisionBlockedError\` and \`DecisionEvaluationError\` and the canonical
+\`DecisionEvidence\`. Keep \`reasonCode\` and \`failureKind\` stable and
+content-free; never copy prompts, matched text, callback errors, or arbitrary
+metadata into operational evidence. Policy, approval, audit, and rail failures,
+timeouts, and malformed results fail closed.
+
+\`model.completed\` contains validated accounting for completed calls, including
+tool-call responses and blocked final candidates. \`model.object\` releases only
+the final guarded, validated value. Never count token totals from both.
+Direct calls own their release boundary; rails do not inspect opaque provider
+reasoning or retract content already released by custom code.
+
+Use guardrails alongside Zod schemas, agent tool allowlists, permissions, governance, and business authorization. They control content and execution flow; they do not replace identity or deterministic business rules.`,
 	},
 	{
 		id: 'adapters',
@@ -121,22 +290,22 @@ Use memory only when the use case needs continuity across turns, sessions, or ta
 - Store the minimum useful context.
 - Keep PII and confidential data out unless the business case and controls are explicit.
 - Prefer summaries over raw transcripts.
-- Separate tenant, user, and workflow scopes.
+- Separate tenant, principal, session, and workflow scopes.
 - Make deletion and audit behavior clear.`,
 	},
 	{
 		id: 'durability',
 		title: 'AI Harness Durability',
-		description: 'Persist workflow progress, state, context checkpoints, leases, and workspace files.',
+		description: 'Persist conversations, workflow checkpoints, leases, external waits, and workspace files.',
 		body: `Durability is optional and adapter-based.
 
-Use \`localDurableExecution({ root })\` when a workflow must survive process restarts without adding external infrastructure immediately. The bundle wires a SQLite state store, durable runtime, context checkpoint store, local workspace store, and host-directory sandbox under one root.
+Use \`localDurableExecution({ root })\` when a workflow must survive process restarts without adding external infrastructure immediately. The bundle wires one SQLite \`HarnessStorage\`, a local durable workspace, and a host-directory sandbox under one root.
 
 ## What Gets Persisted
 
 - Session state, messages, runs, and run events.
-- Durable workflow checkpoints and leases.
-- Context checkpoints written through \`ctx.checkpoints\`.
+- Durable workflow step checkpoints and leases.
+- Opaque external waits bound transactionally to their run and session.
 - Workspace files for active runs and checkpoint snapshots.
 
 ## Production Rule

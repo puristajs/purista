@@ -32,13 +32,14 @@ Generated with \`@purista/cli\`.
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
-Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery.
+Agents and workflows are native \`@purista/harness\` modules under \`src/harness/<service>\`. Compose one Harness definition per service and publish selected targets with one \`ServiceBuilder.mountHarness(...)\` call. Keep model providers, Skills, storage, sandbox, admission, queues, and artifact stores in application bootstrap configuration.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
 - \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
 - \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
 - \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
 `
 
 const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
@@ -66,10 +67,10 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 ## Required workflow
 - Read \`purista.json\` before changing services, commands, subscriptions, streams, queues, workers, or agents.
 - Use the local \`@purista/cli\` package scripts whenever the CLI can create the target artifact. Refine generated code instead of hand-writing framework skeletons.
-- Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
+- Keep service code under the configured \`servicePath\` and native Harness definitions under \`src/harness\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery.
+- Mount one composed Harness definition per service with \`ServiceBuilder.mountHarness(...)\`. Keep \`ai.models\` and optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config.
 
 ${createLocalCliUsageGuide(input)}
 
@@ -81,7 +82,7 @@ ${createLocalCliUsageGuide(input)}
 - Run the project test script after framework changes.
 - Run export scripts when definitions, schedules, streams, queues, agents, or HTTP exposure change.
 - Review logs, events, traces, queues, streams, and agent prompts for secret or PII leakage before production changes.
-- For skill-backed agents, verify startup fails for missing skill bindings and that prompts list only skill metadata plus \`/skills/<name>/SKILL.md\`, never the \`SKILL.md\` body.
+- For skill-backed agents, verify startup fails when the required Skill binding is absent and test the native Harness definition independently from its PURISTA mount.
 `
 
 /** Create Claude-specific guidance that delegates to AGENTS.md. */
@@ -100,9 +101,9 @@ This project is CLI-first. Prefer generated PURISTA artifacts over manual framew
 ${createLocalCliUsageGuide(input)}
 
 ## Project Shape
-- \`purista.json\` defines file casing, event casing, \`servicePath\`, and \`agentPath\`.
+- \`purista.json\` defines file casing, event casing, and \`servicePath\`.
 - Service definitions live under \`src/service\` unless \`purista.json\` says otherwise.
-- Agent definitions live under \`src/agents\` unless \`purista.json\` says otherwise.
+- Native Harness modules live under \`src/harness/<service>\`; each service owns one composed Harness definition.
 
 ## Artifact Creation
 - New service: \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
@@ -112,6 +113,7 @@ ${createLocalCliUsageGuide(input)}
 - New queue: \`${runScriptCommand(input, 'add:queue', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
 - New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- New workflow: \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 
@@ -135,7 +137,6 @@ export const createServiceEventEnumFile = (input: CreateProjectInput) => {
 		linter: input.linter,
 		formatter: input.formatter,
 		servicePath: 'src/service',
-		agentPath: 'src/agents',
 	})
 
 	return `export enum ServiceEvent {

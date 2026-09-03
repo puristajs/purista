@@ -13,7 +13,7 @@ Use this reference when choosing packages or checking dependency boundaries.
 - `packages/core`: owns native harness-backed service-agent integration.
 - Core depends on provider-neutral `@purista/harness`.
 - Provider packages such as `@purista/harness-openai` stay app-level dependencies.
-- Core exports `ServiceBuilder`, `AgentQueueBuilder`, selected agent types, testing helpers, harness contract types, logger/state adapters, and provider-style stream event schemas.
+- Core exports `ServiceBuilder`, Harness mount and address-first client types, host-tool adapters/builders, testing helpers, logger/state adapters, and Framework stream contracts.
 
 ## Bridges
 - `packages/amqpbridge`: AMQP event bridge.
@@ -29,7 +29,10 @@ Event bridges and queue bridges are separate package categories. Do not use an e
 
 ## Stores
 - config stores: `aws-config-store`, `nats-config-store`, `redis-config-store`
-- state stores: `nats-state-store`, `redis-state-store`
+- Harness durable storage: `@purista/harness-storage-postgres`
+- Harness memory engines: `@purista/harness-memory-sqlite`,
+  `@purista/harness-memory-postgres`, `@purista/harness-memory-redis`, and
+  `@purista/harness-memory-nats`
 - secret stores: `aws-secret-store`, `azure-secret-store`, `gcloud-secret-store`, `infisical-secret-store`, `vault-secret-store`
 
 Stores are runtime wiring. Service builders declare needs; service instances receive concrete stores.
@@ -44,4 +47,5 @@ Stores are runtime wiring. Service builders declare needs; service instances rec
 - Shared packages may depend on `@purista/core`.
 - Transport packages should not depend on provider packages.
 - Harness must not import PURISTA packages.
-- CLI may generate source that uses core agent builders, but CLI package/runtime code must not require provider packages to run.
+- CLI may generate native Harness modules and Core mount wiring, but CLI
+  package/runtime code must not require model-provider packages to run.

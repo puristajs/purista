@@ -7,6 +7,7 @@ export const puristaCommandIds = [
 	'add-queue',
 	'add-queue-worker',
 	'add-agent',
+	'add-workflow',
 	'export-asyncapi',
 	'export-runtime-capabilities',
 	'export-schedule-manifest',

@@ -1,0 +1,210 @@
+---
+title: Models & Configuration
+description: Declare truthful model capabilities and configure safe runtime defaults before adding application complexity.
+---
+
+## Prerequisites
+
+Complete the [Quickstart](/handbook/harness/quickstart/) first. Keep all
+provider credentials and provider-specific options at this composition root.
+Agents, workflows, tools, and skills should reference a model alias, never a
+provider SDK client.
+
+## Validate deployment configuration before building
+
+Read environment values once at the application composition root and validate
+them there. Keep provider credentials out of agent input, tool parameters,
+skills, logs, fixtures, and traces. A useful deployment contract has a required
+credential, an explicit primary alias/model, and bounded values for every
+timeout or concurrency setting. Fail application startup with a safe
+configuration error when that contract is incomplete rather than discovering a
+missing secret in a customer request.
+
+The Harness's own build-time validation catches inconsistent aliases,
+capabilities, dependencies, and adapter requirements. Your configuration layer
+owns environment parsing, secret retrieval, tenant policy, and choosing which
+provider adapter is installed.
+
+## Model aliases are capability contracts
+
+Register a model by the operations it can actually perform. TypeScript handles
+and runtime validation both use the capability list, preventing an unsupported
+operation from becoming a late provider surprise.
+
+```ts
+.models({
+  fast: {
+    provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+    model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+    capabilities: ['object', 'tool_use'],
+    defaults: { maxTokens: 1200 },
+    retry: true
+  }
+})
+```
+
+| Capability | Use it for |
+| --- | --- |
+| `object` / `object_stream` | Structured, schema-validated output |
+| `text` / `text_stream` | Plain text or streaming text |
+| `tool_use` | Model-directed calls to explicitly registered tools |
+| `embeddings` / `rerank` | Application-owned retrieval orchestration |
+| input capabilities | A provider-supported image, audio, or file input boundary |
+
+Prefer structured output for business decisions. It reduces parsing ambiguity
+and ensures the application sees validated values.
+
+## Use aliases to keep providers replaceable
+
+The following alias names represent workload intent, not a vendor. An agent
+that uses `fast` remains unchanged if you switch the adapter behind it.
+
+```ts
+const harness = defineHarness({ name: 'claims' }).models({
+	fast: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+		model: process.env.OPENAI_FAST_MODEL ?? 'gpt-5-mini',
+		capabilities: ['object', 'tool_use'],
+		defaults: { maxTokens: 1_200 },
+		retry: { maxAttempts: 3, longRetry: 'defer' },
+	},
+	retrieval: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+		model: process.env.OPENAI_EMBEDDING_MODEL ?? 'text-embedding-3-small',
+		capabilities: ['embeddings'],
+	},
+})
+```
+
+`longRetry: 'defer'` gives application workers a normalized retry result rather
+than waiting through a long provider `Retry-After`. An interactive API can use
+`longRetry: 'error'` and respond promptly. Use provider-specific options only
+on the adapter/model configuration that requires them; do not let them leak
+into agent contracts.
+
+## Establish safe defaults
+
+```ts
+.defaults({
+  runTimeoutMs: 60_000,
+  modelTimeoutMs: 30_000,
+  toolTimeoutMs: 10_000,
+  agentMaxIterations: 8,
+  maxParallelToolCalls: 4,
+  historyRetention: { maxTurns: 50, maxBytes: 256_000 }
+})
+```
+
+Keep user-facing budgets short. Move slow or retryable business work to an
+application worker or queue. History retention bounds persisted storage by
+complete turns; it is not a model-context or token estimator.
+
+| Setting | Protects | Choose it from |
+| --- | --- | --- |
+| `runTimeoutMs` | The complete session run | Request or worker SLA |
+| `modelTimeoutMs` | One provider operation | Provider latency and failover policy |
+| `toolTimeoutMs` | One tool handler | Downstream service budget |
+| `agentMaxIterations` | A tool/model loop | Maximum useful reasoning rounds |
+| `maxParallelToolCalls` | A wide tool-call batch | Downstream concurrency capacity |
+| `historyRetention` | Persisted conversation size | Retention and privacy policy |
+
+Set the narrowest appropriate limit. A longer model timeout is not a substitute
+for a durable worker, and a retry policy must be consistent with the tool's
+side-effect/idempotency design.
+
+## A production composition root
+
+This order is deliberate. Static infrastructure is configured before models;
+agents are defined after models; workflows follow agents so TypeScript can
+verify declared delegation.
+
+```ts
+const harness = defineHarness({ name: 'claims-review' })
+	.logger(new JsonLogger({ level: process.env.LOG_LEVEL === 'debug' ? 'debug' : 'info' }))
+	.telemetry({ contentCaptureMode: 'NO_CONTENT' })
+	.sandbox(inMemorySandbox()) // Replace explicitly if tools must execute commands.
+	.defaults({
+		runTimeoutMs: 60_000,
+		modelTimeoutMs: 30_000,
+		toolTimeoutMs: 10_000,
+		agentMaxIterations: 8,
+		maxParallelToolCalls: 4,
+		historyRetention: { maxTurns: 50, maxBytes: 256_000 },
+	})
+	.models({
+		/* aliases */
+	})
+	.tool('tool_id', {
+		/* typed native tool definition */
+	})
+	.skills({
+		/* mounted directories */
+	})
+	.agents({
+		/* model loops */
+	})
+	.workflows({
+		/* orchestration */
+	})
+	.build()
+```
+
+Use the in-memory sandbox only when command execution is not required. The
+Harness does not create an HTTP server, queue, secret manager, or database; the
+application selects and supplies those boundaries. Continue with
+[Tools & Skills](/handbook/harness/tools-and-skills/) to add the first
+capability safely.
+
+## Configuration failures are deployment failures
+
+Treat invalid aliases, unavailable adapter capabilities, missing optional
+packages, expired credentials, and unsupported model operations as safe startup
+or invocation failures. Log the normalized error kind together with a
+deployment or run correlation ID, never the secret, raw provider payload, or
+prompt. The [Observability & Operations](/handbook/harness/observability-operations/)
+guide maps those error categories to operator actions.
+
+## Configure adapters intentionally
+
+In-memory state and sandbox adapters are useful for local development. Choose
+explicit production adapters when history, memory, sandbox execution, or durable
+workspaces must survive restart. The Harness never creates an HTTP server,
+queue worker, secret manager, or database on your behalf.
+
+## Build grounded retrieval in a workflow
+
+Embeddings and reranking are provider operations, not hidden agent message
+types. The application owns document authorization, vector storage, retention,
+and final context assembly. A workflow makes each boundary visible and passes
+only a bounded, authorized evidence set into its answering agent.
+
+```ts
+const queryEmbedding = await ctx.models.retrieval.embed({
+  input: ctx.input.question
+}, ctx.signal)
+
+const candidates = await vectorIndex.search({
+  tenantId: ctx.metadata.tenantId,
+  vector: queryEmbedding.embeddings[0].vector,
+  limit: 20
+})
+
+const ranked = await ctx.models.ranker.rerank({
+  query: ctx.input.question,
+  documents: candidates.map(doc => ({ id: doc.id, text: doc.text, metadata: { source: doc.source } })),
+  topN: 5
+}, ctx.signal)
+
+const evidence = selectAuthorizedDocuments(ranked, candidates).slice(0, 5)
+return ctx.agents.answerer({ question: ctx.input.question, evidence })
+```
+
+The `retrieval` and `ranker` aliases need the `embeddings` and `rerank`
+capabilities respectively. Authorization happens before and after retrieval;
+never trust document metadata returned by a model or use the Harness session
+identifier as a tenant authorization claim. Apply a strict size/count limit to
+grounded context and use an output schema that includes document IDs/citations.
+
+## Next
+
+Expose the smallest useful capability in [Tools & Skills](/handbook/harness/tools-and-skills/).

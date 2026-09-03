@@ -2,24 +2,23 @@
 
 Status: active routing document.
 
-Use [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) as the
-active migration record for PURISTA agent work. Current implementation and
-public handbook/API docs remain the source material for skills and user-facing
-documentation.
+Use
+[88-harness-first-service-integration.md](./88-harness-first-service-integration.md)
+as the active implementation contract for PURISTA Harness work. Current
+implementation and public handbook/API docs remain the source material for
+skills and user-facing documentation.
 
 ## Active Decision
 
-PURISTA agent integration moves into `@purista/core`. The unreleased
-`@purista/ai` package is removed rather than wrapped for compatibility.
-`@purista/harness` becomes a direct, provider-neutral dependency of
-`@purista/core`, and provider packages such as `@purista/harness-*` remain
-application-level dependencies only.
+PURISTA mounts one native `@purista/harness` definition on a service. Native
+Harness modules compose agents, workflows, tools, Skills, and guardrails before
+that single deployment boundary. Core owns addresses, EventBridge delivery,
+trusted identity, business guards, resources, queue bindings, lifecycle, and
+testing adapters. Harness owns its definitions and runtime behavior.
 
-Core owns the service builder integration, agent builder/types, queue-backed
-execution wiring, harness runtime integration, and core testing helpers listed
-in the migration plan. Provider-specific packages, Vercel AI SDK adapters,
-OpenAI, Anthropic, Bedrock, MCP SDK, and sandbox driver packages must not become
-core dependencies.
+The unreleased `@purista/ai` and `AgentQueueBuilder` designs are removed without
+compatibility wrappers. Provider, persistent storage, MCP transport, sandbox,
+artifact, and browser protocol adapters remain application dependencies.
 
 ## Superseded Guidance
 
@@ -28,32 +27,29 @@ the active plan. In particular, future agents must not follow guidance that:
 
 - keeps PURISTA agent integration in `@purista/ai`
 - preserves `@purista/ai` as an optional integration package
-- keeps agent builders, handler context, manifests, or runtime wiring outside
-  `@purista/core`
+- adds a PURISTA-owned agent or workflow builder
+- mounts more than one Harness definition on a service
+- wraps every target in a generated command, stream, queue, or worker
 - defines `@purista/ai/protocol` or `AgentProtocolEnvelope` as an active runtime
   boundary
 - treats `context.ai` as the canonical handler surface
 - emits or depends on `purista-ai:*` run-state artifacts
-- uses `AiSdkProvider`, Vercel AI SDK UI-message streams, or
-  `streamProtocolAdapter` as PURISTA runtime design
+- makes AI SDK UI Message Stream v1 part of the portable Harness execution
+  contract instead of a separate browser adapter
 
-The older `77-ai-harness-integration-strategy.md` and
-`78-clean-ai-package-architecture.md` documents are retained only as superseded
-history. Their old package-boundary recommendations have been replaced by
-`80-core-ai-migration-plan.md`.
+The older `77-ai-harness-integration-strategy.md`,
+`78-clean-ai-package-architecture.md`, and `80-core-ai-migration-plan.md`
+documents are retained only as superseded history.
 
 ## Routing
 
 - Framework implementation, architecture, CLI, docs, and examples should use
-  [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) for migration
-  history and current ownership decisions.
+  [88-harness-first-service-integration.md](./88-harness-first-service-integration.md).
 - User-facing skill updates must not reference internal specs. They should use
   current implementation and public handbook/API docs, then run
   `npm run audit:skills` and `npm run audit:knowledge`.
 - The `purista-skill-maintainer` workflow is the exception: it may use active
   specs to keep implementation, public docs, examples, and user-facing skills
   aligned.
-- Historical documents may be read for rationale only. If they mention
-  `@purista/ai`, `context.ai`, `purista-ai:*`, `AiSdkProvider`, or
-  `streamProtocolAdapter`, treat those references as superseded unless the
-  migration plan explicitly lists the term as removed or forbidden.
+- Historical documents may be read for rationale only. Treat their public API
+  designs as superseded unless the active contract explicitly retains them.

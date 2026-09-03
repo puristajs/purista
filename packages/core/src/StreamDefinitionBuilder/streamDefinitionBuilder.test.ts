@@ -185,6 +185,28 @@ describe('StreamDefinitionBuilder', () => {
 		expect(definition.metadata.expose.http?.stream?.mode).toBe('aggregate')
 	})
 
+	it('stores static response headers with stream protocol metadata', async () => {
+		const definition = await new StreamDefinitionBuilder('aiChat', 'AI SDK chat stream')
+			.exposeAsHttpStreamEndpoint('POST', '/chat')
+			.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+			.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+				await writer.close()
+			})
+			.getDefinition()
+
+		expect(definition.metadata.expose.http?.stream).toMatchObject({
+			protocol: 'ai-sdk-ui-message-stream-v1',
+			responseHeaders: { 'x-vercel-ai-ui-message-stream': 'v1' },
+		})
+	})
+
+	it('rejects invalid and transport-owned stream response headers', () => {
+		const builder = new StreamDefinitionBuilder('aiChat', 'AI SDK chat stream')
+		expect(() => builder.setHttpResponseHeaders({ 'content-type': 'text/plain' })).toThrow(/managed by the server/)
+		expect(() => builder.setHttpResponseHeaders({ 'x-invalid': 'line one\nline two' })).toThrow(/Invalid HTTP/)
+	})
+
 	it('stores and exposes stream guard hooks by name', () => {
 		const beforeGuard = vi.fn(async function beforeGuard() {})
 		const afterGuard = vi.fn(async function afterGuard() {})

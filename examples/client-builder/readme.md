@@ -6,6 +6,12 @@ In this example, you will learn on how to
 - generate TypeScript client code from JSON files
 - generate TypeScript client code from backend code base
 
+Install the released PURISTA dependencies from this example directory:
+
+```bash
+npm install
+```
+
 ## Export service definitions into JSON files
 
 To run the example for exporting the service definitions into JSON files, run the following command:

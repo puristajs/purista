@@ -8,9 +8,6 @@ NODE_VERSION=$(node -p "require('./package.json').version")
 # Print the extracted version
 echo "Version from package.json: $NODE_VERSION"
 
-# Create the content to be written to version.ts
-CONTENT="export const puristaVersion = '$NODE_VERSION'"
-
 # Iterate over each subdirectory in the packages directory
 for dir in ./packages/*/; do
     # Remove trailing slash
@@ -23,7 +20,7 @@ for dir in ./packages/*/; do
     echo "Processing package: $dirname"
 
     # Write the content to version.ts in the src subdirectory of each package
-    echo "$CONTENT" > "./packages/$dirname/src/version.ts"
+    printf '%s\n' '/** PURISTA release version for this package. */' "export const puristaVersion = '$NODE_VERSION'" > "./packages/$dirname/src/version.ts"
     
     # Check if jsr.json exists in the current directory
     if [ -f "./packages/$dirname/jsr.json" ]; then

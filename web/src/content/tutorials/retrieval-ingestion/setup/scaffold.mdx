@@ -1,0 +1,129 @@
+---
+title: Scaffold the RAG project
+description: Create a PURISTA application and generate the service, agent, workflow, command, and stream boundaries used by the pipeline.
+order: 201
+kind: lesson
+status: draft
+---
+
+Create a fresh PURISTA project and enter it.
+
+```bash title="Create and enter the RAG project" replay="parent"
+npm create purista@2.2.0 example-rag -- --runtime node --event-bridge default --non-interactive --defaults
+cd example-rag
+```
+
+Use the published Framework, Harness, Hono, provider, database, and browser
+packages. The scripts keep backend, UI, fast tests, and PostgreSQL tests
+separate.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-complete-rag",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:stream": "purista add stream",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"demo": "node --env-file-if-exists=.env --import tsx src/demo.ts",
+		"build": "npm run build:server && npm run build:ui",
+		"build:server": "tsc --noEmit",
+		"build:ui": "tsc -p ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
+		"lint": "biome check .",
+		"test": "npm run test:server && npm run test:ui",
+		"test:server": "vitest run src/application.test.ts src/service src/harness",
+		"test:postgres": "vitest run src/resources/PgKnowledgeRepository.postgres.test.ts",
+		"test:ui": "vitest run --config ui/vitest.config.ts"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-ai-sdk-ui": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"@purista/hono-http-server": "4.0.0",
+		"@hono/node-server": "2.1.0",
+		"@ai-sdk/react": "4.0.15",
+		"@radix-ui/react-collapsible": "1.1.20",
+		"@radix-ui/react-dialog": "1.1.23",
+		"@radix-ui/react-dropdown-menu": "2.1.24",
+		"@radix-ui/react-hover-card": "1.1.23",
+		"@radix-ui/react-select": "2.3.7",
+		"@radix-ui/react-separator": "1.1.15",
+		"@radix-ui/react-slot": "1.3.3",
+		"@radix-ui/react-tooltip": "1.2.16",
+		"@streamdown/cjk": "1.0.3",
+		"@streamdown/code": "1.1.1",
+		"@streamdown/math": "1.0.2",
+		"@streamdown/mermaid": "1.0.2",
+		"ai": "7.0.0",
+		"class-variance-authority": "0.7.1",
+		"clsx": "2.1.1",
+		"cmdk": "1.1.1",
+		"lucide-react": "1.39.0",
+		"nanoid": "6.0.1",
+		"pg": "8.23.0",
+		"react": "19.2.8",
+		"react-dom": "19.2.8",
+		"shiki": "4.4.3",
+		"streamdown": "2.6.0",
+		"tailwind-merge": "3.6.0",
+		"use-stick-to-bottom": "1.1.6",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@testing-library/jest-dom": "6.9.1",
+		"@testing-library/react": "16.3.2",
+		"@purista/cli": "4.0.0",
+		"@tailwindcss/vite": "4.3.3",
+		"@types/node": "26.2.0",
+		"@types/pg": "8.23.1",
+		"@types/react": "19.2.18",
+		"@types/react-dom": "19.2.4",
+		"jsdom": "27.4.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vite": "8.2.1",
+		"@vitejs/plugin-react": "6.0.5",
+		"tailwindcss": "4.3.3",
+		"vitest": "4.1.10"
+	}
+}
+```
+
+```bash title="Install the published dependencies" replay="project"
+npm install
+```
+
+Generate the CLI-supported Framework and Harness boundaries before filling their
+bodies. `Identity` owns sessions. `Knowledge` owns collection access, ingestion,
+retrieval, and answers. The host-tool definition is a small portable module added
+when the retrieval agent is built.
+
+```bash title="Generate the RAG boundaries" replay="project"
+npm run add:service -- identity --description "Authenticate users and resolve sessions" --non-interactive
+npm run add:service -- knowledge --description "Own knowledge ingestion and retrieval" --non-interactive
+npm run add:command -- login --service identity --service-version 1 --description "Create an opaque session" --non-interactive
+npm run add:command -- resolve-session --service identity --service-version 1 --description "Resolve an opaque session" --non-interactive
+npm run add:command -- ingest-knowledge --service knowledge --service-version 1 --description "Chunk, embed, and store a knowledge source" --non-interactive
+npm run add:command -- search-knowledge --service knowledge --service-version 1 --description "Search one authorized knowledge collection" --non-interactive
+npm run add:agent -- retrieve-evidence --service knowledge --service-version 1 --description "Choose and run knowledge retrieval" --non-interactive
+npm run add:workflow -- answer-knowledge-question --service knowledge --service-version 1 --description "Retrieve evidence and stream a grounded answer" --non-interactive
+npm run add:stream -- answer-knowledge-question --service knowledge --service-version 1 --description "Stream a grounded answer" --non-interactive
+```
+
+```bash title="Check the generated project"
+npm run build
+```
+
+Continue with [Define the RAG contracts](../../build/configure-harness/).

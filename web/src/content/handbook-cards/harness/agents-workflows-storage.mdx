@@ -1,0 +1,216 @@
+---
+title: Agents, Workflows & Storage
+description: Keep model loops focused and use typed workflows for the application-owned process around them.
+---
+
+## Prerequisites
+
+Start with the typed tool or skill path in
+[Tools & Skills](/handbook/harness/tools-and-skills/). An agent is a
+bounded model loop; a workflow is typed TypeScript that coordinates those
+loops and deterministic application work.
+
+## Direct agent or workflow?
+
+| Use a direct agent when… | Use a workflow when… |
+| --- | --- |
+| One model loop can complete the work | The application sequences or coordinates several steps |
+| The agent may use a small allowed tool set | You need fan-out, review, deterministic logic, or durable writes |
+| The output is one validated result | Different agents or models have separate responsibilities |
+
+Workflows call registered agents only after declaring delegation. This makes
+authority, call budgets, and model overrides visible beside the handler.
+
+## Invoke a direct agent safely
+
+Use a direct agent for one bounded conversation loop. A session permits only
+one active run: a concurrent invocation is rejected with `SessionBusyError`;
+it is not queued. Choose the transport policy explicitly: return a conflict,
+serialize requests in application code, or give independent browser tabs/jobs
+distinct privacy-safe application session IDs. A stable idempotency key replays a
+previous successful direct agent invocation rather than making another provider
+call; it does not make external tool side effects exactly-once, so the tool or
+application API still needs its own idempotency boundary.
+
+```ts
+const session = await harness.getSession(`claims:${claimId}:${conversationId}`)
+try {
+  const answer = await session.agents.claims_support.run(
+    { question },
+    { timeoutMs: 30_000, idempotencyKey: requestId, signal: request.signal }
+  )
+  return answer
+} finally {
+  // Frees live MCP and sandbox resources; retained storage/history stays intact.
+  await session.release()
+}
+```
+
+Use `session.destroy()` only for a deliberate deletion or retention workflow: it
+removes persisted session data. Call `harness.shutdown()` once during
+application shutdown, not after every request.
+
+## Stream a run without coupling to HTTP
+
+Harness streams typed `RunEvent` values; it does not own SSE, WebSocket, or an
+HTTP endpoint. Map those events in your application transport. The default
+structured-object agent emits its finished model object; a workflow can opt in
+to `model.delta` or partial-object events only when it calls a model stream
+with `{ emitRunEvents: true }`.
+
+```ts
+for await (const event of session.agents.claims_support.stream({ question })) {
+	if (event.type === 'tool.started') auditToolStart(event.toolId)
+	if (event.type === 'run.finished') sendToClient({ type: 'answer', value: event.output })
+}
+```
+
+## Implement a review workflow
+
+An incident process often needs factual extraction, a risk classification, and
+an application-owned decision. Keep each model responsibility narrow and make
+the allowed delegation visible with the workflow:
+
+```ts
+.agent('facts', {
+  model: 'fast',
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({ facts: z.array(z.string()) }),
+  instructions: 'Extract only concrete, testable facts.'
+})
+.agent('risk', {
+  model: 'fast',
+  input: z.object({ facts: z.array(z.string()) }),
+  output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
+  instructions: 'Classify operational risk from the supplied facts only.'
+})
+.workflow('review_incident', {
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({ facts: z.array(z.string()), level: z.enum(['low', 'medium', 'high']) }),
+  delegation: { agents: ['facts', 'risk'], maxChildAgentCalls: 2 },
+  handler: async (ctx) => {
+    const facts = await ctx.agents.facts({ report: ctx.input.report })
+    const risk = await ctx.agents.risk({ facts: facts.facts })
+    return { ...facts, ...risk }
+  }
+})
+  })
+```
+
+Call it through the session, exactly as you call a direct agent:
+
+```ts
+const result = await session.workflows.review_incident.run({ report })
+if (result.level === 'high') await incidentService.requestHumanReview(result)
+```
+
+The workflow makes the deterministic high-risk escalation. It does not ask a
+model to grant approval. Use `ctx.fanOut(items, callback, { concurrency })`
+for independently reviewable documents; use `Promise.allSettled` and a typed
+partial-result schema when individual failure is acceptable. Use
+`ctx.childTasks.start(...)` only for isolated workflow-owned work; a
+continuable child task remains in-process, so use an application queue or worker
+for work that must survive a restart.
+
+## Fan out a bounded review
+
+Declare the total and parallel child-agent budgets where the workflow is
+defined. `ctx.fanOut` preserves input order, clamps concurrency to the policy,
+and leaves each child call's input/output types intact.
+
+```ts
+workflow({
+	input: z.object({ documents: z.array(z.string()).min(1) }),
+	output: z.object({ reviews: z.array(z.object({ recommendation: z.string() })) }),
+	delegation: {
+		agents: ['reviewer'],
+		maxChildAgentCalls: 10,
+		maxParallelChildAgentCalls: 2,
+		agentModelAliases: { reviewer: ['deep_review'] },
+	},
+	handler: async ctx => {
+		const reviews = await ctx.fanOut(
+			ctx.input.documents,
+			document => ctx.agents.reviewer({ document }, { model: 'deep_review' }),
+			{ concurrency: 2 },
+		)
+		return { reviews }
+	},
+})
+```
+
+Child-agent calls are disabled by default. A workflow-local `delegation` block
+is preferred because it records authority next to the handler. For a deliberate
+global default, use `defaults: { delegation: { enabled: true, ...limits } }` at
+the Harness composition root. `DelegationPolicyError` means the allowlist,
+model override, depth, total budget, or parallel budget was denied; do not
+blindly retry it.
+
+## Start and observe a background child task
+
+Use a child task when the workflow returns before an isolated agent completes.
+It has its own sandbox and does not inherit parent history; later application
+code can inspect status and obtain its typed result.
+
+```ts
+const task = await ctx.childTasks.start(
+	'reviewer',
+	{ documentId: ctx.input.documentId },
+	{
+		timeoutMs: 60_000,
+		model: 'deep_review',
+	},
+)
+
+// In a later request, with the same session:
+const liveTask = await session.childTasks.get(task.id)
+const review = await liveTask?.result()
+```
+
+For an explicitly sequenced private follow-up, start with
+`{ mode: 'continuable' }`, use `task.send(input)` for the next turn, then
+`task.close()` to settle its final output. This is in-process and cannot run in
+a durable workflow. Queue durable work instead.
+
+## Storage, history, and memory
+
+The session scopes one active run, conversation history, and live
+resources. It is not a distributed scheduler. Give each tenant/thread a stable
+application-owned session ID, use a durable `HarnessStorage` when history must
+survive restart, and configure retention as a storage boundary.
+
+Memory adapters are separate from session history. Use history for the
+conversation record and memory for deliberately scoped, application-governed
+facts. Keep retrieval orchestration and vector storage in application/workflow
+code.
+
+Configure history retention as an operational storage limit, not as a token
+budget. `maxTurns` retains complete turns and `maxBytes` bounds serialized
+history. A durable `HarnessStorage` adapter must support atomic message replacement when
+this policy is enabled; otherwise construction fails rather than silently
+retaining more than the configured boundary.
+
+For agent-to-agent work, declaration is authority: only agents named in a
+workflow's `delegation` configuration can be called. `ctx.fanOut` is for a
+bounded set of independent items. `ctx.childTasks.start` is useful for
+isolated workflow-owned work, but its `continuable` mode remains in-process;
+choose the durable workflow path for restart recovery.
+
+## Lifecycle and durability choices
+
+| Need | API or adapter choice | Operational rule |
+| --- | --- | --- |
+| Finish request resources, retain stored history | `session.release()` | Always call in `finally`. |
+| Remove session record and history | `session.destroy()` | Use only for an explicit deletion/retention flow. |
+| Keep a long workflow after restart | Persistent `HarnessStorage` plus optional durable workspace | Invoke a workflow with a stable durable run ID. |
+| Continue an in-process child-agent conversation | `ctx.childTasks.start(..., { mode: 'continuable' })` | It is not restart-safe. |
+| Deliver work after an outage | Application queue or worker | Own retry, idempotency, and delivery outside the Harness. |
+
+Treat session identifiers as privacy-safe application identifiers. Select a
+durable Harness storage before using them for customer conversations across restarts,
+and implement deletion/retention in the storage layer.
+
+## Next
+
+Add content and execution controls in
+[Guardrails & Governance](/handbook/harness/guardrails-governance/).

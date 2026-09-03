@@ -1,0 +1,112 @@
+---
+title: Guardrails & Governance
+description: Add typed content controls, tool policy, approval, and safe evidence at the correct execution boundary.
+---
+
+Guardrails are optional typed content controls for a default-loop Harness
+agent. Governance controls tool exposure, policy, and tool approval.
+They complement application authorization; neither replaces it.
+
+| Boundary | Decision | Owner |
+| --- | --- | --- |
+| Content rail | `allow`, `block`, phase-specific `transform` | `@purista/harness-guardrails` |
+| Tool permission or policy | `allow`, `deny`, `require_approval`, `audit` | Harness governance |
+| Tool approval | `ToolApprovalInterrupt`, then `ToolApprovalResume` | Harness and application review boundary |
+| Workflow business review | `ExternalWaitOutcome`, execution claim and receipt | Application workflow |
+
+## Define one inline policy
+
+Guardrails have one authoring surface: the typed `config` and opaque action
+tokens supplied to `defineGuardrails`. `rails` defaults to `{}`; each phase's
+ordered flow names must identify actions declared for that phase.
+
+```ts title="src/guardrails.ts"
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { z } from 'zod'
+
+const blockOverride = defineGuardrailAction({
+	phase: 'input',
+	valueSchema: z.string(),
+	mayTransform: false,
+	evaluate: ({ value }) =>
+		value.includes('ignore previous instructions')
+			? { decision: 'block', reasonCode: 'instruction_override' }
+			: { decision: 'allow' },
+})
+
+const redactOutput = defineGuardrailAction({
+	phase: 'output',
+	valueSchema: z.string(),
+	evaluate: ({ value }) => ({
+		decision: 'transform',
+		target: 'bot_message',
+		value: value.replaceAll('[internal]', ''),
+		reasonCode: 'internal_note_removed',
+	}),
+})
+
+export const rails = defineGuardrails({
+	config: { rails: { input: { flows: ['block override'] }, output: { flows: ['redact output'] } } },
+	actions: { 'block override': blockOverride, 'redact output': redactOutput },
+})
+```
+
+`defineGuardrailAction` keeps the evaluator, selector, schema, timeout, and
+transform capability private behind the token. A tool-input or tool-output
+action must select one or more tool IDs explicitly. A `valueSchema` validates
+the protected value without coercing, defaulting, stripping, or transforming
+it. Keep `reasonCode` stable and content-free; never use request text, matched
+content, or an exception message as a code.
+
+## Bind and preflight
+
+```ts title="src/harness.ts"
+const harness = defineHarness({ name: 'support' })
+	.models({ assistant: { provider, model: 'selected-in-composition', capabilities: ['object'] } })
+	.agent('answer', {
+		model: 'assistant',
+		input: z.string(),
+		output: z.string(),
+		instructions: 'Answer concisely.',
+		guardrails: rails,
+	})
+	.build()
+```
+
+The `guardrails` field applies input, final-output, tool-input, and tool-output
+rails only to a default-loop agent; a custom handler rejects the field.
+Retrieval remains
+application-owned and uses `filterRetrievedChunks(...)` before selected chunks
+enter model context. The [Guardrails overview](/harness/guardrails/) is the
+canonical website projection for the shared inline-authoring and build-preflight
+guarantees.
+
+## Sequence and limits
+
+The [Guardrails overview](/harness/guardrails/) owns the shared phase matrix,
+timing, final-output lifecycle, transform targets, and composition guarantees.
+
+Actions run in order and transformations feed the next action. Invalid actions,
+timeouts, cancellation, detector/codec faults, and malformed results fail
+closed. No rail can grant authority, inspect opaque model reasoning, roll back
+an admitted external effect, or intercept direct model calls/custom handlers.
+
+## Sensitive data, approval, and evidence
+
+Create a detector at the composition root, then pass its
+`createSensitiveDataActions({ detector })` result into the same action map.
+Configure `sensitiveData` inline with `entities`, `maskToken`, and
+`scoreThreshold`. A structured tool value needs `sensitiveDataToolRail` with a
+selected tool, exact value schema, and reviewed codec; arbitrary JSON is never
+recursively inspected.
+
+Content blocks never request approval. Static `require_approval` permissions
+and policy demands produce a durable `ToolApprovalInterrupt` before the tool
+runs. The application persists and authorizes the review, then supplies a
+`ToolApprovalResume` to continue the same run.
+
+Each evaluation emits content-free `GUARDRAIL` spans, metrics, and structured
+logs. Record only stable IDs, outcome, duration, and reason/failure code. Use
+`DecisionBlockedError` for expected blocks and `DecisionEvaluationError` for
+fail-closed evaluation errors. Test allowed, transformed, blocked, malformed,
+timeout, detector-failure, and missing-model/tool-preflight paths with fakes.

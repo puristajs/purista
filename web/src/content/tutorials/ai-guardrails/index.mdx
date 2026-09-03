@@ -1,0 +1,50 @@
+---
+title: Apply AI guardrails
+description: Add explicit, fail-closed input and output content controls to a native Harness agent.
+order: 190
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter builds a small classifier with content controls. An input rail
+blocks one instruction-override pattern before the provider runs. An output
+rail removes long card-like digit sequences from the final structured reason
+before it reaches the caller.
+
+Guardrails answer a content question: may this exact value enter or leave the
+agent? They do not authenticate the caller and do not decide whether a
+principal may perform a business action. PURISTA business guards keep that
+separate responsibility.
+
+```text title="Guardrail placement"
+validated agent input
+  -> input content rail
+  -> model provider
+  -> schema-valid final candidate
+  -> output content rail
+  -> PURISTA caller
+```
+
+You will generate the complete PURISTA and Harness structure, install the
+optional package, define typed actions and ordered flows, attach them to the
+native agent, protect its published address, and prove that blocked content or
+denied business access never reaches the model.
+
+You need Node.js 24 or newer and basic TypeScript knowledge. The required demo
+uses a strict fake model and needs no API key or earlier tutorial.
+
+The focused source is retained in
+`examples/banking/chapters/ai-guardrails`.
+
+1. [Create the project and generate the agent](./build/install/)
+2. [Define an input content rail](./build/input/)
+3. [Define an output rail and attach the flow](./build/output/)
+4. [Authorize and mount the guarded agent](./build/integrate/)
+5. [Invoke the guarded agent from a command](./build/invoke/)
+6. [Compose the guarded runtime](./build/compose-runtime/)
+7. [Run the complete application](./build/run-application/)
+8. [Test the native and command boundaries](./testing/test-guardrails/)
+9. [Test authorization and content rails through EventBridge](./testing/test-eventbridge/)
+
+Start with [Generate the guarded agent project](./build/install/).

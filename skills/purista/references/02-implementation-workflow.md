@@ -34,6 +34,7 @@ npm run add:stream -- <name> --service <serviceName> --service-version <version>
 npm run add:queue -- <name> --service <serviceName> --service-version <version>
 npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>
 npm run add:agent -- <name> --service <serviceName> --service-version <version>
+npm run add:workflow -- <name> --service <serviceName> --service-version <version>
 ```
 
 Use `npm create purista@latest` for the normal quickstart path. Use `purista init <target>` when an agent, CI job, or script needs the same blueprint engine directly. For automated setup, pass every relevant choice explicitly and combine `--non-interactive`, `--defaults`, and `--no-install` when dependency installation is handled by the caller.

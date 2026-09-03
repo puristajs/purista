@@ -1,0 +1,132 @@
+---
+title: Run the classification application
+description: Prove the complete EventBridge path with a fake model, then optionally bind OpenAI.
+order: 186
+kind: lesson
+status: draft
+---
+
+The runtime composition is ready. Start with a strict fake model so you can
+prove service routing, authorization, schema validation, and lifecycle without
+an API key. The optional entry point changes only the model binding.
+
+## Run without provider credentials
+
+Create `src/demo.ts`. The fake provider returns one structured response and
+fails if another model call occurs.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+import { invokeClassification } from './invokeClassification.js'
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject({
+		object: {
+			category: 'card',
+			urgency: 'normal',
+			reason: 'The message asks about a replacement card without an immediate deadline.',
+		},
+		usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 },
+		finishReason: 'stop',
+	})
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canClassify: async () => true },
+		model: { provider, model: 'fake-classifier' },
+	})
+	await support.start()
+
+	try {
+		const result = await invokeClassification(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{ messageId: 'MSG-200', text: 'How do I replace an expiring card?' },
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+Run the complete local path.
+
+```bash title="Run the deterministic classification demo" replay="project"
+npm run demo
+```
+
+```json title="Expected classification" expect="json"
+{
+	"category": "card",
+	"urgency": "normal",
+	"reason": "The message asks about a replacement card without an immediate deadline."
+}
+```
+
+That result crossed the outer command address, the mounted agent address, and
+the fake model before returning as validated command output.
+
+## Optional: bind OpenAI
+
+Create the optional live entry point. Only this file imports the provider
+adapter and reads credentials.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: {
+			canClassify: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		model: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Support classification service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Classification service could not start.'}\n`)
+	process.exit(1)
+})
+```
+The repository includes this environment template:
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+
+Copy it to `.env`, add your key, and run `npm start` when you want to make a
+real provider request. The process stays active until it receives a shutdown
+signal.
+
+```bash title="Optional live classification service"
+cp .env.example .env
+npm start
+```
+
+Continue with [Test the small classification boundaries](../../testing/test-classification/).

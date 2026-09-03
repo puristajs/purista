@@ -18,12 +18,13 @@
 
 export type {
 	ContentPart,
+	MemoryEngine,
 	ModelCapability,
 	ModelProvider,
 	RunEvent,
 	Session,
 } from '@purista/harness'
-export * from './AgentQueueBuilder/index.js'
+export { inMemoryMemoryEngine } from '@purista/harness'
 export * from './ClientBuilder/index.js'
 export * from './CommandDefinitionBuilder/index.js'
 export * from './core/index.js'
@@ -32,6 +33,7 @@ export * from './DefaultEventBridge/index.js'
 export * from './DefaultQueueBridge/index.js'
 export * from './DefaultSecretStore/index.js'
 export * from './DefaultStateStore/index.js'
+export * from './HarnessMount/index.js'
 export * from './HttpClient/index.js'
 export * from './helper/index.js'
 export * from './mocks/index.js'

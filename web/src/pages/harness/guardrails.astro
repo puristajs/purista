@@ -1,0 +1,186 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import GuardrailsArchitecture from '../../components/harness/GuardrailsArchitecture.astro'
+import {
+  guardrailsBuildGuarantee,
+  guardrailsInlineConfigurationGuarantee,
+  guardrailsOutputRailGuarantee,
+  guardrailsStageGuarantees,
+} from '../../data/guardrails-content.ts'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Guardrails | AI Harness | PURISTA"
+  description="A provider-neutral guardrail architecture for typed, observable AI agent and tool boundaries."
+>
+  <HarnessHero
+    lines={[
+      { text: 'Safety controls' },
+      { text: 'with evidence.', color: 'con' },
+    ]}
+    lede={`Guardrails add typed, fail-closed decisions around a Harness default-loop agent: before a model call, around every tool handoff, and before a final answer leaves the loop. ${guardrailsOutputRailGuarantee} They complement schemas, permissions, governance, and application authorization.`}
+    ctas={[
+      { label: 'Read the implementation guide', href: '/handbook/harness/secure-and-govern/guardrails/', variant: 'primary' },
+      { label: 'Compare privacy detectors', href: '/handbook/harness/secure-and-govern/privacy-detectors/', variant: 'ghost' },
+    ]}
+  />
+
+  <section class="section-pad border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Architecture</div>
+        <h2 class="display display-lg">Protect every handoff in the agent loop.</h2>
+        <p class="lede">A rail has one of three outcomes: allow, block, or transform. Ordered rails run sequentially, so a transformation becomes the next rail’s input. A block or operational fault ends the protected path before the next model, tool, or delivery boundary.</p>
+      </div>
+      <GuardrailsArchitecture />
+      <p class="mt-6 max-w-[80ch] text-[var(--color-fg-muted)]">Retrieval can be prepared alongside other application work, but it enters the model context only after an explicit <code>filterRetrievedChunks(...)</code> call. Guardrail phases themselves are intentionally ordered rather than parallel.</p>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Control boundaries</div>
+        <h2 class="display display-lg">What Guardrails cover — and what remains yours.</h2>
+      </div>
+      <div class="guardrail-boundaries">
+        <div class="guardrail-boundaries__row">
+          <strong>Automatic on an attached default-loop agent</strong>
+          <p>Parsed input, final-answer candidates before output validation and delivery, tool input before permissions/governance/schema validation, and tool output before it returns to the model. {guardrailsOutputRailGuarantee}</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Explicit application call</strong>
+          <p>Retrieval filtering. Your workflow selects the chunks, calls the filter, and keeps vector-store authorization, residency, and retention visible.</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Not intercepted automatically</strong>
+          <p>Direct <code>ctx.models.*</code> calls, custom-handler agents, arbitrary streaming chunks, and unselected fields in structured tool values.</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Never replaced</strong>
+          <p>Authentication, tenant isolation, business authorization, approval ownership, idempotency, rate limits, and the final side-effect transaction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Composition guarantees</div>
+        <h2 class="display display-lg">Author once. Validate before requests.</h2>
+        <p class="lede">{guardrailsInlineConfigurationGuarantee} {guardrailsBuildGuarantee}</p>
+      </div>
+      <div class="overflow-x-auto border border-[var(--color-line)]">
+        <table class="guardrail-package-table">
+          <thead>
+            <tr><th>Stage</th><th>Guarantees</th><th>Does not guarantee</th></tr>
+          </thead>
+          <tbody>
+            {guardrailsStageGuarantees.map(guarantee => (
+              <tr>
+                <td>{guarantee.stage}</td>
+                <td>{guarantee.guarantees}</td>
+                <td>{guarantee.doesNotGuarantee}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Package ecosystem</div>
+        <h2 class="display display-lg">One policy layer, replaceable detectors.</h2>
+        <p class="lede">The core addon enforces policy. Optional privacy adapters implement one shared detector contract and are chosen with the typed inline guardrail configuration at the composition root — never by a browser or provider-specific guardrail configuration.</p>
+      </div>
+      <div class="overflow-x-auto border border-[var(--color-line)]">
+        <table class="guardrail-package-table">
+          <thead>
+            <tr><th>Package</th><th>Choose it for</th><th>Execution boundary</th><th>Start here</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>@purista/harness-guardrails</code></td>
+              <td>Typed input, output, tool, retrieval, and model-check controls</td>
+              <td>In-process interceptor on a default-loop agent; TypeScript actions stay application-owned</td>
+              <td><a href="/handbook/harness/secure-and-govern/guardrails/">Guardrails &amp; Governance</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-presidio</code></td>
+              <td>Existing Microsoft Presidio Analyzer deployment, custom recognizers, or deployment-selected languages</td>
+              <td>Application-injected authenticated internal <code>POST /analyze</code> call; masking remains in Guardrails</td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#4-use-presidio-when-it-is-already-your-governed-detector-service">Presidio sidecar</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-native-privacy</code></td>
+              <td>Local common identifiers: email, phone, card, IPv4/IPv6, IBAN, US SSN, and URL</td>
+              <td>Rust Node-API prebuild in process for Node.js and Bun; no network, model, or fallback implementation</td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#2-bind-the-native-detector-for-the-smallest-local-setup">Native privacy</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-local-ner</code></td>
+              <td>Locally provisioned model labels such as person, organization, or location</td>
+              <td>Optional Transformers.js peer with a pinned local model, asset manifest, label map, and startup warmup</td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#5-use-local-ner-only-with-provisioned-verified-model-assets">Local NER</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-6 text-[var(--color-fg-muted)]">See the <a href="/handbook/harness/ecosystem-packages/">complete Harness package catalogue</a> for model providers, Agent Plugins, MCP peers, test utilities, and every first-party package.</p>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Operational evidence</div>
+        <h2 class="display display-lg">Enforcement is visible without recording content.</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3">
+        <div class="card"><h3 class="h3">Guardrail decisions</h3><p>Every evaluation creates a content-free OpenInference <code>GUARDRAIL</code> span, outcome metric, and structured log with the rail, phase, duration, outcome, and controlled reason code.</p></div>
+        <div class="card"><h3 class="h3">Model-backed checks</h3><p>A <code>modelCheckRail</code> nests the standard model span. Provider, model, and reported token usage remain on that LLM span, so cost analysis stays accurate when available.</p></div>
+        <div class="card"><h3 class="h3">Fail closed</h3><p>Missing actions, invalid outcomes, timeouts, detector faults, codec faults, and optional-local-NER setup failures block the protected path. Logs expose stable failure kinds, never inspected text or secrets.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Implement the ' }, { text: 'right boundary', color: 'con' }, { text: '.' }]}
+    lede="The handbook contains the typed inline configuration, opaque action tokens, coverage matrix, detector feature comparison, workflow/tool/skill behavior, and deterministic test patterns."
+    ctas={[
+      { label: 'Guardrails implementation guide', href: '/handbook/harness/secure-and-govern/guardrails/', variant: 'primary' },
+      { label: 'Privacy detector guide', href: '/handbook/harness/secure-and-govern/privacy-detectors/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style>
+  .guardrail-boundaries { border-top: 1px solid var(--color-line); }
+  .guardrail-boundaries__row {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(13rem, 0.7fr) minmax(0, 1.3fr);
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .guardrail-boundaries__row strong { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--color-con-hi); }
+  .guardrail-boundaries__row p { color: var(--color-fg-muted); margin: 0; max-width: 75ch; }
+
+  .guardrail-package-table { border-collapse: collapse; min-width: 900px; width: 100%; }
+  .guardrail-package-table th { background: var(--color-bg-sunk); color: var(--color-fg); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em; text-align: left; }
+  .guardrail-package-table :is(th, td) { border-bottom: 1px solid var(--color-line); padding: 1rem; vertical-align: top; }
+  .guardrail-package-table td { color: var(--color-fg-muted); font-size: 0.9rem; line-height: 1.55; }
+  .guardrail-package-table tr:last-child td { border-bottom: 0; }
+  .guardrail-package-table td:first-child { color: var(--color-fg); width: 24%; }
+  .guardrail-package-table a { color: var(--color-found-hi); }
+
+  @media (max-width: 640px) {
+    .guardrail-boundaries__row { grid-template-columns: 1fr; gap: 0.55rem; }
+  }
+</style>

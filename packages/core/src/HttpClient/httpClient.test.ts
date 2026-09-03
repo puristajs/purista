@@ -132,6 +132,24 @@ describe('HttpClient', () => {
 		await expect(client.get('/example')).resolves.toStrictEqual(response)
 	})
 
+	it('uses a per-request timeout when provided', async () => {
+		const clock = sandbox.useFakeTimers()
+		const logger = getLoggerMock()
+		const client = new HttpClient({ baseUrl: 'http://example.com', logger: logger.mock, defaultTimeout: 30_000 })
+
+		sandbox.stub(global, 'fetch').callsFake((_url, init) => {
+			return new Promise((_resolve, reject) => {
+				init?.signal?.addEventListener('abort', () => reject(init.signal?.reason))
+			})
+		})
+
+		const request = client.get('/example', { timeout: 25 })
+		const rejection = expect(request).rejects.toMatchObject({ errorCode: 408, message: 'request exceeded 25 ms' })
+		await clock.tickAsync(26)
+
+		await rejection
+	})
+
 	it('records HTTP client request duration without raw URL attributes', async () => {
 		const logger = getLoggerMock()
 		const metricsRecorder = createMemoryMetricsRecorder()

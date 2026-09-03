@@ -1,5 +1,7 @@
 ---
 import Nav from '../components/landing/Nav.astro'
+import RecursiveDocTree from '../components/ui/RecursiveDocTree.astro'
+import type { PrimaryNavKey } from '../data/navigation'
 import type { SidebarItem } from '../lib/sidebar'
 import BaseLayout from './BaseLayout.astro'
 import '../styles/site.css'
@@ -11,13 +13,31 @@ interface Props {
 	currentId?: string
 	headings?: { depth: number; slug: string; text: string }[]
 	prose?: boolean
+	/** Name shown in browser titles and the responsive navigation control. */
+	sectionTitle?: string
+	/** Root route for the current documentation section, without a trailing slash. */
+	sectionRoot?: string
+	active?: PrimaryNavKey
+	/** Opt in to arbitrary-depth page navigation without changing Handbook routes. */
+	recursiveSidebar?: boolean
 }
 
-const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
-const pageTitle = title === 'PURISTA Handbook' ? title : `${title} | PURISTA Handbook`
-const handbookPath = Astro.url.pathname.replace(/\/$/, '')
-const markdownUrl = handbookPath === '/handbook' ? '/handbook.md' : `${handbookPath}.md`
-
+const {
+	title,
+	description,
+	sidebar = [],
+	currentId = '',
+	headings = [],
+	prose = true,
+	sectionTitle = 'Handbook',
+	sectionRoot = '/handbook',
+	active = 'handbook',
+	recursiveSidebar = false,
+} = Astro.props
+const sectionHomeTitle = `PURISTA ${sectionTitle}`
+const pageTitle = title === sectionHomeTitle ? title : `${title} | ${sectionHomeTitle}`
+const sectionPath = Astro.url.pathname.replace(/\/$/, '')
+const markdownUrl = sectionPath === sectionRoot ? `${sectionRoot}.md` : `${sectionPath}.md`
 function isActive(item: SidebarItem, id: string): boolean {
 	const itemBase = item.id.replace(/\/index$/, '')
 	const currentBase = id.replace(/\/index$/, '')
@@ -42,75 +62,126 @@ function isParentActive(item: SidebarItem, id: string): boolean {
 function getItemHref(item: SidebarItem): string {
 	if (item.href) return item.href
 	const base = item.id.replace(/\/index$/, '')
-	if (base === '') return '/handbook/'
-	return `/handbook/${base}`
+	if (base === '') return `${sectionRoot}/`
+	return `${sectionRoot}/${base}`
 }
 ---
 
 <BaseLayout title={pageTitle} description={description} siteShell markdownUrl={markdownUrl}>
-  <Nav active="handbook" />
+  <Nav active={active} />
 
   <div class="h-screen flex flex-col overflow-hidden pt-[72px]">
+  {/* The desktop tree is intentionally hidden below `lg`; keep its first
+      actionable level available through a compact, native disclosure instead
+      of stranding readers at the Handbook landing page on a narrow screen. */}
+  <details class="lg:hidden shrink-0 border-b border-[var(--color-line)] bg-[var(--color-bg)]">
+    <summary class="cursor-pointer px-6 py-3 font-display text-sm font-semibold text-[var(--color-fg-strong)]">
+      Browse {sectionTitle.toLowerCase()} topics
+    </summary>
+    <nav aria-label={`${sectionTitle} navigation`} class="max-h-[55vh] overflow-y-auto border-t border-[var(--color-line)] px-5 py-4">
+      {recursiveSidebar ? <RecursiveDocTree items={sidebar} currentId={currentId} /> : sidebar.map((item) => (
+        item.kind === 'sectionHeader' ? (
+          <a href={getItemHref(item)} class={`block px-1 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-strong)] ${item.sectionStart ? 'border-t border-[var(--color-line)]' : 'pt-0'}`}>
+            {item.title}
+          </a>
+        ) : (
+          <div class="pb-3">
+            <a href={getItemHref(item)} class={`block py-1 text-sm font-semibold ${isActive(item, currentId) ? 'text-[var(--color-found)]' : 'text-[var(--color-fg-strong)]'}`}>
+              {item.title}
+            </a>
+            {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
+              <div class="border-l border-[var(--color-line)] pl-3">
+                {item.items.map((sub) => (
+                  <div>
+                    <a href={getItemHref(sub)} class={`block py-1 text-sm leading-snug ${isActive(sub, currentId) ? 'text-[var(--color-found)]' : isParentActive(sub, currentId) ? 'text-[var(--color-fg-strong)]' : 'text-[var(--color-fg-muted)]'}`}>
+                      {sub.title}
+                    </a>
+                    {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
+                      <div class="border-l border-[var(--color-line)] pl-3">
+                        {sub.items.map((subsub) => (
+                          <a href={getItemHref(subsub)} class={`block py-1 text-sm leading-snug ${isActive(subsub, currentId) ? 'text-[var(--color-found)]' : 'text-[var(--color-fg-muted)]'}`}>
+                            {subsub.title}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      ))}
+    </nav>
+  </details>
+
     <div class="flex flex-1 min-h-0 overflow-hidden">
       {/* Sidebar */}
       <aside class="hidden lg:block w-64 shrink-0 border-r border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
         <div class="px-4 py-6">
-          <a href="/handbook" class="flex items-center gap-2.5 mb-7 px-2">
-            <div class="w-6 h-6 grid place-items-center bg-[var(--color-fg)] text-[var(--color-bg)] rounded text-xs font-extrabold font-display shrink-0">P</div>
-            <span class="font-display font-semibold text-sm tracking-tight" style="color: var(--color-fg-strong)">Handbook</span>
-          </a>
           <nav class="space-y-0.5">
-            {sidebar.map((item) => (
-              <div class="hbl-group">
-                <a
-                  href={getItemHref(item)}
-                  class={`hbl-item ${
-                    isActive(item, currentId)
-                      ? 'hbl-item--active'
-                      : isParentActive(item, currentId)
-                      ? 'hbl-item--parent'
-                      : 'hbl-item--default'
-                  }`}
-                >
-                  {item.title}
-                </a>
-                {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
-                  <div class="hbl-children">
-                    {item.items.map((sub) => (
-                      <div>
-                        <a
-                          href={getItemHref(sub)}
-                          class={`hbl-item hbl-item--sub ${
-                            isActive(sub, currentId)
-                              ? 'hbl-item--active'
-                              : isParentActive(sub, currentId)
-                              ? 'hbl-item--parent'
-                              : 'hbl-item--default'
-                          }`}
-                        >
-                          {sub.title}
-                        </a>
-                        {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
-                          <div class="hbl-children">
-                            {sub.items.map((subsub) => (
-                              <a
-                                href={getItemHref(subsub)}
-                                class={`hbl-item hbl-item--sub ${
-                                  isActive(subsub, currentId)
-                                    ? 'hbl-item--active'
-                                    : 'hbl-item--default'
-                                }`}
-                              >
-                                {subsub.title}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {recursiveSidebar ? <RecursiveDocTree items={sidebar} currentId={currentId} /> : sidebar.map((item) => (
+              item.kind === 'sectionHeader' ? (
+                <div class:list={['mb-5', { 'pt-7 mt-7 border-t border-[var(--color-line)]': item.sectionStart }]}>
+                  <a href={getItemHref(item)} class="flex items-center gap-2.5 px-2 group">
+                    <div class="w-6 h-6 grid place-items-center bg-[var(--color-fg)] text-[var(--color-bg)] rounded text-[0.55rem] font-extrabold font-display tracking-[-0.08em] shrink-0 group-hover:bg-[var(--color-found)] transition-colors">
+                      {item.iconLabel}
+                    </div>
+                    <span class="font-display font-semibold text-sm tracking-tight group-hover:text-[var(--color-found)] transition-colors" style="color: var(--color-fg-strong)">{item.title}</span>
+                  </a>
+                </div>
+              ) : (
+                <div class="hbl-group">
+                  <a
+                    href={getItemHref(item)}
+                    class={`hbl-item ${
+                      isActive(item, currentId)
+                        ? 'hbl-item--active'
+                        : isParentActive(item, currentId)
+                        ? 'hbl-item--parent'
+                        : 'hbl-item--default'
+                    }`}
+                  >
+                    {item.title}
+                  </a>
+                  {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
+                    <div class="hbl-children">
+                      {item.items.map((sub) => (
+                        <div>
+                          <a
+                            href={getItemHref(sub)}
+                            class={`hbl-item hbl-item--sub ${
+                              isActive(sub, currentId)
+                                ? 'hbl-item--active'
+                                : isParentActive(sub, currentId)
+                                ? 'hbl-item--parent'
+                                : 'hbl-item--default'
+                            }`}
+                          >
+                            {sub.title}
+                          </a>
+                          {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
+                            <div class="hbl-children">
+                              {sub.items.map((subsub) => (
+                                <a
+                                  href={getItemHref(subsub)}
+                                  class={`hbl-item hbl-item--sub ${
+                                    isActive(subsub, currentId)
+                                      ? 'hbl-item--active'
+                                      : 'hbl-item--default'
+                                  }`}
+                                >
+                                  {subsub.title}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
             ))}
           </nav>
         </div>

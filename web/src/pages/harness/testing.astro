@@ -8,7 +8,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 
 <HarnessLayout
   title="Testing | AI Harness | PURISTA"
-  description="Test PURISTA AI Harness applications without calling external model providers. Fake providers, contract tests, streaming assertions, MCP fakes, and review gate tests."
+  description="Test PURISTA AI Harness applications without calling external model providers. Fake providers, contract tests, streaming assertions, MCP fakes, and governance approval checks."
 >
 
   <HarnessHero
@@ -17,7 +17,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'without calling', color: 'found' },
       { text: 'external APIs.' },
     ]}
-    lede="Every layer of a harness application is testable in isolation. Inject a fake model provider. Contract-test your state store. Assert streaming event sequences. Run fake MCP servers in CI. No real API keys needed."
+    lede="Every layer of a harness application is testable in isolation. Inject a fake model provider. Contract-test your Harness storage. Assert streaming event sequences. Run fake MCP servers in CI. No real API keys needed."
   />
 
   {/* ── 1. Test pyramid ──────────────────────────────────────────── */}
@@ -42,14 +42,14 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
             level: '2',
             label: 'Contract tests',
             color: 'con',
-            items: ['StateStore adapter', 'MemoryAdapter', 'SandboxSession', 'Model provider adapter'],
+            items: ['HarnessStorage adapter', 'MemoryEngine', 'SandboxSession', 'Model provider adapter'],
             note: 'Use the shared contract test helpers from @purista/harness/testing.',
           },
           {
             level: '3',
             label: 'Integration tests',
             color: 'pilot',
-            items: ['Full session agent runs', 'Workflow sequences', 'Streaming event assertions', 'MCP runner', 'Review gate flows'],
+            items: ['Full session agent runs', 'Workflow sequences', 'Streaming event assertions', 'MCP runner', 'Governance approval decisions'],
             note: 'Use a fake model provider. Real sessions, real sandboxes, fake model responses.',
           },
           {
@@ -114,20 +114,18 @@ const harness = defineHarness({ name: 'test' })
       capabilities: ['object'],
     },
   })
-  .agents(({ agent }) => ({
-    answerer: agent({
-      model: 'fast',
-      input: z.object({ question: z.string() }),
-      output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
-      instructions: 'Answer concisely.',
-    }),
-  }))
+  .agent('answerer', {
+    model: 'fast',
+    input: z.object({ question: z.string() }),
+    output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
+    instructions: 'Answer concisely.',
+  })
   .build()
 
 const session = await harness.getSession('test-user')
 
 await expect(
-  session.agents.answerer.prompt({ question: 'hello?' })
+  session.agents.answerer.run({ question: 'hello?' })
 ).resolves.toMatchObject({ answer: 'Fake answer from test fixture.' })`}
             label="Fake provider test"
             language="typescript"
@@ -162,7 +160,7 @@ await expect(
             language="typescript"
           />
           <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
-            <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness also ships <code class="site-mono text-xs">fakeModelProvider()</code> and <code class="site-mono text-xs">fakeMemoryAdapter()</code> helpers from <code class="site-mono text-xs">@purista/harness/testing</code> for common fixture patterns.</p>
+            <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness also ships <code class="site-mono text-xs">fakeModelProvider()</code> and <code class="site-mono text-xs">fakeMemoryEngine()</code> helpers from <code class="site-mono text-xs">@purista/harness/testing</code> for common fixture patterns.</p>
           </div>
         </div>
       </div>
@@ -393,7 +391,7 @@ it('contains scorer fails gracefully on missing pointer', async () => {
 
 // 1. command runs through sandbox executor
 it('runs command through sandbox exec', async () => {
-  const result = await session.agents.diagrammer.prompt(input)
+  const result = await session.agents.diagrammer.run(input)
   expect(result.diagramXml).toBeDefined()
 })
 
@@ -405,14 +403,14 @@ it('throws SandboxNoExecutorError without executor', async () => {
     .build()
 
   const s = await noExecHarness.getSession('t')
-  await expect(s.agents.diagrammer.prompt(input))
+  await expect(s.agents.diagrammer.run(input))
     .rejects.toThrow('SandboxNoExecutorError')
 })
 
 // 3. validates input schema before calling server
 it('rejects invalid tool input', async () => {
   await expect(
-    session.agents.diagrammer.prompt({ badInput: true })
+    session.agents.diagrammer.run({ badInput: true })
   ).rejects.toThrow('ValidationError')
 })`}
             label="Stdio MCP contract tests"
@@ -429,26 +427,26 @@ it('throws McpAuthError on 401', async () => {
   const harness = buildHarnessWithHttpMcp({
     url: 'http://fake-mcp/bad-auth',
   })
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('McpAuthError')
 })
 
 // 2. protocol failures map to McpProtocolError
 it('throws McpProtocolError on bad response', async () => {
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('McpProtocolError')
 })
 
 // 3. output schema validation
 it('rejects invalid MCP server output', async () => {
   // fake server returns wrong shape
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('ValidationError')
 })
 
 // 4. tool returns isError: true
 it('throws ToolError when MCP signals isError', async () => {
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('ToolError')
 })`}
             label="HTTP MCP contract tests"
@@ -459,36 +457,36 @@ it('throws ToolError when MCP signals isError', async () => {
     </div>
   </section>
 
-  {/* ── 7. Review gates ──────────────────────────────────────────── */}
+  {/* ── 7. Approval and review boundaries ────────────────────────── */}
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="flex items-center gap-3 mb-6">
         <NumberedBadge number={6} color="pilot" />
-        <div class="eyebrow">Integration tests — review gates</div>
+        <div class="eyebrow">Integration tests — approval and review</div>
       </div>
-      <h2 class="display display-lg mb-6">Prove human-in-the-loop flows work correctly</h2>
-      <p class="lede mb-10">Review gates are stateful flows. Four invariants must hold. Test each one explicitly.</p>
+      <h2 class="display display-lg mb-6">Prove the application-owned approval boundary</h2>
+      <p class="lede mb-10">Harness interrupts a run before a matching approval-gated tool call. The application records and authorizes the review, then resumes the same run with a typed decision. Test that storage, identity, expiry, decision endpoint, and resume behavior together.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {[
           {
-            invariant: 'No mutation before approval',
-            test: 'Run the workflow, assert write tools were not called before the review decision resolves.',
+            invariant: 'No tool mutation on rejection',
+            test: 'Resume the interruption with a rejected decision and assert the tool handler did not run.',
             tone: 'found',
           },
           {
-            invariant: 'Review questions visible and submittable',
-            test: 'Assert answer choices are returned and that each can be submitted independently.',
+            invariant: 'Review task is application-owned',
+            test: 'Assert the application persists only the intended proposal reference and exposes its own authenticated UI/endpoint.',
             tone: 'con',
           },
           {
-            invariant: 'Decisions are idempotent',
-            test: 'Submit the same decision twice. Assert the second submission succeeds or returns a clear idempotency signal.',
+            invariant: 'Decision submission is idempotent',
+            test: 'Submit the same application review decision twice. Assert the repository returns the original terminal result or a clear idempotency outcome.',
             tone: 'pilot',
           },
           {
-            invariant: 'Stale ids fail cleanly',
-            test: 'Submit a decision with a stale review id or run id. Assert a meaningful error, not a silent no-op.',
+            invariant: 'Stale decisions fail cleanly',
+            test: 'Submit an outdated task revision or expired task. Assert a meaningful application error, not a silent overwrite.',
             tone: 'found',
           },
         ].map((row) => (
@@ -500,51 +498,7 @@ it('throws ToolError when MCP signals isError', async () => {
         ))}
       </div>
 
-      <CodeBlock
-        code={`it('does not write before review approval', async () => {
-  const writesSpy = vi.fn()
-
-  const harness = defineHarness({ name: 'test' })
-    .tools({
-      write_wiki: {
-        description: 'Write to wiki.',
-        input: z.object({ content: z.string() }),
-        output: z.object({ ok: z.boolean() }),
-        handler: async (_ctx, input) => {
-          writesSpy(input)
-          return { ok: true }
-        },
-      },
-    })
-    .workflows(({ workflow }) => ({
-      propose_and_review: workflow({
-        input: z.object({ topic: z.string() }),
-        output: z.object({ approved: z.boolean() }),
-        handler: async (ctx) => {
-          const proposal = await ctx.agents.writer(ctx.input)
-          const decision = await ctx.reviewGate(proposal)
-          if (decision.approved) {
-            await ctx.tools.write_wiki({ content: proposal.content })
-          }
-          return { approved: decision.approved }
-        },
-      }),
-    }))
-    .build()
-
-  const session = await harness.getSession('test')
-
-  // pause at review gate — do not approve
-  const run = session.workflows.propose_and_review.stream({ topic: 'AI policy' })
-  for await (const event of run) {
-    if (event.type === 'review.requested') break
-  }
-
-  expect(writesSpy).not.toHaveBeenCalled()
-})`}
-        label="No mutation before approval"
-        language="typescript"
-      />
+      <p class="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-5 text-[var(--color-fg-muted)]">The focused, complete governance test is in <a href="/handbook/harness/tools-and-skills/#add-harness-side-governance-to-a-sensitive-tool">Tools &amp; Skills</a>. For a long-running human review, test the application record and authenticated decision endpoint separately, then test that the following workflow or domain step receives only an approved decision. Do not use a process-local Promise as a durable approval queue.</p>
     </div>
   </section>
 
@@ -560,17 +514,17 @@ it('throws ToolError when MCP signals isError', async () => {
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div>
-          <h3 class="h3 mb-3">State store</h3>
+          <h3 class="h3 mb-3">Harness storage</h3>
           <CodeBlock
-            code={`import { stateStoreContract } from '@purista/harness/testing'
-import { myStateStore } from './myStateStore'
+            code={`import { harnessStorageContract } from '@purista/harness/testing'
+import { myHarnessStorage } from './myHarnessStorage'
 
-describe('myStateStore', () => {
-  stateStoreContract(() => myStateStore({
+describe('myHarnessStorage', () => {
+  harnessStorageContract(() => myHarnessStorage({
     url: process.env.TEST_DB_URL,
   }))
 })`}
-            label="stateStoreContract"
+            label="harnessStorageContract"
             language="typescript"
           />
           <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates session CRUD, run write/read, message append, event persistence, and concurrent-write behaviour.</p>
@@ -578,15 +532,15 @@ describe('myStateStore', () => {
         <div>
           <h3 class="h3 mb-3">Memory adapter</h3>
           <CodeBlock
-            code={`import { memoryAdapterContract } from '@purista/harness/testing'
-import { myMemoryAdapter } from './myMemoryAdapter'
+            code={`import { memoryEngineContract } from '@purista/harness/testing'
+import { myMemoryEngine } from './myMemoryEngine'
 
-describe('myMemoryAdapter', () => {
-  memoryAdapterContract(() => myMemoryAdapter({
+describe('myMemoryEngine', () => {
+  memoryEngineContract(() => myMemoryEngine({
     url: process.env.TEST_REDIS_URL,
   }))
 })`}
-            label="memoryAdapterContract"
+            label="memoryEngineContract"
             language="typescript"
           />
           <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates scope isolation, read/write round-trips, list with prefix, delete, TTL expiry, and search when declared.</p>

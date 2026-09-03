@@ -1,0 +1,449 @@
+---
+title: Process the job and expose its result
+description: Invoke Transaction from the worker, persist operational result state, and add a protected lookup command.
+order: 143
+kind: lesson
+status: published
+---
+
+The worker needs current transaction data. It must invoke the owning
+`Transaction` command through a declared capability; it must not import the
+Transaction repository or open its database.
+
+## Implement the worker
+
+```ts title="src/service/reporting/v1/queue-worker/generateStatementWorker/generateStatementWorkerQueueWorkerBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1GetTransactionInputParameterSchema, transactionV1GetTransactionInputPayloadSchema, transactionV1GetTransactionOutputPayloadSchema } from '../../../../transaction/v1/command/getTransaction/schema.js'
+import { canGenerateStatement } from '../../reportAccess.js'
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import { reportingV1GenerateStatementQueuePayloadSchema } from '../../queue/generateStatement/schema.js'
+
+export const generateStatementWorkerQueueWorkerBuilder = reportingV1ServiceBuilder
+	.getQueueWorkerBuilder('generateStatement', 'Build one transaction statement')
+	.setMode('continuous')
+	.setMaxParallelHandlers(1)
+	.canInvoke(
+		'Transaction', '1', 'getTransaction',
+		transactionV1GetTransactionOutputPayloadSchema,
+		transactionV1GetTransactionInputPayloadSchema,
+		transactionV1GetTransactionInputParameterSchema,
+	)
+	.setBeforeGuardHooks({
+		accountStillReadable: async function (_context, message) {
+			const payload = reportingV1GenerateStatementQueuePayloadSchema.parse(message.payload)
+			const allowed = canGenerateStatement({
+				tenantId: message.headers['purista.tenantId'] ?? '',
+				principalId: message.headers['purista.principalId'] ?? '',
+				accountId: payload.accountId,
+			})
+			if (!allowed) throw new HandledError(StatusCode.Forbidden, 'Statement access changed before processing')
+		},
+	})
+	.setHandler(async function (context, message) {
+		const payload = reportingV1GenerateStatementQueuePayloadSchema.parse(message.payload)
+		try {
+			const transaction = await context.service.Transaction['1'].getTransaction(
+				undefined, { transactionId: payload.transactionId },
+			)
+			return {
+				status: 'success' as const,
+				output: {
+					accountId: payload.accountId,
+					transactionId: transaction.transactionId,
+					amountCents: transaction.amountCents,
+					direction: transaction.direction,
+					counterparty: transaction.counterparty,
+					generatedAt: new Date().toISOString(),
+				},
+			}
+		} catch (error) {
+			if (error instanceof HandledError && error.errorCode === StatusCode.NotFound) {
+				return { status: 'fail' as const, reason: 'transaction_not_found', fatal: true }
+			}
+			return { status: 'retry' as const, reason: 'transaction_lookup_failed', delayMs: 250 }
+		}
+	})
+```
+
+`canInvoke` declares the exact downstream command and schemas. PURISTA rebuilds
+the principal and tenant from the queue headers, then forwards them to the
+Transaction command invocation. The worker guard checks account access again
+at execution time.
+
+A missing transaction is a fatal business outcome, so the worker asks for a
+failed result and dead-letter handling. A temporary invocation failure requests
+a retry. A successful return is settled implicitly: PURISTA stores the result
+and acknowledges the lease.
+
+```ts title="src/service/reporting/v1/queue-worker/generateStatementWorker/generateStatementWorkerQueueWorkerBuilder.test.ts" write
+import { HandledError, StatusCode, createQueueWorkerTestHarness } from '@purista/core'
+import { expect, test, vi } from 'vitest'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { generateStatementWorkerQueueWorkerBuilder } from './generateStatementWorkerQueueWorkerBuilder.js'
+
+const payload = {
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+const baseMessage = {
+	id: 'job-1', queueName: 'generateStatement', payload, parameter: {},
+	headers: { 'purista.tenantId': 'tenant-example', 'purista.principalId': 'principal-alex' },
+	createdAt: Date.now(), attempt: 1, maxAttempts: 3,
+	leaseExpiresAt: Date.now() + 60_000, leaseTtlMs: 60_000,
+}
+
+function jobStore() {
+	return { get: vi.fn(), set: vi.fn().mockResolvedValue(undefined) }
+}
+
+test('invokes Transaction, stores a small result, and acknowledges', async () => {
+	const store = jobStore()
+	const harness = await createQueueWorkerTestHarness(reportingV1Service, generateStatementWorkerQueueWorkerBuilder, {
+		queueJobStore: store,
+	})
+	harness.stubs.eventBridge?.invoke.resolves({
+		transactionId: payload.transactionId, amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	})
+	try {
+		const result = await harness.run(baseMessage)
+		expect(result.ackCalls).toHaveLength(1)
+		expect(result.nackCalls).toHaveLength(0)
+		expect(store.set).toHaveBeenCalledWith(expect.objectContaining({
+			jobId: 'job-1', status: 'success', tenantId: 'tenant-example', principalId: 'principal-alex',
+			result: expect.objectContaining({ amountCents: 2599, accountId: 'account-operating' }),
+		}), 15 * 60 * 1000)
+	} finally { await harness.destroy() }
+})
+
+test('retries a temporary transaction lookup failure', async () => {
+	const harness = await createQueueWorkerTestHarness(reportingV1Service, generateStatementWorkerQueueWorkerBuilder, {
+		queueJobStore: jobStore(),
+	})
+	harness.stubs.eventBridge?.invoke.rejects(new Error('temporary bridge failure'))
+	try {
+		const result = await harness.run(baseMessage)
+		expect(result.ackCalls).toHaveLength(0)
+		expect(result.nackCalls).toHaveLength(1)
+		expect(result.deadLetterCalls).toHaveLength(0)
+	} finally { await harness.destroy() }
+})
+
+test('dead-letters a transaction that does not exist', async () => {
+	const harness = await createQueueWorkerTestHarness(reportingV1Service, generateStatementWorkerQueueWorkerBuilder, {
+		queueJobStore: jobStore(),
+	})
+	harness.stubs.eventBridge?.invoke.rejects(new HandledError(StatusCode.NotFound, 'missing'))
+	try {
+		const result = await harness.run(baseMessage)
+		expect(result.ackCalls).toHaveLength(1)
+		expect(result.deadLetterCalls).toHaveLength(1)
+	} finally { await harness.destroy() }
+})
+
+test('checks account access again before doing work', async () => {
+	const harness = await createQueueWorkerTestHarness(reportingV1Service, generateStatementWorkerQueueWorkerBuilder, {
+		queueJobStore: jobStore(),
+	})
+	try {
+		const result = await harness.run({
+			...baseMessage,
+			headers: { 'purista.tenantId': 'tenant-example', 'purista.principalId': 'principal-other' },
+		})
+		expect(result.nackCalls).toHaveLength(1)
+		expect(harness.stubs.eventBridge?.invoke.called).toBe(false)
+	} finally { await harness.destroy() }
+})
+```
+
+The runtime harness tests acknowledgement, retry, dead-letter movement, result
+storage, identity propagation, and denied effects. Fatal dead-letter handling
+acknowledges the original lease after moving the message.
+
+## Generate the result command
+
+```bash title="Generate the status command" replay="project"
+npm run add:command -- get-statement-status \
+  --service reporting --service-version 1 \
+  --description "Read one statement job result" --non-interactive
+```
+
+```ts title="src/service/reporting/v1/reportingJobState.ts" write
+import { z } from 'zod'
+
+export const reportingQueueJobStorePrefix = 'example-bank:reporting-job'
+export const reportingJobStateKey = (jobId: string) => `${reportingQueueJobStorePrefix}:${jobId}`
+
+export const reportingJobRecordSchema = z.object({
+	jobId: z.string().min(1),
+	queueName: z.literal('generateStatement'),
+	status: z.enum(['success', 'failed', 'cancelled', 'dead-lettered', 'progress']),
+	attempt: z.number().int().positive(),
+	updatedAt: z.number().int().nonnegative(),
+	tenantId: z.string().optional(),
+	principalId: z.string().optional(),
+	result: z.unknown().optional(),
+	error: z.unknown().optional(),
+})
+```
+
+The key prefix must match the StateStore-backed QueueJobStore configured at
+startup.
+
+```ts title="src/service/reporting/v1/command/getStatementStatus/schema.ts" write
+import { z } from 'zod'
+import { generatedStatementSchema } from '../../statement.js'
+
+export const reportingV1GetStatementStatusInputPayloadSchema = z.undefined()
+export const reportingV1GetStatementStatusInputParameterSchema = z.object({ jobId: z.string().min(1) })
+export const reportingV1GetStatementStatusOutputPayloadSchema = z.strictObject({
+	jobId: z.string().min(1),
+	status: z.enum(['success', 'failed', 'cancelled', 'dead-lettered', 'progress']),
+	statement: generatedStatementSchema.optional(),
+})
+```
+
+```ts title="src/service/reporting/v1/command/getStatementStatus/getStatementStatusCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { reportingJobRecordSchema, reportingJobStateKey } from '../../reportingJobState.js'
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import { generatedStatementSchema } from '../../statement.js'
+import {
+	reportingV1GetStatementStatusInputParameterSchema,
+	reportingV1GetStatementStatusInputPayloadSchema,
+	reportingV1GetStatementStatusOutputPayloadSchema,
+} from './schema.js'
+
+async function readJob(context: { states: { getState(...names: string[]): Promise<Record<string, unknown>> } }, jobId: string) {
+	const key = reportingJobStateKey(jobId)
+	const values = await context.states.getState(key)
+	const parsed = reportingJobRecordSchema.safeParse(values[key])
+	if (!parsed.success) throw new HandledError(StatusCode.NotFound, 'Statement job not found')
+	return parsed.data
+}
+
+export const getStatementStatusCommandBuilder = reportingV1ServiceBuilder
+	.getCommandBuilder('getStatementStatus', 'Read one statement job result')
+	.addPayloadSchema(reportingV1GetStatementStatusInputPayloadSchema)
+	.addParameterSchema(reportingV1GetStatementStatusInputParameterSchema)
+	.addOutputSchema(reportingV1GetStatementStatusOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'reports/statements/:jobId')
+	.setBeforeGuardHooks({
+		jobOwner: async function (context, _payload, parameter) {
+			const record = await readJob(context, parameter.jobId)
+			if (record.tenantId !== context.message.tenantId || record.principalId !== context.message.principalId) {
+				throw new HandledError(StatusCode.Forbidden, 'This statement job belongs to another user')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const record = await readJob(context, parameter.jobId)
+		return {
+			jobId: record.jobId,
+			status: record.status,
+			statement: record.status === 'success' ? generatedStatementSchema.parse(record.result) : undefined,
+		}
+	})
+```
+
+The `jobOwner` guard compares the current trusted identity with the identity
+stored by the queue runtime. This is business authorization for one report job.
+Unknown jobs return `404`; another owner receives `403`.
+
+```ts title="src/service/reporting/v1/command/getStatementStatus/getStatementStatusCommandBuilder.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { reportingJobStateKey } from '../../reportingJobState.js'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { getStatementStatusCommandBuilder } from './getStatementStatusCommandBuilder.js'
+
+const jobId = 'job-1'
+const parameter = { jobId }
+const record = {
+	jobId, queueName: 'generateStatement', status: 'success' as const, attempt: 1,
+	updatedAt: 1, tenantId: 'tenant-example', principalId: 'principal-alex',
+	result: {
+		accountId: 'account-operating',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books',
+		generatedAt: '2026-09-01T10:00:00.000Z',
+	},
+}
+
+test('returns the owned completed result from StateStore', async () => {
+	const sandbox = createSandbox()
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const { context, stubs } = createCommandContextMock(getStatementStatusCommandBuilder, {
+			payload: undefined, parameter, sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example', principalId: 'principal-alex',
+			payload: { payload: undefined, parameter },
+		})
+		stubs.getState.resolves({ [reportingJobStateKey(jobId)]: record })
+		const guard = safeBind(getStatementStatusCommandBuilder.getBeforeGuardHook('jobOwner'), service)
+		await expect(guard(context, undefined, parameter)).resolves.toBeUndefined()
+		const command = safeBind(getStatementStatusCommandBuilder.getCommandFunction(), service)
+		await expect(command(context, undefined, parameter)).resolves.toEqual({
+			jobId, status: 'success', statement: record.result,
+		})
+	} finally { await service.destroy(); sandbox.restore() }
+})
+
+test('does not expose another principal job result', async () => {
+	const sandbox = createSandbox()
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const { context, stubs } = createCommandContextMock(getStatementStatusCommandBuilder, {
+			payload: undefined, parameter, sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example', principalId: 'principal-other',
+			payload: { payload: undefined, parameter },
+		})
+		stubs.getState.resolves({ [reportingJobStateKey(jobId)]: record })
+		const guard = safeBind(getStatementStatusCommandBuilder.getBeforeGuardHook('jobOwner'), service)
+		await expect(guard(context, undefined, parameter)).rejects.toMatchObject({ errorCode: 403 })
+	} finally { await service.destroy(); sandbox.restore() }
+})
+```
+
+## Wire the queue runtime
+
+```ts title="src/application.ts" write
+import {
+	DefaultQueueBridge,
+	createStateStoreQueueJobStore,
+	initDefaultStateStore,
+	type Logger,
+	type QueueBridge,
+	type StateStore,
+} from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { localIdentityProvider, type LocalIdentityProvider } from './service/identity/v1/LocalIdentityProvider.js'
+import { identityV1Service } from './service/identity/v1/identityV1Service.js'
+import { reportingQueueJobStorePrefix } from './service/reporting/v1/reportingJobState.js'
+import { reportingV1Service } from './service/reporting/v1/reportingV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: ManagedTransactionRepository = new SqliteTransactionRepository(':memory:'),
+	identityProvider: LocalIdentityProvider = localIdentityProvider,
+	identityStateStore: StateStore = initDefaultStateStore({ logger }),
+	queueBridge: QueueBridge = new DefaultQueueBridge({ maxAttempts: 3 }),
+	reportingStateStore: StateStore = initDefaultStateStore({ logger }),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const identity = await identityV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
+		resources: { identityProvider },
+		stateStore: identityStateStore,
+	})
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const reportingJobStore = createStateStoreQueueJobStore(reportingStateStore, reportingQueueJobStorePrefix)
+	const reporting = await reportingV1Service.getInstance(eventBridge, {
+		logger, queueBridge, queueJobStore: reportingJobStore, stateStore: reportingStateStore,
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api', enableHealth: true, healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank API', version: '1.0.0' },
+				components: { securitySchemes: { demoBearer: { type: 'http', scheme: 'bearer' } } },
+			},
+		},
+	})
+
+	http.setProtectMiddleware(createSessionProtectMiddleware(http))
+	await bankProfile.start()
+	await identity.start()
+	await transaction.start()
+	await reporting.start()
+	http.registerService(bankProfile, identity, transaction, reporting)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return {
+		eventBridge, bankProfile, identity, identityStateStore,
+		transaction, transactionRepository,
+		reporting, reportingStateStore, reportingJobStore, queueBridge,
+		http,
+	}
+}
+```
+
+`DefaultQueueBridge` is process-local and suitable for this runnable lesson.
+`createStateStoreQueueJobStore` adapts a dedicated StateStore to PURISTA's queue
+result contract. That StateStore contains job status and small results only;
+transactions remain in the database resource owned by Transaction.
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { DefaultQueueBridge, gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+async function main() {
+	const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const transactionRepository = new SqliteTransactionRepository('var/example-bank.sqlite')
+	const identityStateStore = initDefaultStateStore({ logger })
+	const reportingStateStore = initDefaultStateStore({ logger })
+	const queueBridge = new DefaultQueueBridge({ maxAttempts: 3 })
+	const app = await createApplication(
+		logger, transactionRepository, undefined, identityStateStore, queueBridge, reportingStateStore,
+	)
+	const nodeServer = serve({ fetch: app.http.app.fetch, hostname: '127.0.0.1', port })
+	const nodeHttpListener = createNodeHttpListener(nodeServer)
+
+	gracefulShutdown(logger, [
+		app.http.prepareDestroy(), nodeHttpListener, app.http,
+		app.reporting, app.transaction, app.identity, app.bankProfile,
+		app.reportingStateStore, app.identityStateStore,
+		queueBridge, transactionRepository, app.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank HTTP server with Reporting queue started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank HTTP server could not start.\n')
+	process.exit(1)
+})
+```
+
+The composition root owns the queue bridge and both StateStore instances. It
+stops Reporting before destroying its result store and queue bridge.
+
+```bash title="Verify worker and result lookup" replay="project"
+npx vitest run src/service/reporting/v1
+npm run build:server
+```

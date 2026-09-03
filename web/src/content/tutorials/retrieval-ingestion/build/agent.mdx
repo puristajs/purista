@@ -1,0 +1,76 @@
+---
+title: Let the agent choose retrieval
+description: Define a portable host tool and a native agent that decides when and how to search.
+order: 208
+kind: lesson
+status: draft
+---
+
+Define the host tool contract. It describes the input and output available to
+the model but contains no application implementation.
+
+```ts title="src/harness/knowledge/tool/searchKnowledgeTool.ts" write
+import { defineHarnessModule } from '@purista/harness'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../../service/knowledge/v1/schema.js'
+
+export const searchKnowledgeTool = defineHarnessModule()('knowledge.tool.search', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.hostTool('search_knowledge', {
+			kind: 'host',
+			description: 'Search an authorized knowledge collection and return source chunks with stable document ids.',
+			input: searchKnowledgeInputSchema,
+			output: searchKnowledgeOutputSchema,
+		})
+	},
+})
+```
+
+Fill the generated retrieval agent. The LLM receives the tool and chooses when
+to call it. Application code does not call the tool on the model's behalf.
+
+```ts title="src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.ts" write
+import { type BuilderState, defineHarnessModule, type HostToolDefinition, type ModelAlias } from '@purista/harness'
+import {
+	answerKnowledgeQuestionInputSchema,
+	retrievedEvidenceSchema,
+	type searchKnowledgeInputSchema,
+	type searchKnowledgeOutputSchema,
+} from '../../../../service/knowledge/v1/schema.js'
+
+type RetrieveEvidenceState = BuilderState & {
+	models: { primary: ModelAlias }
+	tools: {
+		search_knowledge: HostToolDefinition<typeof searchKnowledgeInputSchema, typeof searchKnowledgeOutputSchema>
+	}
+}
+
+export const retrieveEvidenceAgent = defineHarnessModule<RetrieveEvidenceState>()('knowledge.agent.retrieve-evidence', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.agent('retrieve_evidence', {
+			model: 'primary',
+			input: answerKnowledgeQuestionInputSchema,
+			output: retrievedEvidenceSchema,
+			tools: ['search_knowledge'],
+			maxSteps: 3,
+			instructions: [
+				'You retrieve evidence for a grounded answer.',
+				'Call search_knowledge with the supplied collectionId and question.',
+				'Return the question and only the evidence returned by the tool.',
+				'Do not answer from memory and do not invent sources.',
+			].join(' '),
+		})
+	},
+})
+```
+
+The agent returns structured evidence rather than the final prose answer. This
+keeps retrieval behavior independently testable and lets the following workflow
+stream grounded text from the collected evidence.
+
+```bash title="Type-check the retrieval agent"
+npm run build
+```
+
+Continue with [Build the answer workflow](../answer-workflow/).

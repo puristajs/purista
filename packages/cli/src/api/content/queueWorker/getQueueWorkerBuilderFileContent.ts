@@ -1,6 +1,6 @@
 import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
-import { camelCase, pascalCase } from '../../change-case.js'
+import { camelCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
@@ -28,14 +28,7 @@ export const getQueueWorkerBuilderFileContent = (input: {
 	const serviceBuilderName = camelCase(template)
 	const serviceBuilderFileName = convertToProjectFileCasing(template, input.puristaConfig)
 	const workerBuilderName = camelCase(`${input.workerName} queue worker builder`)
-	const queueDirName = convertToProjectFileCasing(input.queueName, input.puristaConfig)
-	const queueTypePrefix = pascalCase(`${input.serviceName} v${input.serviceVersion} ${input.queueName} queue`)
-
-	writer.writeLine(`import type { QueueMessage } from '@purista/core'`)
 	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
-	writer.writeLine(
-		`import type { ${queueTypePrefix}Payload, ${queueTypePrefix}Parameter } from '../../queue/${queueDirName}/types.js'`,
-	)
 	writer.blankLine()
 
 	writer.writeLine(`export const ${workerBuilderName} = ${serviceBuilderName}`)
@@ -58,9 +51,7 @@ export const getQueueWorkerBuilderFileContent = (input: {
 			)
 		}
 		writer
-			.write(
-				`.setHandler(async function (context, message: QueueMessage<${queueTypePrefix}Payload, ${queueTypePrefix}Parameter>)`,
-			)
+			.write('.setHandler(async function (context, message)')
 			.inlineBlock(() => {
 				writer.writeLine("context.logger.debug({ message }, 'processing queue job')")
 				writer.writeLine('await context.job.complete()')

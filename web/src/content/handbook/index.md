@@ -54,7 +54,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | **Using an AI coding assistant** | [Quickstart](./1_quickstart/index.md) | [AI Skill](./install-ai-skill.md) for existing projects → [CLI](./cli.md) |
 | **Evaluating the framework** | [Concept](./concept.md) | [Principles](./principles.md) → [From Zero to Production](./from-zero-to-production.md) |
 | **Migrating an existing app** | [Service Builder](./2_building_business-logic/service/the-service-builder.md) | [Command Builder](./2_building_business-logic/command/the-command-builder.md) → [Event Bridges](./3_eco_system/eventbridges/index.md) |
-| **Adding AI agents** | [AI Agents](./2_building_business-logic/ai/index.md) | [Queues](./2_building_business-logic/queue/index.md) → [Streams](./2_building_business-logic/stream/index.md) |
+| **Building with AI** | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) | [AI Harness Guide](/handbook/harness/) → [Queues](./2_building_business-logic/queue/index.md) |
 | **Going to production** | [From Zero to Production](./from-zero-to-production.md) | [Deploy & Scale](./5_deploy_and_scale/index.md) → [OpenTelemetry](./4_open_telemetry/index.md) |
 
 ---
@@ -136,15 +136,16 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | [Queue HTTP Exposure](./2_building_business-logic/queue/queue-http-exposure.md) | Expose queue endpoints via HTTP |
 | [Test a Queue Worker](./2_building_business-logic/queue/test-a-queue-worker.md) | Validate background job logic |
 
-#### AI Agents
+#### Build AI-powered services
 
 | Page | What you'll learn |
 |---|---|
-| [AI Agents overview](./2_building_business-logic/ai/index.md) | LLM-powered workflows and the harness pattern |
-| [Agent Builder](./2_building_business-logic/ai/the-agent-builder.md) | Define agents with model bindings and capabilities |
-| [Harness, Agents & Workflows](./2_building_business-logic/ai/harness-agents-and-workflows.md) | Orchestrate multi-step AI workflows |
-| [Model Capabilities](./2_building_business-logic/ai/model-capabilities.md) | Capability-based gating for LLM providers |
-| [Test an Agent](./2_building_business-logic/ai/test-an-agent.md) | Validate agent behavior with test harnesses |
+| [AI Harness Guide](/handbook/harness/) | Standalone models, tools, skills, agents, workflows, state, safety, tests, and operations |
+| [Architecture and lifecycle](/handbook/framework/build-ai-powered-services/architecture-and-lifecycle/) | Keep native Harness definitions portable and mount one runtime on a service |
+| [Build and mount the first agent](/handbook/framework/build-ai-powered-services/build-and-mount-the-first-agent/) | Scaffold a service, native Harness module, service Harness, and mount with the CLI |
+| [Expose and invoke a target](/handbook/framework/build-ai-powered-services/invoke-and-expose-a-harness-target/) | Use versioned EventBridge addresses from commands, streams, and HTTP |
+| [Tools, Skills, resources, stores, and context](/handbook/framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context/) | Bind native Harness capabilities and trusted PURISTA host capabilities |
+| [Workflows and human review](/handbook/framework/build-ai-powered-services/coordinate-workflows-and-human-review/) | Coordinate work and represent approval as a durable interrupt outcome |
 
 #### Cross-cutting concerns
 
@@ -157,7 +158,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | [Stores](./2_building_business-logic/stores/index.md) | Config, secret, and state persistence |
 | [Config Stores](./2_building_business-logic/stores/config-stores.md) | Environment-specific values |
 | [Secret Stores](./2_building_business-logic/stores/secret-stores.md) | Credentials and tokens |
-| [State Stores](./2_building_business-logic/stores/state-stores.md) | Business state and sessions |
+| [State Stores](./2_building_business-logic/stores/state-stores.md) | Ephemeral application state such as sessions and coordination data |
 
 #### Exposing endpoints
 

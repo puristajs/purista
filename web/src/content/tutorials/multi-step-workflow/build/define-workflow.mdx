@@ -1,0 +1,73 @@
+---
+title: Create the project and sequential workflow
+description: Scaffold the PURISTA boundary and define typed specialist stages inside one native Harness workflow.
+order: 271
+kind: lesson
+status: draft
+---
+
+Create a clean project and install the complete published manifest.
+
+```bash title="Create and enter the multi-step workflow project" replay="parent"
+npm create purista@2.2.0 multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+cd multi-step-support-workflow
+```
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-multi-step-workflow",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+```bash title="Install the multi-step workflow dependencies" replay="project"
+npm install
+```
+
+Generate the service, two specialist agents, owning workflow, and application
+command through the PURISTA CLI.
+
+```bash title="Generate workflow definitions and command" replay="project"
+npm run add:service -- support --description "Own support case resolution" --non-interactive
+npm run add:agent -- classify-support-case --service support --service-version 1 --description "Classify one support case" --non-interactive
+npm run add:agent -- plan-support-resolution --service support --service-version 1 --description "Plan one support resolution" --non-interactive
+npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
+npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
+```
+
+The CLI creates one module and colocated test for each agent and workflow. Keep
+those boundaries. The next page fills the generated files, adds shared schemas,
+and composes the modules in a small service Harness definition.
+
+Continue with [Define the workflow stages](../define-agents/).

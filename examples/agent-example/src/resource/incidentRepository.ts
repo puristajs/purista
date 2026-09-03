@@ -62,6 +62,8 @@ export class IncidentRepository {
 	}
 
 	private readonly briefs: SupportV1CreateIncidentBriefInputPayload[] = []
+	private readonly deploymentRevisions = new Map([['CHG-8821', 1]])
+	private readonly rollbackReceipts = new Map<string, { receiptId: string; changeId: string }>()
 
 	async getSnapshot(incidentId: string): Promise<SupportV1IncidentSnapshot> {
 		const snapshot = this.snapshots[incidentId]
@@ -85,5 +87,26 @@ export class IncidentRepository {
 			briefId: `BRIEF-${this.briefs.length.toString().padStart(3, '0')}`,
 			status: 'stored' as const,
 		}
+	}
+
+	async getDeploymentRevision(changeId: string): Promise<number> {
+		const revision = this.deploymentRevisions.get(changeId)
+		if (revision === undefined) throw new Error(`Unknown deployment "${changeId}"`)
+		return revision
+	}
+
+	/** Idempotent application side effect keyed by the immutable execution claim. */
+	async executeRollback(input: { changeId: string; expectedRevision: number; executionId: string }) {
+		const existing = this.rollbackReceipts.get(input.executionId)
+		if (existing) {
+			if (existing.changeId !== input.changeId) throw new Error('execution_conflict')
+			return existing
+		}
+		const currentRevision = await this.getDeploymentRevision(input.changeId)
+		if (currentRevision !== input.expectedRevision) throw new Error('stale_target_revision')
+		const receipt = { receiptId: `ROLLBACK-${input.executionId.slice(-16)}`, changeId: input.changeId }
+		this.rollbackReceipts.set(input.executionId, receipt)
+		this.deploymentRevisions.set(input.changeId, currentRevision + 1)
+		return receipt
 	}
 }

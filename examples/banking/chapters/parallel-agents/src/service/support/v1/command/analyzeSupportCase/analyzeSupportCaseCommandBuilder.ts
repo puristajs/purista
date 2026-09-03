@@ -1,0 +1,29 @@
+import {
+	supportCaseAnalysisOutputSchema,
+	supportCaseInputSchema,
+} from '../../../../../harness/support/supportCaseSchemas.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseAnalysis, supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('analyzeSupportCase', 'Run bounded specialist analysis for one support case')
+	.addPayloadSchema(supportCaseInputSchema)
+	.addOutputSchema(supportCaseAnalysisOutputSchema)
+	.canInvokeWorkflow('Support', '1', 'analyze_support_case', supportHarness.contracts.workflows.analyze_support_case)
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
+			sessionId: supportCaseSessionId(context.message, payload.caseId),
+		})
+		if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
+		return outcome.output
+	})

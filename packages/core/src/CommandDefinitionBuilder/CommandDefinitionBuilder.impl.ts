@@ -1,3 +1,4 @@
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
@@ -30,6 +31,12 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
+import {
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -269,6 +276,107 @@ export class CommandDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/**
+	 * Declare an address-first Harness agent invocation.
+	 *
+	 * The returned handler context exposes the target under both
+	 * `context.agent.<service>.<version>.<target>.run(...)` and `.stream(...)`.
+	 */
+	canInvokeAgent<
+		Contract extends HarnessTargetContract<'agent', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness workflow invocation. */
+	canInvokeWorkflow<
+		Contract extends HarnessTargetContract<'workflow', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				C['EmitList'],
 				C['QueueInvokes']
 			>
@@ -519,8 +627,11 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * Define query parameters if you expose the function as http endpoint.
-	 * Query parameters are add to openApi definition.
-	 * Query parameters are add to input parameters.
+	 *
+	 * This method adds OpenAPI metadata only. The HTTP adapter reads query values
+	 * independently and places them in the command parameter object. Declare a
+	 * matching field with `addParameterSchema(...)` for runtime validation and
+	 * keep schema optionality aligned with `required`.
 	 *
 	 * @example
 	 * ```ts
@@ -581,7 +692,9 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * Set a transform input hook which will encode or transform the input payload and parameters.
-	 * Will be executed as first step before input validation, before guard and the function itself.
+	 * The raw parameter and payload schemas are validated before this hook. The
+	 * returned domain values are then validated by the command parameter and
+	 * payload schemas before before-guards and the command function run.
 	 * This will change the type of input message payload and input message parameter.
 	 * @param transformInputSchema Input payload validation schema
 	 * @param transformParameterSchema Input parameter validation schema
@@ -824,16 +937,19 @@ export class CommandDefinitionBuilder<
 	/**
 	 * Mark the function to be exposed as http endpoint.
 	 *
-	 * Api url prefix and service version are prepended automatically
+	 * The HTTP server's API mount path and `v${serviceVersion}` are prepended
+	 * automatically. Use Hono path syntax such as `invoices/:invoiceId`; every
+	 * path or query value must have a matching field in the command parameter
+	 * schema to be validated and available as a typed handler parameter.
 	 *
-	 * For exposing a url like: `/api/V1/user/login` simply provide `user/login`as path
+	 * For `/api/v1/user/login`, provide `user/login` as the relative path.
 	 *
 	 * @param method Http method POST, PUT, PATCH, GET, DELETE
 	 * @param path The url path
 	 * @param contentTypeRequest input content type defaults to application/json
 	 * @param contentEncodingRequest input content encoding defaults to utf-8
-	 * @param contentTypeResponse input content type defaults to application/json
-	 * @param contentEncodingResponse input content encoding defaults to utf-8
+	 * @param contentTypeResponse response content type defaults to application/json
+	 * @param contentEncodingResponse response content encoding defaults to utf-8
 	 * @returns CommandDefinitionBuilder
 	 *
 	 * @example

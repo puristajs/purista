@@ -1,0 +1,62 @@
+---
+title: Build semantic retrieval
+description: Authorize a query, create its embedding with the same Harness model, and search the tenant-scoped repository.
+order: 207
+kind: lesson
+status: draft
+---
+
+Replace the generated search command. It applies the read action policy, creates
+a query embedding through the same Harness alias used during ingestion, and
+calls the injected repository.
+
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts" write
+import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../schema.js'
+
+export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
+	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
+	.addPayloadSchema(searchKnowledgeInputSchema)
+	.addOutputSchema(searchKnowledgeOutputSchema)
+	.canUseHarnessModel(knowledgeHarness, 'embedding')
+	.setBeforeGuardHooks({
+		collectionAccess: async function (context, payload) {
+			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				collectionId: payload.collectionId,
+				action: 'search',
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const signal = new AbortController().signal
+		const response = await context.model.embedding.embed(
+			{ input: payload.query, dimensions: this.config.embeddingDimensions },
+			signal,
+		)
+		const queryEmbedding = response.embeddings[0]?.vector
+		if (!queryEmbedding) throw new Error('The embedding model returned no query vector')
+		const matches = await context.resources.knowledgeRepository.search({
+			tenantId: context.message.tenantId ?? '',
+			collectionId: payload.collectionId,
+			embeddingModel: this.config.embeddingModel,
+			queryEmbedding: [...queryEmbedding],
+			limit: payload.limit,
+			signal,
+		})
+		return { matches }
+	})
+```
+
+Using one configured embedding model and dimension for indexing and querying is
+a runtime invariant. Changing that model requires a deliberate re-index, not a
+silent configuration update.
+
+```bash title="Type-check ingestion and search" replay="project"
+npm run build
+```
+
+Continue with [Let the agent choose retrieval](../agent/).

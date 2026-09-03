@@ -9,10 +9,21 @@ interface Props {
 }
 
 const { segments } = Astro.props
+
+const displaySegments = segments.map((segment, index) => {
+	const next = segments[index + 1]
+	const needsSeparator = Boolean(
+		next
+		&& !/\s$/.test(segment.text)
+		&& !/^\s|^[.!?,:;)]/.test(next.text)
+	)
+
+	return { ...segment, text: `${segment.text}${needsSeparator ? ' ' : ''}` }
+})
 ---
 
 {
-  segments.map((seg) => {
+  displaySegments.map((seg) => {
     if (seg.color === 'shimmer') {
       return (
         <span class="bg-gradient-to-r from-[var(--color-pilot)] via-[var(--color-con)] via-[var(--color-found)] to-[var(--color-pilot)] bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_4s_linear_infinite]">

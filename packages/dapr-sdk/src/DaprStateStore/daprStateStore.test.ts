@@ -30,6 +30,15 @@ describe('DaprStateStore', () => {
 	})
 
 	describe('getState', () => {
+		it('uses the default state component when no name is supplied', async () => {
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get').resolves(undefined)
+			const stateStore = new DaprStateStore()
+
+			await stateStore.getState('healthcheck')
+
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/state/stateStore/healthcheck')
+		})
+
 		it('should fetch states from the Dapr state store', async () => {
 			const stateName1 = 'myState1'
 			const stateName2 = 'myState2'

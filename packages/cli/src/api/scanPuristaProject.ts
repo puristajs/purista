@@ -24,7 +24,7 @@ export type PuristaProjectInfo = {
 /**
  * Scan a PURISTA project for service, command, subscription, stream, and event metadata.
  *
- * Queue and agent metadata is available through `createProjectSnapshot`; this helper
+ * Queue metadata is available through `createProjectSnapshot`; this helper
  * keeps the historical public shape used by service artifact generators.
  */
 export const scanPuristaProject = async (

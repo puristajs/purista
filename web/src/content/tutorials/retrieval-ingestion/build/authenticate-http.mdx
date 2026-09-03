@@ -1,0 +1,56 @@
+---
+title: Authenticate protected HTTP endpoints
+description: Resolve bearer sessions in Hono protection middleware and place trusted principal and tenant identity on PURISTA messages.
+order: 213
+kind: lesson
+status: draft
+---
+
+Implement Hono's protection middleware. The webserver calls it only for command
+and stream definitions that are protected; protected is the default, while the
+login command explicitly declares itself public.
+
+```ts title="src/sessionProtectMiddleware.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { EndpointProtectMiddleware, HonoServiceClass } from '@purista/hono-http-server'
+import type { SessionRecord } from './service/identity/v1/session.js'
+
+export const createSessionProtectMiddleware = (http: HonoServiceClass): EndpointProtectMiddleware<HonoServiceClass> =>
+	async function (context, next) {
+		const authorization = context.req.header('authorization')
+		const sessionToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1]
+		if (!sessionToken) throw new HandledError(StatusCode.Unauthorized, 'A session bearer token is required')
+
+		try {
+			const session = (await http.invoke(
+				{
+					receiver: { serviceName: 'Identity', serviceVersion: '1', serviceTarget: 'resolveSession' },
+					payload: { payload: undefined, parameter: { sessionToken } },
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+				},
+				'protect-session',
+			)) as SessionRecord
+			context.set('principalId', session.principalId)
+			context.set('tenantId', session.tenantId)
+			context.set('additionalParameter', { sessionToken })
+			await next()
+		} catch {
+			throw new HandledError(StatusCode.Unauthorized, 'The session is invalid or expired')
+		}
+	}
+```
+
+The middleware extracts the bearer token and invokes the Identity resolver
+through EventBridge. On success it returns principal and tenant IDs for the
+outgoing PURISTA message. Missing or invalid credentials throw handled errors,
+which the Hono service maps to the correct HTTP response.
+
+This is authentication. Knowledge guards still perform action-specific
+authorization for every collection operation.
+
+```bash title="Type-check HTTP authentication"
+npm run build
+```
+
+Continue with [Create the React shell](../ui-shell/).

@@ -1,0 +1,118 @@
+---
+title: Declare the native tool and agent
+description: Define a portable model-facing tool contract and attach it to a structured native Harness agent.
+order: 232
+kind: lesson
+status: draft
+---
+
+The first layer is portable Harness code. It declares what the model may ask a
+host to do, but it does not import PURISTA or know which service implements the
+request.
+
+Replace the complete generated agent file at the path below. It contains four
+contracts:
+
+- tool input: the identifiers the model must provide;
+- tool output: the safe transaction fields the model may read;
+- agent input: the user's question plus its requested scope; and
+- agent output: one validated answer with the transaction ids it used.
+
+```ts title="src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { z } from 'zod'
+
+export const lookupTransactionInputSchema = z.strictObject({
+	accountId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+})
+
+export const transactionSummarySchema = z.strictObject({
+	transactionId: z.string(),
+	accountId: z.string(),
+	status: z.enum(['pending', 'booked', 'rejected']),
+	amount: z.number(),
+	currency: z.string().length(3),
+})
+
+export const answerTransactionQuestionInputSchema = z.strictObject({
+	questionId: z.string().min(1).max(80),
+	accountId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	question: z.string().trim().min(1).max(2_000),
+})
+
+export const answerTransactionQuestionOutputSchema = z.strictObject({
+	answer: z.string().trim().min(1).max(2_000),
+	transactionIds: z.array(z.string()).max(10),
+})
+
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const answerTransactionQuestionAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.answer_transaction_question',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder
+				.hostTool('lookup_transaction', {
+					kind: 'host',
+					description: 'Read one authorized transaction summary by account and transaction id.',
+					input: lookupTransactionInputSchema,
+					output: transactionSummarySchema,
+				})
+				.agent('answer_transaction_question', {
+					model: 'primary',
+					input: answerTransactionQuestionInputSchema,
+					output: answerTransactionQuestionOutputSchema,
+					tools: ['lookup_transaction'],
+					instructions: [
+						'Answer the support question using the lookup_transaction tool.',
+						'Use the accountId and transactionId from the request as tool input.',
+						'Never claim that a transaction was changed.',
+						'Include every transaction id used in the answer.',
+					].join(' '),
+				})
+		},
+	},
+)
+```
+`lookup_transaction` is only a contract here: name, description, input, and
+output. The `tools` array makes the contract available to this agent. During a
+run, the model chooses whether to call it; there is no custom handler that calls
+the tool in advance.
+
+`PrimaryModelState` tells TypeScript that this module requires a model alias
+named `primary`. The alias is a logical name. A concrete provider is supplied
+only when the application starts.
+
+Compose the module in the generated service-level Harness definition.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { answerTransactionQuestionAgent } from './agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+
+export const supportHarness = defineHarness({ name: 'support-tools' })
+	.requireModel('primary', { capabilities: ['object', 'tool_use'] })
+	.use(answerTransactionQuestionAgent)
+	.define()
+```
+`defineHarness(...)` creates the service-level definition. One Support service
+gets one Harness definition, even when later chapters add more agents or
+workflows. `.requireModel(...)` records the capabilities needed from the
+`primary` binding, `.use(...)` adds this module, and `.define()` produces the
+immutable definition.
+
+The result remains usable by native Harness. Any host must supply a model for
+`primary` and an implementation for `lookup_transaction`. PURISTA will supply
+both when this definition is mounted on Support.
+
+```bash title="Check the portable definition" replay="project"
+npm run build
+```
+
+A successful build proves that the tool name in the agent matches the declared
+host tool and that the model requirements compose. The tool still has no
+implementation, so there is nothing useful to run yet.
+
+Continue with [Define the Transaction service boundary](../transaction-resource/).

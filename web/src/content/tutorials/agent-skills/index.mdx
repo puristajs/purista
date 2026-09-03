@@ -1,0 +1,48 @@
+---
+title: Load Agent Skills on demand
+description: Give an agent reviewed, versioned guidance without adding tools, permissions, or prompt bloat.
+order: 240
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches how to add an [Agent Skill](https://agentskills.io/) to a
+native Harness agent and mount that agent on a PURISTA service. A Skill is a
+directory containing instructions and optional reference files. Harness shows
+the model a small catalog first; the model reads the full `SKILL.md` only when
+the current question needs it.
+
+The Example Bank fixture contains one short support procedure. The capability
+is useful for product manuals, operating procedures, style guides, and other
+reviewed knowledge that belongs in source control.
+
+```text title="Skill-enabled execution path"
+PURISTA command
+  -> EventBridge agent address
+  -> business guard
+  -> native Harness agent
+  -> compact Skill catalog
+  -> model selects the read tool when the Skill applies
+  -> validated structured answer
+```
+
+A Skill supplies context. It cannot authenticate a caller, authorize an
+action, reveal a secret, add a tool, or execute a script. PURISTA guards and
+Harness tool and sandbox policies keep those decisions outside the prompt.
+
+Follow these pages in order:
+
+1. [Create the project, service, agent, command, and versioned Skill](./build/create-skill/).
+2. [Bind the Skill and its narrow read capability to the agent](./build/bind-skill/).
+3. [Authorize the published Skill-enabled agent](./build/secure-content/).
+4. [Invoke the agent from a PURISTA command](./build/invoke-agent/).
+5. [Compose the Skill-enabled runtime](./build/compose-runtime/).
+6. [Run the deterministic and optional live application](./build/run-application/).
+7. [Test lazy Skill loading and fail-closed startup](./testing/test-skills/).
+8. [Test PURISTA command and EventBridge routing](./testing/test-routing/).
+
+The complete runnable project is in
+`examples/banking/chapters/agent-skills`.
+
+Start with [Create the project and Skill](./build/create-skill/).

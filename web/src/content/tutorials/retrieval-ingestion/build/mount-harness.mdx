@@ -1,0 +1,60 @@
+---
+title: Bind the search tool and publish targets
+description: Connect the host tool to a PURISTA command and guard every directly addressable agent and workflow.
+order: 210
+kind: lesson
+status: draft
+---
+
+Configure the service mount. The host tool invokes the declared
+`searchKnowledge` command client, so the call travels through EventBridge with
+tenant and principal identity. The LLM sees only the typed tool contract.
+
+```ts title="src/service/knowledge/v1/harness/knowledgeHarnessMount.ts" write
+import { commandAsHarnessTool, type HarnessBusinessGuardContext } from '@purista/core'
+import type { z } from 'zod'
+import { knowledgeHarness } from '../../../../harness/knowledge/knowledgeHarness.js'
+import type { KnowledgeCollectionPolicy } from '../KnowledgeResources.js'
+import { requireKnowledgeCollectionAccess } from '../requireKnowledgeCollectionAccess.js'
+import type { answerKnowledgeQuestionInputSchema } from '../schema.js'
+
+export { knowledgeHarness }
+
+export const knowledgeHarnessPolicy = {
+	publish: { workflows: ['answer_knowledge_question'] },
+	hostTools: {
+		search_knowledge: commandAsHarnessTool('Knowledge', '1', 'searchKnowledge'),
+	},
+	targets: {
+		workflows: {
+			answer_knowledge_question: {
+				beforeGuards: {
+					collectionAccess: async (
+						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+						input: z.output<typeof answerKnowledgeQuestionInputSchema>,
+					) => {
+						await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+							...context.identity,
+							collectionId: input.collectionId,
+							action: 'search',
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+The retrieval agent and answer workflow are directly addressable. Their mount
+policies repeat the collection business guard; protection on an HTTP stream or
+wrapper command alone would not secure those addresses.
+
+This boundary also avoids cyclic imports: the Harness definition declares a
+host tool, while the service mount supplies its PURISTA implementation.
+
+```bash title="Type-check the mounted Harness"
+npm run build
+```
+
+Continue with [Expose an AI SDK UI stream](../stream-ui/).

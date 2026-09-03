@@ -1,7 +1,8 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { z } from 'zod'
 import { addPuristaAgent } from '../api/addPuristaAgent.js'
 import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
+import { convertToProjectFileCasing } from '../api/convertToProjectFileCasing.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
 import {
@@ -60,6 +61,8 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 	execute: async (resolvedInput, context) => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const puristaConfig = requirePuristaConfig(context)
+		const serviceDirectory = convertToProjectFileCasing(resolvedInput.serviceName, puristaConfig)
+		const agentDirectory = convertToProjectFileCasing(resolvedInput.name, puristaConfig)
 		if (resolvedInput.responseEventName) {
 			await ensureServiceEvent({
 				projectRootPath: context.cwd,
@@ -73,12 +76,27 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 		const mutationSnapshot = captureMutationSnapshot([
 			join(
 				context.cwd,
+				dirname(puristaConfig.servicePath ?? 'src/service'),
+				'harness',
+				serviceDirectory,
+				`${serviceDirectory}Harness.ts`,
+			),
+			join(
+				context.cwd,
+				dirname(puristaConfig.servicePath ?? 'src/service'),
+				'harness',
+				serviceDirectory,
+				'agent',
+				agentDirectory,
+			),
+			join(
+				context.cwd,
 				puristaConfig.servicePath ?? 'src/service',
 				resolvedInput.serviceName,
 				`v${resolvedInput.serviceVersion}`,
-				'agent',
-				resolvedInput.name,
+				'harness',
 			),
+			join(context.cwd, 'package.json'),
 		])
 		await addPuristaAgent({
 			projectRootPath: context.cwd,

@@ -157,7 +157,7 @@ describe('CommandDefinitionBuilder', () => {
 		)
 		.canEmit('some', z.object({ example: z.string() }))
 		.setCommandFunction(async function (context, payload, parameter) {
-			const result = await context.service.OtherService[2].testCommand(payload, parameter)
+			const result = await context.service.OtherService['2'].testCommand(payload, parameter)
 
 			const response: {
 				result: {

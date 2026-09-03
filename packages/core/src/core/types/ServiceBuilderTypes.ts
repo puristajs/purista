@@ -1,3 +1,4 @@
+import type { HarnessDefinition } from '@purista/harness'
 import type { Service } from '../Service/Service.impl.js'
 import type { EmptyObject } from './EmptyObject.js'
 import type { PuristaMetricDefinitions } from './PuristaMetrics.js'
@@ -10,10 +11,12 @@ export type ServiceBuilderTypes<
 	Resources extends {} = EmptyObject,
 	ServiceClassType extends ServiceClass<any> = Service<ServiceClassTypes<ConfigType, Resources>>,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
+	Harnesses extends readonly [] | readonly [HarnessDefinition<any>] = readonly [],
 > = {
 	ConfigType: ConfigType
 	ConfigInputType: ConfigInputType
 	Resources: Resources
 	ServiceClassType: ServiceClassType
 	Metrics: Metrics
+	Harnesses: Harnesses
 }

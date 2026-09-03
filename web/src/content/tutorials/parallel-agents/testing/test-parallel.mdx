@@ -1,0 +1,153 @@
+---
+title: Test the specialists and workflow
+description: Verify each generated agent module and the composed parallel workflow with strict model fakes.
+order: 268
+kind: lesson
+status: draft
+---
+
+Test the smallest portable units first. Each generated agent test builds a
+minimal native Harness around one module and supplies one strict fake model.
+This isolates schema, prompt, alias, and unexpected-call failures.
+
+## Test the risk specialist
+
+```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { assessSupportRiskAgent } from './assessSupportRiskAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('assessSupportRiskAgent', () => {
+	it('returns a schema-validated risk assessment', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'risk-agent-test' })
+			.requireModel('risk_model', { capabilities: ['object'] })
+			.use(assessSupportRiskAgent)
+			.define()
+		const runtime = await definition.getInstance({ models: { risk_model: { provider, model: 'risk-fake' } } })
+
+		try {
+			const session = await runtime.getSession('risk-case-1')
+			await expect(
+				session.agents.assess_support_risk.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { level: 'high' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+
+## Test the response specialist
+
+```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResponseAgent } from './planSupportResponseAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('planSupportResponseAgent', () => {
+	it('returns a schema-validated response plan', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'response-agent-test' })
+			.requireModel('response_model', { capabilities: ['object'] })
+			.use(planSupportResponseAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { response_model: { provider, model: 'response-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('response-case-1')
+			await expect(
+				session.agents.plan_support_response.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { nextAction: 'freeze_card' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+
+## Test fan-out and typed merge
+
+Replace the generated workflow test. It instantiates the composed
+`supportHarness`, scripts one response per alias, and proves the workflow runs
+and merges both module outputs.
+
+```ts title="src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('analyzeSupportCaseWorkflow', () => {
+	it('runs both specialists and merges their typed results', async () => {
+		const riskProvider = new FakeModelProvider({ strict: true })
+		const responseProvider = new FakeModelProvider({ strict: true })
+		riskProvider.enqueueObject({
+			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			usage,
+			finishReason: 'stop',
+		})
+		responseProvider.enqueueObject({
+			object: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const runtime = await supportHarness.getInstance({
+			models: {
+				risk_model: { provider: riskProvider, model: 'risk-fake' },
+				response_model: { provider: responseProvider, model: 'response-fake' },
+			},
+		})
+
+		try {
+			const session = await runtime.getSession('case-1')
+			const outcome = await session.workflows.analyze_support_case.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+			})
+			expect(outcome).toMatchObject({
+				status: 'completed',
+				output: {
+					caseId: 'case-1',
+					risk: { level: 'high' },
+					response: { nextAction: 'freeze_card' },
+				},
+			})
+			riskProvider.assertExhausted()
+			responseProvider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+
+Using separate providers makes each branch deterministic without depending on
+which concurrent request reaches a shared queue first.
+
+```bash title="Run the native parallel workflow tests" replay="project"
+npm test -- src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts
+```
+
+Continue with [Test PURISTA parallel workflow routing](../test-routing/).

@@ -18,23 +18,32 @@
 	"scripts": {
 		"start": "tsx src/index.ts",
 		"build": "tsc --noEmit",
+		"build:production": "tsc -p tsconfig.production.json",
+		"start:production": "node dist/index.js",
 		"lint": "npx @biomejs/biome check --write",
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
 		"@types/node": "^26.2.0",
+		"@types/pg": "^8.15.5",
+		"@types/sinon": "^22.0.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
 		"tsx": "^4.23.12",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
+		"sinon": "^22.1.0",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.1.0",
-		"@purista/core": "*",
-		"@purista/harness-openai": "^1.7.3",
-		"@purista/hono-http-server": "*",
+		"@purista/core": "^4.0.0",
+		"@purista/harness": "^3.0.0",
+		"@purista/harness-openai": "^3.0.0",
+		"@purista/harness-sandbox-kubernetes": "^3.0.0",
+		"@purista/harness-storage-postgres": "^3.0.0",
+		"@purista/hono-http-server": "^4.0.0",
 		"@scalar/hono-api-reference": "^0.11.13",
 		"dotenv": "^17.4.2",
+		"pg": "^8.16.3",
 		"zod": "^4.4.3"
 	}
 }

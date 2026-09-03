@@ -1,0 +1,120 @@
+---
+title: Learn PURISTA by building Example Bank
+description: Learn each PURISTA capability step by step in one small, runnable application.
+order: 0
+kind: overview
+---
+
+Learn how to build with PURISTA, one capability at a time. Each chapter starts
+with a Framework task, shows the code you write, tests the boundary with PURISTA
+helpers, and ends with a result you can run.
+
+Example Bank is the application name used throughout the course. It is never a
+service boundary. The composition root assembles the application and Hono
+provides HTTP transport. Each service owns one focused capability:
+`BankProfile` provides the public example profile, `Identity` owns login and
+sessions, `Transaction` owns transaction commands and rules, `Monitoring` owns
+reactions to transaction facts, `Reporting` owns background reports, `Support`
+owns support conversations, and `Knowledge` owns ingestion and retrieval.
+Repositories, model providers, and external clients are injected resources.
+
+One UI, a few invented records, and safe actions make Framework behavior
+visible. You do not need banking knowledge. The example does not implement
+payments, balances, accounting, or regulatory controls.
+
+## Course structure
+
+### Foundations
+
+The first chapters teach you how to:
+
+1. create a PURISTA project with the CLI;
+2. use the PURISTA Hono webserver;
+3. serve a static React application;
+4. expose commands as REST endpoints;
+5. inject a database resource;
+6. protect generated endpoints;
+7. handle opaque sessions with StateStore;
+8. authorize business actions with guards;
+9. transform command input and output; and
+10. inject and mock external resources.
+
+### Messaging and background work
+
+Continue with named command result events, subscriptions, streams, queues,
+queue workers, schedules, typed metrics, and tracing. The bank fixture remains
+small: one transaction fact, one monitoring signal, and one short statement.
+
+### Add AI capabilities
+
+The AI path keeps native Harness definitions and PURISTA orchestration as
+separate layers. A service mounts one composed Harness definition. Commands,
+streams, queues, and workers consume published agents and workflows through
+versioned EventBridge addresses. Provider credentials and runtime adapters stay
+in the application composition root.
+
+The AI path adds structured classification, AI guardrails, a complete
+RAG pipeline, standard browser streaming, memory, PURISTA-backed tools, Skills,
+human review, parallel agents, workflows, sandboxing, and evaluation. The RAG
+chapter covers ingestion and retrieval together: Harness supplies the embedding
+model for both sides, while PURISTA owns authorization, persistence, the
+command-backed search tool, and the HTTP stream. Chapters under active review
+remain visible with a **Draft preview** label so their sequence and examples can
+be reviewed on the website.
+
+## How every chapter works
+
+Each root topic has nested **Build** and **Test with PURISTA** pages, plus small
+optional extensions where they help. The main path uses project-local PURISTA
+CLI commands, complete located edits, easy English, and focused tests. Every
+published chapter has independently runnable source under `examples/banking`
+and a replay from a clean consumer project.
+
+Every chapter stays linked from the course while it is reviewed. The draft
+label is removed only after its tutorial steps, source, tests, runtime behavior,
+and navigation pass together.
+
+## Course chapters
+
+### Foundations
+
+1. [Create a PURISTA project](/tutorials/create-project/).
+2. [Use the Hono webserver](/tutorials/hono-webserver/).
+3. [Serve a static React website](/tutorials/static-website/).
+4. [Expose commands as REST endpoints](/tutorials/rest-endpoints/).
+5. [Persist data with a database resource](/tutorials/database-resource/).
+6. [Protect generated HTTP endpoints](/tutorials/protected-endpoints/).
+7. [Handle sessions with StateStore](/tutorials/sessions/).
+8. [Authorize actions with guards](/tutorials/business-guards/).
+9. [Transform command input and output](/tutorials/command-transforms/).
+10. [Call an external HTTP provider](/tutorials/external-resources/).
+
+### Messaging, background work, and operations
+
+11. [Publish command results as events](/tutorials/command-result-events/).
+12. [React to events with subscriptions](/tutorials/subscriptions/).
+13. [Stream incremental results](/tutorials/streams/).
+14. [Process work with queues](/tutorials/queue-processing/).
+15. [Declare scheduled work](/tutorials/schedules/).
+16. [Add metrics and tracing](/tutorials/observability/).
+17. [Run services across processes and adapters](/tutorials/distributed-runtime/).
+
+### Add AI capabilities
+
+18. [Add a classification agent](/tutorials/classification-agent/).
+19. [Apply AI guardrails](/tutorials/ai-guardrails/).
+20. [Build a complete RAG pipeline](/tutorials/retrieval-ingestion/).
+21. [Persist and manage conversation history](/tutorials/conversation-memory/).
+22. [Give an agent PURISTA tools](/tutorials/agent-tools/).
+23. [Load agent Skills](/tutorials/agent-skills/).
+24. [Pause a workflow for human review](/tutorials/human-review-workflow/).
+25. [Run specialist agents in parallel](/tutorials/parallel-agents/).
+26. [Build a multi-step agent workflow](/tutorials/multi-step-workflow/).
+27. [Run analysis in a sandbox](/tutorials/sandbox-analysis/).
+28. [Evaluate agent behavior](/tutorials/agent-evaluation/).
+
+## Start here
+
+[Create a PURISTA project](/tutorials/create-project/) with the CLI, generate
+the narrow `BankProfile` service and its first command, then test that command
+without starting an HTTP server.

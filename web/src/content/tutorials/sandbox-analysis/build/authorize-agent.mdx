@@ -1,0 +1,109 @@
+---
+title: Authorize the analysis capability
+description: Apply the same action-specific business rule to the wrapper command and directly addressable agent.
+order: 284
+kind: lesson
+status: draft
+---
+
+Declare a small Analysis-owned policy resource and attach it to the generated
+service builder.
+
+```ts title="src/service/analysis/v1/AnalysisResources.ts" write
+export interface AnalysisPolicy {
+	canRun(input: Readonly<{ tenantId: string; principalId: string; analysisId: string }>): Promise<boolean>
+}
+```
+
+```ts title="src/service/analysis/v1/analysisV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { AnalysisPolicy } from './AnalysisResources.js'
+
+export const analysisV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Analysis',
+	serviceVersion: '1',
+	serviceDescription: 'Owns isolated transaction analysis requests',
+}).defineResource<'analysisPolicy', AnalysisPolicy>()
+```
+
+Centralize the fail-closed business rule. Trusted tenant and principal IDs come
+from transport authentication; the policy decides whether that caller may run
+this particular analysis. The helper also derives a tenant- and
+principal-scoped Harness session ID.
+
+```ts title="src/service/analysis/v1/requireTransactionAnalysis.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { AnalysisPolicy } from './AnalysisResources.js'
+
+export async function requireTransactionAnalysis(
+	policy: AnalysisPolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; analysisId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canRun({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			analysisId: input.analysisId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Transaction analysis is not allowed')
+	}
+}
+
+export function transactionAnalysisSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	analysisId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${analysisId}:transaction-analysis-v1`)
+		.digest('hex')
+	return `transaction-analysis:${digest}`
+}
+```
+
+Publish the agent with its own guard. A mounted agent is directly addressable,
+so guarding only a wrapper command would not protect every route.
+
+```ts title="src/service/analysis/v1/harness/analysisHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { analysisHarness } from '../../../../harness/analysis/analysisHarness.js'
+import type { AnalysisPolicy } from '../AnalysisResources.js'
+import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
+
+export { analysisHarness }
+
+export const analysisHarnessPolicy = {
+	publish: { agents: ['analyze_transactions'], workflows: [] },
+	targets: {
+		agents: {
+			analyze_transactions: {
+				beforeGuards: {
+					analysisAccess: async (
+						context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
+						input: { analysisId: string },
+					) => {
+						await requireTransactionAnalysis(context.resources.analysisPolicy, {
+							...context.identity,
+							analysisId: input.analysisId,
+						})
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+
+```bash title="Type-check the guarded mount"
+npm run build
+```
+
+Continue with [Invoke the agent through a command](../invoke-agent/).

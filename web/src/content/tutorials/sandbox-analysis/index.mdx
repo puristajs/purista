@@ -1,0 +1,41 @@
+---
+title: Run analysis in a sandbox
+description: Give an agent a small sandbox tool surface, enforce process limits, and manage isolated resources through PURISTA.
+order: 280
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches sandboxed tool execution as a Framework capability. You
+create a PURISTA service and command, define a native Harness agent, and bind a
+sandbox adapter only at runtime. The agent writes an input file, runs a small
+Python program, reads the result, and returns a structured recommendation.
+
+The Example Bank data keeps the task concrete without adding business
+complexity. The analysis is advisory; a separate guarded command would own any
+effect such as blocking a transaction.
+
+The optional live path runs in a non-root container with networking disabled
+and an application-selected image. The fast default path uses a local directory
+to teach and test the same tool loop without claiming process isolation.
+
+Follow these pages in order:
+
+1. [Scaffold the isolated-analysis project](./setup/scaffold/).
+2. [Configure the Docker boundary](./build/configure/).
+3. [Define the sandboxed agent](./build/define-agent/).
+4. [Authorize the analysis capability](./build/authorize-agent/).
+5. [Invoke the agent through a command](./build/invoke-agent/).
+6. [Compose sandbox and model adapters](./build/compose-runtime/).
+7. [Run the deterministic tool loop](./build/run-application/).
+8. [Run with Docker and a live model](./build/run-live/).
+9. [Manage sandbox retention](./build/cleanup/).
+10. [Test the native tool loop](./testing/test-agent/).
+11. [Test command and EventBridge routing](./testing/test-routing/).
+12. [Test Docker isolation](./testing/test-docker/).
+
+The complete runnable source is in
+`examples/banking/chapters/sandbox-analysis`.
+
+Start with [Scaffold isolated analysis](./setup/scaffold/).

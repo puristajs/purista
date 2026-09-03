@@ -1,0 +1,76 @@
+---
+title: Compose the evaluated service
+description: Bind a model candidate and business policy when creating the mounted PURISTA service instance.
+order: 299
+kind: lesson
+status: draft
+---
+
+Create a provider-neutral service factory. It accepts the candidate's provider
+and model ID plus the Support authorization policy.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		model: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: {
+			models: { primary: options.model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+Add the long-running entry point used by an application. It selects OpenAI only
+at composition time and keeps content capture disabled by default.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: {
+			canClassify: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Evaluated Support classification service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Evaluation service could not start.'}\n`)
+	process.exit(1)
+})
+```
+
+This runtime composition is separate from offline evaluation, but both paths
+use the same `supportHarness` and classifier module.
+
+```bash title="Type-check service composition"
+npm run build
+```
+
+Continue with [Run the mounted classifier](../run-application/).

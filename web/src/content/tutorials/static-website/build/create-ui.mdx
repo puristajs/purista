@@ -1,0 +1,316 @@
+---
+title: Create the React client
+description: Add Vite, React, Tailwind CSS, and small shadcn components inside the existing PURISTA project.
+order: 10
+kind: lesson
+status: published
+---
+
+Continue in the `example-bank` directory from
+[Use the Hono webserver](/tutorials/hono-webserver/). The browser client lives
+in `ui/`, but it is part of the same application and package. You do not need a
+second backend.
+
+## Install the browser packages
+
+```bash title="Install React and the shadcn component helpers" replay="project"
+npm install --save-exact react@19.2.8 react-dom@19.2.8 class-variance-authority@0.7.1 clsx@2.1.1 tailwind-merge@3.6.0 lucide-react@1.32.0
+```
+
+```bash title="Install the Vite, Tailwind, and browser test tools" replay="project"
+npm install --save-dev --save-exact vite@8.2.1 @vitejs/plugin-react@5.2.0 tailwindcss@4.3.3 @tailwindcss/vite@4.3.3 @types/react@19.2.18 @types/react-dom@19.2.4 @testing-library/react@16.3.2 @testing-library/jest-dom@6.9.1 jsdom@30.0.1
+```
+
+Add separate scripts for the server and browser builds. `npm test` builds the
+browser first because the server tests will read the real production files.
+
+```bash title="Add browser build and test scripts" replay="project"
+npm pkg set 'scripts.build:server=tsc' 'scripts.build:ui=vite build --config ui/vite.config.ts' 'scripts.build=npm run build:server && npm run build:ui' 'scripts.test:server=tsc --noEmit && vitest run --config vitest.server.config.ts' 'scripts.test:ui=vitest run --config ui/vitest.config.ts' 'scripts.test=npm run build:ui && npm run test:server && npm run test:ui'
+```
+
+Keep server discovery inside the server source tree. The browser gets its own
+configuration on the testing page.
+
+```ts title="vitest.server.config.ts" write
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+	test: {
+		environment: 'node',
+		include: ['src/**/*.test.ts'],
+	},
+})
+```
+
+## Configure Vite and shadcn
+
+Vite uses `ui/` as its root and writes production files to `ui/dist/`.
+
+```ts title="ui/vite.config.ts" write
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+	root: fileURLToPath(new URL('.', import.meta.url)),
+	plugins: [react(), tailwindcss()],
+	resolve: {
+		alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+	},
+	build: { outDir: 'dist', emptyOutDir: true },
+})
+```
+
+```json title="ui/tsconfig.json" write
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"useDefineForClassFields": true,
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"allowJs": false,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"types": ["vite/client"]
+	},
+	"include": ["src", "vite.config.ts", "vitest.config.ts"]
+}
+```
+
+`components.json` records the normal shadcn paths and default theme choices.
+The component source stays in this repository, so it can be reviewed and
+changed like the rest of the application.
+
+```json title="ui/components.json" write
+{
+	"$schema": "https://ui.shadcn.com/schema.json",
+	"style": "new-york",
+	"rsc": false,
+	"tsx": true,
+	"tailwind": {
+		"css": "src/index.css",
+		"baseColor": "neutral",
+		"cssVariables": true
+	},
+	"aliases": {
+		"components": "@/components",
+		"utils": "@/lib/utils",
+		"ui": "@/components/ui",
+		"lib": "@/lib"
+	},
+	"iconLibrary": "lucide"
+}
+```
+
+```html title="ui/index.html" write
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#171717" />
+		<title>Example Bank</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>
+```
+
+## Add the shared component helpers
+
+These small files follow the shadcn component pattern. `cn` combines Tailwind
+classes, while the component files keep recurring markup consistent.
+
+```ts title="ui/src/lib/utils.ts" write
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs))
+}
+```
+
+```tsx title="ui/src/components/ui/card.tsx" write
+import type * as React from 'react'
+import { cn } from '@/lib/utils'
+
+export function Card({ className, ...props }: React.ComponentProps<'section'>) {
+	return <section className={cn('rounded-xl border bg-card text-card-foreground shadow-sm', className)} {...props} />
+}
+
+export function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div className={cn('grid gap-1.5 p-6', className)} {...props} />
+}
+
+export function CardTitle({ className, ...props }: React.ComponentProps<'h2'>) {
+	return <h2 className={cn('font-semibold leading-none tracking-tight', className)} {...props} />
+}
+
+export function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {
+	return <p className={cn('text-sm text-muted-foreground', className)} {...props} />
+}
+
+export function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div className={cn('p-6 pt-0', className)} {...props} />
+}
+```
+
+```tsx title="ui/src/components/ui/button.tsx" write
+import { cva, type VariantProps } from 'class-variance-authority'
+import type * as React from 'react'
+import { cn } from '@/lib/utils'
+
+export const buttonVariants = cva(
+	'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+	{
+		variants: {
+			variant: {
+				default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+				outline: 'border bg-background hover:bg-accent hover:text-accent-foreground',
+			},
+			size: { default: 'h-10 px-4 py-2', sm: 'h-9 rounded-md px-3' },
+		},
+		defaultVariants: { variant: 'default', size: 'default' },
+	},
+)
+
+type ButtonProps = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants>
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+	return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />
+}
+```
+
+```tsx title="ui/src/components/ui/skeleton.tsx" write
+import type * as React from 'react'
+import { cn } from '@/lib/utils'
+
+export function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />
+}
+```
+
+```tsx title="ui/src/components/ui/alert.tsx" write
+import type * as React from 'react'
+import { cn } from '@/lib/utils'
+
+export function Alert({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div role="alert" className={cn('rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm', className)} {...props} />
+}
+```
+
+## Create the read-only shell
+
+Start with presentation only. The next page connects it to the command.
+
+```tsx title="ui/src/App.tsx" write
+import { Building2, Landmark, Radio } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+export function App() {
+	return (
+		<div className="min-h-screen bg-background text-foreground">
+			<header className="border-b bg-card/80 backdrop-blur">
+				<div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+					<a className="flex items-center gap-3 font-semibold" href="/" aria-label="Example Bank home">
+						<span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><Landmark className="size-5" /></span>
+						Example Bank
+					</a>
+					<nav aria-label="Primary navigation">
+						<a className={buttonVariants({ variant: 'outline', size: 'sm' })} href="/api/openapi.json">API contract</a>
+					</nav>
+				</div>
+			</header>
+			<main className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.2fr_0.8fr] md:py-24">
+				<section className="space-y-6" aria-labelledby="welcome-title">
+					<div className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm text-muted-foreground"><Radio className="size-3.5 text-emerald-600" /> PURISTA application online</div>
+					<h1 id="welcome-title" className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl">A small interface for a growing Framework example.</h1>
+					<p className="max-w-xl text-lg leading-8 text-muted-foreground">The browser shell is ready. On the next page it will read public display data from a generated PURISTA command endpoint.</p>
+				</section>
+				<Card className="self-start border-primary/10 shadow-xl shadow-primary/5">
+					<CardHeader><CardDescription>Public profile</CardDescription><CardTitle className="flex items-center gap-2 text-2xl"><Building2 className="size-5" /> Example Bank</CardTitle></CardHeader>
+					<CardContent><p className="text-sm text-muted-foreground">Preferred currency</p><p className="mt-1 text-3xl font-semibold">EUR</p></CardContent>
+				</Card>
+			</main>
+		</div>
+	)
+}
+```
+
+```tsx title="ui/src/main.tsx" write
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { App } from './App'
+import './index.css'
+
+const root = document.getElementById('root')
+if (!root) throw new Error('Missing React root element')
+
+createRoot(root).render(<StrictMode><App /></StrictMode>)
+```
+
+```css title="ui/src/index.css" write
+@import "tailwindcss";
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-ring: var(--ring);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+	--radius: 0.625rem;
+	--background: oklch(0.985 0.002 247);
+	--foreground: oklch(0.145 0.01 260);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0.01 260);
+	--primary: oklch(0.22 0.04 161);
+	--primary-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.96 0.006 250);
+	--muted-foreground: oklch(0.5 0.02 260);
+	--accent: oklch(0.94 0.015 155);
+	--accent-foreground: oklch(0.22 0.04 161);
+	--destructive: oklch(0.58 0.22 27);
+	--border: oklch(0.9 0.008 255);
+	--ring: oklch(0.52 0.11 160);
+}
+
+@layer base {
+	* { @apply border-border; }
+	body { @apply m-0 bg-background text-foreground antialiased; font-family: "DM Sans", ui-sans-serif, sans-serif; }
+	a { @apply text-inherit no-underline; }
+}
+```
+
+Build the client once. Vite should create `ui/dist/index.html` and a hashed file
+inside `ui/dist/assets/`.
+
+```bash title="Build the browser client" replay="project"
+npm run build:ui
+```

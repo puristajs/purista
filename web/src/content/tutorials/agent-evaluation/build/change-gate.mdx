@@ -1,0 +1,45 @@
+---
+title: Define the change gate
+description: Turn aggregate thresholds and execution health into an explicit release decision.
+order: 297
+kind: lesson
+status: draft
+---
+
+Define the minimum acceptable metrics before running a candidate. The gate also
+fails on execution errors, so a provider outage or invalid output cannot be
+mistaken for a quality score.
+
+```ts title="src/changeGate.ts" write
+import type { EvaluationRunResult } from '@purista/harness'
+import { passRate } from './scorers.js'
+
+export interface ClassificationGateThresholds {
+	categoryRate: number
+	urgencyRate: number
+}
+
+export function assertClassificationGate(
+	result: EvaluationRunResult,
+	thresholds: ClassificationGateThresholds = { categoryRate: 1, urgencyRate: 1 },
+) {
+	if (result.status !== 'completed') throw new Error(`Evaluation did not complete cleanly: ${result.status}`)
+	const categoryRate = passRate(result, 'category_exact')
+	const urgencyRate = passRate(result, 'urgency_exact')
+	if (categoryRate < thresholds.categoryRate || urgencyRate < thresholds.urgencyRate) {
+		throw new Error(
+			`Classification gate failed: category=${categoryRate.toFixed(3)}, urgency=${urgencyRate.toFixed(3)}`,
+		)
+	}
+	return { categoryRate, urgencyRate }
+}
+```
+
+Keep threshold changes reviewable. A lower threshold is a product and risk
+decision, not a way to make CI green after a regression.
+
+```bash title="Type-check the change gate"
+npm run build
+```
+
+Continue with [Run and aggregate evaluation](../scoring/).

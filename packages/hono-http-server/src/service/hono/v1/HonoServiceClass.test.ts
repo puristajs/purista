@@ -1,8 +1,9 @@
-import { getEventBridgeMock, getLoggerMock, ServiceBuilder, StatusCode } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
+import { OPENAPI_DEFAULT_INFO } from './honoServiceConfig.js'
 import { honoV1Service } from './honoV1Service.js'
 
 const serviceBuilder = new ServiceBuilder({
@@ -17,6 +18,13 @@ const plainTextCommand = serviceBuilder
 		return 'plain-text'
 	})
 	.exposeAsHttpEndpoint('GET', 'plain-text', undefined, undefined, 'text/plain')
+
+const csvCommand = serviceBuilder
+	.getCommandBuilder('csv', 'csv')
+	.setCommandFunction(async function () {
+		return 'column\nvalue'
+	})
+	.exposeAsHttpEndpoint('GET', 'csv', undefined, undefined, 'text/csv')
 
 const asyncCommand = serviceBuilder
 	.getCommandBuilder('asyncJob', 'async job')
@@ -45,6 +53,17 @@ const queryCommand = serviceBuilder
 		return { principalId: parameter.principalId ?? null }
 	})
 	.exposeAsHttpEndpoint('GET', 'secure')
+
+const aiMessageStream = serviceBuilder
+	.getStreamBuilder('aiMessageStream', 'AI SDK UI Message Stream')
+	.addChunkSchema(z.object({ event: z.string(), data: z.unknown() }))
+	.enableChunkAggregation(false)
+	.exposeAsHttpStreamEndpoint('POST', 'ai-chat')
+	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+		await writer.close()
+	})
 
 const getEndpointService = async () => {
 	const eventBridge = getEventBridgeMock()
@@ -110,6 +129,26 @@ describe('HonoServiceClass', () => {
 		}
 	})
 
+	it('publishes OpenAPI with the default configuration', async () => {
+		const server = await honoV1Service.getInstance(getEventBridgeMock().mock, {
+			logger: getLoggerMock().mock,
+			serviceConfig: {},
+		})
+		expect(server.config.openApi).toMatchObject({ enabled: true, info: OPENAPI_DEFAULT_INFO })
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/api/openapi.json'))
+			expect(response.status).toBe(200)
+			await expect(response.json()).resolves.toMatchObject({
+				openapi: '3.1.0',
+				info: OPENAPI_DEFAULT_INFO,
+			})
+		} finally {
+			await server.destroy()
+		}
+	})
+
 	it('does not auto-register configured services unless explicitly enabled', async () => {
 		const endpointService = await getEndpointService()
 
@@ -142,6 +181,7 @@ describe('HonoServiceClass', () => {
 		try {
 			const response = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
 			expect(response.status).toBe(200)
+			expect(response.headers.get('content-type')).toContain('text/plain')
 			expect(await response.text()).toBe('plain-text')
 		} finally {
 			invokeMock.mockRestore()
@@ -161,12 +201,17 @@ describe('HonoServiceClass', () => {
 				services: [],
 			},
 		})
+		const healthFunction = vi.fn(async function (this: typeof server) {
+			expect(this).toBe(server)
+		})
+		server.setHealthFunction(healthFunction)
 		await server.start()
 		eventBridge.stubs.isHealthy.resolves(false)
 
 		try {
 			const response = await server.app.fetch(new Request('http://localhost/healthz'))
 			expect(response.status).toBe(200)
+			expect(healthFunction).toHaveBeenCalledTimes(1)
 			await expect(response.json()).resolves.toMatchObject({
 				status: 200,
 				message: 'OK',
@@ -240,6 +285,9 @@ describe('HonoServiceClass', () => {
 
 	it('maps HTTPException and generic errors via app.onError', async () => {
 		const server = await createServer()
+		server.app.get('/handled-error', () => {
+			throw new HandledError(StatusCode.Unauthorized, 'A valid access token is required')
+		})
 		server.app.get('/http-error', () => {
 			throw new HTTPException(418, { message: 'teapot' })
 		})
@@ -249,6 +297,15 @@ describe('HonoServiceClass', () => {
 		await server.start()
 
 		try {
+			const handledError = await server.app.fetch(new Request('http://localhost/handled-error'))
+			expect(handledError.status).toBe(401)
+			expect(handledError.headers.get('content-type')).toContain('application/problem+json')
+			await expect(handledError.json()).resolves.toMatchObject({
+				title: 'Unauthorized',
+				status: 401,
+				detail: 'A valid access token is required',
+			})
+
 			const httpError = await server.app.fetch(new Request('http://localhost/http-error'))
 			expect(httpError.status).toBe(418)
 			expect(httpError.headers.get('content-type')).toContain('application/problem+json')
@@ -342,14 +399,17 @@ describe('HonoServiceClass', () => {
 
 	it('covers plain-text, async, bad-content-type, invalid-json and protect middleware branches', async () => {
 		const server = await createServer({ enableDynamicRoutes: true })
-		server.setProtectMiddleware(async (c, next) => {
+		const protectMiddleware = vi.fn(async function (this: typeof server, c, next) {
+			expect(this).toBe(server)
 			c.set('additionalParameter', { principalId: 'from-middleware' })
 			await next()
 		})
+		server.setProtectMiddleware(protectMiddleware)
 		const plainTextDefinition = await plainTextCommand.getDefinition()
 		const asyncDefinition = await asyncCommand.getDefinition()
 		const echoDefinition = await echoCommand.getDefinition()
 		const queryDefinition = await queryCommand.getDefinition()
+		const csvDefinition = await csvCommand.getDefinition()
 
 		server.addEndpoint(plainTextDefinition.metadata as any, {
 			serviceName: 'HttpTestService',
@@ -371,6 +431,11 @@ describe('HonoServiceClass', () => {
 			serviceVersion: '1',
 			serviceTarget: 'withParam',
 		})
+		server.addEndpoint(csvDefinition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'csv',
+		})
 
 		const invokeMock = vi.spyOn(server, 'invoke').mockImplementation(async (input: any) => {
 			if (input.receiver.serviceTarget === 'plainText') {
@@ -389,6 +454,9 @@ describe('HonoServiceClass', () => {
 			if (input.receiver.serviceTarget === 'withParam') {
 				return { principalId: input.payload.parameter.principalId ?? null }
 			}
+			if (input.receiver.serviceTarget === 'csv') {
+				return 'column\nvalue'
+			}
 			throw new Error('unexpected target')
 		})
 
@@ -398,6 +466,11 @@ describe('HonoServiceClass', () => {
 			const plain = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
 			expect(plain.status).toBe(200)
 			expect(await plain.text()).toBe('plain-text')
+
+			const csv = await server.app.fetch(new Request('http://localhost/api/v1/csv'))
+			expect(csv.status).toBe(200)
+			expect(csv.headers.get('content-type')).toContain('text/csv; charset=utf-8')
+			expect(await csv.text()).toBe('column\nvalue')
 
 			const asyncResult = await server.app.fetch(
 				new Request('http://localhost/api/v1/async-job', {
@@ -445,6 +518,7 @@ describe('HonoServiceClass', () => {
 
 			const secured = await server.app.fetch(new Request('http://localhost/api/v1/secure'))
 			expect(secured.status).toBe(200)
+			expect(protectMiddleware).toHaveBeenCalled()
 			await expect(secured.json()).resolves.toEqual({ principalId: 'from-middleware' })
 		} finally {
 			invokeMock.mockRestore()
@@ -506,13 +580,57 @@ describe('HonoServiceClass', () => {
 		}
 	})
 
+	it('applies protocol response headers and preserves data-only SSE framing', async () => {
+		const server = await createServer({ enableDynamicRoutes: true })
+		const definition = await aiMessageStream.getDefinition()
+		server.addEndpoint(definition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'aiMessageStream',
+		})
+		const openStream = vi.spyOn(server, 'openStream').mockResolvedValue({
+			sessionId: 'session-1',
+			cancel: vi.fn(async () => undefined),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						chunk: { event: 'data', data: { type: 'text-delta', id: 'answer', delta: 'hello' } },
+					},
+				}
+				yield { payload: { frameType: 'chunk', chunk: { event: 'data', data: '[DONE]' } } }
+				yield { payload: { frameType: 'complete', final: null } }
+			},
+		} as any)
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(
+				new Request('http://localhost/api/v1/ai-chat', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: '{}',
+				}),
+			)
+			expect(response.status).toBe(StatusCode.OK)
+			expect(response.headers.get('x-vercel-ai-ui-message-stream')).toBe('v1')
+			const body = await response.text()
+			expect(body).toContain('data: {"type":"text-delta","id":"answer","delta":"hello"}\n\n')
+			expect(body).not.toContain('event: data')
+			expect(body).toContain('data: [DONE]\n\n')
+		} finally {
+			openStream.mockRestore()
+			await server.destroy()
+		}
+	})
+
 	it('exposes prepareDestroy helper', async () => {
 		const server = await createServer()
 		await server.start()
 
 		const prepare = server.prepareDestroy()
 		expect(prepare.name).toContain('prepare shutdown')
-		await prepare.destroy.call(server)
+		await prepare.destroy()
 		const response = await server.app.fetch(new Request('http://localhost/unknown'))
 		expect(response.status).toBe(503)
 		await server.destroy()

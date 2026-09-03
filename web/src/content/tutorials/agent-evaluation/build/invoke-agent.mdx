@@ -1,0 +1,68 @@
+---
+title: Invoke the agent from a command
+description: Declare an address-first dependency and call the classifier through a guarded PURISTA command.
+order: 295
+kind: lesson
+status: draft
+---
+
+Replace the generated command body. The command declares the agent address,
+reuses the Support business rule, and receives a typed client generated from
+the native Harness contract.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
+import {
+	classificationInputSchema,
+	classificationOutputSchema,
+} from '../../../../../harness/support/supportClassificationSchemas.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the evaluated agent')
+	.addPayloadSchema(classificationInputSchema)
+	.addOutputSchema(classificationOutputSchema)
+	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
+		})
+		if (outcome.status !== 'completed') {
+			throw new Error('Message classification was interrupted unexpectedly.')
+		}
+		return outcome.output
+	})
+```
+
+Register the command and mount the Harness once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+This production path and the offline evaluation path share the exact agent
+module. Evaluation can therefore detect changes to the behavior users actually
+receive, while command and service tests continue to verify Framework routing
+and authorization.
+
+```bash title="Type-check the complete service"
+npm run build
+```
+
+Continue with [Add deterministic scorers](../deterministic-checks/).

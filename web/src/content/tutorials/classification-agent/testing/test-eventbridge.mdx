@@ -1,0 +1,127 @@
+---
+title: Test classification through EventBridge
+description: Start the mounted Support service and prove normal command routing plus direct-target authorization before model work.
+order: 188
+kind: lesson
+status: draft
+---
+
+The unit tests replaced the agent call with a stub. This final test starts the
+real `DefaultEventBridge`, Support service, and mounted Harness runtime while
+keeping model behavior deterministic.
+
+Replace the generated service test with the complete file below.
+
+```ts title="src/service/support/v1/supportV1Service.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './supportV1Service.js'
+
+describe('supportV1Service', () => {
+	it('routes the command to the mounted agent through EventBridge', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The message asks about a replacement card without an immediate deadline.',
+			},
+			usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 },
+			finishReason: 'stop',
+		})
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const policy = { canClassify: vi.fn(async () => true) }
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: policy },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			const response = await eventBridge.invoke(
+				getCommandMessageMock({
+					tenantId: 'tenant-example',
+					principalId: 'principal-alex',
+					receiver: {
+						serviceName: 'Support',
+						serviceVersion: '1',
+						serviceTarget: 'classifySupportMessage',
+					},
+					payload: {
+						payload: { messageId: 'MSG-200', text: 'How do I replace an expiring card?' },
+						parameter: {},
+					},
+				}),
+			)
+
+			expect(response).toEqual({
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The message asks about a replacement card without an immediate deadline.',
+			})
+			expect(policy.canClassify).toHaveBeenCalledTimes(2)
+			expect(policy.canClassify).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'MSG-200',
+			})
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies the published agent before the model is called', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-other',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
+						payload: {
+							payload: { messageId: 'MSG-201', text: 'Please classify this message.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
+The first case calls the wrapper command. The policy runs once at that command
+and once at the mounted target, both with the same trusted identity and message
+id. The second case calls the published agent address directly. Its empty strict
+provider proves the mount guard denied access before any model request.
+
+Run the complete chapter verification and demo.
+
+```bash title="Verify the complete classification chapter" replay="project"
+npm run build
+npm test
+npm run lint
+npm run demo
+```
+
+You now have the smallest complete PURISTA AI path: portable structured agent,
+service-owned mount and guard, address-first command invocation, runtime model
+binding, deterministic demo, and integration proof.

@@ -1,0 +1,166 @@
+---
+title: Test Framework integration
+description: Mock the typed agent client in a command test, then verify the real mounted address through EventBridge.
+order: 303
+kind: lesson
+status: draft
+---
+
+Test the command with PURISTA's context mock. Replace the Support policy and
+generated agent client while preserving message identity and typed payloads.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('classifySupportMessageCommandBuilder', () => {
+	it('authorizes the message and invokes the evaluated agent address', async () => {
+		const payload = { messageId: 'message-1', text: 'My card is missing.' }
+		const policy = { canClassify: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = { category: 'card' as const, urgency: 'urgent' as const, reason: 'The card is missing.' }
+		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output,
+		})
+
+		await expect(
+			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			policy.canClassify.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'message-1',
+			}),
+		).toBe(true)
+		expect(
+			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
+			}),
+		).toBe(true)
+	})
+})
+```
+
+Test the mounted service through `DefaultEventBridge`. This catches address,
+mount, business-guard, identity-propagation, and composition errors that the
+offline evaluation intentionally does not cover.
+
+```ts title="src/service/support/v1/supportV1Service.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './supportV1Service.js'
+
+describe('evaluated support service', () => {
+	it('mounts the same portable agent evaluated by the release gate', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { category: 'card', urgency: 'normal', reason: 'The customer asks about a replacement card.' },
+			usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 },
+			finishReason: 'stop',
+		})
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const policy = { canClassify: vi.fn(async () => true) }
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: policy },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						payload: {
+							payload: { messageId: 'message-runtime', text: 'How do I replace my expiring card?' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The customer asks about a replacement card.',
+			})
+			expect(policy.canClassify).toHaveBeenCalledTimes(2)
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies the directly addressed agent before model work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-denied',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'classify_support_message',
+						},
+						payload: {
+							payload: { messageId: 'message-denied', text: 'Please classify this.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
+
+Run the complete chapter gate.
+
+```bash title="Verify the evaluation chapter" replay="project"
+npm run build
+npm test
+npm run lint
+npm run demo
+```
+
+Evaluation measures behavior. These Framework tests prove that authorized users
+can reach that behavior through the production route and unauthorized users
+cannot.

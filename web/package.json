@@ -9,7 +9,8 @@
 	"scripts": {
 		"prebuild": "cd .. && npm run build:api-docs",
 		"dev": "NODE_NO_WARNINGS=1 astro dev",
-		"build": "NODE_NO_WARNINGS=1 astro build",
+		"build": "NODE_NO_WARNINGS=1 astro build && node scripts/normalize-handbook-links.mjs",
+		"audit:internal-links": "node scripts/audit-internal-links.mjs",
 		"preview": "NODE_NO_WARNINGS=1 astro preview",
 		"astro": "astro"
 	},
@@ -17,6 +18,8 @@
 		"@astrojs/mdx": "^7.0.5",
 		"@astrojs/react": "^6.0.2",
 		"@fontsource/inter": "^5.3.0",
+		"@fontsource/inter-tight": "^5.3.0",
+		"@fontsource/jetbrains-mono": "^5.3.0",
 		"@sebastianwessel/isostate": "^0.5.0",
 		"@shikijs/transformers": "^4.4.3",
 		"@tailwindcss/vite": "^4.3.3",

@@ -4,6 +4,12 @@ This is an example of PURISTA using the MQTT event bridge.
 
 ## Setup
 
+Install the released PURISTA dependencies from this example directory:
+
+```bash
+npm install
+```
+
 ## Start a MQTT broker
 
 To start a local MQTT broker you can use the npm command.  
@@ -18,6 +24,10 @@ npm run mqtt:up
 
 As soon as the MQTT broker is running, you can start the example.  
 Navigate to [http://localhost:8080/api](http://localhost:8080/api) to open the OpenAPI UI
+
+```bash
+npm start
+```
 
 ## Stop the MQTT broker
 

@@ -1,0 +1,155 @@
+---
+title: Emit a distinct in-flight fact
+description: Use canEmit and context.emit only for a separate fact that becomes true during command execution.
+order: 113
+kind: lesson
+status: published
+---
+
+Sometimes another fact becomes true before a command finishes. Here the
+handler announces that recording has started immediately before it asks the
+repository to save. This fact is deliberately different from “recorded.”
+
+Give the custom event its own small schema.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordingStartedEvent.ts" write
+import { z } from 'zod'
+
+export const recordingStartedEventName = 'transaction.recording.started.v1'
+
+export const recordingStartedEventSchema = z.object({
+	accountId: z.string().trim().min(1),
+})
+```
+
+Declare the capability with `canEmit`, then emit it at the line where recording
+starts. The final transaction result still uses `setSuccessEventName`; it is
+never passed to `context.emit`.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordingStartedEventName, recordingStartedEventSchema } from './recordingStartedEvent.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record a synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.setSuccessEventName('transaction.recorded.v1')
+	.canEmit(recordingStartedEventName, recordingStartedEventSchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'accounts/:accountId/transactions')
+	.setBeforeGuardHooks({
+		accountMayRecord: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'record',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload, parameter) {
+		await context.emit(recordingStartedEventName, { accountId: parameter.accountId })
+
+		return context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId!,
+		})
+	})
+```
+
+`canEmit(name, schema)` adds one typed emitter to the command context.
+`context.emit(name, payload)` validates that payload, adds the command's trusted
+principal and tenant metadata, and asks the EventBridge to publish the custom
+message. It does not wait for subscribers to finish.
+
+Test the handler-level call with PURISTA's typed command context helper.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionManualEvent.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+	validate,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordingStartedEventName, recordingStartedEventSchema } from './recordingStartedEvent.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const input = { amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books' }
+const parameter = { accountId: 'account-operating' }
+
+describe('recordTransaction custom event', () => {
+	test('emits one distinct started fact before saving', async () => {
+		const save = sandbox.stub().resolves({
+			...input, ...parameter, tenantId: 'tenant-example',
+			transactionId: crypto.randomUUID(), recordedAt: new Date().toISOString(),
+		})
+		const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+		const resources = transactionTestResources(transactionRepository)
+		const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+			logger: getLoggerMock(sandbox).mock,
+			resources,
+		})
+		try {
+			const { context, stubs } = createCommandContextMock(recordTransactionCommandBuilder, {
+				payload: input, parameter, resources, sandbox,
+			})
+			context.message = getCommandMessageMock({
+				principalId: 'principal-alex', tenantId: 'tenant-example',
+				payload: { payload: input, parameter },
+			})
+			const handler = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+			await handler(context, input, parameter)
+
+			expect(stubs.emit[recordingStartedEventName].calledOnceWith(
+				recordingStartedEventName,
+				{ accountId: 'account-operating' },
+			)).toBe(true)
+			expect(save.calledOnce).toBe(true)
+		} finally {
+			await service.destroy()
+		}
+	})
+
+	test('keeps the declared custom-event schema on the builder', async () => {
+		const definition = await recordTransactionCommandBuilder.getDefinition()
+		expect((definition.emitList as Record<string, unknown>)[recordingStartedEventName])
+			.toBe(recordingStartedEventSchema)
+		const valid = await validate(recordingStartedEventSchema, {
+			accountId: 'account-operating',
+		})
+		const invalid = await validate(recordingStartedEventSchema, {
+			accountId: '',
+		})
+
+		expect(valid.success).toBe(true)
+		expect(invalid.success).toBe(false)
+	})
+})
+```
+
+```bash title="Test the declared custom event" replay="project"
+npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionManualEvent.test.ts
+```
+
+If saving later fails, the started fact may already have been published. That
+timing is intentional. Neither event form creates a transaction between the
+database and EventBridge.

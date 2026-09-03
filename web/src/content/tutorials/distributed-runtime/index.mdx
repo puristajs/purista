@@ -1,0 +1,59 @@
+---
+title: Run services across processes and adapters
+description: Split PURISTA services into processes, select adapters by capability, and verify the real broker boundaries.
+order: 17
+kind: chapter
+group: operate
+status: published
+---
+
+A PURISTA service does not need different business code when it moves to
+another process. The application composition changes instead. Each process
+creates its own EventBridge connection, starts only the services it owns, and
+closes only its own resources.
+
+This chapter starts from [Add metrics and tracing](/tutorials/observability/).
+The existing `Transaction` command publishes a named successful result, and
+`Monitoring` subscribes to it. We add a very small `Reporting` queue so the
+same topology also proves a durable QueueBridge. The banking data stays
+synthetic and small; the lesson is about PURISTA deployment boundaries.
+
+```text title="Local distributed topology"
+probe process
+  -> NATS EventBridge -> Transaction process
+  -> named command result -> Monitoring process
+  -> command -> Reporting process -> NATS QueueBridge -> Reporting worker
+
+NATS JetStream
+  -> event and command transport
+  -> queue delivery and strict enqueue idempotency
+  -> operational Monitoring and Reporting state
+
+SQLite
+  -> Transaction business records owned by the Transaction process
+```
+
+## What you will build
+
+You will:
+
+1. create separate composition roots for `Transaction`, `Monitoring`, and `Reporting`;
+2. generate the Reporting queue and producer with the PURISTA CLI;
+3. select NATS adapters by their advertised EventBridge and QueueBridge capabilities;
+4. keep incremental streams out of a transport that does not support them;
+5. run the three Node.js processes beside one pinned NATS container;
+6. test restart, broker unavailability, strict duplicate-key handling, and shutdown; and
+7. keep the normal in-memory service tests fast and independent from Docker.
+
+## Honest delivery boundaries
+
+The selected NATS EventBridge uses JetStream for the durable Monitoring
+subscription. The NATS QueueBridge enforces an idempotency key when it accepts
+a job, but a worker side effect can still run more than once around a crash.
+The NATS EventBridge does not support PURISTA incremental streams, so this
+profile rejects a topology that asks it to carry one.
+
+No Kubernetes platform, multi-region deployment, or exactly-once claim is part
+of this chapter.
+
+Start with [Split service processes](./build/split/).

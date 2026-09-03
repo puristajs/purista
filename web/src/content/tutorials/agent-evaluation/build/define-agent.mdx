@@ -1,0 +1,77 @@
+---
+title: Define the evaluated agent
+description: Implement one portable Harness classifier with strict input and output schemas.
+order: 293
+kind: lesson
+status: draft
+---
+
+Define the contracts shared by the native agent, PURISTA command, and
+evaluation cases.
+
+```ts title="src/harness/support/supportClassificationSchemas.ts" write
+import { z } from 'zod'
+
+export const classificationInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classificationOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+
+export type ClassificationInput = z.output<typeof classificationInputSchema>
+export type ClassificationOutput = z.output<typeof classificationOutputSchema>
+```
+
+Fill the CLI-generated agent module. The output schema makes category and
+urgency directly scorable, while the explanation remains available for users
+and later qualitative evaluation.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { classificationInputSchema, classificationOutputSchema } from '../../supportClassificationSchemas.js'
+
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.classify_support_message',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('classify_support_message', {
+				model: 'primary',
+				input: classificationInputSchema,
+				output: classificationOutputSchema,
+				instructions: [
+					'Classify one Example Bank support message.',
+					'Use urgent only for an immediate deadline, active loss, or blocked essential access.',
+					'Give one short reason grounded only in the supplied message.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+
+Compose the module and declare its required model capability. The portable
+definition does not select OpenAI or any other provider.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+export const supportHarness = defineHarness({ name: 'classification-evaluation' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.use(classifySupportMessageAgent)
+	.define()
+```
+
+```bash title="Type-check the native agent"
+npm run build
+```
+
+Continue with [Authorize the mounted agent](../authorize-agent/).

@@ -1,0 +1,23 @@
+{
+  "schedules": [
+    {
+      "concurrencyPolicy": "forbid",
+      "description": "Emit one daily statement occurrence",
+      "enabledByDefault": false,
+      "expression": {
+        "kind": "cron",
+        "value": "0 6 * * *"
+      },
+      "idempotencyKey": "event.id",
+      "missedRunPolicy": "skip",
+      "name": "dailyStatement",
+      "targetKind": "event",
+      "targetName": "reporting.daily-statement.due.v1",
+      "targetServiceName": "Reporting",
+      "targetServiceVersion": "1",
+      "timezone": "Europe/Berlin"
+    }
+  ],
+  "title": "Example Bank schedules",
+  "version": "1.0.0"
+}

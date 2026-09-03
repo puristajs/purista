@@ -2,20 +2,16 @@
 import { getCollection, render } from 'astro:content'
 import HandbookCard from '../../../components/handbook/HandbookCard.astro'
 import SocScrolly from '../../../components/scrolly/SocScrolly.astro'
-import { getCardBySlug, getSidebarItems, handbookSections } from '../../../data/handbook'
+import { getCardBySlug, getNextTopic, getPreviousTopic, getProductCardTopics, getSidebarItems } from '../../../data/handbook'
 import HandbookLayout from '../../../layouts/HandbookLayout.astro'
 
 export async function getStaticPaths() {
-	const paths: { params: { section: string; card: string }; props: { sectionId: string; cardId: string } }[] = []
-	for (const section of handbookSections) {
-		for (const card of section.cards) {
-			paths.push({
-				params: { section: section.id, card: card.id },
-				props: { sectionId: section.id, cardId: card.id },
-			})
-		}
-	}
-	return paths
+	return ['framework', 'harness'].flatMap(product =>
+		getProductCardTopics(product as 'framework' | 'harness').map(topic => ({
+			params: { section: topic.sectionId!, card: topic.cardId! },
+			props: { sectionId: topic.sectionId!, cardId: topic.cardId! },
+		})),
+	)
 }
 
 const { sectionId, cardId } = Astro.props
@@ -23,26 +19,24 @@ const result = getCardBySlug(sectionId, cardId)
 if (!result) {
 	throw new Error(`Card not found: ${sectionId}/${cardId}`)
 }
-const { section, card } = result
+const { section, card, product } = result
 const sidebar = getSidebarItems()
 
 // Try to load MDX content for this card
 const cardEntries = await getCollection('handbookCards', entry => entry.id === `${sectionId}/${cardId}`)
 const cardEntry = cardEntries[0]
-
-let CardContent = null
-let cardHeadings: { depth: number; slug: string; text: string }[] = []
-if (cardEntry) {
-	const rendered = await render(cardEntry)
-	CardContent = rendered.Content
-	cardHeadings = rendered.headings
+if (!cardEntry) {
+	throw new Error(`Missing canonical handbook content for ${sectionId}/${cardId}`)
 }
-
-const relatedCards = section.cards.filter(c => c.id !== card.id).slice(0, 3)
-
-const sectionIndex = handbookSections.findIndex(s => s.id === section.id)
-const nextSection = handbookSections[sectionIndex + 1] || handbookSections[0]
-const readNext = nextSection?.cards[0]
+const rendered = await render(cardEntry)
+const CardContent = rendered.Content
+const cardHeadings = rendered.headings
+const cardTopic = getProductCardTopics(product).find(topic => topic.topicId === `${sectionId}/${cardId}`)!
+const previousTopic = getPreviousTopic(cardTopic)
+const nextTopic = getNextTopic(cardTopic)
+const chapterCards = getProductCardTopics(product)
+	.filter(topic => topic.parentTopicId === cardTopic.parentTopicId && topic.topicId !== cardTopic.topicId)
+	.slice(0, 3)
 ---
 
 <HandbookLayout
@@ -50,7 +44,8 @@ const readNext = nextSection?.cards[0]
   description={card.description}
   sidebar={sidebar}
   currentId={`${sectionId}/${cardId}`}
-  headings={cardHeadings}
+  headings={card.id === 'separation-of-concerns' ? [] : cardHeadings}
+  product={product}
 >
   <nav class="flex items-center gap-2 text-sm text-[var(--color-fg-subtle)] mb-8">
     <a href="/handbook/" class="hover:text-[var(--color-fg)] transition-colors">Handbook</a>
@@ -62,7 +57,7 @@ const readNext = nextSection?.cards[0]
 
   {card.id === 'separation-of-concerns' ? (
     <SocScrolly />
-  ) : CardContent ? (
+  ) : (
     <>
       <div class="mb-10">
         <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
@@ -77,67 +72,18 @@ const readNext = nextSection?.cards[0]
       </div>
       <CardContent />
     </>
-  ) : (
-    <>
-      <div class="mb-12">
-        <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
-          {section.title}
-        </p>
-        <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
-          {card.title}
-        </h1>
-        <p class="lede max-w-[70ch]">
-          {card.description}
-        </p>
-      </div>
-
-      <div class="space-y-12">
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">Overview</h2>
-          <p class="text-[var(--color-fg-muted)] leading-relaxed">
-            This page covers <strong class="text-[var(--color-fg)]">{card.title}</strong> in depth.
-            Content will include conceptual explanations, code examples, and best practices.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">Key Concepts</h2>
-          <ul class="bullet-list space-y-2">
-            <li>Core principle and purpose</li>
-            <li>When and why to use this pattern</li>
-            <li>Integration with other PURISTA concepts</li>
-            <li>Common pitfalls and how to avoid them</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">How It Works</h2>
-          <div class="rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-10 flex items-center justify-center min-h-[180px]">
-            <p class="text-[var(--color-fg-subtle)] text-sm">Visual diagram coming soon</p>
-          </div>
-        </section>
-
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">Code Example</h2>
-          <div class="rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-5">
-            <pre class="text-[var(--color-fg-muted)] text-sm overflow-x-auto"><code>// Example code for {card.title}
-// Will be populated with real implementation examples</code></pre>
-          </div>
-        </section>
-      </div>
-    </>
   )}
 
-  {relatedCards.length > 0 && (
+  {chapterCards.length > 0 && (
     <section class="pt-8 border-t border-[var(--color-line)]">
-      <h2 class="font-display font-semibold text-base text-[var(--color-fg)] mb-5">Related</h2>
+      <h2 class="font-display font-semibold text-base text-[var(--color-fg)] mb-5">In this chapter</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {relatedCards.map((related) => (
+        {chapterCards.map((related) => (
           <HandbookCard
             title={related.title}
             description={related.description}
-            icon={related.icon}
-            href={`/handbook/${section.id}/${related.id}/`}
+            icon={related.icon ?? 'help'}
+            href={related.canonicalRoute}
             color={section.color}
           />
         ))}
@@ -145,17 +91,21 @@ const readNext = nextSection?.cards[0]
     </section>
   )}
 
-  {readNext && (
+  {(previousTopic || nextTopic) && (
     <section class="pt-8 border-t border-[var(--color-line)]">
-      <div class="flex items-start justify-between gap-6">
-        <div>
-          <div class="font-mono text-[0.7rem] tracking-[0.12em] uppercase text-[var(--color-fg-subtle)] font-semibold mb-2">Read Next</div>
-          <a href={`/handbook/${nextSection.id}/${readNext.id}/`} class="group inline-flex items-center gap-2">
-            <span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{readNext.title}</span>
-            <span class="text-[var(--color-fg-subtle)] group-hover:text-[var(--color-found)] transition-colors">→</span>
+      <div class="flex items-start justify-between gap-6 flex-wrap">
+        {previousTopic && (
+          <a href={previousTopic.canonicalRoute} class="group inline-flex items-center gap-2 text-sm">
+            <span class="text-[var(--color-fg-subtle)]">←</span>
+            <span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{previousTopic.title}</span>
           </a>
-          <p class="text-[0.82rem] text-[var(--color-fg-muted)] mt-1">from {nextSection.title}</p>
-        </div>
+        )}
+        {nextTopic && (
+          <a href={nextTopic.canonicalRoute} class="group inline-flex items-center gap-2 text-sm ml-auto">
+            <span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{nextTopic.title}</span>
+            <span class="text-[var(--color-fg-subtle)]">→</span>
+          </a>
+        )}
       </div>
     </section>
   )}

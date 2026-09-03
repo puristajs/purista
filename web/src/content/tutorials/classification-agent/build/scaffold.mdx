@@ -1,0 +1,102 @@
+---
+title: Create the project and generate the agent
+description: Install the published packages and let the PURISTA CLI create the Support service, native Harness module, mount, and test.
+order: 181
+kind: lesson
+status: draft
+---
+
+Start in an empty parent directory. This chapter creates a complete application
+named `support-classification`; it has no hidden dependency on another example.
+
+```bash title="Create and enter the classification project" replay="parent"
+npm create purista@2.2.0 support-classification -- --runtime node --event-bridge default --non-interactive --defaults
+cd support-classification
+```
+
+All remaining commands run inside `support-classification`.
+
+Install the versions used by this lesson. The OpenAI adapter is needed only for
+the optional live entry point; tests and the first demo use a fake model.
+
+```bash title="Install Framework, Harness, and test dependencies" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @biomejs/biome@2.5.8 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
+```
+
+Replace `package.json` with the complete file below. The `add:*` scripts use the
+project-local CLI. `demo` will run the credential-free composition created
+later.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-classification-agent",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+Generate the narrow capability owner, then attach its first agent.
+
+```bash title="Generate Support and its classification agent" replay="project"
+npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with a structured result" --non-interactive
+```
+
+`add:agent` creates and connects four parts:
+
+```text title="Generated agent structure"
+src/
+├── harness/support/
+│   ├── agent/classifySupportMessage/
+│   │   ├── classifySupportMessageAgent.ts
+│   │   └── classifySupportMessageAgent.test.ts
+│   └── supportHarness.ts
+└── service/support/v1/
+    ├── harness/supportHarnessMount.ts
+    └── supportV1Service.ts
+```
+
+The agent file contains portable AI behavior. `supportHarness.ts` composes all
+Harness modules owned by Support. The mount file publishes selected targets
+through PURISTA. The service file contains the single `.mountHarness(...)`
+registration. There is no PURISTA `AgentBuilder` because native Harness owns
+agent definitions.
+
+Run the generated checkpoint before replacing the placeholders.
+
+```bash title="Verify the generated agent checkpoint" replay="project"
+npm run build
+npm test
+```
+
+Continue with [Define the structured classifier](../define/).

@@ -12,7 +12,8 @@ You can setup your local environment quickly by following the official Dapr docu
 
 ## Start the example
 
-You can simply run `npm start` which uses the Dapr "Multi-App Run" developing feature to start multiple services at once.  
+Install the released dependencies with `npm install`, then run `npm start`.
+The start command uses the Dapr "Multi-App Run" developing feature to start multiple services at once.
 This will also output logs in the subfolder `.dapr/logs` within each `deployment/[service-name]` directory.
 
 As soon as you have started the services, you should be able to send a simple request:

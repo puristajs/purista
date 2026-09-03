@@ -18,7 +18,9 @@ PURISTA ships three distinct store abstractions. Use this table to pick the righ
 | **Set at startup** | No | No | No (fetched on demand) |
 | **Persistent** | Yes (with Redis/NATS) | Yes (external store) | Yes (managed by provider) |
 
-If the data is a credential → use a [secret store](/handbook/stores/secret-store/).  
+If the data is a sensitive credential managed while the service runs → use a [secret store](/handbook/stores/secret-store/).
+
+If it is a fixed technical credential required at startup → use approved deployment secret delivery or workload identity.
 If the data is configuration that operators tune → use a [config store](/handbook/stores/config-store/).  
 If the data is business state your handlers read and write → use a state store.
 

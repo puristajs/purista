@@ -23,6 +23,28 @@ class TestClass extends ConfigStoreBaseClass {
 	}
 }
 
+class CacheTestClass extends ConfigStoreBaseClass {
+	public readonly values = new Map<string, unknown>()
+	public readonly reads: string[][] = []
+
+	protected async getConfigImpl<ConfigNames extends string[]>(
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+		this.reads.push(configNames)
+		return Object.fromEntries(
+			configNames.map(name => [name, this.values.get(name)]),
+		) as ObjectWithKeysFromStringArray<ConfigNames>
+	}
+
+	protected async setConfigImpl(configName: string, configValue: unknown): Promise<void> {
+		this.values.set(configName, configValue)
+	}
+
+	protected async removeConfigImpl(configName: string): Promise<void> {
+		this.values.delete(configName)
+	}
+}
+
 describe('ConfigStoreBaseClass', () => {
 	let sandbox: SinonSandbox
 	let configStore: ConfigStoreBaseClass
@@ -54,6 +76,21 @@ describe('ConfigStoreBaseClass', () => {
 
 			await expect(configStore.getConfig('test')).rejects.toEqual(new Error('Not implemented'))
 		})
+
+		it('reuses enabled cache entries and refreshes them after the TTL', async () => {
+			const clock = sandbox.useFakeTimers({ now: 1_000 })
+			const cached = new CacheTestClass('cached', { logger: logger.mock, enableCache: true, cacheTtl: 100 })
+			cached.values.set('theme', 'dark')
+
+			await expect(cached.getConfig('theme')).resolves.toEqual({ theme: 'dark' })
+			cached.values.set('theme', 'light')
+			await expect(cached.getConfig('theme')).resolves.toEqual({ theme: 'dark' })
+			expect(cached.reads).toHaveLength(1)
+
+			await clock.tickAsync(101)
+			await expect(cached.getConfig('theme')).resolves.toEqual({ theme: 'light' })
+			expect(cached.reads).toHaveLength(2)
+		})
 	})
 
 	describe('setConfig', () => {
@@ -73,6 +110,14 @@ describe('ConfigStoreBaseClass', () => {
 
 			await expect(configStore.setConfig('test', {})).rejects.toEqual(new Error('Not implemented'))
 		})
+
+		it('updates the enabled cache after a successful write', async () => {
+			const cached = new CacheTestClass('cached', { logger: logger.mock, enableCache: true, enableSet: true })
+
+			await cached.setConfig('theme', 'dark')
+			await expect(cached.getConfig('theme')).resolves.toEqual({ theme: 'dark' })
+			expect(cached.reads).toHaveLength(0)
+		})
 	})
 
 	describe('removeConfig', () => {
@@ -90,6 +135,16 @@ describe('ConfigStoreBaseClass', () => {
 			sandbox.stub(configStore.config, 'enableRemove').value(true)
 
 			await expect(configStore.removeConfig('test')).rejects.toMatchObject(new Error('Not implemented'))
+		})
+
+		it('invalidates the enabled cache after a successful removal', async () => {
+			const cached = new CacheTestClass('cached', { logger: logger.mock, enableCache: true, enableRemove: true })
+			cached.values.set('theme', 'dark')
+			await cached.getConfig('theme')
+
+			await cached.removeConfig('theme')
+			await expect(cached.getConfig('theme')).resolves.toEqual({ theme: undefined })
+			expect(cached.reads).toHaveLength(2)
 		})
 	})
 })

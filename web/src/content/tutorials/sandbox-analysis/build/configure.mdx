@@ -1,0 +1,41 @@
+---
+title: Configure the Docker boundary
+description: Build a small non-root image while keeping the sandbox adapter and immutable image selection in trusted composition.
+order: 282
+kind: lesson
+status: draft
+---
+
+Create a small non-root image for live isolated execution. The model never
+chooses an image tag, user, or runtime socket. The trusted application
+composition selects those values.
+
+```dockerfile title="sandbox.Dockerfile" write
+FROM python:3.13-slim
+RUN useradd --create-home --uid 10001 sandbox
+WORKDIR /workspace
+USER sandbox
+```
+
+Use Compose only to build and inspect the local image. The PURISTA application
+will create individual sandbox containers through the Harness adapter.
+
+```yaml title="compose.yaml" write
+services:
+  sandbox-image:
+    image: purista-tutorial-sandbox:local
+    build:
+      context: .
+      dockerfile: sandbox.Dockerfile
+    command: ["python3", "--version"]
+```
+
+```bash title="Build the local sandbox image" replay="project"
+docker compose build sandbox-image
+```
+
+The later default demo uses a local-directory adapter so readers can run and
+test the agent without Docker. That adapter exercises the same tool interface
+but does not claim process isolation.
+
+Continue with [Define the sandboxed agent](../define-agent/).

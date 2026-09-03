@@ -1,0 +1,74 @@
+---
+title: Define an external wait
+description: Define a native Harness workflow that pauses durably and returns one typed review outcome.
+order: 252
+kind: lesson
+status: draft
+---
+
+Replace the generated workflow body with one versioned external wait. Its input
+contains only opaque identity, integrity data, and a deadline. Mutable review
+comments and user profiles belong in the Support database, not in a workflow
+checkpoint.
+
+```ts title="src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.ts" write
+import { defineHarnessModule } from '@purista/harness'
+import { z } from 'zod'
+
+export const reviewOutcomeSchema = z.enum(['approved', 'rejected', 'expired', 'cancelled'])
+
+export const reviewSupportActionInputSchema = z.strictObject({
+	waitId: z.string().min(1).max(200),
+	deadline: z.iso.datetime({ offset: false, precision: 3 }),
+	actionDigest: z.string().regex(/^[a-f0-9]{64}$/),
+	definitionVersion: z.literal('support-card-freeze-v1'),
+})
+
+export const reviewSupportActionOutputSchema = z.strictObject({
+	status: reviewOutcomeSchema,
+})
+
+export const reviewSupportActionWorkflow = defineHarnessModule()('support.workflow.review-support-action', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.workflow('review_support_action', {
+			input: reviewSupportActionInputSchema,
+			output: reviewSupportActionOutputSchema,
+			handler: async (context) => {
+				const outcome = await context.externalWait.wait({
+					waitId: context.input.waitId,
+					kind: 'human_review',
+					schemaVersion: 'support-review-signal-v1',
+					definitionVersion: context.input.definitionVersion,
+					deadline: context.input.deadline,
+				})
+				return { status: outcome.status }
+			},
+		})
+	},
+})
+```
+
+`context.externalWait.wait(...)` is a normal Harness workflow operation. On the
+first run it creates a durable wait and interrupts the run. After an external
+caller signals that wait, rerunning the same durable run returns the recorded
+outcome.
+
+Compose the workflow module once in the Support harness.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { reviewSupportActionWorkflow } from './workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
+
+export const supportHarness = defineHarness({ name: 'support-human-review' }).use(reviewSupportActionWorkflow).define()
+```
+
+At this point the workflow is defined, but it is not yet safely published as a
+PURISTA address. The mount policy comes after the review resource and business
+policy contracts exist.
+
+```bash title="Type-check the workflow"
+npm run build
+```
+
+Continue with [Model the review state](../model-review/).

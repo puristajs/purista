@@ -1,0 +1,41 @@
+---
+title: Build a durable multi-step agent workflow
+description: Sequence typed agents, checkpoint completed stages, retry transient work, and invoke the workflow through PURISTA.
+order: 270
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches how to build recoverable multi-step AI work. You create a
+fresh PURISTA project, generate the service, agents, workflow, and command with
+the CLI, then fill in each generated boundary. A classification stage runs
+first. A planning stage consumes the validated classification. Each stage has
+a named durable checkpoint, so a later invocation can resume without repeating
+completed model work.
+
+The Example Bank workflow resolves one support case, but the focus is the
+Harness and PURISTA execution model:
+
+- schema-validated output becomes the next stage input;
+- `context.step` creates explicit durable checkpoint boundaries;
+- step retry is bounded and counts against the child-agent call budget;
+- stable tenant, principal, and case identity makes a repeated command resume
+  the same work;
+- SQLite persists live checkpoints across process restarts;
+- both the command and directly addressable workflow enforce business access;
+- the workflow remains addressable through EventBridge.
+
+1. [Create the project and generate the modules](./build/define-workflow/)
+2. [Define the two typed workflow stages](./build/define-agents/)
+3. [Add bounded retry and named checkpoints](./build/retry-checkpoint/)
+4. [Protect and publish only the workflow](./build/publish-workflow/)
+5. [Invoke a durable run through PURISTA](./build/invoke/)
+6. [Compose the durable runtime](./build/compose-runtime/)
+7. [Run the deterministic and optional live application](./build/run-application/)
+8. [Test the generated stage agents](./testing/test-agents/)
+9. [Test restart and checkpoint recovery](./testing/test-workflow/)
+10. [Test durable command and EventBridge routing](./testing/test-routing/)
+
+The retained project is in
+`examples/banking/chapters/multi-step-workflow`.

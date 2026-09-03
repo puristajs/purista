@@ -1,0 +1,57 @@
+---
+title: Use PURISTA commands as agent tools
+description: Let a native Harness agent call a guarded PURISTA command through a typed, address-first host-tool binding.
+order: 230
+kind: chapter
+group: ai
+status: draft
+---
+
+An agent often needs information owned by another service. For example, a
+support agent may need one transaction summary before it can answer a question.
+The agent should not import the Transaction service or open its database. Its
+tool calls the owning command through PURISTA EventBridge instead.
+
+This chapter adds one read-only tool to the Example Bank support agent. The
+banking story stays small so the framework boundary is easy to see:
+
+```text title="Execution path"
+Support command
+  -> Support / 1 / answer_transaction_question agent (EventBridge)
+  -> model chooses lookup_transaction
+  -> typed PURISTA host-tool binding
+  -> Transaction / 1 / getTransactionSummary command (EventBridge)
+  -> account business guard
+  -> injected transaction reader
+```
+
+The model supplies `accountId` and `transactionId` as untrusted tool input.
+PURISTA carries `tenantId` and `principalId` from the original request across
+both EventBridge calls. The Support and Transaction guards make separate
+business authorization decisions before model or database work begins.
+
+You only need Node.js 24 or newer and basic TypeScript knowledge. The required
+path uses a fake model and an in-memory transaction reader, so it needs no API
+key, database, HTTP server, or earlier tutorial. An optional final step swaps in
+OpenAI without changing the Harness definition.
+
+## What you will build
+
+You will:
+
+1. [create the project and generate every Framework artifact](./setup/scaffold/);
+2. [declare the portable model-facing tool and agent](./build/declare-host-tool/);
+3. [define the Transaction service boundary](./build/transaction-resource/);
+4. [implement the guarded Transaction command](./build/bind-command/);
+5. [bind the tool to the command at the Support mount](./build/mount-tool/);
+6. [invoke the mounted agent from a Support command](./build/invoke-agent/);
+7. [compose the PURISTA runtime](./build/compose-runtime/);
+8. [run the complete path](./build/run-application/);
+9. [test each small boundary](./testing/test-tools/); and
+10. [prove both EventBridge hops together](./testing/test-eventbridge/).
+
+Every code block that creates or replaces a file contains the complete file.
+The retained source is in `examples/banking/chapters/agent-tools` and follows
+the same paths used below.
+
+Start with [Generate the capability owners](./setup/scaffold/).

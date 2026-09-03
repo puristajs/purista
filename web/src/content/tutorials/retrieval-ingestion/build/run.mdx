@@ -1,0 +1,72 @@
+---
+title: Run the live RAG application
+description: Start the composed services, HTTP listener, static UI, PostgreSQL repository, and live model adapters with ordered shutdown.
+order: 220
+kind: lesson
+status: draft
+---
+
+Create the live entry point. The shutdown list first prepares Hono, closes the
+Node listener, then destroys services and their owned resources in dependency
+order.
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function main() {
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const application = await createKnowledgeApplication(logger)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank knowledge application started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Knowledge application could not start.'}\n`)
+	process.exit(1)
+})
+```
+
+Document runtime settings without committing a credential.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+DATABASE_URL=postgres://example_bank:local-example-password@127.0.0.1:55432/example_bank
+PORT=3000
+```
+
+Start PostgreSQL, build the UI, copy `.env.example` to `.env`, provide the API
+key, and start the application.
+
+```bash title="Start the live RAG application"
+docker compose up -d --wait
+npm run build:ui
+npm start
+```
+
+Open `http://127.0.0.1:3000`, sign in with the visible tutorial credential,
+ingest the sample source, and ask how long an international transfer can remain
+pending.
+
+Continue with [Run the deterministic application](../deterministic-demo/).

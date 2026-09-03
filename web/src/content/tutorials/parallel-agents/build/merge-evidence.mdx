@@ -1,0 +1,111 @@
+---
+title: Protect and publish the workflow
+description: Add case-level business authorization and expose only the composed workflow through PURISTA.
+order: 264
+kind: lesson
+status: draft
+---
+
+The native workflow can run both specialists and merge their evidence. Before
+publishing it through EventBridge, add a business policy for the support case.
+The specialist agents remain private implementation details.
+
+## Declare the case policy
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportCasePolicy {
+	canAnalyze(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
+}
+```
+
+Declare it on the Support service builder so mount guards and commands receive
+the policy as a typed resource.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support cases and support automation',
+}).defineResource<'supportCasePolicy', SupportCasePolicy>()
+```
+
+Keep the fail-closed decision in one helper. The session helper derives a
+caller-scoped id for workflow history; the id itself does not authorize access.
+
+```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export async function requireSupportCaseAnalysis(
+	policy: SupportCasePolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAnalyze({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			caseId: input.caseId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case analysis is not allowed')
+	}
+}
+
+export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; principalId?: string }>, caseId: string) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	return `support-case:${identity.tenantId}:${identity.principalId}:${caseId}`
+}
+```
+
+## Publish only the workflow
+
+Replace the generated mount policy. The directly addressable workflow owns its
+guard because a wrapper command cannot protect callers that skip it.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
+
+export { supportHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['analyze_support_case'] },
+	targets: {
+		agents: {},
+		workflows: {
+			analyze_support_case: {
+				beforeGuards: {
+					caseAccess: async (
+						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+						input: { caseId: string },
+					) => {
+						await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+`publish.agents` is empty, so neither specialist gets its own EventBridge
+address. Callers receive only the workflow's merged contract.
+
+```bash title="Verify the protected parallel workflow mount" replay="project"
+npm run build
+```
+
+Continue with [Invoke the workflow from a command](../invoke-workflow/).

@@ -1,0 +1,108 @@
+---
+title: Invoke the agent from a command
+description: Add an application command that calls the mounted agent through its declared PURISTA address.
+order: 236
+kind: lesson
+status: draft
+---
+
+The mounted agent is now a versioned PURISTA target named
+`Support / 1 / answer_transaction_question`. Other application capabilities
+should call that address through EventBridge instead of importing the Harness
+runtime.
+
+This chapter uses a Support command as the application-facing entry point. It
+returns one complete structured answer. A later streaming chapter exposes
+portable agent events through a PURISTA stream for chat UIs.
+
+## Reuse the agent contract
+
+The command and agent accept the same payload and return the same result. The
+command builder can therefore use the native Harness schemas directly. Remove
+the unused placeholder schema and type files generated for this command.
+
+```bash title="Remove unused Support command placeholders" replay="project"
+rm src/service/support/v1/command/answerTransactionQuestion/schema.ts
+rm src/service/support/v1/command/answerTransactionQuestion/types.ts
+```
+
+Replace the generated command builder with the complete file below.
+
+```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.ts" write
+import {
+	answerTransactionQuestionInputSchema,
+	answerTransactionQuestionOutputSchema,
+} from '../../../../../harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportQuestion, supportQuestionSessionId } from '../../requireSupportQuestion.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const answerTransactionQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('answerTransactionQuestion', 'Answer a support question with authorized PURISTA tools')
+	.addPayloadSchema(answerTransactionQuestionInputSchema)
+	.addOutputSchema(answerTransactionQuestionOutputSchema)
+	.canInvokeAgent(
+		'Support',
+		'1',
+		'answer_transaction_question',
+		supportHarness.contracts.agents.answer_transaction_question,
+	)
+	.setBeforeGuardHooks({
+		questionAccess: async function (context, payload) {
+			await requireSupportQuestion(context.resources.supportQuestionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				accountId: payload.accountId,
+				transactionId: payload.transactionId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].answer_transaction_question.run(payload, {
+			sessionId: supportQuestionSessionId(context.message, payload.questionId),
+		})
+		if (outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
+		return outcome.output
+	})
+```
+There are three important calls in this builder:
+
+1. `canInvokeAgent(...)` declares the only agent address this command may use.
+   It adds a typed function at
+   `context.agent.Support['1'].answer_transaction_question`.
+2. `setBeforeGuardHooks(...)` authorizes the support request before the model
+   starts. A caller can also invoke the published agent target directly, so the
+   mount policy repeats this guard at that boundary.
+3. `.run(...)` asks for one aggregate result. The call crosses EventBridge even
+   though the command and agent currently run in the same process.
+
+`sessionId` is a correlation and history key, not proof of authority. The
+helper derives it from the trusted tenant and principal together with
+`questionId`, which prevents two callers who choose the same question id from
+sharing a session.
+
+## Register the command and keep one Harness mount
+
+Replace the generated Support service file. The service registers the command
+and mounts the composed Harness definition once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { answerTransactionQuestionCommandBuilder } from './command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(answerTransactionQuestionCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+Run a typecheck. It verifies that the command's declared target address and the
+mounted Harness contract agree.
+
+```bash title="Verify the command-to-agent declaration" replay="project"
+npm run build
+```
+
+The definitions are complete, but no service instance is running yet. The next
+page supplies the model, resource implementations, EventBridge, and caller.
+
+Continue with [Compose the PURISTA runtime](../compose-runtime/).

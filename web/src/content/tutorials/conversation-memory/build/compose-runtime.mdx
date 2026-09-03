@@ -1,0 +1,67 @@
+---
+title: Compose the conversation runtime
+description: Bind one Harness storage instance to the mounted runtime and the authorized history resource.
+order: 225
+kind: lesson
+status: draft
+---
+
+The commands and mounted agent are complete. The composition root must now bind
+one storage instance to two typed ports:
+
+- Harness uses it for sessions, messages, run receipts, and checkpoints.
+- The `supportConversationHistory` resource uses it for authorized export and
+  clear commands.
+
+Using one instance prevents the application commands from reading a different
+transcript store than the agent writes.
+
+## Create the provider-neutral service factory
+
+Create the complete factory below.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
+import { HarnessConversationHistory } from './resources/HarnessConversationHistory.js'
+import type { SupportConversationPolicy } from './service/support/v1/SupportConversationPolicy.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportConversationPolicy
+		model: { provider: ModelProvider; model: string }
+		storage: HarnessStorage
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			supportConversationHistory: new HarnessConversationHistory(options.storage),
+			supportConversationPolicy: options.policy,
+		},
+		ai: {
+			models: { primary: options.model },
+			storage: options.storage,
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+The factory does not select SQLite, PostgreSQL, or in-memory storage. The
+process entry point chooses the adapter. The same rule applies to the model and
+authorization policy.
+
+`contentCaptureMode: 'NO_CONTENT'` keeps prompts and model output out of
+telemetry by default. It does not disable storage; the configured Harness
+storage still retains the bounded conversation history requested by this
+chapter.
+
+```bash title="Verify the shared storage composition" replay="project"
+npm run build
+```
+
+Continue with [Run the conversation service](../run-application/).

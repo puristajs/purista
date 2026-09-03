@@ -1,0 +1,121 @@
+---
+title: Create the project and generate the artifacts
+description: Start from an empty directory and let the PURISTA CLI create both services, both commands, and the native Harness agent.
+order: 231
+kind: lesson
+status: draft
+---
+
+Start in an empty parent directory. This chapter creates a complete application
+named `support-agent-tools`; it does not depend on another tutorial project.
+
+```bash title="Create and enter the project" replay="parent"
+npm create purista@2.2.0 support-agent-tools -- --runtime node --event-bridge default --non-interactive --defaults
+cd support-agent-tools
+```
+
+All commands on the remaining pages run inside `support-agent-tools`.
+
+Install the published Framework, Harness, provider adapter, and test packages.
+`--save-exact` keeps the lesson on the versions it was tested with.
+
+```bash title="Install the tutorial dependencies" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @biomejs/biome@2.5.8 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.0.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
+```
+
+Replace `package.json` with the complete file below. The `add:*` scripts call
+the project-local CLI. `demo` will run the credential-free application that we
+build later.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-agent-tools",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.0.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+Create two narrow capability owners. `Support` owns the agent and support
+request. `Transaction` owns transaction data and the authorization rule for
+reading it.
+
+```bash title="Generate the Support and Transaction services" replay="project"
+npm run add:service -- support --description "Own support conversations and support automation" --non-interactive
+npm run add:service -- transaction --description "Own transaction records and transaction business rules" --non-interactive
+```
+
+Now generate the agent and commands. The CLI needs the service name and version
+because it registers every artifact with its owner.
+
+```bash title="Generate the agent and commands" replay="project"
+npm run add:agent -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized transaction data" --non-interactive
+npm run add:command -- get-transaction-summary --service transaction --service-version 1 --description "Read an authorized transaction summary" --non-interactive
+npm run add:command -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized PURISTA tools" --non-interactive
+```
+
+The agent command creates more than one file. Before editing, find these paths:
+
+```text title="Files created by the PURISTA CLI"
+src/
+├── harness/support/
+│   ├── agent/answerTransactionQuestion/
+│   │   ├── answerTransactionQuestionAgent.ts
+│   │   └── answerTransactionQuestionAgent.test.ts
+│   └── supportHarness.ts
+└── service/
+    ├── support/v1/
+    │   ├── command/answerTransactionQuestion/
+    │   ├── harness/supportHarnessMount.ts
+    │   └── supportV1Service.ts
+    └── transaction/v1/
+        ├── command/getTransactionSummary/
+        └── transactionV1Service.ts
+```
+
+The native agent module describes AI behavior. `supportHarness.ts` composes all
+Harness modules owned by Support. `supportHarnessMount.ts` connects that
+portable definition to PURISTA and publishes selected targets. The service file
+contains the single `.mountHarness(...)` call.
+
+Run the generated tests before changing anything. This checkpoint proves the
+CLI produced a valid project and gives you a known starting point.
+
+```bash title="Verify the generated checkpoint" replay="project"
+npm run build
+npm test
+```
+
+Next, replace the generated agent placeholder with the real tool contract and
+agent behavior.
+
+Continue with [Declare the model-facing tool and agent](../../build/declare-host-tool/).

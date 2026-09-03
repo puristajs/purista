@@ -1,0 +1,18 @@
+{
+	"name": "@purista/banking-tutorials",
+	"version": "3.2.4",
+	"private": true,
+	"type": "module",
+	"description": "PURISTA examples built by replaying the website tutorial instructions",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"test": "node tutorial/verify.mjs",
+		"test:drafts": "node tutorial/verify-drafts.mjs",
+		"check:drafts": "node tutorial/verify-drafts.mjs --structure-only",
+		"check:source": "node tutorial/replay.mjs --check",
+		"build": "node tutorial/replay.mjs --check",
+		"replay": "node tutorial/replay.mjs"
+	}
+}

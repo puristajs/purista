@@ -1,0 +1,57 @@
+---
+title: Create a versioned dataset
+description: Store stable inputs, expected structured behavior, and semantic segments as ordinary application data.
+order: 292
+kind: lesson
+status: draft
+---
+
+Create a small, reviewable evaluation dataset. Each case has a stable ID, the
+real agent input, the expected structured fields, and segments used to inspect
+important slices independently.
+
+```ts title="src/dataset.ts" write
+import type { EvaluationDataset } from '@purista/harness'
+import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+
+export type ClassificationAssessment = Pick<ClassificationOutput, 'category' | 'urgency'>
+
+export const supportClassificationDataset = {
+	id: 'support-classification-cases',
+	version: '1.0.0',
+	cases: [
+		{
+			id: 'missing-card',
+			input: { messageId: 'message-1', text: 'My card was stolen and someone is using it now.' },
+			assessment: { category: 'card', urgency: 'urgent' },
+			segments: { category: 'card', urgency: 'urgent' },
+		},
+		{
+			id: 'transfer-date',
+			input: { messageId: 'message-2', text: 'When will my scheduled transfer arrive?' },
+			assessment: { category: 'transfer', urgency: 'normal' },
+			segments: { category: 'transfer', urgency: 'normal' },
+		},
+		{
+			id: 'locked-out',
+			input: { messageId: 'message-3', text: 'I am locked out and must pay rent today.' },
+			assessment: { category: 'account_access', urgency: 'urgent' },
+			segments: { category: 'account_access', urgency: 'urgent' },
+		},
+	],
+} as const satisfies EvaluationDataset<ClassificationInput, ClassificationAssessment>
+```
+
+Version the dataset independently from prompts, models, and scorers. A dataset
+change means the measurement target changed; a candidate change means the
+system under test changed. Keeping those identities separate makes evaluation
+results comparable.
+
+The banking messages are deliberately short fixtures. The capability being
+taught is dataset structure and traceability, not banking-domain coverage.
+
+```bash title="Type-check the dataset"
+npm run build
+```
+
+Continue with [Define the evaluated agent](../define-agent/).

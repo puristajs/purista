@@ -1,0 +1,78 @@
+---
+title: Define the structured classifier
+description: Add strict input and output schemas, a model requirement, and concise instructions.
+order: 182
+kind: lesson
+status: draft
+---
+
+Replace the generated prompt example with the real classification boundary.
+The input contains only the message identifier and text. Trusted tenant and
+principal identity travel in PURISTA message headers when the agent is invoked;
+the model must not be allowed to supply them.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { z } from 'zod'
+
+export const classifySupportMessageInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classifySupportMessageOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.classify-support-message',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('classify_support_message', {
+				model: 'primary',
+				input: classifySupportMessageInputSchema,
+				output: classifySupportMessageOutputSchema,
+				updates: 'object-snapshot',
+				instructions: [
+					'Classify one Example Bank support message.',
+					'Use urgent only when the text describes an immediate deadline, active loss, or blocked essential access.',
+					'Give one short reason grounded only in the supplied text.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+`model: 'primary'` is a portable alias. The definition does not choose a
+provider credential or deployment model. `updates: 'object-snapshot'` also
+declares the only incremental update shape this agent may produce. A caller can
+still choose aggregate `.run(...) ` or streaming `.stream(...)`.
+
+Compose the module into one service-level Harness definition.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+export const supportHarness = defineHarness({ name: 'support' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.use(classifySupportMessageAgent)
+	.define()
+```
+The required `object` capability makes startup fail early if the bound
+provider cannot create structured output. Later Support agents and workflows
+will be added with more `.use(...)` calls to this same definition. The service
+still mounts the composed definition only once.
+
+Run the compiler before adding the consumer command.
+
+```bash title="Check the native Harness definition" replay="project"
+npm run build
+```
+
+Continue with [Invoke the agent from a command](../invoke/).

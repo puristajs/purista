@@ -1,0 +1,114 @@
+---
+title: Run the parallel workflow
+description: Invoke both specialists through EventBridge with deterministic providers, then optionally bind OpenAI.
+order: 267
+kind: lesson
+status: draft
+---
+
+Start with one strict fake provider per alias. Separate providers avoid a
+timing-dependent shared response queue while the workflow runs both branches
+concurrently.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+async function main() {
+	const riskProvider = new FakeModelProvider({ strict: true })
+	const responseProvider = new FakeModelProvider({ strict: true })
+	riskProvider.enqueueObject({
+		object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+		usage,
+		finishReason: 'stop',
+	})
+	responseProvider.enqueueObject({
+		object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+		usage,
+		finishReason: 'stop',
+	})
+	const logger = initLogger('fatal')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		supportCasePolicy: { canAnalyze: async () => true },
+		riskModel: { provider: riskProvider, model: 'risk-fake' },
+		responseModel: { provider: responseProvider, model: 'response-fake' },
+	})
+	await support.start()
+
+	try {
+		const result = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyzeSupportCase' },
+				payload: {
+					payload: { caseId: 'case-1', message: 'My card is missing.' },
+					parameter: {},
+				},
+			}),
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		riskProvider.assertExhausted()
+		responseProvider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The parallel-agent demo failed.'}\n`)
+	process.exit(1)
+})
+```
+Document optional live-provider settings and create the live entry point.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the live example.')
+	const provider = openai({ apiKey })
+	const model = process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini'
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		supportCasePolicy: {
+			canAnalyze: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		riskModel: { provider, model },
+		responseModel: { provider, model },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Parallel support analysis service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Parallel analysis service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the deterministic parallel-agent application" replay="project"
+npm run build
+npm run demo
+```
+
+The result contains both typed specialist outputs. To make live calls, copy
+`.env.example` to `.env`, set the key, and run `npm start`.
+
+Continue with [Test specialists and authorization](../../testing/test-parallel/).

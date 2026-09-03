@@ -1,0 +1,76 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+import {
+	getVisibleTutorialEntries,
+	getTutorialBreadcrumbs,
+	getTutorialPageNavigation,
+	getTutorialSidebar,
+	tutorialRoute,
+	tutorialRouteSlug,
+} from '../../data/tutorials'
+import TutorialLayout from '../../layouts/TutorialLayout.astro'
+
+export async function getStaticPaths() {
+	const entries = getVisibleTutorialEntries(await getCollection('tutorials'), {
+		includeDrafts: true,
+	})
+	return entries.map(entry => ({
+		params: { slug: tutorialRouteSlug(entry.id) || undefined },
+		props: { entry },
+	}))
+}
+
+type Props = {
+	entry: CollectionEntry<'tutorials'>
+}
+
+const { entry } = Astro.props
+const visibility = { includeDrafts: true }
+const entries = getVisibleTutorialEntries(await getCollection('tutorials'), visibility)
+const { Content, headings } = await render(entry)
+const sidebar = getTutorialSidebar(entries, visibility)
+const { previous, next } = getTutorialPageNavigation(entries, entry.id, visibility)
+const breadcrumbs = getTutorialBreadcrumbs(entries, entry.id, visibility)
+---
+
+<TutorialLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	sidebar={sidebar}
+	currentId={entry.id}
+	headings={headings}
+>
+	<header class="mb-10">
+		<nav aria-label="Breadcrumb" class="not-prose font-mono text-xs mb-3 text-[var(--color-found)]">
+			<ol class="flex flex-wrap list-none m-0 p-0 gap-x-2 gap-y-1">
+				{breadcrumbs.map((crumb, index) => <li class="m-0 p-0">
+					{index > 0 && <span aria-hidden="true" class="mr-2 text-[var(--color-fg-subtle)]">/</span>}
+					{crumb.href ? <a href={crumb.href}>{crumb.title}</a> : <span>{crumb.title}</span>}
+				</li>)}
+			</ol>
+		</nav>
+		<h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3 text-[var(--color-fg-strong)] leading-[1.15]">
+			{entry.data.title}
+		</h1>
+		{entry.data.status === 'draft' && <p class="not-prose mb-3 font-mono text-xs text-[var(--color-fg-subtle)]">Draft preview · under active review</p>}
+		{entry.data.description && <p class="lede max-w-[70ch]">{entry.data.description}</p>}
+	</header>
+	<Content />
+
+	{(previous || next) && (
+		<nav class="mt-12 pt-8 border-t border-[var(--color-line)] flex items-start justify-between gap-6 flex-wrap" aria-label="Tutorial page navigation">
+			{previous ? (
+				<a href={tutorialRoute(previous.id)} class="group inline-flex items-center gap-2 text-sm">
+					<span class="text-[var(--color-fg-subtle)]">←</span>
+					<span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{previous.data.title}</span>
+				</a>
+			) : <span />}
+			{next && (
+				<a href={tutorialRoute(next.id)} class="group inline-flex items-center gap-2 text-sm ml-auto">
+					<span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{next.data.title}</span>
+					<span class="text-[var(--color-fg-subtle)]">→</span>
+				</a>
+			)}
+		</nav>
+	)}
+</TutorialLayout>

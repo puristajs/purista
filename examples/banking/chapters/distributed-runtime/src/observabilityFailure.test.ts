@@ -1,0 +1,88 @@
+import { SpanStatusCode } from '@opentelemetry/api'
+import { getCommandMessageMock, initDefaultStateStore, initLogger } from '@purista/core'
+import { afterEach, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { createTestTelemetry } from './observability/testTelemetry.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+let cleanup: (() => Promise<void>) | undefined
+afterEach(async () => cleanup?.())
+
+test('exports a failed subscription without transaction content', async () => {
+	const logger = initLogger('fatal')
+	const telemetry = createTestTelemetry()
+	const repository = new SqliteTransactionRepository(':memory:')
+	const stateStore = initDefaultStateStore({ logger })
+	stateStore.setState = async () => {
+		throw new Error('state store unavailable')
+	}
+	const app = await createApplication(logger, repository, stateStore, telemetry)
+	cleanup = async () => {
+		await app.monitoring.destroy()
+		await app.transaction.destroy()
+		await stateStore.destroy()
+		await repository.destroy()
+		await app.eventBridge.destroy()
+		await telemetry.destroy()
+	}
+
+	await app.eventBridge.invoke(getCommandMessageMock({
+		tenantId: 'tenant-example',
+		receiver: { serviceName: 'Transaction', serviceVersion: '1', serviceTarget: 'recordTransaction' },
+		payload: {
+			payload: { amountCents: 12_500, direction: 'debit', counterparty: 'Northwind Books' },
+			parameter: { accountId: 'account-operating' },
+		},
+	}))
+
+	for (let attempt = 0; attempt < 50; attempt += 1) {
+		const failed = telemetry.traceExporter.getFinishedSpans().some(
+			span => span.name === 'observeLargeDebit' && span.status.code === SpanStatusCode.ERROR,
+		)
+		if (failed) break
+		await new Promise(resolve => setTimeout(resolve, 10))
+	}
+	await telemetry.forceFlush()
+
+	const spans = telemetry.traceExporter.getFinishedSpans()
+	const failedSubscription = spans.find(span => span.name === 'observeLargeDebit')
+	expect(failedSubscription?.status).toMatchObject({
+		code: SpanStatusCode.ERROR,
+		message: 'state store unavailable',
+	})
+
+	const metrics = telemetry.metricExporter.getMetrics().flatMap(resource =>
+		resource.scopeMetrics.flatMap(scope => scope.metrics),
+	)
+	const monitoringMetric = metrics.find(
+		metric => metric.descriptor.name === 'app.monitoring.large_debit.signals',
+	)
+	const subscriptionMetric = metrics.find(
+		metric => metric.descriptor.name === 'purista.subscription.executions',
+	)
+	expect(monitoringMetric?.dataPoints.some(point => point.attributes.outcome === 'store_error')).toBe(true)
+	expect(subscriptionMetric?.dataPoints.some(point =>
+		point.attributes['purista.subscription.name'] === 'observeLargeDebit'
+		&& point.attributes['purista.outcome'] === 'unhandled_error',
+	)).toBe(true)
+
+	const exportedEvidence = JSON.stringify({
+		spans: spans.map(span => ({
+			name: span.name,
+			attributes: span.attributes,
+			status: span.status,
+			events: span.events,
+		})),
+		metrics,
+	})
+	for (const forbidden of [
+		'Northwind Books',
+		'account-operating',
+		'3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		'amountCents',
+		'counterparty',
+	]) {
+		expect(exportedEvidence).not.toContain(forbidden)
+	}
+	expect(await app.eventBridge.isReady()).toBe(true)
+})

@@ -34,12 +34,6 @@ const bodyAttrs = siteShell ? { 'data-site': '' } : {}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <SeoHead title={title} description={description} canonicalPath={canonicalPath} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <meta name="generator" content={Astro.generator} />
     {markdownUrl && <link rel="alternate" type="text/markdown" href={markdownUrl} />}
     <slot name="head" />
@@ -51,7 +45,6 @@ const bodyAttrs = siteShell ? { 'data-site': '' } : {}
 
 <style is:global>
   main,
-  nav,
   footer {
     position: relative;
     z-index: 2;

@@ -8,7 +8,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 
 <HarnessLayout
   title="Durability | AI Harness | PURISTA"
-  description="Persist AI Harness workflow progress, context checkpoints, state, and workspaces with the local durable execution bundle or custom adapters."
+  description="Persist AI Harness conversations, workflow checkpoints, leases, waits, and workspaces with one storage boundary and optional workspace adapter."
 >
   <HarnessHero
     lines={[
@@ -16,14 +16,14 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'without a hosted', color: 'found' },
       { text: 'orchestrator.' },
     ]}
-    lede="Long-running agents need more than memory. The harness can persist workflow checkpoints, session state, leases, context snapshots, and workspace files inside your application boundary, then resume safely after restart."
+    lede="Long-running workflows need more than memory. HarnessStorage persists conversations, run records, step checkpoints, leases, and external waits inside your application boundary; an optional workspace preserves files."
   />
 
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head--center mb-12">
         <div class="eyebrow">Recommended default</div>
-        <h2 class="display display-lg">One local bundle for state, runtime, and files</h2>
+        <h2 class="display display-lg">One local bundle for storage and files</h2>
         <p class="lede">Use <code class="site-mono">localDurableExecution(&#123; root &#125;)</code> when you want production-shaped durability without adding Redis, Postgres, Docker, or a hosted workflow engine on day one.</p>
       </div>
 
@@ -41,23 +41,17 @@ const local = localDurableExecution({
 })
 
 const harness = defineHarness({ name: 'research' })
-  .state(local.state)
-  .runtime(local.runtime)
+  .storage(local.storage)
   .sandbox(local.sandbox)
-  .workspaceStore(local.workspaceStore)
-  .checkpoints(local.checkpoints)
-  .workflows(({ workflow }) => ({
-    report: workflow({
-      input,
-      output,
-      durable: { enabled: true },
-      handler: async ctx => {
-        const facts = await collectFacts(ctx)
-        await ctx.checkpoints.write('facts', facts)
-        return writeReport(facts)
-      },
-    }),
-  }))
+  .workspace(local.workspace)
+  .workflow('report', {
+    input,
+    output,
+    handler: async ctx => {
+      const facts = await ctx.step('collect-facts-v1', () => collectFacts(ctx))
+      return writeReport(facts)
+    },
+  })
   .build()
 
 process.on('SIGTERM', () => local.close())`}
@@ -68,10 +62,10 @@ process.on('SIGTERM', () => local.close())`}
 
         <div class="dur-stack">
           {[
-            ['SQLite state', 'Sessions, messages, runs, run events, workflow checkpoints, leases, and context checkpoints are persisted through the built-in Node or Bun SQLite module.'],
+            ['SQLite storage', 'Sessions, messages, runs, run events, workflow step checkpoints, leases, and opaque external waits use the built-in Node or Bun SQLite module.'],
             ['Host workspace', 'Each durable run gets an active directory under the configured root. Checkpoints copy that active tree so resumed work sees the committed files.'],
             ['Local sandbox', 'The sandbox maps the run workspace to the virtual root. File operations stay jailed to the run directory; command execution is opt-in.'],
-            ['OTel traces', 'Runtime, workspace, state, and context checkpoint operations emit spans and metrics so retry and resume behavior is visible.'],
+            ['OTel traces', 'Storage and workspace operations emit content-free spans and metrics so retry, wait, signal, and resume behavior is visible.'],
           ].map(([title, text]) => (
             <div class="dur-stack-item">
               <span class="dur-stack-title site-mono">{title}</span>
@@ -94,11 +88,9 @@ process.on('SIGTERM', () => local.close())`}
 
       <div class="dur-ports">
         {[
-          ['StateStore', '.state(...)', 'Session metadata, message history, run records, and run events.'],
-          ['DurableRuntime', '.runtime(...)', 'Workflow step checkpoints, durable leases, cancellation state, and resume position.'],
-          ['DurableWorkspaceStore', '.workspaceStore(...)', 'Run workspace lifecycle, checkpoint snapshots, retention, abort, and cleanup.'],
+          ['HarnessStorage', '.storage(...)', 'Sessions, messages, runs, events, workflow checkpoints, leases, and external waits.'],
+          ['DurableWorkspace', '.workspace(...)', 'Run workspace lifecycle, file snapshots, retention, abort, and cleanup.'],
           ['SandboxFactory', '.sandbox(...)', 'The filesystem or execution boundary used by agents, tools, MCP, and mounted skills.'],
-          ['ContextCheckpointStore', '.checkpoints(...)', 'Named JSON snapshots written by workflow code through ctx.checkpoints.'],
         ].map(([port, api, text]) => (
           <div class="dur-port">
             <div class="dur-port-head">
@@ -124,7 +116,7 @@ process.on('SIGTERM', () => local.close())`}
       <div class="dur-rules">
         {[
           ['Acquire first', 'The harness acquires the durable lease and workspace before it creates the run record, preventing duplicate active workers from mutating the same durable run.'],
-          ['Write explicit context', 'Use ctx.checkpoints for application-level snapshots such as extracted facts, cursor positions, and reviewed decisions.'],
+          ['Keep application state external', 'Use your application database or PURISTA StateStore for business state. Harness checkpoints contain only replayable workflow step results.'],
           ['Keep streams observational', 'Stream events help users and operators watch progress. They are not used as recovery cursors. Recovery is driven by durable checkpoints.'],
           ['Prefer local files, swap later', 'A host directory is enough for the full API. Container and remote adapters can be plugged in later without changing workflow code.'],
         ].map(([title, text]) => (

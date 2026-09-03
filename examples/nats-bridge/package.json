@@ -33,10 +33,10 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.1.0",
-		"@purista/core": "*",
-		"@purista/hono-http-server": "*",
-		"@purista/nats-state-store": "*",
-		"@purista/natsbridge": "*",
+		"@purista/core": "^4.0.0",
+		"@purista/hono-http-server": "^4.0.0",
+		"@purista/nats-state-store": "^4.0.0",
+		"@purista/natsbridge": "^4.0.0",
 		"zod": "^4.4.3"
 	}
 }

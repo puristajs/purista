@@ -1,0 +1,100 @@
+---
+title: Compose the classification runtime
+description: Inject the authorization policy and model through one reusable PURISTA service factory.
+order: 185
+kind: lesson
+status: draft
+---
+
+The Support service now owns a mounted agent and a command that invokes it by
+address. The remaining definitions are infrastructure-independent. This step
+creates the composition root that supplies a concrete model, policy,
+EventBridge, and logger.
+
+## Create the service factory
+
+Create `createSupportService.ts`. Passing adapters as arguments lets the demo,
+live process, and tests use the same service definition.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		model: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: {
+			models: { primary: options.model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+The `primary` key satisfies the model alias declared by `supportHarness`.
+`contentCaptureMode: 'NO_CONTENT'` prevents prompts and results from being
+captured in telemetry by default.
+
+The factory returns an unstarted PURISTA service instance. The process that
+owns EventBridge also owns the order in which the bridge and service start and
+stop.
+
+## Create an address-first terminal caller
+
+Create a small adapter for the terminal demos. It sends a normal PURISTA
+command message to `Support / 1 / classifySupportMessage`.
+
+```ts title="src/invokeClassification.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from './harness/support/agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
+type Classification = z.infer<typeof classifySupportMessageOutputSchema>
+
+export function invokeClassification(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: ClassificationInput,
+) {
+	return eventBridge.invoke<Classification>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'classify',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+		payload: { payload, parameter: {} },
+	})
+}
+```
+
+The identity values represent trusted server-side identity. In an HTTP
+application, authentication middleware verifies a credential and writes these
+fields to the message. Request payload fields never grant authority.
+
+Compile this boundary before starting the runtime.
+
+```bash title="Verify the classification composition" replay="project"
+npm run build
+```
+
+Continue with [Run the classification application](../run-application/).

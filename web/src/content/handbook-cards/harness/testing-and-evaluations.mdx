@@ -1,0 +1,169 @@
+---
+title: Testing & Evaluations
+description: Use deterministic fakes and explicit evaluation data to prove behavior without relying on live providers.
+---
+
+## Prerequisites
+
+Build a minimal Harness first. Tests use the same sessions, schemas, agents,
+tools, workflows, and rails as production; only adapters and fixtures change.
+Never record production prompts, tool values, or credentials to create fixtures.
+
+## Test from the boundary inward
+
+| Level | Prove | Preferred evidence |
+| --- | --- | --- |
+| Tool unit test | Authorization, validation, and business rules | Invoke the handler with a small fixture |
+| Agent integration test | Prompt-to-output and error mapping | `FakeModelProvider` |
+| Workflow test | Delegation, branching, side effects, cancellation | Scripted model outcomes and asserted contracts |
+| Guardrail test | Allow, transform, block, and failure-closed paths | Detector/action fakes |
+| Live smoke test | Provider credentials and deployment wiring | Explicit opt-in environment only |
+
+## Write a deterministic agent test
+
+`FakeModelProvider` is the Harness test adapter. Queue the exact model outcome
+before opening a session, then assert the typed result and safe request shape.
+
+```ts
+import { expect, test } from 'vitest'
+import { z } from 'zod'
+import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+
+test('returns a validated support answer without a provider call', async () => {
+	const provider = new FakeModelProvider()
+	provider.enqueueObject({
+		object: { answer: 'Update the delivery address before dispatch.' },
+		usage: { inputTokens: 4, outputTokens: 8, totalTokens: 12 },
+		finishReason: 'stop',
+	})
+
+	const harness = defineHarness({ name: 'support-test' })
+		.sandbox(inMemorySandbox())
+		.models({ fake: { provider, model: 'fake', capabilities: ['object'] } })
+		.agent('support', {
+			model: 'fake',
+			input: z.object({ question: z.string() }),
+			output: z.object({ answer: z.string() }),
+			instructions: 'Answer concisely.',
+		})
+		.build()
+
+	const session = await harness.getSession('test:customer-42')
+	try {
+		await expect(session.agents.support.run({ question: 'Can I update my address?' })).resolves.toEqual({
+			answer: 'Update the delivery address before dispatch.',
+		})
+		expect(provider.requests).toHaveLength(1)
+	} finally {
+		await session.release()
+		await harness.shutdown()
+	}
+})
+```
+
+For a tool loop, queue a model response containing a tool call and then a final
+response. Assert the tool's side effect, Zod validation failure, and a denied
+authorization path separately. The fake provider is deterministic but retains
+the real Harness loop, telemetry shape, and session lifecycle.
+
+## Cover the boundaries around the model loop
+
+Keep each integration test small and synthetic. These checks prove the behavior
+that an HTTP route, worker, or operator can observe:
+
+| Boundary | Deterministic test |
+| --- | --- |
+| Streaming | Collect `session.*.stream()` event types; assert `run.started`, tool lifecycle, and `run.finished`. For `emitRunEvents: true`, assert `streamId`, alias, and partial/delta behavior. |
+| Skills | Mount a temporary `SKILL.md`; script a `read` call then final object; assert the catalog is present but the skill body was not injected into the initial request. |
+| MCP | Use a local fake server; assert stdio rejects a file-only sandbox, and HTTP covers auth, protocol, schema, cancellation, and safe failure. |
+| Guardrails/privacy | Script allow, transform, block, and detector failure; assert a block prevents the model/tool side effect and contains no inspected content in logs or events. |
+| Shared approval | Combine static permission and policy demands; assert one provider call with the same frozen parsed input, bounded signal/deadline, and no late side effect on timeout or cancellation. |
+| Output/accounting | Intermediate tool calls skip output rails; blocked final candidates emit `model.completed` but no released `model.object`. Count usage once. |
+| Durable review | Concurrent resumes and crashes before/after execution and receipt reuse one immutable claim and idempotency key; changed action/revision fails closed. |
+| Adapter setup | Assert `.requires(...)` rejects missing capabilities before accepting work; run each port's public contract suite. |
+
+`RecordingTelemetry` lets an integration test verify span names and safe
+attributes without an OTLP backend. Assert model alias, provider, token usage,
+rail decision, and error kind—not prompts, tool values, or detector findings.
+
+```ts
+import { RecordingTelemetry } from '@purista/harness/testing'
+
+const telemetry = new RecordingTelemetry()
+// Build the Harness with the recorder, run the synthetic case, then inspect
+// only content-free attributes emitted by the expected span.
+expect(telemetry.spans.some(span => span.name.startsWith('evaluate_guardrail '))).toBe(true)
+```
+
+For a regression fixture, record an approved synthetic interaction with
+`createReplayInteractionRecorder`, then replay it with `replayModelProvider`.
+Fixtures are reviewable test data—not captured production conversations—and
+must contain no customer or credential content. Use `assertReplayConsumed` so
+CI proves the intended provider calls were exercised.
+
+Adapter packages run their contract suites before application integration:
+
+```ts
+import { loggerContract, harnessStorageContract } from '@purista/harness/testing'
+
+harnessStorageContract(() => createTestHarnessStorage())
+loggerContract(() => createTestLogger())
+```
+
+Use `sandboxContract`, `sandboxSnapshotContract`, `memoryEngineContract`,
+`modelProviderContract`, and `durableWorkspaceContract` for the matching
+port. Contract tests establish Harness compatibility; add backend-specific
+tests for tenancy, migrations, retention, outages, and credentials.
+
+## Test a rail block and detector failure
+
+Use `FakeSensitiveDataDetector`, `FakePresidioSidecar`, or
+`FakeLocalNerRuntime` from the selected optional package. Script synthetic
+findings, then assert that a block prevents the model or tool side effect. Add
+a second case for an adapter fault and assert it fails closed with the stable
+error kind. Do not put inspected text in snapshots or expected telemetry.
+
+## Evaluate a prompt change deliberately
+
+An evaluation compares explicit candidate behavior against an explicit dataset
+and scorer. Keep datasets, expected output, human labels, and experiment
+history in your application or evaluation system. Harness helpers return
+aggregate evidence and do not persist prompt or output content by default.
+
+```ts
+import { evaluateDeterministicScorer, evaluatePromptCandidates } from '@purista/harness'
+
+const scores = await evaluatePromptCandidates({
+	candidates: [
+		{ id: 'brief', prompt: 'Answer in one paragraph.' },
+		{ id: 'cited', prompt: 'Answer concisely and cite the policy.' },
+	],
+	items: [{ id: 'returns-1', input: { question: 'Can I return this?' }, expected: 'policy' }],
+	signal: new AbortController().signal,
+	runCandidate: async (candidate, item, signal) => {
+		signal.throwIfAborted()
+		return runSupportCandidate(candidate.prompt, item.input)
+	},
+	scorer: target =>
+		evaluateDeterministicScorer(
+			{
+				type: 'contains',
+				path: '/answer',
+				value: String(target.expected),
+				caseInsensitive: true,
+			},
+			target,
+		),
+})
+```
+
+Start with schema validity, required citations, allowed tool use, policy
+outcome, latency budgets, and domain rules. Add model judges or human review
+only after documenting their criteria, cost, and failure path. Keep a live
+provider smoke test separate from CI's deterministic suite.
+
+## Next
+
+Export safe evidence and operate a run in
+[Observability & Operations](/handbook/harness/observability-operations/).

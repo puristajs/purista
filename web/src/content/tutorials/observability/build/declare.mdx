@@ -1,0 +1,330 @@
+---
+title: Declare typed metrics
+description: Add service-owned counters with bounded attributes and record them at the business boundary.
+order: 161
+kind: lesson
+status: published
+---
+
+Start from the completed [subscription chapter](/tutorials/subscriptions/).
+That project already contains the `Transaction` and `Monitoring` services. No
+CLI command is needed on this page because we are extending those generated
+service builders rather than creating another Framework artifact.
+
+A custom metric name starts with `app.`. Its attributes must describe a small,
+fixed set of categories. Never use a transaction ID, account ID, tenant ID, or
+principal ID as a metric attribute. Those values create an unbounded number of
+time series and can expose restricted identifiers.
+
+## Count recorded transactions
+
+Create the metric contract next to the service that owns it.
+
+```ts title="src/service/transaction/v1/transactionMetrics.ts" write
+import { z } from 'zod'
+
+export const transactionRecordedMetricName = 'app.transaction.recorded'
+
+export const transactionRecordedMetricAttributesSchema = z.strictObject({
+	direction: z.enum(['credit', 'debit']),
+	amount_band: z.enum(['under_100_eur', 'at_least_100_eur']),
+})
+
+export const transactionRecordedMetricDefinition = {
+	kind: 'counter',
+	unit: '{transaction}',
+	description: 'Successfully recorded synthetic transactions',
+	attributes: transactionRecordedMetricAttributesSchema,
+} as const
+```
+
+`amount_band` has two possible values. It gives an operator a useful grouping
+without exposing the exact amount or creating one series per transaction.
+
+Declare the metric on the existing generated builder.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalTransactionServiceInfo } from '../generalTransactionServiceInfo.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionServiceV1ConfigSchema } from './transactionServiceConfig.js'
+import {
+	transactionRecordedMetricDefinition,
+	transactionRecordedMetricName,
+} from './transactionMetrics.js'
+
+export const transactionServiceInfo = {
+	serviceVersion: '1',
+	...generalTransactionServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const transactionV1ServiceBuilder = new ServiceBuilder(transactionServiceInfo)
+	.setConfigSchema(transactionServiceV1ConfigSchema)
+	.defineResource<'transactionRepository', TransactionRepository>()
+	.defineMetric(transactionRecordedMetricName, transactionRecordedMetricDefinition)
+```
+
+`defineMetric` makes a typed handle available to every handler built from this
+service builder. Record the metric only after the repository has returned a
+successful result.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import {
+	transactionRecordedMetricName,
+} from '../../transactionMetrics.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record one synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.setSuccessEventName(ServiceEvent.TransactionRecordedV1)
+	.setCommandFunction(async function (context, payload, parameter) {
+		if (!context.message.tenantId) {
+			throw new HandledError(StatusCode.Unauthorized, 'Tenant metadata is required')
+		}
+		const transaction = await context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId,
+		})
+		context.metrics[transactionRecordedMetricName].add(1, {
+			direction: transaction.direction,
+			amount_band: transaction.amountCents >= 10_000 ? 'at_least_100_eur' : 'under_100_eur',
+		})
+		return transaction
+	})
+```
+
+The metric is separate from the named command result. The successful result is
+still the fact consumed by `Monitoring`; the counter is operational evidence.
+
+## Count monitoring outcomes
+
+`Monitoring` owns whether a qualifying signal was stored or its StateStore
+write failed.
+
+```ts title="src/service/monitoring/v1/monitoringMetrics.ts" write
+import { z } from 'zod'
+
+export const largeDebitSignalMetricName = 'app.monitoring.large_debit.signals'
+
+export const largeDebitSignalMetricDefinition = {
+	kind: 'counter',
+	unit: '{signal}',
+	description: 'Outcomes while storing large debit monitoring signals',
+	attributes: z.strictObject({
+		outcome: z.enum(['stored', 'store_error']),
+	}),
+} as const
+```
+
+Add the definition to the generated `Monitoring` builder.
+
+```ts title="src/service/monitoring/v1/monitoringV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalMonitoringServiceInfo } from '../generalMonitoringServiceInfo.js'
+import {
+	largeDebitSignalMetricDefinition,
+	largeDebitSignalMetricName,
+} from './monitoringMetrics.js'
+import { monitoringServiceV1ConfigSchema } from './monitoringServiceConfig.js'
+
+export const monitoringServiceInfo = {
+	serviceVersion: '1',
+	...generalMonitoringServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const monitoringV1ServiceBuilder = new ServiceBuilder(monitoringServiceInfo)
+	.setConfigSchema(monitoringServiceV1ConfigSchema)
+	.defineMetric(largeDebitSignalMetricName, largeDebitSignalMetricDefinition)
+```
+
+Record the outcome without swallowing the failure.
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts" write
+import { EBMessageType } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import {
+	largeDebitSignalMetricName,
+} from '../../monitoringMetrics.js'
+import {
+	largeDebitSignalSchema,
+	largeDebitThresholdCents,
+	latestLargeDebitSignalKey,
+} from '../../monitoringSignal.js'
+import { monitoringV1ServiceBuilder } from '../../monitoringV1ServiceBuilder.js'
+import {
+	monitoringV1ObserveLargeDebitInputParameterSchema,
+	monitoringV1ObserveLargeDebitInputPayloadSchema,
+} from './schema.js'
+
+export const observeLargeDebitSubscriptionBuilder = monitoringV1ServiceBuilder
+	.getSubscriptionBuilder('observeLargeDebit', 'Observe large recorded debit transactions')
+	.subscribeToEvent(ServiceEvent.TransactionRecordedV1)
+	.filterForMessageType(EBMessageType.CommandSuccessResponse)
+	.filterSentFrom('Transaction', '1', 'recordTransaction', undefined)
+	.filterTenantId('tenant-example')
+	.addPayloadSchema(monitoringV1ObserveLargeDebitInputPayloadSchema)
+	.addParameterSchema(monitoringV1ObserveLargeDebitInputParameterSchema)
+	.setSubscriptionFunction(async function (context, payload, _parameter) {
+		if (payload.direction !== 'debit' || payload.amountCents < largeDebitThresholdCents) return
+
+		const signal = largeDebitSignalSchema.parse({
+			transactionId: payload.transactionId,
+			accountId: payload.accountId,
+			amountCents: payload.amountCents,
+		})
+		try {
+			await context.states.setState(latestLargeDebitSignalKey, signal)
+			context.metrics[largeDebitSignalMetricName].add(1, { outcome: 'stored' })
+		} catch (error) {
+			context.metrics[largeDebitSignalMetricName].add(1, { outcome: 'store_error' })
+			throw error
+		}
+	})
+```
+
+The error metric does not turn failure into success. Rethrowing lets PURISTA
+mark the subscription span and Framework metric as failed and lets the selected
+EventBridge apply its supported failure behavior.
+
+## Test definitions and recording points
+
+Use the real metric contract with PURISTA's in-memory recorder. This proves
+that valid categories are recorded and unexpected or identifier-shaped
+attributes are rejected.
+
+```ts title="src/service/transaction/v1/transactionMetrics.test.ts" write
+import {
+	createMemoryMetricsRecorder,
+	createMetricContext,
+	validateMetricDefinition,
+} from '@purista/core'
+import { expect, test } from 'vitest'
+import { z } from 'zod'
+import {
+	transactionRecordedMetricDefinition,
+	transactionRecordedMetricName,
+} from './transactionMetrics.js'
+
+test('records only the declared bounded transaction attributes', () => {
+	const recorder = createMemoryMetricsRecorder()
+	const metrics = createMetricContext({
+		[transactionRecordedMetricName]: transactionRecordedMetricDefinition,
+	}, recorder)
+
+	metrics[transactionRecordedMetricName].add(1, {
+		direction: 'debit',
+		amount_band: 'at_least_100_eur',
+	})
+	expect(recorder.records).toEqual([{
+		name: transactionRecordedMetricName,
+		kind: 'counter',
+		value: 1,
+		attributes: { direction: 'debit', amount_band: 'at_least_100_eur' },
+	}])
+})
+
+test('rejects unknown attributes and high-cardinality identifier keys', async () => {
+	const metrics = createMetricContext({
+		[transactionRecordedMetricName]: transactionRecordedMetricDefinition,
+	}, createMemoryMetricsRecorder())
+
+	expect(() => metrics[transactionRecordedMetricName].add(1, {
+		direction: 'debit',
+		amount_band: 'at_least_100_eur',
+		transaction_id: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	} as never)).toThrow('attributes failed validation')
+
+	await expect(validateMetricDefinition('app.transaction.byid', {
+		kind: 'counter',
+		unit: '{transaction}',
+		description: 'Invalid example',
+		attributes: z.strictObject({ transaction_id: z.string() }),
+	})).rejects.toThrow('forbidden attribute keys')
+})
+```
+
+The focused handler tests already use PURISTA context mocks. Extend them to
+assert the metric call and to prove that a failed repository write records no
+success metric.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox, type SinonStub } from 'sinon'
+import { afterEach, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionRecordedMetricName } from '../../transactionMetrics.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const payload = { amountCents: 12_500, direction: 'debit' as const, counterparty: 'Northwind Books' }
+const parameter = { accountId: 'account-operating' }
+const stored = {
+	...payload,
+	...parameter,
+	tenantId: 'tenant-example',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+}
+
+async function setup(save: SinonStub) {
+	const repository: TransactionRepository = { save }
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: { transactionRepository: repository },
+	})
+	const mocked = createCommandContextMock(recordTransactionCommandBuilder, {
+		payload, parameter, resources: { transactionRepository: repository }, sandbox,
+	})
+	mocked.context.message = { ...mocked.context.message, tenantId: 'tenant-example' }
+	const add = mocked.context.metrics[transactionRecordedMetricName].add as SinonStub
+	const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+	return { service, mocked, add, command }
+}
+
+test('records a bounded success metric after saving', async () => {
+	const fixture = await setup(sandbox.stub().resolves(stored))
+	try {
+		await expect(fixture.command(fixture.mocked.context, payload, parameter)).resolves.toEqual(stored)
+		expect(fixture.add.calledOnceWith(1, {
+			direction: 'debit', amount_band: 'at_least_100_eur',
+		})).toBe(true)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('does not record a success metric when persistence fails', async () => {
+	const fixture = await setup(sandbox.stub().rejects(new Error('database unavailable')))
+	try {
+		await expect(fixture.command(fixture.mocked.context, payload, parameter))
+			.rejects.toThrow('database unavailable')
+		expect(fixture.add.called).toBe(false)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+```
+
+```bash title="Test the declared business metrics" replay="project"
+npx vitest run \
+  src/service/transaction/v1/transactionMetrics.test.ts \
+  src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts
+npm run build
+```
+
+The services now own two typed business metrics. They still do not own an
+exporter. Next we configure OpenTelemetry at the application boundary.

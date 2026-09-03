@@ -15,7 +15,7 @@ afterEach(() => {
 })
 
 describe('createProjectSnapshot', () => {
-	it('captures services, queues, queue workers, and agents', async () => {
+	it('captures services, queues, and queue workers', async () => {
 		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-snapshot-'))
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		mkdirSync(join(serviceDir, 'command', 'signUp'), { recursive: true })
@@ -23,7 +23,6 @@ describe('createProjectSnapshot', () => {
 		mkdirSync(join(serviceDir, 'stream', 'searchUsers'), { recursive: true })
 		mkdirSync(join(serviceDir, 'queue', 'processJobs'), { recursive: true })
 		mkdirSync(join(serviceDir, 'queue-worker', 'processJobsWorker'), { recursive: true })
-		mkdirSync(join(TEST_DIR, 'src', 'agents', 'triage', 'v1'), { recursive: true })
 
 		writeFileSync(
 			join(TEST_DIR, 'src', 'service', 'serviceEvent.enum.ts'),
@@ -31,11 +30,8 @@ describe('createProjectSnapshot', () => {
 		)
 		writeFileSync(join(serviceDir, 'userV1ServiceBuilder.ts'), 'export const userV1ServiceBuilder = {}\n')
 		writeFileSync(join(serviceDir, 'userV1Service.ts'), 'export const userV1Service = {}\n')
-		writeFileSync(join(TEST_DIR, 'src', 'agents', 'triage', 'v1', 'triageAgent.ts'), 'export const triageAgent = {}\n')
-
 		const config = puristaConfigSchema.parse({
 			servicePath: 'src/service',
-			agentPath: 'src/agents',
 			fileConvention: 'camel',
 			eventConvention: 'dotCase',
 			formatter: 'none',
@@ -48,6 +44,5 @@ describe('createProjectSnapshot', () => {
 		expect(snapshot.services.user['1'].streams).toContain('searchUsers')
 		expect(snapshot.services.user['1'].queues).toContain('processJobs')
 		expect(snapshot.services.user['1'].queueWorkers).toContain('processJobsWorker')
-		expect(snapshot.agents.triage).toContain('1')
 	})
 })

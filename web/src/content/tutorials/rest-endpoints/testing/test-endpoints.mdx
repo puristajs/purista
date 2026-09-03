@@ -1,0 +1,312 @@
+---
+title: Test command and HTTP contracts
+description: Mock the repository in command tests and prove validation blocks side effects before the handler runs.
+order: 10
+kind: lesson
+status: published
+---
+
+Test the command handler with a resource mock, then test HTTP validation through
+Hono. These boundaries answer different questions.
+
+## Test the record command with a mocked resource
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+test('records validated input through the repository resource', async () => {
+	const sandbox = createSandbox()
+	const input = { amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books' }
+	const stored = { ...input, transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32', recordedAt: '2026-09-01T10:00:00.000Z' }
+	const save = sandbox.stub().resolves(stored)
+	const repository: TransactionRepository = {
+		save,
+		findById: sandbox.stub(),
+	}
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: { transactionRepository: repository },
+	})
+	try {
+		const { context } = createCommandContextMock(recordTransactionCommandBuilder, {
+			payload: input,
+			parameter: {},
+			resources: { transactionRepository: repository },
+			sandbox,
+		})
+		const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+		expect(await command(context, input, {})).toEqual(stored)
+		expect(save.calledOnce).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+Replace the generated read-command test too:
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { getTransactionCommandBuilder } from './getTransactionCommandBuilder.js'
+
+test('returns a transaction from the repository resource', async () => {
+	const sandbox = createSandbox()
+	const stored = { transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32', amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books', recordedAt: '2026-09-01T10:00:00.000Z' }
+	const repository: TransactionRepository = { save: sandbox.stub(), findById: sandbox.stub().resolves(stored) }
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock, resources: { transactionRepository: repository } })
+	try {
+		const { context } = createCommandContextMock(getTransactionCommandBuilder, { payload: undefined, parameter: { transactionId: stored.transactionId }, resources: { transactionRepository: repository }, sandbox })
+		const command = safeBind(getTransactionCommandBuilder.getCommandFunction(), service)
+		expect(await command(context, undefined, { transactionId: stored.transactionId })).toEqual(stored)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+## Prove validation prevents the resource call
+
+Add a focused endpoint test rather than expanding the static-file assertions:
+
+```ts title="src/transactionEndpoints.test.ts" write
+import { initLogger } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import type { TransactionRepository } from './service/transaction/v1/TransactionRepository.js'
+
+const sandbox = createSandbox()
+
+afterEach(() => sandbox.restore())
+
+async function withApplication(
+	repository: TransactionRepository,
+	testFunction: (app: Awaited<ReturnType<typeof createApplication>>) => Promise<void>,
+) {
+	const app = await createApplication(initLogger('fatal'), repository)
+	try {
+		await testFunction(app)
+	} finally {
+		await app.http.prepareDestroy().destroy()
+		await app.http.destroy()
+		await app.transaction.destroy()
+		await app.bankProfile.destroy()
+		await app.eventBridge.destroy()
+	}
+}
+
+describe('generated transaction endpoints', () => {
+	test('rejects invalid input before calling the repository', async () => {
+		const save = sandbox.stub()
+		const repository: TransactionRepository = { save, findById: sandbox.stub() }
+		await withApplication(repository, async app => {
+			const response = await app.http.app.request('/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ amountCents: 0, direction: 'debit', counterparty: 'Northwind Books' }),
+			})
+			expect(response.status).toBe(400)
+			expect(response.headers.get('content-type')).toContain('application/problem+json')
+			expect(save.called).toBe(false)
+		})
+	})
+
+	test('returns Problem Details when a transaction is missing', async () => {
+		const repository: TransactionRepository = { save: sandbox.stub(), findById: sandbox.stub().resolves(undefined) }
+		await withApplication(repository, async app => {
+			const id = '3bd00f72-8db0-4f39-875d-fd5e251a7f32'
+			const response = await app.http.app.request(`/api/v1/transactions/${id}`)
+			expect(response.status).toBe(404)
+			expect(await response.json()).toMatchObject({ status: 404, detail: 'Transaction not found' })
+		})
+	})
+})
+```
+
+The application now starts a `Transaction` service, so the existing Hono test
+must also destroy it. Replace that test with the complete updated file:
+
+```ts title="src/application.test.ts" write
+import { serve } from '@hono/node-server'
+import { initLogger } from '@purista/core'
+import { once } from 'node:events'
+import { describe, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function destroyApplication(app: Awaited<ReturnType<typeof createApplication>>) {
+	await app.http.prepareDestroy().destroy()
+	await app.http.destroy()
+	await app.transaction.destroy()
+	await app.bankProfile.destroy()
+	await app.eventBridge.destroy()
+}
+
+describe('Hono application boundary', () => {
+	test('serves the website without taking ownership of API paths', async () => {
+		const app = await createApplication(initLogger('fatal'))
+		try {
+			const home = await app.http.app.request('/')
+			expect(home.status).toBe(200)
+			expect(home.headers.get('content-type')).toContain('text/html')
+			const html = await home.text()
+			expect(html).toContain('<div id="root"></div>')
+
+			const assetPath = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1]
+			expect(assetPath).toBeDefined()
+			const asset = await app.http.app.request(assetPath ?? '')
+			expect(asset.status).toBe(200)
+			expect(asset.headers.get('content-type')).toContain('javascript')
+
+			const browserPath = await app.http.app.request('/overview')
+			expect(browserPath.status).toBe(200)
+			expect(browserPath.headers.get('content-type')).toContain('text/html')
+
+			const api = await app.http.app.request('/api/v1/profile')
+			expect(api.status).toBe(200)
+			expect(await api.json()).toEqual({ name: 'Example Bank', currency: 'EUR' })
+
+			const missingApi = await app.http.app.request('/api/v1/missing')
+			expect(missingApi.status).toBe(404)
+			expect(missingApi.headers.get('content-type')).toContain('application/problem+json')
+		} finally {
+			await destroyApplication(app)
+		}
+	})
+
+	test('serves through Node and releases the listener', async () => {
+		const app = await createApplication(initLogger('fatal'))
+		const nodeServer = serve({ fetch: app.http.app.fetch, hostname: '127.0.0.1', port: 0 })
+		await once(nodeServer, 'listening')
+		const address = nodeServer.address()
+		expect(address).not.toBeNull()
+		expect(typeof address).not.toBe('string')
+		if (!address || typeof address === 'string') throw new Error('Expected a TCP listener')
+
+		try {
+			const response = await fetch(`http://127.0.0.1:${address.port}/`)
+			expect(response.status).toBe(200)
+			expect(response.headers.get('content-type')).toContain('text/html')
+		} finally {
+			await app.http.prepareDestroy().destroy()
+			await createNodeHttpListener(nodeServer).destroy()
+			await app.http.destroy()
+			await app.transaction.destroy()
+			await app.bankProfile.destroy()
+			await app.eventBridge.destroy()
+		}
+
+		expect(nodeServer.listening).toBe(false)
+	})
+})
+```
+
+Replace the browser test as well. Its `fetch` stub forwards both the URL and
+request options to the real Hono application, so the form test executes the
+real generated command endpoint.
+
+```tsx title="ui/src/App.test.tsx" write
+import { initLogger } from '@purista/core'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { createApplication } from '../../src/application.js'
+import { App } from './App'
+
+let application: Awaited<ReturnType<typeof createApplication>>
+
+beforeAll(async () => {
+	application = await createApplication(initLogger('fatal'))
+})
+
+afterEach(() => {
+	cleanup()
+	vi.unstubAllGlobals()
+})
+
+afterAll(async () => {
+	await application.http.prepareDestroy().destroy()
+	await application.http.destroy()
+	await application.transaction.destroy()
+	await application.bankProfile.destroy()
+	await application.eventBridge.destroy()
+})
+
+function useRealHttpBoundary() {
+	vi.stubGlobal('fetch', (input: string | URL | Request, init?: RequestInit) =>
+		application.http.app.request(typeof input === 'string' ? input : input.toString(), init),
+	)
+}
+
+describe('Example Bank browser shell', () => {
+	test('shows the real profile command result', async () => {
+		useRealHttpBoundary()
+		render(<App />)
+
+		expect(screen.getByLabelText('Loading public profile')).toBeInTheDocument()
+		expect(await screen.findByRole('heading', { name: 'Example Bank' })).toBeInTheDocument()
+		expect(screen.getByText('EUR')).toBeInTheDocument()
+	})
+
+	test('records a transaction through the generated command endpoint', async () => {
+		useRealHttpBoundary()
+		render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' })
+
+		fireEvent.change(screen.getByLabelText('Amount in cents'), { target: { value: '2599' } })
+		fireEvent.change(screen.getByLabelText('Counterparty'), { target: { value: 'Northwind Books' } })
+		fireEvent.submit(screen.getByRole('form', { name: 'Record transaction' }))
+
+		expect(await screen.findByText('Recorded transaction')).toBeInTheDocument()
+		expect(screen.getByText('2599 cents')).toBeInTheDocument()
+	})
+
+	test('shows Problem Details returned for invalid command input', async () => {
+		useRealHttpBoundary()
+		render(<App />)
+		await screen.findByRole('heading', { name: 'Example Bank' })
+
+		fireEvent.change(screen.getByLabelText('Amount in cents'), { target: { value: '0' } })
+		fireEvent.change(screen.getByLabelText('Counterparty'), { target: { value: 'Northwind Books' } })
+		fireEvent.submit(screen.getByRole('form', { name: 'Record transaction' }))
+
+		expect(await screen.findByRole('alert')).toBeInTheDocument()
+	})
+
+	test('shows a useful error when the profile command cannot be reached', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+		render(<App />)
+		expect(await screen.findByRole('alert')).toHaveTextContent('The public profile is unavailable.')
+	})
+})
+```
+
+Run every check and call both generated endpoints:
+
+```bash title="Build and test commands, HTTP, and UI" replay="project"
+npm test
+npm run build
+```
+
+```bash title="Start the application with transaction endpoints" replay="server"
+npm start
+```
+
+```bash title="Record a synthetic transaction" replay="request"
+curl --fail-with-body --silent -X POST http://127.0.0.1:3000/api/v1/transactions \
+  -H 'content-type: application/json' \
+  -d '{"amountCents":2599,"direction":"debit","counterparty":"Northwind Books"}'
+```
+
+The response contains a generated `transactionId` and `recordedAt`. Copy that
+ID into `GET /api/v1/transactions/:transactionId` to exercise the read command.

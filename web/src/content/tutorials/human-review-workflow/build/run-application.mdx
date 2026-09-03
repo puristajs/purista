@@ -1,0 +1,147 @@
+---
+title: Run the human-review flow
+description: Exercise waiting, approval, durable resume, and one protected effect through EventBridge.
+order: 260
+kind: lesson
+status: draft
+---
+
+Create a deterministic demo that invokes the two Support commands through the
+EventBridge. The requester first receives `waiting`; a different authorized
+principal records approval and resumes the same run.
+
+```ts title="src/demo.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { createReviewApplication } from './createReviewApplication.js'
+
+async function main() {
+	const dataDirectory = await mkdtemp(join(tmpdir(), 'purista-human-review-'))
+	const logger = initLogger('fatal')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const effects: string[] = []
+	const application = await createReviewApplication(
+		eventBridge,
+		logger,
+		{
+			canRequest: async ({ tenantId, principalId, cardId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex' && cardId === 'card-1',
+			canReview: async ({ tenantId, principalId, requestId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-reviewer' && requestId === 'review-1',
+		},
+		{
+			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
+				tenantId === 'tenant-example' &&
+				principalId === 'principal-reviewer' &&
+				cardId === 'card-1' &&
+				approvalId.startsWith('support-review-run:'),
+		},
+		{
+			freeze: async ({ cardId, idempotencyKey }) => {
+				effects.push(idempotencyKey)
+				return { status: 'frozen', cardId }
+			},
+		},
+		dataDirectory,
+	)
+
+	try {
+		const waiting = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'requestCardFreeze' },
+				payload: {
+					payload: { requestId: 'review-1', cardId: 'card-1', reason: 'Card is missing' },
+					parameter: {},
+				},
+			}),
+		)
+		const decided = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-reviewer',
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'decideCardFreeze' },
+				payload: {
+					payload: {
+						requestId: 'review-1',
+						expectedRevision: 1,
+						eventId: 'decision-1',
+						outcome: 'approved',
+					},
+					parameter: {},
+				},
+			}),
+		)
+		process.stdout.write(`${JSON.stringify({ waiting, decided, effectCount: effects.length }, null, 2)}\n`)
+	} finally {
+		await application.destroy()
+		await eventBridge.destroy()
+		await rm(dataDirectory, { recursive: true, force: true })
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The human review demo failed.'}\n`)
+	process.exit(1)
+})
+```
+
+Add the long-running entry point with explicit example policies. These policies
+make the authorization inputs visible. A real application should resolve them
+from trusted grants and business records.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { createReviewApplication } from './createReviewApplication.js'
+
+async function main() {
+	const logger = initLogger()
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const application = await createReviewApplication(
+		eventBridge,
+		logger,
+		{
+			canRequest: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+			canReview: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-reviewer',
+		},
+		{
+			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
+				tenantId === 'tenant-example' &&
+				principalId === 'principal-reviewer' &&
+				cardId === 'card-1' &&
+				/^support-review-run:[a-f0-9]{64}$/.test(approvalId),
+		},
+		{
+			freeze: async ({ cardId }) => ({ status: 'frozen', cardId }),
+		},
+	)
+	gracefulShutdown(logger, [application, eventBridge])
+	logger.info('Human review workflow services started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Human review services could not start.'}\n`)
+	process.exit(1)
+})
+```
+
+Run the complete path.
+
+```bash title="Run the deterministic human-review application" replay="project"
+npm run build
+npm run demo
+```
+
+The output contains the typed waiting result, the approved terminal result,
+and an effect count of one. The application has exercised two PURISTA command
+addresses, a mounted Harness workflow, an external wait, and separate durable
+stores.
+
+Continue with [Test the native workflow](../../testing/test-workflow/).

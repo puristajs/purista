@@ -2,565 +2,173 @@
 import CTASection from '../../components/sections/CTASection.astro'
 import HarnessHero from '../../components/harness/HarnessHero.astro'
 import CodeBlock from '../../components/ui/CodeBlock.astro'
-import NumberedBadge from '../../components/ui/NumberedBadge.astro'
 import HarnessLayout from '../../layouts/HarnessLayout.astro'
 ---
 
 <HarnessLayout
   title="Memory | AI Harness | PURISTA"
-  description="How PURISTA AI Harness manages agent memory: scopes, the memory facade, sandboxMemory default, TTL, search, and custom MemoryAdapter implementations."
+  description="Scoped, typed agent memory for PURISTA AI Harness: local defaults, durable engines, identity isolation, and optional semantic recall."
 >
-
   <HarnessHero
     lines={[
-      { text: 'Agent memory,' },
-      { text: 'scoped to where', color: 'found' },
-      { text: 'it matters.' },
+      { text: 'Memory that stays' },
+      { text: 'in the right scope.', color: 'found' },
     ]}
-    lede="Memory in the harness is not a global store. Every read and write is scoped — to the session, the run, the agent, the user, or the tenant. The facade handles namespacing. You choose how and where values are persisted."
+    lede="PURISTA AI Harness separates conversation state from durable recall. Core owns identity, scope validation, traces, and model-backed indexing; you choose the storage engine that fits the deployment."
   />
 
-  {/* ── 1. Memory vs History ─────────────────────────────────────── */}
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head--center mb-12">
-        <div class="eyebrow">Two stores, one session</div>
-        <h2 class="display display-lg">Memory and history are different things</h2>
-        <p class="lede">Every session has two stores. History is the conversation — the ordered list of messages that the model sees on the next turn. Memory is a key-value store your application and agents can read and write freely between runs.</p>
+        <div class="eyebrow">Two distinct responsibilities</div>
+        <h2 class="display display-lg">Conversation state is not agent memory</h2>
+        <p class="lede">HarnessStorage persists the conversation, runs, checkpoints, and approval waits. Memory holds application facts and recall that an agent, tool, skill, or workflow deliberately reads or updates.</p>
       </div>
-
-      <div class="mem-two-col">
-        <div>
-          <div class="eyebrow mb-3" style="color: var(--color-found-hi)">History</div>
-          <p class="text-[var(--color-fg-muted)] mb-4">The ordered message log for the current session. The harness feeds the configured <code class="site-mono text-xs">historyWindow</code> into each new model request. Persisted through the <code class="site-mono text-xs">StateStore</code>.</p>
-          <CodeBlock
-            code={`const messages = await session.history.list({ limit: 20 })
-// returns: Message[] — role, content, timestamps`}
-            language="typescript"
-          />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="memory-panel">
+          <div class="eyebrow mb-3" style="color: var(--color-found-hi)">HarnessStorage</div>
+          <h3 class="h3 mb-3">The durable operational record</h3>
+          <p>Messages, run lifecycle, resumable workflows, external waits, approvals, and checkpoints. Choose a regular Harness storage backend for the deployment.</p>
         </div>
-        <div>
-          <div class="eyebrow mb-3" style="color: var(--color-con-hi)">Memory</div>
-          <p class="text-[var(--color-fg-muted)] mb-4">A key-value store for anything the agent or workflow should be able to recall: preferences, prior topics, user context, intermediate results. Scoped and structured. <strong class="text-[var(--color-fg)]">Not visible to the model unless you explicitly include it in a prompt.</strong></p>
-          <CodeBlock
-            code={`await session.memory.write('last-topic', { topic: 'pricing' })
-const prior = await session.memory.read<{ topic: string }>('last-topic')
-// -> { topic: 'pricing' }`}
-            language="typescript"
-          />
+        <div class="memory-panel">
+          <div class="eyebrow mb-3" style="color: var(--color-con-hi)">MemoryEngine</div>
+          <h3 class="h3 mb-3">Scoped facts and recall</h3>
+          <p>Typed JSON records, TTL, and optional text or semantic retrieval. Memory is never model-visible unless the application includes it in a prompt or tool result.</p>
         </div>
       </div>
     </div>
   </section>
 
-  {/* ── 2. Scopes ────────────────────────────────────────────────── */}
   <section class="section-pad">
     <div class="wrap">
       <div class="section-head--center mb-12">
-        <div class="eyebrow">Five scopes</div>
-        <h2 class="display display-lg">Put memory exactly where it belongs</h2>
-        <p class="lede">The memory facade exposes five scopes. Each scope is namespaced so two agents, users, or tenants never share the same key space accidentally.</p>
+        <div class="eyebrow">Safe by construction</div>
+        <h2 class="display display-lg">Identity determines the namespace</h2>
+        <p class="lede">Tenant and principal are optional, but their presence and values are bound when a session opens. A mismatched reopen fails before a sandbox, model, memory engine, or run starts.</p>
       </div>
-
-      <div class="mem-scope-grid">
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-found-hi)">session</code>
-            <span class="mem-scope-lifetime">lives for the session</span>
-          </div>
-          <p>One conversation thread. Write values here that any agent or workflow in this session should be able to read back.</p>
-          <CodeBlock
-            code={`await ctx.memory.session.write('locale', 'de-DE')
-const locale = await ctx.memory.session.read<string>('locale')`}
-            language="typescript"
-          />
-        </div>
-
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-con-hi)">run</code>
-            <span class="mem-scope-lifetime">lives for one agent/workflow run</span>
-          </div>
-          <p>Scratch space for intermediate results within a single run. Use it to pass data between tool calls without polluting session memory.</p>
-          <CodeBlock
-            code={`await ctx.memory.run.write('retrieved-ids', ['doc-1', 'doc-7'])
-const ids = await ctx.memory.run.read<string[]>('retrieved-ids')`}
-            language="typescript"
-          />
-        </div>
-
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-pilot-hi)">agent</code>
-            <span class="mem-scope-lifetime">per agent within the session</span>
-          </div>
-          <p>Isolated per agent id within the session. Present in agent and TypeScript tool contexts. Two agents in the same session never share agent-scoped keys.</p>
-          <CodeBlock
-            code={`// inside an agent handler or tool handler
-await ctx.memory.agent?.write('style-preference', 'concise')
-const pref = await ctx.memory.agent?.read<string>('style-preference')`}
-            language="typescript"
-          />
-        </div>
-
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-found-hi)">user(id?)</code>
-            <span class="mem-scope-lifetime">across sessions, per user</span>
-          </div>
-          <p>Persists across sessions for a given user. The facade picks up <code class="site-mono text-xs">metadata.userId</code> automatically, or you can pass the id explicitly.</p>
-          <CodeBlock
-            code={`// explicit id
-await ctx.memory.user('u_123').write('timezone', 'Europe/Berlin')
-
-// uses metadata.userId from the session
-const tz = await ctx.memory.user().read<string>('timezone')`}
-            language="typescript"
-          />
-        </div>
-
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-con-hi)">tenant(id?)</code>
-            <span class="mem-scope-lifetime">across sessions, per tenant</span>
-          </div>
-          <p>Shared across all users in a tenant. Good for org-level settings, shared reference data, and tenant-specific configuration.</p>
-          <CodeBlock
-            code={`await ctx.memory.tenant('t_acme').write('approved-models', ['gpt-4o-mini'])
-const approved = await ctx.memory.tenant().read<string[]>('approved-models')`}
-            language="typescript"
-          />
-        </div>
-
-        <div class="mem-scope">
-          <div class="mem-scope-head">
-            <code class="site-mono mem-scope-id" style="color: var(--color-fg-muted)">scope(opts)</code>
-            <span class="mem-scope-lifetime">explicit, for edge cases</span>
-          </div>
-          <p>Build an explicit <code class="site-mono text-xs">MemoryScope</code> when you need a combination not covered by the helpers — for example, a cross-agent, cross-session index scoped to a specific workflow.</p>
-          <CodeBlock
-            code={`const handle = ctx.memory.scope({
-  kind: 'user',
-  userId: 'u_123',
-  tenantId: 't_acme',
-})
-await handle.write('onboarding-complete', true)`}
-            language="typescript"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {/* ── 3. Facade API ────────────────────────────────────────────── */}
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="section-head--center mb-12">
-        <div class="eyebrow">The facade API</div>
-        <h2 class="display display-lg">Five operations, every scope</h2>
-        <p class="lede">Every scope handle exposes the same five operations. The facade handles scoping, validation, telemetry, and content-capture policy. Your code just reads and writes values.</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div>
-          <CodeBlock
-            code={`// read — returns undefined when absent
-const value = await ctx.memory.session.read<MyType>('key')
-
-// write — with optional options
-await ctx.memory.session.write('key', { value: 42 }, {
-  ttlMs: 3_600_000,      // expire after 1 hour (requires memory.ttl)
-  tags: ['cache', 'v2'], // filterable tags
-  metadata: { source: 'tool-result' },
-})
-
-// delete
-await ctx.memory.session.delete('key')
-
-// list — metadata only, no values
-const entries = await ctx.memory.session.list({
-  prefix: 'cache/',
-  limit: 50,
-})
-
-// search — requires memory.search capability
-const results = await ctx.memory.session.search({
-  text: 'pricing policy',
-  limit: 10,
-  tags: ['docs'],
-})`}
-            label="All five operations"
-            language="typescript"
-          />
-        </div>
-        <div class="flex flex-col gap-4">
-          <div>
-            <h3 class="h3 mb-3">Write options</h3>
-            <div class="mem-api-table">
-              <div class="mem-api-row">
-                <code class="site-mono text-xs" style="color: var(--color-found-hi)">ttlMs</code>
-                <span>Positive expiry duration in ms. Requires the adapter to declare <code class="site-mono text-xs">memory.ttl</code>.</span>
-              </div>
-              <div class="mem-api-row">
-                <code class="site-mono text-xs" style="color: var(--color-found-hi)">tags</code>
-                <span>String array for filtering <code class="site-mono text-xs">list()</code> and <code class="site-mono text-xs">search()</code> results.</span>
-              </div>
-              <div class="mem-api-row">
-                <code class="site-mono text-xs" style="color: var(--color-found-hi)">metadata</code>
-                <span>JSON metadata stored beside the value. Returned in <code class="site-mono text-xs">list()</code> entries.</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h3 class="h3 mb-3">List result shape</h3>
-            <CodeBlock
-              code={`interface MemoryEntry {
-  key: string
-  createdAt?: string   // ISO timestamp
-  updatedAt?: string
-  expiresAt?: string   // set when ttlMs was used
-  tags?: string[]
-  metadata?: Record<string, JsonValue>
-  // note: no value — use read() for values
-}`}
-              language="typescript"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="p-5 border border-[var(--color-line)] rounded-[var(--radius-md)]">
-        <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Content capture.</strong> Memory content follows the harness <code class="site-mono text-xs">contentCaptureMode</code>. With the default <code class="site-mono text-xs">NO_CONTENT</code>, values are never emitted to telemetry. The adapter respects this setting for any custom spans or metrics it emits.</p>
-      </div>
-    </div>
-  </section>
-
-  {/* ── 4. sandboxMemory default ─────────────────────────────────── */}
-  <section class="section-pad">
-    <div class="wrap">
-      <div class="flex items-center gap-3 mb-6">
-        <NumberedBadge number={1} color="found" />
-        <div class="eyebrow">Default adapter</div>
-      </div>
-      <h2 class="display display-lg mb-6">sandboxMemory() — zero config, zero setup</h2>
-      <p class="lede mb-10">When you don't call <code class="site-mono">.memory(...)</code>, the harness uses <code class="site-mono">sandboxMemory()</code> automatically. It stores everything as JSON files inside the session sandbox. No database, no network, no extra dependencies.</p>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div>
-          <CodeBlock
-            code={`// default — no .memory() call needed
-const harness = defineHarness({ name: 'my-service' })
-  .models({ ... })
-  .agents({ ... })
-  .build()
-
-// session memory lives at:
-// /memory/session/<key>.json
-
-// run memory lives at:
-// /memory/runs/<runId>/<key>.json`}
-            label="Default behaviour"
-            language="typescript"
-          />
-        </div>
-        <div>
-          <h3 class="h3 mb-4">What sandboxMemory can do</h3>
-          <div class="mem-api-table">
-            <div class="mem-api-row">
-              <span class="text-[var(--color-found-hi)]">✓</span>
-              <span><code class="site-mono text-xs">read</code>, <code class="site-mono text-xs">write</code>, <code class="site-mono text-xs">delete</code>, <code class="site-mono text-xs">list</code></span>
-            </div>
-            <div class="mem-api-row">
-              <span class="text-[var(--color-found-hi)]">✓</span>
-              <span>session and run scopes</span>
-            </div>
-            <div class="mem-api-row">
-              <span class="text-[var(--color-fg-subtle)]">✗</span>
-              <span>No TTL — values don't expire</span>
-            </div>
-            <div class="mem-api-row">
-              <span class="text-[var(--color-fg-subtle)]">✗</span>
-              <span>No semantic search (<code class="site-mono text-xs">memory.search</code> not declared)</span>
-            </div>
-            <div class="mem-api-row">
-              <span class="text-[var(--color-fg-subtle)]">✗</span>
-              <span>No persistence across process restarts</span>
-            </div>
-            <div class="mem-api-row">
-              <span class="text-[var(--color-fg-subtle)]">✗</span>
-              <span>No user or tenant scopes</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-5 border border-[var(--color-line)] rounded-[var(--radius-md)]">
-        <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Good for development and stateless agents.</strong> <code class="site-mono text-xs">sandboxMemory()</code> is the right default for local development and agents that don't need cross-session recall. Move to a dedicated adapter when users or tenants need memory that survives restarts.</p>
-      </div>
-    </div>
-  </section>
-
-  {/* ── 5. When to use a custom adapter ─────────────────────────── */}
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="flex items-center gap-3 mb-6">
-        <NumberedBadge number={2} color="con" />
-        <div class="eyebrow">Custom adapters</div>
-      </div>
-      <h2 class="display display-lg mb-6">When sandboxMemory isn't enough</h2>
-      <p class="lede mb-10">Swap the adapter when your application needs cross-session user memory, TTL-based cache eviction, vector or full-text search, or shared tenant-level context. The session API stays identical — only the adapter behind it changes.</p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <div class="scope-grid">
         {[
-          {
-            need: 'User memory survives session restart',
-            solution: 'External adapter (Redis, Postgres, vector DB)',
-            tone: 'con',
-          },
-          {
-            need: 'Semantic search across stored memories',
-            solution: 'Adapter that declares memory.search (vector-backed)',
-            tone: 'con',
-          },
-          {
-            need: 'Auto-expire cached tool results',
-            solution: 'Adapter that declares memory.ttl',
-            tone: 'con',
-          },
-          {
-            need: 'Tenant-level shared context',
-            solution: 'Adapter that supports tenant scope',
-            tone: 'con',
-          },
-        ].map((row) => (
-          <div class="p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
-            <div class="text-xs font-mono mb-1" style="color: var(--color-fg-subtle)">NEED</div>
-            <p class="text-sm font-medium text-[var(--color-fg)] mb-2">{row.need}</p>
-            <div class="text-xs font-mono mb-1" style={`color: var(--color-${row.tone}-hi)`}>SOLUTION</div>
-            <p class="text-sm text-[var(--color-fg-muted)] m-0">{row.solution}</p>
+          ['application', 'Shared application facts'],
+          ['tenant()', 'Shared tenant workspace'],
+          ['principal()', 'One account within an optional tenant'],
+          ['session', 'One conversation'],
+          ['run', 'Transient work for one execution'],
+          ['agent', 'One agent inside a session'],
+        ].map(([scope, description]) => (
+          <div class="scope-card">
+            <code class="site-mono">{scope}</code>
+            <span>{description}</span>
           </div>
         ))}
       </div>
-
-      <h3 class="h3 mb-4">Registering a custom adapter</h3>
       <CodeBlock
-        code={`import { defineHarness } from '@purista/harness'
-// Implement MemoryAdapter or use a community adapter.
-// See the MemoryAdapter contract below for the interface to implement.
-import { MyRedisMemoryAdapter } from './myRedisMemoryAdapter'
+        code={`const session = await harness.getSession('claim:42', {
+  tenantId: 'acme-insurance',
+  principalId: 'adjuster:ada',
+})
 
-const harness = defineHarness({ name: 'my-service' })
-  .memory(new MyRedisMemoryAdapter({ url: process.env.REDIS_URL! }))
-  .requires(['memory.session', 'memory.user', 'memory.ttl', 'memory.search'])
-  // .requires() fails at build time if the adapter doesn't declare these
-  .models({ ... })
-  .build()`}
-        label="External memory adapter"
+await session.memory.write('locale', 'de-DE')
+
+// in an agent, workflow, tool, or skill context
+await ctx.memory.principal().write('claim-summary', claim, {
+  index: { text: claim.description },
+  tags: ['claim', 'open'],
+})`}
+        label="Bind identity once, then select the intended lifetime"
         language="typescript"
       />
     </div>
   </section>
 
-  {/* ── 6. Implementing a MemoryAdapter ──────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Choose the smallest engine</div>
+        <h2 class="display display-lg">One API, four deployment paths</h2>
+        <p class="lede">No configuration uses a dependency-free, process-local in-memory engine. Add a first-party package only when retention, sharing, or retrieval requires it.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Engine</th><th>Designed for</th><th>Recall</th><th>Deployment boundary</th></tr></thead>
+          <tbody>
+            <tr><td>In-memory</td><td>Tests, local development, one process</td><td>KV, list, TTL</td><td>No package or backend</td></tr>
+            <tr><td>SQLite</td><td>Local durable applications</td><td>FTS5; optional exact vectors</td><td>One file; optional <code>sqlite-vec</code></td></tr>
+            <tr><td>PostgreSQL</td><td>Shared relational production deployments</td><td>Text, semantic, hybrid</td><td>PostgreSQL 16+ with pgvector</td></tr>
+            <tr><td>Redis</td><td>Low-latency shared recall</td><td>Text; optional semantic and hybrid</td><td>Redis 8+ with Search</td></tr>
+            <tr><td>NATS</td><td>Existing JetStream KV deployments</td><td>KV, list, TTL</td><td>JetStream; deliberately no search</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <CodeBlock
+        code={`import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
+
+const harness = defineHarness({ name: 'claims-review' })
+  .memory(sqliteMemoryEngine({ file: '.purista/memory.sqlite' }))
+  .requires(['memory.persistent'])
+  // models, tools, agents, workflows
+  .build()`}
+        label="A durable local composition"
+        language="typescript"
+      />
+      <p class="memory-note">SQLite has no required third-party runtime dependency. Exact local vectors are an explicit <code>sqlite-vec@0.1.9</code> opt-in. PostgreSQL, Redis, and NATS each live in their own package; Dapr is intentionally not a supported memory backend.</p>
+    </div>
+  </section>
+
   <section class="section-pad">
     <div class="wrap">
-      <div class="flex items-center gap-3 mb-6">
-        <NumberedBadge number={3} color="pilot" />
-        <div class="eyebrow">Expert: implement your own</div>
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Optional model work, visible in operations</div>
+        <h2 class="display display-lg">Semantic recall stays provider-neutral</h2>
+        <p class="lede">Only an engine with vector capability can use a typed embedding alias. A summary alias is separately optional. TypeScript rejects incompatible aliases before deployment, and the Harness validates the same constraint at build time.</p>
       </div>
-      <h2 class="display display-lg mb-6">The MemoryAdapter contract</h2>
-      <p class="lede mb-10">External adapter packages belong in <code class="site-mono">@purista/harness-memory-*</code>. The core harness owns validation, telemetry wrapping, error normalisation, and content-capture policy. Your adapter implements backend I/O only.</p>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h3 class="h3 mb-4">Adapter interface</h3>
-          <CodeBlock
-            code={`import type { MemoryAdapter, MemoryStore } from '@purista/harness'
-
-export function myMemoryAdapter(): MemoryAdapter {
-  return {
-    info: {
-      id: 'my_memory',
-      packageName: '@myorg/harness-memory-custom',
-      capabilities: [
-        'memory.session',
-        'memory.run',
-        'memory.user',
-        'memory.tenant',
-        'memory.ttl',
-        'memory.search',
-      ],
-    },
-
-    get capabilities() { return this.info.capabilities },
-
-    async open(scope, ctx) {
-      // return a MemoryStore for this scope
-      return buildStore(scope, ctx)
-    },
-
-    async close() {
-      // release connections
-    },
-  }
-}`}
-            label="Adapter shell"
-            language="typescript"
-          />
-        </div>
-        <div>
-          <h3 class="h3 mb-4">MemoryStore operations</h3>
-          <CodeBlock
-            code={`function buildStore(scope, ctx): MemoryStore {
-  return {
-    async get(key, opCtx) {
-      opCtx.signal.throwIfAborted()
-      return backend.get(namespace(scope, key))
-    },
-
-    async set(key, value, opCtx) {
-      opCtx.signal.throwIfAborted()
-      const ttl = opCtx.opts?.ttlMs
-      await backend.set(namespace(scope, key), value, { ttl })
-    },
-
-    async delete(key, opCtx) {
-      opCtx.signal.throwIfAborted()
-      await backend.delete(namespace(scope, key))
-    },
-
-    async list(opCtx) {
-      opCtx.signal.throwIfAborted()
-      return backend.list(namespace(scope, opCtx.opts?.prefix ?? ''))
-    },
-
-    // optional: only implement when capability declared
-    async search(query, opCtx) {
-      opCtx.signal.throwIfAborted()
-      return backend.vectorSearch(namespace(scope, ''), query)
-    },
-  }
-}`}
-            label="MemoryStore implementation"
-            language="typescript"
-          />
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          {
-            title: 'Respect ctx.signal',
-            body: 'Call signal.throwIfAborted() at the start of every backend operation. Pass it into any async SDK calls that accept it.',
-            tone: 'found',
-          },
-          {
-            title: 'Backend I/O only',
-            body: 'Core owns telemetry wrapping, error normalisation, and content-capture enforcement. Don\'t duplicate those in your adapter.',
-            tone: 'con',
-          },
-          {
-            title: 'Pass the contract tests',
-            body: 'Use memoryAdapterContract from @purista/harness/testing before publishing. It validates scope isolation, read/write round-trips, and list behaviour.',
-            tone: 'pilot',
-          },
-        ].map((item) => (
-          <div>
-            <div class="text-sm font-semibold mb-2" style={`color: var(--color-${item.tone}-hi)`}>{item.title}</div>
-            <p class="text-sm text-[var(--color-fg-muted)] m-0">{item.body}</p>
-          </div>
-        ))}
+      <CodeBlock
+        code={`const harness = defineHarness({ name: 'knowledge-assistant' })
+  .models({
+    memoryEmbedding: { provider, model: 'embed-v1', capabilities: ['embeddings'] },
+    memorySummary: { provider, model: 'summary-v1', capabilities: ['object'] },
+  })
+  .memory((model) => ({
+    engine: vectorMemoryEngine,
+    embedding: model.memoryEmbedding,
+    summary: model.memorySummary,
+  }))
+  .build()`}
+        label="Capabilities drive autocomplete and type checking"
+        language="typescript"
+      />
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div class="memory-panel"><h3 class="h3 mb-2">Traceable</h3><p><code>harness.memory.*</code> spans show each operation without memory content. The nested model span contains provider, model, available token usage, and cost attributes once.</p></div>
+        <div class="memory-panel"><h3 class="h3 mb-2">Fail-closed</h3><p>An explicit text, semantic, or hybrid request fails when its engine capability is absent. The system never quietly changes retrieval mode.</p></div>
+        <div class="memory-panel"><h3 class="h3 mb-2">Testable</h3><p>Use the in-memory engine for deterministic unit tests and <code>memoryEngineContract</code> for a custom or backend-specific engine.</p></div>
       </div>
     </div>
   </section>
 
   <CTASection
-    headline={[{ text: 'Compare prompts ' }, { text: 'before you ship', color: 'found' }, { text: '.' }]}
-    lede="The eval helpers let you run deterministic prompt comparisons locally — no external platform needed."
+    headline={[{ text: 'Build the right' }, { text: ' memory boundary.', color: 'found' }]}
+    lede="The handbook has setup, capability matrices, engine-specific examples, operation details, and production guidance."
     ctas={[
-      { label: 'Prompt Evaluations', href: '/harness/evaluations/', variant: 'primary' },
-      { label: 'Architecture Reference', href: '/harness/architecture/', variant: 'ghost' },
-      { label: 'Testing Guide', href: '/harness/testing/', variant: 'ghost' },
+      { label: 'Memory guide', href: '/handbook/harness/memory/', variant: 'primary' },
+      { label: 'All Harness packages', href: '/handbook/harness/ecosystem-packages/', variant: 'ghost' },
+      { label: 'Observability', href: '/harness/observability/', variant: 'ghost' },
     ]}
   />
 </HarnessLayout>
 
 <style>
-  .mem-two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(2rem, 4vw, 4rem);
-    align-items: start;
-  }
-  /* prevent grid children from overflowing their column */
-  .mem-two-col > * {
-    min-width: 0;
-    overflow: hidden;
-  }
-  @media (max-width: 760px) { .mem-two-col { grid-template-columns: 1fr; } }
-
-  .mem-scope-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-    border-top: 1px solid var(--color-line);
-    border-left: 1px solid var(--color-line);
-  }
-  @media (max-width: 900px) { .mem-scope-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px) { .mem-scope-grid { grid-template-columns: 1fr; } }
-
-  .mem-scope {
-    padding: clamp(1.2rem, 2vw, 1.6rem);
-    border-bottom: 1px solid var(--color-line);
-    border-right: 1px solid var(--color-line);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    /* prevent the cell from growing beyond its allocated grid column */
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .mem-scope-head {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-  }
-
-  .mem-scope-id {
-    font-size: 0.92rem;
-    font-weight: 700;
-  }
-
-  .mem-scope-lifetime {
-    font-size: 0.73rem;
-    color: var(--color-fg-subtle);
-    font-family: var(--font-mono);
-    letter-spacing: 0.02em;
-  }
-
-  .mem-scope p {
-    font-size: 0.87rem;
-    color: var(--color-fg-muted);
-    line-height: 1.55;
-    margin: 0;
-  }
-
-  .mem-api-table {
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--color-line);
-  }
-
-  .mem-api-row {
-    display: grid;
-    grid-template-columns: minmax(140px, auto) 1fr;
-    gap: 1rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid var(--color-line);
-    font-size: 0.85rem;
-    color: var(--color-fg-muted);
-    align-items: baseline;
-  }
+  .memory-panel { padding: 1.5rem; border: 1px solid var(--color-line); border-radius: var(--radius-md); background: var(--color-bg); }
+  .memory-panel p, .memory-note { margin: 0; color: var(--color-fg-muted); }
+  .scope-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-left: 1px solid var(--color-line); border-top: 1px solid var(--color-line); margin-bottom: 2rem; }
+  .scope-card { display: flex; min-height: 6.5rem; flex-direction: column; justify-content: space-between; gap: .75rem; padding: 1.25rem; border-right: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
+  .scope-card code { color: var(--color-found-hi); font-weight: 700; }
+  .scope-card span { color: var(--color-fg-muted); font-size: .9rem; }
+  .table-wrap { overflow-x: auto; margin-bottom: 2rem; border: 1px solid var(--color-line); border-radius: var(--radius-md); }
+  table { width: 100%; min-width: 720px; border-collapse: collapse; text-align: left; }
+  th, td { padding: 1rem; border-bottom: 1px solid var(--color-line); vertical-align: top; }
+  th { color: var(--color-fg); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+  td { color: var(--color-fg-muted); font-size: .92rem; }
+  tr:last-child td { border-bottom: 0; }
+  .memory-note { margin-top: 1rem; font-size: .9rem; }
+  @media (max-width: 760px) { .scope-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .scope-grid { grid-template-columns: 1fr; } }
 </style>
