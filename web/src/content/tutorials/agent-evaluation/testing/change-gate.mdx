@@ -1,16 +1,23 @@
 ---
 title: Create a change gate
-description: Convert aggregate thresholds and execution health into a test or CI failure.
-order: 294
+description: Convert aggregate thresholds and execution health into tests and CI failures.
+order: 296
 kind: lesson
 status: draft
 ---
 
-A gate must fail when the evaluation did not complete cleanly, even if some
-available case scores look good. Then compare the all-cases aggregate for each
-required dimension.
+Create the gate separately from the evaluator. It rejects incomplete execution,
+then evaluates overall and segment thresholds with readable failure messages.
 
-```ts title="src/changeGate.ts"
+```ts title="src/changeGate.ts" write
+import type { EvaluationRunResult } from '@purista/harness'
+import { passRate } from './scorers.js'
+
+export interface ClassificationGateThresholds {
+	categoryRate: number
+	urgencyRate: number
+}
+
 export function assertClassificationGate(
 	result: EvaluationRunResult,
 	thresholds: ClassificationGateThresholds = { categoryRate: 1, urgencyRate: 1 },
@@ -26,43 +33,193 @@ export function assertClassificationGate(
 	return { categoryRate, urgencyRate }
 }
 ```
+Test the complete deterministic run and its failure modes. Also test the
+mounted PURISTA command and EventBridge guard so quality checks do not replace
+application authorization checks.
 
-The evaluation suite has one passing scripted candidate and one intentional
-regression. Both execute the real portable agent with strict fake providers.
-The second case proves the gate throws when category accuracy drops.
+```ts title="src/agentEvaluation.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { assertClassificationGate } from './changeGate.js'
+import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
 
-Test the PURISTA application separately. A focused command test injects the
-classification policy and mocked declared agent client, then asserts the
-caller-scoped session id. The EventBridge suite proves a successful command
-crosses both business guards and a denied direct-agent invocation reaches no
-model call.
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
-For a production release gate, also inspect critical segment thresholds,
-scorer errors, latency, token use, cost, guardrail behavior, citation
-grounding, tool trajectories, and required workflow steps. Keep threshold
-changes under review rather than weakening them automatically when a candidate
-fails.
+describe('classification agent evaluation', () => {
+	it('runs the versioned dataset and passes the deterministic change gate', async () => {
+		const provider = passingEvaluationProvider()
+		const result = await runClassificationEvaluation(provider)
+		expect(assertClassificationGate(result)).toEqual({ categoryRate: 1, urgencyRate: 1 })
+		expect(result.cases).toHaveLength(3)
+		expect(result.dimensionAggregates).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ dimensionId: 'category_exact' }),
+				expect.objectContaining({ dimensionId: 'urgency_exact' }),
+			]),
+		)
+		provider.assertExhausted()
+	})
 
+	it('fails the gate when a candidate regresses', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		for (const object of [
+			{ category: 'other', urgency: 'normal', reason: 'Incorrect fixture.' },
+			{ category: 'transfer', urgency: 'normal', reason: 'Correct fixture.' },
+			{ category: 'account_access', urgency: 'urgent', reason: 'Correct fixture.' },
+		]) {
+			provider.enqueueObject({ object, usage, finishReason: 'stop' })
+		}
+		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
+		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)
+	})
+})
+```
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('classifySupportMessageCommandBuilder', () => {
+	it('authorizes the message and invokes the evaluated agent address', async () => {
+		const payload = { messageId: 'message-1', text: 'My card is missing.' }
+		const policy = { canClassify: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = { category: 'card' as const, urgency: 'urgent' as const, reason: 'The card is missing.' }
+		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output,
+		})
+
+		await expect(
+			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			policy.canClassify.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'message-1',
+			}),
+		).toBe(true)
+		expect(
+			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
+			}),
+		).toBe(true)
+	})
+})
+```
+```ts title="src/service/support/v1/supportV1Service.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './supportV1Service.js'
+
+describe('evaluated support service', () => {
+	it('mounts the same portable agent evaluated by the release gate', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { category: 'card', urgency: 'normal', reason: 'The customer asks about a replacement card.' },
+			usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 },
+			finishReason: 'stop',
+		})
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const policy = { canClassify: vi.fn(async () => true) }
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: policy },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						payload: {
+							payload: { messageId: 'message-runtime', text: 'How do I replace my expiring card?' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The customer asks about a replacement card.',
+			})
+			expect(policy.canClassify).toHaveBeenCalledTimes(2)
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies the directly addressed agent before model work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-denied',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'classify_support_message',
+						},
+						payload: {
+							payload: { messageId: 'message-denied', text: 'Please classify this.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
 ```bash title="Verify the evaluation chapter" replay="project"
 npm run build
 npm test
 npm run lint
-npm run evaluate
 npm run demo
+npm run evaluate
 ```
 
-`npm run evaluate` uses scripted outputs and prints a deterministic passing
-gate. `npm run demo` invokes the mounted agent through a real EventBridge. Both
-need no API key. They prove execution wiring, not live model quality.
-
-Run a provider candidate only when you intentionally want a live quality
-measurement. Record the provider and model version with the result, review
-cost and data policy first, and expect a non-zero exit when the gate fails.
-
-```bash title="Run the optional live candidate" replay="project"
-cp .env.example .env
-npm run evaluate:live
-```
-
-This chapter remains a draft until the released Harness v3 package passes a
-clean registry replay.
+Store the dataset, scorer versions, thresholds, and target metadata with each
+release candidate. A change gate is useful only when a failed report can be
+reproduced and explained.

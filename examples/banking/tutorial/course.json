@@ -818,6 +818,32 @@
       "id": "agent-evaluation",
       "title": "Evaluate agent behavior",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/agentEvaluation.test.ts",
+        "src/changeGate.ts",
+        "src/createSupportService.ts",
+        "src/dataset.ts",
+        "src/demo.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/runClassificationEvaluation.ts",
+        "src/runEvaluation.ts",
+        "src/runLiveEvaluation.ts",
+        "src/scorers.ts",
+        "src/service/support/v1/SupportResources.ts",
+        "src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
+        "src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportClassification.ts",
+        "src/service/support/v1/supportServiceConfig.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts",
+        "src/testing/scriptedClassificationProvider.ts"
+      ],
       "requires": [
         "ai-guardrails",
         "retrieval-ingestion",
@@ -825,8 +851,10 @@
       ],
       "pages": [
         "agent-evaluation/build/dataset",
+        "agent-evaluation/build/mount-agent",
         "agent-evaluation/build/deterministic-checks",
         "agent-evaluation/build/scoring",
+        "agent-evaluation/build/run-application",
         "agent-evaluation/testing/change-gate"
       ]
     }

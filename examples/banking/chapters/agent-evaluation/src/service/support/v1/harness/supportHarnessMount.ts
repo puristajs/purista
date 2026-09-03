@@ -1,5 +1,5 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { classificationHarness } from '../../../../classificationAgent.js'
+import { classificationHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
 

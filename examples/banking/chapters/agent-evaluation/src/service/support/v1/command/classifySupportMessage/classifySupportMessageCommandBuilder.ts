@@ -1,4 +1,4 @@
-import { classificationInputSchema, classificationOutputSchema } from '../../../../../classificationAgent.js'
+import { classificationInputSchema, classificationOutputSchema } from '../../../../../harness/support/supportHarness.js'
 import { classificationHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'

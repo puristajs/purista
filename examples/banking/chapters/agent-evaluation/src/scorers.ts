@@ -1,6 +1,6 @@
 import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
-import type { ClassificationOutput } from './classificationAgent.js'
 import type { ClassificationAssessment } from './dataset.js'
+import type { ClassificationOutput } from './harness/support/supportHarness.js'
 
 export const categoryScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
 	id: 'classification-category',

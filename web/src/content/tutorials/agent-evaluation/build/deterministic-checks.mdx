@@ -1,50 +1,50 @@
 ---
 title: Add deterministic checks
 description: Score exact structured behavior with ordinary, versioned scorer adapters.
-order: 292
+order: 293
 kind: lesson
 status: draft
 ---
 
-Start with deterministic scoring whenever the expected behavior can be checked
-in code. It is fast, reproducible, inexpensive, and easy to debug.
+Create deterministic category and urgency scorers. They are normal functions
+with stable ids and versions, so a report identifies exactly which policy
+produced each score.
 
-```ts title="src/scorers.ts"
-export const categoryScorer = createDeterministicEvaluationScorer<
-	ClassificationAssessment,
-	ClassificationOutput
->({
+```ts title="src/scorers.ts" write
+import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
+import type { ClassificationAssessment } from './dataset.js'
+import type { ClassificationOutput } from './harness/support/supportHarness.js'
+
+export const categoryScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
 	id: 'classification-category',
 	version: '1.0.0',
 	dimension: { id: 'category_exact', kind: 'boolean' },
-	evaluate: observation => {
+	evaluate: (observation) => {
 		const passed = observation.assessment?.category === observation.output.category
-		return {
-			outcome: 'scored',
-			dimensionId: 'category_exact',
-			kind: 'boolean',
-			value: passed,
-			passed,
-		}
+		return { outcome: 'scored', dimensionId: 'category_exact', kind: 'boolean', value: passed, passed }
 	},
 })
+
+export const urgencyScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
+	id: 'classification-urgency',
+	version: '1.0.0',
+	dimension: { id: 'urgency_exact', kind: 'boolean' },
+	evaluate: (observation) => {
+		const passed = observation.assessment?.urgency === observation.output.urgency
+		return { outcome: 'scored', dimensionId: 'urgency_exact', kind: 'boolean', value: passed, passed }
+	},
+})
+
+export function passRate(result: EvaluationRunResult, dimensionId: string) {
+	const aggregate = result.dimensionAggregates.find(
+		(item) => item.dimensionId === dimensionId && item.scope.kind === 'all',
+	)
+	if (!aggregate) throw new Error(`Missing evaluation aggregate ${dimensionId}`)
+	return aggregate.passCounts?.rate ?? 0
+}
 ```
-
-Create a separate versioned scorer for urgency. Separate dimensions let the
-gate set different thresholds and let reports show which behavior changed.
-
-All scorer implementations use the same `EvaluationScorer` interface. When a
-quality property requires judgment, add a model-backed or external scorer
-adapter with:
-
-- an explicit id and version;
-- declared dimensions;
-- a bounded timeout and retry policy;
-- provider-reported accounting and trace correlation;
-- an `inconclusive` result when evidence is insufficient.
-
-Keep judge prompts and judge models versioned as part of the scorer contract.
-Do not turn an uncertain judge answer into a false deterministic pass.
+Deterministic checks should cover schema-valid facts first. Model-based judges
+can be added for nuanced prose quality, but they need their own model version,
+prompt version, variance budget, and cost controls.
 
 Continue with [Run and score the agent](../scoring/).
-

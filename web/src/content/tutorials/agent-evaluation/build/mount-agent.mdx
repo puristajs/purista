@@ -1,0 +1,192 @@
+---
+title: Mount the evaluated agent
+description: Define one portable Harness agent and expose it through guarded PURISTA addresses.
+order: 292
+kind: lesson
+status: draft
+---
+
+Create the complete portable Harness definition with strict input and output
+schemas. The same definition is mounted on PURISTA and instantiated directly by
+the evaluator.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { z } from 'zod'
+
+export const classificationInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classificationOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+
+export const classificationHarness = defineHarness({ name: 'classification-evaluation' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.agent('classify_support_message', {
+		model: 'primary',
+		input: classificationInputSchema,
+		output: classificationOutputSchema,
+		instructions: [
+			'Classify one Example Bank support message.',
+			'Use urgent only for an immediate deadline, active loss, or blocked essential access.',
+			'Give one short reason grounded only in the supplied message.',
+		].join(' '),
+	})
+	.define()
+
+export type ClassificationInput = z.output<typeof classificationInputSchema>
+export type ClassificationOutput = z.output<typeof classificationOutputSchema>
+```
+Declare the Support-owned classification policy and service configuration.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportClassificationPolicy {
+	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
+}
+```
+```ts title="src/service/support/v1/supportServiceConfig.ts" write
+import { z } from 'zod'
+
+export const supportServiceV1ConfigSchema = z.object({})
+
+export type SupportServiceV1Config = z.input<typeof supportServiceV1ConfigSchema>
+```
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
+
+export const supportServiceInfo = {
+	serviceVersion: '1',
+	...generalSupportServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
+```
+Keep business authorization outside the dataset and model prompt.
+
+```ts title="src/service/support/v1/requireSupportClassification.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+
+export async function requireSupportClassification(
+	policy: SupportClassificationPolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; messageId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canClassify({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			messageId: input.messageId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support message classification is not allowed')
+	}
+}
+
+export function supportClassificationSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	messageId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${messageId}:support-classification-v1`)
+		.digest('hex')
+	return `support-classification:${digest}`
+}
+```
+Publish the agent with the same guard used by direct service callers.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { classificationHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportClassification } from '../requireSupportClassification.js'
+import type { SupportClassificationPolicy } from '../SupportResources.js'
+
+export { classificationHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: ['classify_support_message'], workflows: [] },
+	targets: {
+		agents: {
+			classify_support_message: {
+				beforeGuards: {
+					messageAccess: async (
+						context: HarnessBusinessGuardContext<{
+							supportClassificationPolicy: SupportClassificationPolicy
+						}>,
+						input: { messageId: string },
+					) => {
+						await requireSupportClassification(context.resources.supportClassificationPolicy, {
+							...context.identity,
+							messageId: input.messageId,
+						})
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+Replace the generated command with its typed address-first agent invocation.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
+import { classificationInputSchema, classificationOutputSchema } from '../../../../../harness/support/supportHarness.js'
+import { classificationHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the evaluated agent')
+	.addPayloadSchema(classificationInputSchema)
+	.addOutputSchema(classificationOutputSchema)
+	.canInvokeAgent(
+		'Support',
+		'1',
+		'classify_support_message',
+		classificationHarness.contracts.agents.classify_support_message,
+	)
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
+		})
+		if (outcome.status !== 'completed') {
+			throw new Error('Message classification was interrupted unexpectedly.')
+		}
+		return outcome.output
+	})
+```
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
+import { classificationHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
+	.mountHarness(classificationHarness, supportHarnessPolicy)
+```
+Continue with [Add deterministic checks](../deterministic-checks/).

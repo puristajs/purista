@@ -1,6 +1,10 @@
 import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
-import { type ClassificationInput, type ClassificationOutput, classificationHarness } from './classificationAgent.js'
 import { type ClassificationAssessment, supportClassificationDataset } from './dataset.js'
+import {
+	type ClassificationInput,
+	type ClassificationOutput,
+	classificationHarness,
+} from './harness/support/supportHarness.js'
 import { categoryScorer, urgencyScorer } from './scorers.js'
 
 export async function runClassificationEvaluation(

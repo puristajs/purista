@@ -1,42 +1,78 @@
 ---
-title: Create a versioned evaluation dataset
-description: Store stable inputs, expected behavior, and semantic segments without coupling cases to one model.
+title: Create the project and evaluation dataset
+description: Scaffold the PURISTA boundary and store stable inputs, expected behavior, and semantic segments.
 order: 291
 kind: lesson
 status: draft
 ---
 
-Create a clean consumer project and install exact published packages. Generate
-the Support capability, native agent, and address-first command before adding
-evaluation code beside the portable Harness definition.
+Create a clean project and install its complete published manifest.
 
-```bash title="Create the evaluated Support boundary" replay="project"
-npm create purista@latest agent-evaluation
+```bash title="Create and enter the evaluation project" replay="parent"
+npm create purista@latest agent-evaluation -- --runtime node --event-bridge default --non-interactive --defaults
 cd agent-evaluation
-npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
-npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
-npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
-npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify a support message" --non-interactive
-npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the evaluated agent" --non-interactive
 ```
 
-Mount the definition once on `Support` and let the generated command invoke its
-address-first target. The evaluation runner imports the same
-`classificationHarness`; it does not maintain a second prompt or schema.
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-agent-evaluation",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"evaluate": "node --import tsx src/runEvaluation.ts",
+		"evaluate:live": "node --env-file-if-exists=.env --import tsx src/runLiveEvaluation.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+```bash title="Install the evaluation dependencies" replay="project"
+npm install
+```
 
-The runtime application still needs normal PURISTA security. Define a
-message-aware policy resource, use it as the command's before guard, and apply
-the same check to the published mounted-agent target. Scope the command's
-Harness session to trusted tenant, principal, and message identity. Those
-checks belong in command and EventBridge tests; the offline evaluator calls the
-native agent directly because it measures classifier behavior rather than
-caller authorization.
+Generate the Support owner and its normal application command. The portable
+Harness definition is created on the next page and can also run standalone in
+the evaluator.
 
-Define the expected fields separately from the complete agent output. The
-reason is free text, so this first dataset checks category and urgency without
-requiring one exact sentence.
+```bash title="Generate the evaluated PURISTA boundary" replay="project"
+npm run add:service -- support --description "Own support classification" --non-interactive
+npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message" --non-interactive
+```
 
-```ts title="src/dataset.ts"
+Create a small versioned dataset. Each case has stable input, expected fields,
+and a segment used for aggregate reporting. Expectations deliberately cover
+behavior instead of provider-specific prose.
+
+```ts title="src/dataset.ts" write
+import type { EvaluationDataset } from '@purista/harness'
+import type { ClassificationInput, ClassificationOutput } from './harness/support/supportHarness.js'
+
 export type ClassificationAssessment = Pick<ClassificationOutput, 'category' | 'urgency'>
 
 export const supportClassificationDataset = {
@@ -49,22 +85,19 @@ export const supportClassificationDataset = {
 			assessment: { category: 'card', urgency: 'urgent' },
 			segments: { category: 'card', urgency: 'urgent' },
 		},
+		{
+			id: 'transfer-date',
+			input: { messageId: 'message-2', text: 'When will my scheduled transfer arrive?' },
+			assessment: { category: 'transfer', urgency: 'normal' },
+			segments: { category: 'transfer', urgency: 'normal' },
+		},
+		{
+			id: 'locked-out',
+			input: { messageId: 'message-3', text: 'I am locked out and must pay rent today.' },
+			assessment: { category: 'account_access', urgency: 'urgent' },
+			segments: { category: 'account_access', urgency: 'urgent' },
+		},
 	],
 } as const satisfies EvaluationDataset<ClassificationInput, ClassificationAssessment>
 ```
-
-Use stable case ids. Increase the dataset version when case meaning or expected
-behavior changes. Increase the candidate or task version when the prompt,
-model settings, policies, or execution logic change. Add new examples for production failures, boundary values,
-guardrail blocks, retrieval grounding, tool trajectories, and workflow
-outcomes as those capabilities evolve.
-
-Segments make aggregate gaps visible. An overall score can hide a category
-that fails consistently, so this dataset records category and urgency on each
-case.
-
-Do not place live customer messages or secrets in source-controlled fixtures.
-Use reviewed synthetic or appropriately governed datasets and retain content
-according to application policy.
-
-Continue with [Add deterministic checks](../deterministic-checks/).
+Continue with [Mount the evaluated agent](../mount-agent/).
