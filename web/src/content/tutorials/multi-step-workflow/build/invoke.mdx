@@ -1,35 +1,63 @@
 ---
-title: Invoke a durable workflow through EventBridge
-description: Mount the workflow, guard both addresses, derive caller-scoped run identity, and bind persistent storage.
+title: Invoke the durable workflow through PURISTA
+description: Mount the workflow, guard both addresses, and derive caller-scoped session and run identity.
 order: 273
 kind: lesson
 status: draft
 ---
 
-Publish the workflow and keep the two stage agents private. Define one business
-authorization function and use it at both public boundaries. The command guard
-protects the command's own address. The mounted target guard protects callers
-that invoke the workflow address directly.
+Declare the Support-owned case policy resource.
 
-```ts title="src/service/support/v1/requireSupportCaseResolution.ts"
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportCasePolicy {
+	canResolve(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
+}
+```
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support cases and resolution workflows',
+}).defineResource<'supportCasePolicy', SupportCasePolicy>()
+```
+Keep the business authorization check fail-closed and reuse it at the command
+and mounted workflow boundaries.
+
+```ts title="src/service/support/v1/requireSupportCaseResolution.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
 export async function requireSupportCaseResolution(
 	policy: SupportCasePolicy,
-	input: { tenantId?: string; principalId?: string; caseId: string },
+	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
 ) {
 	if (!input.tenantId || !input.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	if (!(await policy.canResolve({
-		tenantId: input.tenantId,
-		principalId: input.principalId,
-		caseId: input.caseId,
-	}))) {
+	if (
+		!(await policy.canResolve({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			caseId: input.caseId,
+		}))
+	) {
 		throw new HandledError(StatusCode.Forbidden, 'Support case resolution is not allowed')
 	}
 }
 ```
+Publish only the workflow and protect direct callers.
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts"
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportResolutionHarness } from '../../../../harness/support/supportResolutionWorkflow.js'
+import { requireSupportCaseResolution } from '../requireSupportCaseResolution.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
+
+export { supportResolutionHarness }
+
 export const supportHarnessPolicy = {
 	publish: { agents: [], workflows: ['resolve_support_case'] },
 	targets: {
@@ -37,7 +65,10 @@ export const supportHarnessPolicy = {
 		workflows: {
 			resolve_support_case: {
 				beforeGuards: {
-					caseAccess: async (context, input) => {
+					caseAccess: async (
+						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+						input: { caseId: string },
+					) => {
 						await requireSupportCaseResolution(context.resources.supportCasePolicy, {
 							...context.identity,
 							caseId: input.caseId,
@@ -49,12 +80,12 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
+Derive stable session and durable run ids from trusted tenant, principal, and
+case identity. An application retry must address the same logical run.
 
-Create stable session and run ids from the trusted tenant, principal, and case
-identity. Hashing keeps raw identity values out of infrastructure identifiers
-while preventing one caller from sharing a durable run with another.
+```ts title="src/service/support/v1/durableIdentity.ts" write
+import { createHash } from 'node:crypto'
 
-```ts title="src/service/support/v1/durableIdentity.ts"
 export function durableResolutionIdentity(tenantId: string, principalId: string, caseId: string) {
 	const digest = createHash('sha256').update(`${tenantId}:${principalId}:${caseId}:support-resolution-v1`).digest('hex')
 	return {
@@ -63,12 +94,19 @@ export function durableResolutionIdentity(tenantId: string, principalId: string,
 	}
 }
 ```
+Replace the generated command with the complete address-first invocation.
 
-Declare the workflow address and add the command guard before writing command
-logic. Authentication middleware belongs to the Hono chapter. This guard makes
-the business decision: may this authenticated caller resolve this case?
+```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import {
+	supportResolutionInputSchema,
+	supportResolutionOutputSchema,
+} from '../../../../../harness/support/supportResolutionWorkflow.js'
+import { durableResolutionIdentity } from '../../durableIdentity.js'
+import { supportResolutionHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
-```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
 export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
@@ -88,67 +126,28 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 			})
 		},
 	})
-```
-
-Invoke the workflow with both durable identifiers. A repeated command with the
-same tenant, principal, case, and input resumes the same run. Harness rejects
-changed input bound to that run id. The workflow target guard runs again because
-the workflow is independently addressable and must remain safe for every caller.
-
-```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
-.setCommandFunction(async function (context, payload) {
-	const tenantId = context.message.tenantId
-	const principalId = context.message.principalId
-	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
-	const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
-		sessionId: identity.sessionId,
-		durable: { runId: identity.runId },
+	.setCommandFunction(async function (context, payload) {
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
+		const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
+			sessionId: identity.sessionId,
+			durable: { runId: identity.runId },
+		})
+		if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+		return outcome.output
 	})
-	if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
-	return outcome.output
-})
 ```
+Register the command and mount the workflow once.
 
-Accept models and storage as composition inputs so tests can inject strict fake
-providers while the live process can inject real adapters.
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { resolveSupportCaseCommandBuilder } from './command/resolveSupportCase/resolveSupportCaseCommandBuilder.js'
+import { supportHarnessPolicy, supportResolutionHarness } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
-```ts title="src/createSupportService.ts"
-export function createSupportService(eventBridge: EventBridge, logger: Logger, options: Readonly<{
-	supportCasePolicy: SupportCasePolicy
-	storage: HarnessStorage
-	sandbox?: Sandbox
-	workspace?: DurableWorkspace
-	classificationModel: { provider: ModelProvider; model: string }
-	resolutionModel: { provider: ModelProvider; model: string }
-}>) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportCasePolicy: options.supportCasePolicy },
-		ai: {
-			storage: options.storage,
-			...(options.sandbox ? { sandbox: options.sandbox } : {}),
-			...(options.workspace ? { workspace: options.workspace } : {}),
-			models: {
-				classification_model: options.classificationModel,
-				resolution_model: options.resolutionModel,
-			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(resolveSupportCaseCommandBuilder.getDefinition())
+	.mountHarness(supportResolutionHarness, supportHarnessPolicy)
 ```
-
-The optional live entry point uses `localDurableExecution` under `.data`. The
-bundle supplies SQLite run storage plus a matching durable workspace and local
-files-only sandbox. All three boundaries must agree when a session resumes in a
-new process. The mounted Harness owns their shutdown through the Support
-service.
-
-```ts title="src/index.ts"
-const dataDirectory = '.data/multi-step-workflow'
-await mkdir(dataDirectory, { recursive: true })
-const local = localDurableExecution({ root: dataDirectory })
-```
-
-Continue with [Test failure, retry, and checkpoint replay](../../testing/test-workflow/).
+Continue with [Compose and run durable resolution](../run-application/).

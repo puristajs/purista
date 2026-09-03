@@ -1,0 +1,161 @@
+---
+title: Compose and run durable resolution
+description: Bind model and storage adapters, invoke the durable command, and compare deterministic and live runs.
+order: 274
+kind: lesson
+status: draft
+---
+
+Create a provider-neutral service factory. Durable Harness storage is injected
+alongside the model so the same service definition works with test, local, and
+shared adapters.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { DurableWorkspace, HarnessStorage, ModelProvider, Sandbox } from '@purista/harness'
+import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		supportCasePolicy: SupportCasePolicy
+		storage: HarnessStorage
+		sandbox?: Sandbox
+		workspace?: DurableWorkspace
+		classificationModel: { provider: ModelProvider; model: string }
+		resolutionModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportCasePolicy: options.supportCasePolicy },
+		ai: {
+			storage: options.storage,
+			...(options.sandbox ? { sandbox: options.sandbox } : {}),
+			...(options.workspace ? { workspace: options.workspace } : {}),
+			models: {
+				classification_model: options.classificationModel,
+				resolution_model: options.resolutionModel,
+			},
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+Create a deterministic demo that forces a transient second-stage failure,
+retries it, and completes without repeating the checkpointed facts stage.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { inMemoryHarnessStorage } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+async function main() {
+	const classificationProvider = new FakeModelProvider({ strict: true })
+	const resolutionProvider = new FakeModelProvider({ strict: true })
+	classificationProvider.enqueueObject({
+		object: { category: 'card', urgency: 'urgent' },
+		usage,
+		finishReason: 'stop',
+	})
+	resolutionProvider.enqueueObject({
+		object: { summary: 'Verify the caller and secure the missing card.', nextAction: 'freeze_card' },
+		usage,
+		finishReason: 'stop',
+	})
+	const storage = inMemoryHarnessStorage()
+	const logger = initLogger('fatal')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		supportCasePolicy: { canResolve: async () => true },
+		storage,
+		classificationModel: { provider: classificationProvider, model: 'classification-fake' },
+		resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+	})
+	await support.start()
+
+	try {
+		const result = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+				payload: {
+					payload: { caseId: 'case-1', message: 'My card is missing.' },
+					parameter: {},
+				},
+			}),
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		classificationProvider.assertExhausted()
+		resolutionProvider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+		await storage.close()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The multi-step workflow demo failed.'}\n`)
+	process.exit(1)
+})
+```
+Document optional live-provider settings and create the live entry point with
+SQLite Harness storage.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+```ts title="src/index.ts" write
+import { mkdir } from 'node:fs/promises'
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { localDurableExecution } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
+	const provider = openai({ apiKey })
+	const model = process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini'
+	const dataDirectory = '.data/multi-step-workflow'
+	await mkdir(dataDirectory, { recursive: true })
+	const local = localDurableExecution({ root: dataDirectory })
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		supportCasePolicy: {
+			canResolve: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		storage: local.storage,
+		sandbox: local.sandbox,
+		workspace: local.workspace,
+		classificationModel: { provider, model },
+		resolutionModel: { provider, model },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Durable support resolution service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Support workflow service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the deterministic multi-step workflow" replay="project"
+npm run build
+npm run demo
+```
+
+Continue with [Test failure, restart, and checkpoint replay](../../testing/test-workflow/).

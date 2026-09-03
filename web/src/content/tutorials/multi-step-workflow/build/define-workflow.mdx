@@ -1,85 +1,76 @@
 ---
-title: Define the sequential workflow
-description: Compose typed specialist stages inside one native Harness workflow.
+title: Create the project and sequential workflow
+description: Scaffold the PURISTA boundary and define typed specialist stages inside one native Harness workflow.
 order: 271
 kind: lesson
 status: draft
 ---
 
-Create a fresh project and install the published packages. Then generate the
-Support capability, both focused agents, their workflow, and the command that
-will invoke it through EventBridge.
+Create a clean project and install the complete published manifest.
 
-```bash title="Create the workflow boundary" replay="project"
-npm create purista@latest multi-step-workflow
-cd multi-step-workflow
-npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
-npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
-npm run add:service -- support --description "Owns support cases and resolution workflows" --non-interactive
-npm run add:agent -- classify-support-case --service support --service-version 1 --description "Classify one support case" --non-interactive
-npm run add:agent -- plan-support-resolution --service support --service-version 1 --description "Plan the next support action" --non-interactive
+```bash title="Create and enter the multi-step workflow project" replay="parent"
+npm create purista@latest multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+cd multi-step-support-workflow
+```
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-multi-step-workflow",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+```bash title="Install the multi-step workflow dependencies" replay="project"
+npm install
+```
+
+Generate the service, two specialist agents, owning workflow, and application
+command through the PURISTA CLI.
+
+```bash title="Generate workflow definitions and command" replay="project"
+npm run add:service -- support --description "Own support case resolution" --non-interactive
+npm run add:agent -- collect-support-facts --service support --service-version 1 --description "Collect facts for one support case" --non-interactive
+npm run add:agent -- draft-support-resolution --service support --service-version 1 --description "Draft one support resolution" --non-interactive
 npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
 npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
 ```
 
-The CLI creates native Harness modules and the PURISTA service files. The
-retained focused example keeps the short schemas, agents, and workflow in one
-`supportResolutionWorkflow.ts` file so you can see the complete sequence at
-once. Provider keys and runtime adapters do not belong in that definition.
+This focused example keeps the short agent and workflow definitions together.
+Remove their generated placeholders before creating that complete composition.
 
-Define strict schemas for the request, the intermediate classification, the
-planner input, and the final result. Passing a typed intermediate object keeps
-the second stage independent from the first agent's prose or transcript.
-
-```ts title="src/harness/support/supportResolutionWorkflow.ts"
-export const supportClassificationSchema = z.strictObject({
-	category: z.enum(['account_access', 'card', 'transfer', 'other']),
-	urgency: z.enum(['normal', 'urgent']),
-})
-
-export const resolutionPlanInputSchema = z.strictObject({
-	caseId: z.string(),
-	message: z.string(),
-	classification: supportClassificationSchema,
-})
+```bash title="Remove superseded generated Harness placeholders" replay="project"
+rm -rf src/harness/support/agent src/harness/support/workflow
 ```
-
-Register the two focused agents and allowlist both on the workflow.
-
-```ts title="src/harness/support/supportResolutionWorkflow.ts"
-export const supportResolutionHarness = defineHarness({ name: 'support-resolution' })
-	.requireModel('classification_model', { capabilities: ['object'] })
-	.requireModel('resolution_model', { capabilities: ['object'] })
-	.agent('classify_support_case', {
-		model: 'classification_model',
-		input: supportResolutionInputSchema,
-		output: supportClassificationSchema,
-		instructions: 'Classify one Example Bank support case using only the supplied message.',
-	})
-	.agent('plan_support_resolution', {
-		model: 'resolution_model',
-		input: resolutionPlanInputSchema,
-		output: resolutionPlanSchema,
-		instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
-	})
-	.workflow('resolve_support_case', {
-		input: supportResolutionInputSchema,
-		output: supportResolutionOutputSchema,
-		delegation: {
-			agents: ['classify_support_case', 'plan_support_resolution'],
-			maxChildAgentCalls: 3,
-			maxParallelChildAgentCalls: 1,
-		},
-		handler: async context => {
-			// Add durable stages in the next lesson.
-		},
-	})
-	.define()
-```
-
-The workflow is sequential, so `maxParallelChildAgentCalls` remains one. The
-total budget is three: one classification call and up to two planning attempts.
-Neither agent is published as a service target. They are implementation details
-of the published workflow.
 
 Continue with [Add retries and checkpoints](../retry-checkpoint/).

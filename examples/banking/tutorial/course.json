@@ -746,6 +746,25 @@
       "id": "multi-step-workflow",
       "title": "Build a multi-step agent workflow",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/supportResolutionWorkflow.test.ts",
+        "src/harness/support/supportResolutionWorkflow.ts",
+        "src/index.ts",
+        "src/multiStepWorkflow.integration.test.ts",
+        "src/service/support/v1/SupportResources.ts",
+        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts",
+        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts",
+        "src/service/support/v1/durableIdentity.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportCaseResolution.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
       "requires": [
         "human-review-workflow",
         "parallel-agents"
@@ -754,6 +773,7 @@
         "multi-step-workflow/build/define-workflow",
         "multi-step-workflow/build/retry-checkpoint",
         "multi-step-workflow/build/invoke",
+        "multi-step-workflow/build/run-application",
         "multi-step-workflow/testing/test-workflow"
       ]
     },

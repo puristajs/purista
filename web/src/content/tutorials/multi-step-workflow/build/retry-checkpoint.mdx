@@ -6,57 +6,91 @@ kind: lesson
 status: draft
 ---
 
-Wrap each recoverable stage in `context.step`. Under a durable invocation,
-Harness commits the JSON-serializable output after the function succeeds. On a
-later attempt of the same run, a committed step returns its stored output
-without executing the function again.
+Create the complete portable Harness workflow. It collects facts, checkpoints
+that completed result, retries only the resolution stage, checkpoints the
+resolution, and returns one typed output.
 
-```ts title="src/harness/support/supportResolutionWorkflow.ts"
-const classification = supportClassificationSchema.parse(
-	await context.step(
-		'classify-case-v1',
-		() => context.agents.classify_support_case(context.input),
-	),
-)
-```
+```ts title="src/harness/support/supportResolutionWorkflow.ts" write
+import { defineHarness, isHarnessError } from '@purista/harness'
+import { z } from 'zod'
 
-Give stable step ids version suffixes. Changing the meaning of a deployed step
-while old runs can resume is unsafe; add a new id when its contract changes.
+export const supportResolutionInputSchema = z.strictObject({
+	caseId: z.string().trim().min(1).max(80),
+	message: z.string().trim().min(1).max(2_000),
+})
 
-Add a bounded retry policy to the planning stage.
+export const supportClassificationSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+})
 
-```ts title="src/harness/support/supportResolutionWorkflow.ts"
-const plan = resolutionPlanSchema.parse(
-	await context.step(
-		'plan-resolution-v1',
-		() => context.agents.plan_support_resolution({ ...context.input, classification }),
-		{
-			retry: {
-				maxAttempts: 2,
-				minDelayMs: 100,
-				maxDelayMs: 1_000,
-				backoff: 'exponential',
-				shouldRetry: (error) => isHarnessError(error) && error.retriable,
-			},
+export const resolutionPlanInputSchema = z.strictObject({
+	caseId: z.string(),
+	message: z.string(),
+	classification: supportClassificationSchema,
+})
+
+export const resolutionPlanSchema = z.strictObject({
+	summary: z.string().trim().min(1).max(300),
+	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
+})
+
+export const supportResolutionOutputSchema = z.strictObject({
+	caseId: z.string(),
+	classification: supportClassificationSchema,
+	plan: resolutionPlanSchema,
+})
+
+export const supportResolutionHarness = defineHarness({ name: 'support-resolution' })
+	.requireModel('classification_model', { capabilities: ['object'] })
+	.requireModel('resolution_model', { capabilities: ['object'] })
+	.agent('classify_support_case', {
+		model: 'classification_model',
+		input: supportResolutionInputSchema,
+		output: supportClassificationSchema,
+		instructions: 'Classify one Example Bank support case using only the supplied message.',
+	})
+	.agent('plan_support_resolution', {
+		model: 'resolution_model',
+		input: resolutionPlanInputSchema,
+		output: resolutionPlanSchema,
+		instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
+	})
+	.workflow('resolve_support_case', {
+		input: supportResolutionInputSchema,
+		output: supportResolutionOutputSchema,
+		delegation: {
+			agents: ['classify_support_case', 'plan_support_resolution'],
+			maxChildAgentCalls: 3,
+			maxParallelChildAgentCalls: 1,
 		},
-	),
-)
-
-return { caseId: context.input.caseId, classification, plan }
+		handler: async (context) => {
+			const classification = supportClassificationSchema.parse(
+				await context.step('classify-case-v1', () => context.agents.classify_support_case(context.input)),
+			)
+			const plan = resolutionPlanSchema.parse(
+				await context.step(
+					'plan-resolution-v1',
+					() => context.agents.plan_support_resolution({ ...context.input, classification }),
+					{
+						retry: {
+							maxAttempts: 2,
+							minDelayMs: 100,
+							maxDelayMs: 1_000,
+							backoff: 'exponential',
+							shouldRetry: (error) => isHarnessError(error) && error.retriable,
+						},
+					},
+				),
+			)
+			return { caseId: context.input.caseId, classification, plan }
+		},
+	})
+	.define()
 ```
+Named checkpoints make recovery explicit. After a process restart, Harness
+reuses the committed facts instead of rerunning the first agent. Retry policy
+belongs around the stage that can fail transiently; it does not replay every
+earlier side effect.
 
-The retained source uses a short exponential backoff so the example behaves
-like production while remaining practical to test. `shouldRetry` accepts only
-an exported Harness error whose `retriable` flag is true. Validation,
-authorization, cancellation, and unknown programming errors therefore fail
-immediately instead of being repeated.
-
-Every agent attempt, including a retry, consumes one
-`maxChildAgentCalls` slot. Set the budget from the maximum intended path rather
-than only counting logical steps.
-
-`context.step` is a pass-through during a non-durable invocation. Checkpoint
-recovery begins only when the caller supplies a durable run id and the runtime
-binds storage. The next lesson configures both.
-
-Continue with [Invoke a durable run through PURISTA](../invoke/).
+Continue with [Invoke the durable workflow through PURISTA](../invoke/).
