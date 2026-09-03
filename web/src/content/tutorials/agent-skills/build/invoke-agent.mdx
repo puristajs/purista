@@ -1,0 +1,93 @@
+---
+title: Invoke the Skill-enabled agent
+description: Generate a normal PURISTA command, declare the agent address, and return only a completed answer.
+order: 244
+kind: lesson
+status: draft
+---
+
+The published agent now protects direct calls. Add a normal Support command as
+the application entry point for one aggregate answer.
+
+## Generate the command
+
+Use the project-local CLI before replacing its placeholder behavior.
+
+```bash title="Generate the command" replay="project"
+npm run add:command -- answer-procedure-question --service support --service-version 1 --description "Answer a support procedure question with a reviewed Skill" --non-interactive
+```
+
+## Declare and call the agent address
+
+Replace the generated command builder. It reuses the native agent schemas and
+declares the only mounted target available to its handler.
+
+```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts" write
+import {
+	answerProcedureQuestionInputSchema,
+	answerProcedureQuestionOutputSchema,
+} from '../../../../../harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportProcedureAccess, supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('answerProcedureQuestion', 'Answer a support procedure question with a reviewed Skill')
+	.addPayloadSchema(answerProcedureQuestionInputSchema)
+	.addOutputSchema(answerProcedureQuestionOutputSchema)
+	.canInvokeAgent(
+		'Support',
+		'1',
+		'answer_procedure_question',
+		supportHarness.contracts.agents.answer_procedure_question,
+	)
+	.setBeforeGuardHooks({
+		procedureAccess: async function (context, payload) {
+			await requireSupportProcedureAccess(
+				context.resources.supportProcedurePolicy,
+				{ tenantId: context.message.tenantId, principalId: context.message.principalId },
+				payload.caseId,
+			)
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].answer_procedure_question.run(payload, {
+			sessionId: supportProcedureSessionId(context.message, payload.caseId),
+		})
+		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
+		return outcome.output
+	})
+```
+
+`canInvokeAgent(...)` creates the typed
+`context.agent.Support['1'].answer_procedure_question` client. `.run(...)`
+crosses EventBridge and waits for an aggregate outcome. This agent has no
+approval or external wait, so an interruption is not returned as an answer.
+
+The command repeats business authorization because it is another reachable
+address. The mount guard still protects callers that skip this wrapper.
+
+## Register the command and mount once
+
+Replace the generated service file.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { answerProcedureQuestionCommandBuilder } from './command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(answerProcedureQuestionCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+This chapter keeps the command transport-independent. If you later expose it
+through Hono, authentication verifies the credential and places trusted tenant
+and principal ids on the message. These guards then perform business
+authorization.
+
+```bash title="Verify the Skill command and mount" replay="project"
+npm run build
+```
+
+Continue with [Compose the Skill-enabled runtime](../compose-runtime/).

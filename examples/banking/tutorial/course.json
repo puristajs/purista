@@ -684,12 +684,15 @@
         "agent-tools"
       ],
       "pages": [
-        "agent-skills/build/create-skill",
-        "agent-skills/build/bind-skill",
-        "agent-skills/build/secure-content",
-        "agent-skills/build/run-application",
-        "agent-skills/testing/test-skills"
-      ]
+			"agent-skills/build/create-skill",
+			"agent-skills/build/bind-skill",
+			"agent-skills/build/secure-content",
+			"agent-skills/build/invoke-agent",
+			"agent-skills/build/compose-runtime",
+			"agent-skills/build/run-application",
+			"agent-skills/testing/test-skills",
+			"agent-skills/testing/test-routing"
+		]
     },
     {
       "id": "human-review-workflow",

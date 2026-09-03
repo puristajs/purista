@@ -1,23 +1,30 @@
 ---
-title: Authorize and invoke the agent
-description: Guard both public addresses, invoke through EventBridge, and keep Skill text outside the trust boundary.
+title: Authorize the Skill-enabled agent
+description: Protect the published agent with a business policy that evaluates the requested support case.
 order: 243
 kind: lesson
 status: draft
 ---
 
-The application must decide whether the authenticated principal may use
-procedure guidance for this support case. A production policy can check case
-assignment, tenant ownership, and case state. Define that business decision as
-a service resource so production code and tests can provide different
-implementations.
+Skill text gives the model reviewed guidance. It does not decide whether the
+authenticated principal may use that guidance for a support case. Add a typed
+business policy to the Support service and apply it to the published agent
+address before model or sandbox work begins.
+
+## Declare the case policy
+
+Create the resource contract. A production implementation can check tenant
+ownership, case assignment, and case state.
 
 ```ts title="src/service/support/v1/SupportProcedurePolicy.ts" write
 export interface SupportProcedurePolicy {
 	canAnswer(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
-Use one helper for the command guard and the mounted-agent guard.
+
+Use one helper for every reachable boundary. The separate session helper
+combines trusted identity with the case id; its result correlates history but
+never grants access.
 
 ```ts title="src/service/support/v1/requireSupportProcedureAccess.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -52,7 +59,9 @@ export function supportProcedureSessionId(
 	return `support-procedure:${identity.tenantId}:${identity.principalId}:${caseId}`
 }
 ```
-Declare the resource on the generated service builder.
+
+Declare the policy on the generated service builder. The concrete implementation
+will be injected at startup.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -64,10 +73,11 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support conversations and support automation',
 }).defineResource<'supportProcedurePolicy', SupportProcedurePolicy>()
 ```
-The mount policy selects the reachable target and runs the same business check
-when another service addresses the agent directly. The agent input supplies
-only `caseId`; trusted tenant and principal ids come from the PURISTA
-message.
+
+## Guard the directly addressable target
+
+Replace the generated mount policy. The agent input supplies only `caseId`;
+trusted tenant and principal ids come from the PURISTA message.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
@@ -102,72 +112,13 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-Generate the application command before editing it.
 
-```bash title="Generate the command" replay="project"
-npm run add:command -- answer-procedure-question --service support --service-version 1 --description "Answer a support procedure question with a reviewed Skill" --non-interactive
+A Skill may recommend a business operation, but it cannot bypass this guard or
+add the operation as a tool. A script inside the Skill directory also remains
+data because this agent has `read` and no execution tool.
+
+```bash title="Verify the protected Skill mount" replay="project"
+npm run build
 ```
 
-The command declares the exact agent address and performs authorization at its
-own public boundary. It then invokes the agent through EventBridge and unwraps
-only a completed outcome.
-
-```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts" write
-import {
-	answerProcedureQuestionInputSchema,
-	answerProcedureQuestionOutputSchema,
-} from '../../../../../harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
-import { supportHarness } from '../../harness/supportHarnessMount.js'
-import { requireSupportProcedureAccess, supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
-import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
-
-export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
-	.getCommandBuilder('answerProcedureQuestion', 'Answer a support procedure question with a reviewed Skill')
-	.addPayloadSchema(answerProcedureQuestionInputSchema)
-	.addOutputSchema(answerProcedureQuestionOutputSchema)
-	.canInvokeAgent(
-		'Support',
-		'1',
-		'answer_procedure_question',
-		supportHarness.contracts.agents.answer_procedure_question,
-	)
-	.setBeforeGuardHooks({
-		procedureAccess: async function (context, payload) {
-			await requireSupportProcedureAccess(
-				context.resources.supportProcedurePolicy,
-				{ tenantId: context.message.tenantId, principalId: context.message.principalId },
-				payload.caseId,
-			)
-		},
-	})
-	.setCommandFunction(async function (context, payload) {
-		const outcome = await context.agent.Support['1'].answer_procedure_question.run(payload, {
-			sessionId: supportProcedureSessionId(context.message, payload.caseId),
-		})
-		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
-		return outcome.output
-	})
-```
-Register the command and mount the Harness exactly once.
-
-```ts title="src/service/support/v1/supportV1Service.ts" write
-import { answerProcedureQuestionCommandBuilder } from './command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
-import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
-
-export const supportV1Service = supportV1ServiceBuilder
-	.addCommandDefinition(answerProcedureQuestionCommandBuilder.getDefinition())
-	.mountHarness(supportHarness, supportHarnessPolicy)
-```
-This focused chapter does not add HTTP. If you expose the command later, use
-the Hono authentication middleware from the earlier chapters. Protected is the
-default; the middleware verifies the token and places trusted tenant and
-principal ids on the message. These guards then decide whether that principal
-may access this business operation.
-
-Skill content remains data throughout this flow. A file may recommend a
-command, but it cannot add that command as a tool or bypass its guard. A script
-inside the Skill directory also remains a file because this agent has `read`
-and no execution tool.
-
-Continue with [Compose and run the Skill-enabled service](../run-application/).
+Continue with [Invoke the Skill-enabled agent](../invoke-agent/).

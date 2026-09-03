@@ -1,76 +1,16 @@
 ---
-title: Compose and run the Skill-enabled service
-description: Bind models at the composition root and invoke the Skill-enabled agent through PURISTA addresses.
-order: 244
+title: Run the Skill-enabled application
+description: Prove lazy Skill loading with a fake model, then optionally bind OpenAI.
+order: 246
 kind: lesson
 status: draft
 ---
 
-Create a provider-neutral service factory. The Harness definition owns the
-Skill and agent contract; the composition root supplies the model provider.
+The runtime composition is ready. Start with a strict fake model that asks for
+the `read` tool and then returns a structured answer. This proves the model
+loads the Skill on demand without requiring provider credentials.
 
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import { inMemorySandbox, type ModelProvider } from '@purista/harness'
-import type { SupportProcedurePolicy } from './service/support/v1/SupportProcedurePolicy.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		policy: SupportProcedurePolicy
-		model: { provider: ModelProvider; model: string }
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportProcedurePolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			sandbox: inMemorySandbox(),
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-Keep the caller address-first so the same code can reach another service
-instance through a distributed EventBridge.
-
-```ts title="src/invokeProcedureAnswer.ts" write
-import { type EventBridge, getNewInstanceId } from '@purista/core'
-import type { z } from 'zod'
-import type {
-	answerProcedureQuestionInputSchema,
-	answerProcedureQuestionOutputSchema,
-} from './harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
-
-type ProcedureQuestion = z.infer<typeof answerProcedureQuestionInputSchema>
-type ProcedureAnswer = z.infer<typeof answerProcedureQuestionOutputSchema>
-
-export function invokeProcedureAnswer(
-	eventBridge: EventBridge,
-	identity: Readonly<{ tenantId: string; principalId: string }>,
-	payload: ProcedureQuestion,
-) {
-	return eventBridge.invoke<ProcedureAnswer>({
-		contentType: 'application/json',
-		contentEncoding: 'utf-8',
-		tenantId: identity.tenantId,
-		principalId: identity.principalId,
-		sender: {
-			serviceName: 'TutorialClient',
-			serviceVersion: '1',
-			serviceTarget: 'askProcedureQuestion',
-			instanceId: getNewInstanceId(),
-		},
-		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerProcedureQuestion' },
-		payload: { payload, parameter: {} },
-	})
-}
-```
-Create the deterministic demo with a strict fake provider. It invokes the
-normal PURISTA command and prints the typed answer without a credential.
+## Run the deterministic demo
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'

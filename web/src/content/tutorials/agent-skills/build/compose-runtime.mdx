@@ -1,0 +1,94 @@
+---
+title: Compose the Skill-enabled runtime
+description: Bind the model, sandbox, policy, and address-first caller without changing the portable agent.
+order: 245
+kind: lesson
+status: draft
+---
+
+The Harness definition owns the Skill, built-in tool allowlist, and agent
+contract. The composition root supplies the model provider, business policy,
+and sandbox used by this process.
+
+## Create the service factory
+
+Use a provider-neutral factory so local tests and a live process share the same
+service definition.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import { inMemorySandbox, type ModelProvider } from '@purista/harness'
+import type { SupportProcedurePolicy } from './service/support/v1/SupportProcedurePolicy.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportProcedurePolicy
+		model: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportProcedurePolicy: options.policy },
+		ai: {
+			models: { primary: options.model },
+			sandbox: inMemorySandbox(),
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+The in-memory sandbox mounts the reviewed Skill and supplies the allowed
+`read` implementation. It is appropriate for this credential-free example;
+the sandbox-analysis chapter covers process isolation for executable tools.
+
+## Add an address-first caller
+
+Create a terminal adapter that invokes the normal Support command through
+EventBridge.
+
+```ts title="src/invokeProcedureAnswer.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	answerProcedureQuestionInputSchema,
+	answerProcedureQuestionOutputSchema,
+} from './harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+
+type ProcedureQuestion = z.infer<typeof answerProcedureQuestionInputSchema>
+type ProcedureAnswer = z.infer<typeof answerProcedureQuestionOutputSchema>
+
+export function invokeProcedureAnswer(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: ProcedureQuestion,
+) {
+	return eventBridge.invoke<ProcedureAnswer>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'askProcedureQuestion',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerProcedureQuestion' },
+		payload: { payload, parameter: {} },
+	})
+}
+```
+
+The identity arguments represent trusted server-side values. Browser input may
+choose the question and case id, but authentication must establish tenant and
+principal before constructing this message.
+
+```bash title="Verify the Skill runtime composition" replay="project"
+npm run build
+```
+
+Continue with [Run the Skill-enabled application](../run-application/).
