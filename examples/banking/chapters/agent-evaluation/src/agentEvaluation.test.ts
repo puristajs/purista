@@ -2,19 +2,13 @@ import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { assertClassificationGate } from './changeGate.js'
 import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
 describe('classification agent evaluation', () => {
 	it('runs the versioned dataset and passes the deterministic change gate', async () => {
-		const provider = new FakeModelProvider({ strict: true })
-		for (const object of [
-			{ category: 'card', urgency: 'urgent', reason: 'The card is stolen and active misuse is reported.' },
-			{ category: 'transfer', urgency: 'normal', reason: 'The question concerns a scheduled transfer date.' },
-			{ category: 'account_access', urgency: 'urgent', reason: 'Essential access is blocked before a deadline.' },
-		]) {
-			provider.enqueueObject({ object, usage, finishReason: 'stop' })
-		}
+		const provider = passingEvaluationProvider()
 		const result = await runClassificationEvaluation(provider)
 		expect(assertClassificationGate(result)).toEqual({ categoryRate: 1, urgencyRate: 1 })
 		expect(result.cases).toHaveLength(3)

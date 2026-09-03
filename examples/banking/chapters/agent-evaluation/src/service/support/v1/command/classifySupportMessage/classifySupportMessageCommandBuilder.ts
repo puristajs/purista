@@ -1,5 +1,6 @@
 import { classificationInputSchema, classificationOutputSchema } from '../../../../../classificationAgent.js'
 import { classificationHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
@@ -12,9 +13,18 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		'classify_support_message',
 		classificationHarness.contracts.agents.classify_support_message,
 	)
-	.setCommandFunction(async function ({ agent }, payload) {
-		const outcome = await agent.Support['1'].classify_support_message.run(payload, {
-			sessionId: `support-message:${payload.messageId}`,
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
 		})
 		if (outcome.status !== 'completed') {
 			throw new Error('Message classification was interrupted unexpectedly.')

@@ -6,20 +6,31 @@ kind: lesson
 status: draft
 ---
 
-Keep evaluation code beside the portable Harness definition or in a dedicated
-test package. Generate the PURISTA boundary and install the same published
-dependencies that a clean consumer uses.
+Create a clean consumer project and install exact published packages. Generate
+the Support capability, native agent, and address-first command before adding
+evaluation code beside the portable Harness definition.
 
 ```bash title="Create the evaluated Support boundary" replay="project"
+npm create purista@latest agent-evaluation
+cd agent-evaluation
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
 npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
-npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the evaluated agent" --non-interactive
 npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify a support message" --non-interactive
-npm install @purista/core @purista/harness @purista/harness-openai zod
+npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the evaluated agent" --non-interactive
 ```
 
 Mount the definition once on `Support` and let the generated command invoke its
 address-first target. The evaluation runner imports the same
 `classificationHarness`; it does not maintain a second prompt or schema.
+
+The runtime application still needs normal PURISTA security. Define a
+message-aware policy resource, use it as the command's before guard, and apply
+the same check to the published mounted-agent target. Scope the command's
+Harness session to trusted tenant, principal, and message identity. Those
+checks belong in command and EventBridge tests; the offline evaluator calls the
+native agent directly because it measures classifier behavior rather than
+caller authorization.
 
 Define the expected fields separately from the complete agent output. The
 reason is free text, so this first dataset checks category and urgency without
@@ -43,7 +54,8 @@ export const supportClassificationDataset = {
 ```
 
 Use stable case ids. Increase the dataset version when case meaning or expected
-behavior changes. Add new examples for production failures, boundary values,
+behavior changes. Increase the candidate or task version when the prompt,
+model settings, policies, or execution logic change. Add new examples for production failures, boundary values,
 guardrail blocks, retrieval grounding, tool trajectories, and workflow
 outcomes as those capabilities evolve.
 

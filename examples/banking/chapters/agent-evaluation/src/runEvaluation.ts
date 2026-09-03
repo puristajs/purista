@@ -1,14 +1,13 @@
-import { openai } from '@purista/harness-openai'
 import { assertClassificationGate } from './changeGate.js'
 import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
 
 async function main() {
-	const apiKey = process.env.OPENAI_API_KEY?.trim()
-	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the evaluation.')
-	const model = process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini'
-	const result = await runClassificationEvaluation(openai({ apiKey }), { model })
+	const provider = passingEvaluationProvider()
+	const result = await runClassificationEvaluation(provider, { model: 'scripted-evaluation-model' })
 	const gate = assertClassificationGate(result)
 	process.stdout.write(`${JSON.stringify({ status: result.status, gate }, null, 2)}\n`)
+	provider.assertExhausted()
 }
 
 main().catch((error: unknown) => {

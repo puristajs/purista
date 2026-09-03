@@ -192,6 +192,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   default test, label its boundary, and add an opt-in integration test for the
   real container or remote sandbox adapter. Purge adapter-owned resources
   through its administration API before removing private lifecycle metadata.
+- Separate evaluation-pipeline proof from model-quality evidence. A scripted
+  provider can deterministically test dataset execution, scorers, aggregation,
+  and failing gates, but it cannot establish candidate quality. Put the live
+  provider run behind a separate explicit command, record its model identity,
+  and allow a failed threshold to exit non-zero. Evaluate the native Harness
+  target without duplicating its prompt or schema, while separate PURISTA
+  helper and EventBridge tests cover identity and business authorization.
 - Treat Agent Skills as model-readable context only. Register explicit
   directories, validate them at startup, expose only the required sandbox
   tools, and prove the initial prompt contains the compact catalog rather than

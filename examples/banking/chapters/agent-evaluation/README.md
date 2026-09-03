@@ -10,9 +10,14 @@ npm install
 npm run build
 npm test
 npm run lint
+npm run evaluate
+npm run demo
 ```
 
-The test uses a strict fake model provider and needs no API key.
+The tests, default evaluation command, and EventBridge demo use strict fake
+model providers and need no API key. They prove the evaluation pipeline and
+release-gate wiring; they do not measure a live model's quality.
 
-To run the real service or evaluation, copy `.env.example` to `.env`, set
-`OPENAI_API_KEY`, then use `npm start` or `npm run evaluate`.
+To run the live service or evaluate a real provider candidate, copy
+`.env.example` to `.env`, set `OPENAI_API_KEY`, then use `npm start` or
+`npm run evaluate:live`.

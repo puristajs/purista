@@ -7,14 +7,20 @@ group: ai
 status: draft
 ---
 
-This chapter teaches repeatable agent evaluation for the portable support
-classifier mounted by a PURISTA `Support` service. It runs that same definition
-over a small versioned dataset, applies deterministic scorers, and fails a
-change gate when accuracy drops.
+This chapter teaches repeatable agent evaluation for a portable classifier
+mounted by a PURISTA `Support` service. You create a fresh project, generate
+the service, agent, and command with the CLI, then evaluate that exact native
+Harness definition over a small versioned dataset. Deterministic scorers measure
+observable behavior, and a change gate fails when accuracy drops.
 
 Evaluation is an offline engineering workflow. It does not belong in a public
 request handler, and it does not replace command tests, business guard tests,
 or production observability.
+
+The default evaluation uses a strict scripted provider. It proves dataset,
+runner, scorer, aggregate, and gate wiring without credentials. It does not
+measure model quality. The optional live evaluation runs the same dataset
+against a named provider model and may fail the gate.
 
 You will learn how to:
 
@@ -23,7 +29,8 @@ You will learn how to:
 - start with deterministic checks before adding model judges;
 - aggregate results across semantic segments;
 - keep observations and accounting under application ownership;
-- turn thresholds into a CI failure.
+- turn thresholds into a CI failure;
+- keep runtime authorization tests separate from offline quality evaluation.
 
 1. [Create a versioned evaluation dataset](./build/dataset/)
 2. [Add deterministic checks](./build/deterministic-checks/)

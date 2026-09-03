@@ -8,6 +8,7 @@ status: draft
 
 Instantiate the portable Harness definition with the candidate provider. The
 evaluation task opens one isolated session per case and runs the real agent.
+No alternate evaluation-only prompt, handler, or output schema is allowed.
 
 ```ts title="src/runClassificationEvaluation.ts"
 const harness = await classificationHarness.getInstance({
@@ -48,6 +49,11 @@ Raise it only with explicit model admission and rate-limit planning.
 Harness returns result records and aggregates; the application decides where
 to persist content-bearing observations. Use `scoreEvaluation` to apply new
 scorer versions to saved observations without rerunning expensive tasks.
+
+The evaluator does not call the mounted PURISTA address. That is intentional:
+the evaluation target is the portable model behavior, while command tests and
+EventBridge integration tests verify identity propagation and business guards.
+Keep both suites in the release pipeline.
 
 Always shut down the Harness in `finally` so adapters and live sessions close
 when a task or scorer fails.

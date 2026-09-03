@@ -1,5 +1,6 @@
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
 import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
 import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
 
 export const supportServiceInfo = {
@@ -7,6 +8,6 @@ export const supportServiceInfo = {
 	...generalSupportServiceInfo,
 } as const satisfies ServiceInfoType
 
-export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo).setConfigSchema(
-	supportServiceV1ConfigSchema,
-)
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
