@@ -1,24 +1,22 @@
 ---
-title: Test both classification boundaries
-description: Test the native Harness definition, the PURISTA address declaration, and real EventBridge routing.
-order: 184
+title: Test the small classification boundaries
+description: Test the native Harness definition and the PURISTA command helper without starting the complete service.
+order: 186
 kind: lesson
 status: draft
 ---
 
-There are two behaviors to test separately:
+Test the two smallest boundaries before starting EventBridge:
 
-1. the native Harness definition sends the expected structured request to a
-   model and validates its result; and
-2. the PURISTA command invokes the declared service address and handles the
-   returned `RunOutcome`.
+1. native Harness should validate the model's structured classification; and
+2. the PURISTA command should authorize the message and invoke only its
+   declared agent address.
 
-Neither unit test needs a network call or provider credential.
+Both tests are deterministic and require no provider credentials.
 
-## Test the native definition
+## Test the native Harness definition
 
-Replace the generated agent test with a strict fake provider. The fake returns
-one structured response and fails if the agent makes an unexpected model call.
+Replace the test generated beside the agent.
 
 ```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -62,12 +60,14 @@ describe('classifySupportMessageAgent', () => {
 	})
 })
 ```
+`FakeModelProvider` returns exactly one object. Harness validates it with the
+agent output schema. `strict: true` also rejects an unexpected extra model
+request.
 
-## Test the PURISTA command
+## Test the PURISTA command helper
 
-Use `createCommandContextMock` with the generated command builder. The helper
-creates a typed stub for every declared invocation. Resolve that address with a
-completed outcome, then verify the command passed the stable session id.
+Replace the generated command test. `createCommandContextMock` reads
+`canInvokeAgent(...)` and creates the matching invocation stub.
 
 ```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -86,10 +86,11 @@ describe('classifySupportMessageCommandBuilder', () => {
 			messageId: 'MSG-123',
 			text: 'I cannot sign in and payroll closes in one hour.',
 		}
+		const supportClassificationPolicy = { canClassify: sandbox.stub().resolves(true) }
 		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
-			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
+			resources: { supportClassificationPolicy },
 			sandbox,
 		})
 		context.message = getCommandMessageMock({
@@ -114,6 +115,13 @@ describe('classifySupportMessageCommandBuilder', () => {
 		expect(
 			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
 				sessionId: supportClassificationSessionId(context.message, payload.messageId),
+			}),
+		).toBe(true)
+		expect(
+			supportClassificationPolicy.canClassify.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'MSG-123',
 			}),
 		).toBe(true)
 	})
@@ -143,167 +151,12 @@ describe('classifySupportMessageCommandBuilder', () => {
 	})
 })
 ```
+The first case checks both the business policy input and the derived session id.
+The second ensures an interrupted run does not become a successful command
+response.
 
-Now add one integration test. It starts a real local EventBridge and the mounted
-service, but still supplies the deterministic fake model.
-
-```ts title="src/service/support/v1/supportV1Service.test.ts" write
-import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
-import { describe, expect, it, vi } from 'vitest'
-import { supportV1Service } from './supportV1Service.js'
-
-describe('supportV1Service', () => {
-	it('routes the command to the mounted agent through EventBridge', async () => {
-		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {
-				category: 'card',
-				urgency: 'normal',
-				reason: 'The message asks about a replacement card without an immediate deadline.',
-			},
-			usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 },
-			finishReason: 'stop',
-		})
-		const eventBridge = new DefaultEventBridge()
-		await eventBridge.start()
-		const policy = { canClassify: vi.fn(async () => true) }
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportClassificationPolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
-		})
-		await service.start()
-
-		try {
-			const response = await eventBridge.invoke(
-				getCommandMessageMock({
-					tenantId: 'tenant-example',
-					principalId: 'principal-alex',
-					receiver: {
-						serviceName: 'Support',
-						serviceVersion: '1',
-						serviceTarget: 'classifySupportMessage',
-					},
-					payload: {
-						payload: { messageId: 'MSG-200', text: 'How do I replace an expiring card?' },
-						parameter: {},
-					},
-				}),
-			)
-
-			expect(response).toEqual({
-				category: 'card',
-				urgency: 'normal',
-				reason: 'The message asks about a replacement card without an immediate deadline.',
-			})
-			expect(policy.canClassify).toHaveBeenCalledTimes(2)
-			expect(policy.canClassify).toHaveBeenCalledWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-alex',
-				messageId: 'MSG-200',
-			})
-			provider.assertExhausted()
-		} finally {
-			await service.destroy()
-			await eventBridge.destroy()
-		}
-	})
-
-	it('denies the published agent before the model is called', async () => {
-		const provider = new FakeModelProvider({ strict: true })
-		const eventBridge = new DefaultEventBridge()
-		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
-		})
-		await service.start()
-
-		try {
-			await expect(
-				eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-other',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
-						payload: {
-							payload: { messageId: 'MSG-201', text: 'Please classify this message.' },
-							parameter: {},
-						},
-					}),
-				),
-			).rejects.toMatchObject({ errorCode: 403 })
-			provider.assertExhausted()
-		} finally {
-			await service.destroy()
-			await eventBridge.destroy()
-		}
-	})
-})
+```bash title="Run the focused classification unit tests" replay="project"
+npm test -- src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts
 ```
 
-```bash title="Run the focused classification checks" replay="project"
-npm run build
-npx vitest run src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts src/service/support/v1/supportV1Service.test.ts
-npm run lint
-```
-
-The same test file includes a denied case. Its policy returns `false`, the
-command rejects with a handled `403`, and the strict fake provider remains
-unused. This proves the published target guard runs before paid model work.
-
-The service-routing tests prove the normal command reaches the mounted agent
-address with the trusted identity. The complete focused source is retained in
-`examples/banking/chapters/classification-agent`.
-
-In an application composition root, bind a real provider like this:
-
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
-import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		policy: SupportClassificationPolicy
-		model: { provider: ModelProvider; model: string }
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-
-The application owns credentials, provider selection, business-policy
-implementation, telemetry policy, and service lifecycle. The definition stays portable. Model admission is supplied
-as a `ModelAdmission` adapter with `acquire()`; it is not a numeric object.
-Use a PURISTA Harness queue binding when the complete agent invocation must
-wait durably before it starts.
-
-Run the credential-free demo first. It starts EventBridge, injects a permissive
-fixture policy and strict fake model, invokes the command, and prints the typed
-classification.
-
-```bash title="Run the deterministic classification demo" replay="project"
-npm run demo
-```
-
-For an optional live run, copy `.env.example` to `.env`, add the provider key,
-and start the retained composition root. It starts the EventBridge and mounted
-Support service and registers graceful shutdown.
-
-```bash title="Run the classification service" replay="project"
-cp .env.example .env
-npm start
-```
+Continue with [Test the complete EventBridge route](../test-eventbridge/).

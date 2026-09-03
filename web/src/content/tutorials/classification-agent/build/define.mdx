@@ -48,7 +48,6 @@ export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState
 	},
 )
 ```
-
 `model: 'primary'` is a portable alias. The definition does not choose a
 provider credential or deployment model. `updates: 'object-snapshot'` also
 declares the only incremental update shape this agent may produce. A caller can
@@ -65,7 +64,6 @@ export const supportHarness = defineHarness({ name: 'support' })
 	.use(classifySupportMessageAgent)
 	.define()
 ```
-
 The required `object` capability makes startup fail early if the bound
 provider cannot create structured output. Later Support agents and workflows
 will be added with more `.use(...)` calls to this same definition. The service

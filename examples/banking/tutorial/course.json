@@ -398,14 +398,36 @@
       "id": "classification-agent",
       "title": "Add a classification agent",
       "status": "draft",
+	  "constructionVerified": true,
+	  "requiredWrittenFiles": [
+		"package.json",
+		"src/createSupportService.ts",
+		"src/demo.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts",
+		"src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts",
+		"src/harness/support/supportHarness.ts",
+		"src/index.ts",
+		"src/invokeClassification.ts",
+		"src/service/support/v1/SupportResources.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
+		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+		"src/service/support/v1/harness/supportHarnessMount.ts",
+		"src/service/support/v1/requireSupportClassification.ts",
+		"src/service/support/v1/supportV1Service.test.ts",
+		"src/service/support/v1/supportV1Service.ts",
+		"src/service/support/v1/supportV1ServiceBuilder.ts"
+	  ],
       "requires": [
         "create-project"
       ],
       "pages": [
         "classification-agent/build/scaffold",
         "classification-agent/build/define",
+		"classification-agent/build/mount",
         "classification-agent/build/invoke",
-        "classification-agent/testing/test-classification"
+		"classification-agent/build/run-application",
+		"classification-agent/testing/test-classification",
+		"classification-agent/testing/test-eventbridge"
       ]
     },
     {

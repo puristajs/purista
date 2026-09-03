@@ -1,20 +1,36 @@
 ---
 title: Invoke the agent from a command
-description: Generate a normal command, declare the agent address, and unwrap the completed outcome.
-order: 183
+description: Generate an application command, declare the mounted agent address, and return its completed structured result.
+order: 184
 kind: lesson
 status: draft
 ---
 
-Application code should consume the agent through a normal PURISTA boundary.
-Generate the command before editing it.
+The mounted agent is a PURISTA capability, but mounting it does not create an
+HTTP endpoint or application-specific API. Add a normal Support command as the
+entry point for callers that need one aggregate classification.
+
+## Generate the command
+
+Use the project-local CLI. It creates the builder, placeholder schemas, inferred
+types, test, and service registration.
 
 ```bash title="Generate the classification command" replay="project"
 npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the mounted agent" --non-interactive
 ```
 
-Use the same schemas at the command boundary and declare the exact target
-address with `canInvokeAgent`.
+The command and agent share the same input and output contracts, so remove the
+unused command-local placeholders. The command builder will import the native
+Harness schemas directly.
+
+```bash title="Remove unused command schema placeholders" replay="project"
+rm src/service/support/v1/command/classifySupportMessage/schema.ts
+rm src/service/support/v1/command/classifySupportMessage/types.ts
+```
+
+## Declare and call the agent address
+
+Replace the generated command builder with the complete file below.
 
 ```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
 import {
@@ -49,128 +65,18 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
+`canInvokeAgent(...)` declares the versioned target and adds only that call to
+`context.agent`. `.run(...)` asks for one aggregate `RunOutcome`; it still
+crosses EventBridge when the command and agent live in the same process.
 
-`canInvokeAgent` adds only the declared address to `context.agent`. The call
-always crosses EventBridge, even when Support and the command run in the same
-process. This preserves the same location-independent execution model as
-commands, streams, and subscriptions.
+The command guard authorizes the normal entry point. The mount guard from the
+previous page protects direct target invocations. The classifier has no
+approval or external wait, so an interrupted outcome is unexpected and must not
+be returned as a successful classification.
 
-`.run(...)` returns a `RunOutcome`. The command returns the validated output
-only after a completed run. This classifier has no approval or external-wait
-step, so an interruption is unexpected here. A later workflow chapter will
-show how to expose an interrupted outcome as an ordinary review state rather
-than an HTTP 500 response.
+## Register the command and mount once
 
-Both the command and the directly published agent address need business
-authorization. Define one policy contract and reuse one helper so the two
-entry points make the same decision.
-
-```ts title="src/service/support/v1/SupportResources.ts" write
-export interface SupportClassificationPolicy {
-	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
-}
-```
-
-```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
-import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
-import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
-import type { SupportClassificationPolicy } from './SupportResources.js'
-import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
-
-export const supportServiceInfo = {
-	serviceVersion: '1',
-	...generalSupportServiceInfo,
-} as const satisfies ServiceInfoType
-
-export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
-	.setConfigSchema(supportServiceV1ConfigSchema)
-	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
-```
-
-```ts title="src/service/support/v1/requireSupportClassification.ts" write
-import { createHash } from 'node:crypto'
-import { HandledError, StatusCode } from '@purista/core'
-import type { SupportClassificationPolicy } from './SupportResources.js'
-
-export async function requireSupportClassification(
-	policy: SupportClassificationPolicy,
-	input: Readonly<{ tenantId?: string; principalId?: string; messageId: string }>,
-) {
-	if (!input.tenantId || !input.principalId)
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	if (
-		!(await policy.canClassify({
-			tenantId: input.tenantId,
-			principalId: input.principalId,
-			messageId: input.messageId,
-		}))
-	) {
-		throw new HandledError(StatusCode.Forbidden, 'Support message classification is not allowed')
-	}
-}
-
-export function supportClassificationSessionId(
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	messageId: string,
-) {
-	if (!identity.tenantId || !identity.principalId)
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	const digest = createHash('sha256')
-		.update(`${identity.tenantId}:${identity.principalId}:${messageId}:support-classification-v1`)
-		.digest('hex')
-	return `support-classification:${digest}`
-}
-```
-
-The policy receives the message identifier because authorization may depend on
-the specific business object. The derived Harness session id includes trusted
-tenant and principal identity before it is hashed, so two callers cannot share
-a session merely by choosing the same `messageId`.
-
-Replace the generated mount policy. It selects the reachable agent and checks
-whether the authenticated principal may use support automation before the
-model runs.
-
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
-import { requireSupportClassification } from '../requireSupportClassification.js'
-import type { SupportClassificationPolicy } from '../SupportResources.js'
-
-export { supportHarness }
-
-export const supportHarnessPolicy = {
-	publish: { agents: ['classify_support_message'], workflows: [] },
-	targets: {
-		agents: {
-			classify_support_message: {
-				beforeGuards: {
-					mayClassifySupport: async (
-						context: HarnessBusinessGuardContext<{
-							supportClassificationPolicy: SupportClassificationPolicy
-						}>,
-						input: { messageId: string },
-					) => {
-						await requireSupportClassification(context.resources.supportClassificationPolicy, {
-							...context.identity,
-							messageId: input.messageId,
-						})
-					},
-				},
-			},
-		},
-		workflows: {},
-	},
-} as const
-```
-
-The command guard protects the normal application entry point. The mount guard
-protects callers that address the published agent directly. Both perform
-business authorization. An HTTP protection middleware is
-responsible for authenticating a token and placing trusted tenant and principal
-ids on the PURISTA message. The model input never grants access.
-
-The service adds the command definition and mounts the Harness once.
+Replace the service file. Keep one mount for the composed Support Harness.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
@@ -181,9 +87,12 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
+No HTTP metadata is needed for this terminal example. If you later expose the
+command through Hono, it remains protected unless the builder explicitly calls
+`makeEndpointPublic()`.
 
-The command has no HTTP metadata yet. Adding an HTTP endpoint later does not
-change how the command invokes the agent, and the endpoint will remain
-protected unless its builder explicitly calls `makeEndpointPublic()`.
+```bash title="Verify the command and mount composition" replay="project"
+npm run build
+```
 
-Continue with [Test both boundaries](../testing/test-classification/).
+Continue with [Wire and run the classification application](../run-application/).

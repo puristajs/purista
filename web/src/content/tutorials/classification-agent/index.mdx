@@ -28,19 +28,23 @@ The command never imports or calls an agent definition directly. The Harness
 definition contains no API key and no OpenAI client. That separation keeps the
 definition usable by native Harness and by a mounted PURISTA service.
 
+You need Node.js 24 or newer and basic TypeScript knowledge. The required path
+uses `FakeModelProvider`, so it needs no API key, HTTP server, database, or
+earlier tutorial.
+
 ## What you will build
 
 You will:
 
-1. generate `Support` and `classifySupportMessage` with the PURISTA CLI;
-2. replace the generated example schemas with a strict classification contract;
-3. compose one Harness definition and mount it once on the service;
-4. generate a command that declares the agent's versioned address;
-5. bind a concrete model provider only when the service instance is created;
-6. test the Harness definition with `FakeModelProvider`; and
-7. test the PURISTA command with `createCommandContextMock`.
+1. [create a project and generate Support plus its agent](./build/scaffold/);
+2. [replace the placeholder with a structured classifier](./build/define/);
+3. [authorize and mount the published agent](./build/mount/);
+4. [generate a command that invokes the agent by address](./build/invoke/);
+5. [bind the runtime and run a deterministic demo](./build/run-application/);
+6. [test the native agent and command helper](./testing/test-classification/); and
+7. [prove the complete EventBridge route and direct-target denial](./testing/test-eventbridge/).
 
-The completed focused source is in
-`examples/banking/chapters/classification-agent`.
+Every code block that creates or replaces a file contains the complete file.
+The finished source is in `examples/banking/chapters/classification-agent`.
 
 Start with [Generate the service and agent](./build/scaffold/).
