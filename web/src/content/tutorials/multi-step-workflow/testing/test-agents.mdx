@@ -1,0 +1,94 @@
+---
+title: Test the workflow stage agents
+description: Verify each generated agent module and its declared model alias before testing recovery.
+order: 278
+kind: lesson
+status: draft
+---
+
+Test the generated modules before testing the complete service. The two agent
+tests each provide only their declared model alias and prove that Harness
+validates the structured result.
+
+```ts title="src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { classifySupportCaseAgent } from './classifySupportCaseAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('classifySupportCaseAgent', () => {
+	it('returns a schema-validated classification', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { category: 'card', urgency: 'urgent' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'classification-agent-test' })
+			.requireModel('classification_model', { capabilities: ['object'] })
+			.use(classifySupportCaseAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { classification_model: { provider, model: 'classification-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('classification-case-1')
+			await expect(
+				session.agents.classify_support_case.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { category: 'card', urgency: 'urgent' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+```ts title="src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResolutionAgent } from './planSupportResolutionAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('planSupportResolutionAgent', () => {
+	it('returns a schema-validated resolution plan', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'resolution-agent-test' })
+			.requireModel('resolution_model', { capabilities: ['object'] })
+			.use(planSupportResolutionAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { resolution_model: { provider, model: 'resolution-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('resolution-case-1')
+			await expect(
+				session.agents.plan_support_resolution.run({
+					caseId: 'case-1',
+					message: 'My card is missing.',
+					classification: { category: 'card', urgency: 'urgent' },
+				}),
+			).resolves.toMatchObject({ status: 'completed', output: { nextAction: 'freeze_card' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+
+```bash title="Run the workflow stage tests" replay="project"
+npm test -- src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.test.ts src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.test.ts
+```
+
+Continue with [Test restart and checkpoint recovery](../test-workflow/).

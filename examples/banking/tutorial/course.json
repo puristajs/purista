@@ -820,13 +820,18 @@
         "human-review-workflow",
         "parallel-agents"
       ],
-      "pages": [
-        "multi-step-workflow/build/define-workflow",
-        "multi-step-workflow/build/retry-checkpoint",
-        "multi-step-workflow/build/invoke",
-        "multi-step-workflow/build/run-application",
-        "multi-step-workflow/testing/test-workflow"
-      ]
+		"pages": [
+			"multi-step-workflow/build/define-workflow",
+			"multi-step-workflow/build/define-agents",
+			"multi-step-workflow/build/retry-checkpoint",
+			"multi-step-workflow/build/publish-workflow",
+			"multi-step-workflow/build/invoke",
+			"multi-step-workflow/build/compose-runtime",
+			"multi-step-workflow/build/run-application",
+			"multi-step-workflow/testing/test-agents",
+			"multi-step-workflow/testing/test-workflow",
+			"multi-step-workflow/testing/test-routing"
+		]
     },
     {
       "id": "sandbox-analysis",

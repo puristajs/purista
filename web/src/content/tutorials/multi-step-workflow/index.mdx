@@ -27,10 +27,15 @@ Harness and PURISTA execution model:
 - the workflow remains addressable through EventBridge.
 
 1. [Create the project and generate the modules](./build/define-workflow/)
-2. [Fill the agents and add workflow checkpoints](./build/retry-checkpoint/)
-3. [Invoke a durable run through PURISTA](./build/invoke/)
-4. [Compose and run the durable application](./build/run-application/)
-5. [Test failure, retry, restart, and checkpoint replay](./testing/test-workflow/)
+2. [Define the two typed workflow stages](./build/define-agents/)
+3. [Add bounded retry and named checkpoints](./build/retry-checkpoint/)
+4. [Protect and publish only the workflow](./build/publish-workflow/)
+5. [Invoke a durable run through PURISTA](./build/invoke/)
+6. [Compose the durable runtime](./build/compose-runtime/)
+7. [Run the deterministic and optional live application](./build/run-application/)
+8. [Test the generated stage agents](./testing/test-agents/)
+9. [Test restart and checkpoint recovery](./testing/test-workflow/)
+10. [Test durable command and EventBridge routing](./testing/test-routing/)
 
 The retained project is in
 `examples/banking/chapters/multi-step-workflow`.

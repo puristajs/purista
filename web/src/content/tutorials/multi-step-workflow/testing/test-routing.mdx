@@ -1,0 +1,309 @@
+---
+title: Test durable PURISTA routing
+description: Verify command identity, mounted authorization, bounded retry, input idempotency, and checkpoint reuse through EventBridge.
+order: 280
+kind: lesson
+status: draft
+---
+
+Test the PURISTA command separately with its declared workflow client, trusted
+identity, stable durable ids, and business policy. This test needs no running
+Harness runtime because the generated context mock supplies the workflow
+client.
+
+```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { durableResolutionIdentity } from '../../durableIdentity.js'
+import { resolveSupportCaseCommandBuilder } from './resolveSupportCaseCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('resolveSupportCaseCommandBuilder', () => {
+	it('authorizes the case and invokes the declared durable workflow address', async () => {
+		const payload = { caseId: 'case-1', message: 'My card is missing.' }
+		const policy = { canResolve: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(resolveSupportCaseCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportCasePolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = {
+			caseId: 'case-1',
+			classification: { category: 'card' as const, urgency: 'urgent' as const },
+			plan: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' as const },
+		}
+		;(stubs.workflow as any).Support['1'].resolve_support_case.run.resolves({
+			status: 'completed',
+			runId: 'support-run-1',
+			output,
+		})
+
+		await expect(
+			resolveSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			policy.canResolve.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				caseId: 'case-1',
+			}),
+		).toBe(true)
+		const identity = durableResolutionIdentity('tenant-example', 'principal-alex', 'case-1')
+		expect(
+			(stubs.workflow as any).Support['1'].resolve_support_case.run.calledOnceWith(payload, {
+				sessionId: identity.sessionId,
+				durable: { runId: identity.runId },
+			}),
+		).toBe(true)
+	})
+})
+```
+Finally run a mounted EventBridge integration. It proves command routing,
+workflow publication, both authorization boundaries, bounded retry, checkpoint
+reuse, and idempotency protection through the public PURISTA address.
+
+```ts title="src/multiStepWorkflow.integration.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { InMemoryHarnessStorage, ModelError } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('durable multi-step workflow over PURISTA', () => {
+	it('retries a failed step and replays the earlier checkpoint on the next invocation', async () => {
+		const classificationProvider = new FakeModelProvider({ strict: true })
+		const resolutionProvider = new FakeModelProvider({ strict: true })
+		const resolutionObject = vi.spyOn(resolutionProvider, 'object')
+		resolutionObject
+			.mockRejectedValueOnce(
+				new ModelError('The planning provider is temporarily unavailable.', {
+					provider: 'fake',
+					model: 'resolution-fake',
+					method: 'object',
+					reason: 'provider_unavailable',
+				}),
+			)
+			.mockRejectedValueOnce(
+				new ModelError('The planning provider is temporarily unavailable.', {
+					provider: 'fake',
+					model: 'resolution-fake',
+					method: 'object',
+					reason: 'provider_unavailable',
+				}),
+			)
+		classificationProvider.enqueueObject({
+			object: { category: 'card', urgency: 'urgent' },
+			usage,
+			finishReason: 'stop',
+		})
+		const storage = new InMemoryHarnessStorage()
+		const policy = { canResolve: vi.fn(async () => true) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportCasePolicy: policy },
+			ai: {
+				storage,
+				models: {
+					classification_model: { provider: classificationProvider, model: 'classification-fake' },
+					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+				},
+			},
+		})
+		await service.start()
+		const message = () =>
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+				payload: {
+					payload: { caseId: 'case-1', message: 'My card was stolen and is being used.' },
+					parameter: {},
+				},
+			})
+
+		try {
+			await expect(eventBridge.invoke(message())).rejects.toBeDefined()
+			expect(classificationProvider.requests).toHaveLength(1)
+			expect(resolutionObject).toHaveBeenCalledTimes(2)
+
+			resolutionProvider.enqueueObject({
+				object: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+				usage,
+				finishReason: 'stop',
+			})
+			await expect(eventBridge.invoke(message())).resolves.toEqual({
+				caseId: 'case-1',
+				classification: { category: 'card', urgency: 'urgent' },
+				plan: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+			})
+			expect(classificationProvider.requests).toHaveLength(1)
+			expect(resolutionObject).toHaveBeenCalledTimes(3)
+			classificationProvider.assertExhausted()
+			resolutionProvider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('does not retry a permanent model-output validation failure', async () => {
+		const classificationProvider = new FakeModelProvider({ strict: true })
+		const resolutionProvider = new FakeModelProvider({ strict: true })
+		classificationProvider.enqueueObject({
+			object: { category: 'card', urgency: 'normal' },
+			usage,
+			finishReason: 'stop',
+		})
+		resolutionProvider.enqueueObject({
+			object: { summary: '', nextAction: 'unknown' },
+			usage,
+			finishReason: 'stop',
+		})
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			resources: { supportCasePolicy: { canResolve: vi.fn(async () => true) } },
+			ai: {
+				storage: new InMemoryHarnessStorage(),
+				models: {
+					classification_model: { provider: classificationProvider, model: 'classification-fake' },
+					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+				},
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+						payload: {
+							payload: { caseId: 'case-permanent', message: 'My card is damaged.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toBeDefined()
+			expect(resolutionProvider.requests).toHaveLength(1)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('rejects changed input for an existing durable run without another model call', async () => {
+		const classificationProvider = new FakeModelProvider({ strict: true })
+		const resolutionProvider = new FakeModelProvider({ strict: true })
+		classificationProvider.enqueueObject({
+			object: { category: 'transfer', urgency: 'normal' },
+			usage,
+			finishReason: 'stop',
+		})
+		resolutionProvider.enqueueObject({
+			object: { summary: 'Check the transfer status.', nextAction: 'reply' },
+			usage,
+			finishReason: 'stop',
+		})
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			resources: { supportCasePolicy: { canResolve: vi.fn(async () => true) } },
+			ai: {
+				storage: new InMemoryHarnessStorage(),
+				models: {
+					classification_model: { provider: classificationProvider, model: 'classification-fake' },
+					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+				},
+			},
+		})
+		await service.start()
+
+		const invoke = (message: string) =>
+			eventBridge.invoke(
+				getCommandMessageMock({
+					tenantId: 'tenant-example',
+					principalId: 'principal-alex',
+					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+					payload: {
+						payload: { caseId: 'case-stable', message },
+						parameter: {},
+					},
+				}),
+			)
+
+		try {
+			await expect(invoke('Where is transfer tx-1?')).resolves.toMatchObject({ caseId: 'case-stable' })
+			await expect(invoke('Use different input for the same case.')).rejects.toBeDefined()
+			expect(classificationProvider.requests).toHaveLength(1)
+			expect(resolutionProvider.requests).toHaveLength(1)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('rejects a direct workflow invocation before any model call when business access is denied', async () => {
+		const classificationProvider = new FakeModelProvider({ strict: true })
+		const resolutionProvider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			resources: { supportCasePolicy: { canResolve: vi.fn(async () => false) } },
+			ai: {
+				storage: new InMemoryHarnessStorage(),
+				models: {
+					classification_model: { provider: classificationProvider, model: 'classification-fake' },
+					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+				},
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-denied',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolve_support_case' },
+						payload: {
+							payload: { caseId: 'case-denied', message: 'Help with this case.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(classificationProvider.requests).toHaveLength(0)
+			expect(resolutionProvider.requests).toHaveLength(0)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
+Run type checking first, then all five test files, lint, and the deterministic
+demo.
+
+```bash title="Verify the multi-step workflow chapter" replay="project"
+npm run build
+npm test
+npm run lint
+npm run demo
+```

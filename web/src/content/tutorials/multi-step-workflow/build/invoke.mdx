@@ -1,87 +1,18 @@
 ---
-title: Invoke the durable workflow through PURISTA
-description: Mount the workflow, guard both addresses, and derive caller-scoped session and run identity.
-order: 273
+title: Invoke the durable workflow
+description: Derive stable caller-scoped run identity and call the mounted workflow from a normal PURISTA command.
+order: 275
 kind: lesson
 status: draft
 ---
 
-Declare the Support-owned case policy resource.
+The workflow is published and protected. The application command now needs
+stable session and run ids so a repeated request resumes the same durable work.
 
-```ts title="src/service/support/v1/SupportResources.ts" write
-export interface SupportCasePolicy {
-	canResolve(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
-}
-```
-```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
-import { ServiceBuilder } from '@purista/core'
-import type { SupportCasePolicy } from './SupportResources.js'
+## Derive durable identity from trusted values
 
-export const supportV1ServiceBuilder = new ServiceBuilder({
-	serviceName: 'Support',
-	serviceVersion: '1',
-	serviceDescription: 'Owns support cases and resolution workflows',
-}).defineResource<'supportCasePolicy', SupportCasePolicy>()
-```
-Keep the business authorization check fail-closed and reuse it at the command
-and mounted workflow boundaries.
-
-```ts title="src/service/support/v1/requireSupportCaseResolution.ts" write
-import { HandledError, StatusCode } from '@purista/core'
-import type { SupportCasePolicy } from './SupportResources.js'
-
-export async function requireSupportCaseResolution(
-	policy: SupportCasePolicy,
-	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
-) {
-	if (!input.tenantId || !input.principalId) {
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	if (
-		!(await policy.canResolve({
-			tenantId: input.tenantId,
-			principalId: input.principalId,
-			caseId: input.caseId,
-		}))
-	) {
-		throw new HandledError(StatusCode.Forbidden, 'Support case resolution is not allowed')
-	}
-}
-```
-Publish only the workflow and protect direct callers.
-
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
-import { requireSupportCaseResolution } from '../requireSupportCaseResolution.js'
-import type { SupportCasePolicy } from '../SupportResources.js'
-
-export { supportHarness }
-
-export const supportHarnessPolicy = {
-	publish: { agents: [], workflows: ['resolve_support_case'] },
-	targets: {
-		agents: {},
-		workflows: {
-			resolve_support_case: {
-				beforeGuards: {
-					caseAccess: async (
-						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
-						input: { caseId: string },
-					) => {
-						await requireSupportCaseResolution(context.resources.supportCasePolicy, {
-							...context.identity,
-							caseId: input.caseId,
-						})
-					},
-				},
-			},
-		},
-	},
-} as const
-```
-Derive stable session and durable run ids from trusted tenant, principal, and
-case identity. An application retry must address the same logical run.
+Create one helper that hashes tenant, principal, case, and contract version.
+An application retry for the same case will derive the same ids.
 
 ```ts title="src/service/support/v1/durableIdentity.ts" write
 import { createHash } from 'node:crypto'
@@ -94,7 +25,14 @@ export function durableResolutionIdentity(tenantId: string, principalId: string,
 	}
 }
 ```
-Replace the generated command with the complete address-first invocation.
+
+The ids correlate and resume work. They do not authorize it; the command and
+mounted-target guards still evaluate the current request.
+
+## Invoke the workflow by address
+
+Replace the generated command. It declares the exact workflow contract and
+uses identity from the PURISTA message, never from the payload.
 
 ```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -134,7 +72,12 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
-Register the command and mount the workflow once.
+
+`canInvokeWorkflow(...)` creates the typed workflow client. The EventBridge
+call carries trace and trusted identity. The durable option tells Harness to
+use the stable run record and its named checkpoints.
+
+Register the command and mount once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { resolveSupportCaseCommandBuilder } from './command/resolveSupportCase/resolveSupportCaseCommandBuilder.js'
@@ -145,4 +88,9 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(resolveSupportCaseCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-Continue with [Compose and run durable resolution](../run-application/).
+
+```bash title="Verify the durable command invocation" replay="project"
+npm run build
+```
+
+Continue with [Compose the durable runtime](../compose-runtime/).

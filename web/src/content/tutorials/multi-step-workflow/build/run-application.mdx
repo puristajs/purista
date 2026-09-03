@@ -1,51 +1,13 @@
 ---
-title: Compose and run durable resolution
-description: Bind model and storage adapters, invoke the durable command, and compare deterministic and live runs.
-order: 274
+title: Run durable resolution
+description: Invoke the workflow with deterministic local adapters, then optionally bind persistent SQLite and OpenAI.
+order: 277
 kind: lesson
 status: draft
 ---
 
-Create a provider-neutral service factory. Durable Harness storage is injected
-alongside the model so the same service definition works with test, local, and
-shared adapters.
-
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { DurableWorkspace, HarnessStorage, ModelProvider, Sandbox } from '@purista/harness'
-import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		supportCasePolicy: SupportCasePolicy
-		storage: HarnessStorage
-		sandbox?: Sandbox
-		workspace?: DurableWorkspace
-		classificationModel: { provider: ModelProvider; model: string }
-		resolutionModel: { provider: ModelProvider; model: string }
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportCasePolicy: options.supportCasePolicy },
-		ai: {
-			storage: options.storage,
-			...(options.sandbox ? { sandbox: options.sandbox } : {}),
-			...(options.workspace ? { workspace: options.workspace } : {}),
-			models: {
-				classification_model: options.classificationModel,
-				resolution_model: options.resolutionModel,
-			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-Create a deterministic demo that forces a transient second-stage failure,
-retries it, and completes without repeating the checkpointed facts stage.
+The composition is ready. Start with in-memory storage and strict fake models
+so the first complete path is deterministic and needs no provider credential.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -158,4 +120,4 @@ npm run build
 npm run demo
 ```
 
-Continue with [Test failure, restart, and checkpoint replay](../../testing/test-workflow/).
+Continue with [Test the generated workflow stages](../../testing/test-agents/).
