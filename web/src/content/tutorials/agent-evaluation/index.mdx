@@ -7,38 +7,40 @@ group: ai
 status: draft
 ---
 
-This chapter teaches repeatable agent evaluation for a portable classifier
-mounted by a PURISTA `Support` service. You create a fresh project, generate
-the service, agent, and command with the CLI, then evaluate that exact native
-Harness definition over a small versioned dataset. Deterministic scorers measure
-observable behavior, and a change gate fails when accuracy drops.
+This chapter teaches repeatable evaluation as an engineering capability. You
+build a portable classifier, mount it on a PURISTA Support service, and evaluate
+that exact native Harness definition over a small versioned dataset.
 
-Evaluation is an offline engineering workflow. It does not belong in a public
-request handler, and it does not replace command tests, business guard tests,
-or production observability.
+The Example Bank messages make classification concrete without expanding the
+business domain. Deterministic scorers measure observable structured behavior,
+and a change gate fails when accuracy or execution health regresses.
 
-The default evaluation uses a strict scripted provider. It proves dataset,
-runner, scorer, aggregate, and gate wiring without credentials. It does not
-measure model quality. The optional live evaluation runs the same dataset
-against a named provider model and may fail the gate.
+Evaluation is an offline workflow. It does not belong in a public request
+handler, and it does not replace command tests, business-guard tests, routed
+integration tests, or production observability.
 
-You will learn how to:
+The default candidate is a strict scripted provider. It proves the complete
+evaluation system without credentials but does not measure model quality. An
+optional runner evaluates the same definition and dataset against a named live
+provider model.
 
-- version datasets, candidates, tasks, and scorers independently;
-- execute the real portable agent for every case;
-- start with deterministic checks before adding model judges;
-- aggregate results across semantic segments;
-- keep observations and accounting under application ownership;
-- turn thresholds into a CI failure;
-- keep runtime authorization tests separate from offline quality evaluation.
+Follow these pages in order:
 
-1. [Create a versioned evaluation dataset](./build/dataset/)
-2. [Define and mount the exact agent under evaluation](./build/mount-agent/)
-3. [Add deterministic checks](./build/deterministic-checks/)
-4. [Run and score the agent](./build/scoring/)
-5. [Compose the credential-free and optional live runners](./build/run-application/)
-6. [Create a change gate](./testing/change-gate/)
+1. [Scaffold the evaluation project](./setup/scaffold/).
+2. [Create a versioned dataset](./build/dataset/).
+3. [Define the evaluated agent](./build/define-agent/).
+4. [Authorize the mounted agent](./build/authorize-agent/).
+5. [Invoke the agent from a command](./build/invoke-agent/).
+6. [Add deterministic scorers](./build/deterministic-checks/).
+7. [Define the change gate](./build/change-gate/).
+8. [Run and aggregate evaluation](./build/scoring/).
+9. [Compose the evaluated service](./build/compose-runtime/).
+10. [Run the mounted classifier through PURISTA](./build/run-application/).
+11. [Run a live candidate](./build/run-live/).
+12. [Test the agent and evaluation runner](./testing/test-evaluation/).
+13. [Test Framework integration](./testing/test-framework/).
 
-The retained project is in `examples/banking/chapters/agent-evaluation`. It
-contains the mounted PURISTA service, the address-first command, and the
-offline evaluation runner.
+The complete runnable source is in
+`examples/banking/chapters/agent-evaluation`.
+
+Start with [Scaffold the evaluation project](./setup/scaffold/).

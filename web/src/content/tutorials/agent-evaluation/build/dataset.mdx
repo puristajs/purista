@@ -1,74 +1,14 @@
 ---
-title: Create the project and evaluation dataset
-description: Scaffold the PURISTA boundary and store stable inputs, expected behavior, and semantic segments.
-order: 291
+title: Create a versioned dataset
+description: Store stable inputs, expected structured behavior, and semantic segments as ordinary application data.
+order: 292
 kind: lesson
 status: draft
 ---
 
-Create a clean project and install its complete published manifest.
-
-```bash title="Create and enter the evaluation project" replay="parent"
-npm create purista@2.2.0 agent-evaluation -- --runtime node --event-bridge default --non-interactive --defaults
-cd agent-evaluation
-```
-
-```json title="package.json" write
-{
-	"name": "@purista/tutorial-agent-evaluation",
-	"version": "1.0.0",
-	"private": true,
-	"type": "module",
-	"engines": {
-		"node": ">=24.15.0"
-	},
-	"scripts": {
-		"add:service": "purista add service",
-		"add:command": "purista add command",
-		"add:agent": "purista add agent",
-		"build": "tsc --noEmit",
-		"demo": "node --import tsx src/demo.ts",
-		"evaluate": "node --import tsx src/runEvaluation.ts",
-		"evaluate:live": "node --env-file-if-exists=.env --import tsx src/runLiveEvaluation.ts",
-		"lint": "biome check .",
-		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
-		"test": "vitest run"
-	},
-	"dependencies": {
-		"@purista/core": "4.0.0",
-		"@purista/harness": "3.0.0",
-		"@purista/harness-openai": "3.0.0",
-		"zod": "4.4.3"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.5.8",
-		"@purista/cli": "4.0.0",
-		"@types/node": "26.2.0",
-		"@types/sinon": "22.0.0",
-		"sinon": "22.1.0",
-		"tsx": "4.23.12",
-		"typescript": "7.0.2",
-		"vitest": "4.1.10"
-	}
-}
-```
-```bash title="Install the evaluation dependencies" replay="project"
-npm install
-```
-
-Generate the Support owner, the evaluated agent, and its normal application
-command. The next page fills the generated agent module and composes the same
-definition for PURISTA and the standalone evaluator.
-
-```bash title="Generate the evaluated PURISTA boundary" replay="project"
-npm run add:service -- support --description "Own support classification" --non-interactive
-npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message" --non-interactive
-npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message" --non-interactive
-```
-
-Create a small versioned dataset. Each case has stable input, expected fields,
-and a segment used for aggregate reporting. Expectations deliberately cover
-behavior instead of provider-specific prose.
+Create a small, reviewable evaluation dataset. Each case has a stable ID, the
+real agent input, the expected structured fields, and segments used to inspect
+important slices independently.
 
 ```ts title="src/dataset.ts" write
 import type { EvaluationDataset } from '@purista/harness'
@@ -101,4 +41,17 @@ export const supportClassificationDataset = {
 	],
 } as const satisfies EvaluationDataset<ClassificationInput, ClassificationAssessment>
 ```
-Continue with [Mount the evaluated agent](../mount-agent/).
+
+Version the dataset independently from prompts, models, and scorers. A dataset
+change means the measurement target changed; a candidate change means the
+system under test changed. Keeping those identities separate makes evaluation
+results comparable.
+
+The banking messages are deliberately short fixtures. The capability being
+taught is dataset structure and traceability, not banking-domain coverage.
+
+```bash title="Type-check the dataset"
+npm run build
+```
+
+Continue with [Define the evaluated agent](../define-agent/).

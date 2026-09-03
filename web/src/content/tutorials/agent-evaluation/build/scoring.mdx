@@ -1,13 +1,14 @@
 ---
-title: Run and score the agent
-description: Execute the portable agent for each case and aggregate versioned observations.
-order: 294
+title: Run and aggregate evaluation
+description: Execute the real portable agent for every case, aggregate observations, and apply the release gate.
+order: 298
 kind: lesson
 status: draft
 ---
 
-Run every dataset case in an isolated Harness session and return its typed
-agent output to the evaluator.
+Build a runner around the native Harness definition. It creates one runtime,
+uses a separate stable session per case, scores successful outputs, records
+failures as observations, and always shuts the runtime down.
 
 ```ts title="src/runClassificationEvaluation.ts" write
 import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
@@ -54,7 +55,10 @@ export async function runClassificationEvaluation(
 	}
 }
 ```
-Use a strict scripted provider for the repeatable local evaluation target.
+
+Create a strict scripted provider for the credential-free candidate. It returns
+the expected structured outputs and fails if the runner makes an unexpected
+model call.
 
 ```ts title="src/testing/scriptedClassificationProvider.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -73,7 +77,9 @@ export function passingEvaluationProvider() {
 	return provider
 }
 ```
-Compose the dataset, target, and scorers into one deterministic evaluation run.
+
+Add the executable that supplies candidate identity, runs the complete dataset,
+and applies the change gate.
 
 ```ts title="src/runEvaluation.ts" write
 import { assertClassificationGate } from './changeGate.js'
@@ -93,8 +99,14 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-The aggregate retains per-case observations, segment scores, execution status,
-and target metadata. A score without execution health is insufficient because
-partial runs can look deceptively successful.
 
-Continue with [Compose deterministic and live evaluation](../run-application/).
+```bash title="Run the credential-free evaluation" replay="project"
+npm run build
+npm run evaluate
+```
+
+The output reports a completed run and a passing aggregate gate. This proves
+dataset, agent, runner, scorer, aggregate, and gate wiring; a scripted candidate
+does not measure real model quality.
+
+Continue with [Compose the evaluated service](../compose-runtime/).

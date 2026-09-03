@@ -1,14 +1,14 @@
 ---
-title: Add deterministic checks
-description: Score exact structured behavior with ordinary, versioned scorer adapters.
-order: 293
+title: Add deterministic scorers
+description: Measure exact structured behavior with small, versioned scorer adapters before introducing model judges.
+order: 296
 kind: lesson
 status: draft
 ---
 
-Create deterministic category and urgency scorers. They are normal functions
-with stable ids and versions, so a report identifies exactly which policy
-produced each score.
+Start with deterministic checks for fields that have an objective expected
+value. Each scorer returns a stable name, version, numeric score, and readable
+reason.
 
 ```ts title="src/scorers.ts" write
 import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
@@ -43,8 +43,16 @@ export function passRate(result: EvaluationRunResult, dimensionId: string) {
 	return aggregate.passCounts?.rate ?? 0
 }
 ```
-Deterministic checks should cover schema-valid facts first. Model-based judges
-can be added for nuanced prose quality, but they need their own model version,
-prompt version, variance budget, and cost controls.
 
-Continue with [Run and score the agent](../scoring/).
+Scorer versions change only when scoring semantics change. This keeps a score
+series interpretable and avoids silently comparing two different metrics.
+
+Model judges can be added later for tone or explanation quality, but they need
+provider configuration, calibration examples, and their own versioning. Exact
+category and urgency fields do not need that extra uncertainty.
+
+```bash title="Type-check the scorers"
+npm run build
+```
+
+Continue with [Define the change gate](../change-gate/).

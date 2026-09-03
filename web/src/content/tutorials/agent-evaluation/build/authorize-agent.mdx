@@ -1,0 +1,124 @@
+---
+title: Authorize the mounted agent
+description: Protect the directly addressable classifier with the Support service's action-specific business policy.
+order: 294
+kind: lesson
+status: draft
+---
+
+Declare the Support-owned policy resource and explicit service configuration.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportClassificationPolicy {
+	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
+}
+```
+
+```ts title="src/service/support/v1/supportServiceConfig.ts" write
+import { z } from 'zod'
+
+export const supportServiceV1ConfigSchema = z.object({})
+
+export type SupportServiceV1Config = z.input<typeof supportServiceV1ConfigSchema>
+```
+
+Attach the resource to the generated service builder.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
+
+export const supportServiceInfo = {
+	serviceVersion: '1',
+	...generalSupportServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
+```
+
+Centralize the business authorization rule and the tenant- and
+principal-scoped session identity used for Harness calls.
+
+```ts title="src/service/support/v1/requireSupportClassification.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+
+export async function requireSupportClassification(
+	policy: SupportClassificationPolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; messageId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canClassify({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			messageId: input.messageId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support message classification is not allowed')
+	}
+}
+
+export function supportClassificationSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	messageId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${messageId}:support-classification-v1`)
+		.digest('hex')
+	return `support-classification:${digest}`
+}
+```
+
+Publish the agent with its own guard. Offline evaluation may invoke the native
+Harness definition directly, but every Framework address must remain secure
+when the service runs.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportClassification } from '../requireSupportClassification.js'
+import type { SupportClassificationPolicy } from '../SupportResources.js'
+
+export { supportHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: ['classify_support_message'], workflows: [] },
+	targets: {
+		agents: {
+			classify_support_message: {
+				beforeGuards: {
+					messageAccess: async (
+						context: HarnessBusinessGuardContext<{
+							supportClassificationPolicy: SupportClassificationPolicy
+						}>,
+						input: { messageId: string },
+					) => {
+						await requireSupportClassification(context.resources.supportClassificationPolicy, {
+							...context.identity,
+							messageId: input.messageId,
+						})
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+
+```bash title="Type-check the mounted capability"
+npm run build
+```
+
+Continue with [Invoke the agent from a command](../invoke-agent/).

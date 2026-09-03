@@ -930,12 +930,19 @@
         "multi-step-workflow"
       ],
       "pages": [
+        "agent-evaluation/setup/scaffold",
         "agent-evaluation/build/dataset",
-        "agent-evaluation/build/mount-agent",
+        "agent-evaluation/build/define-agent",
+        "agent-evaluation/build/authorize-agent",
+        "agent-evaluation/build/invoke-agent",
         "agent-evaluation/build/deterministic-checks",
+        "agent-evaluation/build/change-gate",
         "agent-evaluation/build/scoring",
+        "agent-evaluation/build/compose-runtime",
         "agent-evaluation/build/run-application",
-        "agent-evaluation/testing/change-gate"
+        "agent-evaluation/build/run-live",
+        "agent-evaluation/testing/test-evaluation",
+        "agent-evaluation/testing/test-framework"
       ]
     }
   ],

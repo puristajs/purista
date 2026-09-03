@@ -1,0 +1,91 @@
+---
+title: Test the agent and runner
+description: Verify the native classifier contract and prove the deterministic dataset passes the aggregate release gate.
+order: 302
+kind: lesson
+status: draft
+---
+
+Test the native agent module with a fake provider. This isolates schema,
+instructions, model alias, and output validation from PURISTA routing.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
+
+describe('classifySupportMessageAgent', () => {
+	it('returns a schema-validated classification', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { category: 'card', urgency: 'urgent', reason: 'The card is stolen and active misuse is reported.' },
+			usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 },
+			finishReason: 'stop',
+		})
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'classification-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('classification-message-1')
+			await expect(
+				session.agents.classify_support_message.run({
+					messageId: 'message-1',
+					text: 'My card was stolen and someone is using it now.',
+				}),
+			).resolves.toMatchObject({ status: 'completed', output: { category: 'card', urgency: 'urgent' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+
+Then test the offline runner and change gate over the complete versioned
+dataset.
+
+```ts title="src/agentEvaluation.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { assertClassificationGate } from './changeGate.js'
+import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('classification agent evaluation', () => {
+	it('runs the versioned dataset and passes the deterministic change gate', async () => {
+		const provider = passingEvaluationProvider()
+		const result = await runClassificationEvaluation(provider)
+		expect(assertClassificationGate(result)).toEqual({ categoryRate: 1, urgencyRate: 1 })
+		expect(result.cases).toHaveLength(3)
+		expect(result.dimensionAggregates).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ dimensionId: 'category_exact' }),
+				expect.objectContaining({ dimensionId: 'urgency_exact' }),
+			]),
+		)
+		provider.assertExhausted()
+	})
+
+	it('fails the gate when a candidate regresses', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		for (const object of [
+			{ category: 'other', urgency: 'normal', reason: 'Incorrect fixture.' },
+			{ category: 'transfer', urgency: 'normal', reason: 'Correct fixture.' },
+			{ category: 'account_access', urgency: 'urgent', reason: 'Correct fixture.' },
+		]) {
+			provider.enqueueObject({ object, usage, finishReason: 'stop' })
+		}
+		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
+		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)
+	})
+})
+```
+
+```bash title="Run native and evaluation tests"
+npx vitest run src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/agentEvaluation.test.ts
+```
+
+Continue with [Test Framework integration](../test-framework/).
