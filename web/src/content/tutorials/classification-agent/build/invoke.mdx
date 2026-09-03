@@ -51,19 +51,72 @@ step, so an interruption is unexpected here. A later workflow chapter will
 show how to expose an interrupted outcome as an ordinary review state rather
 than an HTTP 500 response.
 
-Keep the CLI-generated mount policy. It explicitly selects which Harness
-targets are reachable through the service.
+The agent address is published directly, so it needs its own business guard.
+Create the policy resource and declare it on the Support service builder.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportClassificationPolicy {
+	canClassify(input: Readonly<{ tenantId: string; principalId: string }>): Promise<boolean>
+}
+```
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
+
+export const supportServiceInfo = {
+	serviceVersion: '1',
+	...generalSupportServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
+```
+
+Replace the generated mount policy. It selects the reachable agent and checks
+whether the authenticated principal may use support automation before the
+model runs.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import type { SupportClassificationPolicy } from '../SupportResources.js'
 
 export { supportHarness }
 
 export const supportHarnessPolicy = {
 	publish: { agents: ['classify_support_message'], workflows: [] },
-	targets: { agents: {}, workflows: {} },
+	targets: {
+		agents: {
+			classify_support_message: {
+				beforeGuards: {
+					mayClassifySupport: async (
+						context: HarnessBusinessGuardContext<{
+							supportClassificationPolicy: SupportClassificationPolicy
+						}>,
+					) => {
+						const { tenantId, principalId } = context.identity
+						if (!tenantId || !principalId) {
+							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+						}
+						if (!(await context.resources.supportClassificationPolicy.canClassify({ tenantId, principalId }))) {
+							throw new HandledError(StatusCode.Forbidden, 'Support classification is not allowed')
+						}
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
 } as const
 ```
+
+This guard performs business authorization. An HTTP protection middleware is
+responsible for authenticating a token and placing trusted tenant and principal
+ids on the PURISTA message. The model input never grants access.
 
 The service adds the command definition and mounts the Harness once.
 

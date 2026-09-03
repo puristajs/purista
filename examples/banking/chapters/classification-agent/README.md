@@ -12,9 +12,10 @@ npm install
 npm run lint
 npm run build
 npm test
+npm run demo
 ```
 
-The tests use `FakeModelProvider` and need no API key. An application that starts
+The tests and default demo use `FakeModelProvider` and need no API key. An application that starts
 this service supplies a real provider, for example `openai({ apiKey })`, through
 the service's `ai.models.primary` runtime binding. Provider credentials never
 belong in the portable Harness definition.

@@ -154,8 +154,10 @@ describe('supportV1Service', () => {
 		})
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
+		const policy = { canClassify: vi.fn(async () => true) }
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: policy },
 			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
 		})
 		await service.start()
@@ -182,6 +184,10 @@ describe('supportV1Service', () => {
 				urgency: 'normal',
 				reason: 'The message asks about a replacement card without an immediate deadline.',
 			})
+			expect(policy.canClassify).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+			})
 			provider.assertExhausted()
 		} finally {
 			await service.destroy()
@@ -197,49 +203,58 @@ npx vitest run src/harness/support/agent/classifySupportMessage/classifySupportM
 npm run lint
 ```
 
-The service-routing test proves the normal command reaches the mounted agent
-address. The complete focused source is retained in
+The same test file includes a denied case. Its policy returns `false`, the
+command rejects with a handled `403`, and the strict fake provider remains
+unused. This proves the published target guard runs before paid model work.
+
+The service-routing tests prove the normal command reaches the mounted agent
+address with the trusted identity. The complete focused source is retained in
 `examples/banking/chapters/classification-agent`.
 
 In an application composition root, bind a real provider like this:
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
-import { openai } from '@purista/harness-openai'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
 export function createSupportService(
 	eventBridge: EventBridge,
 	logger: Logger,
-	environment: Readonly<Record<string, string | undefined>> = process.env,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		model: { provider: ModelProvider; model: string }
+	}>,
 ) {
-	const apiKey = environment.OPENAI_API_KEY?.trim()
-	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the classification agent.')
-
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
+		resources: { supportClassificationPolicy: options.policy },
 		ai: {
-			models: {
-				primary: {
-					provider: openai({ apiKey }),
-					model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini',
-				},
-			},
+			models: { primary: options.model },
 			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }
 ```
 
-The application owns credentials, provider selection, telemetry policy, and
-service lifecycle. The definition stays portable. Model admission is supplied
+The application owns credentials, provider selection, business-policy
+implementation, telemetry policy, and service lifecycle. The definition stays portable. Model admission is supplied
 as a `ModelAdmission` adapter with `acquire()`; it is not a numeric object.
 Use a PURISTA Harness queue binding when the complete agent invocation must
 wait durably before it starts.
 
-Copy `.env.example` to `.env`, add the provider key, and start the retained
-composition root. It starts the EventBridge and the mounted Support service and
-registers graceful shutdown.
+Run the credential-free demo first. It starts EventBridge, injects a permissive
+fixture policy and strict fake model, invokes the command, and prints the typed
+classification.
+
+```bash title="Run the deterministic classification demo" replay="project"
+npm run demo
+```
+
+For an optional live run, copy `.env.example` to `.env`, add the provider key,
+and start the retained composition root. It starts the EventBridge and mounted
+Support service and registers graceful shutdown.
 
 ```bash title="Run the classification service" replay="project"
 cp .env.example .env
