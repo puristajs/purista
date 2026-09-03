@@ -1,0 +1,80 @@
+---
+title: Scaffold the human-review project
+description: Create a PURISTA application and generate the service, workflow, and command boundaries used by a durable review.
+order: 251
+kind: lesson
+status: draft
+---
+
+Create a fresh PURISTA project. This workflow coordinates application work and
+human input without calling a model, so it needs Harness storage but no model
+provider or API key.
+
+```bash title="Create and enter the human-review project" replay="parent"
+npm create purista@2.2.0 human-review-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+cd human-review-workflow
+```
+
+Use the published package versions and expose the CLI commands that the next
+pages call.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-human-review-workflow",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:workflow": "purista add workflow",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+
+```bash title="Install the human-review dependencies" replay="project"
+npm install
+```
+
+Generate the two service owners and the native Harness workflow. Support owns
+the review process. Transaction owns the card action that may happen after an
+approval.
+
+```bash title="Generate the capability owners" replay="project"
+npm run add:service -- support --description "Owns support reviews and automation" --non-interactive
+npm run add:service -- transaction --description "Owns transaction and card actions" --non-interactive
+npm run add:workflow -- review-support-action --service support --service-version 1 --description "Wait for an authorized support review decision" --non-interactive
+```
+
+Inspect the generated folders before changing them. The CLI has created a
+Harness workflow module, the Support harness composition, a mount policy, and
+both PURISTA service versions.
+
+```bash title="Check the generated project"
+npm run build
+```
+
+Continue with [Define an external wait](../define-workflow/).

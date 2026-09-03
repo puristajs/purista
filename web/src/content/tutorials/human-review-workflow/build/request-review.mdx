@@ -1,0 +1,88 @@
+---
+title: Request human review
+description: Start the durable workflow from a guarded command and return its external wait as typed application data.
+order: 254
+kind: lesson
+status: draft
+---
+
+Generate the command that starts the review.
+
+```bash title="Generate the review request command" replay="project"
+npm run add:command -- request-card-freeze --service support --service-version 1 --description "Create a durable human review request" --non-interactive
+```
+
+Declare the workflow address before using it. The command guard authorizes this
+specific card action with the trusted tenant and principal already placed on
+the PURISTA message by the transport authentication middleware.
+
+The handler creates the business record before invoking the workflow, so the
+published workflow guard can verify the initial call. It maps the Harness
+external-wait interrupt into the command's declared `waiting` result.
+
+```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { reviewIdentity } from '../../reviewIdentity.js'
+import { requestCardFreezeInputSchema, reviewRequestResultSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
+	.addPayloadSchema(requestCardFreezeInputSchema)
+	.addOutputSchema(reviewRequestResultSchema)
+	.canInvokeWorkflow('Support', '1', 'review_support_action', supportHarness.contracts.workflows.review_support_action)
+	.setBeforeGuardHooks({
+		callerMayRequest: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: payload.cardId }))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This card action is not allowed')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const deadline = new Date(Date.now() + 15 * 60_000).toISOString()
+		const identity = reviewIdentity({ ...payload, tenantId }, deadline)
+		const record = await context.resources.supportReviewStore.create({
+			...payload,
+			tenantId,
+			principalId,
+			waitId: identity.workflowInput.waitId,
+			runId: identity.runId,
+			sessionId: identity.sessionId,
+			actionDigest: identity.actionDigest,
+			workflowInput: identity.workflowInput,
+		})
+		const outcome = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+			sessionId: record.sessionId,
+			durable: { runId: record.runId },
+		})
+		if (outcome.status === 'interrupted' && outcome.interrupt.type === 'external-wait') {
+			return {
+				status: 'waiting' as const,
+				requestId: record.requestId,
+				waitId: outcome.interrupt.id,
+				runId: outcome.runId,
+				deadline: outcome.interrupt.deadline,
+			}
+		}
+		if (outcome.status !== 'completed') throw new Error('Unexpected review workflow interrupt')
+		return { status: outcome.output.status, requestId: record.requestId }
+	})
+```
+
+The command remains transport independent. A Hono endpoint can expose the same
+command later, and `waiting` remains a successful JSON result. Actual failures
+such as unauthorized, forbidden, missing, or conflicting requests use handled
+errors and the Framework error mapper.
+
+```bash title="Type-check the request command"
+npm run build
+```
+
+Continue with [Authorize the workflow address](../authorize-workflow/).

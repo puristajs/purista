@@ -1,94 +1,14 @@
 ---
-title: Compose and run human review
-description: Bind separate durable workflow and business-record stores, then execute the full waiting and approval path.
-order: 254
+title: Run the human-review flow
+description: Exercise waiting, approval, durable resume, and one protected effect through EventBridge.
+order: 260
 kind: lesson
 status: draft
 ---
 
-Bind persistent adapters at the application composition root. Harness uses its
-SQLite adapter for runs and waits. Support uses a separate SQLite resource for
-review business records. The application owns both lifecycles and closes them
-after the services.
-
-```ts title="src/createReviewApplication.ts" write
-import { mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
-import type { EventBridge, Logger } from '@purista/core'
-import { sqliteHarnessStorage } from '@purista/harness'
-import { HarnessReviewWaitSignal } from './resources/HarnessReviewWaitSignal.js'
-import { SqliteSupportReviewStore } from './resources/SqliteSupportReviewStore.js'
-import type { SupportReviewPolicy } from './service/support/v1/SupportReviewResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
-import type { CardFreezeExecutor, CardFreezePolicy } from './service/transaction/v1/transactionV1ServiceBuilder.js'
-
-export async function createReviewApplication(
-	eventBridge: EventBridge,
-	logger: Logger,
-	supportReviewPolicy: SupportReviewPolicy,
-	cardFreezePolicy: CardFreezePolicy,
-	cardFreezeExecutor: CardFreezeExecutor,
-	dataDirectory = '.data/human-review',
-) {
-	await mkdir(dataDirectory, { recursive: true })
-	const storage = sqliteHarnessStorage({ file: join(dataDirectory, 'harness.sqlite') })
-	const reviewStore = new SqliteSupportReviewStore(join(dataDirectory, 'reviews.sqlite'))
-	const transaction = await transactionV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { cardFreezeExecutor, cardFreezePolicy },
-	})
-	const support = await supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: {
-			supportReviewStore: reviewStore,
-			supportReviewPolicy,
-			reviewWaitSignal: new HarnessReviewWaitSignal(storage),
-		},
-		ai: { models: {}, storage },
-	})
-	let destroyed = false
-	const destroy = async () => {
-		if (destroyed) return
-		destroyed = true
-		const errors: unknown[] = []
-		for (const close of [() => support.destroy(), () => transaction.destroy(), () => storage.close()]) {
-			try {
-				await close()
-			} catch (error) {
-				errors.push(error)
-			}
-		}
-		try {
-			reviewStore.close()
-		} catch (error) {
-			errors.push(error)
-		}
-		if (errors.length > 0) throw new AggregateError(errors, 'Human review application shutdown failed')
-	}
-	try {
-		await transaction.start()
-		await support.start()
-	} catch (startupError) {
-		try {
-			await destroy()
-		} catch (shutdownError) {
-			throw new AggregateError([startupError, shutdownError], 'Human review application startup failed')
-		}
-		throw startupError
-	}
-
-	return {
-		name: 'Human review application',
-		support,
-		transaction,
-		destroy,
-	}
-}
-```
-Create a deterministic demo that requests review, receives a typed `waiting`
-result, records approval, resumes the same durable run, and executes the
-guarded Transaction command once.
+Create a deterministic demo that invokes the two Support commands through the
+EventBridge. The requester first receives `waiting`; a different authorized
+principal records approval and resumes the same run.
 
 ```ts title="src/demo.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
@@ -169,9 +89,10 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-The live entry point uses the same local adapters and explicit example
-policies. They make the authorization flow visible; production policies should
-validate durable grants from a trusted store.
+
+Add the long-running entry point with explicit example policies. These policies
+make the authorization inputs visible. A real application should resolve them
+from trusted grants and business records.
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
@@ -210,13 +131,17 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
+
+Run the complete path.
+
 ```bash title="Run the deterministic human-review application" replay="project"
 npm run build
 npm run demo
 ```
 
-The output first shows `waiting`, then `approved`, and records one card-freeze
-effect. A browser can render those typed states directly without interpreting
-an exception as a pending approval.
+The output contains the typed waiting result, the approved terminal result,
+and an effect count of one. The application has exercised two PURISTA command
+addresses, a mounted Harness workflow, an external wait, and separate durable
+stores.
 
-Continue with [Test every review boundary](../../testing/test-review/).
+Continue with [Test the native workflow](../../testing/test-workflow/).

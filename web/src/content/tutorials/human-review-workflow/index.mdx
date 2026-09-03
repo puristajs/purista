@@ -7,13 +7,14 @@ group: ai
 status: draft
 ---
 
-This chapter teaches a durable application review. A PURISTA command starts a
-native Harness workflow. The workflow reaches an external wait, and the
-command returns an ordinary `waiting` result. A later command records an
-authorized decision, signals the wait, and resumes the same run.
+This chapter teaches durable human review as a Framework capability. A PURISTA
+command starts a native Harness workflow. The workflow reaches an external
+wait, and the command returns an ordinary `waiting` result. A later command
+records an authorized decision, signals the wait, and resumes the same run.
 
 The Example Bank fixture asks a reviewer to approve or reject one card freeze.
-The banking rule stays small so the Framework boundaries remain visible.
+The business story stays deliberately small so workflow, storage,
+authorization, routing, and idempotency remain visible.
 
 ```text title="Human review execution path"
 request command
@@ -29,26 +30,34 @@ decision command
   -> approved Transaction command, once
 ```
 
-Harness storage owns run checkpoints and the opaque wait. The Support service's
-database resource owns review records and reviewer decisions. The Transaction
-service owns the business effect. PURISTA StateStore is not used for any of
-these durable business records.
+Harness storage owns workflow checkpoints and the opaque wait. The Support
+service database owns review records and reviewer decisions. The Transaction
+service owns the protected effect. PURISTA StateStore is not used for these
+durable business records.
 
-An external wait is different from model tool approval. Use a Harness approval
-interrupt when a person must approve one model-selected tool call; AI SDK UI
-Message Stream v1 can then carry the standard approval parts. This chapter
-teaches an application workflow whose client contract is the typed states
-`waiting`, `approved`, `rejected`, `expired`, and `cancelled`.
+An external wait differs from approval of one model-selected tool call. Use a
+Harness tool-approval interrupt for that AI interaction; its stream can carry
+AI SDK UI Message Stream v1 approval parts. This chapter instead teaches an
+application workflow with the typed states `waiting`, `approved`, `rejected`,
+`expired`, and `cancelled`.
 
 Follow these pages in order:
 
-1. [Create the project and define the generated workflow](./build/define-workflow/).
-2. [Publish it safely and return a typed waiting state](./build/interrupt/).
-3. [Record an authorized decision, signal the wait, and resume](./build/approve-resume/).
-4. [Compose and run the durable review application](./build/run-application/).
-5. [Test workflow, resource, EventBridge, isolation, and idempotency boundaries](./testing/test-review/).
+1. [Scaffold the human-review project](./setup/scaffold/).
+2. [Define an external wait](./build/define-workflow/).
+3. [Model the review state](./build/model-review/).
+4. [Request human review from a command](./build/request-review/).
+5. [Authorize the directly addressable workflow](./build/authorize-workflow/).
+6. [Persist review decisions atomically](./build/persist-decision/).
+7. [Protect the approved business effect](./build/protect-effect/).
+8. [Record a decision and resume the workflow](./build/approve-resume/).
+9. [Compose the review runtime](./build/compose-runtime/).
+10. [Run the human-review flow](./build/run-application/).
+11. [Test waiting and resume in native Harness](./testing/test-workflow/).
+12. [Test commands with mocked resources](./testing/test-commands/).
+13. [Test the routed review flow](./testing/test-review/).
 
 The complete runnable source is in
 `examples/banking/chapters/human-review-workflow`.
 
-Start with [Generate and define the workflow](./build/define-workflow/).
+Start with [Scaffold the human-review project](./setup/scaffold/).

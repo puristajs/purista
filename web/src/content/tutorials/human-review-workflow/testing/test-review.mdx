@@ -1,262 +1,14 @@
 ---
-title: Test every review boundary
-description: Prove native waiting and resume, mocked command resources, real EventBridge routing, isolation, and idempotency.
-order: 255
+title: Test the routed review flow
+description: Verify waiting, decisions, authorization, tenant isolation, deadlines, and idempotency over the real EventBridge.
+order: 263
 kind: lesson
 status: draft
 ---
 
-Use the in-memory review store in fast tests. It implements the same optimistic
-revision and idempotent decision contract as SQLite without hiding the business
-rules in command mocks.
-
-```ts title="src/resources/InMemorySupportReviewStore.ts" write
-import { HandledError, StatusCode } from '@purista/core'
-import type { SupportReviewRecord, SupportReviewStore } from '../service/support/v1/SupportReviewResources.js'
-
-export class InMemorySupportReviewStore implements SupportReviewStore {
-	private readonly records = new Map<string, SupportReviewRecord>()
-	private key(tenantId: string, requestId: string) {
-		return `${tenantId}\u0000${requestId}`
-	}
-
-	public async create(input: Omit<SupportReviewRecord, 'revision' | 'status'>) {
-		const key = this.key(input.tenantId, input.requestId)
-		const existing = this.records.get(key)
-		if (existing) {
-			if (existing.actionDigest !== input.actionDigest || existing.principalId !== input.principalId) {
-				throw new HandledError(StatusCode.Conflict, 'Review request conflicts with its existing action')
-			}
-			return structuredClone(existing)
-		}
-		const record: SupportReviewRecord = { ...structuredClone(input), revision: 1, status: 'pending' }
-		this.records.set(key, record)
-		return structuredClone(record)
-	}
-
-	public async get(tenantId: string, requestId: string) {
-		const record = this.records.get(this.key(tenantId, requestId))
-		return record ? structuredClone(record) : undefined
-	}
-
-	public async getByWaitId(tenantId: string, waitId: string) {
-		for (const record of this.records.values()) {
-			if (record.tenantId === tenantId && record.waitId === waitId) return structuredClone(record)
-		}
-		return undefined
-	}
-
-	public async decide(input: {
-		tenantId: string
-		requestId: string
-		expectedRevision: number
-		eventId: string
-		outcome: 'approved' | 'rejected'
-		principalId: string
-	}) {
-		const key = this.key(input.tenantId, input.requestId)
-		const record = this.records.get(key)
-		if (!record) throw new HandledError(StatusCode.NotFound, 'Review request not found')
-		if (record.status !== 'pending') {
-			if (
-				record.decisionEventId === input.eventId &&
-				record.status === input.outcome &&
-				record.decidedBy === input.principalId
-			) {
-				return structuredClone(record)
-			}
-			throw new HandledError(StatusCode.Conflict, 'Review request already has a terminal decision')
-		}
-		if (record.revision !== input.expectedRevision) {
-			throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
-		}
-		const decided: SupportReviewRecord = {
-			...record,
-			revision: record.revision + 1,
-			status: input.outcome,
-			decisionEventId: input.eventId,
-			decidedBy: input.principalId,
-		}
-		this.records.set(key, decided)
-		return structuredClone(decided)
-	}
-}
-```
-Test the native workflow by running it once until an external wait interrupts,
-signalling the wait through Harness storage, and rerunning the same durable ID
-until it completes.
-
-```ts title="src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts" write
-import { InMemoryHarnessStorage } from '@purista/harness'
-import { describe, expect, it } from 'vitest'
-import { supportHarness } from '../../supportHarness.js'
-
-describe('reviewSupportActionWorkflow', () => {
-	it('returns an external wait and resumes the same durable run', async () => {
-		const storage = new InMemoryHarnessStorage()
-		const runtime = await supportHarness.getInstance({ models: {}, storage })
-		const input = {
-			waitId: 'wait-1',
-			deadline: new Date(Date.now() + 60_000).toISOString(),
-			actionDigest: 'a'.repeat(64),
-			definitionVersion: 'support-card-freeze-v1' as const,
-		}
-
-		try {
-			const session = await runtime.getSession('review-session')
-			const waiting = await session.workflows.review_support_action.run(input, {
-				durable: { runId: 'review-run' },
-			})
-			expect(waiting).toMatchObject({
-				status: 'interrupted',
-				interrupt: { type: 'external-wait', id: 'wait-1' },
-			})
-			await storage.signalWait({ waitId: 'wait-1', eventId: 'decision-1', outcome: 'approved' })
-			const resumed = await session.workflows.review_support_action.run(input, {
-				durable: { runId: 'review-run' },
-			})
-			expect(resumed).toMatchObject({ status: 'completed', output: { status: 'approved' } })
-		} finally {
-			await runtime.shutdown()
-		}
-	})
-})
-```
-Test the request command with mocked PURISTA resources and workflow clients.
-The guard must receive trusted identity and the command must return the typed
-waiting state rather than throw.
-
-```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts" write
-import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
-import { createSandbox } from 'sinon'
-import { afterEach, describe, expect, it } from 'vitest'
-import { requestCardFreezeCommandBuilder } from './requestCardFreezeCommandBuilder.js'
-
-const sandbox = createSandbox()
-afterEach(() => sandbox.restore())
-
-describe('requestCardFreezeCommandBuilder', () => {
-	it('maps the workflow interrupt to a typed waiting result', async () => {
-		const payload = { requestId: 'review-1', cardId: 'card-1', reason: 'Card is missing' }
-		const reviews = {
-			create: sandbox.stub().callsFake(async (input) => ({ ...input, revision: 1, status: 'pending' })),
-			get: sandbox.stub(),
-			getByWaitId: sandbox.stub(),
-			decide: sandbox.stub(),
-		}
-		const policy = { canRequest: sandbox.stub().resolves(true), canReview: sandbox.stub() }
-		const { context, stubs } = createCommandContextMock(requestCardFreezeCommandBuilder, {
-			payload,
-			parameter: {},
-			resources: { supportReviewStore: reviews, supportReviewPolicy: policy },
-			sandbox,
-		})
-		context.message = getCommandMessageMock({
-			tenantId: 'tenant-example',
-			principalId: 'principal-alex',
-			payload: { payload, parameter: {} },
-		})
-		;(stubs.workflow as any).Support['1'].review_support_action.run.callsFake(
-			async (_input: unknown, options: { durable: { runId: string } }) => ({
-				status: 'interrupted',
-				runId: options.durable.runId,
-				interrupt: {
-					type: 'external-wait',
-					id: 'wait-1',
-					deadline: '2026-09-03T12:00:00.000Z',
-				},
-			}),
-		)
-
-		await expect(
-			requestCardFreezeCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
-		).resolves.toMatchObject({ status: 'waiting', requestId: 'review-1' })
-		expect(
-			policy.canRequest.calledOnceWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-alex',
-				cardId: 'card-1',
-			}),
-		).toBe(true)
-		expect(reviews.create.calledOnce).toBe(true)
-	})
-})
-```
-Test the final Transaction effect independently. Its business guard binds the
-approval to tenant, principal, card, and idempotency identity.
-
-```ts title="src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts" write
-import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
-import { createSandbox } from 'sinon'
-import { afterEach, describe, expect, it } from 'vitest'
-import { freezeCardCommandBuilder } from './freezeCardCommandBuilder.js'
-
-const sandbox = createSandbox()
-afterEach(() => sandbox.restore())
-
-describe('freezeCardCommandBuilder', () => {
-	it('passes the approved identity to the idempotent executor', async () => {
-		const policy = { canFreeze: sandbox.stub().resolves(true) }
-		const executor = { freeze: sandbox.stub().resolves({ status: 'frozen', cardId: 'card-1' }) }
-		const payload = { cardId: 'card-1' }
-		const parameter = { approvalId: 'support-review-run:approved-1' }
-		const { context } = createCommandContextMock(freezeCardCommandBuilder, {
-			payload,
-			parameter,
-			resources: { cardFreezePolicy: policy, cardFreezeExecutor: executor },
-			sandbox,
-		})
-		context.message = getCommandMessageMock({
-			tenantId: 'tenant-example',
-			principalId: 'principal-reviewer',
-			payload: { payload, parameter },
-		})
-
-		await expect(
-			freezeCardCommandBuilder.getCommandFunction().call({} as never, context, payload, parameter),
-		).resolves.toEqual({
-			status: 'frozen',
-			cardId: 'card-1',
-		})
-		expect(
-			policy.canFreeze.calledOnceWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-reviewer',
-				cardId: 'card-1',
-				approvalId: 'support-review-run:approved-1',
-			}),
-		).toBe(true)
-		expect(executor.freeze.calledOnce).toBe(true)
-		expect(executor.freeze.calledWithMatch({ idempotencyKey: 'support-review-run:approved-1' })).toBe(true)
-	})
-
-	it('rejects an unapproved direct call before the effect', async () => {
-		const policy = { canFreeze: sandbox.stub().resolves(false) }
-		const executor = { freeze: sandbox.stub() }
-		const payload = { cardId: 'card-1' }
-		const parameter = { approvalId: 'forged' }
-		const { context } = createCommandContextMock(freezeCardCommandBuilder, {
-			payload,
-			parameter,
-			resources: { cardFreezePolicy: policy, cardFreezeExecutor: executor },
-			sandbox,
-		})
-		context.message = getCommandMessageMock({
-			tenantId: 'tenant-example',
-			principalId: 'principal-reviewer',
-			payload: { payload, parameter },
-		})
-
-		await expect(
-			freezeCardCommandBuilder.getCommandFunction().call({} as never, context, payload, parameter),
-		).rejects.toMatchObject({ errorCode: 403 })
-		expect(executor.freeze.notCalled).toBe(true)
-	})
-})
-```
-Finally exercise the full PURISTA route through EventBridge. The integration
-suite covers waiting, approval, direct-address denial, tenant isolation,
-decision replay, and exactly-once effect execution.
+Finish with the real PURISTA route. Start both service instances on a
+`DefaultEventBridge`, mount the native Harness workflow, and keep only the
+business adapters in memory.
 
 ```ts title="src/humanReview.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -662,6 +414,20 @@ describe('durable human review over PURISTA', () => {
 	})
 })
 ```
+
+The suite covers the boundaries that can fail when the pieces are composed:
+
+- approval resumes the original run and a duplicate delivery executes the
+  effect once;
+- rejection never executes the effect;
+- the reviewer business policy runs before the decision is recorded;
+- tenant isolation prevents another tenant from finding the review;
+- a missing durable wait becomes a handled conflict;
+- a deadline produces `expired` without the approved effect; and
+- stale revisions and conflicting terminal decisions are rejected.
+
+Run the complete chapter gate.
+
 ```bash title="Verify the human-review chapter" replay="project"
 npm run build
 npm test
@@ -669,5 +435,5 @@ npm run lint
 npm run demo
 ```
 
-The test suite needs no model provider because this workflow coordinates
-business work and human input without an LLM.
+No model provider is needed because this workflow coordinates application work
+and human input without an LLM.

@@ -733,10 +733,18 @@
         "agent-tools"
       ],
       "pages": [
+        "human-review-workflow/setup/scaffold",
         "human-review-workflow/build/define-workflow",
-        "human-review-workflow/build/interrupt",
+        "human-review-workflow/build/model-review",
+        "human-review-workflow/build/request-review",
+        "human-review-workflow/build/authorize-workflow",
+        "human-review-workflow/build/persist-decision",
+        "human-review-workflow/build/protect-effect",
         "human-review-workflow/build/approve-resume",
+        "human-review-workflow/build/compose-runtime",
         "human-review-workflow/build/run-application",
+        "human-review-workflow/testing/test-workflow",
+        "human-review-workflow/testing/test-commands",
         "human-review-workflow/testing/test-review"
       ]
     },
