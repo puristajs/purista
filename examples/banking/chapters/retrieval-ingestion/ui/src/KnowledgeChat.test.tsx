@@ -50,6 +50,17 @@ vi.mock('@/components/ai-elements/prompt-input', () => ({
 		<button type="submit" {...properties} />
 	),
 }))
+vi.mock('@/components/ai-elements/tool', () => ({
+	Tool: ({ children }: PropsWithChildren) => <aside>{children}</aside>,
+	ToolHeader: ({ toolName, state }: { toolName: string; state: string }) => (
+		<p>
+			{toolName}: {state}
+		</p>
+	),
+	ToolContent: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	ToolInput: ({ input }: { input: unknown }) => <pre>{JSON.stringify(input)}</pre>,
+	ToolOutput: ({ output }: { output: unknown }) => <pre>{JSON.stringify(output)}</pre>,
+}))
 
 afterEach(cleanup)
 
@@ -84,5 +95,35 @@ describe('KnowledgeChat', () => {
 		fireEvent.submit(screen.getByRole('button').closest('form') as HTMLFormElement)
 
 		expect(sendMessage).toHaveBeenCalledWith({ text: 'How long can a transfer stay pending?' })
+	})
+
+	it('renders standard retrieval tool status and streamed text parts', () => {
+		useChat.mockReturnValue({
+			sendMessage,
+			status: 'streaming',
+			messages: [
+				{
+					id: 'assistant-1',
+					role: 'assistant',
+					parts: [
+						{
+							type: 'dynamic-tool',
+							toolCallId: 'search-1',
+							toolName: 'search_knowledge',
+							state: 'output-available',
+							input: { query: 'transfer timing' },
+							output: { matches: 1 },
+						},
+						{ type: 'text', text: 'Up to two business days.' },
+					],
+				},
+			],
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(screen.getByText('search_knowledge: output-available')).toBeInTheDocument()
+		expect(screen.getByText('Up to two business days.')).toBeInTheDocument()
+		expect(screen.getByText('The answer is streaming.')).toBeInTheDocument()
 	})
 })

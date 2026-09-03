@@ -50,7 +50,6 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		return { matches }
 	})
 ```
-
 The `search` action is distinct from `edit`. A valid authenticated user may be
 allowed to ask questions without being allowed to replace source material.
 The business guard runs before the embedding request and database call.

@@ -31,7 +31,6 @@ export const identityV1ServiceBuilder = new ServiceBuilder({
 	}),
 )
 ```
-
 Create the session helper used by both Identity commands.
 
 ```ts title="src/service/identity/v1/session.ts" write
@@ -60,7 +59,6 @@ export async function readActiveSession(states: SessionStates, token: string, no
 	return parsed.data
 }
 ```
-
 Replace the generated login command. It is the only public endpoint. The fixed
 credential is a local tutorial fixture, not a production identity system.
 
@@ -100,7 +98,6 @@ export const loginCommandBuilder = identityV1ServiceBuilder
 		return { sessionToken, displayName, expiresAt }
 	})
 ```
-
 The generated `resolveSession` command stays protected from HTTP exposure; it
 is an internal EventBridge capability used by the Hono middleware.
 
@@ -117,7 +114,6 @@ export const resolveSessionCommandBuilder = identityV1ServiceBuilder
 		return readActiveSession(context.states, parameter.sessionToken)
 	})
 ```
-
 Register both generated command definitions on Identity.
 
 ```ts title="src/service/identity/v1/identityV1Service.ts" write
@@ -130,7 +126,6 @@ export const identityV1Service = identityV1ServiceBuilder.addCommandDefinition(
 	resolveSessionCommandBuilder.getDefinition(),
 )
 ```
-
 Create the Hono protection middleware. It extracts the bearer token, asks the
 Identity service to verify and resolve it, then places trusted `principalId`
 and `tenantId` values in the Hono context. Hono copies those values into the
@@ -166,7 +161,6 @@ export const createSessionProtectMiddleware = (http: HonoServiceClass): Endpoint
 		}
 	}
 ```
-
 Authentication establishes identity. The Knowledge command and workflow
 guards still perform authorization for `edit` and `search`. A valid session
 does not automatically grant access to every collection.

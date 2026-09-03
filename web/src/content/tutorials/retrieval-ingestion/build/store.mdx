@@ -47,7 +47,6 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
 CREATE INDEX IF NOT EXISTS knowledge_chunks_scope_idx
   ON knowledge_chunks (tenant_id, collection_id, embedding_model);
 ```
-
 The example fixes the vector size at 1,536 because its live configuration uses
 that OpenAI embedding dimension. A production migration must create a new
 index or column when this dimension changes.
@@ -77,7 +76,6 @@ services:
 volumes:
   knowledge-postgres:
 ```
-
 Implement the repository resource. `replaceRevision` locks the current
 document row and performs document update, old-chunk deletion, and new inserts
 inside one transaction. Any error rolls the complete replacement back.
@@ -208,7 +206,6 @@ export class PgKnowledgeRepository implements KnowledgeRepository {
 	}
 }
 ```
-
 The search SQL includes tenant, collection, active revision, and embedding
 model before ordering by cosine distance. The repository does not decide
 whether a principal may search; that business decision remains in the command

@@ -67,7 +67,6 @@ export class StaleKnowledgeRevisionError extends Error {
 	}
 }
 ```
-
 Declare both resources and the embedding configuration on the service builder.
 The configured model id is stored with each vector so incompatible indexes are
 not mixed silently.
@@ -93,7 +92,6 @@ export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo
 	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
 	.defineResource<'knowledgeRepository', KnowledgeRepository>()
 ```
-
 Put the authorization rule in one helper because ingestion, search, and the
 published workflow must make the same fail-closed identity check.
 
@@ -125,7 +123,6 @@ export async function requireKnowledgeCollectionAccess(
 	}
 }
 ```
-
 Use a small deterministic chunker. It has no I/O and can be tested with plain
 inputs and outputs.
 
@@ -142,7 +139,6 @@ export function chunkKnowledgeText(text: string, wordsPerChunk = 80) {
 	return chunks
 }
 ```
-
 Replace the generated ingestion command with the complete implementation.
 HTTP endpoints are protected by default, so there is no security toggle. Only
 an explicitly public command calls `makeEndpointPublic()`.
@@ -217,7 +213,6 @@ export const ingestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		}
 	})
 ```
-
 `canUseHarnessModel(...)` is the declaration that makes
 `context.model.embedding` available. The business guard runs before the model
 or repository. The handler validates the number, order, dimension, and finite

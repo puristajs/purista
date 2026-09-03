@@ -30,7 +30,6 @@ export function latestUserText(messages: ReadonlyArray<{ role: string; parts: un
 	return text
 }
 ```
-
 Replace the generated stream builder with the complete adapter. HTTP security
 is enabled by default. The endpoint publishes the exact protocol name and
 headers expected by AI SDK clients.
@@ -81,7 +80,6 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 		if (!writer.cancelled) await writer.close({ status: 'completed' })
 	})
 ```
-
 `canInvokeWorkflow(...)` declares the address before the handler can use it.
 The call crosses EventBridge and preserves identity for the workflow guard and
 command-backed retrieval tool. `createHarnessUIMessageSseEvents(...)` maps
@@ -103,5 +101,4 @@ export const knowledgeV1Service = knowledgeV1ServiceBuilder
 	.addStreamDefinition(answerKnowledgeQuestionStreamBuilder.getDefinition())
 	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
 ```
-
 Continue with [Authenticate the HTTP endpoints](./authenticate-http/).

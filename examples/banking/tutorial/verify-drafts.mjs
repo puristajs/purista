@@ -66,7 +66,10 @@ async function assertServiceBoundaries(chapterId, projectRoot) {
 }
 
 function sourcePathFromTitle(title) {
-	if (!/^(?:src|ui|public|skills)\//.test(title) && !/^(?:package\.json|purista\.json|compose\.yaml|sandbox\.Dockerfile)$/.test(title))
+	if (
+		!/^(?:src|ui|public|skills|database)\//.test(title) &&
+		!/^(?:\.[A-Za-z0-9_.-]+|package\.json|purista\.json|compose\.yaml|sandbox\.Dockerfile)$/.test(title)
+	)
 		return undefined
 	return title
 }

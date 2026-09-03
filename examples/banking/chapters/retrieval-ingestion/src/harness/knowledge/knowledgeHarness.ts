@@ -1,6 +1,6 @@
 import { defineHarness } from '@purista/harness'
 import { answerKnowledgeQuestionInputSchema } from '../../service/knowledge/v1/schema.js'
-import { retrieveEvidenceAgent } from './agent/retrieveEvidenceAgent.js'
+import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
 import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
 
 export const knowledgeHarness = defineHarness({ name: 'knowledge' })

@@ -1,7 +1,7 @@
 ---
 title: Build the standard chat interface
 description: Add React, shadcn, and AI Elements, then consume the protected AI SDK UI Message Stream v1 endpoint.
-order: 208
+order: 209
 kind: lesson
 status: draft
 ---
@@ -10,68 +10,15 @@ The browser should consume a standard AI stream. It does not need a PURISTA
 client package. AI SDK's `useChat` hook manages messages and streaming, while
 AI Elements supplies maintained chat components built on shadcn.
 
-Install the UI packages from the project root. These are normal published npm
-dependencies, just like the Framework and Harness packages.
-
-```bash title="Install the React UI packages" replay="project"
-npm install react react-dom ai @ai-sdk/react
-npm install --save-dev vite @vitejs/plugin-react tailwindcss @tailwindcss/vite typescript @types/react @types/react-dom
-```
-
-Create `ui/components.json` so the component generator knows where the React
-source and Tailwind stylesheet live.
-
-```json title="ui/components.json" write
-{
-	"$schema": "https://ui.shadcn.com/schema.json",
-	"style": "new-york",
-	"rsc": false,
-	"tsx": true,
-	"tailwind": {
-		"css": "src/index.css",
-		"baseColor": "neutral",
-		"cssVariables": true
-	},
-	"aliases": {
-		"components": "@/components",
-		"utils": "@/lib/utils",
-		"ui": "@/components/ui",
-		"lib": "@/lib",
-		"hooks": "@/hooks"
-	}
-}
-```
-
-Run the AI Elements generator inside `ui`. It writes the selected components
+Run the AI Elements generator inside the UI shell from the previous step. It
+writes the selected components
 and their shadcn dependencies into `ui/src/components`; your application owns
 that generated source and can style it normally.
 
 ```bash title="Add the AI Elements components" replay="project"
 cd ui
-npx ai-elements@latest add conversation message prompt-input
+npx ai-elements@latest add conversation message prompt-input tool
 cd ..
-```
-
-Configure Vite to build the UI into `public`. Hono will serve that directory
-in the next step.
-
-```ts title="ui/vite.config.ts" write
-import { fileURLToPath, URL } from 'node:url'
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
-
-export default defineConfig({
-	root: fileURLToPath(new URL('.', import.meta.url)),
-	plugins: [react(), tailwindcss()],
-	resolve: {
-		alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-	},
-	build: {
-		outDir: fileURLToPath(new URL('../public', import.meta.url)),
-		emptyOutDir: true,
-	},
-})
 ```
 
 The ingestion form calls the protected PURISTA command. It sends the session
@@ -163,11 +110,12 @@ export function KnowledgeSource({ sessionToken, onIngested }: { sessionToken: st
 	)
 }
 ```
-
 Create the chat next. `DefaultChatTransport` posts UI messages to the
 protected stream and parses AI SDK UI Message Stream v1. `useChat` updates the
-message parts while text deltas arrive. The endpoint path and bearer token are
-the only application-specific transport settings.
+message parts while status, tool, and text events arrive. The endpoint path
+and bearer token are the only application-specific transport settings. The
+AI Elements tool component shows when retrieval is pending, running, complete,
+or failed without a custom event parser.
 
 ```tsx title="ui/src/KnowledgeChat.tsx" write
 import { useChat } from '@ai-sdk/react'
@@ -186,6 +134,7 @@ import {
 	PromptInputSubmit,
 	PromptInputTextarea,
 } from '@/components/ai-elements/prompt-input'
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool'
 
 export function KnowledgeChat({
 	sessionToken,
@@ -214,6 +163,15 @@ export function KnowledgeChat({
 
 	return (
 		<section className="flex h-[36rem] flex-col rounded-xl border bg-card p-4 shadow-sm" aria-label="Knowledge chat">
+			<p className="sr-only" aria-live="polite">
+				{status === 'submitted'
+					? 'The question was submitted.'
+					: status === 'streaming'
+						? 'The answer is streaming.'
+						: status === 'error'
+							? 'The answer failed.'
+							: 'Ready for a question.'}
+			</p>
 			<Conversation>
 				<ConversationContent>
 					{messages.length === 0 ? (
@@ -225,11 +183,26 @@ export function KnowledgeChat({
 						messages.map((message) => (
 							<Message from={message.role} key={message.id}>
 								<MessageContent>
-									{message.parts.map((part) =>
-										part.type === 'text' ? (
-											<MessageResponse key={`${message.id}-${part.type}-${part.text}`}>{part.text}</MessageResponse>
-										) : null,
-									)}
+									{message.parts.map((part) => {
+										if (part.type === 'text') {
+											return <MessageResponse key={`${message.id}-text-${part.text}`}>{part.text}</MessageResponse>
+										}
+										if (part.type === 'dynamic-tool') {
+											return (
+												<Tool key={`${message.id}-tool-${part.toolCallId}`}>
+													<ToolHeader type={part.type} state={part.state} toolName={part.toolName} />
+													<ToolContent>
+														<ToolInput input={part.input} />
+														<ToolOutput
+															output={'output' in part ? part.output : undefined}
+															errorText={'errorText' in part ? part.errorText : undefined}
+														/>
+													</ToolContent>
+												</Tool>
+											)
+										}
+										return null
+									})}
 								</MessageContent>
 							</Message>
 						))
@@ -255,7 +228,6 @@ export function KnowledgeChat({
 	)
 }
 ```
-
 Compose login, ingestion, and chat in `App`. The local credential exists only
 to make the full authentication path visible in a runnable tutorial.
 
@@ -333,7 +305,6 @@ export function App() {
 	)
 }
 ```
-
 The UI now exercises the real application sequence: authenticate, invoke an
 authorized ingestion command, then consume a protected streaming endpoint.
 Continue with [Compose and run the application](./run/).

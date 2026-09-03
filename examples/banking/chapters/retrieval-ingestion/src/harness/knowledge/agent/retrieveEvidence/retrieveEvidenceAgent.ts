@@ -4,7 +4,7 @@ import {
 	retrievedEvidenceSchema,
 	type searchKnowledgeInputSchema,
 	type searchKnowledgeOutputSchema,
-} from '../../../service/knowledge/v1/schema.js'
+} from '../../../../service/knowledge/v1/schema.js'
 
 type RetrieveEvidenceState = BuilderState & {
 	models: { primary: ModelAlias }

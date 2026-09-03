@@ -26,19 +26,18 @@ export const searchKnowledgeTool = defineHarnessModule()('knowledge.tool.search'
 	},
 })
 ```
-
 Replace the generated agent module. The agent can use only
 `search_knowledge`. Harness owns the model loop, so the model decides when to
 call the tool. No application handler calls search before the model runs.
 
-```ts title="src/harness/knowledge/agent/retrieveEvidenceAgent.ts" write
+```ts title="src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.ts" write
 import { type BuilderState, defineHarnessModule, type HostToolDefinition, type ModelAlias } from '@purista/harness'
 import {
 	answerKnowledgeQuestionInputSchema,
 	retrievedEvidenceSchema,
 	type searchKnowledgeInputSchema,
 	type searchKnowledgeOutputSchema,
-} from '../../../service/knowledge/v1/schema.js'
+} from '../../../../service/knowledge/v1/schema.js'
 
 type RetrieveEvidenceState = BuilderState & {
 	models: { primary: ModelAlias }
@@ -66,7 +65,6 @@ export const retrieveEvidenceAgent = defineHarnessModule<RetrieveEvidenceState>(
 	},
 })
 ```
-
 Now replace the temporary Harness composition with its final form. The workflow
 delegates evidence retrieval to the agent, then streams the final answer from
 the primary model. Citation instructions receive the retrieved evidence as
@@ -75,7 +73,7 @@ data.
 ```ts title="src/harness/knowledge/knowledgeHarness.ts" write
 import { defineHarness } from '@purista/harness'
 import { answerKnowledgeQuestionInputSchema } from '../../service/knowledge/v1/schema.js'
-import { retrieveEvidenceAgent } from './agent/retrieveEvidenceAgent.js'
+import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
 import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
 
 export const knowledgeHarness = defineHarness({ name: 'knowledge' })
@@ -112,7 +110,6 @@ export const knowledgeHarness = defineHarness({ name: 'knowledge' })
 	})
 	.define()
 ```
-
 Bind the native tool name to the versioned PURISTA command address. The mount
 also guards the directly published workflow before any model work. The search
 command keeps its own guard because every caller of retrieval must pass it.
@@ -152,7 +149,6 @@ export const knowledgeHarnessPolicy = {
 	},
 } as const
 ```
-
 `commandAsHarnessTool(...)` is sufficient because tool and command contracts
 match exactly. It invokes through EventBridge and propagates the trusted
 tenant, principal, trace, and correlation context. Use the host-tool builder

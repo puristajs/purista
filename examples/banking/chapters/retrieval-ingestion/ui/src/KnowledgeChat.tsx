@@ -14,6 +14,7 @@ import {
 	PromptInputSubmit,
 	PromptInputTextarea,
 } from '@/components/ai-elements/prompt-input'
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool'
 
 export function KnowledgeChat({
 	sessionToken,
@@ -42,6 +43,15 @@ export function KnowledgeChat({
 
 	return (
 		<section className="flex h-[36rem] flex-col rounded-xl border bg-card p-4 shadow-sm" aria-label="Knowledge chat">
+			<p className="sr-only" aria-live="polite">
+				{status === 'submitted'
+					? 'The question was submitted.'
+					: status === 'streaming'
+						? 'The answer is streaming.'
+						: status === 'error'
+							? 'The answer failed.'
+							: 'Ready for a question.'}
+			</p>
 			<Conversation>
 				<ConversationContent>
 					{messages.length === 0 ? (
@@ -53,11 +63,26 @@ export function KnowledgeChat({
 						messages.map((message) => (
 							<Message from={message.role} key={message.id}>
 								<MessageContent>
-									{message.parts.map((part) =>
-										part.type === 'text' ? (
-											<MessageResponse key={`${message.id}-${part.type}-${part.text}`}>{part.text}</MessageResponse>
-										) : null,
-									)}
+									{message.parts.map((part) => {
+										if (part.type === 'text') {
+											return <MessageResponse key={`${message.id}-text-${part.text}`}>{part.text}</MessageResponse>
+										}
+										if (part.type === 'dynamic-tool') {
+											return (
+												<Tool key={`${message.id}-tool-${part.toolCallId}`}>
+													<ToolHeader type={part.type} state={part.state} toolName={part.toolName} />
+													<ToolContent>
+														<ToolInput input={part.input} />
+														<ToolOutput
+															output={'output' in part ? part.output : undefined}
+															errorText={'errorText' in part ? part.errorText : undefined}
+														/>
+													</ToolContent>
+												</Tool>
+											)
+										}
+										return null
+									})}
 								</MessageContent>
 							</Message>
 						))
