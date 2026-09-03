@@ -7,10 +7,12 @@ group: ai
 status: draft
 ---
 
-This chapter teaches recoverable multi-step AI work. A classification stage
-runs first. A planning stage consumes the validated classification. Each stage
-has a named durable checkpoint, so a later retry does not repeat completed
-model work.
+This chapter teaches how to build recoverable multi-step AI work. You create a
+fresh PURISTA project, generate the service, agents, workflow, and command with
+the CLI, then fill in each generated boundary. A classification stage runs
+first. A planning stage consumes the validated classification. Each stage has
+a named durable checkpoint, so a later invocation can resume without repeating
+completed model work.
 
 The Example Bank workflow resolves one support case, but the focus is the
 Harness and PURISTA execution model:
@@ -18,7 +20,10 @@ Harness and PURISTA execution model:
 - schema-validated output becomes the next stage input;
 - `context.step` creates explicit durable checkpoint boundaries;
 - step retry is bounded and counts against the child-agent call budget;
-- stable run identity makes a repeated command resume the same work;
+- stable tenant, principal, and case identity makes a repeated command resume
+  the same work;
+- SQLite persists live checkpoints across process restarts;
+- both the command and directly addressable workflow enforce business access;
 - the workflow remains addressable through EventBridge.
 
 1. [Define the sequential workflow](./build/define-workflow/)
@@ -28,4 +33,3 @@ Harness and PURISTA execution model:
 
 The retained project is in
 `examples/banking/chapters/multi-step-workflow`.
-

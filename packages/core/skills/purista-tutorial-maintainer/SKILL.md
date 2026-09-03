@@ -179,6 +179,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   run without credentials. Keep an optional live provider composition
   separate; do not make an API key the learner's first proof that the chapter
   is wired correctly.
+- Match durability language to the runnable composition. A live entry point
+  described as durable must bind a compatible persistent storage, workspace,
+  and sandbox lifecycle, then close them during shutdown; storage alone does
+  not make a Harness session restart-safe. In-memory adapters are only for
+  disposable tests or demos. Prove recovery by closing and recreating the
+  complete runtime bundle before resuming the same run, rather than retrying
+  only within one process.
 - Treat Agent Skills as model-readable context only. Register explicit
   directories, validate them at startup, expose only the required sandbox
   tools, and prove the initial prompt contains the compact catalog rather than

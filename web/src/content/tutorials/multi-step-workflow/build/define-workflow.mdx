@@ -6,14 +6,26 @@ kind: lesson
 status: draft
 ---
 
-Generate the Support service and its command, then install the provider-neutral
-Harness and the OpenAI adapter by their published package names.
+Create a fresh project and install the published packages. Then generate the
+Support capability, both focused agents, their workflow, and the command that
+will invoke it through EventBridge.
 
 ```bash title="Create the workflow boundary" replay="project"
+npm create purista@latest multi-step-workflow
+cd multi-step-workflow
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
 npm run add:service -- support --description "Owns support cases and resolution workflows" --non-interactive
+npm run add:agent -- classify-support-case --service support --service-version 1 --description "Classify one support case" --non-interactive
+npm run add:agent -- plan-support-resolution --service support --service-version 1 --description "Plan the next support action" --non-interactive
+npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
 npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
-npm install @purista/harness @purista/harness-openai zod
 ```
+
+The CLI creates native Harness modules and the PURISTA service files. The
+retained focused example keeps the short schemas, agents, and workflow in one
+`supportResolutionWorkflow.ts` file so you can see the complete sequence at
+once. Provider keys and runtime adapters do not belong in that definition.
 
 Define strict schemas for the request, the intermediate classification, the
 planner input, and the final result. Passing a typed intermediate object keeps
@@ -65,8 +77,9 @@ export const supportResolutionHarness = defineHarness({ name: 'support-resolutio
 	.define()
 ```
 
-The workflow is sequential, so parallel child calls remain one. The total
-budget is three: one classification call and up to two planning attempts.
+The workflow is sequential, so `maxParallelChildAgentCalls` remains one. The
+total budget is three: one classification call and up to two planning attempts.
+Neither agent is published as a service target. They are implementation details
+of the published workflow.
 
 Continue with [Add retries and checkpoints](../retry-checkpoint/).
-

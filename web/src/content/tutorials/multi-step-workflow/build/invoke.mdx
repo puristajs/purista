@@ -1,14 +1,15 @@
 ---
-title: Invoke a durable run through PURISTA
-description: Mount the workflow, protect its command, and derive tenant-scoped stable run identity.
+title: Invoke a durable workflow through EventBridge
+description: Mount the workflow, guard both addresses, derive caller-scoped run identity, and bind persistent storage.
 order: 273
 kind: lesson
 status: draft
 ---
 
-Publish the workflow and keep the two stage agents private. Reuse one business
-authorization function as the target guard. This protects every EventBridge
-invocation, including callers that do not use the HTTP command.
+Publish the workflow and keep the two stage agents private. Define one business
+authorization function and use it at both public boundaries. The command guard
+protects the command's own address. The mounted target guard protects callers
+that invoke the workflow address directly.
 
 ```ts title="src/service/support/v1/requireSupportCaseResolution.ts"
 export async function requireSupportCaseResolution(
@@ -49,15 +50,13 @@ export const supportHarnessPolicy = {
 } as const
 ```
 
-Create stable session and run ids from the trusted tenant and immutable case
-identity. Hashing keeps raw tenant ids out of infrastructure identifiers while
-preventing collisions between tenants.
+Create stable session and run ids from the trusted tenant, principal, and case
+identity. Hashing keeps raw identity values out of infrastructure identifiers
+while preventing one caller from sharing a durable run with another.
 
 ```ts title="src/service/support/v1/durableIdentity.ts"
-export function durableResolutionIdentity(tenantId: string, caseId: string) {
-	const digest = createHash('sha256')
-		.update(`${tenantId}:${caseId}:support-resolution-v1`)
-		.digest('hex')
+export function durableResolutionIdentity(tenantId: string, principalId: string, caseId: string) {
+	const digest = createHash('sha256').update(`${tenantId}:${principalId}:${caseId}:support-resolution-v1`).digest('hex')
 	return {
 		sessionId: `support-resolution:${digest}`,
 		runId: `support-resolution-run:${digest}`,
@@ -65,8 +64,9 @@ export function durableResolutionIdentity(tenantId: string, caseId: string) {
 }
 ```
 
-Declare the workflow address and protect the HTTP endpoint. The mounted target
-guard runs before any model stage starts.
+Declare the workflow address and add the command guard before writing command
+logic. Authentication middleware belongs to the Hono chapter. This guard makes
+the business decision: may this authenticated caller resolve this case?
 
 ```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
 export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
@@ -79,19 +79,28 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 		'resolve_support_case',
 		supportResolutionHarness.contracts.workflows.resolve_support_case,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/case-resolution')
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
 ```
 
 Invoke the workflow with both durable identifiers. A repeated command with the
-same tenant, principal, case, and input resumes the same run. Harness rejects a
-changed input bound to that run id.
+same tenant, principal, case, and input resumes the same run. Harness rejects
+changed input bound to that run id. The workflow target guard runs again because
+the workflow is independently addressable and must remain safe for every caller.
 
 ```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
 .setCommandFunction(async function (context, payload) {
 	const tenantId = context.message.tenantId
-	if (!tenantId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	const identity = durableResolutionIdentity(tenantId, payload.caseId)
+	const principalId = context.message.principalId
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
 	const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
 		sessionId: identity.sessionId,
 		durable: { runId: identity.runId },
@@ -101,7 +110,45 @@ changed input bound to that run id.
 })
 ```
 
-Bind a persistent Harness storage adapter in production. In-memory storage is
-appropriate only for tests and local disposable runs.
+Accept models and storage as composition inputs so tests can inject strict fake
+providers while the live process can inject real adapters.
+
+```ts title="src/createSupportService.ts"
+export function createSupportService(eventBridge: EventBridge, logger: Logger, options: Readonly<{
+	supportCasePolicy: SupportCasePolicy
+	storage: HarnessStorage
+	sandbox?: Sandbox
+	workspace?: DurableWorkspace
+	classificationModel: { provider: ModelProvider; model: string }
+	resolutionModel: { provider: ModelProvider; model: string }
+}>) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportCasePolicy: options.supportCasePolicy },
+		ai: {
+			storage: options.storage,
+			...(options.sandbox ? { sandbox: options.sandbox } : {}),
+			...(options.workspace ? { workspace: options.workspace } : {}),
+			models: {
+				classification_model: options.classificationModel,
+				resolution_model: options.resolutionModel,
+			},
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+The optional live entry point uses `localDurableExecution` under `.data`. The
+bundle supplies SQLite run storage plus a matching durable workspace and local
+files-only sandbox. All three boundaries must agree when a session resumes in a
+new process. The mounted Harness owns their shutdown through the Support
+service.
+
+```ts title="src/index.ts"
+const dataDirectory = '.data/multi-step-workflow'
+await mkdir(dataDirectory, { recursive: true })
+const local = localDurableExecution({ root: dataDirectory })
+```
 
 Continue with [Test failure, retry, and checkpoint replay](../../testing/test-workflow/).

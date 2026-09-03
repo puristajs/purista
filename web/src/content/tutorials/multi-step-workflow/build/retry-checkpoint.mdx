@@ -55,7 +55,8 @@ Every agent attempt, including a retry, consumes one
 `maxChildAgentCalls` slot. Set the budget from the maximum intended path rather
 than only counting logical steps.
 
-`context.step` is a pass-through during a non-durable invocation. Supply a
-durable run option and durable storage when checkpoint recovery matters.
+`context.step` is a pass-through during a non-durable invocation. Checkpoint
+recovery begins only when the caller supplies a durable run id and the runtime
+binds storage. The next lesson configures both.
 
 Continue with [Invoke a durable run through PURISTA](../invoke/).

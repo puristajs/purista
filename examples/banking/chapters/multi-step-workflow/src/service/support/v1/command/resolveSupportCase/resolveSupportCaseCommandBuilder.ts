@@ -5,6 +5,7 @@ import {
 } from '../../../../../harness/support/supportResolutionWorkflow.js'
 import { durableResolutionIdentity } from '../../durableIdentity.js'
 import { supportResolutionHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
@@ -17,12 +18,20 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 		'resolve_support_case',
 		supportResolutionHarness.contracts.workflows.resolve_support_case,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/case-resolution')
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const tenantId = context.message.tenantId
-		if (!tenantId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-		const identity = durableResolutionIdentity(tenantId, payload.caseId)
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
 		const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
