@@ -1,33 +1,30 @@
 ---
-title: Test the tool at every boundary
-description: Test native model tool selection, the command-to-agent declaration, and caller identity across a real EventBridge.
-order: 236
+title: Test the small agent-tool boundaries
+description: Test native model tool selection and the PURISTA command-to-agent invocation without starting the complete application.
+order: 237
 kind: lesson
 status: draft
 ---
 
-This feature crosses three boundaries. Test each boundary at the smallest useful
-level:
+The Transaction command already has a focused test for its business guard and
+resource. Two small boundaries remain:
 
-1. native Harness: does the model see and choose the declared tool?
-2. command handler: does the command invoke only the declared agent address?
-3. PURISTA integration: do identity and business guards survive both
-   EventBridge hops?
+1. Does native Harness give the tool to the model and execute the selected
+   host function?
+2. Does the Support command invoke only its declared agent address and handle
+   the aggregate outcome correctly?
 
-All tests use `FakeModelProvider`. They make no provider network request and do
-not need an API key.
+These tests use injected fakes. They make no network request and do not start an
+EventBridge.
 
-## Test the portable Harness definition
+## Test native Harness tool selection
 
-Create this test beside `supportHarness.ts`. Native Harness requires a
-run-scoped host context for a host-tool call. In standalone use, the host
-supplies that context explicitly. PURISTA supplies it from the incoming
-message when mounted.
+Replace the test generated beside the agent with the complete file below.
 
-```ts title="src/harness/support/supportHarness.test.ts" write
+```ts title="src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
 
@@ -93,16 +90,16 @@ describe('supportHarness', () => {
 	})
 })
 ```
+The first queued model response requests `lookup_transaction`. Harness validates
+its arguments and calls the injected function. The second response sees the
+tool result and returns the final structured answer. `strict: true` fails if the
+agent makes an unexpected model request.
 
-The fake provider's first response asks for the tool. Harness validates the
-arguments and runs the supplied host function. The second response produces
-the final structured output. `strict: true` also fails the test if an
-unexpected model call occurs.
+## Test the PURISTA command helper
 
-## Test the Support command handler
-
-`createCommandContextMock` reads the command builder's `canInvokeAgent`
-declaration and creates the matching typed invocation stub.
+Replace the generated Support command test. `createCommandContextMock` reads
+the builder's `canInvokeAgent(...)` declaration and creates the corresponding
+typed invocation stub.
 
 ```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -122,10 +119,11 @@ describe('answerTransactionQuestion command', () => {
 			transactionId: 'tx-100',
 			question: 'What is the status?',
 		}
+		const supportQuestionPolicy = { canAsk: sandbox.stub().resolves(true) }
 		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
 			payload,
 			parameter: {},
-			resources: { supportQuestionPolicy: { canAsk: sandbox.stub().resolves(true) } },
+			resources: { supportQuestionPolicy },
 			sandbox,
 		})
 		context.message = getCommandMessageMock({
@@ -146,79 +144,58 @@ describe('answerTransactionQuestion command', () => {
 		expect(
 			run.calledOnceWith(payload, { sessionId: supportQuestionSessionId(context.message, payload.questionId) }),
 		).toBe(true)
+		expect(
+			supportQuestionPolicy.canAsk.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+			}),
+		).toBe(true)
+	})
+
+	it('does not return an interrupted agent run as a command success', async () => {
+		const payload = {
+			questionId: 'question-2',
+			accountId: 'account-operating',
+			transactionId: 'tx-100',
+			question: 'What is the status?',
+		}
+		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportQuestionPolicy: { canAsk: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		;(stubs.agent as any).Support['1'].answer_transaction_question.run.resolves({
+			status: 'interrupted',
+			runId: 'run-2',
+			interrupt: { kind: 'approval', approvalId: 'approval-1' },
+		})
+
+		await expect(
+			answerTransactionQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('The support answer was interrupted unexpectedly.')
 	})
 })
 ```
+The second case matters because an interrupted Harness run is a typed control
+state, not a successful command output. This aggregate command does not expose
+an approval flow, so it rejects the unexpected state. The human-review tutorial
+shows how to map an expected interruption to an application response.
 
-This test does not start Harness or EventBridge. It proves the command handler
-uses the declared address and unwraps only a completed outcome.
+Run all three focused command and Harness tests.
 
-## Test identity and denial through EventBridge
-
-The retained `src/agentTools.integration.test.ts` starts `Support` and
-`Transaction` on a real `DefaultEventBridge`. The permitted test invokes the
-outer Support command with a tenant and principal, then checks both policies
-and the reader.
-
-```ts title="src/agentTools.integration.test.ts"
-expect(supportQuestionPolicy.canAsk).toHaveBeenCalledWith({
-	tenantId: 'tenant-example',
-	principalId: 'principal-alex',
-	accountId: 'account-operating',
-	transactionId: 'tx-100',
-})
-expect(accountReadPolicy.canRead).toHaveBeenCalledWith({
-	tenantId: 'tenant-example',
-	principalId: 'principal-alex',
-	accountId: 'account-operating',
-})
-expect(transactionSummaryReader.getById).toHaveBeenCalledWith('tx-100')
+```bash title="Run the focused boundary tests" replay="project"
+npm test -- src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts
 ```
 
-The denied test makes `supportQuestionPolicy.canAsk` return `false`. It expects
-a handled `403` and proves neither the Transaction policy nor database reader
-ran. Because the fake provider has no queued response, it also proves the
-business guard stopped the request before a model call.
+These tests prove each function in isolation. They do not yet prove that
+identity crosses both EventBridge calls.
 
-```ts title="src/agentTools.integration.test.ts"
-await expect(
-	eventBridge.invoke(
-		getCommandMessageMock({
-			tenantId: 'tenant-example',
-			principalId: 'principal-other',
-			receiver: {
-				serviceName: 'Support',
-				serviceVersion: '1',
-				serviceTarget: 'answer_transaction_question',
-			},
-			payload: {
-				payload: {
-					questionId: 'question-2',
-					accountId: 'account-operating',
-					transactionId: 'tx-100',
-					question: 'What is the status?',
-				},
-				parameter: {},
-			},
-		}),
-	),
-).rejects.toMatchObject({ errorCode: 403 })
-expect(accountReadPolicy.canRead).not.toHaveBeenCalled()
-expect(transactionSummaryReader.getById).not.toHaveBeenCalled()
-provider.assertExhausted()
-```
-
-Run every focused check and the credential-free demonstration.
-
-```bash title="Verify and run the chapter" replay="project"
-npm run build
-npm test
-npm run lint
-npm run demo
-```
-
-The demo prints a structured answer after the fake model selects the tool and
-the guarded command reads the injected transaction resource. For an optional
-real-provider run, copy `.env.example`, set `OPENAI_API_KEY`, and run
-`npm start`. Provider credentials remain in the composition root and never
-enter the Harness definition.
+Continue with [Test the complete EventBridge path](../test-eventbridge/).

@@ -111,17 +111,30 @@ async function inspectTutorialPage(chapter, page) {
 	}
 
 	const blocks = [...source.matchAll(/^```(\w+)([^\n]*)\n([\s\S]*?)^```\s*$/gm)]
+	const writes = []
+	let actionCount = 0
 	for (const block of blocks) {
 		const title = block[2].match(/title="([^"]+)"/)?.[1]
 		assert(title, `${page}: every code block needs an exact file or action title`)
+		const writesFile = /(?:^|\s)write(?:\s|$)/.test(block[2])
+		const replaysCommand = /replay="(?:parent|project|server|request)"/.test(block[2])
+		if (writesFile || replaysCommand) actionCount++
 		const sourcePath = sourcePathFromTitle(title)
 		if (sourcePath) {
 			const fullPath = join(bankRoot, 'chapters', chapter.id, sourcePath)
 			assert(await exists(fullPath), `${page}: referenced source does not exist: ${sourcePath}`)
-			await assertSnippetMatchesSource(page, sourcePath, block[3], fullPath)
+			if (chapter.constructionVerified && writesFile) {
+				assert.equal(
+					block[3].trimEnd(),
+					(await readFile(fullPath, 'utf8')).trimEnd(),
+					`${page}: write block must contain the complete current ${sourcePath}`,
+				)
+				writes.push(sourcePath)
+			} else await assertSnippetMatchesSource(page, sourcePath, block[3], fullPath)
 		}
 	}
-	return source
+	if (chapter.constructionVerified) assert(actionCount > 0, `${page}: verified construction page has no file edit or command`)
+	return { source, writes }
 }
 
 async function inspectChapter(chapter) {
@@ -139,11 +152,20 @@ async function inspectChapter(chapter) {
 		assertPublishedDependencySpec(chapter.id, 'tsx', packageJson.devDependencies?.tsx ?? packageJson.dependencies?.tsx)
 	}
 
-	const pageSources = []
-	for (const page of chapter.pages) pageSources.push(await inspectTutorialPage(chapter, page))
-	const fullTutorial = pageSources.join('\n')
+	const inspectedPages = []
+	for (const page of chapter.pages) inspectedPages.push(await inspectTutorialPage(chapter, page))
+	const fullTutorial = inspectedPages.map(page => page.source).join('\n')
 	for (const command of fullTutorial.matchAll(/npm run (add:[a-z0-9:-]+)/g))
 		assert(packageJson.scripts?.[command[1]], `${chapter.id}: tutorial uses missing package script ${command[1]}`)
+	if (chapter.constructionVerified) {
+		const writes = inspectedPages.flatMap(page => page.writes)
+		assert.equal(new Set(writes).size, writes.length, `${chapter.id}: a complete file is written more than once`)
+		assert.deepEqual(
+			[...writes].sort(),
+			[...(chapter.requiredWrittenFiles ?? [])].sort(),
+			`${chapter.id}: required construction files and complete write blocks differ`,
+		)
+	}
 
 	await assertServiceBoundaries(chapter.id, projectRoot)
 	process.stdout.write(`Checked draft tutorial structure: ${chapter.id}\n`)

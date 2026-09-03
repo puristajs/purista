@@ -7,7 +7,18 @@ status: draft
 ---
 
 The native Harness definition knows the tool contract. The Support mount now
-supplies the PURISTA implementation.
+supplies its PURISTA implementation. This is the adapter layer between the two
+libraries:
+
+```text title="Portable definition and PURISTA binding"
+Harness module                      Support service mount
+-------------------------------     --------------------------------
+lookup_transaction contract    ->   typed host-tool implementation
+answer_transaction_question    ->   published EventBridge target
+model alias primary            ->   runtime binding on a later page
+```
+
+## Define the Support authorization policy
 
 First define the business policy used to publish the agent itself.
 
@@ -23,8 +34,8 @@ export interface SupportQuestionPolicy {
 	): Promise<boolean>
 }
 ```
-
-Declare that resource on the generated Support service builder.
+Declare that resource on the generated Support service builder. The concrete
+policy will be injected when the service instance is created.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -36,10 +47,12 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support conversations and support automation',
 }).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
 ```
+## Share one business rule across both entry points
 
 Create one helper for the outer command and the directly published agent. Its
-policy input names the account and transaction being requested. The separate
-session helper includes trusted caller identity before hashing the value.
+policy input names the account and transaction being requested. The session
+helper combines the question with trusted caller identity, then hashes the
+value so raw identities do not become storage keys.
 
 ```ts title="src/service/support/v1/requireSupportQuestion.ts" write
 import { createHash } from 'node:crypto'
@@ -81,6 +94,7 @@ export function supportQuestionSessionId(
 	return `support-question:${digest}`
 }
 ```
+## Implement the mount adapter
 
 Replace the generated mount file with the complete binding and mount policy.
 
@@ -91,7 +105,7 @@ import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
-} from '../../../transaction/v1/schema.js'
+} from '../../../transaction/v1/command/getTransactionSummary/schema.js'
 import { requireSupportQuestion } from '../requireSupportQuestion.js'
 import type { SupportQuestionPolicy } from '../SupportResources.js'
 import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
@@ -138,12 +152,16 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-
 `.canInvoke(...)` is the capability declaration. It gives this tool handler a
 typed `context.service.Transaction['1'].getTransactionSummary(...)` function.
 That call goes through EventBridge and carries the current trace, correlation,
 tenant, and principal values. The handler does not accept identity from the
 model input.
+
+The handler removes `tenantId` from the command result because that field is
+needed for server-side scope validation but is not part of the model-facing
+tool output contract. Harness validates the returned object against
+`transactionSummarySchema` before it is sent back to the model.
 
 The published agent has its own business guard because callers can address a
 mounted target directly. The outer Support command uses the same policy before
@@ -155,5 +173,12 @@ For a tool that only forwards one command without changing input or output,
 appropriate because the tool removes the internal `tenantId` field from the
 model-visible result. The same builder can explicitly declare streams, queue
 jobs, agents, workflows, and emitted events when a tool really needs them.
+
+Run a typecheck. This proves the host-tool input/output contracts match the
+command call and the published agent guard can access the declared resource.
+
+```bash title="Verify the mounted tool binding" replay="project"
+npm run build
+```
 
 Continue with [Invoke the agent from a command](./invoke-agent/).

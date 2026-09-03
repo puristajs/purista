@@ -13,6 +13,13 @@ data location. Shared UI components and fixture utilities are appropriate;
 shared code must not hide the behavior the chapter is teaching. No chapter
 depends on a previous chapter's running process or database.
 
+For chapters under active reconstruction, keep a machine-checked list of files
+the learner must create or replace. Require exact equality between every
+learner-facing `write` fence and the retained file, reject duplicate writes,
+and require at least one executable edit or command on each construction page.
+Grow this gate chapter by chapter; a final-source build alone does not prove the
+written construction path.
+
 Provide a clean consumer install using declared, compatible dependencies and
 a lockfile in the distributed example. Keep maintainer workspace builds and
 sibling checkouts out of public setup instructions. Verify packed artifacts

@@ -1,21 +1,25 @@
 ---
 title: Build the guarded owning command
-description: Keep database access and account authorization inside the Transaction service that owns them.
+description: Keep transaction access and account authorization inside the Transaction service that owns them.
 order: 233
 kind: lesson
 status: draft
 ---
 
-The tool needs transaction data, but the Support service does not own that
-data. Build the capability on `Transaction` first. Its command will use an
-injected reader for persistence and an injected policy for business
-authorization.
+The tool needs transaction data, but Support does not own that data. Build the
+read capability on `Transaction` first. The command will use an injected reader
+for persistence and an injected policy for business authorization.
 
-Create the resource contracts.
+The example keeps both contracts small. A real database adapter can implement
+the same reader later without changing the command or agent.
+
+## Declare the injected resources
+
+Create the resource contracts below.
 
 ```ts title="src/service/transaction/v1/TransactionResources.ts" write
 import type { z } from 'zod'
-import type { getTransactionSummaryOutputSchema } from './schema.js'
+import type { getTransactionSummaryOutputSchema } from './command/getTransactionSummary/schema.js'
 
 export type StoredTransactionSummary = z.output<typeof getTransactionSummaryOutputSchema>
 
@@ -27,14 +31,18 @@ export interface AccountReadPolicy {
 	canRead(input: Readonly<{ tenantId: string; principalId: string; accountId: string }>): Promise<boolean>
 }
 ```
+`TransactionSummaryReader` is the database-facing port. `AccountReadPolicy`
+answers the business question “may this principal read this account?” Neither
+interface chooses infrastructure. Transaction records belong behind a database
+resource rather than in a PURISTA StateStore.
 
-The reader represents a database adapter. A `StateStore` is intended for
-application state such as sessions and workflow state; transaction records
-belong in a database resource.
+## Replace the generated command schema
 
-Put the command schemas in the service schema file.
+Replace the generated schema beside the command. The command output includes
+`tenantId` because the after guard must verify the loaded record. The
+model-facing tool schema deliberately omits that internal field.
 
-```ts title="src/service/transaction/v1/schema.ts" write
+```ts title="src/service/transaction/v1/command/getTransactionSummary/schema.ts" write
 import { z } from 'zod'
 
 export const getTransactionSummaryPayloadSchema = z.strictObject({
@@ -53,8 +61,18 @@ export const getTransactionSummaryOutputSchema = z.strictObject({
 	currency: z.string().length(3),
 })
 ```
+The builder will infer its types from these Zod schemas, so the generated
+`types.ts` file is unused. Remove it now to keep one source of truth.
 
-Declare both resources on the generated service builder.
+```bash title="Remove unused Transaction command aliases" replay="project"
+rm src/service/transaction/v1/command/getTransactionSummary/types.ts
+```
+
+## Declare the resources on Transaction
+
+Replace the generated service builder with the complete definition below.
+`defineResource` makes each resource available as a typed property on command
+contexts. It does not create the concrete implementation.
 
 ```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -68,19 +86,20 @@ export const transactionV1ServiceBuilder = new ServiceBuilder({
 	.defineResource<'transactionSummaryReader', TransactionSummaryReader>()
 	.defineResource<'accountReadPolicy', AccountReadPolicy>()
 ```
+## Implement the command and its guards
 
-Replace the generated command builder. The before guard answers a business
-question: may this principal read this account? Authentication happens earlier
-at the HTTP boundary; the guard performs authorization for this capability.
+Replace the generated command builder. The before guard decides whether the
+trusted caller may read the requested account. Authentication happens before
+the command is invoked; this guard performs business authorization.
 
 ```ts title="src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
 import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
-} from '../../schema.js'
-import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+} from './schema.js'
 
 export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
 	.getCommandBuilder('getTransactionSummary', 'Read an authorized transaction summary')
@@ -112,13 +131,14 @@ export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
 		return result
 	})
 ```
-
 The model-proposed ids are validated input, but they are not authorization.
-The before guard checks the trusted identity from the PURISTA message. The
-after guard also verifies that the loaded record stays inside the requested
-tenant and account scope.
+The before guard uses trusted message identity. The handler reads the injected
+resource. The after guard verifies that the returned record still belongs to
+the requested tenant and account.
 
-Register the command on the owning service.
+Register the command on the owning service by replacing the generated service
+file. This is what makes the command address
+`Transaction / 1 / getTransactionSummary` available through EventBridge.
 
 ```ts title="src/service/transaction/v1/transactionV1Service.ts" write
 import { getTransactionSummaryCommandBuilder } from './command/getTransactionSummary/getTransactionSummaryCommandBuilder.js'
@@ -128,9 +148,87 @@ export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefini
 	getTransactionSummaryCommandBuilder.getDefinition(),
 )
 ```
+## Test the owning command now
 
-This command only reads data, so its parameter schema is empty. Stable
-idempotency keys become necessary when a tool performs a side effect; they do
-not belong on a read command merely to demonstrate the mechanism.
+Replace the generated command test. The first case proves the guard and reader
+cooperate. The second proves denial stops the reader.
+
+```ts title="src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { getTransactionSummaryCommandBuilder } from './getTransactionSummaryCommandBuilder.js'
+
+const sandbox = createSandbox()
+
+afterEach(() => sandbox.restore())
+
+const payload = { accountId: 'account-operating', transactionId: 'tx-100' }
+const stored = {
+	...payload,
+	tenantId: 'tenant-example',
+	status: 'pending' as const,
+	amount: 42,
+	currency: 'EUR',
+}
+
+describe('getTransactionSummary command', () => {
+	it('checks account access and reads the injected transaction resource', async () => {
+		const accountReadPolicy = { canRead: sandbox.stub().resolves(true) }
+		const transactionSummaryReader = { getById: sandbox.stub().resolves(stored) }
+		const { context } = createCommandContextMock(getTransactionSummaryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { accountReadPolicy, transactionSummaryReader },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			getTransactionSummaryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(stored)
+		expect(
+			accountReadPolicy.canRead.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				accountId: 'account-operating',
+			}),
+		).toBe(true)
+		expect(transactionSummaryReader.getById.calledOnceWith('tx-100')).toBe(true)
+	})
+
+	it('does not read the resource when the account policy denies access', async () => {
+		const accountReadPolicy = { canRead: sandbox.stub().resolves(false) }
+		const transactionSummaryReader = { getById: sandbox.stub() }
+		const { context } = createCommandContextMock(getTransactionSummaryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { accountReadPolicy, transactionSummaryReader },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-other',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			getTransactionSummaryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toMatchObject({ errorCode: 403 })
+		expect(transactionSummaryReader.getById.called).toBe(false)
+	})
+})
+```
+Run the focused test and typecheck. At this checkpoint, the Transaction
+capability works without Harness.
+
+```bash title="Verify the guarded Transaction command" replay="project"
+npm test -- src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts
+npm run build
+```
 
 Continue with [Bind the tool to the command](./mount-tool/).

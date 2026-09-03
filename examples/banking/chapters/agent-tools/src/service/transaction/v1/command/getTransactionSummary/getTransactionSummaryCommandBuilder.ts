@@ -1,10 +1,10 @@
 import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
 import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
-} from '../../schema.js'
-import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+} from './schema.js'
 
 export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
 	.getCommandBuilder('getTransactionSummary', 'Read an authorized transaction summary')

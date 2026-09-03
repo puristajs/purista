@@ -1,13 +1,32 @@
 ---
 title: Invoke the agent from a command
-description: Add a normal application command that calls the mounted agent through its declared EventBridge address.
+description: Add an application command that calls the mounted agent through its declared PURISTA address.
 order: 235
 kind: lesson
 status: draft
 ---
 
-The agent is now a published PURISTA capability. Application code should call
-it by address. Replace the generated Support command builder with this code.
+The mounted agent is now a versioned PURISTA target named
+`Support / 1 / answer_transaction_question`. Other application capabilities
+should call that address through EventBridge instead of importing the Harness
+runtime.
+
+This chapter uses a Support command as the application-facing entry point. It
+returns one complete structured answer. A later streaming chapter exposes
+portable agent events through a PURISTA stream for chat UIs.
+
+## Reuse the agent contract
+
+The command and agent accept the same payload and return the same result. The
+command builder can therefore use the native Harness schemas directly. Remove
+the unused placeholder schema and type files generated for this command.
+
+```bash title="Remove unused Support command placeholders" replay="project"
+rm src/service/support/v1/command/answerTransactionQuestion/schema.ts
+rm src/service/support/v1/command/answerTransactionQuestion/types.ts
+```
+
+Replace the generated command builder with the complete file below.
 
 ```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.ts" write
 import {
@@ -46,13 +65,26 @@ export const answerTransactionQuestionCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
+There are three important calls in this builder:
 
-`canInvokeAgent(...)` declares one versioned address and adds only that target
-to `context.agent`. The call crosses EventBridge even though the command and
-agent are mounted on the same Support service instance. The EventBridge may
-route a later deployment to another instance without changing this command.
+1. `canInvokeAgent(...)` declares the only agent address this command may use.
+   It adds a typed function at
+   `context.agent.Support['1'].answer_transaction_question`.
+2. `setBeforeGuardHooks(...)` authorizes the support request before the model
+   starts. A caller can also invoke the published agent target directly, so the
+   mount policy repeats this guard at that boundary.
+3. `.run(...)` asks for one aggregate result. The call crosses EventBridge even
+   though the command and agent currently run in the same process.
 
-Register the command and keep the one generated Harness mount.
+`sessionId` is a correlation and history key, not proof of authority. The
+helper derives it from the trusted tenant and principal together with
+`questionId`, which prevents two callers who choose the same question id from
+sharing a session.
+
+## Register the command and keep one Harness mount
+
+Replace the generated Support service file. The service registers the command
+and mounts the composed Harness definition once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { answerTransactionQuestionCommandBuilder } from './command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.js'
@@ -63,58 +95,14 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(answerTransactionQuestionCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
+Run a typecheck. It verifies that the command's declared target address and the
+mounted Harness contract agree.
 
-The command uses aggregate `.run(...)` because its contract returns one
-structured answer. A chat UI that needs status and token events should expose a
-stream boundary and consume `.stream(...)`; that is covered by the RAG and
-streaming AI chapters.
-
-The command guard authorizes the account and transaction before the
-EventBridge call. `supportQuestionSessionId(...)` creates a stable session for
-this caller and question without exposing tenant or principal identifiers in
-the session key.
-
-At application startup, inject the database adapter, both policies, and the
-model provider. Definitions contain aliases and contracts; the composition
-root owns concrete infrastructure.
-
-```ts title="src/createSupportApplication.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
-import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
-import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
-
-export async function createSupportApplication(
-	eventBridge: EventBridge,
-	logger: Logger,
-	resources: Readonly<{
-		accountReadPolicy: AccountReadPolicy
-		transactionSummaryReader: TransactionSummaryReader
-		supportQuestionPolicy: SupportQuestionPolicy
-	}>,
-	model: Readonly<{ provider: ModelProvider; model: string }>,
-) {
-	const transaction = await transactionV1Service.getInstance(eventBridge, {
-		logger,
-		resources: {
-			accountReadPolicy: resources.accountReadPolicy,
-			transactionSummaryReader: resources.transactionSummaryReader,
-		},
-	})
-	const support = await supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
-		ai: {
-			models: { primary: model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-	await transaction.start()
-	await support.start()
-	return { support, transaction }
-}
+```bash title="Verify the command-to-agent declaration" replay="project"
+npm run build
 ```
 
-Continue with [Test all three boundaries](../testing/test-tools/).
+The definitions are complete, but no service instance is running yet. The next
+page supplies the model, resource implementations, EventBridge, and caller.
+
+Continue with [Wire and run the application](../run-application/).

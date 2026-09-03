@@ -4,7 +4,7 @@ import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
-} from '../../../transaction/v1/schema.js'
+} from '../../../transaction/v1/command/getTransactionSummary/schema.js'
 import { requireSupportQuestion } from '../requireSupportQuestion.js'
 import type { SupportQuestionPolicy } from '../SupportResources.js'
 import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'

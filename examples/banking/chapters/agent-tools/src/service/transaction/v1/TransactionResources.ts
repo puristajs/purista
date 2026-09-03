@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { getTransactionSummaryOutputSchema } from './schema.js'
+import type { getTransactionSummaryOutputSchema } from './command/getTransactionSummary/schema.js'
 
 export type StoredTransactionSummary = z.output<typeof getTransactionSummaryOutputSchema>
 

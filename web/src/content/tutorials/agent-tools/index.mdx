@@ -1,17 +1,16 @@
 ---
-title: Give an agent PURISTA tools
-description: Let a native Harness agent call guarded PURISTA capabilities through typed, address-first host-tool bindings.
+title: Use PURISTA commands as agent tools
+description: Let a native Harness agent call a guarded PURISTA command through a typed, address-first host-tool binding.
 order: 230
 kind: chapter
 group: ai
 status: draft
 ---
 
-An agent often needs information that belongs to another service. The agent
-must not import that service, open its database, or trust identity proposed by
-the model. In PURISTA, the tool implementation invokes the owning service by
-address through EventBridge. The command's business guards still decide
-whether the caller may read the requested data.
+An agent often needs information owned by another service. For example, a
+support agent may need one transaction summary before it can answer a question.
+The agent should not import the Transaction service or open its database. Its
+tool calls the owning command through PURISTA EventBridge instead.
 
 This chapter adds one read-only tool to the Example Bank support agent. The
 banking story stays small so the framework boundary is easy to see:
@@ -27,22 +26,30 @@ Support command
 ```
 
 The model supplies `accountId` and `transactionId` as untrusted tool input.
-PURISTA supplies `tenantId` and `principalId` from the original message. The
-tool cannot replace those trusted values.
+PURISTA carries `tenantId` and `principalId` from the original request across
+both EventBridge calls. The Support and Transaction guards make separate
+business authorization decisions before model or database work begins.
+
+You only need Node.js 24 or newer and basic TypeScript knowledge. The required
+path uses a fake model and an in-memory transaction reader, so it needs no API
+key, database, HTTP server, or earlier tutorial. An optional final step swaps in
+OpenAI without changing the Harness definition.
 
 ## What you will build
 
 You will:
 
-1. [generate the two services, the agent, and both commands](./setup/scaffold/);
-2. [declare a portable native Harness tool and agent](./build/declare-host-tool/);
-3. [build the guarded owning command](./build/bind-command/);
-4. [bind the host tool to that command](./build/mount-tool/);
-5. [invoke the mounted agent through a normal PURISTA command](./build/invoke-agent/); and
-6. [test the native Harness and PURISTA boundaries](./testing/test-tools/).
+1. [create the project and generate every Framework artifact](./setup/scaffold/);
+2. [declare the portable model-facing tool and agent](./build/declare-host-tool/);
+3. [implement the guarded Transaction command](./build/bind-command/);
+4. [bind the tool to the command at the Support mount](./build/mount-tool/);
+5. [invoke the mounted agent from a Support command](./build/invoke-agent/);
+6. [wire the runtime and run the complete path](./build/run-application/);
+7. [test each small boundary](./testing/test-tools/); and
+8. [prove both EventBridge hops together](./testing/test-eventbridge/).
 
-The retained source is in `examples/banking/chapters/agent-tools`. Its default
-demo uses a strict fake model, so a learner can run the complete path without a
-provider account or network request.
+Every code block that creates or replaces a file contains the complete file.
+The retained source is in `examples/banking/chapters/agent-tools` and follows
+the same paths used below.
 
 Start with [Generate the capability owners](./setup/scaffold/).

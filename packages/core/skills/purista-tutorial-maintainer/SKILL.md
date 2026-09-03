@@ -132,12 +132,29 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   registration; and never use an undeclared placeholder in a command the
   learner is expected to run. At each page boundary, the exit state must be the
   next page's entry state.
+- A fence marked `write` is a complete file replacement and must match the
+  retained source exactly. Never label an object fragment, selected methods,
+  or a partial `package.json` as `write`. Use a command that performs the edit,
+  show a clearly labeled non-runnable excerpt, or show the complete file.
+- Account for generator cleanup. If a lesson replaces a generated contract,
+  test, type file, or registration, name that generated file and show the exact
+  replacement or removal. Do not leave readers with hidden duplicate schemas,
+  stale generated tests, or imports that only disappear in the retained
+  solution.
+- A runnable AI chapter includes the application factory, concrete runtime
+  bindings, address-first caller, deterministic demo entry point, shutdown,
+  and expected output in the required path. Showing only definitions, mounts,
+  and handler fragments is incomplete even when the retained source can run.
 - Keep a short required path, nesting optional variations and deeper checks
   beneath their owner. Do not require unrelated chapters or grow the teaching
   domain into a production bank.
 - Teach builder/context testing, mocked resources/stores, and focused
   guard/transform tests beside implementation, followed by small runtime
   checks. An HTTP-only suite does not satisfy the Framework testing lesson.
+- Keep the first integration test reconstructable: show the complete test file
+  or provide an exact generated source action. A few assertions copied from a
+  hidden integration suite do not teach how the application is started or how
+  the request reaches the capability.
 - A reader can explain what changed and why, as well as reproduce the result.
 - Dependencies and mocked external services have a reproducible local setup,
   usually Docker Compose, with health checks, fixtures, and scoped cleanup.

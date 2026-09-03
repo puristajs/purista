@@ -1,0 +1,294 @@
+---
+title: Wire and run the application
+description: Bind concrete resources and a model at startup, then call the complete agent-tool-command path through EventBridge.
+order: 236
+kind: lesson
+status: draft
+---
+
+Definitions describe what the application can do. The composition root chooses
+the concrete EventBridge, model provider, policies, and transaction reader for
+this process.
+
+This page first creates a reusable application factory. It then adds a
+credential-free demo and an optional OpenAI entry point. Both run the same
+PURISTA services and Harness definition.
+
+## Create the service factory
+
+Create the complete file below. It receives infrastructure as arguments so
+tests and demos can inject safe local implementations.
+
+```ts title="src/createSupportApplication.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+
+export async function createSupportApplication(
+	eventBridge: EventBridge,
+	logger: Logger,
+	resources: Readonly<{
+		accountReadPolicy: AccountReadPolicy
+		transactionSummaryReader: TransactionSummaryReader
+		supportQuestionPolicy: SupportQuestionPolicy
+	}>,
+	model: Readonly<{ provider: ModelProvider; model: string }>,
+) {
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			accountReadPolicy: resources.accountReadPolicy,
+			transactionSummaryReader: resources.transactionSummaryReader,
+		},
+	})
+	const support = await supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
+		ai: {
+			models: { primary: model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+	await transaction.start()
+	await support.start()
+	return { support, transaction }
+}
+```
+The Transaction instance receives only its database reader and account policy.
+The Support instance receives its question policy and an `ai.models.primary`
+binding. `contentCaptureMode: 'NO_CONTENT'` keeps prompts and model output out
+of telemetry by default.
+
+## Add one address-first caller
+
+Create a small terminal adapter. It constructs a normal PURISTA invocation for
+`Support / 1 / answerTransactionQuestion`. In an HTTP application, the Hono
+webserver would construct the same message from the command's endpoint metadata.
+
+```ts title="src/invokeSupportQuestion.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	answerTransactionQuestionInputSchema,
+	answerTransactionQuestionOutputSchema,
+} from './harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+
+type Question = z.infer<typeof answerTransactionQuestionInputSchema>
+type Answer = z.infer<typeof answerTransactionQuestionOutputSchema>
+
+/** A small outer adapter used by the terminal demos to address the Support command. */
+export function invokeSupportQuestion(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: Question,
+) {
+	return eventBridge.invoke<Answer>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'askSupport',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: {
+			serviceName: 'Support',
+			serviceVersion: '1',
+			serviceTarget: 'answerTransactionQuestion',
+		},
+		payload: { payload, parameter: {} },
+	})
+}
+```
+The identity values represent trusted server-side identity. A browser must not
+be allowed to choose these message fields directly. The authentication layer
+verifies a credential and adds them before invoking the command.
+
+## Run the complete path without an API key
+
+Create `src/demo.ts`. `FakeModelProvider` returns two queued model responses:
+the first selects `lookup_transaction`; the second returns the final structured
+answer after Harness gives the tool result back to the model loop.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createSupportApplication } from './createSupportApplication.js'
+import { invokeSupportQuestion } from './invokeSupportQuestion.js'
+
+const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'lookup-1',
+				name: 'lookup_transaction',
+				arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+		usage,
+		finishReason: 'stop',
+	})
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const { support, transaction } = await createSupportApplication(
+		eventBridge,
+		logger,
+		{
+			supportQuestionPolicy: { canAsk: async () => true },
+			accountReadPolicy: { canRead: async () => true },
+			transactionSummaryReader: {
+				getById: async (transactionId) => ({
+					transactionId,
+					accountId: 'account-operating',
+					tenantId: 'tenant-example',
+					status: 'pending',
+					amount: 42,
+					currency: 'EUR',
+				}),
+			},
+		},
+		{ provider, model: 'fake-support' },
+	)
+
+	try {
+		const answer = await invokeSupportQuestion(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{
+				questionId: 'demo-question-1',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+				question: 'What is the status and amount of this transaction?',
+			},
+		)
+		process.stdout.write(`${JSON.stringify(answer, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await transaction.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+Run it from the project root.
+
+```bash title="Run the credential-free agent tool demo" replay="project"
+npm run demo
+```
+
+You should receive one validated command result:
+
+```json title="Expected demo output" expect="json"
+{
+	"answer": "Transaction tx-100 is pending for EUR 42.",
+	"transactionIds": ["tx-100"]
+}
+```
+
+That output proves the full path ran: outer command, mounted agent, model tool
+selection, host-tool adapter, Transaction command, and final model response.
+
+## Optional: bind a live provider
+
+Create the live entry point below. Only this composition root imports the
+OpenAI adapter.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportApplication } from './createSupportApplication.js'
+import { invokeSupportQuestion } from './invokeSupportQuestion.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const { support, transaction } = await createSupportApplication(
+		eventBridge,
+		logger,
+		{
+			supportQuestionPolicy: {
+				canAsk: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-alex',
+			},
+			accountReadPolicy: {
+				canRead: async ({ tenantId, principalId, accountId }) =>
+					tenantId === 'tenant-example' && principalId === 'principal-alex' && accountId === 'account-operating',
+			},
+			transactionSummaryReader: {
+				getById: async (transactionId) =>
+					transactionId === 'tx-100'
+						? {
+								transactionId,
+								accountId: 'account-operating',
+								tenantId: 'tenant-example',
+								status: 'pending',
+								amount: 42,
+								currency: 'EUR',
+							}
+						: undefined,
+			},
+		},
+		{
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+	)
+
+	try {
+		const answer = await invokeSupportQuestion(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{
+				questionId: 'live-question-1',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+				question: 'What is the status and amount of this transaction?',
+			},
+		)
+		process.stdout.write(`${JSON.stringify(answer, null, 2)}\n`)
+	} finally {
+		await support.destroy()
+		await transaction.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Agent tool services could not start.'}\n`)
+	process.exit(1)
+})
+```
+Copy `.env.example` to `.env`, set your key, and run `npm start` only when you
+want to make a provider request.
+
+```dotenv title=".env.example"
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+
+The next two pages test the small contracts first and the complete EventBridge
+path last.
+
+Continue with [Test the small boundaries](../../testing/test-tools/).

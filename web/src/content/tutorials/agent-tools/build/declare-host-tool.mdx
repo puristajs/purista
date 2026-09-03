@@ -6,8 +6,17 @@ kind: lesson
 status: draft
 ---
 
-Replace the generated agent file. This file describes what the model may ask
-the host to do. It does not know that PURISTA will implement the tool.
+The first layer is portable Harness code. It declares what the model may ask a
+host to do, but it does not import PURISTA or know which service implements the
+request.
+
+Replace the complete generated agent file at the path below. It contains four
+contracts:
+
+- tool input: the identifiers the model must provide;
+- tool output: the safe transaction fields the model may read;
+- agent input: the user's question plus its requested scope; and
+- agent output: one validated answer with the transaction ids it used.
 
 ```ts title="src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts" write
 import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
@@ -68,10 +77,14 @@ export const answerTransactionQuestionAgent = defineHarnessModule<PrimaryModelSt
 	},
 )
 ```
-
 `lookup_transaction` is only a contract here: name, description, input, and
-output. The model chooses when to call it. The agent handler does not call a
-tool manually.
+output. The `tools` array makes the contract available to this agent. During a
+run, the model chooses whether to call it; there is no custom handler that calls
+the tool in advance.
+
+`PrimaryModelState` tells TypeScript that this module requires a model alias
+named `primary`. The alias is a logical name. A concrete provider is supplied
+only when the application starts.
 
 Compose the module in the generated service-level Harness definition.
 
@@ -84,13 +97,22 @@ export const supportHarness = defineHarness({ name: 'support-tools' })
 	.use(answerTransactionQuestionAgent)
 	.define()
 ```
+`defineHarness(...)` creates the service-level definition. One Support service
+gets one Harness definition, even when later chapters add more agents or
+workflows. `.requireModel(...)` records the capabilities needed from the
+`primary` binding, `.use(...)` adds this module, and `.define()` produces the
+immutable definition.
 
-The definition remains usable by native Harness. A host must supply a model
-for `primary` and an implementation for `lookup_transaction`. PURISTA will
-supply both when the same definition is mounted.
+The result remains usable by native Harness. Any host must supply a model for
+`primary` and an implementation for `lookup_transaction`. PURISTA will supply
+both when this definition is mounted on Support.
 
 ```bash title="Check the portable definition" replay="project"
 npm run build
 ```
+
+A successful build proves that the tool name in the agent matches the declared
+host tool and that the model requirements compose. The tool still has no
+implementation, so there is nothing useful to run yet.
 
 Continue with [Build the guarded owning command](./bind-command/).

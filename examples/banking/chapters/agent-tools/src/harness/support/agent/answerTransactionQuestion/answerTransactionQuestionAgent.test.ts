@@ -1,6 +1,6 @@
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
 

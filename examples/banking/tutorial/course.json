@@ -459,8 +459,33 @@
     },
     {
       "id": "agent-tools",
-      "title": "Give an agent PURISTA tools",
+      "title": "Use PURISTA commands as agent tools",
       "status": "draft",
+	  "constructionVerified": true,
+	  "requiredWrittenFiles": [
+		"package.json",
+		"src/agentTools.integration.test.ts",
+		"src/createSupportApplication.ts",
+		"src/demo.ts",
+		"src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts",
+		"src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts",
+		"src/harness/support/supportHarness.ts",
+		"src/index.ts",
+		"src/invokeSupportQuestion.ts",
+		"src/service/support/v1/SupportResources.ts",
+		"src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts",
+		"src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.ts",
+		"src/service/support/v1/harness/supportHarnessMount.ts",
+		"src/service/support/v1/requireSupportQuestion.ts",
+		"src/service/support/v1/supportV1Service.ts",
+		"src/service/support/v1/supportV1ServiceBuilder.ts",
+		"src/service/transaction/v1/TransactionResources.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.ts",
+		"src/service/transaction/v1/command/getTransactionSummary/schema.ts",
+		"src/service/transaction/v1/transactionV1Service.ts",
+		"src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+	  ],
       "requires": [
         "classification-agent"
       ],
@@ -470,7 +495,9 @@
         "agent-tools/build/bind-command",
 		"agent-tools/build/mount-tool",
 		"agent-tools/build/invoke-agent",
-        "agent-tools/testing/test-tools"
+		"agent-tools/build/run-application",
+		"agent-tools/testing/test-tools",
+		"agent-tools/testing/test-eventbridge"
       ]
     },
     {

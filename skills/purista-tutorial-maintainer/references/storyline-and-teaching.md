@@ -120,6 +120,15 @@ Apply these rules to code fences:
 - End each page with an observable checkpoint. Start the next page from exactly
   that filesystem and runtime state. Replay the pages in order without filling
   gaps from the retained solution.
+- Treat `write` as an exact operation, not presentation metadata. Its body is
+  the whole destination file and must equal the retained source after
+  formatting. A partial `package.json`, selected test cases, or an abbreviated
+  composition root needs a different presentation and cannot be replayed as a
+  file replacement.
+- Inventory files produced by each CLI command before editing. When the chosen
+  architecture no longer needs a generated schema, type file, or placeholder
+  test, teach its explicit removal at the point where the replacement source
+  becomes valid.
 
 For an AI chapter, the ledger usually includes the native target, composed
 Harness definition, mount and publish policy, direct-target guard, host-tool
@@ -127,6 +136,12 @@ binding, owning command and its business guard, address-first caller, provider
 and resource bindings, standalone Harness test, Framework helper test, and
 EventBridge integration test. A chapter may teach only part of this list, but
 its claimed execution path must be complete.
+
+The required path must also show the executable edges around that ledger:
+application factory, service start order, deterministic model script, concrete
+resource fixtures, caller message, expected output, and ordered shutdown. A
+reader must not need to inspect the retained solution to discover `demo.ts`,
+`index.ts`, an invocation helper, or the integration test setup.
 
 ## Easy English without missing explanations
 
