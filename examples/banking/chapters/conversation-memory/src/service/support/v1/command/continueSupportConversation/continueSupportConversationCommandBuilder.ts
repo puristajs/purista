@@ -1,7 +1,7 @@
 import {
 	answerSupportQuestionInputSchema,
 	answerSupportQuestionOutputSchema,
-} from '../../../../../harness/support/answerSupportQuestionAgent.js'
+} from '../../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { conversationSessionId } from '../../conversationSessionId.js'
 import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'

@@ -13,6 +13,34 @@ application boundary; the agent remains a native Harness definition.
 npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
 ```
 
+Create the shared request, transcript, and clear-result schemas. The service
+configuration is empty in this focused example, but declaring it keeps the
+service builder and instance contract explicit.
+
+```ts title="src/service/support/v1/schema.ts" write
+import { z } from 'zod'
+
+export const conversationIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/)
+
+export const conversationHistoryRequestSchema = z.strictObject({ conversationId: conversationIdSchema })
+
+export const conversationHistoryEntrySchema = z.strictObject({
+	role: z.enum(['system', 'user', 'assistant', 'tool']),
+	content: z.string(),
+	timestamp: z.string(),
+})
+
+export const conversationHistorySchema = z.strictObject({
+	messages: z.array(conversationHistoryEntrySchema),
+})
+
+export const clearedConversationHistorySchema = z.strictObject({ cleared: z.literal(true) })
+```
+```ts title="src/service/support/v1/supportServiceConfig.ts" write
+import { z } from 'zod'
+
+export const supportServiceV1ConfigSchema = z.object({})
+```
 The caller supplies a small `conversationId`, while trusted tenant and
 principal identity come from the PURISTA message. First declare the business
 policy used by both the command and the directly addressable agent.
@@ -29,7 +57,21 @@ export interface SupportConversationPolicy {
 	}): Promise<boolean>
 }
 ```
+Declare the narrow transcript resource that the read and clear commands will
+use. Harness still owns the storage implementation and session lifecycle.
 
+```ts title="src/service/support/v1/SupportConversationHistory.ts" write
+export interface SupportConversationHistoryEntry {
+	role: 'system' | 'user' | 'assistant' | 'tool'
+	content: string
+	timestamp: string
+}
+
+export interface SupportConversationHistory {
+	list(sessionId: string): Promise<SupportConversationHistoryEntry[]>
+	clear(sessionId: string): Promise<void>
+}
+```
 Keep the fail-closed authorization rule in one helper. Authentication must
 establish identity before this command is called; the policy then decides
 whether that valid caller may continue this particular conversation.
@@ -59,7 +101,6 @@ export async function requireSupportConversationAccess(
 	}
 }
 ```
-
 Declare the policy and transcript reader as service resources.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
@@ -79,7 +120,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.defineResource<'supportConversationHistory', SupportConversationHistory>()
 	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
 ```
-
 Build one logical conversation id, then derive the opaque storage id only when
 an application command needs to inspect stored messages. The mounted runtime
 uses the same `createHarnessSessionStorageId(...)` helper internally.
@@ -104,14 +144,13 @@ export function conversationStorageSessionId(
 	return createHarnessSessionStorageId(identity, conversationSessionId(identity, conversationId))
 }
 ```
-
 Protect the published agent address itself. A wrapper command guard cannot
 protect callers that invoke `Support / 1 / answer_support_question` directly.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
 import type { z } from 'zod'
-import type { answerSupportQuestionInputSchema } from '../../../../harness/support/answerSupportQuestionAgent.js'
+import type { answerSupportQuestionInputSchema } from '../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
 import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'
@@ -142,7 +181,6 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-
 Declare the versioned agent address on the command and invoke it through
 EventBridge. Reusing the same logical session id loads earlier complete turns.
 The mounted runtime scopes it with trusted tenant and principal identity, so a
@@ -153,7 +191,7 @@ different caller cannot join the transcript by supplying the same
 import {
 	answerSupportQuestionInputSchema,
 	answerSupportQuestionOutputSchema,
-} from '../../../../../harness/support/answerSupportQuestionAgent.js'
+} from '../../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { conversationSessionId } from '../../conversationSessionId.js'
 import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
@@ -181,7 +219,6 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
-
 This focused chapter leaves the command transport-independent. To expose it
 over HTTP, add `.exposeAsHttpEndpoint(...)` and reuse the authenticated Hono
 setup from the sessions chapter. Protected endpoints are already the default;

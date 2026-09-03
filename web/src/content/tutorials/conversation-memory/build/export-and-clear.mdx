@@ -17,24 +17,8 @@ npm run add:command -- get-conversation-history --service support --service-vers
 npm run add:command -- clear-conversation-history --service support --service-version 1 --description "Clear the caller support conversation transcript" --non-interactive
 ```
 
-Wrap the storage port in a narrow service resource. The wrapper exposes only
-the operations these commands need and removes internal message and run ids from
-the public response.
-
-```ts title="src/service/support/v1/SupportConversationHistory.ts" write
-export interface SupportConversationHistoryEntry {
-	role: 'system' | 'user' | 'assistant' | 'tool'
-	content: string
-	timestamp: string
-}
-
-export interface SupportConversationHistory {
-	list(sessionId: string): Promise<SupportConversationHistoryEntry[]>
-	clear(sessionId: string): Promise<void>
-}
-```
-
-Implement that resource with the same Harness storage port that the mounted
+Implement the narrow resource from the previous step with the same Harness
+storage port that the mounted
 runtime will use.
 
 ```ts title="src/resources/HarnessConversationHistory.ts" write
@@ -57,7 +41,6 @@ export class HarnessConversationHistory implements SupportConversationHistory {
 	}
 }
 ```
-
 The read command authorizes the `read` action before deriving the same
 identity-scoped id as the agent invocation.
 
@@ -86,7 +69,6 @@ export const getConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		return { messages: await context.resources.supportConversationHistory.list(sessionId) }
 	})
 ```
-
 The clear command authorizes a different business action. A policy can permit
 someone to continue and read a support case while denying deletion.
 
@@ -116,7 +98,6 @@ export const clearConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		return { cleared: true as const }
 	})
 ```
-
 Register all commands and mount the native Harness once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
@@ -132,54 +113,10 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(clearConversationHistoryCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
-Keep service construction provider-neutral. Bind one storage instance to both
-the Harness runtime and the narrow history resource so the resource does not
-create a second transcript store.
-
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { HarnessStorage, ModelProvider } from '@purista/harness'
-import { HarnessConversationHistory } from './resources/HarnessConversationHistory.js'
-import type { SupportConversationPolicy } from './service/support/v1/SupportConversationPolicy.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		policy: SupportConversationPolicy
-		model: { provider: ModelProvider; model: string }
-		storage: HarnessStorage
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: {
-			supportConversationHistory: new HarnessConversationHistory(options.storage),
-			supportConversationPolicy: options.policy,
-		},
-		ai: {
-			models: { primary: options.model },
-			storage: options.storage,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-
-The live composition root creates SQLite and the OpenAI adapter, then passes
-both into this function. Tests and the deterministic demo pass in-memory
-storage and a strict fake provider through the same interface.
-
-Harness closes its configured storage during service shutdown. Replace SQLite
-with the PostgreSQL storage adapter for shared multi-instance coordination;
-the agent and command contracts do not change.
-
 Clearing messages keeps the session record and run receipts. `Session.destroy()`
 is the destructive Harness operation for deleting the complete session,
 including persisted runs and events. Use that only for a deliberate full-delete
 policy. `Session.release()` keeps all persisted state and only frees live
 sandbox, MCP, and child-task resources.
 
-Continue with [Test history, isolation, and deletion](../../testing/test-history/).
+Continue with [Compose and run the conversation service](../run-application/).

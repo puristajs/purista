@@ -549,6 +549,32 @@
       "id": "conversation-memory",
       "title": "Persist and manage conversation history",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.ts",
+        "src/harness/support/supportHarness.test.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/resources/HarnessConversationHistory.ts",
+        "src/service/support/v1/SupportConversationHistory.ts",
+        "src/service/support/v1/SupportConversationPolicy.ts",
+        "src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts",
+        "src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts",
+        "src/service/support/v1/command/conversationCommands.test.ts",
+        "src/service/support/v1/command/getConversationHistory/getConversationHistoryCommandBuilder.ts",
+        "src/service/support/v1/conversationSessionId.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportConversationAccess.ts",
+        "src/service/support/v1/schema.ts",
+        "src/service/support/v1/supportServiceConfig.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
       "requires": [
         "classification-agent"
       ],
@@ -556,6 +582,7 @@
         "conversation-memory/build/configure-storage",
 		"conversation-memory/build/use-session",
 		"conversation-memory/build/export-and-clear",
+		"conversation-memory/build/run-application",
 		"conversation-memory/testing/test-history"
       ]
     },

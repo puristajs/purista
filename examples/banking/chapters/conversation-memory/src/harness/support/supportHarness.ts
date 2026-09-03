@@ -1,5 +1,5 @@
 import { defineHarness } from '@purista/harness'
-import { answerSupportQuestionAgent } from './answerSupportQuestionAgent.js'
+import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 
 export const supportHarness = defineHarness({ name: 'support-conversations' })
 	.requireModel('primary', { capabilities: ['object'] })

@@ -1,6 +1,6 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
 import type { z } from 'zod'
-import type { answerSupportQuestionInputSchema } from '../../../../harness/support/answerSupportQuestionAgent.js'
+import type { answerSupportQuestionInputSchema } from '../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
 import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'

@@ -1,15 +1,17 @@
 ---
 title: Test history, isolation, and deletion
-description: Verify model context, identity-scoped sessions, retention, and clear behavior without a real provider.
-order: 224
+description: Verify model context, command-derived session ids, mounted authorization, retention, and clear behavior without a provider call.
+order: 225
 kind: lesson
 status: draft
 ---
 
-Use a strict `FakeModelProvider` and in-memory Harness storage for the fast
-suite. Run two turns in one session and inspect the second provider request.
+Test native history behavior with a strict `FakeModelProvider` and in-memory
+Harness storage. The second turn must receive the first complete turn, while a
+different session must remain isolated. The same suite sends nine turns through
+the `maxTurns: 8` policy and verifies that clearing removes the transcript.
 
-```ts title="src/harness/support/supportHarness.test.ts" extend
+```ts title="src/harness/support/supportHarness.test.ts" write
 import { inMemoryHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
@@ -79,29 +81,262 @@ describe('support conversation history', () => {
 			await runtime.shutdown()
 		}
 	})
+
+	it('clears transcript content without deleting the reusable session id', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({ object: { answer: 'I can help.' }, usage, finishReason: 'stop' })
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const session = await runtime.getSession('support:tenant-example:principal-alex:case-3', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			await session.agents.answer_support_question.run({ conversationId: 'case-3', question: 'Can you help?' })
+			expect(await session.history.list()).not.toHaveLength(0)
+			await session.clearHistory()
+			expect(await session.history.list()).toEqual([])
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+
+	it('retains only the newest eight complete conversation turns', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		for (let index = 1; index <= 9; index += 1) {
+			provider.enqueueObject({
+				object: { answer: `Answer ${index}` },
+				usage,
+				finishReason: 'stop',
+			})
+		}
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const session = await runtime.getSession('support:tenant-example:principal-alex:case-retention', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			for (let index = 1; index <= 9; index += 1) {
+				await session.agents.answer_support_question.run({
+					conversationId: 'case-retention',
+					question: `Question ${index}`,
+				})
+			}
+
+			const history = await session.history.list()
+			expect(history).toHaveLength(16)
+			expect(history[0]).toMatchObject({ role: 'user', content: expect.stringContaining('Question 2') })
+			expect(history.at(-1)).toMatchObject({ role: 'assistant', content: expect.stringContaining('Answer 9') })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
 })
 ```
+Test the PURISTA commands separately. These assertions prove that agent
+invocation and transcript deletion derive their ids from trusted message
+identity, and that the business policy receives distinct `continue` and
+`clear` actions.
 
-Open a second session and prove its request does not contain the first answer.
-Then call `session.clearHistory()` and verify `session.history.list()` is empty.
-The retained command tests also prove that invocation and deletion derive the
-storage id from `context.message.tenantId` and `principalId`, and that the
-business policy receives distinct `continue` and `clear` actions.
+```ts title="src/service/support/v1/command/conversationCommands.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { conversationStorageSessionId } from '../conversationSessionId.js'
+import { clearConversationHistoryCommandBuilder } from './clearConversationHistory/clearConversationHistoryCommandBuilder.js'
+import { continueSupportConversationCommandBuilder } from './continueSupportConversation/continueSupportConversationCommandBuilder.js'
 
-Run a service-level EventBridge test as a separate boundary. The allowed case
-proves both the command guard and mounted-agent guard run. The denied case calls
-the published `answer_support_question` address directly and proves the mount
-guard stops execution before the fake provider receives a request. This matters
-because another service can invoke the published address without using the
-wrapper command.
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
 
-The retained suite sends nine complete turns through the configured
-`maxTurns: 8` policy and proves that only the newest eight user/assistant pairs
-remain. Before lowering `maxBytes`, also test that the newest complete turn
-fits and that trimming never splits a tool call from its tool result. Test your
-production storage adapter with the Harness storage contract suite before
-using it for shared multi-instance traffic.
+describe('support conversation commands', () => {
+	it('derives the agent session from trusted caller identity', async () => {
+		const payload = { conversationId: 'case-1', question: 'What did we discuss?' }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(continueSupportConversationCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportConversationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		;(stubs.agent as any).Support['1'].answer_support_question.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output: { answer: 'We discussed a pending transfer.' },
+		})
 
+		await expect(
+			continueSupportConversationCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ answer: 'We discussed a pending transfer.' })
+		expect(
+			(stubs.agent as any).Support['1'].answer_support_question.run.calledOnceWith(payload, {
+				sessionId: 'support:case-1',
+			}),
+		).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-1',
+				action: 'continue',
+			}),
+		).toBe(true)
+	})
+
+	it('clears only the identity-scoped transcript', async () => {
+		const history = { list: sandbox.stub(), clear: sandbox.stub().resolves() }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const payload = { conversationId: 'case-2' }
+		const { context } = createCommandContextMock(clearConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportConversationHistory: history, supportConversationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			clearConversationHistoryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ cleared: true })
+		expect(history.clear.calledOnceWith(conversationStorageSessionId(context.message, payload.conversationId))).toBe(
+			true,
+		)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-2',
+				action: 'clear',
+			}),
+		).toBe(true)
+	})
+})
+```
+Finally run a real local EventBridge boundary. The allowed case proves the
+command guard and mounted-agent guard both execute. The denied case invokes the
+published agent address directly and proves the mount guard stops execution
+before the model receives a request.
+
+```ts title="src/service/support/v1/supportV1Service.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { inMemoryHarnessStorage } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { HarnessConversationHistory } from '../../../resources/HarnessConversationHistory.js'
+import { supportV1Service } from './supportV1Service.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('support conversation service', () => {
+	it('authorizes the command and mounted agent before continuing a conversation', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { answer: 'A transfer can remain pending for two business days.' },
+			usage,
+			finishReason: 'stop',
+		})
+		const storage = inMemoryHarnessStorage()
+		const policy = { canAccess: vi.fn(async () => true) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: {
+				supportConversationHistory: new HarnessConversationHistory(storage),
+				supportConversationPolicy: policy,
+			},
+			ai: { models: { primary: { provider, model: 'fake-support' } }, storage },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'continueSupportConversation',
+						},
+						payload: {
+							payload: { conversationId: 'case-1', question: 'How long can it stay pending?' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({ answer: 'A transfer can remain pending for two business days.' })
+			expect(policy.canAccess).toHaveBeenCalledTimes(2)
+			expect(policy.canAccess).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-1',
+				action: 'continue',
+			})
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies the directly addressed agent before model work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const storage = inMemoryHarnessStorage()
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: {
+				supportConversationHistory: new HarnessConversationHistory(storage),
+				supportConversationPolicy: { canAccess: vi.fn(async () => false) },
+			},
+			ai: { models: { primary: { provider, model: 'fake-support' } }, storage },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-other',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'answer_support_question',
+						},
+						payload: {
+							payload: { conversationId: 'case-1', question: 'What did we discuss?' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
 Run the complete local gate.
 
 ```bash title="Verify the conversation-history chapter" replay="project"
@@ -111,12 +346,7 @@ npm run lint
 npm run demo
 ```
 
-The demo starts a real local EventBridge, performs two turns through the
-protected command, and exports all four stored messages. It uses an in-memory
-adapter and strict fake model, so the default proof needs no API key. The
-optional `npm start` path uses SQLite and OpenAI from the application
-composition root.
-
-The retained snapshot passes three test files with seven tests. It remains a draft
-until the published PURISTA v4 and Harness v3 packages can be installed into a
-fresh consumer directory and replayed without workspace links.
+These tests cover the application contract without an API key. Before reducing
+`maxBytes` in production, also test that trimming keeps complete tool calls and
+their results together. Run the Harness storage contract suite against the
+chosen shared storage adapter before deploying multiple instances.
