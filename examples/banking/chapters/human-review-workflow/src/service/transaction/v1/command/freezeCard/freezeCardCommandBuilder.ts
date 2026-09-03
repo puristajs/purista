@@ -7,6 +7,22 @@ export const freezeCardCommandBuilder = transactionV1ServiceBuilder
 	.addPayloadSchema(freezeCardInputSchema)
 	.addParameterSchema(freezeCardParameterSchema)
 	.addOutputSchema(freezeCardOutputSchema)
+	.setBeforeGuardHooks({
+		approvedCardFreeze: async function (context, payload, parameter) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.cardFreezePolicy.canFreeze({
+					tenantId,
+					principalId,
+					cardId: payload.cardId,
+					approvalId: parameter.approvalId,
+				}))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This card freeze is not approved')
+			}
+		},
+	})
 	.setCommandFunction(async function (context, payload, parameter) {
 		const { tenantId, principalId } = context.message
 		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
@@ -14,6 +30,6 @@ export const freezeCardCommandBuilder = transactionV1ServiceBuilder
 			...payload,
 			tenantId,
 			principalId,
-			idempotencyKey: parameter.idempotencyKey,
+			idempotencyKey: parameter.approvalId,
 		})
 	})

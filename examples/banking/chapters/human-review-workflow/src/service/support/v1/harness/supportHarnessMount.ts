@@ -1,9 +1,9 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { reviewSupportActionHarness } from '../../../../harness/support/reviewSupportActionWorkflow.js'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireReviewWorkflowAccess } from '../requireReviewWorkflowAccess.js'
 import type { SupportReviewPolicy, SupportReviewStore } from '../SupportReviewResources.js'
 
-export { reviewSupportActionHarness }
+export { supportHarness }
 
 export const supportHarnessPolicy = {
 	publish: { agents: [], workflows: ['review_support_action'] },

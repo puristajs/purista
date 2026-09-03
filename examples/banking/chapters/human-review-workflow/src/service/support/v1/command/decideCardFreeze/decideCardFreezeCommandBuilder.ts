@@ -4,7 +4,7 @@ import {
 	freezeCardOutputSchema,
 	freezeCardParameterSchema,
 } from '../../../../transaction/v1/schema.js'
-import { reviewSupportActionHarness } from '../../harness/supportHarnessMount.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { decideReviewInputSchema, reviewTerminalSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -12,15 +12,8 @@ export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('decideCardFreeze', 'Authorize and deliver one human review decision')
 	.addPayloadSchema(decideReviewInputSchema)
 	.addOutputSchema(reviewTerminalSchema)
-	.canInvokeWorkflow(
-		'Support',
-		'1',
-		'review_support_action',
-		reviewSupportActionHarness.contracts.workflows.review_support_action,
-	)
+	.canInvokeWorkflow('Support', '1', 'review_support_action', supportHarness.contracts.workflows.review_support_action)
 	.canInvoke('Transaction', '1', 'freezeCard', freezeCardOutputSchema, freezeCardInputSchema, freezeCardParameterSchema)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/card-freeze-reviews/decision')
 	.setBeforeGuardHooks({
 		reviewerMayDecide: async function (context, payload) {
 			const { tenantId, principalId } = context.message
@@ -52,7 +45,7 @@ export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
 		})
 		if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
 		if (resumed.output.status === 'approved') {
-			await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { idempotencyKey: record.runId })
+			await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
 		}
 		return { status: resumed.output.status, requestId: record.requestId }
 	})

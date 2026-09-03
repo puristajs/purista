@@ -1,19 +1,79 @@
 ---
-title: Test the review boundary
-description: Prove waiting behavior, reviewer identity, tenant isolation, idempotent approval, and rejection.
+title: Test every review boundary
+description: Prove native waiting and resume, mocked command resources, real EventBridge routing, isolation, and idempotency.
 order: 254
 kind: lesson
 status: draft
 ---
 
-Test the complete path over a real `DefaultEventBridge`. Use
-`InMemoryHarnessStorage` for durable checkpoints and waits, and bind in-memory
-business resources to the two service instances. No model is involved.
+Use three test levels. Each one answers a different question and none needs a
+model provider or API key.
 
-Start with a request from one principal and assert that the command returns a
-waiting result instead of rejecting.
+## Test the native workflow
 
-```ts title="src/humanReview.integration.test.ts"
+Create a standalone Harness runtime with in-memory checkpoint storage. The
+first call returns an external wait. Signal that wait and run the same durable
+ID again to prove it completes with the decision.
+
+```ts title="src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts" write
+const storage = new InMemoryHarnessStorage()
+const runtime = await supportHarness.getInstance({ models: {}, storage })
+const input = {
+	waitId: 'wait-1',
+	deadline: new Date(Date.now() + 60_000).toISOString(),
+	actionDigest: 'a'.repeat(64),
+	definitionVersion: 'support-card-freeze-v1' as const,
+}
+```
+
+```ts title="src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts" write
+const waiting = await session.workflows.review_support_action.run(input, {
+	durable: { runId: 'review-run' },
+})
+expect(waiting).toMatchObject({
+	status: 'interrupted',
+	interrupt: { type: 'external-wait', id: 'wait-1' },
+})
+await storage.signalWait({ waitId: 'wait-1', eventId: 'decision-1', outcome: 'approved' })
+const resumed = await session.workflows.review_support_action.run(input, {
+	durable: { runId: 'review-run' },
+})
+expect(resumed).toMatchObject({ status: 'completed', output: { status: 'approved' } })
+```
+
+## Test the PURISTA command
+
+Use `createCommandContextMock` for the request command. Inject a policy and
+review store stub, place trusted identity on the message, and script only the
+declared workflow client. This verifies resource use and waiting-state mapping
+without starting infrastructure.
+
+```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts" write
+const { context, stubs } = createCommandContextMock(requestCardFreezeCommandBuilder, {
+	payload,
+	parameter: {},
+	resources: { supportReviewStore: reviews, supportReviewPolicy: policy },
+	sandbox,
+})
+context.message = getCommandMessageMock({
+	tenantId: 'tenant-example',
+	principalId: 'principal-alex',
+	payload: { payload, parameter: {} },
+})
+```
+
+The test resolves the workflow with `status: 'interrupted'` and an
+`external-wait`, then asserts the command returns `{ status: 'waiting' }`. It
+also verifies `canRequest` received tenant, principal, and card ID and that the
+review record was created.
+
+## Test the complete PURISTA flow
+
+The integration suite starts a real `DefaultEventBridge`, Support service,
+Transaction service, and mounted Harness workflow. It still uses in-memory
+adapters so each case stays isolated and fast.
+
+```ts title="src/humanReview.integration.test.ts" write
 const waiting = await eventBridge.invoke(
 	getCommandMessageMock({
 		tenantId: 'tenant-example',
@@ -28,42 +88,38 @@ const waiting = await eventBridge.invoke(
 expect(waiting).toMatchObject({ status: 'waiting', requestId: 'review-1' })
 ```
 
-Deliver the decision as a different authorized principal. Repeat the exact
-message and assert that the business effect ran once.
+Deliver the same approved decision twice and assert that the effect executor
+ran once.
 
-```ts title="src/humanReview.integration.test.ts"
+```ts title="src/humanReview.integration.test.ts" write
 await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
 await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
 expect(executor.effects).toHaveBeenCalledTimes(1)
 ```
 
-The retained suite adds separate cases for the boundaries that matter:
+The remaining integration cases prove:
 
-- a different tenant cannot resume the durable run;
-- a reviewer denied by `supportReviewPolicy` cannot write or signal a decision;
-- a stale database revision returns `409 Conflict`;
-- a conflicting second decision is rejected;
-- an expired or missing wait does not execute the business effect;
-- rejection completes the workflow and never calls `freezeCard`;
-- the Transaction resource deduplicates by the durable run id.
+- rejection never invokes the Transaction effect;
+- a reviewer denied by business policy cannot record a decision;
+- another tenant cannot find or resume the review;
+- stale revisions and conflicting decisions return handled conflicts;
+- an unavailable wait does not execute the effect; and
+- the Transaction resource deduplicates the approved effect by run ID.
 
-Run all three project gates.
+Run all checks and the deterministic SQLite-backed demo.
 
 ```bash title="Verify the human-review chapter" replay="project"
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The retained project proves every boundary above. The core framework suite
-also verifies the mounted runtime's identity-derived session binding. This
-chapter remains a draft until the released PURISTA v4 and Harness v3 packages
-pass a clean registry replay.
+The demo creates temporary SQLite databases, starts the real EventBridge and
+both services, requests review, approves it as a different principal, and
+prints the waiting state, final state, and effect count. It removes the
+temporary data after shutdown.
 
-The retained composition root also starts the Support and Transaction services
-with in-memory tutorial resources. The integration test remains the quickest
-way to drive both the waiting and decision addresses.
-
-```bash title="Run the human-review services" replay="project"
-npm start
-```
+Use `npm start` when you want to keep the local services running. That
+composition stores Harness checkpoints below `.data/human-review/harness.sqlite`
+and Support review records below `.data/human-review/reviews.sqlite`.

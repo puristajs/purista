@@ -1,5 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
-import { reviewSupportActionHarness } from '../../harness/supportHarnessMount.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { reviewIdentity } from '../../reviewIdentity.js'
 import { requestCardFreezeInputSchema, reviewRequestResultSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
@@ -8,14 +8,7 @@ export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
 	.addPayloadSchema(requestCardFreezeInputSchema)
 	.addOutputSchema(reviewRequestResultSchema)
-	.canInvokeWorkflow(
-		'Support',
-		'1',
-		'review_support_action',
-		reviewSupportActionHarness.contracts.workflows.review_support_action,
-	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/card-freeze-reviews')
+	.canInvokeWorkflow('Support', '1', 'review_support_action', supportHarness.contracts.workflows.review_support_action)
 	.setBeforeGuardHooks({
 		callerMayRequest: async function (context, payload) {
 			const { tenantId, principalId } = context.message

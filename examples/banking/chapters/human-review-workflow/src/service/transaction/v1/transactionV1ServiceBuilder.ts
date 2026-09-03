@@ -11,8 +11,21 @@ export interface CardFreezeExecutor {
 	): Promise<{ status: 'frozen'; cardId: string }>
 }
 
+export interface CardFreezePolicy {
+	canFreeze(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			cardId: string
+			approvalId: string
+		}>,
+	): Promise<boolean>
+}
+
 export const transactionV1ServiceBuilder = new ServiceBuilder({
 	serviceName: 'Transaction',
 	serviceVersion: '1',
 	serviceDescription: 'Owns transaction and card business actions',
-}).defineResource<'cardFreezeExecutor', CardFreezeExecutor>()
+})
+	.defineResource<'cardFreezeExecutor', CardFreezeExecutor>()
+	.defineResource<'cardFreezePolicy', CardFreezePolicy>()

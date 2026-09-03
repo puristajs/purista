@@ -5,7 +5,7 @@ async function main() {
 	const logger = initLogger()
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
-	const { support, transaction } = await createReviewApplication(
+	const application = await createReviewApplication(
 		eventBridge,
 		logger,
 		{
@@ -15,10 +15,17 @@ async function main() {
 				tenantId === 'tenant-example' && principalId === 'principal-reviewer',
 		},
 		{
+			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
+				tenantId === 'tenant-example' &&
+				principalId === 'principal-reviewer' &&
+				cardId === 'card-1' &&
+				/^support-review-run:[a-f0-9]{64}$/.test(approvalId),
+		},
+		{
 			freeze: async ({ cardId }) => ({ status: 'frozen', cardId }),
 		},
 	)
-	gracefulShutdown(logger, [support, transaction, eventBridge])
+	gracefulShutdown(logger, [application, eventBridge])
 	logger.info('Human review workflow services started')
 }
 

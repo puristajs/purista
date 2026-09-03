@@ -184,6 +184,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   tools, and prove the initial prompt contains the compact catalog rather than
   the complete Skill. Skill trust metadata never replaces PURISTA business
   guards or grants script execution, network access, credentials, or tools.
+- Keep human-review mechanisms distinct. A business workflow uses a durable
+  external wait and maps its interruption to a typed application state such as
+  `waiting`; a model-selected tool uses a Harness approval interrupt and the
+  standard AI SDK UI approval parts. Neither state becomes a generic 500
+  response. Persist business decisions outside Harness storage, authorize the
+  published target and every downstream effect address, and use stable
+  approval and idempotency identities when resuming.
 - Teach RAG as one complete index-to-answer path. Ingestion remains deterministic
   PURISTA command or worker logic, but embeddings come from a declared Harness
   model alias through `canUseHarnessModel(...)`; do not invent an embedding

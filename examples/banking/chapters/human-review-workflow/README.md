@@ -9,7 +9,9 @@ npm install
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The integration tests use in-memory adapters and a real `DefaultEventBridge`.
-No model provider is involved.
+The tests use isolated in-memory adapters and a real `DefaultEventBridge`. The
+demo uses temporary SQLite databases for Harness checkpoints and Support
+review records. No model provider or API key is involved.

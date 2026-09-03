@@ -1,54 +1,48 @@
 ---
-title: Authorize, signal, and resume
-description: Record one reviewer decision, wake the durable run, and execute the approved command idempotently.
+title: Record, signal, and resume
+description: Commit one reviewer decision, wake the durable run, and execute the approved command through a guarded address.
 order: 253
 kind: lesson
 status: draft
 ---
 
 Generate one command for the review decision and one command on the service
-that owns the business effect.
+that owns the effect.
 
 ```bash title="Generate the decision and effect commands" replay="project"
 npm run add:command -- decide-card-freeze --service support --service-version 1 --description "Authorize and deliver one human review decision" --non-interactive
 npm run add:command -- freeze-card --service transaction --service-version 1 --description "Freeze a card after an approved review" --non-interactive
 ```
 
-The decision payload carries an expected database revision and a stable event
-id. Implement `supportReviewStore.decide` as a transaction or compare-and-swap:
+The decision payload carries an expected revision and stable event ID. The
+review store must implement `decide` as one database transaction:
 
-1. Load the review inside the tenant boundary.
-2. Require `status: 'pending'` and the expected revision.
-3. Store the terminal decision, reviewer id, and event id atomically.
-4. Treat an exact retry of the same event as success.
-5. Reject a different second decision with `409 Conflict`.
+1. load the tenant-scoped pending review;
+2. compare its revision;
+3. store outcome, reviewer, event ID, and next revision atomically;
+4. accept an exact retry of the same decision; and
+5. reject a stale or different second decision with `409 Conflict`.
 
-Protect the endpoint and authorize the review as a business action.
+The retained `SqliteSupportReviewStore` uses `BEGIN IMMEDIATE` and a guarded
+update. This database is the durable business record. It is separate from
+Harness checkpoint storage and from PURISTA StateStore.
 
-```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts"
-.enableHttpSecurity(true)
-.exposeAsHttpEndpoint('POST', 'support/card-freeze-reviews/decision')
-.setBeforeGuardHooks({
-	reviewerMayDecide: async function (context, payload) {
-		const { tenantId, principalId } = context.message
-		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-		if (
-			!(await context.resources.supportReviewPolicy.canReview({
-				tenantId,
-				principalId,
-				requestId: payload.requestId,
-			}))
-		) {
-			throw new HandledError(StatusCode.Forbidden, 'This review decision is not allowed')
-		}
-	},
-})
+```ts title="src/resources/SqliteSupportReviewStore.ts" write
+const result = this.database
+	.prepare(`
+					UPDATE support_reviews
+					SET status = ?, revision = revision + 1, decision_event_id = ?, decided_by = ?
+					WHERE tenant_id = ? AND request_id = ? AND revision = ? AND status = 'pending'
+				`)
+	.run(input.outcome, input.eventId, input.principalId, input.tenantId, input.requestId, input.expectedRevision)
+if (result.changes !== 1) throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
 ```
 
-After the database accepts the decision, signal the external wait. The
-resource keeps Harness storage behind an application-owned interface.
+The decision command first checks whether the current reviewer may decide this
+specific request. After the store commits, a narrow resource signals the
+Harness wait.
 
-```ts title="src/resources/HarnessReviewWaitSignal.ts"
+```ts title="src/resources/HarnessReviewWaitSignal.ts" write
 export class HarnessReviewWaitSignal implements ReviewWaitSignal {
 	public constructor(private readonly storage: HarnessStorage) {}
 
@@ -58,12 +52,12 @@ export class HarnessReviewWaitSignal implements ReviewWaitSignal {
 }
 ```
 
-Resume through the typed, address-first workflow client with exactly the same
-input, session id, and durable run id. If the terminal result is approved,
-invoke the owning Transaction command. Use the durable run id as the effect
-idempotency key so retries cannot freeze the card twice.
+Resume through the declared workflow address with the original input, session
+ID, and durable run ID. An unavailable wait is a handled conflict. An approved
+result invokes the Transaction command with the durable run ID as both approval
+and idempotency identity.
 
-```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts"
+```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts" write
 const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
 const signal = await context.resources.reviewWaitSignal.signal({
 	waitId: record.waitId,
@@ -71,22 +65,82 @@ const signal = await context.resources.reviewWaitSignal.signal({
 	outcome: payload.outcome,
 })
 if (signal.kind === 'not_found') throw new HandledError(StatusCode.Conflict, 'Review wait is not available')
-
 const resumed = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
 	sessionId: record.sessionId,
 	durable: { runId: record.runId },
 })
 if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
-
 if (resumed.output.status === 'approved') {
-	await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { idempotencyKey: record.runId })
+	await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
 }
 return { status: resumed.output.status, requestId: record.requestId }
 ```
 
-For this business-review endpoint, a UI posts the decision and renders the
-typed JSON states `waiting`, `approved`, or `rejected`. Model-selected tool
-approval uses the separate approval interrupt and the AI SDK UI Message Stream
-v1 adapter, which emits the standard approval parts expected by AI SDK clients.
+The final effect address also needs business authorization because another
+service can call it directly. A Transaction-owned policy verifies the current
+principal, card, and trusted approval ID. Its executor uses the same ID to
+deduplicate the external effect.
 
-Continue with [Test the review boundary](../../testing/test-review/).
+```ts title="src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.ts" write
+.setBeforeGuardHooks({
+	approvedCardFreeze: async function (context, payload, parameter) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		if (
+			!(await context.resources.cardFreezePolicy.canFreeze({
+				tenantId,
+				principalId,
+				cardId: payload.cardId,
+				approvalId: parameter.approvalId,
+			}))
+		) {
+			throw new HandledError(StatusCode.Forbidden, 'This card freeze is not approved')
+		}
+	},
+})
+.setCommandFunction(async function (context, payload, parameter) {
+	const { tenantId, principalId } = context.message
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	return context.resources.cardFreezeExecutor.freeze({
+		...payload,
+		tenantId,
+		principalId,
+		idempotencyKey: parameter.approvalId,
+	})
+})
+```
+
+In production, `cardFreezePolicy` should validate an approved grant from a
+trusted store or signed capability and bind it to the tenant, card, action, and
+expiry. The small local policy in `src/index.ts` is only a visible tutorial
+fixture.
+
+Finally bind persistent adapters at the application composition root. Harness
+uses its SQLite adapter for runs and waits. Support uses a separate SQLite
+resource for review records. The application owns both lifecycles and closes
+them after the services.
+
+```ts title="src/createReviewApplication.ts" write
+const storage = sqliteHarnessStorage({ file: join(dataDirectory, 'harness.sqlite') })
+const reviewStore = new SqliteSupportReviewStore(join(dataDirectory, 'reviews.sqlite'))
+const transaction = await transactionV1Service.getInstance(eventBridge, {
+	logger,
+	resources: { cardFreezeExecutor, cardFreezePolicy },
+})
+const support = await supportV1Service.getInstance(eventBridge, {
+	logger,
+	resources: {
+		supportReviewStore: reviewStore,
+		supportReviewPolicy,
+		reviewWaitSignal: new HarnessReviewWaitSignal(storage),
+	},
+	ai: { models: {}, storage },
+})
+```
+
+A browser adapter can render the returned state directly: `waiting` shows the
+deadline and review controls; a decision response shows `approved` or
+`rejected`. Expected review state never becomes a thrown Harness error or a
+Framework 500 response.
+
+Continue with [Test every review boundary](../../testing/test-review/).

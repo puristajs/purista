@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
 	reviewOutcomeSchema,
 	type reviewSupportActionInputSchema,
-} from '../../../harness/support/reviewSupportActionWorkflow.js'
+} from '../../../harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
 
 export const requestCardFreezeInputSchema = z.strictObject({
 	requestId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),

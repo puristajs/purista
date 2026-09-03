@@ -11,7 +11,7 @@ export class InMemorySupportReviewStore implements SupportReviewStore {
 		const key = this.key(input.tenantId, input.requestId)
 		const existing = this.records.get(key)
 		if (existing) {
-			if (existing.actionDigest !== input.actionDigest || existing.tenantId !== input.tenantId) {
+			if (existing.actionDigest !== input.actionDigest || existing.principalId !== input.principalId) {
 				throw new HandledError(StatusCode.Conflict, 'Review request conflicts with its existing action')
 			}
 			return structuredClone(existing)

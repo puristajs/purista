@@ -39,7 +39,7 @@ async function startReviewTestApplication(
 	await eventBridge.start()
 	const transaction = await transactionV1Service.getInstance(eventBridge, {
 		logger: initLogger('fatal'),
-		resources: { cardFreezeExecutor: executor },
+		resources: { cardFreezeExecutor: executor, cardFreezePolicy: { canFreeze: vi.fn(async () => true) } },
 	})
 	const support = await supportV1Service.getInstance(eventBridge, {
 		logger: initLogger('fatal'),
@@ -74,7 +74,7 @@ describe('durable human review over PURISTA', () => {
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const transaction = await transactionV1Service.getInstance(eventBridge, {
-			resources: { cardFreezeExecutor: executor },
+			resources: { cardFreezeExecutor: executor, cardFreezePolicy: { canFreeze: vi.fn(async () => true) } },
 		})
 		const support = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
@@ -133,7 +133,7 @@ describe('durable human review over PURISTA', () => {
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const transaction = await transactionV1Service.getInstance(eventBridge, {
-			resources: { cardFreezeExecutor: executor },
+			resources: { cardFreezeExecutor: executor, cardFreezePolicy: { canFreeze: vi.fn(async () => true) } },
 		})
 		const support = await supportV1Service.getInstance(eventBridge, {
 			resources: {
