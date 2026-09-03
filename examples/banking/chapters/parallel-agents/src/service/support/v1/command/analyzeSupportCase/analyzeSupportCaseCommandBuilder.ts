@@ -3,6 +3,7 @@ import {
 	supportCaseInputSchema,
 } from '../../../../../harness/support/supportCaseAnalysisHarness.js'
 import { supportCaseAnalysisHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseAnalysis, supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
@@ -15,11 +16,18 @@ export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 		'analyze_support_case',
 		supportCaseAnalysisHarness.contracts.workflows.analyze_support_case,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/case-analysis')
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
-			sessionId: `support-case:${payload.caseId}`,
+			sessionId: supportCaseSessionId(context.message, payload.caseId),
 		})
 		if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
 		return outcome.output

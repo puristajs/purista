@@ -18,3 +18,10 @@ export async function requireSupportCaseAnalysis(
 		throw new HandledError(StatusCode.Forbidden, 'Support case analysis is not allowed')
 	}
 }
+
+export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; principalId?: string }>, caseId: string) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	return `support-case:${identity.tenantId}:${identity.principalId}:${caseId}`
+}

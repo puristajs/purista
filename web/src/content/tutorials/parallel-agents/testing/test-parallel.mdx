@@ -26,25 +26,47 @@ responseProvider.enqueueObject({
 })
 ```
 
+Test the PURISTA command separately with `createCommandContextMock`. Inject a
+case-policy stub, add trusted identity to the message, resolve only the declared
+workflow client, and verify the tenant-scoped session ID.
+
+```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts" write
+const { context, stubs } = createCommandContextMock(analyzeSupportCaseCommandBuilder, {
+	payload,
+	parameter: {},
+	resources: { supportCasePolicy: policy },
+	sandbox,
+})
+context.message = getCommandMessageMock({
+	tenantId: 'tenant-example',
+	principalId: 'principal-alex',
+	payload: { payload, parameter: {} },
+})
+```
+
 Start the mounted Support service on a real `DefaultEventBridge`, invoke the
 command with identity, and assert the complete merged output. Also assert each
 provider received exactly one request and call `assertExhausted()`.
 
-The second test returns `false` from `supportCasePolicy.canAnalyze`. It expects
-a handled `403` and asserts both provider request arrays remain empty. That
-proves business authorization occurs before either parallel model effect.
+The successful call crosses both the command guard and mounted-workflow guard.
+The denied direct-workflow test returns `false` from
+`supportCasePolicy.canAnalyze`, expects a handled `403`, and asserts both
+provider request arrays remain empty. That proves business authorization
+occurs before either parallel model effect.
 
 ```bash title="Verify the parallel-agent chapter" replay="project"
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
 The retained source passes both tests. This chapter remains a draft until the
 released PURISTA v4 and Harness v3 packages pass a clean registry replay.
 
-Copy the environment template, add the provider key, and start the mounted
-workflow service.
+The demo uses the same strict fake providers and invokes the command through a
+real EventBridge. For an optional live run, copy the environment template, add
+the provider key, and start the mounted workflow service.
 
 ```bash title="Run the parallel-agent service" replay="project"
 cp .env.example .env

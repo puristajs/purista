@@ -19,7 +19,8 @@ You will learn how to:
 - cap total and simultaneous child calls;
 - use `context.fanOut` instead of unmanaged concurrency;
 - merge evidence without asking another model to reinterpret it;
-- keep business authorization in a PURISTA command guard.
+- apply business authorization at both the command and published workflow
+  addresses.
 
 1. [Define the specialist agents](./build/define-specialists/)
 2. [Fan out with an explicit concurrency budget](./build/fan-out/)
@@ -27,5 +28,5 @@ You will learn how to:
 4. [Test both specialists and the denied path](./testing/test-parallel/)
 
 The retained project is in `examples/banking/chapters/parallel-agents`. Its
-tests use two strict fake providers and a real EventBridge.
-
+tests and default demo use two strict fake providers and a real EventBridge, so
+they need no API key.

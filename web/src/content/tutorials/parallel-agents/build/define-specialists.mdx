@@ -6,14 +6,26 @@ kind: lesson
 status: draft
 ---
 
-Add the Support service and generate the command that will expose the complete
-analysis, then install Harness with published package names.
+Create a fresh project and install the published packages. Then generate the
+Support capability, both specialist agents, their owning workflow, and the
+command that consumes the workflow.
 
 ```bash title="Create the PURISTA boundary" replay="project"
+npm create purista@latest parallel-agent-workflow
+cd parallel-agent-workflow
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
 npm run add:service -- support --description "Owns support cases and support automation" --non-interactive
+npm run add:agent -- assess-support-risk --service support --service-version 1 --description "Assess risk in one support case" --non-interactive
+npm run add:agent -- plan-support-response --service support --service-version 1 --description "Plan a response for one support case" --non-interactive
+npm run add:workflow -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis" --non-interactive
 npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
-npm install @purista/harness @purista/harness-openai zod
 ```
+
+The CLI creates native Harness modules and one service-level composition. The
+retained focused source keeps the short schemas, agents, and workflow together
+in `src/harness/support/supportCaseAnalysisHarness.ts` so the complete fan-out
+is visible on one screen. Provider credentials remain outside this definition.
 
 Define the shared input and two different outputs. Strict schemas make each
 specialist responsibility visible to TypeScript, the runtime, and tests.
@@ -67,4 +79,3 @@ These agents produce recommendations only. Commands still own database reads,
 authorization, and effects such as freezing a card.
 
 Continue with [Fan out with an explicit concurrency budget](../fan-out/).
-

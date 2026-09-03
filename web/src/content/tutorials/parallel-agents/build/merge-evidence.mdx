@@ -23,9 +23,9 @@ return {
 ```
 
 Define a Support resource for the business decision. The workflow target guard
-from the previous step asks whether the trusted principal may analyze this
-case. The command is a protected HTTP projection and an address-first caller;
-it does not duplicate that business guard.
+from the previous step protects direct workflow callers. The command is a
+second public EventBridge address, so it applies the same case-level policy
+before invoking the workflow.
 
 ```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
 export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
@@ -38,8 +38,15 @@ export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 		'analyze_support_case',
 		supportCaseAnalysisHarness.contracts.workflows.analyze_support_case,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/case-analysis')
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
 ```
 
 Invoke the workflow by its address-first typed client. The explicit session id
@@ -49,11 +56,16 @@ principal inside the mounted runtime.
 ```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
 .setCommandFunction(async function (context, payload) {
 	const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
-		sessionId: `support-case:${payload.caseId}`,
+		sessionId: supportCaseSessionId(context.message, payload.caseId),
 	})
 	if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
 	return outcome.output
 })
 ```
+
+The session ID includes trusted tenant and principal identity as well as the
+case ID. This prevents two tenants that choose the same case ID from sharing
+Harness history. The focused command has no HTTP metadata; a later Hono
+projection remains protected by default.
 
 Continue with [Test both specialists and the denied path](../../testing/test-parallel/).
