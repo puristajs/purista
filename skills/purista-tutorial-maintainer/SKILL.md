@@ -173,6 +173,17 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   resource bindings, deterministic native Harness test, focused PURISTA helper
   test, and real EventBridge integration test. Omit only items the chapter does
   not claim to teach, and state the reason in internal review evidence.
+- Give each AI chapter a deterministic default demo when its lesson does not
+  depend on a live provider's behavior. The demo must cross the real PURISTA
+  EventBridge and mounted Harness boundary with a strict scripted provider and
+  run without credentials. Keep an optional live provider composition
+  separate; do not make an API key the learner's first proof that the chapter
+  is wired correctly.
+- Treat Agent Skills as model-readable context only. Register explicit
+  directories, validate them at startup, expose only the required sandbox
+  tools, and prove the initial prompt contains the compact catalog rather than
+  the complete Skill. Skill trust metadata never replaces PURISTA business
+  guards or grants script execution, network access, credentials, or tools.
 - Teach RAG as one complete index-to-answer path. Ingestion remains deterministic
   PURISTA command or worker logic, but embeddings come from a declared Harness
   model alias through `canUseHarnessModel(...)`; do not invent an embedding

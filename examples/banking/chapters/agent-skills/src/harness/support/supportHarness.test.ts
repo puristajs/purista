@@ -28,9 +28,9 @@ describe('support Skill', () => {
 		})
 
 		try {
-			const session = await runtime.getSession('support-skill:request-1')
+			const session = await runtime.getSession('support-skill:case-104')
 			const outcome = await session.agents.answer_procedure_question.run({
-				requestId: 'request-1',
+				caseId: 'case-104',
 				question: 'How long can a transfer stay pending?',
 			})
 			expect(outcome).toMatchObject({

@@ -1,8 +1,9 @@
 import {
 	answerProcedureQuestionInputSchema,
 	answerProcedureQuestionOutputSchema,
-} from '../../../../../harness/support/supportHarness.js'
+} from '../../../../../harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
 import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportProcedureAccess, supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
@@ -15,11 +16,18 @@ export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 		'answer_procedure_question',
 		supportHarness.contracts.agents.answer_procedure_question,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/procedure-question')
+	.setBeforeGuardHooks({
+		procedureAccess: async function (context, payload) {
+			await requireSupportProcedureAccess(
+				context.resources.supportProcedurePolicy,
+				{ tenantId: context.message.tenantId, principalId: context.message.principalId },
+				payload.caseId,
+			)
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const outcome = await context.agent.Support['1'].answer_procedure_question.run(payload, {
-			sessionId: `support-procedure:${payload.requestId}`,
+			sessionId: supportProcedureSessionId(context.message, payload.caseId),
 		})
 		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
 		return outcome.output

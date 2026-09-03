@@ -1,14 +1,17 @@
 ---
-title: Test mounting and failure behavior
-description: Prove catalog disclosure, explicit read access, Skill activation, and fail-closed loading.
+title: Test lazy loading and authorization
+description: Prove catalog disclosure, explicit read access, fail-closed loading, and both PURISTA guards.
 order: 244
 kind: lesson
 status: draft
 ---
 
-Script the model to read the mounted file, then return a structured answer.
+Test the native Harness behavior first. `FakeModelProvider` scripts the model's
+tool choice and final structured output, so the test needs no network or API
+key.
 
-```ts title="src/harness/support/supportHarness.test.ts"
+```ts title="src/harness/support/supportHarness.test.ts" write
+const provider = new FakeModelProvider({ strict: true })
 provider.enqueueObject({
 	object: {},
 	toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
@@ -23,32 +26,100 @@ provider.enqueueObject({
 	usage,
 	finishReason: 'stop',
 })
+const runtime = await supportHarness.getInstance({
+	models: { primary: { provider, model: 'fake-support' } },
+	sandbox: inMemorySandbox(),
+})
 ```
 
-Inspect the first provider request. It should contain the compact catalog and
-file location, not the complete procedure. Its tool list should contain only
-`read`.
+The first provider request contains the compact catalog and file location. It
+does not contain the complete procedure. The only offered tool is `read`.
 
-```ts title="src/harness/support/supportHarness.test.ts"
+```ts title="src/harness/support/supportHarness.test.ts" write
 const firstRequest = provider.requests[0]
 if (!('messages' in firstRequest) || !('tools' in firstRequest))
 	throw new Error('Expected an object model request.')
 expect(firstRequest.messages[0]?.content).toContain('Location: /skills/support-methods/SKILL.md')
 expect(firstRequest.messages[0]?.content).not.toContain('normal review window')
-expect(firstRequest.tools?.map(tool => tool.name) ?? []).toEqual(['read'])
+expect(firstRequest.tools?.map((tool) => tool.name) ?? []).toEqual(['read'])
+provider.assertExhausted()
 ```
 
-Create a second definition with a missing directory and assert
-`getInstance(...)` rejects with `SKILL_MANIFEST_ERROR`. Also test malformed
-frontmatter, name mismatches, unsupported sandbox mounting, and file-count or
-byte limits when your application accepts separately packaged Skills.
+The same file creates a definition with a missing directory and expects
+`SKILL_MANIFEST_ERROR`. This proves startup fails instead of silently running
+without the reviewed procedure. Production systems that accept separately
+packaged Skills should also test malformed frontmatter, name mismatches, file
+count limits, and byte limits.
 
-```bash title="Verify the agent-skills chapter" replay="project"
+Next test the PURISTA command with `createCommandContextMock`. Supply a policy
+stub, place trusted identity on the message, resolve the declared agent
+address, and assert both the invocation and policy input.
+
+```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts" write
+const policy = { canAnswer: sandbox.stub().resolves(true) }
+const { context, stubs } = createCommandContextMock(answerProcedureQuestionCommandBuilder, {
+	payload,
+	parameter: {},
+	resources: { supportProcedurePolicy: policy },
+	sandbox,
+})
+context.message = getCommandMessageMock({
+	tenantId: 'tenant-example',
+	principalId: 'principal-alex',
+	payload: { payload, parameter: {} },
+})
+;(stubs.agent as any).Support['1'].answer_procedure_question.run.resolves({
+	status: 'completed',
+	runId: 'run-1',
+	output: { answer: 'Up to two business days.', method: 'pending_transfer' },
+})
+```
+
+Finally start a real local EventBridge and the mounted service with the same
+strict fake model. A permitted command call causes two policy checks: one at
+the command boundary and one at the published agent boundary.
+
+```ts title="src/service/support/v1/supportV1Service.test.ts" write
+const policy = { canAnswer: vi.fn(async () => true) }
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+const service = await supportV1Service.getInstance(eventBridge, {
+	logger: initLogger('fatal'),
+	resources: { supportProcedurePolicy: policy },
+	ai: { models: { primary: { provider, model: 'fake-support' } } },
+})
+await service.start()
+```
+
+The denied integration test addresses `answer_procedure_question` directly.
+It expects a handled `403` and then calls `provider.assertExhausted()`. The
+strict provider had no responses queued, so this proves the guard rejected the
+request before any model work.
+
+Run all focused checks and the deterministic demo.
+
+```bash title="Verify the Skill chapter" replay="project"
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The retained snapshot passes the native Skill test, fail-closed loading test,
-and PURISTA command invocation test. It remains a draft until a fresh registry
-consumer replay is possible with the published major versions.
+The demo starts EventBridge, injects a simple tutorial policy and scripted
+provider, invokes the command by address, and prints the typed answer. For an
+optional live service, bind the OpenAI adapter only in the application entry
+point:
+
+```ts title="src/index.ts" write
+const support = await createSupportService(eventBridge, logger, {
+	policy: { canAnswer: async () => true },
+	model: {
+		provider: openai({ apiKey }),
+		model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+	},
+})
+```
+
+Copy `.env.example` to `.env`, set `OPENAI_API_KEY`, and run `npm start` only
+when you want that live provider call. The Harness definition, Skill, PURISTA
+service, tests, and default demo stay provider-neutral and credential-free.

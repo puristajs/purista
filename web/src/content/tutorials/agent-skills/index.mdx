@@ -1,24 +1,47 @@
 ---
-title: Load agent Skills
-description: Mount reviewed procedures into a Harness agent without turning their content into authority or executable capability.
+title: Load agent skills on demand
+description: Give an agent reviewed, versioned guidance without adding tools, permissions, or prompt bloat.
 order: 240
 kind: chapter
 group: ai
 status: draft
 ---
 
-This chapter teaches Harness Skills: version-controlled directories that contain
-procedures, references, and optional assets for an agent.
+This chapter teaches how to add an [Agent Skill](https://agentskills.io/) to a
+native Harness agent and mount that agent on a PURISTA service. A Skill is a
+directory containing instructions and optional reference files. Harness shows
+the model a small catalog first; the model reads the full `SKILL.md` only when
+the current question needs it.
 
-A Skill is not a PURISTA command and it grants no business permission. Harness
-mounts its files into the configured sandbox, adds a compact catalog to the
-agent instructions, and lets the model read a relevant `SKILL.md`. The agent
-still receives only the tools that the application explicitly allows.
+The Example Bank fixture contains one short support procedure. The capability
+is useful for product manuals, operating procedures, style guides, and other
+reviewed knowledge that belongs in source control.
 
-1. [Create a versioned Skill](./build/create-skill/)
-2. [Bind the Skill to an agent](./build/bind-skill/)
-3. [Treat Skill content as untrusted data](./build/secure-content/)
-4. [Test mounting and failure behavior](./testing/test-skills/)
+```text title="Skill-enabled execution path"
+PURISTA command
+  -> EventBridge agent address
+  -> business guard
+  -> native Harness agent
+  -> compact Skill catalog
+  -> model selects the read tool when the Skill applies
+  -> validated structured answer
+```
 
-The retained project lives in `examples/banking/chapters/agent-skills` and can
-run its complete verification suite without model credentials.
+A Skill supplies context. It cannot authenticate a caller, authorize an
+action, reveal a secret, add a tool, or execute a script. PURISTA guards and
+Harness tool and sandbox policies keep those decisions outside the prompt.
+
+You will:
+
+1. create a new PURISTA project, service, agent, and versioned Skill;
+2. bind the Skill and its narrow `read` capability to the agent;
+3. protect both the command and directly addressable agent with a business
+   policy;
+4. invoke the agent through EventBridge; and
+5. test lazy loading, authorization, and fail-closed startup without an API
+   key.
+
+The complete runnable project is in
+`examples/banking/chapters/agent-skills`.
+
+Start with [Create the project and Skill](./build/create-skill/).

@@ -10,6 +10,8 @@ npm install
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The tests need no credentials. Set `OPENAI_API_KEY` only for `npm start`.
+The checks and deterministic demo need no credentials. Set `OPENAI_API_KEY`
+only for the optional live `npm start` composition.

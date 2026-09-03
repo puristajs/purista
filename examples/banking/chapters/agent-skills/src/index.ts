@@ -1,11 +1,20 @@
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
 import { createSupportService } from './createSupportService.js'
 
 async function main() {
 	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the live example.')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
-	const support = await createSupportService(eventBridge, logger)
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canAnswer: async () => true },
+		model: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])
 	logger.info('Support Skill service started')
