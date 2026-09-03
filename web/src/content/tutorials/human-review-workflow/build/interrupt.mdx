@@ -18,6 +18,18 @@ states use the same result union, so a pending review is data rather than an
 exception.
 
 ```ts title="src/service/support/v1/schema.ts" write
+import { z } from 'zod'
+import {
+	reviewOutcomeSchema,
+	type reviewSupportActionInputSchema,
+} from '../../../harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
+
+export const requestCardFreezeInputSchema = z.strictObject({
+	requestId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),
+	cardId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	reason: z.string().trim().min(1).max(500),
+})
+
 export const reviewWaitingSchema = z.strictObject({
 	status: z.literal('waiting'),
 	requestId: z.string(),
@@ -32,13 +44,24 @@ export const reviewTerminalSchema = z.strictObject({
 })
 
 export const reviewRequestResultSchema = z.union([reviewWaitingSchema, reviewTerminalSchema])
-```
 
+export const decideReviewInputSchema = z.strictObject({
+	requestId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),
+	expectedRevision: z.number().int().positive(),
+	eventId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),
+	outcome: z.enum(['approved', 'rejected']),
+})
+
+export type ReviewWorkflowInput = z.output<typeof reviewSupportActionInputSchema>
+```
 The Support service owns three injected resources: its durable review records,
 its business authorization policy, and the narrow adapter used to signal a
 Harness wait.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { ReviewWaitSignal, SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+
 export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceName: 'Support',
 	serviceVersion: '1',
@@ -48,32 +71,53 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
 	.defineResource<'reviewWaitSignal', ReviewWaitSignal>()
 ```
-
 Create stable identities from tenant, request ID, and definition version. A
 retry must select the same wait, session, and run. The action digest prevents a
 caller from reusing a request ID for different card or reason data.
 
 ```ts title="src/service/support/v1/reviewIdentity.ts" write
-const actionDigest = createHash('sha256')
-	.update(JSON.stringify([input.tenantId, input.requestId, input.cardId, input.reason, 'support-card-freeze-v1']))
-	.digest('hex')
-const identityDigest = createHash('sha256')
-	.update(`${input.tenantId}:${input.requestId}:support-card-freeze-v1`)
-	.digest('hex')
-const workflowInput: ReviewWorkflowInput = {
-	waitId: `support-review-wait:${identityDigest}`,
-	deadline,
-	actionDigest,
-	definitionVersion: 'support-card-freeze-v1',
+import { createHash } from 'node:crypto'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export function reviewIdentity(
+	input: Readonly<{ tenantId: string; requestId: string; cardId: string; reason: string }>,
+	deadline: string,
+) {
+	const actionDigest = createHash('sha256')
+		.update(JSON.stringify([input.tenantId, input.requestId, input.cardId, input.reason, 'support-card-freeze-v1']))
+		.digest('hex')
+	const identityDigest = createHash('sha256')
+		.update(`${input.tenantId}:${input.requestId}:support-card-freeze-v1`)
+		.digest('hex')
+	const workflowInput: ReviewWorkflowInput = {
+		waitId: `support-review-wait:${identityDigest}`,
+		deadline,
+		actionDigest,
+		definitionVersion: 'support-card-freeze-v1',
+	}
+	return {
+		actionDigest,
+		sessionId: `support-review:${identityDigest}`,
+		runId: `support-review-run:${identityDigest}`,
+		workflowInput,
+	}
 }
 ```
-
 Declare the workflow address and apply a business guard to the command. The
 policy checks the valid caller's access to this card action. Authentication is
 the separate job of a transport middleware, which places trusted tenant and
-principal IDs on the PURISTA message.
+principal IDs on the PURISTA message. The handler persists the business record before it starts the workflow. The
+published workflow guard can therefore verify the record on the initial call.
+When Harness returns an external-wait interrupt, map it into the declared
+result union.
 
 ```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { reviewIdentity } from '../../reviewIdentity.js'
+import { requestCardFreezeInputSchema, reviewRequestResultSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
 export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
 	.addPayloadSchema(requestCardFreezeInputSchema)
@@ -90,31 +134,38 @@ export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 			}
 		},
 	})
+	.setCommandFunction(async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const deadline = new Date(Date.now() + 15 * 60_000).toISOString()
+		const identity = reviewIdentity({ ...payload, tenantId }, deadline)
+		const record = await context.resources.supportReviewStore.create({
+			...payload,
+			tenantId,
+			principalId,
+			waitId: identity.workflowInput.waitId,
+			runId: identity.runId,
+			sessionId: identity.sessionId,
+			actionDigest: identity.actionDigest,
+			workflowInput: identity.workflowInput,
+		})
+		const outcome = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+			sessionId: record.sessionId,
+			durable: { runId: record.runId },
+		})
+		if (outcome.status === 'interrupted' && outcome.interrupt.type === 'external-wait') {
+			return {
+				status: 'waiting' as const,
+				requestId: record.requestId,
+				waitId: outcome.interrupt.id,
+				runId: outcome.runId,
+				deadline: outcome.interrupt.deadline,
+			}
+		}
+		if (outcome.status !== 'completed') throw new Error('Unexpected review workflow interrupt')
+		return { status: outcome.output.status, requestId: record.requestId }
+	})
 ```
-
-The handler persists the business record before it starts the workflow. The
-published workflow guard can therefore verify the record on the initial call.
-When Harness returns an external-wait interrupt, map it into the declared
-result union.
-
-```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts" write
-const outcome = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
-	sessionId: record.sessionId,
-	durable: { runId: record.runId },
-})
-if (outcome.status === 'interrupted' && outcome.interrupt.type === 'external-wait') {
-	return {
-		status: 'waiting' as const,
-		requestId: record.requestId,
-		waitId: outcome.interrupt.id,
-		runId: outcome.runId,
-		deadline: outcome.interrupt.deadline,
-	}
-}
-if (outcome.status !== 'completed') throw new Error('Unexpected review workflow interrupt')
-return { status: outcome.output.status, requestId: record.requestId }
-```
-
 The command has no HTTP metadata in this focused project. It is transport
 independent and already callable through EventBridge. If you expose it with
 Hono, protected is the default and the same typed output becomes a successful

@@ -14,6 +14,86 @@ npm run add:command -- decide-card-freeze --service support --service-version 1 
 npm run add:command -- freeze-card --service transaction --service-version 1 --description "Freeze a card after an approved review" --non-interactive
 ```
 
+Define the Support-owned store, policy, and wait-signal resource contracts, then
+centralize authorization for the directly addressable workflow.
+
+```ts title="src/service/support/v1/SupportReviewResources.ts" write
+import type { ExternalWaitOutcome, ExternalWaitSignalResult } from '@purista/harness'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export interface SupportReviewRecord {
+	requestId: string
+	cardId: string
+	reason: string
+	tenantId: string
+	principalId: string
+	revision: number
+	status: 'pending' | ExternalWaitOutcome
+	waitId: string
+	runId: string
+	sessionId: string
+	actionDigest: string
+	workflowInput: ReviewWorkflowInput
+	decisionEventId?: string
+	decidedBy?: string
+}
+
+export interface SupportReviewStore {
+	create(input: Omit<SupportReviewRecord, 'revision' | 'status'>): Promise<SupportReviewRecord>
+	get(tenantId: string, requestId: string): Promise<SupportReviewRecord | undefined>
+	getByWaitId(tenantId: string, waitId: string): Promise<SupportReviewRecord | undefined>
+	decide(
+		input: Readonly<{
+			tenantId: string
+			requestId: string
+			expectedRevision: number
+			eventId: string
+			outcome: 'approved' | 'rejected'
+			principalId: string
+		}>,
+	): Promise<SupportReviewRecord>
+}
+
+export interface SupportReviewPolicy {
+	canRequest(input: Readonly<{ tenantId: string; principalId: string; cardId: string }>): Promise<boolean>
+	canReview(input: Readonly<{ tenantId: string; principalId: string; requestId: string }>): Promise<boolean>
+}
+
+export interface ReviewWaitSignal {
+	signal(
+		input: Readonly<{
+			waitId: string
+			eventId: string
+			outcome: 'approved' | 'rejected'
+		}>,
+	): Promise<ExternalWaitSignalResult>
+}
+```
+```ts title="src/service/support/v1/requireReviewWorkflowAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export async function requireReviewWorkflowAccess(
+	resources: Readonly<{ supportReviewPolicy: SupportReviewPolicy; supportReviewStore: SupportReviewStore }>,
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	input: ReviewWorkflowInput,
+) {
+	const { tenantId, principalId } = identity
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+
+	const record = await resources.supportReviewStore.getByWaitId(tenantId, input.waitId)
+	if (!record || record.actionDigest !== input.actionDigest) {
+		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+	}
+
+	const allowed =
+		record.principalId === principalId
+			? await resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: record.cardId })
+			: await resources.supportReviewPolicy.canReview({ tenantId, principalId, requestId: record.requestId })
+	if (!allowed) throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+}
+```
 The decision payload carries an expected revision and stable event ID. The
 review store must implement `decide` as one database transaction:
 
@@ -28,21 +108,177 @@ update. This database is the durable business record. It is separate from
 Harness checkpoint storage and from PURISTA StateStore.
 
 ```ts title="src/resources/SqliteSupportReviewStore.ts" write
-const result = this.database
-	.prepare(`
+import { mkdirSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportReviewRecord, SupportReviewStore } from '../service/support/v1/SupportReviewResources.js'
+import type { ReviewWorkflowInput } from '../service/support/v1/schema.js'
+
+interface ReviewRow {
+	tenant_id: string
+	request_id: string
+	card_id: string
+	reason: string
+	principal_id: string
+	revision: number
+	status: SupportReviewRecord['status']
+	wait_id: string
+	run_id: string
+	session_id: string
+	action_digest: string
+	workflow_input: string
+	decision_event_id: string | null
+	decided_by: string | null
+}
+
+export class SqliteSupportReviewStore implements SupportReviewStore {
+	private readonly database: DatabaseSync
+
+	public constructor(file: string) {
+		mkdirSync(dirname(file), { recursive: true })
+		this.database = new DatabaseSync(file)
+		this.database.exec('PRAGMA journal_mode = WAL')
+		this.database.exec(`
+			CREATE TABLE IF NOT EXISTS support_reviews (
+				tenant_id TEXT NOT NULL,
+				request_id TEXT NOT NULL,
+				card_id TEXT NOT NULL,
+				reason TEXT NOT NULL,
+				principal_id TEXT NOT NULL,
+				revision INTEGER NOT NULL,
+				status TEXT NOT NULL,
+				wait_id TEXT NOT NULL,
+				run_id TEXT NOT NULL,
+				session_id TEXT NOT NULL,
+				action_digest TEXT NOT NULL,
+				workflow_input TEXT NOT NULL,
+				decision_event_id TEXT,
+				decided_by TEXT,
+				PRIMARY KEY (tenant_id, request_id),
+				UNIQUE (tenant_id, wait_id)
+			)
+		`)
+	}
+
+	public async create(input: Omit<SupportReviewRecord, 'revision' | 'status'>) {
+		this.database
+			.prepare(`
+				INSERT OR IGNORE INTO support_reviews (
+					tenant_id, request_id, card_id, reason, principal_id, revision, status,
+					wait_id, run_id, session_id, action_digest, workflow_input
+				) VALUES (?, ?, ?, ?, ?, 1, 'pending', ?, ?, ?, ?, ?)
+			`)
+			.run(
+				input.tenantId,
+				input.requestId,
+				input.cardId,
+				input.reason,
+				input.principalId,
+				input.waitId,
+				input.runId,
+				input.sessionId,
+				input.actionDigest,
+				JSON.stringify(input.workflowInput),
+			)
+		const record = await this.get(input.tenantId, input.requestId)
+		if (!record) throw new Error('The review record could not be loaded after insertion')
+		if (record.actionDigest !== input.actionDigest || record.principalId !== input.principalId) {
+			throw new HandledError(StatusCode.Conflict, 'Review request conflicts with its existing action')
+		}
+		return record
+	}
+
+	public async get(tenantId: string, requestId: string) {
+		const row = this.database
+			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND request_id = ?')
+			.get(tenantId, requestId) as unknown as ReviewRow | undefined
+		return row ? this.toRecord(row) : undefined
+	}
+
+	public async getByWaitId(tenantId: string, waitId: string) {
+		const row = this.database
+			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND wait_id = ?')
+			.get(tenantId, waitId) as unknown as ReviewRow | undefined
+		return row ? this.toRecord(row) : undefined
+	}
+
+	public async decide(input: {
+		tenantId: string
+		requestId: string
+		expectedRevision: number
+		eventId: string
+		outcome: 'approved' | 'rejected'
+		principalId: string
+	}) {
+		this.database.exec('BEGIN IMMEDIATE')
+		try {
+			const current = await this.get(input.tenantId, input.requestId)
+			if (!current) throw new HandledError(StatusCode.NotFound, 'Review request not found')
+			if (current.status !== 'pending') {
+				if (
+					current.decisionEventId === input.eventId &&
+					current.status === input.outcome &&
+					current.decidedBy === input.principalId
+				) {
+					this.database.exec('COMMIT')
+					return current
+				}
+				throw new HandledError(StatusCode.Conflict, 'Review request already has a terminal decision')
+			}
+			if (current.revision !== input.expectedRevision) {
+				throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
+			}
+			const result = this.database
+				.prepare(`
 					UPDATE support_reviews
 					SET status = ?, revision = revision + 1, decision_event_id = ?, decided_by = ?
 					WHERE tenant_id = ? AND request_id = ? AND revision = ? AND status = 'pending'
 				`)
-	.run(input.outcome, input.eventId, input.principalId, input.tenantId, input.requestId, input.expectedRevision)
-if (result.changes !== 1) throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
-```
+				.run(input.outcome, input.eventId, input.principalId, input.tenantId, input.requestId, input.expectedRevision)
+			if (result.changes !== 1) throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
+			const decided = await this.get(input.tenantId, input.requestId)
+			if (!decided) throw new Error('The decided review record could not be loaded')
+			this.database.exec('COMMIT')
+			return decided
+		} catch (error) {
+			this.database.exec('ROLLBACK')
+			throw error
+		}
+	}
 
+	public close() {
+		this.database.close()
+	}
+
+	private toRecord(row: ReviewRow): SupportReviewRecord {
+		return {
+			requestId: row.request_id,
+			cardId: row.card_id,
+			reason: row.reason,
+			tenantId: row.tenant_id,
+			principalId: row.principal_id,
+			revision: row.revision,
+			status: row.status,
+			waitId: row.wait_id,
+			runId: row.run_id,
+			sessionId: row.session_id,
+			actionDigest: row.action_digest,
+			workflowInput: JSON.parse(row.workflow_input) as ReviewWorkflowInput,
+			decisionEventId: row.decision_event_id ?? undefined,
+			decidedBy: row.decided_by ?? undefined,
+		}
+	}
+}
+```
 The decision command first checks whether the current reviewer may decide this
 specific request. After the store commits, a narrow resource signals the
 Harness wait.
 
 ```ts title="src/resources/HarnessReviewWaitSignal.ts" write
+import type { HarnessStorage } from '@purista/harness'
+import type { ReviewWaitSignal } from '../service/support/v1/SupportReviewResources.js'
+
 export class HarnessReviewWaitSignal implements ReviewWaitSignal {
 	public constructor(private readonly storage: HarnessStorage) {}
 
@@ -51,96 +287,176 @@ export class HarnessReviewWaitSignal implements ReviewWaitSignal {
 	}
 }
 ```
-
 Resume through the declared workflow address with the original input, session
 ID, and durable run ID. An unavailable wait is a handled conflict. An approved
 result invokes the Transaction command with the durable run ID as both approval
 and idempotency identity.
 
 ```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts" write
-const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
-const signal = await context.resources.reviewWaitSignal.signal({
-	waitId: record.waitId,
-	eventId: payload.eventId,
-	outcome: payload.outcome,
-})
-if (signal.kind === 'not_found') throw new HandledError(StatusCode.Conflict, 'Review wait is not available')
-const resumed = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
-	sessionId: record.sessionId,
-	durable: { runId: record.runId },
-})
-if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
-if (resumed.output.status === 'approved') {
-	await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
-}
-return { status: resumed.output.status, requestId: record.requestId }
-```
+import { HandledError, StatusCode } from '@purista/core'
+import {
+	freezeCardInputSchema,
+	freezeCardOutputSchema,
+	freezeCardParameterSchema,
+} from '../../../../transaction/v1/schema.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { decideReviewInputSchema, reviewTerminalSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
+export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('decideCardFreeze', 'Authorize and deliver one human review decision')
+	.addPayloadSchema(decideReviewInputSchema)
+	.addOutputSchema(reviewTerminalSchema)
+	.canInvokeWorkflow('Support', '1', 'review_support_action', supportHarness.contracts.workflows.review_support_action)
+	.canInvoke('Transaction', '1', 'freezeCard', freezeCardOutputSchema, freezeCardInputSchema, freezeCardParameterSchema)
+	.setBeforeGuardHooks({
+		reviewerMayDecide: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.supportReviewPolicy.canReview({
+					tenantId,
+					principalId,
+					requestId: payload.requestId,
+				}))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This review decision is not allowed')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
+		const signal = await context.resources.reviewWaitSignal.signal({
+			waitId: record.waitId,
+			eventId: payload.eventId,
+			outcome: payload.outcome,
+		})
+		if (signal.kind === 'not_found') throw new HandledError(StatusCode.Conflict, 'Review wait is not available')
+		const resumed = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+			sessionId: record.sessionId,
+			durable: { runId: record.runId },
+		})
+		if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
+		if (resumed.output.status === 'approved') {
+			await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
+		}
+		return { status: resumed.output.status, requestId: record.requestId }
+	})
+```
 The final effect address also needs business authorization because another
 service can call it directly. A Transaction-owned policy verifies the current
 principal, card, and trusted approval ID. Its executor uses the same ID to
 deduplicate the external effect.
 
+```ts title="src/service/transaction/v1/schema.ts" write
+import { z } from 'zod'
+
+export const freezeCardInputSchema = z.strictObject({ cardId: z.string() })
+export const freezeCardParameterSchema = z.strictObject({ approvalId: z.string().min(1).max(200) })
+export const freezeCardOutputSchema = z.strictObject({ status: z.literal('frozen'), cardId: z.string() })
+```
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+
+export interface CardFreezeExecutor {
+	freeze(
+		input: Readonly<{
+			cardId: string
+			tenantId: string
+			principalId: string
+			idempotencyKey: string
+		}>,
+	): Promise<{ status: 'frozen'; cardId: string }>
+}
+
+export interface CardFreezePolicy {
+	canFreeze(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			cardId: string
+			approvalId: string
+		}>,
+	): Promise<boolean>
+}
+
+export const transactionV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Transaction',
+	serviceVersion: '1',
+	serviceDescription: 'Owns transaction and card business actions',
+})
+	.defineResource<'cardFreezeExecutor', CardFreezeExecutor>()
+	.defineResource<'cardFreezePolicy', CardFreezePolicy>()
+```
 ```ts title="src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.ts" write
-.setBeforeGuardHooks({
-	approvedCardFreeze: async function (context, payload, parameter) {
+import { HandledError, StatusCode } from '@purista/core'
+import { freezeCardInputSchema, freezeCardOutputSchema, freezeCardParameterSchema } from '../../schema.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+
+export const freezeCardCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('freezeCard', 'Freeze a card after an approved review')
+	.addPayloadSchema(freezeCardInputSchema)
+	.addParameterSchema(freezeCardParameterSchema)
+	.addOutputSchema(freezeCardOutputSchema)
+	.setBeforeGuardHooks({
+		approvedCardFreeze: async function (context, payload, parameter) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.cardFreezePolicy.canFreeze({
+					tenantId,
+					principalId,
+					cardId: payload.cardId,
+					approvalId: parameter.approvalId,
+				}))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This card freeze is not approved')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload, parameter) {
 		const { tenantId, principalId } = context.message
 		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-		if (
-			!(await context.resources.cardFreezePolicy.canFreeze({
-				tenantId,
-				principalId,
-				cardId: payload.cardId,
-				approvalId: parameter.approvalId,
-			}))
-		) {
-			throw new HandledError(StatusCode.Forbidden, 'This card freeze is not approved')
-		}
-	},
-})
-.setCommandFunction(async function (context, payload, parameter) {
-	const { tenantId, principalId } = context.message
-	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	return context.resources.cardFreezeExecutor.freeze({
-		...payload,
-		tenantId,
-		principalId,
-		idempotencyKey: parameter.approvalId,
+		return context.resources.cardFreezeExecutor.freeze({
+			...payload,
+			tenantId,
+			principalId,
+			idempotencyKey: parameter.approvalId,
+		})
 	})
-})
 ```
+Register the effect command on the owning Transaction service and register the
+request and decision commands with the mounted Support workflow.
 
+```ts title="src/service/transaction/v1/transactionV1Service.ts" write
+import { freezeCardCommandBuilder } from './command/freezeCard/freezeCardCommandBuilder.js'
+import { transactionV1ServiceBuilder } from './transactionV1ServiceBuilder.js'
+
+export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefinition(
+	freezeCardCommandBuilder.getDefinition(),
+)
+```
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { decideCardFreezeCommandBuilder } from './command/decideCardFreeze/decideCardFreezeCommandBuilder.js'
+import { requestCardFreezeCommandBuilder } from './command/requestCardFreeze/requestCardFreezeCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(requestCardFreezeCommandBuilder.getDefinition())
+	.addCommandDefinition(decideCardFreezeCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
 In production, `cardFreezePolicy` should validate an approved grant from a
 trusted store or signed capability and bind it to the tenant, card, action, and
 expiry. The small local policy in `src/index.ts` is only a visible tutorial
 fixture.
-
-Finally bind persistent adapters at the application composition root. Harness
-uses its SQLite adapter for runs and waits. Support uses a separate SQLite
-resource for review records. The application owns both lifecycles and closes
-them after the services.
-
-```ts title="src/createReviewApplication.ts" write
-const storage = sqliteHarnessStorage({ file: join(dataDirectory, 'harness.sqlite') })
-const reviewStore = new SqliteSupportReviewStore(join(dataDirectory, 'reviews.sqlite'))
-const transaction = await transactionV1Service.getInstance(eventBridge, {
-	logger,
-	resources: { cardFreezeExecutor, cardFreezePolicy },
-})
-const support = await supportV1Service.getInstance(eventBridge, {
-	logger,
-	resources: {
-		supportReviewStore: reviewStore,
-		supportReviewPolicy,
-		reviewWaitSignal: new HarnessReviewWaitSignal(storage),
-	},
-	ai: { models: {}, storage },
-})
-```
 
 A browser adapter can render the returned state directly: `waiting` shows the
 deadline and review controls; a decision response shows `approved` or
 `rejected`. Expected review state never becomes a thrown Harness error or a
 Framework 500 response.
 
-Continue with [Test every review boundary](../../testing/test-review/).
+Continue with [Compose and run human review](../run-application/).

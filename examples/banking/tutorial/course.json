@@ -669,6 +669,35 @@
       "id": "human-review-workflow",
       "title": "Pause a workflow for human review",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        "package.json",
+        "src/createReviewApplication.ts",
+        "src/demo.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts",
+        "src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.ts",
+        "src/humanReview.integration.test.ts",
+        "src/index.ts",
+        "src/resources/HarnessReviewWaitSignal.ts",
+        "src/resources/InMemorySupportReviewStore.ts",
+        "src/resources/SqliteSupportReviewStore.ts",
+        "src/service/support/v1/SupportReviewResources.ts",
+        "src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts",
+        "src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts",
+        "src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireReviewWorkflowAccess.ts",
+        "src/service/support/v1/reviewIdentity.ts",
+        "src/service/support/v1/schema.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts",
+        "src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts",
+        "src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.ts",
+        "src/service/transaction/v1/schema.ts",
+        "src/service/transaction/v1/transactionV1Service.ts",
+        "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+      ],
       "requires": [
         "agent-tools"
       ],
@@ -676,6 +705,7 @@
         "human-review-workflow/build/define-workflow",
         "human-review-workflow/build/interrupt",
         "human-review-workflow/build/approve-resume",
+        "human-review-workflow/build/run-application",
         "human-review-workflow/testing/test-review"
       ]
     },
