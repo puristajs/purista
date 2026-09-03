@@ -1,74 +1,234 @@
 ---
-title: Test both specialists and the denied path
+title: Test specialists and authorization
 description: Script each model alias independently and prove authorization runs before fan-out.
-order: 264
+order: 265
 kind: lesson
 status: draft
 ---
 
-Bind a separate strict `FakeModelProvider` to each model alias. This avoids a
-timing-dependent shared response queue and makes an unexpected specialist call
-fail immediately.
+Test the portable Harness fan-out with separate strict providers. This proves
+both agents run, their typed results merge deterministically, and neither alias
+receives an unexpected call.
 
-```ts title="src/parallelAgents.integration.test.ts"
-const riskProvider = new FakeModelProvider({ strict: true })
-const responseProvider = new FakeModelProvider({ strict: true })
+```ts title="src/harness/support/supportCaseAnalysisHarness.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportCaseAnalysisHarness } from './supportCaseAnalysisHarness.js'
 
-riskProvider.enqueueObject({
-	object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-	usage,
-	finishReason: 'stop',
-})
-responseProvider.enqueueObject({
-	object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-	usage,
-	finishReason: 'stop',
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('supportCaseAnalysisHarness', () => {
+	it('runs both specialists and merges their typed results', async () => {
+		const riskProvider = new FakeModelProvider({ strict: true })
+		const responseProvider = new FakeModelProvider({ strict: true })
+		riskProvider.enqueueObject({
+			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			usage,
+			finishReason: 'stop',
+		})
+		responseProvider.enqueueObject({
+			object: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const runtime = await supportCaseAnalysisHarness.getInstance({
+			models: {
+				risk_model: { provider: riskProvider, model: 'risk-fake' },
+				response_model: { provider: responseProvider, model: 'response-fake' },
+			},
+		})
+
+		try {
+			const session = await runtime.getSession('case-1')
+			const outcome = await session.workflows.analyze_support_case.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+			})
+			expect(outcome).toMatchObject({
+				status: 'completed',
+				output: {
+					caseId: 'case-1',
+					risk: { level: 'high' },
+					response: { nextAction: 'freeze_card' },
+				},
+			})
+			riskProvider.assertExhausted()
+			responseProvider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
 })
 ```
-
-Test the PURISTA command separately with `createCommandContextMock`. Inject a
-case-policy stub, add trusted identity to the message, resolve only the declared
-workflow client, and verify the tenant-scoped session ID.
+Test the command with its mocked workflow address and case policy. The test
+asserts trusted identity, the derived session id, and the complete output.
 
 ```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts" write
-const { context, stubs } = createCommandContextMock(analyzeSupportCaseCommandBuilder, {
-	payload,
-	parameter: {},
-	resources: { supportCasePolicy: policy },
-	sandbox,
-})
-context.message = getCommandMessageMock({
-	tenantId: 'tenant-example',
-	principalId: 'principal-alex',
-	payload: { payload, parameter: {} },
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { analyzeSupportCaseCommandBuilder } from './analyzeSupportCaseCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('analyzeSupportCaseCommandBuilder', () => {
+	it('authorizes the case and invokes the declared workflow address', async () => {
+		const payload = { caseId: 'case-1', message: 'My card is missing.' }
+		const policy = { canAnalyze: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(analyzeSupportCaseCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportCasePolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = {
+			caseId: 'case-1',
+			risk: { level: 'high' as const, evidence: ['The customer reports a missing card.'] },
+			response: { customerReply: 'We can help.', nextAction: 'freeze_card' as const },
+		}
+		;(stubs.workflow as any).Support['1'].analyze_support_case.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output,
+		})
+
+		await expect(
+			analyzeSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			policy.canAnalyze.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				caseId: 'case-1',
+			}),
+		).toBe(true)
+		expect(
+			(stubs.workflow as any).Support['1'].analyze_support_case.run.calledOnceWith(payload, {
+				sessionId: 'support-case:tenant-example:principal-alex:case-1',
+			}),
+		).toBe(true)
+	})
 })
 ```
+Use a real local EventBridge for the mounted integration. The denied test calls
+the published workflow address directly and proves the mount guard rejects it
+before either provider receives work.
 
-Start the mounted Support service on a real `DefaultEventBridge`, invoke the
-command with identity, and assert the complete merged output. Also assert each
-provider received exactly one request and call `assertExhausted()`.
+```ts title="src/parallelAgents.integration.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
-The successful call crosses both the command guard and mounted-workflow guard.
-The denied direct-workflow test returns `false` from
-`supportCasePolicy.canAnalyze`, expects a handled `403`, and asserts both
-provider request arrays remain empty. That proves business authorization
-occurs before either parallel model effect.
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
+describe('parallel specialist workflow over PURISTA', () => {
+	it('runs both specialists, merges typed outputs, and keeps caller identity in the business guard', async () => {
+		const riskProvider = new FakeModelProvider({ strict: true })
+		const responseProvider = new FakeModelProvider({ strict: true })
+		riskProvider.enqueueObject({
+			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			usage,
+			finishReason: 'stop',
+		})
+		responseProvider.enqueueObject({
+			object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const policy = { canAnalyze: vi.fn(async () => true) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportCasePolicy: policy },
+			ai: {
+				models: {
+					risk_model: { provider: riskProvider, model: 'risk-fake' },
+					response_model: { provider: responseProvider, model: 'response-fake' },
+				},
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyzeSupportCase' },
+						payload: {
+							payload: { caseId: 'case-1', message: 'My card is missing.' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({
+				caseId: 'case-1',
+				risk: { level: 'high', evidence: ['The customer reports a missing card.'] },
+				response: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+			})
+			expect(policy.canAnalyze).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				caseId: 'case-1',
+			})
+			expect(riskProvider.requests).toHaveLength(1)
+			expect(responseProvider.requests).toHaveLength(1)
+			riskProvider.assertExhausted()
+			responseProvider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('does not start either specialist when the business guard denies the case', async () => {
+		const riskProvider = new FakeModelProvider({ strict: true })
+		const responseProvider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			resources: { supportCasePolicy: { canAnalyze: vi.fn(async () => false) } },
+			ai: {
+				models: {
+					risk_model: { provider: riskProvider, model: 'risk-fake' },
+					response_model: { provider: responseProvider, model: 'response-fake' },
+				},
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyze_support_case' },
+						payload: { payload: { caseId: 'case-denied', message: 'Help' }, parameter: {} },
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(riskProvider.requests).toHaveLength(0)
+			expect(responseProvider.requests).toHaveLength(0)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
 ```bash title="Verify the parallel-agent chapter" replay="project"
 npm run build
 npm test
 npm run lint
 npm run demo
-```
-
-The retained source passes both tests. This chapter remains a draft until the
-released PURISTA v4 and Harness v3 packages pass a clean registry replay.
-
-The demo uses the same strict fake providers and invokes the command through a
-real EventBridge. For an optional live run, copy the environment template, add
-the provider key, and start the mounted workflow service.
-
-```bash title="Run the parallel-agent service" replay="project"
-cp .env.example .env
-npm start
 ```

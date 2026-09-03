@@ -1,33 +1,106 @@
 ---
-title: Merge typed evidence
-description: Validate each specialist result, combine it deterministically, and invoke the workflow through PURISTA.
+title: Mount and invoke the parallel workflow
+description: Authorize the published workflow, invoke it through a PURISTA command, and keep specialists private.
 order: 263
 kind: lesson
 status: draft
 ---
 
-Locate both tagged results and validate them before returning the workflow
-output. This merge is deterministic: it does not add another model round that
-could omit or rewrite evidence.
+Define the case-level business policy resource on the Support service.
 
-```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
-const risk = results.find((result) => result.kind === 'risk')
-const response = results.find((result) => result.kind === 'response')
-if (!risk || !response) throw new Error('Support analysis did not return both specialist results')
-
-return {
-	caseId: context.input.caseId,
-	risk: riskAssessmentSchema.parse(risk.value),
-	response: responsePlanSchema.parse(response.value),
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportCasePolicy {
+	canAnalyze(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
 
-Define a Support resource for the business decision. The workflow target guard
-from the previous step protects direct workflow callers. The command is a
-second public EventBridge address, so it applies the same case-level policy
-before invoking the workflow.
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support cases and support automation',
+}).defineResource<'supportCasePolicy', SupportCasePolicy>()
+```
+Keep the fail-closed authorization rule in one helper so the command and
+directly addressable workflow use the same decision.
 
-```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
+```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export async function requireSupportCaseAnalysis(
+	policy: SupportCasePolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAnalyze({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			caseId: input.caseId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case analysis is not allowed')
+	}
+}
+
+export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; principalId?: string }>, caseId: string) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	return `support-case:${identity.tenantId}:${identity.principalId}:${caseId}`
+}
+```
+Publish only the workflow. The specialists remain internal Harness
+implementation details and receive no EventBridge addresses.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { supportCaseAnalysisHarness } from '../../../../harness/support/supportCaseAnalysisHarness.js'
+import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
+
+export { supportCaseAnalysisHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['analyze_support_case'] },
+	targets: {
+		agents: {},
+		workflows: {
+			analyze_support_case: {
+				beforeGuards: {
+					caseAccess: async (
+						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+						input: { caseId: string },
+					) => {
+						await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+Replace the generated command with the complete address-first invocation. Its
+session id is derived from trusted tenant and principal identity plus the case
+id.
+
+```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts" write
+import {
+	supportCaseAnalysisOutputSchema,
+	supportCaseInputSchema,
+} from '../../../../../harness/support/supportCaseAnalysisHarness.js'
+import { supportCaseAnalysisHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportCaseAnalysis, supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
 export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('analyzeSupportCase', 'Run bounded specialist analysis for one support case')
 	.addPayloadSchema(supportCaseInputSchema)
@@ -47,25 +120,23 @@ export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 			})
 		},
 	})
-```
-
-Invoke the workflow by its address-first typed client. The explicit session id
-keeps the case transcript and run history isolated by trusted tenant and
-principal inside the mounted runtime.
-
-```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
-.setCommandFunction(async function (context, payload) {
-	const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
-		sessionId: supportCaseSessionId(context.message, payload.caseId),
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
+			sessionId: supportCaseSessionId(context.message, payload.caseId),
+		})
+		if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
+		return outcome.output
 	})
-	if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
-	return outcome.output
-})
 ```
+Register the command and mount the Harness once.
 
-The session ID includes trusted tenant and principal identity as well as the
-case ID. This prevents two tenants that choose the same case ID from sharing
-Harness history. The focused command has no HTTP metadata; a later Hono
-projection remains protected by default.
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { analyzeSupportCaseCommandBuilder } from './command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.js'
+import { supportCaseAnalysisHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
-Continue with [Test both specialists and the denied path](../../testing/test-parallel/).
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(analyzeSupportCaseCommandBuilder.getDefinition())
+	.mountHarness(supportCaseAnalysisHarness, supportHarnessPolicy)
+```
+Continue with [Compose and run the parallel workflow](../run-application/).

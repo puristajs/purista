@@ -1,81 +1,84 @@
 ---
-title: Define the specialist agents
-description: Give each agent a narrow task, a dedicated model alias, and a strict output contract.
+title: Create the project and specialist contracts
+description: Scaffold the PURISTA boundary and define narrow specialist inputs, outputs, and model roles.
 order: 261
 kind: lesson
 status: draft
 ---
 
-Create a fresh project and install the published packages. Then generate the
-Support capability, both specialist agents, their owning workflow, and the
-command that consumes the workflow.
+Create a clean PURISTA project from an empty parent directory.
 
-```bash title="Create the PURISTA boundary" replay="project"
-npm create purista@latest parallel-agent-workflow
+```bash title="Create and enter the parallel-agent project" replay="parent"
+npm create purista@latest parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd parallel-agent-workflow
-npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
-npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
-npm run add:service -- support --description "Owns support cases and support automation" --non-interactive
+```
+
+Use the complete published dependency and script contract.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-parallel-agents",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+```bash title="Install the parallel-agent dependencies" replay="project"
+npm install
+```
+
+Generate the Support capability, both agents, their workflow, and the command
+that invokes it. Keeping the CLI steps visible gives every definition its
+standard service-owned location.
+
+```bash title="Generate specialists, workflow, and command" replay="project"
+npm run add:service -- support --description "Own support cases and support automation" --non-interactive
 npm run add:agent -- assess-support-risk --service support --service-version 1 --description "Assess risk in one support case" --non-interactive
 npm run add:agent -- plan-support-response --service support --service-version 1 --description "Plan a response for one support case" --non-interactive
 npm run add:workflow -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis" --non-interactive
 npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
 ```
 
-The CLI creates native Harness modules and one service-level composition. The
-retained focused source keeps the short schemas, agents, and workflow together
-in `src/harness/support/supportCaseAnalysisHarness.ts` so the complete fan-out
-is visible on one screen. Provider credentials remain outside this definition.
+This focused example keeps the two short agent definitions and workflow in one
+portable Harness file. Remove the generated agent and workflow placeholders
+before writing that composition.
 
-Define the shared input and two different outputs. Strict schemas make each
-specialist responsibility visible to TypeScript, the runtime, and tests.
-
-```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
-export const supportCaseInputSchema = z.strictObject({
-	caseId: z.string().trim().min(1).max(80),
-	message: z.string().trim().min(1).max(2_000),
-})
-
-export const riskAssessmentSchema = z.strictObject({
-	level: z.enum(['low', 'medium', 'high']),
-	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
-})
-
-export const responsePlanSchema = z.strictObject({
-	customerReply: z.string().trim().min(1).max(500),
-	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
-})
+```bash title="Remove superseded generated Harness placeholders" replay="project"
+rm -rf src/harness/support/agent src/harness/support/workflow
 ```
 
-Use separate model aliases even when production binds both aliases to the same
-provider and model. The aliases let you tune, admit, observe, and test the two
-roles independently later.
-
-```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
-export const supportCaseAnalysisHarness = defineHarness({ name: 'support-case-analysis' })
-	.requireModel('risk_model', { capabilities: ['object'] })
-	.requireModel('response_model', { capabilities: ['object'] })
-	.agent('assess_support_risk', {
-		model: 'risk_model',
-		input: supportCaseInputSchema,
-		output: riskAssessmentSchema,
-		instructions: [
-			'Assess security and financial risk in one Example Bank support message.',
-			'Use only facts present in the message and list short evidence statements.',
-		].join(' '),
-	})
-	.agent('plan_support_response', {
-		model: 'response_model',
-		input: supportCaseInputSchema,
-		output: responsePlanSchema,
-		instructions: [
-			'Plan a concise Example Bank support response.',
-			'Do not claim an action happened. Select the next action that a service should perform.',
-		].join(' '),
-	})
-```
-
-These agents produce recommendations only. Commands still own database reads,
-authorization, and effects such as freezing a card.
+The specialists use different strict output schemas and different model
+aliases. They produce recommendations; PURISTA commands continue to own
+authorization and business effects.
 
 Continue with [Fan out with an explicit concurrency budget](../fan-out/).
