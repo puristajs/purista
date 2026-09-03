@@ -1,23 +1,98 @@
 ---
 title: Test specialists and authorization
-description: Script each model alias independently and prove authorization runs before fan-out.
+description: Test each generated agent module, the composed workflow, the command helper, and the real EventBridge denial boundary.
 order: 265
 kind: lesson
 status: draft
 ---
 
-Test the portable Harness fan-out with separate strict providers. This proves
-both agents run, their typed results merge deterministically, and neither alias
-receives an unexpected call.
+Test the smallest portable units first. Each generated agent test builds a
+minimal native Harness around one module and supplies one strict fake model.
+This catches schema, prompt, alias, and unexpected-call failures without
+starting PURISTA.
 
-```ts title="src/harness/support/supportCaseAnalysisHarness.test.ts" write
+```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportCaseAnalysisHarness } from './supportCaseAnalysisHarness.js'
+import { assessSupportRiskAgent } from './assessSupportRiskAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('assessSupportRiskAgent', () => {
+	it('returns a schema-validated risk assessment', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'risk-agent-test' })
+			.requireModel('risk_model', { capabilities: ['object'] })
+			.use(assessSupportRiskAgent)
+			.define()
+		const runtime = await definition.getInstance({ models: { risk_model: { provider, model: 'risk-fake' } } })
+
+		try {
+			const session = await runtime.getSession('risk-case-1')
+			await expect(
+				session.agents.assess_support_risk.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { level: 'high' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResponseAgent } from './planSupportResponseAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('planSupportResponseAgent', () => {
+	it('returns a schema-validated response plan', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'response-agent-test' })
+			.requireModel('response_model', { capabilities: ['object'] })
+			.use(planSupportResponseAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { response_model: { provider, model: 'response-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('response-case-1')
+			await expect(
+				session.agents.plan_support_response.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { nextAction: 'freeze_card' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+Next replace the generated workflow test. It instantiates the composed
+`supportHarness`, scripts one response per alias, and proves that the workflow
+runs and merges both modules.
+
+```ts title="src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
-describe('supportCaseAnalysisHarness', () => {
+describe('analyzeSupportCaseWorkflow', () => {
 	it('runs both specialists and merges their typed results', async () => {
 		const riskProvider = new FakeModelProvider({ strict: true })
 		const responseProvider = new FakeModelProvider({ strict: true })
@@ -31,7 +106,7 @@ describe('supportCaseAnalysisHarness', () => {
 			usage,
 			finishReason: 'stop',
 		})
-		const runtime = await supportCaseAnalysisHarness.getInstance({
+		const runtime = await supportHarness.getInstance({
 			models: {
 				risk_model: { provider: riskProvider, model: 'risk-fake' },
 				response_model: { provider: responseProvider, model: 'response-fake' },
@@ -60,8 +135,9 @@ describe('supportCaseAnalysisHarness', () => {
 	})
 })
 ```
-Test the command with its mocked workflow address and case policy. The test
-asserts trusted identity, the derived session id, and the complete output.
+The PURISTA command test mocks the declared workflow address and the injected
+case policy. It verifies trusted identity, the derived session id, and the
+aggregate result without starting EventBridge.
 
 ```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -116,9 +192,9 @@ describe('analyzeSupportCaseCommandBuilder', () => {
 	})
 })
 ```
-Use a real local EventBridge for the mounted integration. The denied test calls
-the published workflow address directly and proves the mount guard rejects it
-before either provider receives work.
+Finish with a real local EventBridge. The success case crosses the command,
+mounted workflow, and both agents. The denial case calls the published
+workflow address directly and proves the mount guard stops both providers.
 
 ```ts title="src/parallelAgents.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -226,9 +302,14 @@ describe('parallel specialist workflow over PURISTA', () => {
 	})
 })
 ```
+Run the complete chapter verification.
+
 ```bash title="Verify the parallel-agent chapter" replay="project"
 npm run build
 npm test
 npm run lint
 npm run demo
 ```
+
+The focused tests explain which module failed. The EventBridge test proves the
+complete address-first path and its direct-target authorization boundary.

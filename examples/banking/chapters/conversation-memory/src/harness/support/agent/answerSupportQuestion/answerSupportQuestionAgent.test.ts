@@ -1,11 +1,11 @@
 import { inMemoryHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 10, outputTokens: 5, totalTokens: 15 }
 
-describe('support conversation history', () => {
+describe('answerSupportQuestionAgent', () => {
 	it('reuses one session history and keeps another session isolated', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({

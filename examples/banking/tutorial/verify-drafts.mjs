@@ -97,6 +97,7 @@ async function assertSnippetMatchesSource(page, sourcePath, snippet, fullPath) {
 }
 
 async function inspectTutorialPage(chapter, page) {
+	const constructionSourceAligned = chapter.constructionSourceAligned || chapter.constructionVerified
 	const pagePath = join(contentRoot, `${page}.mdx`)
 	assert(await exists(pagePath), `${chapter.id}: missing tutorial page ${page}.mdx`)
 	const source = await readFile(pagePath, 'utf8')
@@ -126,7 +127,9 @@ async function inspectTutorialPage(chapter, page) {
 		if (sourcePath) {
 			const fullPath = join(bankRoot, 'chapters', chapter.id, sourcePath)
 			assert(await exists(fullPath), `${page}: referenced source does not exist: ${sourcePath}`)
-			if (chapter.constructionVerified && writesFile) {
+			if (constructionSourceAligned)
+				assert(writesFile, `${page}: source-aligned construction must create or replace the complete ${sourcePath}`)
+			if (constructionSourceAligned && writesFile) {
 				assert.equal(
 					block[3].trimEnd(),
 					(await readFile(fullPath, 'utf8')).trimEnd(),
@@ -136,12 +139,13 @@ async function inspectTutorialPage(chapter, page) {
 			} else await assertSnippetMatchesSource(page, sourcePath, block[3], fullPath)
 		}
 	}
-	if (chapter.constructionVerified) assert(actionCount > 0, `${page}: verified construction page has no file edit or command`)
+	if (constructionSourceAligned) assert(actionCount > 0, `${page}: source-aligned construction page has no file edit or command`)
 	return { source, writes }
 }
 
 async function inspectChapter(chapter) {
 	const projectRoot = join(bankRoot, 'chapters', chapter.id)
+	const constructionSourceAligned = chapter.constructionSourceAligned || chapter.constructionVerified
 	assert(await exists(projectRoot), `${chapter.id}: missing retained example project`)
 	const packageJsonPath = join(projectRoot, 'package.json')
 	assert(await exists(packageJsonPath), `${chapter.id}: missing package.json`)
@@ -158,9 +162,18 @@ async function inspectChapter(chapter) {
 	const inspectedPages = []
 	for (const page of chapter.pages) inspectedPages.push(await inspectTutorialPage(chapter, page))
 	const fullTutorial = inspectedPages.map(page => page.source).join('\n')
+	if (constructionSourceAligned) {
+		assert.match(chapter.projectDirectory ?? '', /^[a-z0-9][a-z0-9-]*$/, `${chapter.id}: missing projectDirectory`)
+		assert(Array.isArray(chapter.replayRequires), `${chapter.id}: replayRequires must explicitly describe construction prerequisites`)
+		const scaffoldPattern = new RegExp(
+			`npm create purista@\\d+\\.\\d+\\.\\d+ ${chapter.projectDirectory}(?:\\s|$)`,
+		)
+		assert(scaffoldPattern.test(fullTutorial), `${chapter.id}: setup must pin the project creator and create projectDirectory`)
+		assert(!/npm create purista@latest/.test(fullTutorial), `${chapter.id}: setup must not depend on a moving project creator tag`)
+	}
 	for (const command of fullTutorial.matchAll(/npm run (add:[a-z0-9:-]+)/g))
 		assert(packageJson.scripts?.[command[1]], `${chapter.id}: tutorial uses missing package script ${command[1]}`)
-	if (chapter.constructionVerified) {
+	if (constructionSourceAligned) {
 		const writes = inspectedPages.flatMap(page => page.writes)
 		assert.equal(new Set(writes).size, writes.length, `${chapter.id}: a complete file is written more than once`)
 		assert.deepEqual(
@@ -169,6 +182,19 @@ async function inspectChapter(chapter) {
 			`${chapter.id}: required construction files and complete write blocks differ`,
 		)
 	}
+	for (let index = 0; index < chapter.pages.length - 1; index++) {
+		const nextSlug = chapter.pages[index + 1].split('/').at(-1)
+		assert(inspectedPages[index].source.includes(nextSlug), `${chapter.pages[index]}: missing link to next step ${nextSlug}`)
+	}
+	const landingPath = join(contentRoot, chapter.id, 'index.mdx')
+	assert(await exists(landingPath), `${chapter.id}: missing chapter landing page`)
+	const landing = await readFile(landingPath, 'utf8')
+	for (const page of chapter.pages) {
+		const slug = page.split('/').at(-1)
+		assert(landing.includes(slug), `${chapter.id}: landing page does not link to required step ${page}`)
+	}
+	if (chapter.constructionVerified)
+		assert(await exists(join(projectRoot, '.tutorial-proof.json')), `${chapter.id}: constructionVerified requires replay proof`)
 
 	await assertServiceBoundaries(chapter.id, projectRoot)
 	process.stdout.write(`Checked draft tutorial structure: ${chapter.id}\n`)

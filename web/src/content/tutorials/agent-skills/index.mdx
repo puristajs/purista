@@ -1,5 +1,5 @@
 ---
-title: Load agent skills on demand
+title: Load Agent Skills on demand
 description: Give an agent reviewed, versioned guidance without adding tools, permissions, or prompt bloat.
 order: 240
 kind: chapter
@@ -31,15 +31,13 @@ A Skill supplies context. It cannot authenticate a caller, authorize an
 action, reveal a secret, add a tool, or execute a script. PURISTA guards and
 Harness tool and sandbox policies keep those decisions outside the prompt.
 
-You will:
+Follow these pages in order:
 
-1. create a new PURISTA project, service, agent, and versioned Skill;
-2. bind the Skill and its narrow `read` capability to the agent;
-3. protect both the command and directly addressable agent with a business
-   policy;
-4. invoke the agent through EventBridge; and
-5. test lazy loading, authorization, and fail-closed startup without an API
-   key.
+1. [Create the project, service, agent, command, and versioned Skill](./build/create-skill/).
+2. [Bind the Skill and its narrow read capability to the agent](./build/bind-skill/).
+3. [Authorize both entry points and invoke the agent through EventBridge](./build/secure-content/).
+4. [Compose and run the Skill-enabled service](./build/run-application/).
+5. [Test lazy loading, authorization, and fail-closed startup](./testing/test-skills/).
 
 The complete runnable project is in
 `examples/banking/chapters/agent-skills`.

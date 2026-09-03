@@ -26,10 +26,11 @@ Harness and PURISTA execution model:
 - both the command and directly addressable workflow enforce business access;
 - the workflow remains addressable through EventBridge.
 
-1. [Define the sequential workflow](./build/define-workflow/)
-2. [Add retries and checkpoints](./build/retry-checkpoint/)
+1. [Create the project and generate the modules](./build/define-workflow/)
+2. [Fill the agents and add workflow checkpoints](./build/retry-checkpoint/)
 3. [Invoke a durable run through PURISTA](./build/invoke/)
-4. [Test failure, retry, and checkpoint replay](./testing/test-workflow/)
+4. [Compose and run the durable application](./build/run-application/)
+5. [Test failure, retry, restart, and checkpoint replay](./testing/test-workflow/)
 
 The retained project is in
 `examples/banking/chapters/multi-step-workflow`.

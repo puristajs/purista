@@ -4,11 +4,11 @@ import { join } from 'node:path'
 import { localDurableExecution, ModelError } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportResolutionHarness } from './supportResolutionWorkflow.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
-describe('supportResolutionHarness', () => {
+describe('resolveSupportCaseWorkflow', () => {
 	it('replays a completed step from SQLite after a runtime restart', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
@@ -37,7 +37,7 @@ describe('supportResolutionHarness', () => {
 		})
 		const directory = await mkdtemp(join(tmpdir(), 'purista-multi-step-'))
 		const firstLocal = localDurableExecution({ root: directory })
-		const firstRuntime = await supportResolutionHarness.getInstance({
+		const firstRuntime = await supportHarness.getInstance({
 			storage: firstLocal.storage,
 			sandbox: firstLocal.sandbox,
 			workspace: firstLocal.workspace,
@@ -63,7 +63,7 @@ describe('supportResolutionHarness', () => {
 				finishReason: 'stop',
 			})
 			const secondLocal = localDurableExecution({ root: directory })
-			const secondRuntime = await supportResolutionHarness.getInstance({
+			const secondRuntime = await supportHarness.getInstance({
 				storage: secondLocal.storage,
 				sandbox: secondLocal.sandbox,
 				workspace: secondLocal.workspace,

@@ -10,7 +10,7 @@ Create a fresh TypeScript project. The tutorial uses published package names
 and versions so the same commands work outside this repository.
 
 ```bash title="Create and enter the Skill project" replay="parent"
-npm create purista@latest support-skills -- --runtime node --event-bridge default --non-interactive --defaults
+npm create purista@2.2.0 support-skills -- --runtime node --event-bridge default --non-interactive --defaults
 cd support-skills
 ```
 
@@ -64,13 +64,6 @@ automation only; it does not become a catch-all banking service.
 ```bash title="Generate Support and the Skill-enabled agent" replay="project"
 npm run add:service -- support --description "Answer support questions with reviewed procedures" --non-interactive
 npm run add:agent -- answer-procedure-question --service support --service-version 1 --description "Answer one question with a reviewed Skill" --non-interactive
-```
-
-The complete Harness test later covers loading and model behavior, so remove
-the smaller generated agent placeholder test.
-
-```bash title="Remove the superseded generated agent test" replay="project"
-rm src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts
 ```
 
 Create `skills/support-methods/SKILL.md`. The directory name and frontmatter

@@ -1,10 +1,10 @@
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { knowledgeHarness } from './knowledgeHarness.js'
+import { knowledgeHarness } from '../../knowledgeHarness.js'
 
 const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
 
-describe('knowledgeHarness', () => {
+describe('answerKnowledgeQuestionWorkflow', () => {
 	it('lets the retrieval agent choose the search tool and streams the grounded answer', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({

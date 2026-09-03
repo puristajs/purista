@@ -1,97 +1,103 @@
 ---
 title: Fan out with an explicit concurrency budget
-description: Define both specialists and let one workflow run them concurrently within bounded delegation limits.
+description: Replace the generated workflow module, allowlist both specialists, and compose the service Harness without collapsing generated modules.
 order: 262
 kind: lesson
 status: draft
 ---
 
-Create the complete portable Harness definition. Each agent has one model role
-and one output contract. The workflow allowlists both agents and limits child
-calls as well as simultaneous calls.
+The workflow owns orchestration. It may call only the two agents named in its
+delegation policy. The total-call limit prevents retries or future code from
+silently adding more model work, while the parallel limit allows these two
+independent calls to overlap.
 
-```ts title="src/harness/support/supportCaseAnalysisHarness.ts" write
+Replace the generated workflow module at its CLI-owned path.
+
+```ts title="src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.ts" write
+import { type AgentDefinition, type BuilderState, defineHarnessModule } from '@purista/harness'
+import {
+	responsePlanSchema,
+	riskAssessmentSchema,
+	supportCaseAnalysisOutputSchema,
+	supportCaseInputSchema,
+} from '../../supportCaseSchemas.js'
+
+type ParallelWorkflowState = BuilderState & {
+	agents: {
+		assess_support_risk: AgentDefinition<any, typeof supportCaseInputSchema, typeof riskAssessmentSchema>
+		plan_support_response: AgentDefinition<any, typeof supportCaseInputSchema, typeof responsePlanSchema>
+	}
+}
+
+export const analyzeSupportCaseWorkflow = defineHarnessModule<ParallelWorkflowState>()(
+	'support.workflow.analyze_support_case',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.workflow('analyze_support_case', {
+				input: supportCaseInputSchema,
+				output: supportCaseAnalysisOutputSchema,
+				delegation: {
+					agents: ['assess_support_risk', 'plan_support_response'],
+					maxChildAgentCalls: 2,
+					maxParallelChildAgentCalls: 2,
+				},
+				handler: async (context) => {
+					const results = await context.fanOut(
+						['risk', 'response'] as const,
+						async (focus) =>
+							focus === 'risk'
+								? { kind: 'risk' as const, value: await context.agents.assess_support_risk(context.input) }
+								: { kind: 'response' as const, value: await context.agents.plan_support_response(context.input) },
+						{ concurrency: 2 },
+					)
+					const risk = results.find((result) => result.kind === 'risk')
+					const response = results.find((result) => result.kind === 'response')
+					if (!risk || !response) throw new Error('Support analysis did not return both specialist results')
+					return {
+						caseId: context.input.caseId,
+						risk: riskAssessmentSchema.parse(risk.value),
+						response: responsePlanSchema.parse(response.value),
+					}
+				},
+			})
+		},
+	},
+)
+```
+`context.fanOut(...)` preserves the input order and cancels remaining work if
+one branch fails. Its `concurrency: 2` option controls this workflow run. The
+delegation policy also caps total and parallel child-agent calls for the run.
+Provider admission or a PURISTA queue controls aggregate concurrency across
+many requests and service instances.
+
+The workflow tags each result before merging it. Ordinary TypeScript then
+finds and validates both results, so no third model call can rewrite or omit
+the evidence.
+
+Replace the generated service-level Harness composition. It binds logical
+model requirements and applies each generated module once.
+
+```ts title="src/harness/support/supportHarness.ts" write
 import { defineHarness } from '@purista/harness'
-import { z } from 'zod'
+import { assessSupportRiskAgent } from './agent/assessSupportRisk/assessSupportRiskAgent.js'
+import { planSupportResponseAgent } from './agent/planSupportResponse/planSupportResponseAgent.js'
+import { analyzeSupportCaseWorkflow } from './workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
 
-export const supportCaseInputSchema = z.strictObject({
-	caseId: z.string().trim().min(1).max(80),
-	message: z.string().trim().min(1).max(2_000),
-})
-
-export const riskAssessmentSchema = z.strictObject({
-	level: z.enum(['low', 'medium', 'high']),
-	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
-})
-
-export const responsePlanSchema = z.strictObject({
-	customerReply: z.string().trim().min(1).max(500),
-	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
-})
-
-export const supportCaseAnalysisOutputSchema = z.strictObject({
-	caseId: z.string(),
-	risk: riskAssessmentSchema,
-	response: responsePlanSchema,
-})
-
-export const supportCaseAnalysisHarness = defineHarness({ name: 'support-case-analysis' })
+export const supportHarness = defineHarness({ name: 'support-case-analysis' })
 	.requireModel('risk_model', { capabilities: ['object'] })
 	.requireModel('response_model', { capabilities: ['object'] })
-	.agent('assess_support_risk', {
-		model: 'risk_model',
-		input: supportCaseInputSchema,
-		output: riskAssessmentSchema,
-		instructions: [
-			'Assess security and financial risk in one Example Bank support message.',
-			'Use only facts present in the message and list short evidence statements.',
-		].join(' '),
-	})
-	.agent('plan_support_response', {
-		model: 'response_model',
-		input: supportCaseInputSchema,
-		output: responsePlanSchema,
-		instructions: [
-			'Plan a concise Example Bank support response.',
-			'Do not claim an action happened. Select the next action that a service should perform.',
-		].join(' '),
-	})
-	.workflow('analyze_support_case', {
-		input: supportCaseInputSchema,
-		output: supportCaseAnalysisOutputSchema,
-		delegation: {
-			agents: ['assess_support_risk', 'plan_support_response'],
-			maxChildAgentCalls: 2,
-			maxParallelChildAgentCalls: 2,
-		},
-		handler: async (context) => {
-			const results = await context.fanOut(
-				['risk', 'response'] as const,
-				async (focus) =>
-					focus === 'risk'
-						? { kind: 'risk' as const, value: await context.agents.assess_support_risk(context.input) }
-						: { kind: 'response' as const, value: await context.agents.plan_support_response(context.input) },
-				{ concurrency: 2 },
-			)
-			const risk = results.find((result) => result.kind === 'risk')
-			const response = results.find((result) => result.kind === 'response')
-			if (!risk || !response) throw new Error('Support analysis did not return both specialist results')
-			return {
-				caseId: context.input.caseId,
-				risk: riskAssessmentSchema.parse(risk.value),
-				response: responsePlanSchema.parse(response.value),
-			}
-		},
-	})
+	.use(assessSupportRiskAgent)
+	.use(planSupportResponseAgent)
+	.use(analyzeSupportCaseWorkflow)
 	.define()
 ```
-`context.fanOut` preserves input order, cancels remaining work when the
-workflow fails, and enforces the child-agent budget. The explicit
-`concurrency: 2` permits both specialists to run together. Provider admission
-or a PURISTA queue still controls aggregate concurrency across many runs and
-service instances.
+This is the only service-level Harness definition. The agent and workflow
+files remain portable native Harness modules; the PURISTA mount comes on the
+next page.
 
-The merge is deterministic: it validates both tagged results and does not add
-another model call that could rewrite or omit evidence.
+```bash title="Verify the composed parallel workflow" replay="project"
+npm run build
+```
 
 Continue with [Mount and invoke the parallel workflow](../merge-evidence/).

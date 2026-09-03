@@ -65,49 +65,76 @@ export const retrieveEvidenceAgent = defineHarnessModule<RetrieveEvidenceState>(
 	},
 })
 ```
-Now replace the temporary Harness composition with its final form. The workflow
-delegates evidence retrieval to the agent, then streams the final answer from
-the primary model. Citation instructions receive the retrieved evidence as
-data.
+Replace the generated workflow module. It delegates evidence retrieval to the
+agent, then streams the final answer from the primary model. Citation
+instructions receive the retrieved evidence as data.
+
+```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.ts" write
+import { type AgentDefinition, type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import {
+	answerKnowledgeQuestionInputSchema,
+	type retrievedEvidenceSchema,
+} from '../../../../service/knowledge/v1/schema.js'
+
+type AnswerKnowledgeQuestionState = BuilderState & {
+	models: { primary: ModelAlias }
+	agents: {
+		retrieve_evidence: AgentDefinition<any, typeof answerKnowledgeQuestionInputSchema, typeof retrievedEvidenceSchema>
+	}
+}
+
+export const answerKnowledgeQuestionWorkflow = defineHarnessModule<AnswerKnowledgeQuestionState>()(
+	'knowledge.workflow.answer-knowledge-question',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.workflow('answer_knowledge_question', {
+				input: answerKnowledgeQuestionInputSchema,
+				output: answerKnowledgeQuestionInputSchema.shape.question,
+				updates: 'text-delta',
+				delegation: { agents: ['retrieve_evidence'] },
+				handler: async (context) => {
+					const research = await context.agents.retrieve_evidence(context.input)
+					let answer = ''
+					for await (const chunk of context.models.primary.textStream(
+						{
+							messages: [
+								{
+									role: 'system',
+									content:
+										'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
+								},
+								{ role: 'user', content: JSON.stringify(research) },
+							],
+						},
+						context.signal,
+						{ emitRunEvents: true },
+					)) {
+						if (chunk.kind === 'delta') answer += chunk.text
+					}
+					return answer
+				},
+			})
+		},
+	},
+)
+```
+Compose the tool, agent, and workflow modules in the service Harness. This file
+selects required model capabilities while the application composition root
+still supplies the concrete providers and model names.
 
 ```ts title="src/harness/knowledge/knowledgeHarness.ts" write
 import { defineHarness } from '@purista/harness'
-import { answerKnowledgeQuestionInputSchema } from '../../service/knowledge/v1/schema.js'
 import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
 import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
+import { answerKnowledgeQuestionWorkflow } from './workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.js'
 
 export const knowledgeHarness = defineHarness({ name: 'knowledge' })
 	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
 	.requireModel('embedding', { capabilities: ['embeddings'] })
 	.use(searchKnowledgeTool)
 	.use(retrieveEvidenceAgent)
-	.workflow('answer_knowledge_question', {
-		input: answerKnowledgeQuestionInputSchema,
-		output: answerKnowledgeQuestionInputSchema.shape.question,
-		updates: 'text-delta',
-		delegation: { agents: ['retrieve_evidence'] },
-		handler: async (context) => {
-			const research = await context.agents.retrieve_evidence(context.input)
-			let answer = ''
-			for await (const chunk of context.models.primary.textStream(
-				{
-					messages: [
-						{
-							role: 'system',
-							content:
-								'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
-						},
-						{ role: 'user', content: JSON.stringify(research) },
-					],
-				},
-				context.signal,
-				{ emitRunEvents: true },
-			)) {
-				if (chunk.kind === 'delta') answer += chunk.text
-			}
-			return answer
-		},
-	})
+	.use(answerKnowledgeQuestionWorkflow)
 	.define()
 ```
 Bind the native tool name to the versioned PURISTA command address. The mount
@@ -154,4 +181,4 @@ match exactly. It invokes through EventBridge and propagates the trusted
 tenant, principal, trace, and correlation context. Use the host-tool builder
 when an implementation must map data or declare several PURISTA capabilities.
 
-Continue with [Stream to a standard chat UI](./stream-ui/).
+Continue with [Stream to a standard chat UI](../stream-ui/).

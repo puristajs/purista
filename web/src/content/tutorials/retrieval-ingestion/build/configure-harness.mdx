@@ -10,7 +10,7 @@ Start in an empty parent directory. `npm create purista` creates the application
 folder; every later command on this page runs inside that folder.
 
 ```bash title="Create and enter the RAG project" replay="parent"
-npm create purista@latest example-rag -- --runtime node --event-bridge default --non-interactive --defaults
+npm create purista@2.2.0 example-rag -- --runtime node --event-bridge default --non-interactive --defaults
 cd example-rag
 ```
 
@@ -33,6 +33,7 @@ links or copied build artifacts.
 		"add:command": "purista add command",
 		"add:stream": "purista add stream",
 		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
 		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
 		"demo": "node --env-file-if-exists=.env --import tsx src/demo.ts",
 		"build": "npm run build:server && npm run build:ui",
@@ -101,17 +102,16 @@ links or copied build artifacts.
 	}
 }
 ```
-
 Install that manifest exactly as a normal consumer would.
 
 ```bash title="Install the published RAG application dependencies" replay="project"
 npm install
 ```
 
-Generate every Framework boundary before editing it. The agent command also
-creates `src/harness/knowledge`, a mount policy, and the service mount. Keep
-those generated locations. Later steps replace only the placeholder
-implementation inside them.
+Generate every Framework and Harness boundary before editing it. The agent and
+workflow commands create colocated modules and tests below
+`src/harness/knowledge`. Keep those generated locations. Later steps replace
+the placeholder implementations inside them.
 
 ```bash title="Generate the Knowledge boundaries" replay="project"
 npm run add:service -- knowledge --description "Own knowledge sources, retrieval, and grounded answers" --non-interactive
@@ -119,17 +119,10 @@ npm run add:command -- ingest-knowledge --service knowledge --service-version 1 
 npm run add:command -- search-knowledge --service knowledge --service-version 1 --description "Search authorized knowledge chunks" --non-interactive
 npm run add:stream -- answer-knowledge-question --service knowledge --service-version 1 --description "Stream a grounded answer" --non-interactive
 npm run add:agent -- retrieve-evidence --service knowledge --service-version 1 --description "Retrieve evidence for a grounded answer" --non-interactive
+npm run add:workflow -- answer-knowledge-question --service knowledge --service-version 1 --description "Retrieve evidence and stream a grounded answer" --non-interactive
 npm run add:service -- identity --description "Own local tutorial sessions" --non-interactive
 npm run add:command -- login --service identity --service-version 1 --description "Create a local tutorial session" --non-interactive
 npm run add:command -- resolve-session --service identity --service-version 1 --description "Resolve a local tutorial session" --non-interactive
-```
-
-The later Harness integration test covers the complete model-selected retrieval
-flow, so remove the smaller generated agent placeholder test before replacing
-the generated agent implementation.
-
-```bash title="Remove the superseded generated agent test" replay="project"
-rm src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.test.ts
 ```
 
 Create one shared schema file. These contracts connect commands, the native
@@ -215,8 +208,7 @@ export type SearchKnowledgeInput = z.input<typeof searchKnowledgeInputSchema>
 export type KnowledgeMatch = z.output<typeof knowledgeMatchSchema>
 ```
 The schemas are now the shared language for both sides of RAG. The next pages
-build the indexing command first. The complete Harness definition is written
-once the retrieval tool and agent exist, so the file is never shown as two
-different complete implementations.
+build the indexing command first. The retrieval page later fills the generated
+agent and workflow modules, then composes them in one small Harness definition.
 
-Continue with [Ingest and embed a source](./ingest/).
+Continue with [Ingest and embed a source](../ingest/).

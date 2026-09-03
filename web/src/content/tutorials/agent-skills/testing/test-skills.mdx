@@ -12,15 +12,15 @@ that the first request contains only the compact catalog, offers only the
 `read` tool, and does not disclose the complete procedure before the model
 chooses it. It also proves that a missing Skill directory fails startup.
 
-```ts title="src/harness/support/supportHarness.test.ts" write
+```ts title="src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts" write
 import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 6, outputTokens: 5, totalTokens: 11 }
 
-describe('support Skill', () => {
+describe('answerProcedureQuestionAgent', () => {
 	it('mounts the reviewed Skill and exposes only the read built-in', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({

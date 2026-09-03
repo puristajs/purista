@@ -1,21 +1,16 @@
 import {
 	analyzeTransactionsInputSchema,
 	analyzeTransactionsOutputSchema,
-} from '../../../../../harness/analysis/transactionAnalysisHarness.js'
+} from '../../../../../harness/analysis/analysisSchemas.js'
 import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
-import { transactionAnalysisHarness } from '../../harness/analysisHarnessMount.js'
+import { analysisHarness } from '../../harness/analysisHarnessMount.js'
 import { requireTransactionAnalysis, transactionAnalysisSessionId } from '../../requireTransactionAnalysis.js'
 
 export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 	.getCommandBuilder('analyzeTransactions', 'Run an isolated transaction analysis')
 	.addPayloadSchema(analyzeTransactionsInputSchema)
 	.addOutputSchema(analyzeTransactionsOutputSchema)
-	.canInvokeAgent(
-		'Analysis',
-		'1',
-		'analyze_transactions',
-		transactionAnalysisHarness.contracts.agents.analyze_transactions,
-	)
+	.canInvokeAgent('Analysis', '1', 'analyze_transactions', analysisHarness.contracts.agents.analyze_transactions)
 	.setBeforeGuardHooks({
 		analysisAccess: async function (context, payload) {
 			await requireTransactionAnalysis(context.resources.analysisPolicy, {

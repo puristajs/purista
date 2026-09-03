@@ -1,17 +1,16 @@
 ---
 title: Add retries and checkpoints
-description: Commit named stage outputs and retry only the stage that can fail transiently.
+description: Fill the generated agent and workflow modules, commit named stage outputs, and retry only the stage that can fail transiently.
 order: 272
 kind: lesson
 status: draft
 ---
 
-Create the complete portable Harness workflow. It collects facts, checkpoints
-that completed result, retries only the resolution stage, checkpoints the
-resolution, and returns one typed output.
+Start with schemas shared by the generated agents, workflow, and PURISTA
+command. The first agent classifies the case. The second agent accepts that
+validated classification as part of its own input.
 
-```ts title="src/harness/support/supportResolutionWorkflow.ts" write
-import { defineHarness, isHarnessError } from '@purista/harness'
+```ts title="src/harness/support/supportResolutionSchemas.ts" write
 import { z } from 'zod'
 
 export const supportResolutionInputSchema = z.strictObject({
@@ -40,57 +39,148 @@ export const supportResolutionOutputSchema = z.strictObject({
 	classification: supportClassificationSchema,
 	plan: resolutionPlanSchema,
 })
+```
+## Fill the generated agent modules
 
-export const supportResolutionHarness = defineHarness({ name: 'support-resolution' })
+Replace the first generated agent definition. `defineHarnessModule` keeps the
+agent portable: it declares the model alias it needs but does not select a
+provider or model name.
+
+```ts title="src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { supportClassificationSchema, supportResolutionInputSchema } from '../../supportResolutionSchemas.js'
+
+type ClassificationModelState = BuilderState & { models: { classification_model: ModelAlias } }
+
+export const classifySupportCaseAgent = defineHarnessModule<ClassificationModelState>()(
+	'support.agent.classify_support_case',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('classify_support_case', {
+				model: 'classification_model',
+				input: supportResolutionInputSchema,
+				output: supportClassificationSchema,
+				instructions: 'Classify one Example Bank support case using only the supplied message.',
+			})
+		},
+	},
+)
+```
+Replace the second generated agent definition. Its input schema proves that the
+workflow must provide the classification before this stage can run.
+
+```ts title="src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { resolutionPlanInputSchema, resolutionPlanSchema } from '../../supportResolutionSchemas.js'
+
+type ResolutionModelState = BuilderState & { models: { resolution_model: ModelAlias } }
+
+export const planSupportResolutionAgent = defineHarnessModule<ResolutionModelState>()(
+	'support.agent.plan_support_resolution',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('plan_support_resolution', {
+				model: 'resolution_model',
+				input: resolutionPlanInputSchema,
+				output: resolutionPlanSchema,
+				instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
+			})
+		},
+	},
+)
+```
+## Fill the generated workflow module
+
+The workflow declares both agent dependencies and a serial delegation budget.
+Each `context.step` has a stable name. Harness stores the completed value under
+that name when durable execution is enabled.
+
+```ts title="src/harness/support/workflow/resolveSupportCase/resolveSupportCaseWorkflow.ts" write
+import { type AgentDefinition, type BuilderState, defineHarnessModule, isHarnessError } from '@purista/harness'
+import {
+	type resolutionPlanInputSchema,
+	resolutionPlanSchema,
+	supportClassificationSchema,
+	supportResolutionInputSchema,
+	supportResolutionOutputSchema,
+} from '../../supportResolutionSchemas.js'
+
+type ResolutionWorkflowState = BuilderState & {
+	agents: {
+		classify_support_case: AgentDefinition<any, typeof supportResolutionInputSchema, typeof supportClassificationSchema>
+		plan_support_resolution: AgentDefinition<any, typeof resolutionPlanInputSchema, typeof resolutionPlanSchema>
+	}
+}
+
+export const resolveSupportCaseWorkflow = defineHarnessModule<ResolutionWorkflowState>()(
+	'support.workflow.resolve_support_case',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.workflow('resolve_support_case', {
+				input: supportResolutionInputSchema,
+				output: supportResolutionOutputSchema,
+				delegation: {
+					agents: ['classify_support_case', 'plan_support_resolution'],
+					maxChildAgentCalls: 3,
+					maxParallelChildAgentCalls: 1,
+				},
+				handler: async (context) => {
+					const classification = supportClassificationSchema.parse(
+						await context.step('classify-case-v1', () => context.agents.classify_support_case(context.input)),
+					)
+					const plan = resolutionPlanSchema.parse(
+						await context.step(
+							'plan-resolution-v1',
+							() => context.agents.plan_support_resolution({ ...context.input, classification }),
+							{
+								retry: {
+									maxAttempts: 2,
+									minDelayMs: 100,
+									maxDelayMs: 1_000,
+									backoff: 'exponential',
+									shouldRetry: (error) => isHarnessError(error) && error.retriable,
+								},
+							},
+						),
+					)
+					return { caseId: context.input.caseId, classification, plan }
+				},
+			})
+		},
+	},
+)
+```
+The classification step has no local retry policy. The planning step retries
+only errors that Harness marks as retriable. A schema validation failure is
+permanent and therefore does not consume another model call. `maxAttempts: 2`
+allows the first planning call plus one retry, while
+`maxChildAgentCalls: 3` budgets one classification call and two planning calls.
+
+## Compose the service Harness
+
+The service Harness supplies the two model requirements and installs each
+generated module. Keeping composition here avoids cyclic imports between the
+agents and workflow.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { classifySupportCaseAgent } from './agent/classifySupportCase/classifySupportCaseAgent.js'
+import { planSupportResolutionAgent } from './agent/planSupportResolution/planSupportResolutionAgent.js'
+import { resolveSupportCaseWorkflow } from './workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
+
+export const supportHarness = defineHarness({ name: 'support-resolution' })
 	.requireModel('classification_model', { capabilities: ['object'] })
 	.requireModel('resolution_model', { capabilities: ['object'] })
-	.agent('classify_support_case', {
-		model: 'classification_model',
-		input: supportResolutionInputSchema,
-		output: supportClassificationSchema,
-		instructions: 'Classify one Example Bank support case using only the supplied message.',
-	})
-	.agent('plan_support_resolution', {
-		model: 'resolution_model',
-		input: resolutionPlanInputSchema,
-		output: resolutionPlanSchema,
-		instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
-	})
-	.workflow('resolve_support_case', {
-		input: supportResolutionInputSchema,
-		output: supportResolutionOutputSchema,
-		delegation: {
-			agents: ['classify_support_case', 'plan_support_resolution'],
-			maxChildAgentCalls: 3,
-			maxParallelChildAgentCalls: 1,
-		},
-		handler: async (context) => {
-			const classification = supportClassificationSchema.parse(
-				await context.step('classify-case-v1', () => context.agents.classify_support_case(context.input)),
-			)
-			const plan = resolutionPlanSchema.parse(
-				await context.step(
-					'plan-resolution-v1',
-					() => context.agents.plan_support_resolution({ ...context.input, classification }),
-					{
-						retry: {
-							maxAttempts: 2,
-							minDelayMs: 100,
-							maxDelayMs: 1_000,
-							backoff: 'exponential',
-							shouldRetry: (error) => isHarnessError(error) && error.retriable,
-						},
-					},
-				),
-			)
-			return { caseId: context.input.caseId, classification, plan }
-		},
-	})
+	.use(classifySupportCaseAgent)
+	.use(planSupportResolutionAgent)
+	.use(resolveSupportCaseWorkflow)
 	.define()
 ```
-Named checkpoints make recovery explicit. After a process restart, Harness
-reuses the committed facts instead of rerunning the first agent. Retry policy
-belongs around the stage that can fail transiently; it does not replay every
-earlier side effect.
+After a process restart, the same session and run id let Harness restore the
+committed classification instead of asking the first agent again. The next
+page derives those stable ids from trusted PURISTA message identity.
 
 Continue with [Invoke the durable workflow through PURISTA](../invoke/).

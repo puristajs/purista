@@ -1,9 +1,9 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportResolutionHarness } from '../../../../harness/support/supportResolutionWorkflow.js'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportCaseResolution } from '../requireSupportCaseResolution.js'
 import type { SupportCasePolicy } from '../SupportResources.js'
 
-export { supportResolutionHarness }
+export { supportHarness }
 
 export const supportHarnessPolicy = {
 	publish: { agents: [], workflows: ['resolve_support_case'] },

@@ -1,10 +1,10 @@
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportCaseAnalysisHarness } from './supportCaseAnalysisHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
-describe('supportCaseAnalysisHarness', () => {
+describe('analyzeSupportCaseWorkflow', () => {
 	it('runs both specialists and merges their typed results', async () => {
 		const riskProvider = new FakeModelProvider({ strict: true })
 		const responseProvider = new FakeModelProvider({ strict: true })
@@ -18,7 +18,7 @@ describe('supportCaseAnalysisHarness', () => {
 			usage,
 			finishReason: 'stop',
 		})
-		const runtime = await supportCaseAnalysisHarness.getInstance({
+		const runtime = await supportHarness.getInstance({
 			models: {
 				risk_model: { provider: riskProvider, model: 'risk-fake' },
 				response_model: { provider: responseProvider, model: 'response-fake' },

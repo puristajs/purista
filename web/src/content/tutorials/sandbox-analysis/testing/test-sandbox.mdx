@@ -10,21 +10,21 @@ Test the portable Harness definition with an in-memory sandbox and scripted
 model. Assertions cover the offered tools, writable path policy, process
 result, and structured analysis.
 
-```ts title="src/harness/analysis/transactionAnalysisHarness.test.ts" write
+```ts title="src/harness/analysis/agent/analyzeTransactions/analyzeTransactionsAgent.test.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { localDirectorySandbox } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { scriptedAnalysisProvider } from '../../testing/scriptedAnalysisProvider.js'
-import { transactionAnalysisHarness } from './transactionAnalysisHarness.js'
+import { scriptedAnalysisProvider } from '../../../../testing/scriptedAnalysisProvider.js'
+import { analysisHarness } from '../../analysisHarness.js'
 
-describe('transactionAnalysisHarness', () => {
+describe('analyzeTransactionsAgent', () => {
 	it('runs the declared write, bash, and read loop', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-'))
 		const provider = scriptedAnalysisProvider()
-		const runtime = await transactionAnalysisHarness.getInstance({
+		const runtime = await analysisHarness.getInstance({
 			models: { analysis_model: { provider, model: 'analysis-fake' } },
 			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 		})
@@ -47,7 +47,7 @@ describe('transactionAnalysisHarness', () => {
 		}
 	})
 
-	it('rejects a write outside the allowed workspace before changing the host fixture', async () => {
+	it('returns a denied tool result for a write outside the workspace', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-denied-'))
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
@@ -65,7 +65,7 @@ describe('transactionAnalysisHarness', () => {
 			usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 },
 			finishReason: 'stop',
 		})
-		const runtime = await transactionAnalysisHarness.getInstance({
+		const runtime = await analysisHarness.getInstance({
 			models: { analysis_model: { provider, model: 'analysis-fake' } },
 			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 		})

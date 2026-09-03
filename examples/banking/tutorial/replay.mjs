@@ -73,7 +73,7 @@ function sequence(id, seen = new Set(), active = new Set()) {
 	if (seen.has(id)) return []
 	active.add(id)
 	const chapter = chapters.get(id)
-	const result = chapter.requires.flatMap(parent => sequence(parent, seen, active))
+	const result = (chapter.replayRequires ?? chapter.requires).flatMap(parent => sequence(parent, seen, active))
 	active.delete(id)
 	seen.add(id)
 	return [...result, chapter]
@@ -99,7 +99,7 @@ async function pagesFor(id) {
 					assert(block.title, `${page}: code block needs an exact file/action title`)
 					if (block.write)
 						assert(
-							['ts', 'tsx', 'json', 'yaml', 'javascript', 'css', 'html', 'md', 'dockerfile', 'sql'].includes(
+							['ts', 'tsx', 'json', 'yaml', 'javascript', 'css', 'html', 'md', 'dotenv', 'dockerfile', 'sql'].includes(
 								block.language,
 							),
 						)
@@ -165,7 +165,9 @@ const output = resolve(values.out)
 assert(!(await exists(output)), 'Output directory must not exist; never overwrite another project')
 assert(!output.startsWith(`${repo}${sep}`), 'Replay outside the monorepo to verify a consumer installation')
 await mkdir(output, { recursive: true })
-const project = join(output, 'example-bank')
+const projectDirectory = chapters.get(values.chapter).projectDirectory ?? 'example-bank'
+assert(/^[a-z0-9][a-z0-9-]*$/.test(projectDirectory), `Invalid tutorial project directory: ${projectDirectory}`)
+const project = join(output, projectDirectory)
 const actions = []
 let server
 let serverExit

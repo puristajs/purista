@@ -1,27 +1,108 @@
 ---
 title: Test failure, restart, and checkpoint replay
-description: Force a stage failure, restart the runtime, and prove the completed stage does not run twice.
+description: Test each generated agent, force a workflow stage failure, restart the runtime, and prove the completed stage does not run twice.
 order: 275
 kind: lesson
 status: draft
 ---
 
-Test the native workflow with strict model providers and durable storage. Force
-the resolution stage to fail once, recreate the runtime, invoke the same run,
-and assert that the facts stage was restored from its checkpoint.
+Test the generated modules before testing the complete service. The two agent
+tests each provide only their declared model alias and prove that Harness
+validates the structured result.
 
-```ts title="src/harness/support/supportResolutionWorkflow.test.ts" write
+```ts title="src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { classifySupportCaseAgent } from './classifySupportCaseAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('classifySupportCaseAgent', () => {
+	it('returns a schema-validated classification', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { category: 'card', urgency: 'urgent' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'classification-agent-test' })
+			.requireModel('classification_model', { capabilities: ['object'] })
+			.use(classifySupportCaseAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { classification_model: { provider, model: 'classification-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('classification-case-1')
+			await expect(
+				session.agents.classify_support_case.run({ caseId: 'case-1', message: 'My card is missing.' }),
+			).resolves.toMatchObject({ status: 'completed', output: { category: 'card', urgency: 'urgent' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+```ts title="src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResolutionAgent } from './planSupportResolutionAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('planSupportResolutionAgent', () => {
+	it('returns a schema-validated resolution plan', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const definition = defineHarness({ name: 'resolution-agent-test' })
+			.requireModel('resolution_model', { capabilities: ['object'] })
+			.use(planSupportResolutionAgent)
+			.define()
+		const runtime = await definition.getInstance({
+			models: { resolution_model: { provider, model: 'resolution-fake' } },
+		})
+
+		try {
+			const session = await runtime.getSession('resolution-case-1')
+			await expect(
+				session.agents.plan_support_resolution.run({
+					caseId: 'case-1',
+					message: 'My card is missing.',
+					classification: { category: 'card', urgency: 'urgent' },
+				}),
+			).resolves.toMatchObject({ status: 'completed', output: { nextAction: 'freeze_card' } })
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+Now test the composed native workflow with strict model providers and durable
+storage. Force the planning stage to exhaust its retry, recreate the runtime,
+invoke the same run, and assert that the classification is restored from its
+checkpoint.
+
+```ts title="src/harness/support/workflow/resolveSupportCase/resolveSupportCaseWorkflow.test.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { localDurableExecution, ModelError } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportResolutionHarness } from './supportResolutionWorkflow.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
-describe('supportResolutionHarness', () => {
+describe('resolveSupportCaseWorkflow', () => {
 	it('replays a completed step from SQLite after a runtime restart', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
@@ -50,7 +131,7 @@ describe('supportResolutionHarness', () => {
 		})
 		const directory = await mkdtemp(join(tmpdir(), 'purista-multi-step-'))
 		const firstLocal = localDurableExecution({ root: directory })
-		const firstRuntime = await supportResolutionHarness.getInstance({
+		const firstRuntime = await supportHarness.getInstance({
 			storage: firstLocal.storage,
 			sandbox: firstLocal.sandbox,
 			workspace: firstLocal.workspace,
@@ -76,7 +157,7 @@ describe('supportResolutionHarness', () => {
 				finishReason: 'stop',
 			})
 			const secondLocal = localDurableExecution({ root: directory })
-			const secondRuntime = await supportResolutionHarness.getInstance({
+			const secondRuntime = await supportHarness.getInstance({
 				storage: secondLocal.storage,
 				sandbox: secondLocal.sandbox,
 				workspace: secondLocal.workspace,
@@ -106,8 +187,10 @@ describe('supportResolutionHarness', () => {
 	})
 })
 ```
-Test the PURISTA command with its declared workflow client, trusted identity,
-stable durable ids, and business policy.
+Test the PURISTA command separately with its declared workflow client, trusted
+identity, stable durable ids, and business policy. This test needs no running
+Harness runtime because the generated context mock supplies the workflow
+client.
 
 ```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -165,8 +248,9 @@ describe('resolveSupportCaseCommandBuilder', () => {
 	})
 })
 ```
-Run a mounted EventBridge integration to prove both guards, workflow routing,
-retry behavior, and recovery through the public command address.
+Finally run a mounted EventBridge integration. It proves command routing,
+workflow publication, both authorization boundaries, bounded retry, checkpoint
+reuse, and idempotency protection through the public PURISTA address.
 
 ```ts title="src/multiStepWorkflow.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -395,6 +479,9 @@ describe('durable multi-step workflow over PURISTA', () => {
 	})
 })
 ```
+Run type checking first, then all five test files, lint, and the deterministic
+demo.
+
 ```bash title="Verify the multi-step workflow chapter" replay="project"
 npm run build
 npm test

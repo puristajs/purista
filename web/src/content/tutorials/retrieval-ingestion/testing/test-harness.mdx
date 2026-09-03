@@ -1,24 +1,105 @@
 ---
 title: Test the native Harness retrieval flow
-description: Script model tool selection and verify portable tool, text, and completion events without a provider call.
+description: Test model-selected retrieval and the streaming answer workflow without a provider call.
 order: 212
 kind: lesson
 status: draft
 ---
 
-The native Harness test owns agent and workflow behavior. Queue each model turn
-in order: choose the search tool, return structured evidence, then stream the
-grounded answer. Supply a host-tool mock because EventBridge routing belongs to
-the integration test on the next page.
+Test the generated retrieval agent first. Queue the model turn that selects the
+search tool and the turn that returns structured evidence. The host-tool mock
+proves that application code does not call search before the model asks for it.
 
-```ts title="src/harness/knowledge/knowledgeHarness.test.ts" write
+```ts title="src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.test.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { knowledgeHarness } from './knowledgeHarness.js'
+import { knowledgeHarness } from '../../knowledgeHarness.js'
 
 const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
 
-describe('knowledgeHarness', () => {
+describe('retrieveEvidenceAgent', () => {
+	it('lets the model choose the declared search tool', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {},
+			toolCalls: [
+				{
+					id: 'search-1',
+					name: 'search_knowledge',
+					arguments: { collectionId: 'customer-help', query: 'How long are transfers pending?', limit: 4 },
+				},
+			],
+			usage,
+			finishReason: 'tool_calls',
+		})
+		provider.enqueueObject({
+			object: {
+				question: 'How long are transfers pending?',
+				evidence: [
+					{
+						documentId: 'transfer-guide',
+						chunkIndex: 2,
+						content: 'International transfers can remain pending for two business days.',
+						score: 0.94,
+					},
+				],
+			},
+			usage,
+			finishReason: 'stop',
+		})
+		const search = vi.fn(async () => ({
+			matches: [
+				{
+					documentId: 'transfer-guide',
+					chunkIndex: 2,
+					content: 'International transfers can remain pending for two business days.',
+					score: 0.94,
+				},
+			],
+		}))
+		const runtime = await knowledgeHarness.getInstance({
+			models: {
+				primary: { provider, model: 'fake-knowledge-model' },
+				embedding: { provider, model: 'fake-embedding-model' },
+			},
+			hostTools: { search_knowledge: search },
+		})
+
+		try {
+			const session = await runtime.getSession('retrieve-evidence-1')
+			await expect(
+				session.agents.retrieve_evidence.run(
+					{
+						collectionId: 'customer-help',
+						question: 'How long are transfers pending?',
+					},
+					{ hostContext: { identity: { tenantId: 'tenant-example', principalId: 'principal-alex' } } },
+				),
+			).resolves.toMatchObject({
+				status: 'completed',
+				output: { evidence: [expect.objectContaining({ documentId: 'transfer-guide', chunkIndex: 2 })] },
+			})
+			expect(search).toHaveBeenCalledOnce()
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+})
+```
+Then test the generated answer workflow. Queue each model turn in order: choose
+the search tool, return structured evidence, then stream the grounded answer.
+Supply a host-tool mock because EventBridge routing belongs to the integration
+test on the next page.
+
+```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { knowledgeHarness } from '../../knowledgeHarness.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('answerKnowledgeQuestionWorkflow', () => {
 	it('lets the retrieval agent choose the search tool and streams the grounded answer', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
@@ -109,13 +190,13 @@ describe('knowledgeHarness', () => {
 	})
 })
 ```
-The assertions cover the observable contract: the model selected the declared
-tool, tool progress was emitted, text arrived incrementally, and the workflow
-finished with the aggregated answer. `provider.assertExhausted()` also catches
-unexpected model calls.
+These assertions cover the observable contract: the model selected the
+declared tool, tool progress was emitted, text arrived incrementally, and the
+workflow finished with the aggregated answer. `provider.assertExhausted()` also
+catches missing or unexpected model calls.
 
-```bash title="Run the native Harness RAG test" replay="project"
-npm run test:server -- src/harness/knowledge/knowledgeHarness.test.ts
+```bash title="Run the native Harness RAG tests" replay="project"
+npm run test:server -- src/harness/knowledge
 ```
 
 Continue with [Test streaming and HTTP authentication](../test-stream-http/).

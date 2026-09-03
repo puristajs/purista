@@ -1,5 +1,8 @@
-import { classificationInputSchema, classificationOutputSchema } from '../../../../../harness/support/supportHarness.js'
-import { classificationHarness } from '../../harness/supportHarnessMount.js'
+import {
+	classificationInputSchema,
+	classificationOutputSchema,
+} from '../../../../../harness/support/supportClassificationSchemas.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -7,12 +10,7 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the evaluated agent')
 	.addPayloadSchema(classificationInputSchema)
 	.addOutputSchema(classificationOutputSchema)
-	.canInvokeAgent(
-		'Support',
-		'1',
-		'classify_support_message',
-		classificationHarness.contracts.agents.classify_support_message,
-	)
+	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
 	.setBeforeGuardHooks({
 		messageAccess: async function (context, payload) {
 			await requireSupportClassification(context.resources.supportClassificationPolicy, {

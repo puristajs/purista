@@ -11,15 +11,15 @@ Harness storage. The second turn must receive the first complete turn, while a
 different session must remain isolated. The same suite sends nine turns through
 the `maxTurns: 8` policy and verifies that clearing removes the transcript.
 
-```ts title="src/harness/support/supportHarness.test.ts" write
+```ts title="src/harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts" write
 import { inMemoryHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 10, outputTokens: 5, totalTokens: 15 }
 
-describe('support conversation history', () => {
+describe('answerSupportQuestionAgent', () => {
 	it('reuses one session history and keeps another session isolated', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({

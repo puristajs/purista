@@ -11,7 +11,7 @@ packages. This workflow does not call a model, so it needs no provider adapter
 or API key.
 
 ```bash title="Create and enter the human-review project" replay="parent"
-npm create purista@latest human-review-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+npm create purista@2.2.0 human-review-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd human-review-workflow
 ```
 
@@ -65,13 +65,6 @@ registration.
 npm run add:service -- support --description "Owns support reviews and automation" --non-interactive
 npm run add:service -- transaction --description "Owns transaction and card actions" --non-interactive
 npm run add:workflow -- review-support-action --service support --service-version 1 --description "Wait for an authorized support review decision" --non-interactive
-```
-
-The workflow test later exercises waiting and resumption end to end. Remove the
-smaller generated placeholder test before replacing the workflow.
-
-```bash title="Remove the superseded generated workflow test" replay="project"
-rm src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts
 ```
 
 Replace the generated workflow body with a versioned external wait. The input

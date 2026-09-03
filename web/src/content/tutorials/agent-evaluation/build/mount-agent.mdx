@@ -6,12 +6,10 @@ kind: lesson
 status: draft
 ---
 
-Create the complete portable Harness definition with strict input and output
-schemas. The same definition is mounted on PURISTA and instantiated directly by
-the evaluator.
+Start with strict input and output schemas shared by the generated agent,
+PURISTA command, dataset, and scorers.
 
-```ts title="src/harness/support/supportHarness.ts" write
-import { defineHarness } from '@purista/harness'
+```ts title="src/harness/support/supportClassificationSchemas.ts" write
 import { z } from 'zod'
 
 export const classificationInputSchema = z.strictObject({
@@ -25,22 +23,48 @@ export const classificationOutputSchema = z.strictObject({
 	reason: z.string().trim().min(1).max(240),
 })
 
-export const classificationHarness = defineHarness({ name: 'classification-evaluation' })
-	.requireModel('primary', { capabilities: ['object'] })
-	.agent('classify_support_message', {
-		model: 'primary',
-		input: classificationInputSchema,
-		output: classificationOutputSchema,
-		instructions: [
-			'Classify one Example Bank support message.',
-			'Use urgent only for an immediate deadline, active loss, or blocked essential access.',
-			'Give one short reason grounded only in the supplied message.',
-		].join(' '),
-	})
-	.define()
-
 export type ClassificationInput = z.output<typeof classificationInputSchema>
 export type ClassificationOutput = z.output<typeof classificationOutputSchema>
+```
+Replace the generated agent definition. The module declares its model alias and
+portable behavior without selecting a provider.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { classificationInputSchema, classificationOutputSchema } from '../../supportClassificationSchemas.js'
+
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.classify_support_message',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('classify_support_message', {
+				model: 'primary',
+				input: classificationInputSchema,
+				output: classificationOutputSchema,
+				instructions: [
+					'Classify one Example Bank support message.',
+					'Use urgent only for an immediate deadline, active loss, or blocked essential access.',
+					'Give one short reason grounded only in the supplied message.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+Compose the generated module once. PURISTA mounts this definition while the
+offline evaluator instantiates it directly.
+
+```ts title="src/harness/support/supportHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+export const supportHarness = defineHarness({ name: 'classification-evaluation' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.use(classifySupportMessageAgent)
+	.define()
 ```
 Declare the Support-owned classification policy and service configuration.
 
@@ -113,11 +137,11 @@ Publish the agent with the same guard used by direct service callers.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { classificationHarness } from '../../../../harness/support/supportHarness.js'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
 
-export { classificationHarness }
+export { supportHarness }
 
 export const supportHarnessPolicy = {
 	publish: { agents: ['classify_support_message'], workflows: [] },
@@ -146,8 +170,11 @@ export const supportHarnessPolicy = {
 Replace the generated command with its typed address-first agent invocation.
 
 ```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
-import { classificationInputSchema, classificationOutputSchema } from '../../../../../harness/support/supportHarness.js'
-import { classificationHarness } from '../../harness/supportHarnessMount.js'
+import {
+	classificationInputSchema,
+	classificationOutputSchema,
+} from '../../../../../harness/support/supportClassificationSchemas.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -155,12 +182,7 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the evaluated agent')
 	.addPayloadSchema(classificationInputSchema)
 	.addOutputSchema(classificationOutputSchema)
-	.canInvokeAgent(
-		'Support',
-		'1',
-		'classify_support_message',
-		classificationHarness.contracts.agents.classify_support_message,
-	)
+	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
 	.setBeforeGuardHooks({
 		messageAccess: async function (context, payload) {
 			await requireSupportClassification(context.resources.supportClassificationPolicy, {
@@ -182,11 +204,11 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 ```
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
-import { classificationHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
-	.mountHarness(classificationHarness, supportHarnessPolicy)
+	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
 Continue with [Add deterministic checks](../deterministic-checks/).

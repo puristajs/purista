@@ -2,9 +2,9 @@ import { HandledError, StatusCode } from '@purista/core'
 import {
 	supportResolutionInputSchema,
 	supportResolutionOutputSchema,
-} from '../../../../../harness/support/supportResolutionWorkflow.js'
+} from '../../../../../harness/support/supportResolutionSchemas.js'
 import { durableResolutionIdentity } from '../../durableIdentity.js'
-import { supportResolutionHarness } from '../../harness/supportHarnessMount.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -12,12 +12,7 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
 	.addOutputSchema(supportResolutionOutputSchema)
-	.canInvokeWorkflow(
-		'Support',
-		'1',
-		'resolve_support_case',
-		supportResolutionHarness.contracts.workflows.resolve_support_case,
-	)
+	.canInvokeWorkflow('Support', '1', 'resolve_support_case', supportHarness.contracts.workflows.resolve_support_case)
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseResolution(context.resources.supportCasePolicy, {

@@ -101,6 +101,15 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
    not force unrelated migration. The unfiltered source-provenance check remains
    the release gate. Report exact commands, results, and unresolved gaps.
 
+Treat source alignment and construction proof as different states. Exact
+learner-facing file blocks may be machine-aligned with a retained review
+project before the lesson is executable. Call that source-aligned, not
+construction-verified. Claim construction verification only after the current
+pages have created a fresh project outside the monorepo, installed the shown
+published packages, executed every marked command in order, and produced a
+file/proof hash that matches the retained solution. A final-source build or a
+structural documentation check cannot replace this replay.
+
 ## Completion rules
 
 - A chapter stands alone without having completed another chapter. Shared

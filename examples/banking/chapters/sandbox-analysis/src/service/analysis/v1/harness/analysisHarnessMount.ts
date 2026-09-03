@@ -1,9 +1,9 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { transactionAnalysisHarness } from '../../../../harness/analysis/transactionAnalysisHarness.js'
+import { analysisHarness } from '../../../../harness/analysis/analysisHarness.js'
 import type { AnalysisPolicy } from '../AnalysisResources.js'
 import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
 
-export { transactionAnalysisHarness }
+export { analysisHarness }
 
 export const analysisHarnessPolicy = {
 	publish: { agents: ['analyze_transactions'], workflows: [] },

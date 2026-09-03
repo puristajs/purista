@@ -40,23 +40,32 @@ domain model.
 
 ## What you will build
 
-You will:
+Follow these pages in order. Each build page starts from the previous page's
+working checkpoint and ends with a command you can run.
 
-1. create a PURISTA project and install the published Framework, Harness,
-   OpenAI adapter, Hono, and AI SDK UI adapter packages;
-2. define one Harness with a chat model and an embedding model;
-3. build a protected command that chunks, embeds, and stores a reviewed source;
-4. build a protected search command that embeds the question with the same
-   model contract;
-5. expose that search command as a typed host tool;
-6. let a Harness agent choose the tool and stream a grounded answer;
-7. authenticate browser requests with an Identity service and StateStore-backed sessions;
-8. connect a standard React and AI Elements UI; and
-9. test models, resources, authorization, tool choice, and stream events
-   without calling a paid provider.
+### Build the pipeline
+
+1. [Create the RAG project and model contracts](./build/configure-harness/).
+2. [Build the protected ingestion and embedding command](./build/ingest/).
+3. [Store documents and vectors in PostgreSQL with pgvector](./build/store/).
+4. [Build authorized semantic retrieval with the same embedding model](./build/retrieve/).
+5. [Let the native agent choose the command-backed search tool](./build/agent/).
+6. [Expose portable agent events as an AI SDK UI Message Stream](./build/stream-ui/).
+7. [Authenticate the generated HTTP endpoints](./build/authenticate-http/).
+8. [Create the React, Tailwind, shadcn, and test shell](./build/ui-shell/).
+9. [Build the ingestion and AI Elements chat interface](./build/ui/).
+10. [Compose and run the complete application](./build/run/).
+
+### Test the boundaries
+
+11. [Test ingestion, embeddings, authorization, and search](./testing/test-rag/).
+12. [Test the native Harness tool loop](./testing/test-harness/).
+13. [Test streaming and HTTP authentication](./testing/test-stream-http/).
+14. [Test pgvector storage and browser behavior](./testing/test-storage-ui/).
 
 The complete source is in `examples/banking/chapters/retrieval-ingestion`.
-This chapter stays a draft until PURISTA v4 and Harness v3 are available from
-npm and a clean consumer replay succeeds.
+This chapter stays a draft until PURISTA v4, Harness v3, and the matching CLI
+and project creator are available from npm and a clean consumer replay
+succeeds.
 
 Start with [Create the RAG project and contracts](./build/configure-harness/).

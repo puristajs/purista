@@ -22,8 +22,11 @@ node examples/banking/tutorial/replay.mjs \
 ```
 
 The output directory must not already exist. The verifier constructs a fresh
-`example-bank` there by following the prerequisite pages and chapter pages in
-`course.json`. It uses published packages, so it needs registry access and a
+project there by following the replay prerequisites and chapter pages in
+`course.json`. A chapter can keep conceptual learning prerequisites in
+`requires` while declaring an independent construction path with
+`replayRequires: []`; `projectDirectory` names the directory created by its
+setup command. It uses published packages, so it needs registry access and a
 supported Node/npm installation. Port 3000 must be available for the actual
 documented requests. It must not be used for another application during replay.
 
@@ -33,7 +36,7 @@ The Markdown markers are deliberately simple:
 - `dockerfile` fences use the same full-file write marker for reproducible container builds.
 - `sql` fences use that marker for the database schema shown to the reader.
 - `replay="parent"`: execute the shown shell command in the new parent directory.
-- `replay="project"`: execute it inside `example-bank`.
+- `replay="project"`: execute it inside the chapter's declared project directory.
 - `replay="server"`: start the shown server until this page's requests finish.
 - `replay="request"`: execute the shown request against that server.
 - `expect="json"`: compare the previous request response with the shown JSON.
@@ -87,6 +90,10 @@ chapters' required setup.
 
 A work-in-progress recipe may have `status: "draft"` while its pages also remain
 draft. It can be explicitly replayed, but is not counted as a retained, tested
-application. Remove that status only after its required path succeeds. The
+application. `constructionSourceAligned` means its complete-file instructions
+match the retained review source; it does not claim that a learner has rebuilt
+the project. Set `constructionVerified` only after a fresh external replay has
+succeeded and its proof matches the retained source. Remove draft status only
+after that required path succeeds. The
 optional `environment` object records public runtime opt-ins used by the compiled
 smoke check, such as `PURISTA_DEMO_LOGIN=1`; it must not contain credentials.

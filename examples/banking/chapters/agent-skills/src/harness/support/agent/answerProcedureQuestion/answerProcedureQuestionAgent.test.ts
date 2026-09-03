@@ -1,11 +1,11 @@
 import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
-import { supportHarness } from './supportHarness.js'
+import { supportHarness } from '../../supportHarness.js'
 
 const usage = { inputTokens: 6, outputTokens: 5, totalTokens: 11 }
 
-describe('support Skill', () => {
+describe('answerProcedureQuestionAgent', () => {
 	it('mounts the reviewed Skill and exposes only the read built-in', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({

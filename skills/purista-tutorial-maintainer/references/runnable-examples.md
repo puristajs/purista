@@ -20,6 +20,13 @@ and require at least one executable edit or command on each construction page.
 Grow this gate chapter by chapter; a final-source build alone does not prove the
 written construction path.
 
+If chapters create different project directory names, declare that name in the
+replay recipe instead of hard-coding one course-wide directory. Keep conceptual
+learning prerequisites separate from construction prerequisites: a standalone
+chapter can recommend earlier reading while replaying from an empty directory.
+Do not mark a chapter construction-verified until that independent replay has
+actually succeeded and its proof matches the retained source.
+
 Provide a clean consumer install using declared, compatible dependencies and
 a lockfile in the distributed example. Keep maintainer workspace builds and
 sibling checkouts out of public setup instructions. Verify packed artifacts

@@ -40,14 +40,13 @@ Message Stream v1 can then carry the standard approval parts. This chapter
 teaches an application workflow whose client contract is the typed states
 `waiting`, `approved`, `rejected`, `expired`, and `cancelled`.
 
-You will:
+Follow these pages in order:
 
-1. create a PURISTA project and generate two services plus a Harness workflow;
-2. publish the workflow with its own direct-address business guard;
-3. map the external wait to a successful typed command response;
-4. record and resume a review safely across retries; and
-5. test the native workflow, command resources, EventBridge routing, tenant
-   isolation, and idempotency.
+1. [Create the project and define the generated workflow](./build/define-workflow/).
+2. [Publish it safely and return a typed waiting state](./build/interrupt/).
+3. [Record an authorized decision, signal the wait, and resume](./build/approve-resume/).
+4. [Compose and run the durable review application](./build/run-application/).
+5. [Test workflow, resource, EventBridge, isolation, and idempotency boundaries](./testing/test-review/).
 
 The complete runnable source is in
 `examples/banking/chapters/human-review-workflow`.

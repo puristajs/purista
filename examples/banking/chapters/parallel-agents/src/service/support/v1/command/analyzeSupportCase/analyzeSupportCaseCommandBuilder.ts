@@ -1,8 +1,8 @@
 import {
 	supportCaseAnalysisOutputSchema,
 	supportCaseInputSchema,
-} from '../../../../../harness/support/supportCaseAnalysisHarness.js'
-import { supportCaseAnalysisHarness } from '../../harness/supportHarnessMount.js'
+} from '../../../../../harness/support/supportCaseSchemas.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { requireSupportCaseAnalysis, supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -10,12 +10,7 @@ export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('analyzeSupportCase', 'Run bounded specialist analysis for one support case')
 	.addPayloadSchema(supportCaseInputSchema)
 	.addOutputSchema(supportCaseAnalysisOutputSchema)
-	.canInvokeWorkflow(
-		'Support',
-		'1',
-		'analyze_support_case',
-		supportCaseAnalysisHarness.contracts.workflows.analyze_support_case,
-	)
+	.canInvokeWorkflow('Support', '1', 'analyze_support_case', supportHarness.contracts.workflows.analyze_support_case)
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {

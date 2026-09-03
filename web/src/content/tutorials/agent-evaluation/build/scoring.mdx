@@ -12,18 +12,15 @@ agent output to the evaluator.
 ```ts title="src/runClassificationEvaluation.ts" write
 import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
 import { type ClassificationAssessment, supportClassificationDataset } from './dataset.js'
-import {
-	type ClassificationInput,
-	type ClassificationOutput,
-	classificationHarness,
-} from './harness/support/supportHarness.js'
+import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+import { supportHarness } from './harness/support/supportHarness.js'
 import { categoryScorer, urgencyScorer } from './scorers.js'
 
 export async function runClassificationEvaluation(
 	provider: ModelProvider,
 	options: Readonly<{ runId?: string; model?: string }> = {},
 ): Promise<EvaluationRunResult> {
-	const harness = await classificationHarness.getInstance({
+	const harness = await supportHarness.getInstance({
 		models: { primary: { provider, model: options.model ?? 'evaluation-model' } },
 	})
 	try {

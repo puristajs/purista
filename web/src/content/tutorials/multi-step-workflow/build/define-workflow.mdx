@@ -9,7 +9,7 @@ status: draft
 Create a clean project and install the complete published manifest.
 
 ```bash title="Create and enter the multi-step workflow project" replay="parent"
-npm create purista@latest multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+npm create purista@2.2.0 multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd multi-step-support-workflow
 ```
 
@@ -60,17 +60,14 @@ command through the PURISTA CLI.
 
 ```bash title="Generate workflow definitions and command" replay="project"
 npm run add:service -- support --description "Own support case resolution" --non-interactive
-npm run add:agent -- collect-support-facts --service support --service-version 1 --description "Collect facts for one support case" --non-interactive
-npm run add:agent -- draft-support-resolution --service support --service-version 1 --description "Draft one support resolution" --non-interactive
+npm run add:agent -- classify-support-case --service support --service-version 1 --description "Classify one support case" --non-interactive
+npm run add:agent -- plan-support-resolution --service support --service-version 1 --description "Plan one support resolution" --non-interactive
 npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
 npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
 ```
 
-This focused example keeps the short agent and workflow definitions together.
-Remove their generated placeholders before creating that complete composition.
-
-```bash title="Remove superseded generated Harness placeholders" replay="project"
-rm -rf src/harness/support/agent src/harness/support/workflow
-```
+The CLI creates one module and colocated test for each agent and workflow. Keep
+those boundaries. The next page fills the generated files, adds shared schemas,
+and composes the modules in a small service Harness definition.
 
 Continue with [Add retries and checkpoints](../retry-checkpoint/).

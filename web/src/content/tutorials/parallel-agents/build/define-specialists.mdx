@@ -1,19 +1,21 @@
 ---
-title: Create the project and specialist contracts
-description: Scaffold the PURISTA boundary and define narrow specialist inputs, outputs, and model roles.
+title: Create the project and specialist agents
+description: Generate the PURISTA service, two native agents, their workflow, and the invoking command, then replace the agent placeholders with narrow contracts.
 order: 261
 kind: lesson
 status: draft
 ---
 
-Create a clean PURISTA project from an empty parent directory.
+Start in an empty parent directory. This chapter owns a complete project and
+does not need another tutorial application.
 
 ```bash title="Create and enter the parallel-agent project" replay="parent"
-npm create purista@latest parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+npm create purista@2.2.0 parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd parallel-agent-workflow
 ```
 
-Use the complete published dependency and script contract.
+Replace the generated package manifest. The `add:*` scripts always call the
+project-local PURISTA CLI, and the default demo uses fake model providers.
 
 ```json title="package.json" write
 {
@@ -57,9 +59,8 @@ Use the complete published dependency and script contract.
 npm install
 ```
 
-Generate the Support capability, both agents, their workflow, and the command
-that invokes it. Keeping the CLI steps visible gives every definition its
-standard service-owned location.
+Generate the Support capability, both specialist agents, their owning
+workflow, and the application command that invokes it.
 
 ```bash title="Generate specialists, workflow, and command" replay="project"
 npm run add:service -- support --description "Own support cases and support automation" --non-interactive
@@ -69,16 +70,94 @@ npm run add:workflow -- analyze-support-case --service support --service-version
 npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
 ```
 
-This focused example keeps the two short agent definitions and workflow in one
-portable Harness file. Remove the generated agent and workflow placeholders
-before writing that composition.
+The CLI creates one module per agent, one module for the workflow, one shared
+`supportHarness.ts`, a mount policy, and focused test files. Keep that
+structure. It lets a new agent or workflow change without turning the complete
+Harness into one large file.
 
-```bash title="Remove superseded generated Harness placeholders" replay="project"
-rm -rf src/harness/support/agent src/harness/support/workflow
+Put the contracts shared by the two agents and their workflow in one nearby
+file.
+
+```ts title="src/harness/support/supportCaseSchemas.ts" write
+import { z } from 'zod'
+
+export const supportCaseInputSchema = z.strictObject({
+	caseId: z.string().trim().min(1).max(80),
+	message: z.string().trim().min(1).max(2_000),
+})
+
+export const riskAssessmentSchema = z.strictObject({
+	level: z.enum(['low', 'medium', 'high']),
+	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
+})
+
+export const responsePlanSchema = z.strictObject({
+	customerReply: z.string().trim().min(1).max(500),
+	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
+})
+
+export const supportCaseAnalysisOutputSchema = z.strictObject({
+	caseId: z.string(),
+	risk: riskAssessmentSchema,
+	response: responsePlanSchema,
+})
+```
+Replace the first generated agent module. Its only job is to assess risk and
+return schema-validated evidence through the `risk_model` alias.
+
+```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { riskAssessmentSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+type RiskModelState = BuilderState & { models: { risk_model: ModelAlias } }
+
+export const assessSupportRiskAgent = defineHarnessModule<RiskModelState>()('support.agent.assess_support_risk', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.agent('assess_support_risk', {
+			model: 'risk_model',
+			input: supportCaseInputSchema,
+			output: riskAssessmentSchema,
+			instructions: [
+				'Assess security and financial risk in one Example Bank support message.',
+				'Use only facts present in the message and list short evidence statements.',
+			].join(' '),
+		})
+	},
+})
+```
+Replace the second generated module. It uses a separate model alias and
+returns a proposed response; it cannot perform the proposed business action.
+
+```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { responsePlanSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+type ResponseModelState = BuilderState & { models: { response_model: ModelAlias } }
+
+export const planSupportResponseAgent = defineHarnessModule<ResponseModelState>()(
+	'support.agent.plan_support_response',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('plan_support_response', {
+				model: 'response_model',
+				input: supportCaseInputSchema,
+				output: responsePlanSchema,
+				instructions: [
+					'Plan a concise Example Bank support response.',
+					'Do not claim an action happened. Select the next action that a service should perform.',
+				].join(' '),
+			})
+		},
+	},
+)
+```
+Run a typecheck. The generated workflow still has placeholder behavior, but
+both real agent modules now compile in their normal CLI-owned paths.
+
+```bash title="Verify the specialist agent modules" replay="project"
+npm run build
 ```
 
-The specialists use different strict output schemas and different model
-aliases. They produce recommendations; PURISTA commands continue to own
-authorization and business effects.
-
-Continue with [Fan out with an explicit concurrency budget](../fan-out/).
+Continue with [Build the bounded parallel workflow](../fan-out/).
