@@ -1,125 +1,234 @@
 ---
 title: Test lazy loading and authorization
 description: Prove catalog disclosure, explicit read access, fail-closed loading, and both PURISTA guards.
-order: 244
+order: 245
 kind: lesson
 status: draft
 ---
 
 Test the native Harness behavior first. `FakeModelProvider` scripts the model's
-tool choice and final structured output, so the test needs no network or API
-key.
+request to read the Skill and its final structured output. The test verifies
+that the first request contains only the compact catalog, offers only the
+`read` tool, and does not disclose the complete procedure before the model
+chooses it. It also proves that a missing Skill directory fails startup.
 
 ```ts title="src/harness/support/supportHarness.test.ts" write
-const provider = new FakeModelProvider({ strict: true })
-provider.enqueueObject({
-	object: {},
-	toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
-	usage,
-	finishReason: 'tool_calls',
-})
-provider.enqueueObject({
-	object: {
-		answer: 'A pending transfer can remain under review for up to two business days.',
-		method: 'pending_transfer',
-	},
-	usage,
-	finishReason: 'stop',
-})
-const runtime = await supportHarness.getInstance({
-	models: { primary: { provider, model: 'fake-support' } },
-	sandbox: inMemorySandbox(),
+import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from './supportHarness.js'
+
+const usage = { inputTokens: 6, outputTokens: 5, totalTokens: 11 }
+
+describe('support Skill', () => {
+	it('mounts the reviewed Skill and exposes only the read built-in', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {},
+			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+			usage,
+			finishReason: 'tool_calls',
+		})
+		provider.enqueueObject({
+			object: {
+				answer: 'A pending transfer can remain under review for up to two business days.',
+				method: 'pending_transfer',
+			},
+			usage,
+			finishReason: 'stop',
+		})
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-support' } },
+			sandbox: inMemorySandbox(),
+		})
+
+		try {
+			const session = await runtime.getSession('support-skill:case-104')
+			const outcome = await session.agents.answer_procedure_question.run({
+				caseId: 'case-104',
+				question: 'How long can a transfer stay pending?',
+			})
+			expect(outcome).toMatchObject({
+				status: 'completed',
+				output: { method: 'pending_transfer' },
+			})
+			const firstRequest = provider.requests[0]
+			if (!('messages' in firstRequest) || !('tools' in firstRequest))
+				throw new Error('Expected an object model request.')
+			expect(firstRequest.messages[0]?.content).toContain('Location: /skills/support-methods/SKILL.md')
+			expect(firstRequest.messages[0]?.content).not.toContain('normal review window')
+			expect(firstRequest.tools?.map((tool) => tool.name) ?? []).toEqual(['read'])
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
+
+	it('fails closed when a configured Skill directory is missing', async () => {
+		const invalid = defineHarness({ name: 'missing-skill' })
+			.skills({ 'support-methods': { directory: '/path/that/does/not/exist' } })
+			.define()
+
+		await expect(invalid.getInstance({ models: {}, sandbox: inMemorySandbox() })).rejects.toMatchObject({
+			code: 'SKILL_MANIFEST_ERROR',
+		})
+	})
 })
 ```
-
-The first provider request contains the compact catalog and file location. It
-does not contain the complete procedure. The only offered tool is `read`.
-
-```ts title="src/harness/support/supportHarness.test.ts" write
-const firstRequest = provider.requests[0]
-if (!('messages' in firstRequest) || !('tools' in firstRequest))
-	throw new Error('Expected an object model request.')
-expect(firstRequest.messages[0]?.content).toContain('Location: /skills/support-methods/SKILL.md')
-expect(firstRequest.messages[0]?.content).not.toContain('normal review window')
-expect(firstRequest.tools?.map((tool) => tool.name) ?? []).toEqual(['read'])
-provider.assertExhausted()
-```
-
-The same file creates a definition with a missing directory and expects
-`SKILL_MANIFEST_ERROR`. This proves startup fails instead of silently running
-without the reviewed procedure. Production systems that accept separately
-packaged Skills should also test malformed frontmatter, name mismatches, file
-count limits, and byte limits.
-
-Next test the PURISTA command with `createCommandContextMock`. Supply a policy
-stub, place trusted identity on the message, resolve the declared agent
-address, and assert both the invocation and policy input.
+Test the PURISTA command with its address-first agent mock and business policy.
+Trusted tenant and principal values must come from the command message.
 
 ```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts" write
-const policy = { canAnswer: sandbox.stub().resolves(true) }
-const { context, stubs } = createCommandContextMock(answerProcedureQuestionCommandBuilder, {
-	payload,
-	parameter: {},
-	resources: { supportProcedurePolicy: policy },
-	sandbox,
-})
-context.message = getCommandMessageMock({
-	tenantId: 'tenant-example',
-	principalId: 'principal-alex',
-	payload: { payload, parameter: {} },
-})
-;(stubs.agent as any).Support['1'].answer_procedure_question.run.resolves({
-	status: 'completed',
-	runId: 'run-1',
-	output: { answer: 'Up to two business days.', method: 'pending_transfer' },
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { answerProcedureQuestionCommandBuilder } from './answerProcedureQuestionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('answerProcedureQuestionCommandBuilder', () => {
+	it('invokes the Skill-enabled agent through its declared address', async () => {
+		const payload = { caseId: 'case-104', question: 'How long can a transfer stay pending?' }
+		const policy = { canAnswer: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(answerProcedureQuestionCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportProcedurePolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		;(stubs.agent as any).Support['1'].answer_procedure_question.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output: { answer: 'Up to two business days.', method: 'pending_transfer' },
+		})
+
+		await expect(
+			answerProcedureQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ answer: 'Up to two business days.', method: 'pending_transfer' })
+		expect(
+			(stubs.agent as any).Support['1'].answer_procedure_question.run.calledOnceWith(payload, {
+				sessionId: 'support-procedure:tenant-example:principal-alex:case-104',
+			}),
+		).toBe(true)
+		expect(
+			policy.canAnswer.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				caseId: 'case-104',
+			}),
+		).toBe(true)
+	})
 })
 ```
-
-Finally start a real local EventBridge and the mounted service with the same
-strict fake model. A permitted command call causes two policy checks: one at
-the command boundary and one at the published agent boundary.
+Then start a real EventBridge and mounted service. The permitted command call
+causes two policy checks: one at the command boundary and one at the published
+agent boundary. The denied test invokes the agent address directly and proves
+the mount guard stops execution before model work.
 
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
-const policy = { canAnswer: vi.fn(async () => true) }
-const eventBridge = new DefaultEventBridge()
-await eventBridge.start()
-const service = await supportV1Service.getInstance(eventBridge, {
-	logger: initLogger('fatal'),
-	resources: { supportProcedurePolicy: policy },
-	ai: { models: { primary: { provider, model: 'fake-support' } } },
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './supportV1Service.js'
+
+const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
+
+describe('Skill-enabled support service', () => {
+	it('authorizes the command and mounted agent before reading the Skill', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: {},
+			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+			usage,
+			finishReason: 'tool_calls',
+		})
+		provider.enqueueObject({
+			object: { answer: 'Up to two business days.', method: 'pending_transfer' },
+			usage,
+			finishReason: 'stop',
+		})
+		const policy = { canAnswer: vi.fn(async () => true) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportProcedurePolicy: policy },
+			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'answerProcedureQuestion',
+						},
+						payload: {
+							payload: { caseId: 'case-104', question: 'How long can a transfer stay pending?' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({ answer: 'Up to two business days.', method: 'pending_transfer' })
+			expect(policy.canAnswer).toHaveBeenCalledTimes(2)
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies a directly addressed agent before model work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportProcedurePolicy: { canAnswer: vi.fn(async () => false) } },
+			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-other',
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'answer_procedure_question',
+						},
+						payload: {
+							payload: { caseId: 'case-104', question: 'Read the procedure.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
 })
-await service.start()
 ```
-
-The denied integration test addresses `answer_procedure_question` directly.
-It expects a handled `403` and then calls `provider.assertExhausted()`. The
-strict provider had no responses queued, so this proves the guard rejected the
-request before any model work.
-
-Run all focused checks and the deterministic demo.
-
 ```bash title="Verify the Skill chapter" replay="project"
 npm run build
 npm test
 npm run lint
 npm run demo
 ```
-
-The demo starts EventBridge, injects a simple tutorial policy and scripted
-provider, invokes the command by address, and prints the typed answer. For an
-optional live service, bind the OpenAI adapter only in the application entry
-point:
-
-```ts title="src/index.ts" write
-const support = await createSupportService(eventBridge, logger, {
-	policy: { canAnswer: async () => true },
-	model: {
-		provider: openai({ apiKey }),
-		model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
-	},
-})
-```
-
-Copy `.env.example` to `.env`, set `OPENAI_API_KEY`, and run `npm start` only
-when you want that live provider call. The Harness definition, Skill, PURISTA
-service, tests, and default demo stay provider-neutral and credential-free.

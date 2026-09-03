@@ -633,6 +633,27 @@
       "id": "agent-skills",
       "title": "Load agent Skills",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "package.json",
+        "skills/support-methods/SKILL.md",
+        "src/createSupportService.ts",
+        "src/demo.ts",
+        "src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.ts",
+        "src/harness/support/supportHarness.test.ts",
+        "src/harness/support/supportHarness.ts",
+        "src/index.ts",
+        "src/invokeProcedureAnswer.ts",
+        "src/service/support/v1/SupportProcedurePolicy.ts",
+        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts",
+        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts",
+        "src/service/support/v1/harness/supportHarnessMount.ts",
+        "src/service/support/v1/requireSupportProcedureAccess.ts",
+        "src/service/support/v1/supportV1Service.test.ts",
+        "src/service/support/v1/supportV1Service.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts"
+      ],
       "requires": [
         "agent-tools"
       ],
@@ -640,6 +661,7 @@
         "agent-skills/build/create-skill",
         "agent-skills/build/bind-skill",
         "agent-skills/build/secure-content",
+        "agent-skills/build/run-application",
         "agent-skills/testing/test-skills"
       ]
     },

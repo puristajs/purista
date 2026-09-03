@@ -17,7 +17,6 @@ export interface SupportProcedurePolicy {
 	canAnswer(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
-
 Use one helper for the command guard and the mounted-agent guard.
 
 ```ts title="src/service/support/v1/requireSupportProcedureAccess.ts" write
@@ -53,7 +52,6 @@ export function supportProcedureSessionId(
 	return `support-procedure:${identity.tenantId}:${identity.principalId}:${caseId}`
 }
 ```
-
 Declare the resource on the generated service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
@@ -66,7 +64,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support conversations and support automation',
 }).defineResource<'supportProcedurePolicy', SupportProcedurePolicy>()
 ```
-
 The mount policy selects the reachable target and runs the same business check
 when another service addresses the agent directly. The agent input supplies
 only `caseId`; trusted tenant and principal ids come from the PURISTA
@@ -105,7 +102,6 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-
 Generate the application command before editing it.
 
 ```bash title="Generate the command" replay="project"
@@ -152,7 +148,6 @@ export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
-
 Register the command and mount the Harness exactly once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
@@ -164,7 +159,6 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(answerProcedureQuestionCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
 This focused chapter does not add HTTP. If you expose the command later, use
 the Hono authentication middleware from the earlier chapters. Protected is the
 default; the middleware verifies the token and places trusted tenant and
@@ -176,4 +170,4 @@ command, but it cannot add that command as a tool or bypass its guard. A script
 inside the Skill directory also remains a file because this agent has `read`
 and no execution tool.
 
-Continue with [Test lazy loading and authorization](../../testing/test-skills/).
+Continue with [Compose and run the Skill-enabled service](../run-application/).

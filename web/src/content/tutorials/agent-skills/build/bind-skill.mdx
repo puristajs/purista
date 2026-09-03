@@ -47,7 +47,6 @@ export const answerProcedureQuestionAgent = defineHarnessModule<SupportSkillStat
 	},
 )
 ```
-
 `skills: ['support-methods']` is an allowlist for this agent. It does not add a
 tool. `builtinTools: ['read']` separately lets the model open mounted files. A
 default-loop agent that names a Skill without `read` fails validation.
@@ -76,7 +75,6 @@ export const supportHarness = defineHarness({ name: 'support-skills' })
 	.use(answerProcedureQuestionAgent)
 	.define()
 ```
-
 Strict validation checks the manifest, directory name, and supported fields at
 startup. `trust` and `source` record provenance for policy and diagnostics;
 they do not turn file content into authority.
