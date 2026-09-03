@@ -1,46 +1,25 @@
 ---
 title: Release and purge sandbox resources
-description: Separate attachment shutdown from destructive retention cleanup and make administrative retries explicit.
-order: 283
+description: Separate request attachment shutdown from destructive retention cleanup and make administrative retries explicit.
+order: 284
 kind: lesson
 status: draft
 ---
 
-`service.destroy()` shuts down the mounted Harness and releases live
-attachments. It does not silently delete persistent sandbox data that a later
-session may need. Deletion is an application retention decision.
+Normal request completion releases the live sandbox attachment. It does not
+silently turn a model call into an administrative purge. Retention cleanup uses
+the sandbox adapter's trusted administration interface with an explicit owner
+or age selector.
 
-Keep the adapter instance returned by the composition root. Call its
-administration methods only from a trusted operator path protected by PURISTA
-authentication and business authorization. Never expose this surface directly
-to a model or public route.
+An administrative result can be `completed`, `partial`, or `failed`. Persist
+the continuation cursor for a partial result and retry from that cursor. Keep
+this operation behind an operator-owned command or scheduled job; never expose
+it as an agent tool.
 
-For example, a tenant offboarding command can purge the exact tenant selector:
+Stop the local Compose build resources when the lesson is complete.
 
-```ts title="Trusted retention operation"
-const result = await sandbox.administration.purge({
-	selector: {
-		kind: 'tenant',
-		namespace: 'transaction-analysis',
-		tenantId,
-	},
-	idempotencyKey: `analysis-purge:${tenantId}:${retentionJobId}`,
-	limit: 100,
-})
+```bash title="Remove local sandbox containers" replay="project"
+docker compose down --remove-orphans
 ```
 
-Handle both truthful results:
-
-- `completed` means no selected resources remain;
-- `cleanup_pending` includes `retryAfterMs` and must be retried with the same
-  private metadata and idempotency key.
-
-Do not delete the adapter metadata directory after a cleanup failure. It holds
-the ownership journal required to retry the exact provider effects safely.
-
-For routine retention, run bounded `administration.sweep` calls from a
-scheduled PURISTA job and continue with `nextCursor`. Keep the scheduler,
-operator policy, and audit events in application code.
-
-Continue with [Test the complete tool loop](../../testing/test-sandbox/).
-
+Continue with [Test permissions and Docker isolation](../../testing/test-sandbox/).

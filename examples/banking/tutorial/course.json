@@ -781,12 +781,35 @@
       "id": "sandbox-analysis",
       "title": "Run analysis in a sandbox",
       "status": "draft",
+      "constructionVerified": true,
+      "requiredWrittenFiles": [
+        ".env.example",
+        "compose.yaml",
+        "package.json",
+        "sandbox.Dockerfile",
+        "src/createAnalysisService.ts",
+        "src/demo.ts",
+        "src/harness/analysis/transactionAnalysisHarness.test.ts",
+        "src/harness/analysis/transactionAnalysisHarness.ts",
+        "src/index.ts",
+        "src/sandboxAnalysis.docker.integration.test.ts",
+        "src/sandboxAnalysis.integration.test.ts",
+        "src/service/analysis/v1/AnalysisResources.ts",
+        "src/service/analysis/v1/analysisV1Service.ts",
+        "src/service/analysis/v1/analysisV1ServiceBuilder.ts",
+        "src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.test.ts",
+        "src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts",
+        "src/service/analysis/v1/harness/analysisHarnessMount.ts",
+        "src/service/analysis/v1/requireTransactionAnalysis.ts",
+        "src/testing/scriptedAnalysisProvider.ts"
+      ],
       "requires": [
         "multi-step-workflow"
       ],
       "pages": [
         "sandbox-analysis/build/configure",
         "sandbox-analysis/build/run-tool",
+        "sandbox-analysis/build/run-application",
         "sandbox-analysis/build/cleanup",
         "sandbox-analysis/testing/test-sandbox"
       ]

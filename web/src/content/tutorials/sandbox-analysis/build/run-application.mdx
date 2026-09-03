@@ -1,0 +1,198 @@
+---
+title: Compose and run isolated analysis
+description: Bind sandbox and model adapters, invoke through EventBridge, and keep the default demo deterministic.
+order: 283
+kind: lesson
+status: draft
+---
+
+Create a provider-neutral service factory. The PURISTA service receives a
+Harness sandbox port; Docker remains an adapter selected by composition.
+
+```ts title="src/createAnalysisService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider, Sandbox } from '@purista/harness'
+import type { AnalysisPolicy } from './service/analysis/v1/AnalysisResources.js'
+import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
+
+export function createAnalysisService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		analysisPolicy: AnalysisPolicy
+		analysisModel: { provider: ModelProvider; model: string }
+		sandbox: Sandbox
+	}>,
+) {
+	return analysisV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { analysisPolicy: options.analysisPolicy },
+		ai: {
+			models: { analysis_model: options.analysisModel },
+			sandbox: options.sandbox,
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+The scripted provider makes the default demo deterministic while still running
+the real tool loop, mounted guard, and EventBridge address.
+
+```ts title="src/testing/scriptedAnalysisProvider.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+
+const usage = { inputTokens: 5, outputTokens: 3, totalTokens: 8 }
+
+export function scriptedAnalysisProvider() {
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'write-1',
+				name: 'write',
+				arguments: { path: '/workspace/transactions.csv', content: 'id,amount,country\ntx-1,1250,DE\n' },
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'bash-1',
+				name: 'bash',
+				arguments: {
+					command: `python3 -c "import json; json.dump({'flagged':['tx-1']},open('summary.json','w'))"`,
+					cwd: '/workspace',
+				},
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [{ id: 'read-1', name: 'read', arguments: { path: '/workspace/summary.json' } }],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueObject({
+		object: {
+			analysisId: 'analysis-1',
+			flaggedTransactionIds: ['tx-1'],
+			summary: 'One high-value transaction was flagged for human review.',
+		},
+		usage,
+		finishReason: 'stop',
+	})
+	return provider
+}
+```
+```ts title="src/demo.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { localDirectorySandbox } from '@purista/harness'
+import { createAnalysisService } from './createAnalysisService.js'
+import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
+
+async function main() {
+	const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-demo-'))
+	const provider = scriptedAnalysisProvider()
+	const logger = initLogger('fatal')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const service = await createAnalysisService(eventBridge, logger, {
+		analysisPolicy: { canRun: async () => true },
+		analysisModel: { provider, model: 'analysis-fake' },
+		sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+	})
+	await service.start()
+
+	try {
+		const result = await eventBridge.invoke(
+			getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-analyst',
+				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+				payload: {
+					payload: {
+						analysisId: 'analysis-1',
+						transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+					},
+					parameter: {},
+				},
+			}),
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await service.destroy()
+		await eventBridge.destroy()
+		await rm(root, { recursive: true, force: true })
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The sandbox tool-loop demo failed.'}\n`)
+	process.exit(1)
+})
+```
+Document optional live-provider and image settings, then create the live Docker
+composition entry point.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+PURISTA_DOCKER_SANDBOX_IMAGE=
+PURISTA_DOCKER_SANDBOX_ROOT=./runtime/sandboxes
+```
+```ts title="src/index.ts" write
+import { resolve } from 'node:path'
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { dockerSandbox } from '@purista/harness-sandbox-docker'
+import { createAnalysisService } from './createAnalysisService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
+	if (!image) throw new Error('PURISTA_DOCKER_SANDBOX_IMAGE is required to start the optional live example.')
+	const sandbox = dockerSandbox({
+		root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
+		image,
+		user: '10001:10001',
+	})
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const service = await createAnalysisService(eventBridge, logger, {
+		analysisPolicy: {
+			canRun: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-analyst',
+		},
+		analysisModel: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+		sandbox,
+	})
+	await service.start()
+	gracefulShutdown(logger, [service, eventBridge])
+	logger.info('Sandbox transaction analysis service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Sandbox analysis service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the deterministic sandbox application" replay="project"
+npm run build
+npm run demo
+```
+
+Continue with [Release and purge sandbox resources](../cleanup/).

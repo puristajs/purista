@@ -1,80 +1,96 @@
 ---
-title: Configure an isolated sandbox
-description: Build an immutable image and bind the Docker adapter only at runtime composition.
+title: Create and configure isolated analysis
+description: Scaffold the PURISTA boundary, build a non-root image, and keep the Docker adapter in runtime composition.
 order: 281
 kind: lesson
 status: draft
 ---
 
-Create a fresh project and install published packages. Then generate the
-Analysis capability, its native Harness agent, and the PURISTA command that
-invokes the mounted agent through EventBridge.
+Create a clean project and install its complete published manifest.
 
-```bash title="Create the analysis boundary" replay="project"
-npm create purista@latest sandbox-analysis
+```bash title="Create and enter the sandbox-analysis project" replay="parent"
+npm create purista@latest sandbox-analysis -- --runtime node --event-bridge default --non-interactive --defaults
 cd sandbox-analysis
-npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 @purista/harness-sandbox-docker@3.0.0 zod@4.4.3
-npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
-npm run add:service -- analysis --description "Owns isolated transaction analysis requests" --non-interactive
-npm run add:agent -- analyze-transactions --service analysis --service-version 1 --description "Analyze transaction rows with sandbox tools" --non-interactive
+```
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-sandbox-analysis",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run",
+		"test:docker": "vitest run src/sandboxAnalysis.docker.integration.test.ts"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"@purista/harness-sandbox-docker": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+```bash title="Install the sandbox-analysis dependencies" replay="project"
+npm install
+```
+
+Generate the Analysis service, native agent, and application command.
+
+```bash title="Generate the analysis boundaries" replay="project"
+npm run add:service -- analysis --description "Own isolated analysis jobs" --non-interactive
+npm run add:agent -- analyze-transactions --service analysis --service-version 1 --description "Analyze one transaction dataset in a sandbox" --non-interactive
 npm run add:command -- analyze-transactions --service analysis --service-version 1 --description "Run an isolated transaction analysis" --non-interactive
 ```
 
-Build a small non-root image. The retained Compose file builds it locally.
+This example keeps its compact agent and tool definitions in one Harness file.
+Remove the generated agent placeholder before writing it.
 
-```dockerfile title="sandbox.Dockerfile"
+```bash title="Remove superseded generated agent files" replay="project"
+rm -rf src/harness/analysis/agent
+```
+
+Build a small non-root image. The model never chooses an image tag or runtime
+socket; the trusted composition root binds an immutable image id.
+
+```dockerfile title="sandbox.Dockerfile" write
 FROM python:3.13-slim
 RUN useradd --create-home --uid 10001 sandbox
 WORKDIR /workspace
 USER sandbox
 ```
-
-```bash title="Build and resolve the immutable image id"
+```yaml title="compose.yaml" write
+services:
+  sandbox-image:
+    image: purista-tutorial-sandbox:local
+    build:
+      context: .
+      dockerfile: sandbox.Dockerfile
+    command: ["python3", "--version"]
+```
+```bash title="Build the local sandbox image" replay="project"
 docker compose build sandbox-image
-docker image inspect --format '{{.Id}}' purista-tutorial-sandbox:local
 ```
-
-Copy the returned `sha256:...` value into
-`PURISTA_DOCKER_SANDBOX_IMAGE`. The adapter deliberately rejects mutable image
-tags. In a release pipeline, pin the base image by repository digest too.
-
-Keep the reusable service composition provider-neutral. It accepts the model
-and sandbox as typed inputs, so tests can bind a strict fake provider and the
-live process can bind Docker.
-
-```ts title="src/createAnalysisService.ts"
-export function createAnalysisService(eventBridge: EventBridge, logger: Logger, options: Readonly<{
-	analysisPolicy: AnalysisPolicy
-	analysisModel: { provider: ModelProvider; model: string }
-	sandbox: Sandbox
-}>) {
-	return analysisV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { analysisPolicy: options.analysisPolicy },
-		ai: {
-			models: { analysis_model: options.analysisModel },
-			sandbox: options.sandbox,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-
-At the live entry point, validate the provider key and immutable image id, then
-create the adapter. Retain the adapter variable for trusted administration.
-Networking is disabled by default; do not enable it unless the analysis has an
-explicit, reviewed need.
-
-```ts title="src/index.ts"
-const sandbox = dockerSandbox({
-	root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
-	image,
-	user: '10001:10001',
-})
-```
-
-The native Harness definition contains no Docker path, image, or credential.
-Another deployment can bind an adapter with the required capabilities without
-changing the agent.
 
 Continue with [Run only the required tools](../run-tool/).

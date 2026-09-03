@@ -1,15 +1,25 @@
 ---
 title: Run only the required tools
-description: Opt into three built-ins, restrict mutation, and keep business authorization outside the model.
+description: Opt into narrow built-ins, restrict mutation, and keep business authorization outside the model.
 order: 282
 kind: lesson
 status: draft
 ---
 
-Define bounded input and structured output schemas. The agent receives at most
-500 transaction rows and returns ids plus a short summary.
+Create the complete portable Harness definition. It opts into only the file and
+process tools required by the analysis, restricts writable paths, and returns a
+strict result.
 
-```ts title="src/harness/analysis/transactionAnalysisHarness.ts"
+```ts title="src/harness/analysis/transactionAnalysisHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { z } from 'zod'
+
+export const transactionRowSchema = z.strictObject({
+	id: z.string().trim().min(1).max(80),
+	amount: z.number().finite(),
+	country: z.string().length(2),
+})
+
 export const analyzeTransactionsInputSchema = z.strictObject({
 	analysisId: z.string().trim().min(1).max(80),
 	transactions: z.array(transactionRowSchema).min(1).max(500),
@@ -20,12 +30,7 @@ export const analyzeTransactionsOutputSchema = z.strictObject({
 	flaggedTransactionIds: z.array(z.string()).max(500),
 	summary: z.string().trim().min(1).max(500),
 })
-```
 
-Built-in sandbox tools are disabled unless the agent lists them. Enable only
-the three operations needed by this analysis and add mutation policies.
-
-```ts title="src/harness/analysis/transactionAnalysisHarness.ts"
 export const transactionAnalysisHarness = defineHarness({ name: 'transaction-analysis' })
 	.requireModel('analysis_model', { capabilities: ['object', 'tool_use'] })
 	.agent('analyze_transactions', {
@@ -46,42 +51,80 @@ export const transactionAnalysisHarness = defineHarness({ name: 'transaction-ana
 	})
 	.define()
 ```
+Declare the Analysis-owned business policy resource and service builder.
 
-The adapter also enforces CPU, memory, process, temporary-storage, output, and
-timeout limits. Agent permissions and adapter limits are complementary: the
-first controls intended tool use, and the second contains the process.
+```ts title="src/service/analysis/v1/AnalysisResources.ts" write
+export interface AnalysisPolicy {
+	canRun(input: Readonly<{ tenantId: string; principalId: string; analysisId: string }>): Promise<boolean>
+}
+```
+```ts title="src/service/analysis/v1/analysisV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { AnalysisPolicy } from './AnalysisResources.js'
 
-Put business authorization on both public addresses. The command guard protects
-the command even if its implementation changes. The mounted target guard
-protects direct EventBridge callers before Harness opens a sandbox or invokes a
-model.
+export const analysisV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Analysis',
+	serviceVersion: '1',
+	serviceDescription: 'Owns isolated transaction analysis requests',
+}).defineResource<'analysisPolicy', AnalysisPolicy>()
+```
+Authorization stays outside model instructions. Reuse the fail-closed rule for
+the command and directly addressable agent.
 
-```ts title="src/service/analysis/v1/requireTransactionAnalysis.ts"
+```ts title="src/service/analysis/v1/requireTransactionAnalysis.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { AnalysisPolicy } from './AnalysisResources.js'
+
 export async function requireTransactionAnalysis(
 	policy: AnalysisPolicy,
-	input: { tenantId?: string; principalId?: string; analysisId: string },
+	input: Readonly<{ tenantId?: string; principalId?: string; analysisId: string }>,
 ) {
 	if (!input.tenantId || !input.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	if (!(await policy.canRun({
-		tenantId: input.tenantId,
-		principalId: input.principalId,
-		analysisId: input.analysisId,
-	}))) {
+	if (
+		!(await policy.canRun({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			analysisId: input.analysisId,
+		}))
+	) {
 		throw new HandledError(StatusCode.Forbidden, 'Transaction analysis is not allowed')
 	}
 }
-```
 
-```ts title="src/service/analysis/v1/harness/analysisHarnessMount.ts"
+export function transactionAnalysisSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	analysisId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${analysisId}:transaction-analysis-v1`)
+		.digest('hex')
+	return `transaction-analysis:${digest}`
+}
+```
+```ts title="src/service/analysis/v1/harness/analysisHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { transactionAnalysisHarness } from '../../../../harness/analysis/transactionAnalysisHarness.js'
+import type { AnalysisPolicy } from '../AnalysisResources.js'
+import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
+
+export { transactionAnalysisHarness }
+
 export const analysisHarnessPolicy = {
 	publish: { agents: ['analyze_transactions'], workflows: [] },
 	targets: {
 		agents: {
 			analyze_transactions: {
 				beforeGuards: {
-					analysisAccess: async (context, input) => {
+					analysisAccess: async (
+						context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
+						input: { analysisId: string },
+					) => {
 						await requireTransactionAnalysis(context.resources.analysisPolicy, {
 							...context.identity,
 							analysisId: input.analysisId,
@@ -94,8 +137,17 @@ export const analysisHarnessPolicy = {
 	},
 } as const
 ```
+Replace the generated command with the complete address-first invocation.
 
-```ts title="src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts"
+```ts title="src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts" write
+import {
+	analyzeTransactionsInputSchema,
+	analyzeTransactionsOutputSchema,
+} from '../../../../../harness/analysis/transactionAnalysisHarness.js'
+import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
+import { transactionAnalysisHarness } from '../../harness/analysisHarnessMount.js'
+import { requireTransactionAnalysis, transactionAnalysisSessionId } from '../../requireTransactionAnalysis.js'
+
 export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 	.getCommandBuilder('analyzeTransactions', 'Run an isolated transaction analysis')
 	.addPayloadSchema(analyzeTransactionsInputSchema)
@@ -123,12 +175,15 @@ export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 		return outcome.output
 	})
 ```
+Register the command and mount the Harness once.
 
-`transactionAnalysisSessionId` requires trusted tenant and principal ids and
-hashes them together with the analysis id. Two tenants choosing the same
-application id therefore never share a Harness session or sandbox owner.
+```ts title="src/service/analysis/v1/analysisV1Service.ts" write
+import { analysisV1ServiceBuilder } from './analysisV1ServiceBuilder.js'
+import { analyzeTransactionsCommandBuilder } from './command/analyzeTransactions/analyzeTransactionsCommandBuilder.js'
+import { analysisHarnessPolicy, transactionAnalysisHarness } from './harness/analysisHarnessMount.js'
 
-The command returns advice only. A separate capability and guarded command
-would own an effect such as blocking a transaction.
-
-Continue with [Release and purge sandbox resources](../cleanup/).
+export const analysisV1Service = analysisV1ServiceBuilder
+	.addCommandDefinition(analyzeTransactionsCommandBuilder.getDefinition())
+	.mountHarness(transactionAnalysisHarness, analysisHarnessPolicy)
+```
+Continue with [Compose and run isolated analysis](../run-application/).
