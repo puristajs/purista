@@ -1,0 +1,57 @@
+---
+title: Create the RAG service and Harness
+description: Create a project, generate the PURISTA boundaries, and declare chat and embedding model requirements.
+order: 201
+kind: lesson
+status: draft
+---
+
+Start in an empty directory. The first command creates a normal PURISTA
+application. The following installs use the package names and versions a
+consumer will use after the release; they do not use repository-local package
+links.
+
+```bash title="Create and install the RAG project" replay="project"
+npm create purista@latest example-rag -- --runtime node --event-bridge default --non-interactive --defaults
+cd example-rag
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 @purista/harness-ai-sdk-ui@3.0.0 @purista/hono-http-server@4.0.0 @hono/node-server@2.1.0 pg@8.23.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0
+```
+
+Generate the Framework artifacts before adding application behavior. The
+agent command creates the native Harness agent scaffold below
+`src/harness/knowledge` and updates the owning service.
+
+```bash title="Generate the Knowledge boundaries" replay="project"
+npm run add:service -- knowledge --description "Own knowledge sources, retrieval, and grounded answers" --non-interactive
+npm run add:command -- ingest-knowledge --service knowledge --service-version 1 --description "Chunk, embed, and store one reviewed knowledge revision" --non-interactive
+npm run add:command -- search-knowledge --service knowledge --service-version 1 --description "Search authorized knowledge chunks" --non-interactive
+npm run add:stream -- answer-knowledge-question --service knowledge --service-version 1 --description "Stream a grounded answer" --non-interactive
+npm run add:agent -- retrieve-evidence --service knowledge --service-version 1 --description "Retrieve evidence for a grounded answer" --non-interactive
+```
+
+Define one composed Harness for the `Knowledge` service. `primary` describes
+the capabilities needed by the agent and final answer. `embedding` describes a
+separate model that can only create embeddings. These are provider-neutral
+requirements; concrete providers and model ids belong in application startup.
+
+```ts title="src/harness/knowledge/knowledgeHarness.ts"
+export const knowledgeHarness = defineHarness({ name: 'knowledge' })
+	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
+	.requireModel('embedding', { capabilities: ['embeddings'] })
+	.use(searchKnowledgeTool)
+	.use(retrieveEvidenceAgent)
+```
+
+Mount the Harness once on the service. The mount publishes only the answer
+workflow. Ingestion and search remain ordinary PURISTA commands, but they can
+declare access to the mounted embedding alias.
+
+```ts title="src/service/knowledge/v1/knowledgeV1Service.ts"
+export const knowledgeV1Service = knowledgeV1ServiceBuilder
+	.addCommandDefinition(ingestKnowledgeCommandBuilder.getDefinition(), searchKnowledgeCommandBuilder.getDefinition())
+	.addStreamDefinition(answerKnowledgeQuestionStreamBuilder.getDefinition())
+	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
+```
+
+Continue with [Ingest and embed a source](./ingest/).

@@ -1,78 +1,70 @@
-import { serve } from '@hono/node-server'
-import { initLogger } from '@purista/core'
-import { once } from 'node:events'
-import { describe, expect, test } from 'vitest'
-import { createApplication } from './application.js'
-import { createNodeHttpListener } from './nodeHttpListener.js'
+import { initDefaultStateStore, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
 
-async function destroyApplication(app: Awaited<ReturnType<typeof createApplication>>) {
-	await app.http.prepareDestroy().destroy()
-	await app.http.destroy()
-	await app.transaction.destroy()
-	await app.identity.destroy()
-	await app.bankProfile.destroy()
-	await app.identityStateStore.destroy()
-	await app.transactionRepository.destroy()
-	await app.eventBridge.destroy()
+async function fixture() {
+	const logger = initLogger('fatal')
+	const repository = {
+		name: 'mockKnowledgeRepository',
+		replaceRevision: vi.fn(),
+		search: vi.fn(),
+		destroy: vi.fn().mockResolvedValue(undefined),
+	}
+	const provider = new FakeModelProvider({ strict: true })
+	const application = await createKnowledgeApplication(logger, {
+		stateStore: initDefaultStateStore({ logger }),
+		repository,
+		models: {
+			primary: { provider, model: 'fake-knowledge' },
+			embedding: { provider, model: 'fake-embedding' },
+		},
+		embeddingDimensions: 4,
+	})
+	return { application, repository, provider }
 }
 
-describe('Hono application boundary', () => {
-	test('serves the website without taking ownership of API paths', async () => {
-		const app = await createApplication(initLogger('fatal'))
+async function destroy(application: Awaited<ReturnType<typeof createKnowledgeApplication>>) {
+	await new Promise<void>((resolve) => setImmediate(resolve))
+	await application.http.prepareDestroy().destroy()
+	await application.http.destroy()
+	await application.knowledge.destroy()
+	await application.identity.destroy()
+	await application.repository.destroy()
+	await application.stateStore.destroy()
+	await application.eventBridge.destroy()
+}
+
+describe('knowledge HTTP application', () => {
+	it('keeps login public and blocks the protected stream before retrieval', async () => {
+		const { application, repository, provider } = await fixture()
 		try {
-			const home = await app.http.app.request('/')
-			expect(home.status).toBe(200)
-			expect(home.headers.get('content-type')).toContain('text/html')
-			const html = await home.text()
-			expect(html).toContain('<div id="root"></div>')
+			const login = await application.http.app.request('/api/v1/session/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ username: 'alex@example.test', password: 'demo-password' }),
+			})
+			expect(login.status).toBe(200)
+			expect(await login.json()).toMatchObject({ displayName: 'Alex Example' })
 
-			const assetPath = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1]
-			expect(assetPath).toBeDefined()
-			const asset = await app.http.app.request(assetPath ?? '')
-			expect(asset.status).toBe(200)
-			expect(asset.headers.get('content-type')).toContain('javascript')
-
-			const browserPath = await app.http.app.request('/overview')
-			expect(browserPath.status).toBe(200)
-			expect(browserPath.headers.get('content-type')).toContain('text/html')
-
-			const api = await app.http.app.request('/api/v1/profile')
-			expect(api.status).toBe(200)
-			expect(await api.json()).toEqual({ name: 'Example Bank', currency: 'EUR' })
-
-			const missingApi = await app.http.app.request('/api/v1/missing')
-			expect(missingApi.status).toBe(404)
-			expect(missingApi.headers.get('content-type')).toContain('application/problem+json')
+			const denied = await application.http.app.request('/api/v1/knowledge/chat', {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					'x-tenant-id': 'tenant-example',
+					'x-principal-id': 'principal-alex',
+				},
+				body: JSON.stringify({
+					id: 'chat-1',
+					collectionId: 'customer-help',
+					messages: [{ role: 'user', parts: [{ type: 'text', text: 'How long are transfers pending?' }] }],
+				}),
+			})
+			expect(denied.status).toBe(401)
+			expect(repository.search).not.toHaveBeenCalled()
+			provider.assertExhausted()
 		} finally {
-			await destroyApplication(app)
+			await destroy(application)
 		}
-	})
-
-	test('serves through Node and releases the listener', async () => {
-		const app = await createApplication(initLogger('fatal'))
-		const nodeServer = serve({ fetch: app.http.app.fetch, hostname: '127.0.0.1', port: 0 })
-		await once(nodeServer, 'listening')
-		const address = nodeServer.address()
-		expect(address).not.toBeNull()
-		expect(typeof address).not.toBe('string')
-		if (!address || typeof address === 'string') throw new Error('Expected a TCP listener')
-
-		try {
-			const response = await fetch(`http://127.0.0.1:${address.port}/`)
-			expect(response.status).toBe(200)
-			expect(response.headers.get('content-type')).toContain('text/html')
-		} finally {
-			await app.http.prepareDestroy().destroy()
-			await createNodeHttpListener(nodeServer).destroy()
-			await app.http.destroy()
-			await app.transaction.destroy()
-			await app.identity.destroy()
-			await app.bankProfile.destroy()
-			await app.identityStateStore.destroy()
-			await app.transactionRepository.destroy()
-			await app.eventBridge.destroy()
-		}
-
-		expect(nodeServer.listening).toBe(false)
 	})
 })

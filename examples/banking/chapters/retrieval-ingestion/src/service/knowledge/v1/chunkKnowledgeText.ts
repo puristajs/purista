@@ -1,4 +1,4 @@
-export function chunkKnowledgeText(text: string, wordsPerChunk = 24) {
+export function chunkKnowledgeText(text: string, wordsPerChunk = 80) {
 	if (!Number.isInteger(wordsPerChunk) || wordsPerChunk < 1) {
 		throw new Error('wordsPerChunk must be a positive integer')
 	}

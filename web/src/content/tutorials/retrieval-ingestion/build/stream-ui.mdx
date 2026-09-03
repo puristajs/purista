@@ -1,0 +1,76 @@
+---
+title: Stream to a standard chat UI
+description: Project the mounted workflow through a PURISTA stream and AI SDK UI Message Stream v1.
+order: 206
+kind: lesson
+status: draft
+---
+
+The mounted workflow is an internal PURISTA address. A browser should not know
+the EventBridge protocol, so expose a normal protected stream definition and
+adapt its portable Harness events at the HTTP boundary.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts"
+export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
+	.getStreamBuilder('answerKnowledgeQuestion', 'Stream a grounded answer through AI SDK UI Message Stream v1')
+	.addPayloadSchema(answerKnowledgeQuestionHttpInputSchema)
+	.addChunkSchema(aiSdkUiMessageSseEventSchema)
+	.addFinalSchema(answerKnowledgeQuestionFinalSchema)
+	.canInvokeWorkflow(
+		'Knowledge',
+		'1',
+		'answer_knowledge_question',
+		knowledgeHarness.contracts.workflows.answer_knowledge_question,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
+	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	.setHttpResponseHeaders(AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS)
+```
+
+`canInvokeWorkflow` declares the address and contracts before the handler can
+use it. The call crosses EventBridge even when the workflow is mounted on the
+same process. The runtime carries tenant and principal identity to the mount
+guard and command-backed tool.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts"
+		const execution = await context.workflow.Knowledge['1'].answer_knowledge_question.stream(
+			{
+				collectionId: payload.collectionId,
+				question: latestUserText(payload.messages),
+			},
+			{ sessionId: `knowledge-chat:${payload.id}` },
+		)
+		writer.onCancel(() => {
+			void execution.cancel('browser disconnected')
+		})
+
+		for await (const event of createHarnessUIMessageSseEvents(execution)) {
+			if (writer.cancelled) return
+			await writer.write(event)
+		}
+```
+
+The adapter emits AI SDK UI Message Stream v1, including the standard response
+header and data chunks. The browser can use `useChat` and `DefaultChatTransport`
+without a PURISTA-specific client library.
+
+The example UI has two panels. The first calls the protected ingestion command
+with a small reviewed source. The second uses maintained AI Elements components
+for the conversation and prompt input. Chat stays disabled until ingestion has
+completed, so the first question exercises the data the learner just stored.
+
+```tsx title="ui/src/KnowledgeChat.tsx"
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport({
+				api: '/api/v1/knowledge/chat',
+				headers: { authorization: `Bearer ${sessionToken}` },
+				body: { collectionId: 'customer-help' },
+			}),
+		[sessionToken],
+	)
+	const { messages, sendMessage, status } = useChat({ transport })
+```
+
+Continue with [Bind providers and run the application](./run/).

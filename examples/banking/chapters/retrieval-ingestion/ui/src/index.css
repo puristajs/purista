@@ -11,7 +11,6 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
-	--color-destructive: var(--destructive);
 	--color-border: var(--border);
 	--color-ring: var(--ring);
 	--radius-sm: calc(var(--radius) - 4px);
@@ -32,13 +31,16 @@
 	--muted-foreground: oklch(0.5 0.02 260);
 	--accent: oklch(0.94 0.015 155);
 	--accent-foreground: oklch(0.22 0.04 161);
-	--destructive: oklch(0.58 0.22 27);
 	--border: oklch(0.9 0.008 255);
 	--ring: oklch(0.52 0.11 160);
 }
 
 @layer base {
-	* { @apply border-border; }
-	body { @apply m-0 bg-background text-foreground antialiased; font-family: "DM Sans", ui-sans-serif, sans-serif; }
-	a { @apply text-inherit no-underline; }
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply m-0 bg-background text-foreground antialiased;
+		font-family: "DM Sans", ui-sans-serif, sans-serif;
+	}
 }

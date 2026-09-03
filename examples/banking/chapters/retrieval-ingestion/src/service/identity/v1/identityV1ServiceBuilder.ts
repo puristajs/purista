@@ -1,14 +1,16 @@
-import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
-import { generalIdentityServiceInfo } from '../generalIdentityServiceInfo.js'
-import type { LocalIdentityProvider } from './LocalIdentityProvider.js'
-import { identityServiceV1ConfigSchema } from './identityServiceConfig.js'
+import { z } from 'zod'
 
-export const identityServiceInfo = {
+export const identityV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Identity',
 	serviceVersion: '1',
-	...generalIdentityServiceInfo,
-} as const satisfies ServiceInfoType
-
-export const identityV1ServiceBuilder = new ServiceBuilder(identityServiceInfo)
-	.setConfigSchema(identityServiceV1ConfigSchema)
-	.defineResource<'identityProvider', LocalIdentityProvider>()
+	serviceDescription: 'Authenticates local tutorial users and owns sessions',
+}).setConfigSchema(
+	z.object({
+		sessionTtlMs: z
+			.number()
+			.int()
+			.positive()
+			.default(15 * 60 * 1000),
+	}),
+)

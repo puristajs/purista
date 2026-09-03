@@ -1,5 +1,5 @@
 {
-  "plannedChapters": 29,
+  "plannedChapters": 28,
   "forbiddenServiceNames": [
     "Banking",
     "BankingService",
@@ -424,48 +424,20 @@
     },
     {
       "id": "retrieval-ingestion",
-      "title": "Ingest content for retrieval",
-      "status": "published",
-      "requires": [
-        "authenticated-http"
-      ],
-      "smoke": {
-        "type": "http",
-        "path": "/api/v1/profile",
-        "expectJson": {
-          "name": "Example Bank",
-          "currency": "EUR"
-        }
-      },
-      "verification": [
-        {
-          "command": "npm",
-          "args": [
-            "run",
-            "test:postgres"
-          ]
-        }
-      ],
-      "pages": [
-        "retrieval-ingestion/build/accept",
-        "retrieval-ingestion/build/process",
-        "retrieval-ingestion/build/store",
-        "retrieval-ingestion/testing/test-ingestion"
-      ]
-    },
-    {
-      "id": "rag-agent",
-      "title": "Build a retrieval-augmented generation agent",
+      "title": "Build a complete RAG pipeline",
       "status": "draft",
       "requires": [
-        "retrieval-ingestion"
+        "create-project"
       ],
       "pages": [
-        "rag-agent/build/declare-search-tool",
-        "rag-agent/build/define-agent",
-        "rag-agent/build/stream-ui",
-        "rag-agent/build/run-application",
-        "rag-agent/testing/test-rag"
+        "retrieval-ingestion/build/configure-harness",
+        "retrieval-ingestion/build/ingest",
+        "retrieval-ingestion/build/store",
+        "retrieval-ingestion/build/retrieve",
+        "retrieval-ingestion/build/agent",
+        "retrieval-ingestion/build/stream-ui",
+        "retrieval-ingestion/build/run",
+        "retrieval-ingestion/testing/test-rag"
       ]
     },
     {
@@ -573,7 +545,7 @@
       "status": "draft",
       "requires": [
         "ai-guardrails",
-        "rag-agent",
+        "retrieval-ingestion",
         "multi-step-workflow"
       ],
       "pages": [
@@ -604,15 +576,6 @@
       "status": "published",
       "requires": [
         "sessions"
-      ],
-      "pages": []
-    },
-    {
-      "id": "ingestion",
-      "title": "Authenticated Knowledge ingestion with pgvector",
-      "status": "published",
-      "requires": [
-        "retrieval-ingestion"
       ],
       "pages": []
     }

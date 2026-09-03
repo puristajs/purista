@@ -1,26 +1,34 @@
 import { randomUUID } from 'node:crypto'
 import { HandledError, StatusCode } from '@purista/core'
+import { z } from 'zod'
 import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
 import { sessionStateKey } from '../../session.js'
-import {
-	identityV1LoginInputParameterSchema,
-	identityV1LoginInputPayloadSchema,
-	identityV1LoginOutputPayloadSchema,
-} from './schema.js'
+
+const inputSchema = z.strictObject({ username: z.string().min(1), password: z.string().min(1) })
+const outputSchema = z.strictObject({
+	sessionToken: z.uuid(),
+	displayName: z.string(),
+	expiresAt: z.number().int().positive(),
+})
 
 export const loginCommandBuilder = identityV1ServiceBuilder
-	.getCommandBuilder('login', 'Create a local session')
-	.addPayloadSchema(identityV1LoginInputPayloadSchema)
-	.addParameterSchema(identityV1LoginInputParameterSchema)
-	.addOutputSchema(identityV1LoginOutputPayloadSchema)
+	.getCommandBuilder('login', 'Create a local tutorial session')
+	.addPayloadSchema(inputSchema)
+	.addOutputSchema(outputSchema)
 	.exposeAsHttpEndpoint('POST', 'session/login')
 	.makeEndpointPublic()
 	.setCommandFunction(async function (context, payload) {
-		const identity = await context.resources.identityProvider.authenticate(payload.username, payload.password)
-		if (!identity) throw new HandledError(StatusCode.Unauthorized, 'Invalid local credentials')
-
+		if (payload.username !== 'alex@example.test' || payload.password !== 'demo-password') {
+			throw new HandledError(StatusCode.Unauthorized, 'Invalid local credentials')
+		}
 		const sessionToken = randomUUID()
+		const displayName = 'Alex Example'
 		const expiresAt = Date.now() + this.config.sessionTtlMs
-		await context.states.setState(sessionStateKey(sessionToken), { ...identity, expiresAt })
-		return { sessionToken, displayName: identity.displayName, expiresAt }
+		await context.states.setState(sessionStateKey(sessionToken), {
+			principalId: 'principal-alex',
+			tenantId: 'tenant-example',
+			displayName,
+			expiresAt,
+		})
+		return { sessionToken, displayName, expiresAt }
 	})

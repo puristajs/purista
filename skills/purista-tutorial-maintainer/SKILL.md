@@ -155,6 +155,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   Every published mounted target that can be called directly through
   EventBridge carries its own business guard; a wrapper command guard does not
   protect the target address.
+- Teach RAG as one complete index-to-answer path. Ingestion remains deterministic
+  PURISTA command or worker logic, but embeddings come from a declared Harness
+  model alias through `canUseHarnessModel(...)`; do not invent an embedding
+  provider resource beside Harness. Use that same model contract for query
+  embeddings, keep documents and vectors in a database resource, and let the
+  answer agent choose an authorized command-backed retrieval tool. The runnable
+  UI must exercise ingestion before standard AI SDK UI streaming.
 - Teach guards with action/object/state permissions for valid callers, not only
   identity presence. Transforms change representations; handlers own effects
   and atomic state checks. After guards cannot roll back completed mutations.

@@ -1,6 +1,6 @@
 # Verified tutorial scope
 
-Eighteen of 29 planned capability chapters are published. All eleven remaining
+Seventeen of 28 planned capability chapters are published. All eleven remaining
 AI chapters are represented as page-level draft packets in `course.json`.
 The classification packet also has focused source under
 `chapters/classification-agent`; its local typecheck, lint, native Harness
@@ -34,7 +34,6 @@ tests and builds, and checks the documented HTTP behavior.
 | `queue-processing` | Generate a queue and worker, enqueue trusted work, apply business guards, invoke another service, and retrieve stored job results. | `Reporting` creates one short transaction statement in the background. |
 | `schedules` | Declare and export scheduled intent, emit a validated occurrence, and bind it to an existing queue. | `Reporting` requests one synthetic daily statement occurrence without owning the clock. |
 | `observability` | Declare typed business metrics, wire OpenTelemetry at the composition root, inspect framework traces, and verify a real Collector boundary. | `Transaction` counts successful records and `Monitoring` counts bounded signal-storage outcomes. |
-| `retrieval-ingestion` | Generate a queue and worker, inject embedding and PostgreSQL resources, and test transactional pgvector ingestion. | `Knowledge` accepts one reviewed fictional policy revision and stores scoped chunks. |
 | `distributed-runtime` | Split services into independent processes, select adapters by declared capabilities, and verify real EventBridge, subscription, queue, health, restart, and shutdown boundaries. | `Transaction`, `Monitoring`, and `Reporting` run as separate Node.js processes over NATS JetStream. |
 
 Example Bank is the application name, not a service boundary. Published
@@ -144,20 +143,17 @@ restarts, process health, ordered shutdown, and a clear unavailable-broker
 failure. The clean replay completed 110 documented actions across 18 pages and
 37 tests; Compose always removes its NATS volume and network.
 
-The retrieval-ingestion checkpoint starts from the independent authenticated
-HTTP baseline and generates the narrow `Knowledge` service, its
-`ingestKnowledge` queue and worker, and its protected producer command. A
-collection-level business guard runs before enqueueing and the worker checks
-the trusted tenant, principal, and collection again before processing. The
-worker uses declared embedding-provider and repository resources, validates
-vector count, dimensions, finite values, and cancellation, and returns bounded
-queue results. PostgreSQL with pgvector owns document revisions and chunks;
-StateStore contains only queue job state. Transactional tests cover atomic
-replacement, rollback, stale revisions, withdrawal, and tenant, collection,
-and model scope. A real Hono-to-queue-to-database test covers authentication,
-business authorization, and successful ingestion. The clean replay completed
-161 documented actions across 32 pages. Nineteen server test files with 34
-fast tests, five PostgreSQL tests, four UI tests, and both builds pass.
+The complete RAG packet now has focused source under
+`chapters/retrieval-ingestion`. A protected PURISTA command chunks reviewed
+content, obtains embeddings from the mounted Harness model alias, and stores
+the revision and vectors through PostgreSQL with pgvector. The search command
+uses the same alias and a business guard, then the native Harness agent chooses
+the command-backed host tool. A protected PURISTA stream converts portable
+execution events to AI SDK UI Message Stream v1, and the React/AI Elements UI
+exercises ingestion before chat. Strict fake-model tests, mocked repository
+tests, a real pgvector resource test, Harness tool-loop tests, stream adapter
+tests, UI tests, and both builds pass locally. The packet remains draft until
+PURISTA v4 and Harness v3 install from npm in a clean consumer replay.
 
 Run the provenance check with:
 

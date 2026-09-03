@@ -1,4 +1,4 @@
-import { HandledError, StatusCode, type StateStore } from '@purista/core'
+import { HandledError, type StateStore, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
 export const sessionRecordSchema = z.object({
@@ -9,23 +9,16 @@ export const sessionRecordSchema = z.object({
 })
 
 export type SessionRecord = z.infer<typeof sessionRecordSchema>
-
 type SessionStates = Pick<StateStore, 'getState' | 'removeState'>
+export const sessionStateKey = (token: string) => `identity:session:${token}`
 
-export const sessionStateKey = (sessionToken: string) => `identity:session:${sessionToken}`
-
-export async function readActiveSession(states: SessionStates, sessionToken: string, now = Date.now()) {
-	const key = sessionStateKey(sessionToken)
+export async function readActiveSession(states: SessionStates, token: string, now = Date.now()) {
+	const key = sessionStateKey(token)
 	const values = await states.getState(key)
 	const parsed = sessionRecordSchema.safeParse(values[key])
-
-	if (!parsed.success) {
+	if (!parsed.success || parsed.data.expiresAt <= now) {
 		if (values[key] !== undefined) await states.removeState(key)
-		throw new HandledError(StatusCode.Unauthorized, 'Session is missing or invalid')
-	}
-	if (parsed.data.expiresAt <= now) {
-		await states.removeState(key)
-		throw new HandledError(StatusCode.Unauthorized, 'Session has expired')
+		throw new HandledError(StatusCode.Unauthorized, 'Session is missing, invalid, or expired')
 	}
 	return parsed.data
 }

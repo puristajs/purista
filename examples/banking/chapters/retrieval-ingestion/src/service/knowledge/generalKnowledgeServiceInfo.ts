@@ -1,7 +1,4 @@
-import type { ServiceInfoType } from '@purista/core'
-
-export const generalKnowledgeServiceInfo: Omit<ServiceInfoType, 'serviceVersion'> =
-{
+export const generalKnowledgeServiceInfo = {
 	serviceName: 'Knowledge',
-	serviceDescription: 'Ingest and retrieve reviewed knowledge',
-}
+	serviceDescription: 'Owns knowledge retrieval and grounded answers',
+} as const

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
   chunk_index integer NOT NULL CHECK (chunk_index >= 0),
   content text NOT NULL,
   embedding_model text NOT NULL,
-  embedding vector(4) NOT NULL,
+  embedding vector(1536) NOT NULL,
   PRIMARY KEY (tenant_id, collection_id, document_id, chunk_index),
   FOREIGN KEY (tenant_id, collection_id, document_id)
     REFERENCES knowledge_documents (tenant_id, collection_id, document_id)

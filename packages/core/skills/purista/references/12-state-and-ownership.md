@@ -11,7 +11,8 @@ example simplifies the business problem while retaining PURISTA architecture.
 | Deployment settings | Validated service configuration; `configStore` for runtime key access |
 | Credentials | `secretStore` or explicit secret injection; never ordinary state/config fixtures |
 | Domain records and business history, even when the first use case only saves and reads one record | Service-owned database/repository resource |
-| Remote API, identity provider, embeddings, search | Narrow declared resource, concrete implementation injected at startup |
+| Remote API, identity provider, search/vector database | Narrow declared resource, concrete implementation injected at startup |
+| AI model operations, including embeddings and reranking | Harness model requirement; declare access with `canUseHarnessModel(...)` in PURISTA handlers |
 | Agent conversation/checkpoint/workspace state | Supported Harness storage/workspace bindings under service `ai` options |
 
 Choose by **what the data means and who owns it**, not by how few methods the

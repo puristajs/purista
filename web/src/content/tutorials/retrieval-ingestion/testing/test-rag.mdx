@@ -1,0 +1,71 @@
+---
+title: Test the complete RAG path
+description: Mock Harness models and PURISTA resources, then verify tool use, grounding, authorization, and streaming.
+order: 208
+kind: lesson
+status: draft
+---
+
+Test each boundary through the framework that owns it. Fast tests do not need
+an API key, PostgreSQL, or a browser.
+
+For ingestion, create a real PURISTA command test harness, bind a strict
+`FakeModelProvider`, and queue the embedding response the handler should
+consume. Mock only the repository resource.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts"
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }],
+			usage: { inputTokens: 8, outputTokens: 0, totalTokens: 8 },
+		})
+		const policy = { canAccess: vi.fn(async () => true) }
+```
+
+Assert the durable call receives trusted identity, the configured model id,
+and the exact model vector. Add a denied policy case and prove that neither the
+model nor repository runs.
+
+The native Harness test scripts the model loop itself. The first object round
+chooses `search_knowledge`, the host-tool mock returns source chunks, and the
+final model response streams the cited answer.
+
+```ts title="src/harness/knowledge/knowledgeHarness.test.ts"
+		provider.enqueueObject({
+			object: {},
+			toolCalls: [
+				{
+					id: 'search-1',
+					name: 'search_knowledge',
+					arguments: { collectionId: 'customer-help', query: 'How long are transfers pending?', limit: 4 },
+				},
+			],
+			usage,
+			finishReason: 'tool_calls',
+		})
+```
+
+Assert portable Harness events such as `tool.input.available`,
+`tool.finished`, `output.text.delta`, and `run.finished`. The PURISTA stream
+test separately checks that those events become AI SDK `start`, `text-delta`,
+and `[DONE]` data events and that browser cancellation cancels the remote run.
+
+Run all local gates.
+
+```bash title="Build, test, and lint the complete RAG example" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The example also includes a focused Compose integration test. It inserts and
+replaces revisions, proves invalid vectors roll back, and verifies tenant and
+collection isolation against PostgreSQL and pgvector. Keep the real provider
+out of this database test; model adapter and storage contracts have different
+owners.
+
+```bash title="Run the pgvector integration test" replay="project"
+docker compose up -d --wait
+npm run test:postgres
+docker compose down
+```

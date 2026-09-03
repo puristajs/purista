@@ -1,0 +1,64 @@
+---
+title: Let the agent choose the search tool
+description: Declare a native Harness host tool, bind it to a PURISTA command address, and build the grounded answer workflow.
+order: 205
+kind: lesson
+status: draft
+---
+
+The model-facing tool contract belongs to Harness. It contains a stable name,
+a useful description, and input and output schemas. It contains no database
+client and no PURISTA import.
+
+```ts title="src/harness/knowledge/tool/searchKnowledgeTool.ts"
+export const searchKnowledgeTool = defineHarnessModule()('knowledge.tool.search', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.hostTool('search_knowledge', {
+			kind: 'host',
+			description: 'Search an authorized knowledge collection and return source chunks with stable document ids.',
+			input: searchKnowledgeInputSchema,
+			output: searchKnowledgeOutputSchema,
+		})
+	},
+})
+```
+
+The service mount binds that contract to the `Knowledge / 1 / searchKnowledge`
+address. The adapter propagates trusted tenant and principal ids through the
+normal EventBridge invocation. The tool never calls a handler function
+directly.
+
+```ts title="src/service/knowledge/v1/harness/knowledgeHarnessMount.ts"
+export const knowledgeHarnessPolicy = {
+	publish: { workflows: ['answer_knowledge_question'] },
+	hostTools: {
+		search_knowledge: commandAsHarnessTool('Knowledge', '1', 'searchKnowledge'),
+	},
+```
+
+Give the agent the tool and tell it to retrieve evidence. The Harness model
+loop decides when to call `search_knowledge`; application code does not call
+the tool on the model's behalf.
+
+```ts title="src/harness/knowledge/agent/retrieveEvidenceAgent.ts"
+		return builder.agent('retrieve_evidence', {
+			model: 'primary',
+			input: answerKnowledgeQuestionInputSchema,
+			output: retrievedEvidenceSchema,
+			tools: ['search_knowledge'],
+			maxSteps: 3,
+			instructions: [
+				'You retrieve evidence for a grounded answer.',
+				'Call search_knowledge with the supplied collectionId and question.',
+				'Return the question and only the evidence returned by the tool.',
+				'Do not answer from memory and do not invent sources.',
+			].join(' '),
+		})
+```
+
+The answer workflow delegates evidence retrieval, then streams text from the
+primary model with a citation rule. The same workflow supports aggregate
+`.run(...)` and incremental `.stream(...)` callers.
+
+Continue with [Stream to a standard chat UI](./stream-ui/).

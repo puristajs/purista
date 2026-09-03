@@ -1,0 +1,63 @@
+---
+title: Retrieve through the same model
+description: Authorize search, embed the question through Harness, and run a tenant-scoped pgvector query.
+order: 204
+kind: lesson
+status: draft
+---
+
+The query vector must be compatible with the stored document vectors. The
+search command therefore declares the same `embedding` alias used by ingestion
+and passes the same configured dimensions.
+
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
+export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
+	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
+	.addPayloadSchema(searchKnowledgeInputSchema)
+	.addOutputSchema(searchKnowledgeOutputSchema)
+	.canUseHarnessModel(knowledgeHarness, 'embedding')
+```
+
+Search has its own business action. A person who may read a customer-help
+collection does not automatically receive edit access, and the reverse is not
+assumed either.
+
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
+	.setBeforeGuardHooks({
+		collectionAccess: async function (context, payload) {
+			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				collectionId: payload.collectionId,
+				action: 'search',
+			})
+		},
+	})
+```
+
+After the guard succeeds, embed the question and send the vector to the
+repository. The SQL resource filters tenant, collection, active revision, and
+embedding model before ordering by vector distance.
+
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
+	.setCommandFunction(async function (context, payload) {
+		const signal = new AbortController().signal
+		const response = await context.model.embedding.embed(
+			{ input: payload.query, dimensions: this.config.embeddingDimensions },
+			signal,
+		)
+		const queryEmbedding = response.embeddings[0]?.vector
+		if (!queryEmbedding) throw new Error('The embedding model returned no query vector')
+		const matches = await context.resources.knowledgeRepository.search({
+			tenantId: context.message.tenantId ?? '',
+			collectionId: payload.collectionId,
+			embeddingModel: this.config.embeddingModel,
+			queryEmbedding: [...queryEmbedding],
+			limit: payload.limit,
+			signal,
+		})
+		return { matches }
+	})
+```
+
+Continue with [Let the agent choose the search tool](./agent/).

@@ -1,0 +1,84 @@
+import { type FormEvent, useState } from 'react'
+
+const sample = {
+	documentId: 'transfer-guide',
+	revision: 1,
+	title: 'International transfer timing',
+	content:
+		'International transfers can remain pending for up to two business days while the receiving bank completes its checks. Customers can view the current transfer status in the app.',
+}
+
+export function KnowledgeSource({ sessionToken, onIngested }: { sessionToken: string; onIngested(): void }) {
+	const [status, setStatus] = useState<'idle' | 'submitting' | 'ready' | 'error'>('idle')
+
+	async function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		if (!sessionToken) return
+		setStatus('submitting')
+		const data = new FormData(event.currentTarget)
+		const response = await fetch('/api/v1/knowledge/documents', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json', authorization: `Bearer ${sessionToken}` },
+			body: JSON.stringify({
+				collectionId: 'customer-help',
+				documentId: data.get('documentId'),
+				revision: Number(data.get('revision')),
+				title: data.get('title'),
+				content: data.get('content'),
+			}),
+		})
+		if (!response.ok) {
+			setStatus('error')
+			return
+		}
+		setStatus('ready')
+		onIngested()
+	}
+
+	return (
+		<section className="space-y-4 rounded-xl border bg-card p-5 shadow-sm" aria-labelledby="knowledge-source-title">
+			<div>
+				<p className="text-sm font-medium text-muted-foreground">1 · Ingest</p>
+				<h2 className="text-xl font-semibold" id="knowledge-source-title">
+					Add a reviewed source
+				</h2>
+				<p className="mt-1 text-sm text-muted-foreground">
+					PURISTA authorizes the collection. Harness creates the embeddings. PostgreSQL stores the source and vectors.
+				</p>
+			</div>
+			<form className="grid gap-3" onSubmit={submit}>
+				<input name="documentId" defaultValue={sample.documentId} hidden />
+				<input name="revision" defaultValue={sample.revision} hidden />
+				<label className="grid gap-1 text-sm font-medium">
+					Title
+					<input
+						className="h-10 rounded-md border bg-background px-3 font-normal"
+						name="title"
+						defaultValue={sample.title}
+					/>
+				</label>
+				<label className="grid gap-1 text-sm font-medium">
+					Content
+					<textarea
+						className="min-h-28 rounded-md border bg-background p-3 font-normal"
+						name="content"
+						defaultValue={sample.content}
+					/>
+				</label>
+				<button
+					className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
+					type="submit"
+					disabled={!sessionToken || status === 'submitting'}
+				>
+					{status === 'submitting' ? 'Embedding and storing…' : 'Ingest source'}
+				</button>
+			</form>
+			{status === 'ready' ? <p className="text-sm text-emerald-700">The source is ready for retrieval.</p> : null}
+			{status === 'error' ? (
+				<p className="text-sm text-destructive" role="alert">
+					The source could not be ingested.
+				</p>
+			) : null}
+		</section>
+	)
+}

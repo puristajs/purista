@@ -1,0 +1,72 @@
+---
+title: Bind providers and run the application
+description: Bind chat and embedding models, start pgvector, authenticate, ingest the source, and ask a grounded question.
+order: 207
+kind: lesson
+status: draft
+---
+
+Harness definitions name required capabilities, not providers. Bind the OpenAI
+adapter and concrete model ids in the application composition root. The same
+embedding binding serves both PURISTA commands through the mounted Harness.
+
+```ts title="src/createKnowledgeApplication.ts"
+	const provider = openai({ apiKey })
+	const embeddingModel = environment.OPENAI_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small'
+	const embeddingDimensions = 1_536
+	return {
+		stateStore: initDefaultStateStore({ logger }),
+		repository: new PgKnowledgeRepository(databaseUrl, embeddingDimensions),
+		models: {
+			primary: { provider, model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+			embedding: { provider, model: embeddingModel },
+		},
+		embeddingDimensions,
+	}
+```
+
+Pass those bindings when the `Knowledge` service instance is created. The
+service config records the model id and dimensions alongside stored vectors.
+Changing the embedding model therefore requires an explicit reindexing
+decision instead of silently mixing incompatible vectors.
+
+```ts title="src/createKnowledgeApplication.ts"
+	const knowledge = await knowledgeV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			embeddingModel: resolved.models.embedding.model,
+			embeddingDimensions: resolved.embeddingDimensions,
+		},
+		resources: {
+			knowledgeCollectionPolicy: {
+				canAccess: async ({ tenantId, principalId, collectionId }) =>
+					tenantId === 'tenant-example' && principalId === 'principal-alex' && collectionId === 'customer-help',
+			},
+			knowledgeRepository: resolved.repository,
+		},
+		ai: {
+			models: resolved.models,
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+```
+
+Create the local environment, start pgvector, build both server and UI, and
+start the application.
+
+```bash title="Run the complete RAG application" replay="project"
+cp .env.example .env
+docker compose up -d --wait
+npm run build
+npm start
+```
+
+Set `OPENAI_API_KEY` in `.env` before starting. Open
+`http://127.0.0.1:3000`, sign in with the displayed local credentials, select
+**Ingest source**, and then ask: “How long can an international transfer remain
+pending?” The response arrives as live text deltas and cites the stored source.
+
+Stop the Node process with `Ctrl+C`. Run `docker compose down` when you no
+longer need the database.
+
+Continue with [Test the complete RAG path](../../testing/test-rag/).

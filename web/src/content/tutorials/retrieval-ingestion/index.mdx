@@ -1,52 +1,61 @@
 ---
-title: Ingest content for retrieval
-description: Queue, chunk, embed, and transactionally store a reviewed document with PURISTA.
+title: Build a complete RAG pipeline
+description: Ingest, embed, retrieve, and stream grounded answers with PURISTA and the native Harness.
 order: 200
 kind: chapter
 group: ai
-status: published
+status: draft
 ---
 
-Retrieval starts before a user asks a question. Source text must be accepted,
-split into stable chunks, converted to vectors, and stored with enough scope to
-prevent one tenant or collection from reading another.
+Retrieval-augmented generation, usually shortened to RAG, gives a model
+relevant application data before it writes an answer. A complete RAG feature
+has two connected paths: an indexing path that prepares source documents and
+an answer path that retrieves evidence for each question.
 
-This chapter builds that ingestion boundary in the `Knowledge` service. A
-protected command accepts one short fictional policy revision. A PURISTA queue
-moves the slower work out of the HTTP request. Its worker uses two declared
-resources: an embedding provider and a PostgreSQL repository backed by
-pgvector.
+This chapter builds both paths. PURISTA owns the service boundaries,
+authorization, HTTP endpoints, database resource, and address-first calls.
+The native Harness owns the embedding and chat model contracts, the retrieval
+agent, its tool contract, and the answer workflow.
 
-```text title="The ingestion boundary"
-authenticated HTTP command
+```text title="The complete RAG path"
+protected ingestion command
   -> collection edit guard
-  -> PURISTA ingestKnowledge queue
-  -> worker rechecks trusted scope
-  -> deterministic chunker
-  -> injected embedding provider
-  -> transactional PostgreSQL/pgvector repository
+  -> chunk source text
+  -> Harness embedding model
+  -> PostgreSQL and pgvector resource
+
+protected chat stream
+  -> mounted Harness workflow
+  -> retrieval agent chooses search_knowledge
+  -> authorized PURISTA search command
+  -> same Harness embedding model
+  -> pgvector similarity search
+  -> grounded answer with citations
+  -> AI SDK UI Message Stream v1
 ```
 
-`Knowledge` owns the document revisions and retrieval records. `Identity`
-continues to own sessions. StateStore keeps only operational queue-result state;
-the document and its vectors are database records.
+The small Example Bank source document makes the result easy to try. The
+lesson is about building RAG with PURISTA; it does not introduce a banking
+domain model.
 
 ## What you will build
 
 You will:
 
-1. generate `Knowledge`, an ingestion queue, a worker, and a protected command;
-2. apply collection-level business authorization before enqueueing;
-3. pass trusted tenant and principal metadata in queue headers;
-4. split text with deterministic TypeScript and pass PURISTA's cancellation
-   signal to an injected embedding provider;
-5. reject malformed vectors and handle provider failure safely;
-6. replace a document revision atomically in PostgreSQL with pgvector; and
-7. verify the resource and the complete HTTP-to-worker flow with Docker
-   Compose.
+1. create a PURISTA project and install the published Framework, Harness,
+   OpenAI adapter, Hono, and AI SDK UI adapter packages;
+2. define one Harness with a chat model and an embedding model;
+3. build a protected command that chunks, embeds, and stores a reviewed source;
+4. build a protected search command that embeds the question with the same
+   model contract;
+5. expose that search command as a typed host tool;
+6. let a Harness agent choose the tool and stream a grounded answer;
+7. connect a standard React and AI Elements UI; and
+8. test models, resources, authorization, tool choice, and stream events
+   without calling a paid provider.
 
-The example uses one short invented policy and four-dimensional deterministic
-vectors. They make the mechanics easy to inspect. They are not suitable for
-semantic search quality or production use.
+The complete source is in `examples/banking/chapters/retrieval-ingestion`.
+This chapter stays a draft until PURISTA v4 and Harness v3 are available from
+npm and a clean consumer replay succeeds.
 
-Start with [Accept ingestion through a command](./build/accept/).
+Start with [Create the RAG service and Harness](./build/configure-harness/).

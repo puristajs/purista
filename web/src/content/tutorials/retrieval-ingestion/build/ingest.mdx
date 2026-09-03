@@ -1,0 +1,65 @@
+---
+title: Ingest and embed a source
+description: Authorize a collection edit, chunk the document, and create vectors through the mounted Harness model.
+order: 202
+kind: lesson
+status: draft
+---
+
+Ingestion is deterministic application work. It does not need an agent. A
+PURISTA command is the correct boundary because the caller needs to know when
+the reviewed revision has been stored.
+
+The Harness still owns model access. Add `canUseHarnessModel` before the
+handler uses `context.model.embedding`. This keeps the model requirement typed
+and prevents the command from using undeclared generation capabilities.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
+export const ingestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
+	.getCommandBuilder('ingestKnowledge', 'Chunk, embed, and store one reviewed knowledge revision')
+	.addPayloadSchema(ingestKnowledgeInputSchema)
+	.addOutputSchema(ingestKnowledgeOutputSchema)
+	.canUseHarnessModel(knowledgeHarness, 'embedding')
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'knowledge/documents')
+	.setOpenApiSummary('Ingest a reviewed knowledge document')
+	.addOpenApiTags('knowledge', 'ai')
+```
+
+Authentication proves who made the request. The before guard answers the
+business question: may this principal edit this knowledge collection? It runs
+before the model call or database write.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
+	.setBeforeGuardHooks({
+		collectionAccess: async function (context, payload) {
+			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				collectionId: payload.collectionId,
+				action: 'edit',
+			})
+		},
+	})
+```
+
+Chunking stays plain TypeScript so it is predictable and easy to test. Send
+all chunks in one embedding request. Harness preserves input indexes in the
+response. Validate the count, indexes, dimensions, and finite values before
+passing anything to storage.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
+	.setCommandFunction(async function (context, payload) {
+		const signal = new AbortController().signal
+		const chunks = chunkKnowledgeText(payload.content)
+		const response = await context.model.embedding.embed(
+			{ input: chunks, dimensions: this.config.embeddingDimensions },
+			signal,
+		)
+		const embeddings = [...response.embeddings].sort((left, right) => left.index - right.index)
+```
+
+The command never imports OpenAI. A test can supply `FakeModelProvider`, while
+the runnable application binds the OpenAI adapter later.
+
+Continue with [Store vectors as business data](./store/).
