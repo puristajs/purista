@@ -4,6 +4,7 @@ import {
 	getTutorialBreadcrumbs,
 	getTutorialPageNavigation,
 	getTutorialSidebar,
+	getVisibleTutorialEntries,
 	tutorialRoute,
 	type TutorialEntry,
 } from './tutorials'
@@ -78,6 +79,19 @@ describe('tutorial reading structure', () => {
 		const hidden = [entry('state', 10, 'chapter', { group: 'start', status: 'draft' }), ...pages.slice(1)]
 		expect(getPublishedTutorialEntries(hidden)).toEqual([])
 		expect(getTutorialSidebar(hidden)).toEqual([])
+	})
+
+	test('includes draft chapters and their descendants for local preview', () => {
+		const hidden = [
+			entry('agent', 10, 'chapter', { group: 'ai', status: 'draft' }),
+			entry('agent/build/define', 10),
+		]
+
+		expect(getVisibleTutorialEntries(hidden, { includeDrafts: true })).toEqual(hidden)
+		expect(getTutorialSidebar(hidden, { includeDrafts: true })).toMatchObject([
+			{ title: 'Add AI capabilities', kind: 'sectionHeader' },
+			{ id: 'agent', title: 'agent' },
+		])
 	})
 
 	test('rejects ambiguous sibling order instead of silently sorting by title', () => {

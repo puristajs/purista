@@ -3,6 +3,7 @@ import type { SidebarItem } from '../lib/sidebar'
 
 export type TutorialEntry = CollectionEntry<'tutorials'>
 type TutorialNode = SidebarItem & { entry?: TutorialEntry; items?: TutorialNode[] }
+export type TutorialVisibility = Readonly<{ includeDrafts?: boolean }>
 const groupLabels = {
 	start: 'Start here', services: 'Connect services', ai: 'Add AI capabilities',
 	workflows: 'Combine AI capabilities', operate: 'Run and explore',
@@ -25,10 +26,14 @@ export function tutorialRoute(id: string): string {
 	return slug ? `/tutorials/${slug}/` : '/tutorials/'
 }
 
-/** A draft ancestor hides its descendants, even if a child says published. */
-export function getPublishedTutorialEntries(entries: TutorialEntry[]): TutorialEntry[] {
+/** Resolve entries for either the public course or a local draft preview. */
+export function getVisibleTutorialEntries(
+	entries: TutorialEntry[],
+	visibility: TutorialVisibility = {},
+): TutorialEntry[] {
 	const byId = new Map(entries.map(entry => [tutorialRouteSlug(entry.id), entry]))
 	if (byId.size !== entries.length) throw new Error('Duplicate normalized tutorial content ID')
+	if (visibility.includeDrafts) return entries
 	return entries.filter(entry => {
 		if (entry.data.status !== 'published') return false
 		const parts = tutorialRouteSlug(entry.id).split('/')
@@ -39,8 +44,16 @@ export function getPublishedTutorialEntries(entries: TutorialEntry[]): TutorialE
 	})
 }
 
-export function getTutorialChapters(entries: TutorialEntry[]): TutorialEntry[] {
-	return getPublishedTutorialEntries(entries)
+/** A draft ancestor hides its descendants, even if a child says published. */
+export function getPublishedTutorialEntries(entries: TutorialEntry[]): TutorialEntry[] {
+	return getVisibleTutorialEntries(entries)
+}
+
+export function getTutorialChapters(
+	entries: TutorialEntry[],
+	visibility: TutorialVisibility = {},
+): TutorialEntry[] {
+	return getVisibleTutorialEntries(entries, visibility)
 		.filter(entry => entry.data.kind === 'chapter')
 		.sort((a, b) => a.data.order - b.data.order)
 }
@@ -49,15 +62,25 @@ export function getTutorialChapterId(id: string): string | undefined {
 	return tutorialRouteSlug(id).split('/')[0] || undefined
 }
 
-export function getTutorialChapter(entries: TutorialEntry[], id: string): TutorialEntry | undefined {
-	return getTutorialChapters(entries).find(entry => tutorialRouteSlug(entry.id) === getTutorialChapterId(id))
+export function getTutorialChapter(
+	entries: TutorialEntry[],
+	id: string,
+	visibility: TutorialVisibility = {},
+): TutorialEntry | undefined {
+	return getTutorialChapters(entries, visibility).find(
+		entry => tutorialRouteSlug(entry.id) === getTutorialChapterId(id),
+	)
 }
 
-function chapterTree(entries: TutorialEntry[], chapter: TutorialEntry): TutorialNode {
+function chapterTree(
+	entries: TutorialEntry[],
+	chapter: TutorialEntry,
+	visibility: TutorialVisibility = {},
+): TutorialNode {
 	const chapterId = tutorialRouteSlug(chapter.id)
 	const root: TutorialNode = { id: chapterId, title: chapter.data.title, order: chapter.data.order, entry: chapter, items: [] }
 	const nodes = new Map<string, TutorialNode>([[chapterId, root]])
-	for (const entry of getPublishedTutorialEntries(entries)) {
+	for (const entry of getVisibleTutorialEntries(entries, visibility)) {
 		const id = tutorialRouteSlug(entry.id)
 		if (id !== chapterId && !id.startsWith(`${chapterId}/`)) continue
 		const parts = id.split('/')
@@ -97,20 +120,27 @@ function flatten(node: TutorialNode): TutorialEntry[] {
 	return [...(node.entry ? [node.entry] : []), ...(node.items ?? []).flatMap(flatten)]
 }
 
-export function getTutorialChapterPages(entries: TutorialEntry[], chapterId: string): TutorialEntry[] {
-	const chapter = getTutorialChapter(entries, chapterId)
-	return chapter ? flatten(chapterTree(entries, chapter)) : []
+export function getTutorialChapterPages(
+	entries: TutorialEntry[],
+	chapterId: string,
+	visibility: TutorialVisibility = {},
+): TutorialEntry[] {
+	const chapter = getTutorialChapter(entries, chapterId, visibility)
+	return chapter ? flatten(chapterTree(entries, chapter, visibility)) : []
 }
 
 /** Discovery groups stay flat; each chapter's page tree preserves arbitrary depth. */
-export function getTutorialSidebar(entries: TutorialEntry[]): SidebarItem[] {
-	const chapters = getTutorialChapters(entries)
+export function getTutorialSidebar(
+	entries: TutorialEntry[],
+	visibility: TutorialVisibility = {},
+): SidebarItem[] {
+	const chapters = getTutorialChapters(entries, visibility)
 	return Object.entries(groupLabels).flatMap(([group, title]) => {
 		const members = chapters.filter(chapter => chapter.data.group === group)
 		if (!members.length) return []
 		return [
 			{ id: `group-${group}`, title, order: 0, kind: 'sectionHeader' as const },
-			...members.map(chapter => chapterTree(entries, chapter)),
+			...members.map(chapter => chapterTree(entries, chapter, visibility)),
 		]
 	})
 }
@@ -120,10 +150,14 @@ function optional(entry: TutorialEntry) {
 }
 
 /** Required reading skips group indexes and extensions; optional branches stay local. */
-export function getTutorialPageNavigation(entries: TutorialEntry[], currentId: string) {
-	const chapter = getTutorialChapter(entries, currentId)
-	if (!chapter) return { previous: undefined, next: getTutorialChapters(entries)[0] }
-	const pages = getTutorialChapterPages(entries, chapter.id)
+export function getTutorialPageNavigation(
+	entries: TutorialEntry[],
+	currentId: string,
+	visibility: TutorialVisibility = {},
+) {
+	const chapter = getTutorialChapter(entries, currentId, visibility)
+	if (!chapter) return { previous: undefined, next: getTutorialChapters(entries, visibility)[0] }
+	const pages = getTutorialChapterPages(entries, chapter.id, visibility)
 	const id = tutorialRouteSlug(currentId)
 	const current = pages.find(entry => tutorialRouteSlug(entry.id) === id)
 	if (!current) return { previous: undefined, next: undefined }
@@ -142,10 +176,14 @@ export function getTutorialPageNavigation(entries: TutorialEntry[], currentId: s
 }
 
 /** Include every ancestor; a virtual group is a label, never a broken link. */
-export function getTutorialBreadcrumbs(entries: TutorialEntry[], currentId: string) {
+export function getTutorialBreadcrumbs(
+	entries: TutorialEntry[],
+	currentId: string,
+	visibility: TutorialVisibility = {},
+) {
 	const result: { title: string; href?: string }[] = [{ title: 'Tutorials', href: '/tutorials/' }]
 	const parts = tutorialRouteSlug(currentId).split('/').filter(Boolean)
-	const published = getPublishedTutorialEntries(entries)
+	const published = getVisibleTutorialEntries(entries, visibility)
 	for (let length = 1; length < parts.length; length++) {
 		const id = parts.slice(0, length).join('/')
 		const entry = published.find(item => tutorialRouteSlug(item.id) === id)

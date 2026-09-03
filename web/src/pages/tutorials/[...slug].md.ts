@@ -1,9 +1,11 @@
 import { getCollection } from 'astro:content'
 import { markdownResponse, readContentMarkdown } from '../../lib/agent-markdown'
-import { getPublishedTutorialEntries, tutorialRoute, tutorialRouteSlug } from '../../data/tutorials'
+import { getVisibleTutorialEntries, tutorialRoute, tutorialRouteSlug } from '../../data/tutorials'
 
 export async function getStaticPaths() {
-	const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
+	const entries = getVisibleTutorialEntries(await getCollection('tutorials'), {
+		includeDrafts: import.meta.env.DEV,
+	})
 	return entries.map(entry => ({
 		params: { slug: tutorialRouteSlug(entry.id) || undefined },
 		props: { entry },

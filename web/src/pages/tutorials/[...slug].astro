@@ -1,7 +1,7 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content'
 import {
-	getPublishedTutorialEntries,
+	getVisibleTutorialEntries,
 	getTutorialBreadcrumbs,
 	getTutorialPageNavigation,
 	getTutorialSidebar,
@@ -11,7 +11,9 @@ import {
 import TutorialLayout from '../../layouts/TutorialLayout.astro'
 
 export async function getStaticPaths() {
-	const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
+	const entries = getVisibleTutorialEntries(await getCollection('tutorials'), {
+		includeDrafts: import.meta.env.DEV,
+	})
 	return entries.map(entry => ({
 		params: { slug: tutorialRouteSlug(entry.id) || undefined },
 		props: { entry },
@@ -23,11 +25,12 @@ type Props = {
 }
 
 const { entry } = Astro.props
-const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
+const visibility = { includeDrafts: import.meta.env.DEV }
+const entries = getVisibleTutorialEntries(await getCollection('tutorials'), visibility)
 const { Content, headings } = await render(entry)
-const sidebar = getTutorialSidebar(entries)
-const { previous, next } = getTutorialPageNavigation(entries, entry.id)
-const breadcrumbs = getTutorialBreadcrumbs(entries, entry.id)
+const sidebar = getTutorialSidebar(entries, visibility)
+const { previous, next } = getTutorialPageNavigation(entries, entry.id, visibility)
+const breadcrumbs = getTutorialBreadcrumbs(entries, entry.id, visibility)
 ---
 
 <TutorialLayout
