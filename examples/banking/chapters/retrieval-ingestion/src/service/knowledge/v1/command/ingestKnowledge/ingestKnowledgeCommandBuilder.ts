@@ -9,7 +9,6 @@ export const ingestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.addPayloadSchema(ingestKnowledgeInputSchema)
 	.addOutputSchema(ingestKnowledgeOutputSchema)
 	.canUseHarnessModel(knowledgeHarness, 'embedding')
-	.enableHttpSecurity(true)
 	.exposeAsHttpEndpoint('POST', 'knowledge/documents')
 	.setOpenApiSummary('Ingest a reviewed knowledge document')
 	.addOpenApiTags('knowledge', 'ai')

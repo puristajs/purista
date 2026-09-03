@@ -1,36 +1,167 @@
 ---
 title: Ingest and embed a source
-description: Authorize a collection edit, chunk the document, and create vectors through the mounted Harness model.
+description: Declare the database and policy resources, authorize collection edits, chunk source text, and create embeddings through Harness.
 order: 202
 kind: lesson
 status: draft
 ---
 
-Ingestion is deterministic application work. It does not need an agent. A
-PURISTA command is the correct boundary because the caller needs to know when
-the reviewed revision has been stored.
+Ingestion is deterministic application work. A PURISTA command is the right
+boundary because the caller needs to know when the reviewed revision has been
+stored. Harness supplies the embedding model; an agent is not needed here.
 
-The Harness still owns model access. Add `canUseHarnessModel` before the
-handler uses `context.model.embedding`. This keeps the model requirement typed
-and prevents the command from using undeclared generation capabilities.
+Start with the two service-owned resource interfaces. `KnowledgeRepository`
+represents durable document and vector storage. `KnowledgeCollectionPolicy`
+answers the business question “may this principal edit or search this
+collection?”
 
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
+```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
+import type { KnowledgeMatch } from './schema.js'
+
+export type KnowledgeChunkInput = {
+	index: number
+	content: string
+	embedding: number[]
+}
+
+export interface KnowledgeRepository {
+	replaceRevision(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			documentId: string
+			revision: number
+			title: string
+			embeddingModel: string
+			chunks: KnowledgeChunkInput[]
+		}>,
+		signal?: AbortSignal,
+	): Promise<void>
+	search(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			embeddingModel: string
+			queryEmbedding: number[]
+			limit: number
+			signal?: AbortSignal
+		}>,
+	): Promise<KnowledgeMatch[]>
+}
+
+export interface KnowledgeCollectionPolicy {
+	canAccess(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			collectionId: string
+			action: 'edit' | 'search'
+		}>,
+	): Promise<boolean>
+}
+
+export class StaleKnowledgeRevisionError extends Error {
+	constructor() {
+		super('Knowledge revision is not newer than the stored revision')
+		this.name = 'StaleKnowledgeRevisionError'
+	}
+}
+```
+
+Declare both resources and the embedding configuration on the service builder.
+The configured model id is stored with each vector so incompatible indexes are
+not mixed silently.
+
+```ts title="src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { z } from 'zod'
+import { generalKnowledgeServiceInfo } from '../generalKnowledgeServiceInfo.js'
+import type { KnowledgeCollectionPolicy, KnowledgeRepository } from './KnowledgeResources.js'
+
+export const knowledgeServiceInfo = {
+	serviceVersion: '1',
+	...generalKnowledgeServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo)
+	.setConfigSchema(
+		z.object({
+			embeddingModel: z.string().min(1),
+			embeddingDimensions: z.number().int().positive(),
+		}),
+	)
+	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
+	.defineResource<'knowledgeRepository', KnowledgeRepository>()
+```
+
+Put the authorization rule in one helper because ingestion, search, and the
+published workflow must make the same fail-closed identity check.
+
+```ts title="src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { KnowledgeCollectionPolicy } from './KnowledgeResources.js'
+
+export async function requireKnowledgeCollectionAccess(
+	policy: KnowledgeCollectionPolicy,
+	input: Readonly<{
+		tenantId?: string
+		principalId?: string
+		collectionId: string
+		action: 'edit' | 'search'
+	}>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAccess({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			collectionId: input.collectionId,
+			action: input.action,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This knowledge collection is not available')
+	}
+}
+```
+
+Use a small deterministic chunker. It has no I/O and can be tested with plain
+inputs and outputs.
+
+```ts title="src/service/knowledge/v1/chunkKnowledgeText.ts" write
+export function chunkKnowledgeText(text: string, wordsPerChunk = 80) {
+	if (!Number.isInteger(wordsPerChunk) || wordsPerChunk < 1) {
+		throw new Error('wordsPerChunk must be a positive integer')
+	}
+	const words = text.trim().split(/\s+/u).filter(Boolean)
+	const chunks: string[] = []
+	for (let start = 0; start < words.length; start += wordsPerChunk) {
+		chunks.push(words.slice(start, start + wordsPerChunk).join(' '))
+	}
+	return chunks
+}
+```
+
+Replace the generated ingestion command with the complete implementation.
+HTTP endpoints are protected by default, so there is no security toggle. Only
+an explicitly public command calls `makeEndpointPublic()`.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts" write
+import { chunkKnowledgeText } from '../../chunkKnowledgeText.js'
+import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
+import { ingestKnowledgeInputSchema, ingestKnowledgeOutputSchema } from '../../schema.js'
+
 export const ingestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.getCommandBuilder('ingestKnowledge', 'Chunk, embed, and store one reviewed knowledge revision')
 	.addPayloadSchema(ingestKnowledgeInputSchema)
 	.addOutputSchema(ingestKnowledgeOutputSchema)
 	.canUseHarnessModel(knowledgeHarness, 'embedding')
-	.enableHttpSecurity(true)
 	.exposeAsHttpEndpoint('POST', 'knowledge/documents')
 	.setOpenApiSummary('Ingest a reviewed knowledge document')
 	.addOpenApiTags('knowledge', 'ai')
-```
-
-Authentication proves who made the request. The before guard answers the
-business question: may this principal edit this knowledge collection? It runs
-before the model call or database write.
-
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
 			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
@@ -41,14 +172,6 @@ before the model call or database write.
 			})
 		},
 	})
-```
-
-Chunking stays plain TypeScript so it is predictable and easy to test. Send
-all chunks in one embedding request. Harness preserves input indexes in the
-response. Validate the count, indexes, dimensions, and finite values before
-passing anything to storage.
-
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
 	.setCommandFunction(async function (context, payload) {
 		const signal = new AbortController().signal
 		const chunks = chunkKnowledgeText(payload.content)
@@ -57,9 +180,47 @@ passing anything to storage.
 			signal,
 		)
 		const embeddings = [...response.embeddings].sort((left, right) => left.index - right.index)
+		if (
+			embeddings.length !== chunks.length ||
+			embeddings.some(
+				(embedding, index) =>
+					embedding.index !== index ||
+					embedding.vector.length !== this.config.embeddingDimensions ||
+					embedding.vector.some((value) => !Number.isFinite(value)),
+			)
+		) {
+			throw new Error('The embedding model returned invalid document vectors')
+		}
+
+		await context.resources.knowledgeRepository.replaceRevision(
+			{
+				tenantId: context.message.tenantId ?? '',
+				collectionId: payload.collectionId,
+				documentId: payload.documentId,
+				revision: payload.revision,
+				title: payload.title,
+				embeddingModel: this.config.embeddingModel,
+				chunks: chunks.map((content, index) => {
+					const embedding = embeddings[index]
+					if (!embedding) throw new Error('The embedding model omitted a document vector')
+					return { index, content, embedding: [...embedding.vector] }
+				}),
+			},
+			signal,
+		)
+
+		return {
+			documentId: payload.documentId,
+			revision: payload.revision,
+			chunkCount: chunks.length,
+			embeddingModel: this.config.embeddingModel,
+		}
+	})
 ```
 
-The command never imports OpenAI. A test can supply `FakeModelProvider`, while
-the runnable application binds the OpenAI adapter later.
+`canUseHarnessModel(...)` is the declaration that makes
+`context.model.embedding` available. The business guard runs before the model
+or repository. The handler validates the number, order, dimension, and finite
+values of all vectors before it asks the repository to replace a revision.
 
 Continue with [Store vectors as business data](./store/).

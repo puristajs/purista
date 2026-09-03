@@ -53,13 +53,14 @@ streams, queues, and workers consume published agents and workflows through
 versioned EventBridge addresses. Provider credentials and runtime adapters stay
 in the application composition root.
 
-The draft AI path adds structured classification, AI guardrails, a complete
+The AI path adds structured classification, AI guardrails, a complete
 RAG pipeline, standard browser streaming, memory, PURISTA-backed tools, Skills,
 human review, parallel agents, workflows, sandboxing, and evaluation. The RAG
 chapter covers ingestion and retrieval together: Harness supplies the embedding
 model for both sides, while PURISTA owns authorization, persistence, the
-command-backed search tool, and the HTTP stream. AI chapters are published only
-after their package versions and clean consumer replays are available.
+command-backed search tool, and the HTTP stream. Chapters under active review
+remain visible with a **Draft preview** label so their sequence and examples can
+be reviewed on the website.
 
 ## How every chapter works
 
@@ -69,10 +70,11 @@ CLI commands, complete located edits, easy English, and focused tests. Every
 published chapter has independently runnable source under `examples/banking`
 and a replay from a clean consumer project.
 
-Verified capability chapters are added here only after their tutorial steps,
-source, tests, runtime behavior, and navigation pass together.
+Every chapter stays linked from the course while it is reviewed. The draft
+label is removed only after its tutorial steps, source, tests, runtime behavior,
+and navigation pass together.
 
-## Published chapters
+## Course chapters
 
 ### Foundations
 
@@ -99,10 +101,17 @@ source, tests, runtime behavior, and navigation pass together.
 
 ### Add AI capabilities
 
-The native Harness chapters, including the complete RAG pipeline, are present
-in the course manifest as draft build packets. Draft routes are not shown on
-the public website until their retained examples pass the same clean consumer
-gate as the Framework chapters.
+18. [Add a classification agent](/tutorials/classification-agent/).
+19. [Apply AI guardrails](/tutorials/ai-guardrails/).
+20. [Build a complete RAG pipeline](/tutorials/retrieval-ingestion/).
+21. [Persist and manage conversation history](/tutorials/conversation-memory/).
+22. [Give an agent PURISTA tools](/tutorials/agent-tools/).
+23. [Load agent Skills](/tutorials/agent-skills/).
+24. [Pause a workflow for human review](/tutorials/human-review-workflow/).
+25. [Run specialist agents in parallel](/tutorials/parallel-agents/).
+26. [Build a multi-step agent workflow](/tutorials/multi-step-workflow/).
+27. [Run analysis in a sandbox](/tutorials/sandbox-analysis/).
+28. [Evaluate agent behavior](/tutorials/agent-evaluation/).
 
 ## Start here
 

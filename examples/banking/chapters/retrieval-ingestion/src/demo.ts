@@ -1,0 +1,105 @@
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { Pool } from 'pg'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
+
+const dimensions = 1_536
+const vector = Array.from({ length: dimensions }, (_, index) => (index === 0 ? 1 : 0))
+const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
+
+async function resetScriptedFixture(databaseUrl: string) {
+	const pool = new Pool({ connectionString: databaseUrl, max: 1 })
+	try {
+		await pool.query(
+			`DELETE FROM knowledge_documents
+			 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+			['tenant-example', 'customer-help', 'transfer-guide'],
+		)
+	} finally {
+		await pool.end()
+	}
+}
+
+async function main() {
+	const logger = initLogger()
+	const databaseUrl = process.env.DATABASE_URL?.trim()
+	if (!databaseUrl) throw new Error('DATABASE_URL is required. Copy .env.example and start Docker Compose.')
+	await resetScriptedFixture(databaseUrl)
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
+	provider.enqueueObject({
+		object: {},
+		toolCalls: [
+			{
+				id: 'search-1',
+				name: 'search_knowledge',
+				arguments: {
+					collectionId: 'customer-help',
+					query: 'How long can an international transfer remain pending?',
+					limit: 4,
+				},
+			},
+		],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
+	provider.enqueueObject({
+		object: {
+			question: 'How long can an international transfer remain pending?',
+			evidence: [
+				{
+					documentId: 'transfer-guide',
+					chunkIndex: 0,
+					content: 'International transfers can remain pending for up to two business days.',
+					score: 1,
+				},
+			],
+		},
+		usage,
+		finishReason: 'stop',
+	})
+	provider.enqueueTextStream([
+		{ kind: 'delta', text: 'Up to two business days ' },
+		{ kind: 'delta', text: '[transfer-guide#0].' },
+		{ kind: 'finish', usage, finishReason: 'stop' },
+	])
+	const stateStore = initDefaultStateStore({ logger })
+	const repository = new PgKnowledgeRepository(databaseUrl, dimensions)
+	const application = await createKnowledgeApplication(logger, {
+		stateStore,
+		repository,
+		models: {
+			primary: { provider, model: 'scripted-chat' },
+			embedding: { provider, model: 'scripted-embedding' },
+		},
+		embeddingDimensions: dimensions,
+	})
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Scripted RAG demo started; ingest once, then ask the suggested question')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'RAG demo could not start.'}\n`)
+	process.exit(1)
+})

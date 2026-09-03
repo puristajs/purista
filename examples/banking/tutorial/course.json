@@ -437,6 +437,8 @@
         "retrieval-ingestion/build/retrieve",
         "retrieval-ingestion/build/agent",
         "retrieval-ingestion/build/stream-ui",
+		"retrieval-ingestion/build/authenticate-http",
+		"retrieval-ingestion/build/ui",
         "retrieval-ingestion/build/run",
         "retrieval-ingestion/testing/test-rag"
       ]

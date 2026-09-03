@@ -4,7 +4,7 @@ import { getVisibleTutorialEntries, tutorialRoute, tutorialRouteSlug } from '../
 
 export async function getStaticPaths() {
 	const entries = getVisibleTutorialEntries(await getCollection('tutorials'), {
-		includeDrafts: import.meta.env.DEV,
+		includeDrafts: true,
 	})
 	return entries.map(entry => ({
 		params: { slug: tutorialRouteSlug(entry.id) || undefined },

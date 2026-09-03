@@ -37,14 +37,20 @@ npm run lint
 The server tests use fake providers and resources, and the UI test runs in
 JSDOM. They do not need an API key, a running database, or a browser.
 
-To run the complete application, copy `.env.example` to `.env`, set
-`OPENAI_API_KEY`, then use:
+To run the complete application with deterministic model responses, copy
+`.env.example` to `.env`, then use:
 
 ```bash
 docker compose up -d --wait
 npm run build
-npm start
+npm run demo
 ```
 
 Open `http://127.0.0.1:3000` and sign in with the credentials shown by the UI.
 Stop the server with `Ctrl+C`; use `docker compose down` to stop PostgreSQL.
+The scripted entry point resets only its `transfer-guide` fixture when it
+starts, so the same walkthrough can be repeated without deleting the volume.
+
+To use a live OpenAI model, set `OPENAI_API_KEY` in `.env` and run `npm start`
+instead. Both modes use the same PURISTA services, Harness definitions,
+PostgreSQL repository, Hono endpoints, and React UI.

@@ -1,60 +1,61 @@
 ---
 title: Store vectors as business data
-description: Put source revisions and vectors behind an injected PostgreSQL resource and replace them atomically.
+description: Implement the injected repository with PostgreSQL and pgvector, atomic revision replacement, and tenant-scoped search.
 order: 203
 kind: lesson
 status: draft
 ---
 
 Knowledge documents and embeddings are durable business records. They belong
-in a database resource. PURISTA StateStore remains available for session-like
-application state and is not used as a document database.
+behind the `KnowledgeRepository` resource, not in PURISTA StateStore.
+StateStore remains appropriate for session-like application state.
 
-Declare repository operations on the service builder. Handlers depend on this
-business interface rather than `pg`, SQL, or a connection pool.
+Create the database schema. The document table owns the active revision. The
+chunk table stores source text and its vector. The foreign key removes chunks
+when their document is removed.
 
-```ts title="src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts"
-export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo)
-	.setConfigSchema(
-		z.object({
-			embeddingModel: z.string().min(1),
-			embeddingDimensions: z.number().int().positive(),
-		}),
-	)
-	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
-	.defineResource<'knowledgeRepository', KnowledgeRepository>()
+```sql title="database/knowledge.sql" write
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS knowledge_documents (
+  tenant_id text NOT NULL,
+  collection_id text NOT NULL,
+  document_id text NOT NULL,
+  revision integer NOT NULL CHECK (revision > 0),
+  title text NOT NULL,
+  status text NOT NULL CHECK (status IN ('active', 'withdrawn')),
+  embedding_model text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, collection_id, document_id)
+);
+
+CREATE TABLE IF NOT EXISTS knowledge_chunks (
+  tenant_id text NOT NULL,
+  collection_id text NOT NULL,
+  document_id text NOT NULL,
+  revision integer NOT NULL CHECK (revision > 0),
+  chunk_index integer NOT NULL CHECK (chunk_index >= 0),
+  content text NOT NULL,
+  embedding_model text NOT NULL,
+  embedding vector(1536) NOT NULL,
+  PRIMARY KEY (tenant_id, collection_id, document_id, chunk_index),
+  FOREIGN KEY (tenant_id, collection_id, document_id)
+    REFERENCES knowledge_documents (tenant_id, collection_id, document_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS knowledge_chunks_scope_idx
+  ON knowledge_chunks (tenant_id, collection_id, embedding_model);
 ```
 
-The command passes the trusted tenant id, the embedding model id, and the
-validated vectors to the resource. The repository replaces the document row
-and all of its chunks in one transaction. A failed insert therefore cannot
-leave a document with half of its new chunks.
+The example fixes the vector size at 1,536 because its live configuration uses
+that OpenAI embedding dimension. A production migration must create a new
+index or column when this dimension changes.
 
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts"
-		await context.resources.knowledgeRepository.replaceRevision(
-			{
-				tenantId: context.message.tenantId ?? '',
-				collectionId: payload.collectionId,
-				documentId: payload.documentId,
-				revision: payload.revision,
-				title: payload.title,
-				embeddingModel: this.config.embeddingModel,
-				chunks: chunks.map((content, index) => {
-					const embedding = embeddings[index]
-					if (!embedding) throw new Error('The embedding model omitted a document vector')
-					return { index, content, embedding: [...embedding.vector] }
-				}),
-			},
-			signal,
-		)
-```
+Create a scoped Compose dependency. The health check waits until PostgreSQL
+accepts connections, and the host port binds only to loopback.
 
-The Compose file starts PostgreSQL with pgvector and initializes two scoped
-tables. `knowledge_documents` owns the current revision. `knowledge_chunks`
-stores the text and its vector. The database starts empty because the tutorial
-UI exercises the real ingestion endpoint before chat.
-
-```yaml title="compose.yaml"
+```yaml title="compose.yaml" write
 services:
   postgres:
     image: pgvector/pgvector:0.8.1-pg16
@@ -62,6 +63,160 @@ services:
       POSTGRES_DB: example_bank
       POSTGRES_USER: example_bank
       POSTGRES_PASSWORD: local-example-password
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - knowledge-postgres:/var/lib/postgresql/data
+      - ./database/knowledge.sql:/docker-entrypoint-initdb.d/001-knowledge.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U example_bank -d example_bank"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  knowledge-postgres:
+```
+
+Implement the repository resource. `replaceRevision` locks the current
+document row and performs document update, old-chunk deletion, and new inserts
+inside one transaction. Any error rolls the complete replacement back.
+
+```ts title="src/resources/PgKnowledgeRepository.ts" write
+import { Pool, type PoolClient } from 'pg'
+import { type KnowledgeRepository, StaleKnowledgeRevisionError } from '../service/knowledge/v1/KnowledgeResources.js'
+
+function vectorLiteral(vector: number[], dimensions: number) {
+	if (vector.length !== dimensions || !vector.every(Number.isFinite)) {
+		throw new Error(`Expected ${dimensions} finite embedding values`)
+	}
+	return `[${vector.join(',')}]`
+}
+
+async function currentRevision(
+	client: PoolClient,
+	input: { tenantId: string; collectionId: string; documentId: string },
+) {
+	const result = await client.query(
+		`SELECT revision
+		 FROM knowledge_documents
+		 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3
+		 FOR UPDATE`,
+		[input.tenantId, input.collectionId, input.documentId],
+	)
+	return (result.rows[0] as { revision: number } | undefined)?.revision
+}
+
+export class PgKnowledgeRepository implements KnowledgeRepository {
+	public readonly name = 'pgKnowledgeRepository'
+	private readonly pool: Pool
+
+	public constructor(
+		connectionString: string,
+		private readonly embeddingDimensions: number,
+	) {
+		this.pool = new Pool({ connectionString, max: 4 })
+	}
+
+	public async replaceRevision(input: Parameters<KnowledgeRepository['replaceRevision']>[0], signal?: AbortSignal) {
+		signal?.throwIfAborted()
+		const client = await this.pool.connect()
+		try {
+			await client.query('BEGIN')
+			const revision = await currentRevision(client, input)
+			if (revision !== undefined && input.revision <= revision) throw new StaleKnowledgeRevisionError()
+			await client.query(
+				`INSERT INTO knowledge_documents (
+				   tenant_id, collection_id, document_id, revision, title, status, embedding_model
+				 ) VALUES ($1, $2, $3, $4, $5, 'active', $6)
+				 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
+				   revision = EXCLUDED.revision,
+				   title = EXCLUDED.title,
+				   status = 'active',
+				   embedding_model = EXCLUDED.embedding_model,
+				   updated_at = now()`,
+				[input.tenantId, input.collectionId, input.documentId, input.revision, input.title, input.embeddingModel],
+			)
+			await client.query(
+				`DELETE FROM knowledge_chunks
+				 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+				[input.tenantId, input.collectionId, input.documentId],
+			)
+			for (const chunk of input.chunks) {
+				signal?.throwIfAborted()
+				await client.query(
+					`INSERT INTO knowledge_chunks (
+					   tenant_id, collection_id, document_id, revision,
+					   chunk_index, content, embedding_model, embedding
+					 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector)`,
+					[
+						input.tenantId,
+						input.collectionId,
+						input.documentId,
+						input.revision,
+						chunk.index,
+						chunk.content,
+						input.embeddingModel,
+						vectorLiteral(chunk.embedding, this.embeddingDimensions),
+					],
+				)
+			}
+			await client.query('COMMIT')
+		} catch (error) {
+			await client.query('ROLLBACK')
+			throw error
+		} finally {
+			client.release()
+		}
+	}
+
+	public async search(input: Parameters<KnowledgeRepository['search']>[0]) {
+		input.signal?.throwIfAborted()
+		const result = await this.pool.query(
+			`SELECT c.document_id, c.chunk_index, c.content,
+			        1 - (c.embedding <=> $4::vector) AS score
+			 FROM knowledge_chunks c
+			 JOIN knowledge_documents d
+			   ON d.tenant_id = c.tenant_id
+			  AND d.collection_id = c.collection_id
+			  AND d.document_id = c.document_id
+			  AND d.revision = c.revision
+			 WHERE c.tenant_id = $1
+			   AND c.collection_id = $2
+			   AND c.embedding_model = $3
+			   AND d.status = 'active'
+			 ORDER BY c.embedding <=> $4::vector, c.document_id, c.chunk_index
+			 LIMIT $5`,
+			[
+				input.tenantId,
+				input.collectionId,
+				input.embeddingModel,
+				vectorLiteral(input.queryEmbedding, this.embeddingDimensions),
+				input.limit,
+			],
+		)
+		return result.rows.map((row) => ({
+			documentId: String(row.document_id),
+			chunkIndex: Number(row.chunk_index),
+			content: String(row.content),
+			score: Number(row.score),
+		}))
+	}
+
+	public async destroy() {
+		await this.pool.end()
+	}
+}
+```
+
+The search SQL includes tenant, collection, active revision, and embedding
+model before ordering by cosine distance. The repository does not decide
+whether a principal may search; that business decision remains in the command
+guard.
+
+```bash title="Start the local vector database" replay="project"
+cp .env.example .env
+docker compose up -d --wait
 ```
 
 Continue with [Retrieve through the same model](./retrieve/).

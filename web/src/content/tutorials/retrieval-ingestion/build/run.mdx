@@ -1,16 +1,55 @@
 ---
-title: Bind providers and run the application
-description: Bind chat and embedding models, start pgvector, authenticate, ingest the source, and ask a grounded question.
-order: 207
+title: Compose and run the application
+description: Bind resources and models, register PURISTA services with Hono, and run a deterministic or live RAG application.
+order: 209
 kind: lesson
 status: draft
 ---
 
-Harness definitions name required capabilities, not providers. Bind the OpenAI
-adapter and concrete model ids in the application composition root. The same
-embedding binding serves both PURISTA commands through the mounted Harness.
+The composition root supplies concrete resources to the definitions built in
+the earlier steps. The Harness asks for named model capabilities. The
+Knowledge service asks for a repository and collection policy. Identity asks
+for StateStore because sessions are short-lived application state.
 
-```ts title="src/createKnowledgeApplication.ts"
+Create the complete application factory. Dependency injection keeps the same
+composition usable with production adapters, deterministic model providers,
+and test doubles.
+
+```ts title="src/createKnowledgeApplication.ts" write
+import { DefaultEventBridge, initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { honoV1Service } from '@purista/hono-http-server'
+import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
+import { identityV1Service } from './service/identity/v1/identityV1Service.js'
+import type { KnowledgeRepository } from './service/knowledge/v1/KnowledgeResources.js'
+import { knowledgeV1Service } from './service/knowledge/v1/knowledgeV1Service.js'
+import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export interface ManagedKnowledgeRepository extends KnowledgeRepository {
+	readonly name: string
+	destroy(): Promise<void>
+}
+
+export type KnowledgeApplicationDependencies = {
+	stateStore: StateStore
+	repository: ManagedKnowledgeRepository
+	models: {
+		primary: { provider: ModelProvider; model: string }
+		embedding: { provider: ModelProvider; model: string }
+	}
+	embeddingDimensions: number
+}
+
+function defaultDependencies(
+	logger: Logger,
+	environment: Readonly<Record<string, string | undefined>>,
+): KnowledgeApplicationDependencies {
+	const apiKey = environment.OPENAI_API_KEY?.trim()
+	const databaseUrl = environment.DATABASE_URL?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the knowledge application.')
+	if (!databaseUrl) throw new Error('DATABASE_URL is required to run the knowledge application.')
 	const provider = openai({ apiKey })
 	const embeddingModel = environment.OPENAI_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small'
 	const embeddingDimensions = 1_536
@@ -23,14 +62,21 @@ embedding binding serves both PURISTA commands through the mounted Harness.
 		},
 		embeddingDimensions,
 	}
-```
+}
 
-Pass those bindings when the `Knowledge` service instance is created. The
-service config records the model id and dimensions alongside stored vectors.
-Changing the embedding model therefore requires an explicit reindexing
-decision instead of silently mixing incompatible vectors.
-
-```ts title="src/createKnowledgeApplication.ts"
+export async function createKnowledgeApplication(
+	logger: Logger,
+	dependencies?: KnowledgeApplicationDependencies,
+	environment: Readonly<Record<string, string | undefined>> = process.env,
+) {
+	const resolved = dependencies ?? defaultDependencies(logger, environment)
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const identity = await identityV1Service.getInstance(eventBridge, {
+		logger,
+		stateStore: resolved.stateStore,
+		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
+	})
 	const knowledge = await knowledgeV1Service.getInstance(eventBridge, {
 		logger,
 		serviceConfig: {
@@ -49,24 +95,152 @@ decision instead of silently mixing incompatible vectors.
 			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank knowledge API', version: '1.0.0' },
+				components: { securitySchemes: { sessionBearer: { type: 'http', scheme: 'bearer' } } },
+			},
+		},
+	})
+
+	http.setProtectMiddleware(createSessionProtectMiddleware(http))
+	await identity.start()
+	await knowledge.start()
+	http.registerService(identity, knowledge)
+	registerStaticWebsite(http)
+	await http.start()
+	return {
+		eventBridge,
+		stateStore: resolved.stateStore,
+		repository: resolved.repository,
+		identity,
+		knowledge,
+		http,
+	}
+}
 ```
 
-Create the local environment, start pgvector, build both server and UI, and
-start the application.
+Three details keep the boundaries clear:
 
-```bash title="Run the complete RAG application" replay="project"
+1. `http.setProtectMiddleware(...)` authenticates protected HTTP requests and
+   establishes trusted identity.
+2. `http.registerService(...)` projects only command and stream definitions
+   that declare HTTP metadata. The login command is public; ingestion and chat
+   remain protected by default.
+3. The Knowledge guards still authorize access to `customer-help`, even after
+   authentication succeeds.
+
+Build the UI into `public`, then register static files on Hono. This is custom
+HTTP handling for website assets, while application APIs remain PURISTA
+commands and streams.
+
+```ts title="src/staticWebsite.ts" write
+import { serveStatic } from '@hono/node-server/serve-static'
+import type { HonoServiceClass } from '@purista/hono-http-server'
+
+const apiPath = (path: string) => path === '/api' || path.startsWith('/api/')
+
+export function registerStaticWebsite(http: HonoServiceClass) {
+	const indexFile = serveStatic({ path: './public/index.html' })
+	http.app.use('/assets/*', serveStatic({ root: './public' }))
+	http.app.get('/', indexFile)
+	http.app.get('*', async (context, next) => {
+		if (apiPath(context.req.path) || context.req.path === '/health') return next()
+		return indexFile(context, next)
+	})
+}
+```
+
+`serve()` creates the Node HTTP listener that owns the TCP port. Wrap it as a
+PURISTA lifecycle resource so graceful shutdown can close that listener after
+Hono stops accepting work.
+
+```ts title="src/nodeHttpListener.ts" write
+type ClosableNodeServer = { close(callback: (error?: Error) => void): unknown }
+
+export function createNodeHttpListener(server: ClosableNodeServer) {
+	return {
+		name: 'nodeHttpListener',
+		destroy: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+	}
+}
+```
+
+Create the live entry point. Shutdown order starts with the Hono preparation
+hook and listener, then destroys services and their resources.
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function main() {
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const application = await createKnowledgeApplication(logger)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank knowledge application started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Knowledge application could not start.'}\n`)
+	process.exit(1)
+})
+```
+
+The retained project also contains `src/demo.ts`. It injects Harness's strict
+`FakeModelProvider` with a scripted embedding, tool choice, evidence result,
+and text deltas. It still uses the real PURISTA services, EventBridge, guards,
+Hono stream, UI, PostgreSQL, and pgvector. This makes the default walkthrough
+repeatable and free of provider credentials. On startup it deletes only the
+scripted `transfer-guide` fixture, so revision `1` can be ingested again without
+removing the database volume. The live entry point never resets data.
+
+Copy the environment, start PostgreSQL, build the server and UI, then run the
+scripted application.
+
+```bash title="Run the deterministic RAG application" replay="project"
 cp .env.example .env
 docker compose up -d --wait
 npm run build
-npm start
+npm run demo
 ```
 
-Set `OPENAI_API_KEY` in `.env` before starting. Open
-`http://127.0.0.1:3000`, sign in with the displayed local credentials, select
-**Ingest source**, and then ask: “How long can an international transfer remain
-pending?” The response arrives as live text deltas and cites the stored source.
+Open `http://127.0.0.1:3000` and follow one visible sequence:
 
-Stop the Node process with `Ctrl+C`. Run `docker compose down` when you no
-longer need the database.
+1. sign in with `alex@example.test` and `demo-password`;
+2. select **Ingest source** once; and
+3. ask “How long can an international transfer remain pending?”
+
+The model-selected tool retrieves the stored chunk and the answer arrives as
+live text deltas with a source citation. Stop Node with `Ctrl+C`, then stop the
+database with `docker compose down`.
+
+To use a live provider, set `OPENAI_API_KEY` in `.env` and run `npm start`.
+The composition root then binds the OpenAI adapter to `primary` and
+`embedding`; no service, command, tool, workflow, HTTP, or UI code changes.
 
 Continue with [Test the complete RAG path](../../testing/test-rag/).

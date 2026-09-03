@@ -1,36 +1,151 @@
 ---
 title: Test the complete RAG path
-description: Mock Harness models and PURISTA resources, then verify tool use, grounding, authorization, and streaming.
-order: 208
+description: Test PURISTA commands with mocked resources, script native Harness behavior, verify streaming, and run pgvector integration tests.
+order: 210
 kind: lesson
 status: draft
 ---
 
-Test each boundary through the framework that owns it. Fast tests do not need
-an API key, PostgreSQL, or a browser.
+RAG crosses several independently owned boundaries. Keep the fast tests
+focused so a failure tells you whether the command, model loop, protocol
+adapter, HTTP authentication, or database resource broke.
 
-For ingestion, create a real PURISTA command test harness, bind a strict
-`FakeModelProvider`, and queue the embedding response the handler should
-consume. Mock only the repository resource.
+## Test a command with a model and resource mock
 
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts"
+Use `createCommandTestHarness` for the ingestion command. Bind a strict
+`FakeModelProvider` to the Harness model capability and mock only the durable
+repository and collection policy resources. The test runs the real command
+handler and its business guard.
+
+```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts" write
+import { createCommandTestHarness } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { knowledgeV1Service } from '../../knowledgeV1Service.js'
+import { ingestKnowledgeCommandBuilder } from './ingestKnowledgeCommandBuilder.js'
+
+const repository = { replaceRevision: vi.fn().mockResolvedValue(undefined), search: vi.fn() }
+
+afterEach(() => vi.clearAllMocks())
+
+describe('ingestKnowledgeCommandBuilder', () => {
+	it('uses the Harness embedding model and stores the vectors through the repository resource', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueEmbedding({
 			embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }],
 			usage: { inputTokens: 8, outputTokens: 0, totalTokens: 8 },
 		})
 		const policy = { canAccess: vi.fn(async () => true) }
+		const harness = await createCommandTestHarness(knowledgeV1Service, ingestKnowledgeCommandBuilder, {
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
+			resources: { knowledgeCollectionPolicy: policy, knowledgeRepository: repository },
+			ai: {
+				models: {
+					primary: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
+			},
+		})
+
+		try {
+			await harness.service.start()
+			const { result } = await harness.run({
+				payload: {
+					collectionId: 'customer-help',
+					documentId: 'transfer-guide',
+					revision: 1,
+					title: 'International transfer timing',
+					content: 'International transfers can remain pending for two business days.',
+				},
+				parameter: {},
+			})
+
+			expect(result).toEqual({
+				documentId: 'transfer-guide',
+				revision: 1,
+				chunkCount: 1,
+				embeddingModel: 'fake-embedding',
+			})
+			expect(policy.canAccess).toHaveBeenCalledWith({
+				tenantId: 'mocked-tenant-id',
+				principalId: 'mocked-principal-id',
+				collectionId: 'customer-help',
+				action: 'edit',
+			})
+			expect(repository.replaceRevision).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tenantId: 'mocked-tenant-id',
+					embeddingModel: 'fake-embedding',
+					chunks: [expect.objectContaining({ embedding: [0.1, 0.2, 0.3, 0.4] })],
+				}),
+				expect.any(AbortSignal),
+			)
+			provider.assertExhausted()
+		} finally {
+			await harness.destroy()
+		}
+	})
+
+	it('denies collection edits before model or repository work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const harness = await createCommandTestHarness(knowledgeV1Service, ingestKnowledgeCommandBuilder, {
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
+			resources: {
+				knowledgeCollectionPolicy: { canAccess: async () => false },
+				knowledgeRepository: repository,
+			},
+			ai: {
+				models: {
+					primary: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
+			},
+		})
+
+		try {
+			await harness.service.start()
+			const { result, message } = await harness.run({
+				payload: {
+					collectionId: 'internal-risk',
+					documentId: 'secret-policy',
+					revision: 1,
+					title: 'Internal policy',
+					content: 'This source must not be indexed by this caller.',
+				},
+				parameter: {},
+			})
+
+			expect(result).toBeUndefined()
+			expect(message).toMatchObject({ payload: { status: 403, message: 'This knowledge collection is not available' } })
+			provider.assertExhausted()
+			expect(repository.replaceRevision).not.toHaveBeenCalled()
+		} finally {
+			await harness.destroy()
+		}
+	})
+})
 ```
 
-Assert the durable call receives trusted identity, the configured model id,
-and the exact model vector. Add a denied policy case and prove that neither the
-model nor repository runs.
+The first case proves the embedding result reaches the durable resource with
+trusted identity. The second proves authorization runs before any model cost
+or database write.
 
-The native Harness test scripts the model loop itself. The first object round
-chooses `search_knowledge`, the host-tool mock returns source chunks, and the
-final model response streams the cited answer.
+## Test the native model-selected tool loop
 
-```ts title="src/harness/knowledge/knowledgeHarness.test.ts"
+Test the Harness definition separately. Queue each model turn in order: tool
+selection, structured evidence, then streamed answer. Supply a host-tool mock
+because this test owns the native Harness behavior rather than EventBridge.
+
+```ts title="src/harness/knowledge/knowledgeHarness.test.ts" write
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { knowledgeHarness } from './knowledgeHarness.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('knowledgeHarness', () => {
+	it('lets the retrieval agent choose the search tool and streams the grounded answer', async () => {
+		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
 			object: {},
 			toolCalls: [
@@ -43,14 +158,103 @@ final model response streams the cited answer.
 			usage,
 			finishReason: 'tool_calls',
 		})
+		provider.enqueueObject({
+			object: {
+				question: 'How long are transfers pending?',
+				evidence: [
+					{
+						documentId: 'transfer-guide',
+						chunkIndex: 2,
+						content: 'International transfers can remain pending for two business days.',
+						score: 0.94,
+					},
+				],
+			},
+			usage,
+			finishReason: 'stop',
+		})
+		provider.enqueueTextStream([
+			{ kind: 'delta', text: 'They can remain pending for ' },
+			{ kind: 'delta', text: 'two business days [transfer-guide#2].' },
+			{ kind: 'finish', usage, finishReason: 'stop' },
+		])
+		const search = vi.fn(async () => ({
+			matches: [
+				{
+					documentId: 'transfer-guide',
+					chunkIndex: 2,
+					content: 'International transfers can remain pending for two business days.',
+					score: 0.94,
+				},
+			],
+		}))
+		const harness = await knowledgeHarness.getInstance({
+			models: {
+				primary: { provider, model: 'fake-knowledge-model' },
+				embedding: { provider, model: 'fake-embedding-model' },
+			},
+			hostTools: { search_knowledge: search },
+		})
+
+		try {
+			const session = await harness.getSession('knowledge-chat-1')
+			const events = []
+			for await (const event of session.workflows.answer_knowledge_question.stream(
+				{
+					collectionId: 'customer-help',
+					question: 'How long are transfers pending?',
+				},
+				{ hostContext: { identity: { tenantId: 'tenant-example', principalId: 'principal-alex' } } },
+			))
+				events.push(event)
+
+			expect(search).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'retrieve_evidence' }), {
+				collectionId: 'customer-help',
+				query: 'How long are transfers pending?',
+				limit: 4,
+			})
+			expect(events).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ type: 'tool.input.available', toolId: 'search_knowledge' }),
+					expect.objectContaining({ type: 'tool.finished', toolId: 'search_knowledge' }),
+					expect.objectContaining({ type: 'output.text.delta', delta: 'They can remain pending for ' }),
+					expect.objectContaining({
+						type: 'run.finished',
+						outcome: expect.objectContaining({
+							status: 'completed',
+							output: 'They can remain pending for two business days [transfer-guide#2].',
+						}),
+					}),
+				]),
+			)
+			provider.assertExhausted()
+		} finally {
+			await harness.shutdown()
+		}
+	})
+})
 ```
 
-Assert portable Harness events such as `tool.input.available`,
-`tool.finished`, `output.text.delta`, and `run.finished`. The PURISTA stream
-test separately checks that those events become AI SDK `start`, `text-delta`,
-and `[DONE]` data events and that browser cancellation cancels the remote run.
+The assertions prove the model chose the declared tool and the Harness emitted
+portable status, tool, text, and completion events. They do not merely compare
+one final string.
 
-Run all local gates.
+## Test the adapters and integrations
+
+The retained project also tests the remaining ownership boundaries:
+
+- `answerKnowledgeQuestionStreamBuilder.test.ts` mocks the address-first
+  workflow call and verifies AI SDK `start`, `text-delta`, and `[DONE]` events;
+- `application.test.ts` proves login is public and forged identity headers do
+  not bypass Hono authentication;
+- `KnowledgeChat.test.tsx` and `KnowledgeSource.test.tsx` verify the browser
+  sends the token and renders streaming state; and
+- `PgKnowledgeRepository.postgres.test.ts` verifies atomic revision
+  replacement, rollback, vector dimensions, and tenant isolation against real
+  PostgreSQL and pgvector.
+
+Run all local gates. These use fake model providers and do not require an API
+key or database.
 
 ```bash title="Build, test, and lint the complete RAG example" replay="project"
 npm run build
@@ -58,14 +262,14 @@ npm test
 npm run lint
 ```
 
-The example also includes a focused Compose integration test. It inserts and
-replaces revisions, proves invalid vectors roll back, and verifies tenant and
-collection isolation against PostgreSQL and pgvector. Keep the real provider
-out of this database test; model adapter and storage contracts have different
-owners.
+Run the storage contract separately with Docker Compose.
 
 ```bash title="Run the pgvector integration test" replay="project"
 docker compose up -d --wait
 npm run test:postgres
 docker compose down
 ```
+
+The scripted browser demo proves wiring and protocol behavior. It is not a
+retrieval-quality evaluation: production datasets should separately measure
+chunking, recall, citation correctness, refusal behavior, latency, and cost.

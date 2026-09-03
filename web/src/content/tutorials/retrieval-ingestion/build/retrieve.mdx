@@ -1,28 +1,26 @@
 ---
 title: Retrieve through the same model
-description: Authorize search, embed the question through Harness, and run a tenant-scoped pgvector query.
+description: Authorize search, create a query embedding through Harness, and run the tenant-scoped repository query.
 order: 204
 kind: lesson
 status: draft
 ---
 
-The query vector must be compatible with the stored document vectors. The
-search command therefore declares the same `embedding` alias used by ingestion
-and passes the same configured dimensions.
+Stored and query vectors must use the same embedding contract. Replace the
+generated search command with the complete implementation below. It declares
+the same `embedding` alias as ingestion.
 
-```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts" write
+import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../schema.js'
+
 export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
 	.addPayloadSchema(searchKnowledgeInputSchema)
 	.addOutputSchema(searchKnowledgeOutputSchema)
 	.canUseHarnessModel(knowledgeHarness, 'embedding')
-```
-
-Search has its own business action. A person who may read a customer-help
-collection does not automatically receive edit access, and the reverse is not
-assumed either.
-
-```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
 			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
@@ -33,13 +31,6 @@ assumed either.
 			})
 		},
 	})
-```
-
-After the guard succeeds, embed the question and send the vector to the
-repository. The SQL resource filters tenant, collection, active revision, and
-embedding model before ordering by vector distance.
-
-```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts"
 	.setCommandFunction(async function (context, payload) {
 		const signal = new AbortController().signal
 		const response = await context.model.embedding.embed(
@@ -58,6 +49,18 @@ embedding model before ordering by vector distance.
 		})
 		return { matches }
 	})
+```
+
+The `search` action is distinct from `edit`. A valid authenticated user may be
+allowed to ask questions without being allowed to replace source material.
+The business guard runs before the embedding request and database call.
+
+The command is intentionally not exposed as a browser endpoint. It is the
+service-owned retrieval capability used by the model-selected host tool on the
+next page. Other services can also declare and invoke its versioned address.
+
+```bash title="Check both indexing commands" replay="project"
+npm run build:server
 ```
 
 Continue with [Let the agent choose the search tool](./agent/).

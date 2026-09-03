@@ -1,16 +1,51 @@
 ---
-title: Stream to a standard chat UI
-description: Project the mounted workflow through a PURISTA stream and AI SDK UI Message Stream v1.
+title: Expose the answer as an AI SDK stream
+description: Invoke the mounted workflow through a PURISTA stream and emit AI SDK UI Message Stream v1 events.
 order: 206
 kind: lesson
 status: draft
 ---
 
-The mounted workflow is an internal PURISTA address. A browser should not know
-the EventBridge protocol, so expose a normal protected stream definition and
-adapt its portable Harness events at the HTTP boundary.
+The mounted workflow is an internal PURISTA address. A browser should use a
+standard HTTP stream, so the generated stream definition becomes the adapter
+between AI SDK UI messages and portable Harness run events.
 
-```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts"
+First extract the latest user text from the AI SDK message parts. Keep this
+conversion separate from the stream handler so it can be tested directly.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/latestUserText.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { aiSdkTextPartSchema } from '../../schema.js'
+
+export function latestUserText(messages: ReadonlyArray<{ role: string; parts: unknown[] }>) {
+	const user = [...messages].reverse().find((message) => message.role === 'user')
+	if (!user) throw new HandledError(StatusCode.BadRequest, 'A user message is required')
+	const text = user.parts
+		.map((part) => aiSdkTextPartSchema.safeParse(part))
+		.filter((result) => result.success)
+		.map((result) => result.data.text)
+		.join('\n')
+		.trim()
+	if (!text) throw new HandledError(StatusCode.BadRequest, 'The user message contains no text')
+	return text
+}
+```
+
+Replace the generated stream builder with the complete adapter. HTTP security
+is enabled by default. The endpoint publishes the exact protocol name and
+headers expected by AI SDK clients.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts" write
+import { AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS, createHarnessUIMessageSseEvents } from '@purista/harness-ai-sdk-ui/v1'
+import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import {
+	aiSdkUiMessageSseEventSchema,
+	answerKnowledgeQuestionFinalSchema,
+	answerKnowledgeQuestionHttpInputSchema,
+} from '../../schema.js'
+import { latestUserText } from './latestUserText.js'
+
 export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 	.getStreamBuilder('answerKnowledgeQuestion', 'Stream a grounded answer through AI SDK UI Message Stream v1')
 	.addPayloadSchema(answerKnowledgeQuestionHttpInputSchema)
@@ -22,18 +57,12 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 		'answer_knowledge_question',
 		knowledgeHarness.contracts.workflows.answer_knowledge_question,
 	)
-	.enableHttpSecurity(true)
 	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
 	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
 	.setHttpResponseHeaders(AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS)
-```
-
-`canInvokeWorkflow` declares the address and contracts before the handler can
-use it. The call crosses EventBridge even when the workflow is mounted on the
-same process. The runtime carries tenant and principal identity to the mount
-guard and command-backed tool.
-
-```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts"
+	.setOpenApiSummary('Chat with authorized knowledge')
+	.addOpenApiTags('knowledge', 'ai')
+	.setStreamFunction(async function (context, payload, _parameter, writer) {
 		const execution = await context.workflow.Knowledge['1'].answer_knowledge_question.stream(
 			{
 				collectionId: payload.collectionId,
@@ -49,28 +78,30 @@ guard and command-backed tool.
 			if (writer.cancelled) return
 			await writer.write(event)
 		}
+		if (!writer.cancelled) await writer.close({ status: 'completed' })
+	})
 ```
 
-The adapter emits AI SDK UI Message Stream v1, including the standard response
-header and data chunks. The browser can use `useChat` and `DefaultChatTransport`
-without a PURISTA-specific client library.
+`canInvokeWorkflow(...)` declares the address before the handler can use it.
+The call crosses EventBridge and preserves identity for the workflow guard and
+command-backed retrieval tool. `createHarnessUIMessageSseEvents(...)` maps
+Harness events to AI SDK UI Message Stream v1; the browser needs no
+PURISTA-specific client library.
 
-The example UI has two panels. The first calls the protected ingestion command
-with a small reviewed source. The second uses maintained AI Elements components
-for the conversation and prompt input. Chat stays disabled until ingestion has
-completed, so the first question exercises the data the learner just stored.
+Register both commands, the stream, and the single Harness mount on the
+Knowledge service.
 
-```tsx title="ui/src/KnowledgeChat.tsx"
-	const transport = useMemo(
-		() =>
-			new DefaultChatTransport({
-				api: '/api/v1/knowledge/chat',
-				headers: { authorization: `Bearer ${sessionToken}` },
-				body: { collectionId: 'customer-help' },
-			}),
-		[sessionToken],
-	)
-	const { messages, sendMessage, status } = useChat({ transport })
+```ts title="src/service/knowledge/v1/knowledgeV1Service.ts" write
+import { ingestKnowledgeCommandBuilder } from './command/ingestKnowledge/ingestKnowledgeCommandBuilder.js'
+import { searchKnowledgeCommandBuilder } from './command/searchKnowledge/searchKnowledgeCommandBuilder.js'
+import { knowledgeHarness, knowledgeHarnessPolicy } from './harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from './knowledgeV1ServiceBuilder.js'
+import { answerKnowledgeQuestionStreamBuilder } from './stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.js'
+
+export const knowledgeV1Service = knowledgeV1ServiceBuilder
+	.addCommandDefinition(ingestKnowledgeCommandBuilder.getDefinition(), searchKnowledgeCommandBuilder.getDefinition())
+	.addStreamDefinition(answerKnowledgeQuestionStreamBuilder.getDefinition())
+	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
 ```
 
-Continue with [Bind providers and run the application](./run/).
+Continue with [Authenticate the HTTP endpoints](./authenticate-http/).

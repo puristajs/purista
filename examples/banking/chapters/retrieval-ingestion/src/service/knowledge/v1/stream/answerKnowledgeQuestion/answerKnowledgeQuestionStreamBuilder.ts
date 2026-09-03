@@ -19,7 +19,6 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 		'answer_knowledge_question',
 		knowledgeHarness.contracts.workflows.answer_knowledge_question,
 	)
-	.enableHttpSecurity(true)
 	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
 	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
 	.setHttpResponseHeaders(AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS)

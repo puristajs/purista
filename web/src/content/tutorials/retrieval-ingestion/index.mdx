@@ -50,12 +50,13 @@ You will:
    model contract;
 5. expose that search command as a typed host tool;
 6. let a Harness agent choose the tool and stream a grounded answer;
-7. connect a standard React and AI Elements UI; and
-8. test models, resources, authorization, tool choice, and stream events
+7. authenticate browser requests with an Identity service and StateStore-backed sessions;
+8. connect a standard React and AI Elements UI; and
+9. test models, resources, authorization, tool choice, and stream events
    without calling a paid provider.
 
 The complete source is in `examples/banking/chapters/retrieval-ingestion`.
 This chapter stays a draft until PURISTA v4 and Harness v3 are available from
 npm and a clean consumer replay succeeds.
 
-Start with [Create the RAG service and Harness](./build/configure-harness/).
+Start with [Create the RAG project and contracts](./build/configure-harness/).

@@ -1,0 +1,174 @@
+---
+title: Authenticate the HTTP endpoints
+description: Store opaque sessions in PURISTA StateStore and let Hono protection middleware set trusted tenant and principal identity.
+order: 207
+kind: lesson
+status: draft
+---
+
+The browser needs a small local login for this tutorial. `Identity` owns opaque
+session tokens, while PURISTA StateStore holds the short-lived session state.
+Documents and vectors remain in PostgreSQL.
+
+Create the Identity service configuration. The time-to-live is service
+configuration because every Identity instance must use the same session rule.
+
+```ts title="src/service/identity/v1/identityV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import { z } from 'zod'
+
+export const identityV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Identity',
+	serviceVersion: '1',
+	serviceDescription: 'Authenticates local tutorial users and owns sessions',
+}).setConfigSchema(
+	z.object({
+		sessionTtlMs: z
+			.number()
+			.int()
+			.positive()
+			.default(15 * 60 * 1000),
+	}),
+)
+```
+
+Create the session helper used by both Identity commands.
+
+```ts title="src/service/identity/v1/session.ts" write
+import { HandledError, type StateStore, StatusCode } from '@purista/core'
+import { z } from 'zod'
+
+export const sessionRecordSchema = z.object({
+	principalId: z.string().min(1),
+	tenantId: z.string().min(1),
+	displayName: z.string().min(1),
+	expiresAt: z.number().int().positive(),
+})
+
+export type SessionRecord = z.infer<typeof sessionRecordSchema>
+type SessionStates = Pick<StateStore, 'getState' | 'removeState'>
+export const sessionStateKey = (token: string) => `identity:session:${token}`
+
+export async function readActiveSession(states: SessionStates, token: string, now = Date.now()) {
+	const key = sessionStateKey(token)
+	const values = await states.getState(key)
+	const parsed = sessionRecordSchema.safeParse(values[key])
+	if (!parsed.success || parsed.data.expiresAt <= now) {
+		if (values[key] !== undefined) await states.removeState(key)
+		throw new HandledError(StatusCode.Unauthorized, 'Session is missing, invalid, or expired')
+	}
+	return parsed.data
+}
+```
+
+Replace the generated login command. It is the only public endpoint. The fixed
+credential is a local tutorial fixture, not a production identity system.
+
+```ts title="src/service/identity/v1/command/login/loginCommandBuilder.ts" write
+import { randomUUID } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import { z } from 'zod'
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { sessionStateKey } from '../../session.js'
+
+const inputSchema = z.strictObject({ username: z.string().min(1), password: z.string().min(1) })
+const outputSchema = z.strictObject({
+	sessionToken: z.uuid(),
+	displayName: z.string(),
+	expiresAt: z.number().int().positive(),
+})
+
+export const loginCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('login', 'Create a local tutorial session')
+	.addPayloadSchema(inputSchema)
+	.addOutputSchema(outputSchema)
+	.exposeAsHttpEndpoint('POST', 'session/login')
+	.makeEndpointPublic()
+	.setCommandFunction(async function (context, payload) {
+		if (payload.username !== 'alex@example.test' || payload.password !== 'demo-password') {
+			throw new HandledError(StatusCode.Unauthorized, 'Invalid local credentials')
+		}
+		const sessionToken = randomUUID()
+		const displayName = 'Alex Example'
+		const expiresAt = Date.now() + this.config.sessionTtlMs
+		await context.states.setState(sessionStateKey(sessionToken), {
+			principalId: 'principal-alex',
+			tenantId: 'tenant-example',
+			displayName,
+			expiresAt,
+		})
+		return { sessionToken, displayName, expiresAt }
+	})
+```
+
+The generated `resolveSession` command stays protected from HTTP exposure; it
+is an internal EventBridge capability used by the Hono middleware.
+
+```ts title="src/service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.ts" write
+import { z } from 'zod'
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { readActiveSession, sessionRecordSchema } from '../../session.js'
+
+export const resolveSessionCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('resolveSession', 'Resolve one opaque session token')
+	.addParameterSchema(z.strictObject({ sessionToken: z.uuid() }))
+	.addOutputSchema(sessionRecordSchema)
+	.setCommandFunction(async function (context, _payload, parameter) {
+		return readActiveSession(context.states, parameter.sessionToken)
+	})
+```
+
+Register both generated command definitions on Identity.
+
+```ts title="src/service/identity/v1/identityV1Service.ts" write
+import { loginCommandBuilder } from './command/login/loginCommandBuilder.js'
+import { resolveSessionCommandBuilder } from './command/resolveSession/resolveSessionCommandBuilder.js'
+import { identityV1ServiceBuilder } from './identityV1ServiceBuilder.js'
+
+export const identityV1Service = identityV1ServiceBuilder.addCommandDefinition(
+	loginCommandBuilder.getDefinition(),
+	resolveSessionCommandBuilder.getDefinition(),
+)
+```
+
+Create the Hono protection middleware. It extracts the bearer token, asks the
+Identity service to verify and resolve it, then places trusted `principalId`
+and `tenantId` values in the Hono context. Hono copies those values into the
+PURISTA message for the protected command or stream.
+
+```ts title="src/sessionProtectMiddleware.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { EndpointProtectMiddleware, HonoServiceClass } from '@purista/hono-http-server'
+import type { SessionRecord } from './service/identity/v1/session.js'
+
+export const createSessionProtectMiddleware = (http: HonoServiceClass): EndpointProtectMiddleware<HonoServiceClass> =>
+	async function (context, next) {
+		const authorization = context.req.header('authorization')
+		const sessionToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1]
+		if (!sessionToken) throw new HandledError(StatusCode.Unauthorized, 'A session bearer token is required')
+
+		try {
+			const session = (await http.invoke(
+				{
+					receiver: { serviceName: 'Identity', serviceVersion: '1', serviceTarget: 'resolveSession' },
+					payload: { payload: undefined, parameter: { sessionToken } },
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+				},
+				'protect-session',
+			)) as SessionRecord
+			context.set('principalId', session.principalId)
+			context.set('tenantId', session.tenantId)
+			context.set('additionalParameter', { sessionToken })
+			await next()
+		} catch {
+			throw new HandledError(StatusCode.Unauthorized, 'The session is invalid or expired')
+		}
+	}
+```
+
+Authentication establishes identity. The Knowledge command and workflow
+guards still perform authorization for `edit` and `search`. A valid session
+does not automatically grant access to every collection.
+
+Continue with [Build the chat interface](./ui/).

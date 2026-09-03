@@ -2,8 +2,8 @@ import { afterAll, describe, expect, test } from 'vitest'
 import { StaleKnowledgeRevisionError } from '../service/knowledge/v1/KnowledgeResources.js'
 import { PgKnowledgeRepository } from './PgKnowledgeRepository.js'
 
-const databaseUrl = process.env.DATABASE_URL
-if (!databaseUrl) throw new Error('DATABASE_URL is required for PostgreSQL tests')
+const databaseUrl =
+	process.env.DATABASE_URL ?? 'postgres://example_bank:local-example-password@127.0.0.1:55432/example_bank'
 
 const dimensions = 1_536
 const model = 'text-embedding-3-small'

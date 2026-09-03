@@ -1,16 +1,15 @@
-export function latestUserText(messages: ReadonlyArray<{ role: string; parts: unknown[] }>): string {
-	for (let messageIndex = messages.length - 1; messageIndex >= 0; messageIndex -= 1) {
-		const message = messages[messageIndex]
-		if (message?.role !== 'user') continue
-		for (let partIndex = message.parts.length - 1; partIndex >= 0; partIndex -= 1) {
-			const part = message.parts[partIndex]
-			if (part && typeof part === 'object' && 'type' in part && 'text' in part) {
-				const candidate = part as { type?: unknown; text?: unknown }
-				if (candidate.type === 'text' && typeof candidate.text === 'string' && candidate.text.trim()) {
-					return candidate.text.trim()
-				}
-			}
-		}
-	}
-	throw new TypeError('The chat request needs a user text message.')
+import { HandledError, StatusCode } from '@purista/core'
+import { aiSdkTextPartSchema } from '../../schema.js'
+
+export function latestUserText(messages: ReadonlyArray<{ role: string; parts: unknown[] }>) {
+	const user = [...messages].reverse().find((message) => message.role === 'user')
+	if (!user) throw new HandledError(StatusCode.BadRequest, 'A user message is required')
+	const text = user.parts
+		.map((part) => aiSdkTextPartSchema.safeParse(part))
+		.filter((result) => result.success)
+		.map((result) => result.data.text)
+		.join('\n')
+		.trim()
+	if (!text) throw new HandledError(StatusCode.BadRequest, 'The user message contains no text')
+	return text
 }

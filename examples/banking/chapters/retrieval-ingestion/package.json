@@ -12,6 +12,7 @@
 		"add:stream": "purista add stream",
 		"add:agent": "purista add agent",
 		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"demo": "node --env-file-if-exists=.env --import tsx src/demo.ts",
 		"build": "npm run build:server && npm run build:ui",
 		"build:server": "tsc --noEmit",
 		"build:ui": "tsc -p ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
