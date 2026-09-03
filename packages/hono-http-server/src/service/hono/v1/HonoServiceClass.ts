@@ -178,17 +178,31 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Sets middleware for endpoints marked as protected in HTTP metadata.
+	 * Sets authentication middleware for endpoints marked as protected in HTTP metadata.
 	 *
-	 * The middleware can also enrich `additionalParameter`, `principalId` and
-	 * `tenantId` Hono variables before the generated command or stream handler
-	 * calls PURISTA.
+	 * The middleware verifies and decodes the request credential, rejects failed
+	 * authentication, and sets trusted `principalId` and `tenantId` Hono
+	 * variables before the generated command or stream handler calls PURISTA.
+	 * Business authorization belongs to guards on the receiving PURISTA target.
+	 * `additionalParameter` is available for other trusted transport-derived
+	 * parameters.
 	 *
 	 * @example
 	 * ```typescript
+	 * import { HandledError, StatusCode } from '@purista/core'
+	 *
 	 * honoService.setProtectMiddleware(async function (c, next) {
-	 *   c.set('principalId', 'user-123')
-	 *   c.set('tenantId', 'tenant-a')
+	 *   const token = c.req.header('authorization')?.replace(/^Bearer\s+/i, '')
+	 *   if (!token) throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
+	 *
+	 *   let identity
+	 *   try {
+	 *     identity = await accessTokenVerifier.verifyAndDecode(token)
+	 *   } catch {
+	 *     throw new HandledError(StatusCode.Unauthorized, 'Access token is invalid or expired')
+	 *   }
+	 *   c.set('principalId', identity.principalId)
+	 *   c.set('tenantId', identity.tenantId)
 	 *   return next()
 	 * })
 	 * ```

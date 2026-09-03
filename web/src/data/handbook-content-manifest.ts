@@ -1112,7 +1112,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
     "order": 415,
     "title": "Authenticate and propagate principals and tenants",
-    "description": "Protect endpoints by default, resolve technical identity at Hono, and enforce business access with service guards.",
+    "description": "Verify access tokens at Hono, propagate trusted principal and tenant identity, and authorize business actions with service guards.",
     "pageRole": "task"
   },
   {

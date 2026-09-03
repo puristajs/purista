@@ -24,10 +24,11 @@ export const getInvoiceForTenant = async (
 })
 ```
 
-The handler calls it with `context.message.tenantId` after its authentication
-guard has required that value. The database policy should enforce the same
-constraint where it can (for example, row-level security or a tenant-bound
-connection), because application code alone is not a containment boundary.
+The handler calls it with `context.message.tenantId` after its business
+authorization guard has allowed that principal, tenant, record, and action.
+The database policy should enforce the same constraint where it can (for
+example, row-level security or a tenant-bound connection), because application
+code alone is not a containment boundary.
 
 ## Carry the context deliberately into asynchronous work
 

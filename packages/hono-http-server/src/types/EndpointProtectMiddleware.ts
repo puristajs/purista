@@ -7,8 +7,11 @@ import type { VariablesBase } from './VariablesBase.js'
 /**
  * Middleware type for protected generated Hono endpoints.
  *
- * Use it to authenticate/authorize the HTTP request and to set typed Hono
- * variables such as `principalId`, `tenantId` or `additionalParameter`.
+ * Use it to authenticate the HTTP request, verify and decode its credential,
+ * and set typed Hono variables such as `principalId`, `tenantId` or
+ * `additionalParameter`. Business authorization belongs to guards on the
+ * receiving PURISTA command, stream, subscription, worker, or mounted Harness
+ * target.
  */
 export type EndpointProtectMiddleware<
 	T extends Service,

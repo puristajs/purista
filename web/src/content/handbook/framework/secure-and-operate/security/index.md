@@ -21,15 +21,25 @@ protection middleware and reject invalid credentials with a handled error:
 import { HandledError, StatusCode } from '@purista/core'
 
 honoService.setProtectMiddleware(async function (context, next) {
-  const identity = await verifyAccessToken(context.req.header('authorization'))
-  if (!identity) {
+  const token = context.req.header('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
+  if (!token) {
     throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
   }
-  context.set('principalId', identity.subject)
-  context.set('tenantId', identity.tenantId)
+
+  try {
+    const claims = await accessTokenVerifier.verifyAndDecode(token)
+    context.set('principalId', claims.principalId)
+    context.set('tenantId', claims.tenantId)
+  } catch {
+    throw new HandledError(StatusCode.Unauthorized, 'Access token is invalid or expired')
+  }
   return next()
 })
 ```
+
+The verifier validates the token and decrypts it when its format requires
+decryption. Only its normalized principal and tenant claims enter the PURISTA
+message; the raw token stays at the HTTP boundary.
 
 [`setProtectMiddleware(handler)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware)
 establishes the transport boundary. Without this call (or an equivalent

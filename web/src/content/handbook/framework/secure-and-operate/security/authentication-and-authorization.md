@@ -6,8 +6,9 @@ order: 1011
 
 Authentication verifies who called; authorization verifies what that identity
 may do. Keep them separate. Hono middleware can set `principalId`, `tenantId`,
-and additional parameters for an HTTP-exposed command, while a command,
-subscription, or worker guard performs the business decision.
+and additional parameters for an HTTP-exposed command after it has verified and
+decoded the token. A command, stream, subscription, queue-worker, or
+mounted-Harness guard performs the business decision.
 
 ## Protect the transport, then guard the command
 
@@ -20,17 +21,26 @@ identity from the JSON body or an unverified header.
 import { HandledError, StatusCode } from '@purista/core'
 
 honoService.setProtectMiddleware(async function (context, next) {
-  const identity = await verifyAccessToken(context.req.header('authorization'))
-
-  if (!identity) {
+  const token = context.req.header('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
+  if (!token) {
     throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
   }
 
-  context.set('principalId', identity.subject)
-  context.set('tenantId', identity.tenantId)
+  try {
+    const claims = await accessTokenVerifier.verifyAndDecode(token)
+    context.set('principalId', claims.principalId)
+    context.set('tenantId', claims.tenantId)
+  } catch {
+    throw new HandledError(StatusCode.Unauthorized, 'Access token is invalid or expired')
+  }
   return next()
 })
 ```
+
+`verifyAndDecode(...)` represents the application-selected token implementation.
+It validates integrity, issuer, audience, and expiry and decrypts encrypted
+tokens before returning claims. The middleware keeps the raw token at the HTTP
+boundary and places only trusted normalized identity on the Hono context.
 
 The Hono service's default protection handler is a pass-through. If neither
 `setProtectMiddleware(...)` nor `serviceConfig.protectHandler` is configured,
@@ -58,20 +68,24 @@ export const approveInvoiceCommandBuilder = invoiceV1ServiceBuilder
   .enableHttpSecurity(true)
   .setBeforeGuardHooks({
     mayApproveInvoice: async function (context, payload) {
-      if (!context.message.principalId || !context.message.tenantId) {
-        throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
-      }
-
+      const principalId = context.message.principalId
+      const tenantId = context.message.tenantId
       const invoice = await context.resources.invoiceRepository.get(payload.invoiceId)
 
-      // This is the business access rule. The public payload is not the tenant authority.
-      if (!invoice || invoice.tenantId !== context.message.tenantId) {
+      // This is the business access rule. The public payload is not an authority.
+      if (!principalId || !tenantId || !invoice) {
+        throw new HandledError(StatusCode.Forbidden, 'Invoice access is not allowed')
+      }
+
+      const allowed = invoice.tenantId === tenantId
+        && await context.resources.invoicePolicy.mayApprove({ principalId, invoice })
+      if (!allowed) {
         throw new HandledError(StatusCode.Forbidden, 'Invoice access is not allowed')
       }
     },
   })
   .setCommandFunction(async function (context, payload) {
-    // Authentication and business authorization have completed.
+    // The transport authenticated the caller and the guard authorized this action.
     const principalId = context.message.principalId as string
 
     return context.resources.invoiceRepository.approve(payload.invoiceId, principalId)
@@ -88,11 +102,12 @@ export const approveInvoiceCommandBuilder = invoiceV1ServiceBuilder
 | [`setBeforeGuardHooks(hooks)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setbeforeguardhooks) | Named, service-bound business access checks between input validation and the handler. | Each value must be a non-arrow function. Reusing a hook name replaces its earlier definition; named hooks run concurrently, so do not rely on name order. A thrown error prevents the handler from running. Guards may use declared resources to evaluate record, tenant, role, plan, or lifecycle policy. |
 | [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction) | The business effect after validation and guards succeed. | Use a non-arrow `async function`; Core rejects arrows and requires a handler before definition assembly. Its trusted identity is on `context.message`, not the client payload. |
 
-The example assumes that `invoiceRepository` is a narrowly scoped declared
-resource. The guard loads the record because tenant ownership is the business
-access rule; Hono already handled token validity. For a real database, also
-scope the mutation itself by tenant or an authorization predicate so a changed
-record cannot slip between the guard read and the write.
+The example assumes that `invoiceRepository` and `invoicePolicy` are narrowly
+scoped declared resources. The guard loads the record and evaluates the
+principal, tenant, record, and requested action; Hono already handled token
+validity. For a real database, also scope the mutation itself by tenant or an
+authorization predicate so a changed record cannot slip between the guard read
+and the write.
 
 ## Choose the right control
 
@@ -106,10 +121,11 @@ record cannot slip between the guard read and the write.
 
 Do not make authorization depend only on route visibility. A command can be invoked through another supported transport, so enforce policy at the service definition/handler boundary as well. Pass only the resource permissions the service needs; an administrator database client in every service defeats least privilege.
 
-Test one allowed and one denied identity for each sensitive operation. Include a
-missing identity, another tenant, and a route-bypass/internal-invocation case.
-Return a controlled authorization response and avoid logging bearer material or
-full request headers. See [Hono HTTP endpoints](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
+Test missing, malformed, expired, and invalid tokens against the protection
+middleware and expect `401`. Separately test one allowed and one denied
+identity for every sensitive guard. Include a missing trusted identity, another
+tenant, and a route-bypass/internal-invocation case and expect authorization to
+fail closed. Avoid logging bearer material or full request headers. See [Hono HTTP endpoints](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
 for server setup and [tenant isolation](/handbook/framework/secure-and-operate/security/tenant-isolation/)
 for data scope.
 

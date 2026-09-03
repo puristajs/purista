@@ -118,7 +118,7 @@ middleware. Set the general service logger through the top-level
 | `enableHealth` | `false` | Registers `GET healthPath`; it returns `503` while Hono is unavailable, `200` when its health callback resolves, and an RFC 9457 error when the callback throws. | Your platform probes this HTTP process. Enable it deliberately; a listener alone is not a readiness claim. |
 | `healthPath` | `/healthz` | Selects the health route. | Your platform requires a specific probe path. Keep it outside a conflicting API route. |
 | `healthFunction` | A successful no-op | Optional health callback used only when `enableHealth` is true. | Dependencies beyond Hono process readiness must be checked. Prefer `setHealthFunction(...)` after instantiation for its typed callback. |
-| `protectHandler` | Pass-through middleware | Middleware used only by endpoints with HTTP security enabled (the builder default). | The edge authenticates a request or supplies normalized principal/tenant values. Prefer `setProtectMiddleware(...)` for typed variables. |
+| `protectHandler` | Pass-through middleware | Middleware used only by endpoints with HTTP security enabled (the builder default). | Authenticate the request, verify and decode its token, and set normalized principal/tenant values. Prefer `setProtectMiddleware(...)` for typed variables. Do not put business authorization here. |
 | `traceHeaderField` | `x-trace-id` | Reads and echoes the application trace header and includes it in problem details. | An existing edge uses another application correlation header. It complements, rather than replaces, W3C trace propagation. |
 | `problemDetails.typeBaseUri` | Unset | Prefixes generated RFC 9457 problem `type` URIs. | You publish stable, documented problem-type URLs. |
 
@@ -224,11 +224,14 @@ business guard.
 [`setProtectMiddleware(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware)
 runs only for endpoints whose builder retains the default secure setting or
 calls `enableHttpSecurity(true)`. Its arguments are Hono's request context and
-`next`. It may reject unauthenticated traffic, then set normalized
-`principalId`, `tenantId`, or `additionalParameter` values before calling
-`next`. Its `this` value is the Hono service, so a normal `function` can use
-the service deliberately; an arrow function is suitable when no receiver is
-needed. A command guard still makes the business authorization decision.
+`next`. It extracts, verifies, and decodes the request credential, rejects
+failed authentication, then sets normalized `principalId` and `tenantId`
+before calling `next`. Use `additionalParameter` only for other trusted
+transport-derived command parameters. Its `this` value is the Hono service, so
+a normal `function` can use the service deliberately; an arrow function is
+suitable when no receiver is needed. It must not decide whether that identity
+may act on a specific business object. The receiving command, stream,
+subscription, worker, or mounted-Harness guard owns that authorization.
 
 Generated endpoints are protected by default. Mark only an intentionally
 anonymous command or stream with `.makeEndpointPublic()`:
@@ -271,16 +274,25 @@ honoService
     }
   })
   .setProtectMiddleware(async function (request, next) {
-    const identity = await verifyAccessToken(request.req.header('authorization'))
-    if (!identity) {
+    const token = request.req.header('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
+    if (!token) {
       throw new HandledError(StatusCode.Unauthorized, 'A valid access token is required')
     }
 
-    request.set('principalId', identity.subject)
-    request.set('tenantId', identity.tenantId)
+    try {
+      const claims = await accessTokenVerifier.verifyAndDecode(token)
+      request.set('principalId', claims.principalId)
+      request.set('tenantId', claims.tenantId)
+    } catch {
+      throw new HandledError(StatusCode.Unauthorized, 'The access token is invalid or expired')
+    }
     return next()
   })
 ```
+
+The application-selected verifier validates integrity, issuer, audience, and
+expiry and decrypts encrypted tokens before returning claims. Keep the bearer
+token out of `additionalParameter`, PURISTA messages, logs, and traces.
 
 [`setHealthFunction(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#sethealthfunction)
 is called by the health route with the same service receiver. Throw from it to
@@ -291,8 +303,8 @@ runtime effect.
 
 Apply TLS, rate limits, ingress request timeout, network policy, and DDoS
 protection at the edge. Hono’s `maxRequestBodyBytes` and protected-route
-middleware are application-level controls, not a substitute for those boundary
-controls.
+authentication are application-level controls, not a substitute for those
+boundary controls.
 
 ### Find the complete Hono service surface
 
@@ -308,7 +320,7 @@ concerns, while keeping business operations as commands or streams.
 | [`openApi`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#openapi) | Add metadata for an application-owned custom route. | Generated operations are added during endpoint registration. |
 | [`setHonoTypes<...>()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#sethonotypes) | Narrow Hono binding/variable types without changing runtime behavior. | Call after `getInstance(...)`; it returns the same instance. |
 | [`setHealthFunction(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#sethealthfunction) | Check application dependencies when `enableHealth` is enabled. | Configure before traffic; throwing makes the health request fail. |
-| [`setProtectMiddleware(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware) | Authenticate protected generated routes and set trusted identity fields. | Configure before generated routes register. |
+| [`setProtectMiddleware(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware) | Extract, verify, and decode credentials for protected generated routes, then set trusted identity fields. | Configure before generated routes register. Business authorization remains in service guards. |
 | [`registerService(...services)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#registerservice) | Project in-process command and stream definitions in a monolith. | Must run before `start()`; a later call fails. |
 | [`start()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#start) | Install generated routes, not-found and RFC 9457 error handling, register configured services, and mark the HTTP service available. | Configure middleware, protection, health, and projected services first. The service instance is single-use. |
 | [`addEndpoint(metadata, address)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#addendpoint) | Project one already-declared command/stream, including dynamic discovery. | Advanced API; duplicate target registration is ignored and a conflicting method/path fails. |

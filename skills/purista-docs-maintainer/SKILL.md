@@ -470,6 +470,9 @@ runtime test for the complete order.
   decisions or fewer.
 - Never expose secrets, credentials, PII, prompts/completions, raw payloads,
   headers, attachments, or tenant/user identifiers in examples or telemetry.
+- Keep authentication and authorization separate: Hono
+  `setProtectMiddleware(...)` verifies credentials and sets trusted identity;
+  PURISTA target guards authorize business actions on every invocation path.
 - Treat caller-visible application errors as an explicit disclosure boundary.
   Document exactly which status/message/data becomes public and keep provider,
   database, stack, credential, PII, and invalid-output details internal. Never

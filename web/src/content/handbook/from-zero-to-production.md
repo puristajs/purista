@@ -220,10 +220,11 @@ gracefulShutdown(logger, [eventBridge, userService, emailService])
 ### What to enable
 
 1. **OpenTelemetry** — traces, metrics, and structured logs
-2. **Authentication / authorization** — protect HTTP endpoints
-3. **Error handling** — validate timeout behavior, stream cancellation, retry policies
-4. **Integration tests** — test against real infrastructure in staging
-5. **Stream consumer verification** — ensure SSE consumers handle reconnection
+2. **Authentication** — verify and decode credentials in the Hono protection middleware and propagate trusted principal and tenant ids
+3. **Authorization** — guard each command, stream, subscription, and worker according to its business action and object
+4. **Error handling** — validate timeout behavior, stream cancellation, retry policies
+5. **Integration tests** — test against real infrastructure in staging
+6. **Stream consumer verification** — ensure SSE consumers handle reconnection
 
 ### Example: enabling OpenTelemetry
 
@@ -241,19 +242,43 @@ const myService = await myV1Service.getInstance(eventBridge, { spanProcessor })
 
 PURISTA automatically creates spans for every message. No instrumentation in your business logic.
 
-### Example: endpoint protection
+### Example: authentication and business authorization
 
-```typescript [userSignUpCommandBuilder.ts]
-export const userSignUpCommandBuilder = userServiceV1ServiceBuilder
-  .getCommandBuilder('userSignUp', 'register a new user')
-  .exposeAsHttpEndpoint('POST', 'users')
-  .makeEndpointSecured()
+```typescript [configureHttpAuthentication.ts]
+honoService.setProtectMiddleware(async function (context, next) {
+  const token = context.req.header('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
+  if (!token) throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
+
+  try {
+    const identity = await accessTokenVerifier.verifyAndDecode(token)
+    context.set('principalId', identity.principalId)
+    context.set('tenantId', identity.tenantId)
+  } catch {
+    throw new HandledError(StatusCode.Unauthorized, 'Access token is invalid or expired')
+  }
+  return next()
+})
 ```
+
+```typescript [approveInvoiceCommandBuilder.ts]
+export const approveInvoiceCommandBuilder = invoiceV1ServiceBuilder
+  .getCommandBuilder('approveInvoice', 'Approve an invoice')
+  .addPayloadSchema(approveInvoiceSchema)
+  .exposeAsHttpEndpoint('POST', 'invoices/:invoiceId/approval')
+  .setBeforeGuardHooks({ mayApproveInvoice })
+  .setCommandFunction(approveInvoice)
+```
+
+Generated endpoints are protected by default. The middleware authenticates the
+credential and sets trusted identity. `mayApproveInvoice` authorizes that
+identity for this invoice and action. See [authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/).
 
 ### Phase 4 checklist
 
 - [ ] OpenTelemetry exporter configured and verified
-- [ ] Auth middleware applied to protected endpoints
+- [ ] Protection middleware verifies and decodes tokens and sets trusted principal and tenant ids
+- [ ] Business guards cover protected commands, streams, subscriptions, and workers
+- [ ] Authentication failures return `401`; authenticated authorization denials return `403`
 - [ ] Error handling tested: happy path, failure path, timeout, cancellation
 - [ ] Retry policies defined (not relying on defaults)
 - [ ] Stream reconnection tested

@@ -1,6 +1,6 @@
 ---
 title: Authenticate and propagate principals and tenants
-description: Protect endpoints by default, resolve technical identity at Hono, and enforce business access with service guards.
+description: Verify access tokens at Hono, propagate trusted principal and tenant identity, and authorize business actions with service guards.
 order: 415
 ---
 
@@ -42,43 +42,48 @@ so the current-session route retains the protected default.
 that route. `enableHttpSecurity()` restores the default protected setting.
 OpenAPI security metadata alone does not authenticate a request.
 
-## Resolve a session through a service command
+## Verify and decode the token in the protection middleware
 
-Store short-lived session state behind the Identity service. The Hono
-middleware reads the opaque bearer token, then invokes the Identity command by
-address through EventBridge. It does not read the state store directly.
+The protection middleware owns HTTP authentication. It extracts the bearer
+token, verifies it with the application's identity provider or token verifier,
+decodes its trusted claims, and sets the normalized principal and tenant ids.
+The verifier must check integrity, issuer, audience, and expiry. It must also
+decrypt the token before reading claims when the selected token format is
+encrypted.
 
-```ts title="src/http/sessionProtectMiddleware.ts"
+Pass the token verifier into the middleware from the application composition
+root. Do not send the bearer token through EventBridge, copy it into command
+input, or make a business service decode HTTP credentials.
+
+```ts title="src/http/accessTokenProtectMiddleware.ts"
 import { HandledError, StatusCode } from '@purista/core'
 import type { EndpointProtectMiddleware, HonoServiceClass } from '@purista/hono-http-server'
-import type { SessionRecord } from '../service/identity/v1/session.js'
+type VerifiedAccessToken = {
+  principalId: string
+  tenantId: string
+}
 
-export const createSessionProtectMiddleware = (
-  http: HonoServiceClass,
+type AccessTokenVerifier = {
+  verifyAndDecode(token: string): Promise<VerifiedAccessToken>
+}
+
+export const createAccessTokenProtectMiddleware = (
+  accessTokens: AccessTokenVerifier,
 ): EndpointProtectMiddleware<HonoServiceClass> => async function (c, next) {
   const token = c.req.header('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
   if (!token) {
-    throw new HandledError(StatusCode.Unauthorized, 'A session bearer token is required')
+    throw new HandledError(StatusCode.Unauthorized, 'A bearer token is required')
   }
 
-  let session: SessionRecord
+  let identity: VerifiedAccessToken
   try {
-    session = await http.invoke({
-      receiver: {
-        serviceName: 'Identity',
-        serviceVersion: '1',
-        serviceTarget: 'resolveSession',
-      },
-      payload: { payload: undefined, parameter: { sessionToken: token } },
-      contentType: 'application/json',
-      contentEncoding: 'utf-8',
-    }, 'protect-session') as SessionRecord
+    identity = await accessTokens.verifyAndDecode(token)
   } catch {
-    throw new HandledError(StatusCode.Unauthorized, 'The session is invalid or expired')
+    throw new HandledError(StatusCode.Unauthorized, 'The access token is invalid or expired')
   }
 
-  c.set('principalId', session.principalId)
-  c.set('tenantId', session.tenantId)
+  c.set('principalId', identity.principalId)
+  c.set('tenantId', identity.tenantId)
   await next()
 }
 ```
@@ -86,37 +91,38 @@ export const createSessionProtectMiddleware = (
 Install it before Hono registers generated routes:
 
 ```ts title="Configure protected routes"
-http.setProtectMiddleware(createSessionProtectMiddleware(http))
+http.setProtectMiddleware(createAccessTokenProtectMiddleware(accessTokenVerifier))
 await http.start()
 ```
 
-Hono copies only middleware-provided `principalId` and `tenantId` into the
-PURISTA message. Downstream command, stream, queue, agent, and workflow calls
-propagate those trusted message fields.
+Hono copies the middleware-provided `principalId` and `tenantId` into the
+PURISTA message. The raw token remains at the HTTP boundary. Downstream
+command, stream, subscription, queue, agent, and workflow calls propagate the
+trusted identity fields.
 
 ## Authorize the business action in a guard
 
-Authentication proves who called. A command guard decides whether that caller
-may act on this account, transaction, or tenant.
+Authentication is complete before the PURISTA message is created. A command,
+stream, subscription, queue-worker, or mounted-Harness guard decides whether
+that authenticated identity may perform its specific business action.
 
 ```ts title="Business authorization guard"
 const canReadAccount = async function (context, _payload, parameter) {
   const principalId = context.message.principalId
   const tenantId = context.message.tenantId
-  if (!principalId || !tenantId) {
-    throw new HandledError(StatusCode.Unauthorized, 'Authentication is required')
-  }
-
-  const allowed = await context.resources.accountAccess.canRead({
-    accountId: parameter.accountId,
-    principalId,
-    tenantId,
-  })
+  const allowed = principalId !== undefined && tenantId !== undefined
+    && await context.resources.accountAccess.canRead({
+      accountId: parameter.accountId,
+      principalId,
+      tenantId,
+    })
   if (!allowed) throw new HandledError(StatusCode.Forbidden, 'Account access is not allowed')
 }
 ```
 
-Do not treat “a valid user exists” as business authorization. Do not accept
-principal or tenant IDs from payload/query fields as trusted identity.
+The guard does not read or verify the bearer token. It evaluates the trusted
+identity against the requested account and action and fails closed when that
+identity is absent or not allowed. Do not accept principal or tenant ids from
+payload/query fields as trusted identity.
 
 Next: [configure Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/).

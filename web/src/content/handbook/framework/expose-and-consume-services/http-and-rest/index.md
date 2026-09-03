@@ -177,9 +177,10 @@ export const requestReportCommandBuilder = reportV1ServiceBuilder
 
 Use a durable QueueBridge before relying on the acceptance path in production.
 Make enqueueing idempotent and persist or publish a result that the caller can
-retrieve. Apply authentication, authorization, body-size, rate, and timeout
-limits at the edge; never expose raw service errors or an administrative command
-just because it already exists.
+retrieve. Apply authentication, body-size, rate, and timeout limits at the HTTP
+edge, and apply business authorization in the command guard before enqueueing.
+Never expose raw service errors or an administrative command just because it
+already exists.
 
 An async Hono projection requires the command result to retain a string `jobId`
 and `queueName`; otherwise Hono returns `500` instead of `202`. The generated
