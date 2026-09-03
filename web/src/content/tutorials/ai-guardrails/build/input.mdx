@@ -1,17 +1,41 @@
 ---
-title: Block unsafe input
-description: Define an input action and prove it runs before model-provider access.
+title: Define the input content rail
+description: Create a typed, fail-closed action that blocks one instruction-override pattern before provider access.
 order: 192
 kind: lesson
 status: draft
 ---
 
-Define one deterministic action. It validates the entire agent input with the
-same schema used by the agent, inspects only `text`, and returns a stable
-content-free reason code.
+A guardrail action receives a value at a specific model lifecycle phase. This
+first action inspects validated agent input before Harness contacts the model
+provider.
 
-```ts title="src/harness/support/agent/classifySupportMessage/classificationGuardrails.ts" write
-import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+## Create the shared schemas
+
+Create a separate schema file beside the generated agent. The agent and both
+guardrail actions will use the same contracts without importing one another.
+
+```ts title="src/harness/support/agent/classifySupportMessage/schema.ts" write
+import { z } from 'zod'
+
+export const classifySupportMessageInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classifySupportMessageOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+```
+## Define the blocking action
+
+Create the complete action file. The evaluator inspects only `text` and returns
+a stable reason code without copying message content into the result.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classificationInputGuardrail.ts" write
+import { defineGuardrailAction } from '@purista/harness-guardrails'
 import { classifySupportMessageInputSchema } from './schema.js'
 
 export const blockInstructionOverride = defineGuardrailAction({
@@ -23,53 +47,21 @@ export const blockInstructionOverride = defineGuardrailAction({
 			? { decision: 'block', reasonCode: 'instruction_override' }
 			: { decision: 'allow' },
 })
+```
+`phase: 'input'` fixes where the action may run. `valueSchema` gives the
+evaluator a validated value. `mayTransform: false` restricts the result to
+allow or block. An evaluator exception, timeout, cancellation, invalid input,
+or invalid result fails closed when the flow runs.
 
-export const classificationGuardrails = defineGuardrails({
-	config: {
-		rails: {
-			input: { flows: ['block instruction override'] },
-		},
-	},
-	actions: {
-		'block instruction override': blockInstructionOverride,
-	},
-	actionTimeoutMs: 2_000,
-})
+This deterministic expression teaches the lifecycle. It is not a general
+prompt-injection detector.
+
+```bash title="Typecheck the input action" replay="project"
+npm run build
 ```
 
-`mayTransform: false` makes the action an allow-or-block check. An exception,
-timeout, cancellation, invalid schema value, or invalid evaluator result fails
-closed. The action does not log or return the matched message.
+The action exists but is not attached to the agent yet. The next page adds the
+output action, composes both flows, and attaches them together so every runnable
+checkpoint uses the complete final policy.
 
-Attach the compiled flow to the existing default-loop agent.
-
-```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
-import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
-import { classificationGuardrails } from './classificationGuardrails.js'
-import { classifySupportMessageInputSchema, classifySupportMessageOutputSchema } from './schema.js'
-
-type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
-
-export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState>()(
-	'support.agent.classify-support-message',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.agent('classify_support_message', {
-				model: 'primary',
-				input: classifySupportMessageInputSchema,
-				output: classifySupportMessageOutputSchema,
-				updates: 'object-snapshot',
-				instructions: 'Classify the support message and give one concise reason grounded in its text.',
-				guardrails: classificationGuardrails,
-			})
-		},
-	},
-)
-```
-
-Automatic Guardrails attach only to default-loop agents because Harness owns
-their model and tool lifecycle. A custom `handler` owns its own release
-boundaries and cannot also set `guardrails`.
-
-Continue with [Redact final output](./output/).
+Continue with [Define the output rail and attach the flow](./output/).

@@ -1,0 +1,185 @@
+---
+title: Wire and run the guarded application
+description: Supply the model and business policy at startup, then observe an output transform through the complete EventBridge path.
+order: 195
+kind: lesson
+status: draft
+---
+
+The portable policy and PURISTA definitions are complete. Add a composition
+root that supplies the concrete business policy and model.
+
+## Create the service factory
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		model: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: {
+			models: { primary: options.model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+The `primary` binding satisfies the Harness model alias. The business policy is
+a normal typed service resource. `NO_CONTENT` keeps prompts and results out of
+telemetry by default.
+
+## Add an address-first caller
+
+Create the terminal adapter below. It sends a normal command message to
+`Support / 1 / classifySupportMessage`.
+
+```ts title="src/invokeClassification.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from './harness/support/agent/classifySupportMessage/schema.js'
+
+type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
+type Classification = z.infer<typeof classifySupportMessageOutputSchema>
+
+export function invokeClassification(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: ClassificationInput,
+) {
+	return eventBridge.invoke<Classification>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'classify',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+		payload: { payload, parameter: {} },
+	})
+}
+```
+In a server application, authentication middleware verifies a credential and
+adds the trusted identity. A client-supplied tenant or principal must never be
+copied into these fields without verification.
+
+## Run the transformed result without an API key
+
+Create the deterministic demo. The fake model returns a reason containing a
+synthetic test number. The output rail replaces it before the command receives
+the result.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+import { invokeClassification } from './invokeClassification.js'
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject({
+		object: {
+			category: 'card',
+			urgency: 'normal',
+			reason: 'The message contains card number 4111111111111111.',
+		},
+		usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 },
+		finishReason: 'stop',
+	})
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canClassify: async () => true },
+		model: { provider, model: 'fake-classifier' },
+	})
+	await support.start()
+
+	try {
+		const result = await invokeClassification(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{ messageId: 'MSG-302', text: 'I have a question about my card.' },
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the credential-free Guardrails demo" replay="project"
+npm run demo
+```
+
+```json title="Expected transformed classification" expect="json"
+{
+	"category": "card",
+	"urgency": "normal",
+	"reason": "The message contains card number [redacted]."
+}
+```
+
+## Optional: use a live provider
+
+Create the live process entry point.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canClassify: async () => true },
+		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Guarded Support classification service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(
+		`${error instanceof Error ? error.message : 'Guarded classification service could not start.'}\n`,
+	)
+	process.exit(1)
+})
+```
+```dotenv title=".env.example"
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+
+Copy the template to `.env`, set the key, and run `npm start` only when you
+intend to contact the provider. The process remains active until shutdown.
+
+Continue with [Test the native and command boundaries](../../testing/test-guardrails/).

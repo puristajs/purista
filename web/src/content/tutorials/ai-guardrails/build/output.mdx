@@ -1,30 +1,25 @@
 ---
-title: Redact final output
-description: Add a typed transform that removes a sensitive digit pattern from the final result.
+title: Define the output rail and attach the flow
+description: Add a typed output transform, compose both content flows, and attach them to the generated default-loop agent.
 order: 193
 kind: lesson
 status: draft
 ---
 
-An output rail runs on the schema-valid final candidate. It does not run on
-intermediate tool results. Add a second action that preserves the structured
-classification while replacing a long digit sequence in its reason.
+An output rail receives the schema-valid final candidate after the model loop.
+It does not inspect intermediate tool results. This action replaces one narrow
+digit pattern in the classification reason while preserving the structured
+object.
 
-```ts title="src/harness/support/agent/classifySupportMessage/classificationGuardrails.ts" write
-import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
-import { classifySupportMessageInputSchema, classifySupportMessageOutputSchema } from './schema.js'
+## Define the output transform
+
+Create the complete action file.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classificationOutputGuardrail.ts" write
+import { defineGuardrailAction } from '@purista/harness-guardrails'
+import { classifySupportMessageOutputSchema } from './schema.js'
 
 const cardLikeDigits = /\b\d{13,19}\b/g
-
-export const blockInstructionOverride = defineGuardrailAction({
-	phase: 'input',
-	valueSchema: classifySupportMessageInputSchema,
-	mayTransform: false,
-	evaluate: ({ value }) =>
-		/ignore (all )?previous instructions/i.test(value.text)
-			? { decision: 'block', reasonCode: 'instruction_override' }
-			: { decision: 'allow' },
-})
 
 export const redactCardLikeDigits = defineGuardrailAction({
 	phase: 'output',
@@ -41,6 +36,21 @@ export const redactCardLikeDigits = defineGuardrailAction({
 				}
 	},
 })
+```
+The transform target must match the phase: `bot_message` for output. The
+replacement object must still satisfy both the action value schema and agent
+output schema. Guardrails do not search arbitrary nested fields; this action
+explicitly owns `reason`.
+
+## Compose the ordered flows
+
+Create the policy file. Flow names refer to keys in `actions`, which makes the
+execution order visible and reviewable.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classificationGuardrails.ts" write
+import { defineGuardrails } from '@purista/harness-guardrails'
+import { blockInstructionOverride } from './classificationInputGuardrail.js'
+import { redactCardLikeDigits } from './classificationOutputGuardrail.js'
 
 export const classificationGuardrails = defineGuardrails({
 	config: {
@@ -56,14 +66,45 @@ export const classificationGuardrails = defineGuardrails({
 	actionTimeoutMs: 2_000,
 })
 ```
+## Replace the generated agent
 
-The transform target must match the phase: `bot_message` for output. The
-replacement value must still satisfy the action's schema and the agent output
-schema. Guardrails do not search arbitrary nested values automatically; this
-action deliberately owns one reviewed field.
+Replace the complete generated agent file. The `guardrails` property attaches
+the compiled flows to the default-loop agent lifecycle.
 
-This small digit detector demonstrates lifecycle and typing. It is not a full
-card-data policy. Production privacy detection needs a reviewed detector,
-evaluation dataset, retention policy, and the relevant optional adapter.
+```ts title="src/harness/support/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { classificationGuardrails } from './classificationGuardrails.js'
+import { classifySupportMessageInputSchema, classifySupportMessageOutputSchema } from './schema.js'
 
-Continue with [Mount and invoke the guarded agent](./integrate/).
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+export const classifySupportMessageAgent = defineHarnessModule<PrimaryModelState>()(
+	'support.agent.classify-support-message',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('classify_support_message', {
+				model: 'primary',
+				input: classifySupportMessageInputSchema,
+				output: classifySupportMessageOutputSchema,
+				updates: 'object-snapshot',
+				instructions: 'Classify the support message and give one concise reason grounded in its text.',
+				guardrails: classificationGuardrails,
+			})
+		},
+	},
+)
+```
+Automatic Guardrails attach to default-loop agents because Harness owns their
+model and tool lifecycle. A custom agent `handler` owns its own release
+boundaries and cannot also set `guardrails`.
+
+This digit expression is only a synthetic teaching detector. Production
+privacy controls need reviewed detectors, representative evaluation data,
+retention rules, and the appropriate optional adapter.
+
+```bash title="Verify the attached Guardrails flows" replay="project"
+npm run build
+```
+
+Continue with [Authorize, mount, and invoke the agent](./integrate/).

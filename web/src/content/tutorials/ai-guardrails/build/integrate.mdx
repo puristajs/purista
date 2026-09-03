@@ -1,23 +1,24 @@
 ---
-title: Mount and invoke the guarded agent
-description: Protect the published target, call it by address from a command, and bind concrete resources and models at startup.
+title: Authorize, mount, and invoke the guarded agent
+description: Protect the published target with a business guard and call it through a declared PURISTA command address.
 order: 194
 kind: lesson
 status: draft
 ---
 
-Content guardrails inspect values. They do not decide which person may use the
-agent. Add a separate business-policy resource for the published target.
+Content rails inspect values. They do not decide which person may run the
+classifier. Add a separate business policy to the Support service, then apply it
+to both reachable entry points.
+
+## Declare the business policy
+
+Create the resource contract and replace the generated service builder.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportClassificationPolicy {
 	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
 }
 ```
-
-Declare the resource on the generated Support builder. Keep the service info
-and configuration schema created by the CLI.
-
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
 import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
@@ -33,10 +34,9 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.setConfigSchema(supportServiceV1ConfigSchema)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
-
-Put the shared business check and caller-scoped session naming in one helper.
-The policy receives the protected message id, while the Harness session id is
-derived from trusted identity rather than model input alone.
+Create one helper for the command guard and direct-target guard. The policy
+receives the business message id. The session helper mixes trusted identity
+with that id before hashing it; the resulting session key does not grant access.
 
 ```ts title="src/service/support/v1/requireSupportClassification.ts" write
 import { createHash } from 'node:crypto'
@@ -72,10 +72,10 @@ export function supportClassificationSessionId(
 	return `guarded-classification:${digest}`
 }
 ```
+## Protect the mounted target
 
-Replace the generated mount policy. The guard uses trusted identity from the
-PURISTA message and runs before the Harness session reaches a content rail or
-model provider.
+Replace the generated mount policy. Its guard runs before Harness creates a
+session, evaluates a content rail, or contacts a model.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
@@ -109,8 +109,17 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
+## Replace the generated command
 
-Replace the generated command. `canInvokeAgent(...)` declares the versioned
+The command uses the agent's input and output schemas, so remove the unused
+command-local placeholders.
+
+```bash title="Remove unused guarded command schemas" replay="project"
+rm src/service/support/v1/command/classifySupportMessage/schema.ts
+rm src/service/support/v1/command/classifySupportMessage/types.ts
+```
+
+Replace the command builder. `canInvokeAgent(...)` declares the versioned
 address and gives the handler its typed `context.agent` client.
 
 ```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
@@ -146,9 +155,10 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
+## Register both boundaries
 
-The generated service registration contains both parts of the runtime
-boundary: the normal command definition and the single Harness mount.
+Replace the service file. The command and the composed Harness definition are
+registered once on the same owner.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
@@ -159,37 +169,20 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
+The execution order is now explicit:
 
-Keep concrete policy and model implementations in the composition root.
-
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
-import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		policy: SupportClassificationPolicy
-		model: { provider: ModelProvider; model: string }
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
+```text title="Authorization and content enforcement order"
+trusted PURISTA identity
+  -> command business guard
+  -> mounted-target business guard
+  -> input content rail
+  -> model provider
+  -> output content rail
+  -> validated command result
 ```
 
-The order is now explicit: authentication creates trusted message identity,
-the command guard and mounted-target guard perform business authorization, the input rail
-checks content, the model runs, and the output rail checks or transforms the
-candidate result.
+```bash title="Verify the guarded service composition" replay="project"
+npm run build
+```
 
-Continue with [Test authorization and content enforcement](../testing/test-guardrails/).
+Continue with [Wire and run the application](./run-application/).
