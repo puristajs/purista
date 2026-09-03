@@ -1,0 +1,52 @@
+---
+title: Compose the parallel workflow runtime
+description: Bind each model alias and the case policy through one provider-neutral Support service factory.
+order: 266
+kind: lesson
+status: draft
+---
+
+The service definition requires two model aliases. The composition root may
+bind them to different providers or models without changing either specialist
+or the workflow.
+
+Create the provider-neutral factory.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		supportCasePolicy: SupportCasePolicy
+		riskModel: { provider: ModelProvider; model: string }
+		responseModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportCasePolicy: options.supportCasePolicy },
+		ai: {
+			models: {
+				risk_model: options.riskModel,
+				response_model: options.responseModel,
+			},
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+}
+```
+
+The factory makes the two capacity and quality decisions explicit. A cheaper
+model can plan responses while a stricter model assesses risk, or both aliases
+can share one provider. The workflow contract remains unchanged.
+
+```bash title="Verify the parallel runtime composition" replay="project"
+npm run build
+```
+
+Continue with [Run the parallel workflow](../run-application/).

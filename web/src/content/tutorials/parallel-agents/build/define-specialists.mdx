@@ -1,82 +1,16 @@
 ---
-title: Create the project and specialist agents
-description: Generate the PURISTA service, two native agents, their workflow, and the invoking command, then replace the agent placeholders with narrow contracts.
-order: 261
+title: Define the specialist agents
+description: Give each generated agent one responsibility, one model alias, and one schema-validated result.
+order: 262
 kind: lesson
 status: draft
 ---
 
-Start in an empty parent directory. This chapter owns a complete project and
-does not need another tutorial application.
+The CLI generated two agent modules. Keep them separate because they solve
+different tasks and may use different models in production. Put only their
+shared input and result schemas in one nearby file.
 
-```bash title="Create and enter the parallel-agent project" replay="parent"
-npm create purista@2.2.0 parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
-cd parallel-agent-workflow
-```
-
-Replace the generated package manifest. The `add:*` scripts always call the
-project-local PURISTA CLI, and the default demo uses fake model providers.
-
-```json title="package.json" write
-{
-	"name": "@purista/tutorial-parallel-agents",
-	"version": "1.0.0",
-	"private": true,
-	"type": "module",
-	"engines": {
-		"node": ">=24.15.0"
-	},
-	"scripts": {
-		"add:service": "purista add service",
-		"add:command": "purista add command",
-		"add:agent": "purista add agent",
-		"add:workflow": "purista add workflow",
-		"build": "tsc --noEmit",
-		"demo": "node --import tsx src/demo.ts",
-		"lint": "biome check .",
-		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
-		"test": "vitest run"
-	},
-	"dependencies": {
-		"@purista/core": "4.0.0",
-		"@purista/harness": "3.0.0",
-		"@purista/harness-openai": "3.0.0",
-		"zod": "4.4.3"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.5.8",
-		"@purista/cli": "4.0.0",
-		"@types/node": "26.2.0",
-		"@types/sinon": "22.0.0",
-		"sinon": "22.1.0",
-		"tsx": "4.23.12",
-		"typescript": "7.0.2",
-		"vitest": "4.1.10"
-	}
-}
-```
-```bash title="Install the parallel-agent dependencies" replay="project"
-npm install
-```
-
-Generate the Support capability, both specialist agents, their owning
-workflow, and the application command that invokes it.
-
-```bash title="Generate specialists, workflow, and command" replay="project"
-npm run add:service -- support --description "Own support cases and support automation" --non-interactive
-npm run add:agent -- assess-support-risk --service support --service-version 1 --description "Assess risk in one support case" --non-interactive
-npm run add:agent -- plan-support-response --service support --service-version 1 --description "Plan a response for one support case" --non-interactive
-npm run add:workflow -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis" --non-interactive
-npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
-```
-
-The CLI creates one module per agent, one module for the workflow, one shared
-`supportHarness.ts`, a mount policy, and focused test files. Keep that
-structure. It lets a new agent or workflow change without turning the complete
-Harness into one large file.
-
-Put the contracts shared by the two agents and their workflow in one nearby
-file.
+## Define the shared contracts
 
 ```ts title="src/harness/support/supportCaseSchemas.ts" write
 import { z } from 'zod'
@@ -102,8 +36,14 @@ export const supportCaseAnalysisOutputSchema = z.strictObject({
 	response: responsePlanSchema,
 })
 ```
-Replace the first generated agent module. Its only job is to assess risk and
-return schema-validated evidence through the `risk_model` alias.
+
+Both agents receive the same case. Their outputs stay different so the
+workflow can merge typed evidence without another model call.
+
+## Implement the risk specialist
+
+Replace the first generated agent. Its only job is to assess risk and return
+short evidence through the `risk_model` alias.
 
 ```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
 import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
@@ -126,8 +66,14 @@ export const assessSupportRiskAgent = defineHarnessModule<RiskModelState>()('sup
 	},
 })
 ```
-Replace the second generated module. It uses a separate model alias and
-returns a proposed response; it cannot perform the proposed business action.
+
+The alias is a portable requirement. The application composition decides
+which provider and model satisfy it.
+
+## Implement the response specialist
+
+Replace the second generated module. It proposes a response and next action;
+it cannot perform that action.
 
 ```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.ts" write
 import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
@@ -153,8 +99,9 @@ export const planSupportResponseAgent = defineHarnessModule<ResponseModelState>(
 	},
 )
 ```
-Run a typecheck. The generated workflow still has placeholder behavior, but
-both real agent modules now compile in their normal CLI-owned paths.
+
+Run a typecheck before composing the workflow. This verifies both generated
+modules against their aliases and schemas.
 
 ```bash title="Verify the specialist agent modules" replay="project"
 npm run build

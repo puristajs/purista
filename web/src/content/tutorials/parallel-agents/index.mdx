@@ -22,12 +22,18 @@ You will learn how to:
 - apply business authorization at both the command and published workflow
   addresses.
 
-1. [Define the specialist agents](./build/define-specialists/)
-2. [Fan out with an explicit concurrency budget](./build/fan-out/)
-3. [Merge typed evidence](./build/merge-evidence/)
-4. [Compose and run the complete parallel workflow](./build/run-application/)
-5. [Test both specialists and the denied path](./testing/test-parallel/)
+1. [Create the project and generate every boundary](./setup/scaffold/)
+2. [Define the specialist agents](./build/define-specialists/)
+3. [Fan out with an explicit concurrency budget](./build/fan-out/)
+4. [Protect and publish only the workflow](./build/merge-evidence/)
+5. [Invoke the workflow from a PURISTA command](./build/invoke-workflow/)
+6. [Compose the two model bindings](./build/compose-runtime/)
+7. [Run the complete parallel workflow](./build/run-application/)
+8. [Test both specialists and their workflow](./testing/test-parallel/)
+9. [Test PURISTA command and EventBridge routing](./testing/test-routing/)
 
 The retained project is in `examples/banking/chapters/parallel-agents`. Its
 tests and default demo use two strict fake providers and a real EventBridge, so
 they need no API key.
+
+Start with [Create the parallel workflow project](./setup/scaffold/).

@@ -773,13 +773,17 @@
       "requires": [
         "classification-agent"
       ],
-      "pages": [
-        "parallel-agents/build/define-specialists",
-        "parallel-agents/build/fan-out",
-        "parallel-agents/build/merge-evidence",
-        "parallel-agents/build/run-application",
-        "parallel-agents/testing/test-parallel"
-      ]
+		"pages": [
+			"parallel-agents/setup/scaffold",
+			"parallel-agents/build/define-specialists",
+			"parallel-agents/build/fan-out",
+			"parallel-agents/build/merge-evidence",
+			"parallel-agents/build/invoke-workflow",
+			"parallel-agents/build/compose-runtime",
+			"parallel-agents/build/run-application",
+			"parallel-agents/testing/test-parallel",
+			"parallel-agents/testing/test-routing"
+		]
     },
     {
       "id": "multi-step-workflow",

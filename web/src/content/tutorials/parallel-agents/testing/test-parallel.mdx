@@ -1,15 +1,16 @@
 ---
-title: Test specialists and authorization
-description: Test each generated agent module, the composed workflow, the command helper, and the real EventBridge denial boundary.
-order: 265
+title: Test the specialists and workflow
+description: Verify each generated agent module and the composed parallel workflow with strict model fakes.
+order: 268
 kind: lesson
 status: draft
 ---
 
 Test the smallest portable units first. Each generated agent test builds a
 minimal native Harness around one module and supplies one strict fake model.
-This catches schema, prompt, alias, and unexpected-call failures without
-starting PURISTA.
+This isolates schema, prompt, alias, and unexpected-call failures.
+
+## Test the risk specialist
 
 ```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts" write
 import { defineHarness } from '@purista/harness'
@@ -45,6 +46,9 @@ describe('assessSupportRiskAgent', () => {
 	})
 })
 ```
+
+## Test the response specialist
+
 ```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts" write
 import { defineHarness } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -81,9 +85,12 @@ describe('planSupportResponseAgent', () => {
 	})
 })
 ```
-Next replace the generated workflow test. It instantiates the composed
-`supportHarness`, scripts one response per alias, and proves that the workflow
-runs and merges both modules.
+
+## Test fan-out and typed merge
+
+Replace the generated workflow test. It instantiates the composed
+`supportHarness`, scripts one response per alias, and proves the workflow runs
+and merges both module outputs.
 
 ```ts title="src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -135,181 +142,12 @@ describe('analyzeSupportCaseWorkflow', () => {
 	})
 })
 ```
-The PURISTA command test mocks the declared workflow address and the injected
-case policy. It verifies trusted identity, the derived session id, and the
-aggregate result without starting EventBridge.
 
-```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts" write
-import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
-import { createSandbox } from 'sinon'
-import { afterEach, describe, expect, it } from 'vitest'
-import { analyzeSupportCaseCommandBuilder } from './analyzeSupportCaseCommandBuilder.js'
+Using separate providers makes each branch deterministic without depending on
+which concurrent request reaches a shared queue first.
 
-const sandbox = createSandbox()
-afterEach(() => sandbox.restore())
-
-describe('analyzeSupportCaseCommandBuilder', () => {
-	it('authorizes the case and invokes the declared workflow address', async () => {
-		const payload = { caseId: 'case-1', message: 'My card is missing.' }
-		const policy = { canAnalyze: sandbox.stub().resolves(true) }
-		const { context, stubs } = createCommandContextMock(analyzeSupportCaseCommandBuilder, {
-			payload,
-			parameter: {},
-			resources: { supportCasePolicy: policy },
-			sandbox,
-		})
-		context.message = getCommandMessageMock({
-			tenantId: 'tenant-example',
-			principalId: 'principal-alex',
-			payload: { payload, parameter: {} },
-		})
-		const output = {
-			caseId: 'case-1',
-			risk: { level: 'high' as const, evidence: ['The customer reports a missing card.'] },
-			response: { customerReply: 'We can help.', nextAction: 'freeze_card' as const },
-		}
-		;(stubs.workflow as any).Support['1'].analyze_support_case.run.resolves({
-			status: 'completed',
-			runId: 'run-1',
-			output,
-		})
-
-		await expect(
-			analyzeSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
-		).resolves.toEqual(output)
-		expect(
-			policy.canAnalyze.calledOnceWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-alex',
-				caseId: 'case-1',
-			}),
-		).toBe(true)
-		expect(
-			(stubs.workflow as any).Support['1'].analyze_support_case.run.calledOnceWith(payload, {
-				sessionId: 'support-case:tenant-example:principal-alex:case-1',
-			}),
-		).toBe(true)
-	})
-})
-```
-Finish with a real local EventBridge. The success case crosses the command,
-mounted workflow, and both agents. The denial case calls the published
-workflow address directly and proves the mount guard stops both providers.
-
-```ts title="src/parallelAgents.integration.test.ts" write
-import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
-import { describe, expect, it, vi } from 'vitest'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-
-const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
-
-describe('parallel specialist workflow over PURISTA', () => {
-	it('runs both specialists, merges typed outputs, and keeps caller identity in the business guard', async () => {
-		const riskProvider = new FakeModelProvider({ strict: true })
-		const responseProvider = new FakeModelProvider({ strict: true })
-		riskProvider.enqueueObject({
-			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-			usage,
-			finishReason: 'stop',
-		})
-		responseProvider.enqueueObject({
-			object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
-		const policy = { canAnalyze: vi.fn(async () => true) }
-		const eventBridge = new DefaultEventBridge()
-		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportCasePolicy: policy },
-			ai: {
-				models: {
-					risk_model: { provider: riskProvider, model: 'risk-fake' },
-					response_model: { provider: responseProvider, model: 'response-fake' },
-				},
-			},
-		})
-		await service.start()
-
-		try {
-			await expect(
-				eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-alex',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyzeSupportCase' },
-						payload: {
-							payload: { caseId: 'case-1', message: 'My card is missing.' },
-							parameter: {},
-						},
-					}),
-				),
-			).resolves.toEqual({
-				caseId: 'case-1',
-				risk: { level: 'high', evidence: ['The customer reports a missing card.'] },
-				response: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-			})
-			expect(policy.canAnalyze).toHaveBeenCalledWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-alex',
-				caseId: 'case-1',
-			})
-			expect(riskProvider.requests).toHaveLength(1)
-			expect(responseProvider.requests).toHaveLength(1)
-			riskProvider.assertExhausted()
-			responseProvider.assertExhausted()
-		} finally {
-			await service.destroy()
-			await eventBridge.destroy()
-		}
-	})
-
-	it('does not start either specialist when the business guard denies the case', async () => {
-		const riskProvider = new FakeModelProvider({ strict: true })
-		const responseProvider = new FakeModelProvider({ strict: true })
-		const eventBridge = new DefaultEventBridge()
-		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			resources: { supportCasePolicy: { canAnalyze: vi.fn(async () => false) } },
-			ai: {
-				models: {
-					risk_model: { provider: riskProvider, model: 'risk-fake' },
-					response_model: { provider: responseProvider, model: 'response-fake' },
-				},
-			},
-		})
-		await service.start()
-
-		try {
-			await expect(
-				eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-alex',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyze_support_case' },
-						payload: { payload: { caseId: 'case-denied', message: 'Help' }, parameter: {} },
-					}),
-				),
-			).rejects.toMatchObject({ errorCode: 403 })
-			expect(riskProvider.requests).toHaveLength(0)
-			expect(responseProvider.requests).toHaveLength(0)
-		} finally {
-			await service.destroy()
-			await eventBridge.destroy()
-		}
-	})
-})
-```
-Run the complete chapter verification.
-
-```bash title="Verify the parallel-agent chapter" replay="project"
-npm run build
-npm test
-npm run lint
-npm run demo
+```bash title="Run the native parallel workflow tests" replay="project"
+npm test -- src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.test.ts src/harness/support/agent/planSupportResponse/planSupportResponseAgent.test.ts src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts
 ```
 
-The focused tests explain which module failed. The EventBridge test proves the
-complete address-first path and its direct-target authorization boundary.
+Continue with [Test PURISTA parallel workflow routing](../test-routing/).
