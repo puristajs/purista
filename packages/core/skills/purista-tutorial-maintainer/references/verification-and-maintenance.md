@@ -57,9 +57,12 @@ npm run audit:knowledge
 ```
 
 For website/tutorial content, also use the existing Handbook/link audits and
-web build where relevant, then inspect changed routes in a browser. Add
-tutorial-specific validation when that manifest/runner is implemented; do not
-print a nonexistent audit command as though it ran.
+web build where relevant, then inspect changed routes in a browser. Run
+`npm run check:drafts --prefix examples/banking` for draft structure and
+source references, and `npm run test:drafts --prefix examples/banking` for the
+draft projects' build, test, and lint gates. Published chapters additionally
+require the clean consumer replay and runtime smoke gate. Do not report one of
+these narrower checks as evidence for a boundary it does not execute.
 
 When syncing the catalog, update `purista/skills` first, then the affected
 `packages/core/skills` files and installed mirrors. Check for unrelated local

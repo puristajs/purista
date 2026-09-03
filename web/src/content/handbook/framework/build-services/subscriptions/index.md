@@ -23,25 +23,58 @@ output.
 | What is the normal result? | Successful acknowledgement, optional delivery control, and optionally a separately named result/custom event. |
 | What stays decoupled? | The publisher does not declare subscribers or know whether, when, or how many complete. |
 
+The smallest useful definition subscribes to one named fact, validates its
+payload, and performs one observable reaction:
+
+```ts title="src/service/accounting/v1/subscription/logInvoiceCreated.ts"
+import { z } from 'zod'
+import { accountingV1ServiceBuilder } from '../../accountingV1ServiceBuilder.js'
+
+export const logInvoiceCreated = accountingV1ServiceBuilder
+  .getSubscriptionBuilder('logInvoiceCreated', 'Log accepted invoice events')
+  .subscribeToEvent('billing.invoiceCreated', '1')
+  .addPayloadSchema(z.object({ invoiceId: z.string().min(1) }))
+  .setSubscriptionFunction(async function (context, payload) {
+    context.logger.info({ invoiceId: payload.invoiceId }, 'invoice event received')
+  })
+```
+
+After the definition is added to the service and the service is ready, a
+matching event produces the `invoice event received` log and increments
+`purista.subscription.executions` with `purista.outcome=success`.
+
+[`getSubscriptionBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getsubscriptionbuilder)
+creates the service-owned definition. The chain then
+[`subscribeToEvent(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#subscribetoevent),
+validates through
+[`addPayloadSchema(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addpayloadschema),
+and installs the handler with
+[`setSubscriptionFunction(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction).
+
 ## Register before an event can be delivered
 
-`service.start()` first checks EventBridge health, publishes service-init
-metadata, then registers each subscription after validating the bridge
-capabilities the definition requires. Only then does it publish service-ready
-metadata. In a single process, the same EventBridge instance owns registration
-and delivery. In a distributed deployment, each running subscriber registers
-with its own bridge adapter; broker retention, consumer groups, and late
-subscriber behavior are adapter-owned. Start the EventBridge before the
-subscriber service, and wait for service readiness before relying on a
-subscription to receive production events.
+The composition root calls `service.start()`. The service checks EventBridge
+health, publishes service-init metadata, then registers commands,
+subscriptions, and streams in that order. It initializes queues before it
+publishes service-ready metadata. Each subscription is checked against the
+selected bridge's capabilities before registration. In a single process, the
+same EventBridge instance owns registration and delivery. In a distributed
+deployment, each running subscriber registers with its own bridge adapter;
+broker retention, consumer groups, and late subscriber behavior are
+adapter-owned. Start the EventBridge before the subscriber service, and wait
+for service readiness before relying on a subscription to receive production
+events.
 
 ```mermaid title="Subscription registration and delivery ownership"
 sequenceDiagram
+  participant A as App / composition root
   participant EB as EventBridge adapter
   participant S as Subscriber service
   participant B as Broker or local delivery
-  S->>EB: service.start()
-  S->>EB: validate capabilities + registerSubscription
+  A->>S: service.start()
+  S->>EB: isHealthy()
+  S->>S: validate required capabilities
+  S->>EB: registerSubscription(...)
   EB->>B: create/update subscription registration
   B-->>EB: matching business event
   EB->>S: execute subscription handler
@@ -49,9 +82,13 @@ sequenceDiagram
 
 ## See the delivery lifecycle
 
-The normal path below is framework behavior. The EventBridge adapter determines
-what delivery, durable storage, redelivery, and dead-letter capabilities it can
-honor.
+The normal path below is framework behavior after a bridge has selected the
+message. `DefaultEventBridge` evaluates all subscription predicates in process.
+Broker adapters translate the subscription record into their routing and
+consumer primitives; verify the adapter-specific mapping in the
+[EventBridge guide](/handbook/framework/connect-distributed-infrastructure/event-delivery/).
+The adapter also determines what durable storage, redelivery, and dead-letter
+capabilities it can honor.
 
 ```mermaid title="Subscription execution lifecycle"
 flowchart TD
@@ -74,7 +111,7 @@ flowchart TD
   P -->|Yes| Q[Return validated custom result event]
   P -->|No| K
   D -. invalid .-> R[Handled error; no redelivery]
-  E -. failure .-> S[Unhandled error; EventBridge failure path]
+  E -. unhandled failure .-> S[Unhandled error; EventBridge failure path]
   G -. invalid .-> R
   H -. failure .-> S
   I -. HandledError .-> R
@@ -86,6 +123,9 @@ explicit equivalent. The other control results ask the EventBridge for a
 specific action and skip output validation, after guards, and result-event
 creation. A `HandledError` also completes the delivery without redelivery;
 an unexpected error reaches the bridge failure path.
+
+A transform can deliberately throw `HandledError`; that remains on the handled
+path. Other transform failures are wrapped as unhandled errors.
 
 AMQP and NATS are the shipped EventBridges that act on subscription control
 errors. The default, MQTT, and HTTP/Dapr bridges log those errors without

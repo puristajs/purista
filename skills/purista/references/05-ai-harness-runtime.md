@@ -81,6 +81,12 @@ Use `targets.agents[target]` or `targets.workflows[target]` for:
 - `afterGuards`: validate a terminal outcome before it is returned/published;
 - `successEvent`: publish a successfully completed outcome as a fact.
 
+Put business guards on the published mounted target whenever callers may use
+its EventBridge address directly. A guard only on an HTTP wrapper command does
+not protect that address and can be bypassed by another service. Wrapper
+commands and streams own transport/public contracts; target guards own access
+to the published agent or workflow itself.
+
 Content guardrails remain in Harness. Business authorization remains in mount
 guards and the commands/resources that own business effects.
 
@@ -122,6 +128,11 @@ or streaming delivery:
 Approval and external waits are `interrupted` outcomes. They are not
 exceptions and must not become HTTP 500 responses.
 
+At the PURISTA mount boundary, validation maps to `400`, permission, policy,
+and `DECISION_BLOCKED` map to `403`, model admission maps to `429` with retry
+metadata, timeout maps to `504`, and unexpected internal failures map to `500`.
+Do not catch these errors only to serialize a second ad-hoc response format.
+
 ## Host tools
 
 Use `commandAsHarnessTool(service, version, target, options?)` when a native
@@ -148,7 +159,7 @@ const service = await supportV1Service.getInstance(eventBridge, {
     models: {
       primary: { provider, model: 'provider-model-id' },
     },
-    admission: { maxConcurrentRuns: 8 },
+    admission: modelAdmission,
     storage: harnessStorage,
     memory,
     sandbox,
@@ -164,6 +175,11 @@ Configure only capabilities required by the mounted definition. Startup fails
 when required models, host tools, storage, or runtime capabilities are missing.
 Keep provider credentials in application secret configuration.
 
+`admission` is a Harness `ModelAdmission` adapter. Its `acquire(request)`
+method returns a lease whose `release()` method runs after the provider call or
+stream finishes. Use a local or distributed adapter to enforce provider
+concurrency and rate policy. It is not a numeric configuration object.
+
 PURISTA StateStore owns supported application/session key-value state.
 `HarnessStorage` owns AI sessions, runs, checkpoints, and waits. A database
 resource owns transactional domain records. A sandbox/workspace owns execution
@@ -171,7 +187,7 @@ files. Do not substitute one boundary for another.
 
 ## Queue admission and retry
 
-Harness admission limits concurrent active runs within an instance. Put a
+Harness admission controls provider-call capacity through that adapter. Put a
 normal PURISTA queue and worker before a mounted target when work also needs
 durable acceptance, delayed retry, dead letters, replay, or fleet-wide
 concurrency control. The worker calls the address-first target. Convert
@@ -232,6 +248,26 @@ tasks in an application database with tenant, principal/role scope, action
 digest, revision, expiry, decision, and idempotency data. Approve or reject
 through protected commands, reauthorize on resume, and resume the same Harness
 run. Never execute a side effect merely because the model requested approval.
+
+When an authorized reviewer must resume a run originally owned by another
+principal, opt in only on that mounted workflow target:
+
+```ts
+targets: {
+  workflows: {
+    review_action: {
+      durableResume: { identity: 'run-owner' },
+      beforeGuards: { reviewAccess: requireReviewAccess },
+    },
+  },
+}
+```
+
+The current reviewer remains visible to mount guards and host integrations;
+only the Harness run owner is restored for durable resume. PURISTA rejects a
+cross-tenant resume. The guard must load the tenant-scoped review record,
+compare the stored run/session/action digest, and authorize the current
+reviewer before any resume or effect.
 
 ## Testing
 

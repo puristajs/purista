@@ -6,23 +6,26 @@ order: 410
 
 A TypeScript tool is the default integration choice for a business action. Its
 input and output schemas make the model-facing contract clear; its handler
-performs the real authorization and side effect. This local support example
-keeps the lookup deterministic so the composition can be tested without a
-provider credential.
+performs the real authorization and side effect. This support example keeps
+the lookup deterministic while the default agent loop uses the configured
+provider. Tests replace that provider with `FakeModelProvider`.
 
 ```ts title="src/harness/orderSupport.ts"
 import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const orderLookupInput = z.object({ orderId: z.string().min(1) })
 const orderLookupOutput = z.object({ status: z.enum(['pending', 'shipped', 'delivered']) })
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) throw new Error('OPENAI_API_KEY is required to start order support.')
 
 export const orderSupportHarness = defineHarness({ name: 'order-support' })
 	.sandbox(inMemorySandbox())
 	.models({
 		assistant: {
-			provider: { id: 'local', genAiSystem: 'local' },
-			model: 'not-called',
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
 			capabilities: ['object', 'tool_use'],
 		},
 	})
@@ -44,9 +47,10 @@ export const orderSupportHarness = defineHarness({ name: 'order-support' })
 	.build()
 ```
 
-With Zod, `@purista/harness` and `zod` are sufficient; no Harness-specific
-schema addon is needed. You can instead use any Standard Schema validator. The
-tool is unavailable until both its registration and agent allowlist exist.
+With Zod, no Harness-specific schema addon is needed. This runnable agent also
+imports `@purista/harness-openai`; install the adapter for the provider you
+select. You can instead use any Standard Schema validator. The tool is
+unavailable until both its registration and agent allowlist exist.
 
 ## Keep validation separate from model projection
 
@@ -97,7 +101,50 @@ also covers application-only tool output and every other schema boundary.
 | [`tools`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | An agent-local allowlist of registered custom tools. | Omitting it denies custom tools. A live agent with any custom tool also needs a model alias declaring `tool_use`. |
 | [`builtinTools`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Enables only the named built-in tools; omission enables none. | Omit it for this domain lookup. Add a minimal explicit allowlist only after selecting the matching sandbox and authorization boundary. |
 | [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Adds the `support` agent to the session API. | Put it after models and tools so their IDs remain literal and checked in the inline definition. Missing referenced tools are rejected when the definition is built. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates registries and returns the executable Harness. | It rejects a missing model registry, unknown agent references, and collisions between custom tool, skill, and built-in names; it does not make a tool authorized. |
+| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates registries and returns the executable Harness. | It rejects a missing alias used by a default-loop agent, unknown agent references, and collisions between custom tool, skill, and built-in names; it does not make a tool authorized. |
+
+## Define the complete native tool boundary
+
+Use singular [`.tool(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tool)
+for an inline TypeScript handler because it contextually infers the schemas and
+the sandbox registered earlier in the chain. Use plural
+[`.tools(record)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools)
+for a cohesive pre-typed native/MCP catalog. Both calls accumulate; duplicate
+IDs fail instead of replacing an earlier tool.
+
+Tool IDs must match `^[a-z][a-z0-9_]*$`, contain at most 64 characters, and
+must not begin with the reserved `harness_` or `system_` prefixes. They also
+share the model-facing namespace with built-in tools and Skills, so a collision
+fails composition.
+
+| [`TsToolDefinition` field](/handbook/api/interfaces/_purista_harness.TsToolDefinition/) | Required/default | Runtime behavior |
+| --- | --- | --- |
+| `kind` | optional; `ts` | Discriminates a native handler from host and MCP contracts. Omit it for the normal inline tool. |
+| `description` | required non-empty string | Sent to the model to guide selection. It is not authorization and must not contain secrets. |
+| `input` | required `ModelSchema` | Projects once to frozen Draft 2020-12 JSON Schema and validates every model-proposed argument before governance or handler execution. |
+| `output` | required JSON-compatible `Schema` | Validates the handler result before it can return to the model loop or caller. |
+| `handler(ctx, input)` | required async function | Receives only validated input and the run-scoped context. It must authorize business access and make external writes idempotent. |
+| `configureHarnessContext` | optional advanced adapter hook | Receives logger, telemetry, metrics, and runtime defaults during composition. Ordinary application tools do not need it. |
+
+The handler context is
+[`ToolHandlerContext`](/handbook/api/types/_purista_harness.ToolHandlerContext/):
+
+| Context member | Use |
+| --- | --- |
+| `signal` | Forward cancellation to every HTTP, SDK, model, sandbox, and storage operation. A timeout cannot undo a completed external side effect. |
+| `idempotencyKey` | Stable identity for this logical call across approval resume and durable recovery. Pass it to a downstream write/reconciliation boundary. |
+| `runId`, `sessionId`, `agentId`, `toolId`, `callId` | Correlation and operation identity; none is caller authorization. |
+| `metadata` | Read-only, application-supplied JSON metadata. Do not treat model content as trusted metadata. |
+| `sandbox` | Capability-typed attachment inferred from the earlier `.sandbox(...)` call. No undeclared `exec` or `spawn` fallback exists. |
+| `memory` | Scoped application/session/run/agent memory. It is not a system-of-record transaction. |
+| `logger`, `telemetry`, `metrics` | Content-safe diagnostics owned by the current invocation. |
+
+Input validation, permissions/governance/approval, the handler, and output
+validation run in that order. Schema failures are `ValidationError`; an
+unexpected handler failure is normalized as `ToolError` with content-safe
+metadata. Cancellation uses the same signal and prevents later loop work, but
+the handler must cooperate. MCP definitions use the same registry and agent
+allowlist; their transport fields are owned by [Connect MCP tools](../mcp/).
 
 The model and tool registries precede `.agent(...)` because their literal IDs
 become the only values its definition accepts. This is why the configuration

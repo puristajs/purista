@@ -27,11 +27,6 @@ export function createLocalDurableHarness(root: string) {
 		.workspace(local.workspace)
 		.sandbox(local.sandbox)
 		.requires(['storage.persistent', 'workspace.persistent'])
-		// Every Harness definition needs a model alias, even though this workflow
-		// itself performs only deterministic checkpointed work.
-		.models({
-			local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-		})
 		.workflow('prepare_report', {
 			input,
 			output,
@@ -54,7 +49,6 @@ export function createLocalDurableHarness(root: string) {
 | [`.storage(local.storage)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#storage) and [`.workspace(local.workspace)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workspace) | Register the persistent run/checkpoint store and the artifact checkpoint store exactly once. | Both are required for the local durable bundle. Duplicate registrations and invalid adapters fail composition instead of replacing state. |
 | [`.sandbox(local.sandbox)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Registers the sandbox that can bind the matching durable workspace. | `exec: false` leaves it files-and-search only. Do not turn on host execution to obtain durability or isolation. |
 | [`.requires([...])`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#requires) | Requires the named adapter capabilities at build time. | Require `storage.persistent` and `workspace.persistent` when the workflow cannot safely degrade to in-memory state. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Supplies the mandatory alias registry, even for this deterministic workflow. | The placeholder is valid only because neither handler calls a model. Replace it before adding a default-loop agent or model operation. |
 | [`.workflow(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow) | Registers the schema-validated workflow and preserves `ctx.step` in its typed context. | Define workflows after agents when they delegate. A step ID is part of the replay contract, so change it only with a compatible run version. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates adapter capabilities and the completed registry graph, then returns the runnable Harness. | Build before accepting work. An incompatible persistence setup fails before a durable invocation is admitted. |
 
@@ -79,12 +73,12 @@ try {
 app = createLocalDurableHarness(root)
 try {
 	const session = await app.harness.getSession('report:quarterly-42')
-	console.log(
-		await session.workflows.prepare_report.run(
-			{ reportId: 'quarterly-42', failAfterOutline: false },
-			{ durable: { runId } },
-		),
+	const outcome = await session.workflows.prepare_report.run(
+		{ reportId: 'quarterly-42', failAfterOutline: false },
+		{ durable: { runId } },
 	)
+	if (outcome.status === 'interrupted') throw new Error(`Report preparation paused for ${outcome.interrupt.type}`)
+	console.log(outcome.output)
 } finally {
 	await app.harness.shutdown()
 }
@@ -115,10 +109,12 @@ workspace.
 API reference: [`DurableInvokeOptions`](/handbook/api/interfaces/_purista_harness.DurableInvokeOptions/)
 and [`DurableWorkspacePolicy`](/handbook/api/interfaces/_purista_harness.DurableWorkspacePolicy/).
 
-Use `ctx.step('stable-id', fn)` around JSON-serializable work. A committed step
-replays its saved output after resume instead of running again. The local
-adapter uses Node/Bun SQLite and is suitable for development or single-host
-testing; it is not a multi-worker production backend.
+Use
+[`ctx.step('stable-id', fn)`](/handbook/api/interfaces/_purista_harness.DurableWorkflowContext/#step)
+around JSON-serializable work. A committed step replays its saved output after
+resume instead of running again. The local adapter uses Node/Bun SQLite and is
+suitable for development or single-host testing; it is not a multi-worker
+production backend.
 
 Production storage must implement transactional leases, events, checkpoints,
 and waits across workers. Harness does not supply a scheduler, deployment

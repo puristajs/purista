@@ -1,0 +1,92 @@
+---
+title: Authorize, signal, and resume
+description: Record one reviewer decision, wake the durable run, and execute the approved command idempotently.
+order: 253
+kind: lesson
+status: draft
+---
+
+Generate one command for the review decision and one command on the service
+that owns the business effect.
+
+```bash title="Generate the decision and effect commands" replay="project"
+npm run add:command -- decide-card-freeze --service support --service-version 1 --description "Authorize and deliver one human review decision" --non-interactive
+npm run add:command -- freeze-card --service transaction --service-version 1 --description "Freeze a card after an approved review" --non-interactive
+```
+
+The decision payload carries an expected database revision and a stable event
+id. Implement `supportReviewStore.decide` as a transaction or compare-and-swap:
+
+1. Load the review inside the tenant boundary.
+2. Require `status: 'pending'` and the expected revision.
+3. Store the terminal decision, reviewer id, and event id atomically.
+4. Treat an exact retry of the same event as success.
+5. Reject a different second decision with `409 Conflict`.
+
+Protect the endpoint and authorize the review as a business action.
+
+```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts"
+.enableHttpSecurity(true)
+.exposeAsHttpEndpoint('POST', 'support/card-freeze-reviews/decision')
+.setBeforeGuardHooks({
+	reviewerMayDecide: async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		if (
+			!(await context.resources.supportReviewPolicy.canReview({
+				tenantId,
+				principalId,
+				requestId: payload.requestId,
+			}))
+		) {
+			throw new HandledError(StatusCode.Forbidden, 'This review decision is not allowed')
+		}
+	},
+})
+```
+
+After the database accepts the decision, signal the external wait. The
+resource keeps Harness storage behind an application-owned interface.
+
+```ts title="src/resources/HarnessReviewWaitSignal.ts"
+export class HarnessReviewWaitSignal implements ReviewWaitSignal {
+	public constructor(private readonly storage: HarnessStorage) {}
+
+	public signal(input: { waitId: string; eventId: string; outcome: 'approved' | 'rejected' }) {
+		return this.storage.signalWait(input)
+	}
+}
+```
+
+Resume through the typed, address-first workflow client with exactly the same
+input, session id, and durable run id. If the terminal result is approved,
+invoke the owning Transaction command. Use the durable run id as the effect
+idempotency key so retries cannot freeze the card twice.
+
+```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts"
+const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
+const signal = await context.resources.reviewWaitSignal.signal({
+	waitId: record.waitId,
+	eventId: payload.eventId,
+	outcome: payload.outcome,
+})
+if (signal.kind === 'not_found') throw new HandledError(StatusCode.Conflict, 'Review wait is not available')
+
+const resumed = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+	sessionId: record.sessionId,
+	durable: { runId: record.runId },
+})
+if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
+
+if (resumed.output.status === 'approved') {
+	await context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { idempotencyKey: record.runId })
+}
+return { status: resumed.output.status, requestId: record.requestId }
+```
+
+For this business-review endpoint, a UI posts the decision and renders the
+typed JSON states `waiting`, `approved`, or `rejected`. Model-selected tool
+approval uses the separate approval interrupt and the AI SDK UI Message Stream
+v1 adapter, which emits the standard approval parts expected by AI SDK clients.
+
+Continue with [Test the review boundary](../../testing/test-review/).

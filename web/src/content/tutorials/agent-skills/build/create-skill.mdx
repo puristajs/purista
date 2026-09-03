@@ -1,0 +1,46 @@
+---
+title: Create a versioned Skill
+description: Add a focused SKILL.md with strict frontmatter and reviewed support guidance.
+order: 241
+kind: lesson
+status: draft
+---
+
+Create one directory whose name matches the `name` in `SKILL.md`. Keep the
+directory in source control so code review and release versioning cover every
+model-readable file.
+
+```md title="skills/support-methods/SKILL.md"
+---
+name: support-methods
+description: Use when explaining the process for a pending transfer or a card replacement.
+license: Apache-2.0
+compatibility: Example Bank support service v1
+---
+
+# Support methods
+
+Explain the next safe step in plain language. Do not claim that you changed an
+account, card, or transaction.
+
+For a pending transfer, explain that the normal review window is up to two
+business days. Ask the customer to contact support when that window has passed.
+
+For a card replacement, explain how to request a replacement. A damaged or
+stolen card requires the separately authorized card-handling command; this
+Skill does not grant permission to call it.
+```
+
+The description tells the model when the Skill is relevant. It should be short
+and specific. Put detailed procedure text in the body or linked files.
+
+A Skill directory may contain `references/`, `assets/`, or `scripts/`, but
+Harness only mounts them. It does not execute a script, import code, enable
+`bash`, or grant network access. Do not store secrets anywhere in the directory.
+
+For an external Skill source, verify the package version or content digest in
+your deployment process before constructing the Harness definition. The native
+Skill definition validates shape and provenance labels; it does not fetch or
+sign remote content.
+
+Continue with [Bind the Skill to an agent](../bind-skill/).

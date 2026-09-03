@@ -21,7 +21,16 @@ const eventBridge = await createEventBridge(logger)
 const invoiceService = await invoiceV1Service.getInstance(eventBridge, { logger })
 await invoiceService.start()
 
-gracefulShutdown(logger, [invoiceService, eventBridge])
+gracefulShutdown(logger, [
+  {
+    name: `${invoiceService.serviceInfo.serviceName} ${invoiceService.serviceInfo.serviceVersion}`,
+    destroy: () => invoiceService.destroy(),
+  },
+  {
+    name: 'Event bridge',
+    destroy: () => eventBridge.destroy(),
+  },
+])
 ```
 
 ```json title="package.json"

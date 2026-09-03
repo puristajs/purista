@@ -763,10 +763,16 @@ export class HonoServiceClass<
 	 * @example
 	 * ```typescript
 	 * gracefulShutdown(logger, [
-	 * honoService.prepareDestroy(),
-	 * eventbridge,
-	 * ...services,
-	 * honoService
+	 *   honoService.prepareDestroy(),
+	 *   ...services.map(service => ({
+	 *     name: `${service.serviceInfo.serviceName} ${service.serviceInfo.serviceVersion}`,
+	 *     destroy: () => service.destroy(),
+	 *   })),
+	 *   {
+	 *     name: `${honoService.serviceInfo.serviceName} ${honoService.serviceInfo.serviceVersion}`,
+	 *     destroy: () => honoService.destroy(),
+	 *   },
+	 *   { name: eventbridge.name, destroy: () => eventbridge.destroy() },
 	 * ])
 	 * ```
 	 * @returns

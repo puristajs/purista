@@ -1,0 +1,35 @@
+---
+title: Evaluate agent behavior
+description: Run a versioned dataset, score observable behavior, inspect aggregates, and fail a release gate on regression.
+order: 290
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches repeatable agent evaluation for the portable support
+classifier mounted by a PURISTA `Support` service. It runs that same definition
+over a small versioned dataset, applies deterministic scorers, and fails a
+change gate when accuracy drops.
+
+Evaluation is an offline engineering workflow. It does not belong in a public
+request handler, and it does not replace command tests, business guard tests,
+or production observability.
+
+You will learn how to:
+
+- version datasets, candidates, tasks, and scorers independently;
+- execute the real portable agent for every case;
+- start with deterministic checks before adding model judges;
+- aggregate results across semantic segments;
+- keep observations and accounting under application ownership;
+- turn thresholds into a CI failure.
+
+1. [Create a versioned evaluation dataset](./build/dataset/)
+2. [Add deterministic checks](./build/deterministic-checks/)
+3. [Run and score the agent](./build/scoring/)
+4. [Create a change gate](./testing/change-gate/)
+
+The retained project is in `examples/banking/chapters/agent-evaluation`. It
+contains the mounted PURISTA service, the address-first command, and the
+offline evaluation runner.

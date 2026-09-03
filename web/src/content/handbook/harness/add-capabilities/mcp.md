@@ -85,6 +85,53 @@ server's responsibility.
 | `mcp_http` | Running Streamable HTTP server; app-owned authentication | Handle network/auth/protocol failure and retry only safe calls. |
 | `mcp_stdio` | Optional client and sandbox `spawn` capability | A dead server fails the call; a later call starts a new session. |
 
+### Configure Streamable HTTP
+
+[`McpHttpToolDefinition`](/handbook/api/interfaces/_purista_harness.McpHttpToolDefinition/)
+has the complete remote transport contract:
+
+| Field | Required/default | Meaning and boundary |
+| --- | --- | --- |
+| `kind` | required: `mcp_http` | Selects the current Streamable HTTP client. |
+| `description` | required | Local model-facing description. Keep it accurate and free of credentials. |
+| `url` | required absolute URL | Server endpoint owned by the application/deployment. Invalid URLs or unavailable servers fail the tool call. |
+| `tool` | required | Exact upstream MCP tool name selected after schema discovery. A missing or malformed tool/schema fails before invocation. |
+| [`auth`](/handbook/api/types/_purista_harness.McpAuth/) | optional; no authentication | Supports `none`, bearer, OAuth2 access token, API-key header, or basic credentials. Keep values in secret configuration and rotate them outside the model context. |
+| `headers` | optional | Additional application-owned headers. Names are normalized; configured `auth` owns its authentication header. Never forward caller headers wholesale. |
+| `redirect` | fetch default (`follow`) | Choose `error` when credentials must never follow a redirect. Reviewed Agent Plugin bindings force `error`. `manual` exposes redirect handling to the underlying transport. |
+| `inputAdapter`, `outputAdapter` | identity | Explicitly adapt an application value around the discovered MCP schema. They do not bypass input/output validation. |
+| `configureHarnessContext` | optional advanced hook | Receives the bounded Harness adapter context during composition. It must not fetch schemas, start a server, or capture request content. |
+| `provenance` | normally omitted | Content-free, reviewed Agent Plugin origin metadata. Application code should let the plugin binding create it. |
+
+The connection is reused while healthy and reset after a failed connection.
+Every list/call operation receives cancellation and the configured Harness
+`toolTimeoutMs`. A `401` or `403` becomes `McpAuthError`; protocol, discovery,
+transport, and schema failures remain `McpProtocolError` or validation errors.
+
+### Configure sandboxed stdio
+
+[`McpStdioToolDefinition`](/handbook/api/interfaces/_purista_harness.McpStdioToolDefinition/)
+starts a current MCP server through the selected sandbox. It never falls back
+to the application host.
+
+| Field | Required/default | Meaning and boundary |
+| --- | --- | --- |
+| `kind` | required: `mcp_stdio` | Selects the persistent stdio transport. |
+| `description`, `tool` | required | Local model-facing description and exact discovered upstream tool name. |
+| `command` | required | Sandbox-local executable. It must pass sandbox command policy and run without host credentials. |
+| `args` | empty | Fixed sandbox-local arguments; never concatenate model input into a shell string. |
+| `cwd` | sandbox default | Working directory inside the sandbox. It cannot escape the sandbox path policy. |
+| `env` | empty | Narrow server environment. Do not copy `process.env`; pass only reviewed non-secret values or sandbox-scoped credentials. |
+| `install` | omitted | Optional sandbox bootstrap command with its own `command`, `cwd`, `env`, and `timeoutMs`. It requires sandbox `exec`, runs once for the active runner, and retries only after a failed installation. Prefer a prebuilt image in production. |
+| `prepareLaunch` | omitted | May stage files and return launch overrides plus an async `cleanup`. It runs within the overall tool timeout; cleanup runs on connect failure and close. |
+| `inputAdapter`, `outputAdapter`, `configureHarnessContext`, `provenance` | same roles as HTTP | These adapt the local contract or attach content-free integration metadata; they do not grant sandbox or MCP authority. |
+
+Stdio requires `sandbox.spawn`; `install` additionally requires `sandbox.exec`.
+The process, MCP client, and cleanup callback are closed together. Timeout or a
+closed transport resets the connection so a later safe call can start a new
+server. Test install failure, spawn denial, malformed stdout, bounded stderr,
+cancellation, cleanup failure, and process exit.
+
 The Harness validates MCP schemas and normalizes errors, but it does not own
 the server, credentials, or upstream authorization. Keep tokens in secret
 configuration, allowlist each MCP tool per agent, and test unavailable server,

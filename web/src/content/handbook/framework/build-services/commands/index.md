@@ -182,6 +182,22 @@ and
 [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction).
 The first task explains their parameters and runtime behavior together.
 
+## Know which EventBridge changes command delivery
+
+Command definitions remain transport-independent, but delivery requirements are
+validated against
+[`EventBridgeCapabilities`](/handbook/api/types/_purista_core.EventBridgeCapabilities/).
+`DefaultEventBridge` is process-local, reports `durableCommands: false` and
+`manualAckSupported: false`, and is appropriate for local execution and tests.
+AMQP provides durable commands and manual acknowledgement. NATS enables those
+capabilities only when JetStream starts successfully. MQTT and Dapr do not
+provide durable commands or manual acknowledgement through PURISTA.
+
+In strict command mode, a definition requesting manual acknowledgement cannot
+start on a bridge that does not advertise it. Choose the adapter from the
+required delivery/recovery contract and verify it in the real topology; changing
+the adapter does not make the handler's external side effects exactly once.
+
 Continue with [Create and validate a command](/handbook/framework/build-services/commands/create-and-validate/) for the complete resource, schema, registration, invocation, and expected result.
 
 ## Continue in implementation order

@@ -1,7 +1,7 @@
 ---
 title: Services and boundaries
 description: Use versioned services to keep business ownership, dependencies, and change boundaries explicit.
-order: 210
+order: 220
 ---
 
 A PURISTA service is a versioned container for related business behavior. An `incident` service can create, classify, and close incidents; a separate `notification` service can react to incident events without being imported by it.
@@ -44,7 +44,7 @@ Create a new service version when a contract change cannot be safely consumed by
 When a service needs a different operational lifecycle, data owner, or release
 cadence, that is evidence to consider extraction—not merely that another
 handler exists. Keep the boundary local until the distributed trade-offs are
-justified; see [modular monolith](/handbook/framework/apply-patterns-and-recipes/modular-monolith/)
-and [distributed microservices](/handbook/framework/apply-patterns-and-recipes/distributed-microservices/).
+justified; see [modular monolith](/handbook/framework/deploy-applications/modular-monolith/)
+and [distributed services](/handbook/framework/deploy-applications/distributed-services/).
 
 Next: [messages, schemas, and contracts](/handbook/framework/understand-the-framework/messages-schemas-and-contracts/).

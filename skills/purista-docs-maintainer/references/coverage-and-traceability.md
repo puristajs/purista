@@ -220,6 +220,17 @@ Use it to prioritize and measure a coverage pass. It is intentionally a
 non-blocking inventory until a specific method family has no remaining rows;
 it cannot determine whether the surrounding prose is sufficient on its own.
 
+After generating current TypeDoc data, run `npm run audit:handbook`. Its
+public-surface phase reads every declared public method of the curated
+application-facing Framework and Harness owner types from TypeDoc and requires
+an exact member link in that product's handbook. Run
+`npm run audit:handbook:surface` when only the surface failures are needed.
+When an owner becomes user-facing, add it to
+`scripts/handbook-public-surface-audit.mjs`; exclude inherited, protected,
+implementation-adapter, error, and generic logger methods unless the handbook
+deliberately teaches users to call or implement them. The audit proves lookup
+coverage, not the quality or completeness of the surrounding task guidance.
+
 For configuration, derive the documented table from current types, schemas, default factories, validation, and tests. Verify:
 
 - exact key name and nested path;

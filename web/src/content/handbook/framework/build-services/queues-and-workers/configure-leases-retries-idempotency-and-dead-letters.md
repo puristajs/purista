@@ -53,10 +53,16 @@ afterwards only when intentionally overriding it.
 ## Separate framework requests from bridge guarantees
 
 [`setQueueBridgeConfig({ prefetch, orderingGuarantee })`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#setqueuebridgeconfig) defaults to prefetch
-`1` and FIFO. In strict startup mode, core currently rejects only unsupported
-FIFO and prefetch beyond the bridge maximum. It does not prove partitioning,
-priority, delayed delivery, dead-letter operations, or every long-running
-profile requirement.
+`1` and FIFO. Every currently shipped QueueBridge advertises
+`maxBatchSize: 1`; `prefetch > 1` therefore fails service startup with
+`UnhandledError(501, 'queue "<name>" requests prefetch <n>, but <bridge>
+supports at most 1')`.
+
+When the bridge enables strict startup validation, core rejects three cases:
+unsupported FIFO, prefetch beyond the bridge maximum, and a service-level
+event-to-queue binding that requests strict idempotency from a bridge that
+cannot enforce it. These checks do not prove partitioning, priority, delayed
+delivery, dead-letter operations, or every long-running profile requirement.
 
 | Failure class | Worker choice | Design requirement |
 | --- | --- | --- |
@@ -69,5 +75,14 @@ The runtime derives a dead-letter name from bridge prefix/suffix when no target
 is set. Actual retention, inspection, redrive, and purge are QueueBridge
 operations. Verify them—and delayed delivery, idempotent enqueue, ordering, and
 lease recovery—through the selected provider guide and integration tests.
+
+`pause-worker` activates only when all three conditions hold: the configured
+threshold is positive, the current attempt reaches it, and the message header
+`x-purista-last-retry-reason` equals the current failure reason. The selected
+bridge must preserve that retry header. Inspect local pause state with
+`service.getQueueWorkerPauseState()`, pause deliberately with
+`service.pauseQueueWorkers(queueName, reason)`, and resume only after repair
+with `service.resumeQueueWorkers(queueName)`. A paused queue remains paused for
+that service process until resumed.
 
 For the full contract, see [QueueDefinitionBuilder](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/) and [QueueBridge](/handbook/api/interfaces/_purista_core.QueueBridge/).

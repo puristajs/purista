@@ -89,6 +89,8 @@ Run from the `purista` repository root unless noted:
 
 ```bash
 npm run build:api-docs
+npm run audit:handbook
+node scripts/handbook-snippet-coverage.mjs
 npm run build -w @purista/web
 npm run audit:internal-links -w @purista/web
 npm run audit:knowledge

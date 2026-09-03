@@ -1,0 +1,167 @@
+---
+title: Stream to a standard chat UI
+description: Expose the Harness workflow as a protected PURISTA stream using AI SDK UI Message Stream v1.
+order: 213
+kind: lesson
+status: draft
+---
+
+Generate a normal PURISTA stream. Hono will project this definition into a
+protected HTTP endpoint; do not add a custom Hono route.
+
+```bash title="Generate the chat stream" replay="project"
+npm run add:stream -- answer-knowledge-question --service knowledge --service-version 1 --description "Stream a grounded answer to a standard AI chat client" --non-interactive
+```
+
+The request shape follows AI SDK `UIMessage`: the browser sends `messages`, and
+the server reads the latest user text. Keep `collectionId` as explicit
+application data.
+
+```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts" write
+import { AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS, createHarnessUIMessageSseEvents } from '@purista/harness-ai-sdk-ui/v1'
+import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import {
+	aiSdkUiMessageSseEventSchema,
+	answerKnowledgeQuestionFinalSchema,
+	answerKnowledgeQuestionHttpInputSchema,
+} from '../../schema.js'
+import { latestUserText } from './latestUserText.js'
+
+export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
+	.getStreamBuilder('answerKnowledgeQuestion', 'Stream a grounded answer through AI SDK UI Message Stream v1')
+	.addPayloadSchema(answerKnowledgeQuestionHttpInputSchema)
+	.addChunkSchema(aiSdkUiMessageSseEventSchema)
+	.addFinalSchema(answerKnowledgeQuestionFinalSchema)
+	.canInvokeWorkflow(
+		'Knowledge',
+		'1',
+		'answer_knowledge_question',
+		knowledgeHarness.contracts.workflows.answer_knowledge_question,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
+	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	.setHttpResponseHeaders(AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS)
+	.setOpenApiSummary('Chat with authorized knowledge')
+	.addOpenApiTags('knowledge', 'ai')
+	.setStreamFunction(async function (context, payload, _parameter, writer) {
+		const execution = await context.workflow.Knowledge['1'].answer_knowledge_question.stream(
+			{
+				collectionId: payload.collectionId,
+				question: latestUserText(payload.messages),
+			},
+			{ sessionId: `knowledge-chat:${payload.id}` },
+		)
+		writer.onCancel(() => {
+			void execution.cancel('browser disconnected')
+		})
+
+		for await (const event of createHarnessUIMessageSseEvents(execution)) {
+			if (writer.cancelled) return
+			await writer.write(event)
+		}
+		if (!writer.cancelled) await writer.close({ status: 'completed' })
+	})
+```
+
+`canInvokeWorkflow` declares the exact address before the handler can use it.
+The call crosses EventBridge and keeps tenant and principal identity. Stopping
+the browser stream cancels the remote Harness execution.
+
+The adapter emits standard AI SDK v1 chunks and the required
+`x-vercel-ai-ui-message-stream: v1` header. It does not create a PURISTA browser
+protocol or require a PURISTA client package.
+
+Install AI SDK React and add the maintained AI Elements source components to
+the existing React application.
+
+```bash title="Install the standard chat client and AI Elements" replay="project"
+npm install --save-exact @ai-sdk/react@4.0.15 ai@7.0.90
+npx ai-elements@latest add conversation message prompt-input tool
+```
+
+Use `useChat` with the normal HTTP transport. Pass the session token through
+the transport headers so Hono can authenticate the generated protected stream.
+
+```tsx title="ui/src/KnowledgeChat.tsx"
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
+import { useMemo, useState } from 'react'
+import {
+	Conversation,
+	ConversationContent,
+	ConversationEmptyState,
+	ConversationScrollButton,
+} from '@/components/ai-elements/conversation'
+import { Message, MessageContent, MessageResponse } from '@/components/ai-elements/message'
+import {
+	PromptInput,
+	type PromptInputMessage,
+	PromptInputSubmit,
+	PromptInputTextarea,
+} from '@/components/ai-elements/prompt-input'
+
+export function KnowledgeChat({ sessionToken }: { sessionToken: string }) {
+	const [text, setText] = useState('')
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport({
+				api: '/api/v1/knowledge/chat',
+				headers: { authorization: `Bearer ${sessionToken}` },
+				body: { collectionId: 'customer-help' },
+			}),
+		[sessionToken],
+	)
+	const { messages, sendMessage, status } = useChat({ transport })
+
+	function submit(message: PromptInputMessage) {
+		if (!message.text.trim() || !sessionToken) return
+		sendMessage({ text: message.text })
+		setText('')
+	}
+
+	return (
+		<section className="flex h-[36rem] flex-col rounded-xl border bg-card p-4 shadow-sm" aria-label="Knowledge chat">
+			<Conversation>
+				<ConversationContent>
+					{messages.length === 0 ? (
+						<ConversationEmptyState
+							title="Ask Example Bank"
+							description="Answers use the authorized customer-help collection."
+						/>
+					) : (
+						messages.map((message) => (
+							<Message from={message.role} key={message.id}>
+								<MessageContent>
+									{message.parts.map((part) =>
+										part.type === 'text' ? (
+											<MessageResponse key={`${message.id}-${part.type}-${part.text}`}>{part.text}</MessageResponse>
+										) : null,
+									)}
+								</MessageContent>
+							</Message>
+						))
+					)}
+				</ConversationContent>
+				<ConversationScrollButton />
+			</Conversation>
+			<PromptInput onSubmit={submit} className="mt-4">
+				<PromptInputTextarea
+					value={text}
+					onChange={(event) => setText(event.currentTarget.value)}
+					placeholder={sessionToken ? 'Ask about transfers, cards, or account access' : 'Add a session token first'}
+				/>
+				<PromptInputSubmit status={status} disabled={!text.trim() || !sessionToken} />
+			</PromptInput>
+		</section>
+	)
+}
+```
+
+The retained chapter snapshot includes this React application and the generated
+AI Elements and shadcn source components. `npm run build` type-checks both the
+PURISTA server and the UI, then creates the static bundle that the Hono server
+can serve.
+
+Continue with [Compose and run the application](./run-application/).

@@ -1,0 +1,69 @@
+---
+title: Redact final output
+description: Add a typed transform that removes a sensitive digit pattern from the final result.
+order: 193
+kind: lesson
+status: draft
+---
+
+An output rail runs on the schema-valid final candidate. It does not run on
+intermediate tool results. Add a second action that preserves the structured
+classification while replacing a long digit sequence in its reason.
+
+```ts title="src/harness/support/agent/classifySupportMessage/classificationGuardrails.ts" write
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { classifySupportMessageInputSchema, classifySupportMessageOutputSchema } from './schema.js'
+
+const cardLikeDigits = /\b\d{13,19}\b/g
+
+export const blockInstructionOverride = defineGuardrailAction({
+	phase: 'input',
+	valueSchema: classifySupportMessageInputSchema,
+	mayTransform: false,
+	evaluate: ({ value }) =>
+		/ignore (all )?previous instructions/i.test(value.text)
+			? { decision: 'block', reasonCode: 'instruction_override' }
+			: { decision: 'allow' },
+})
+
+export const redactCardLikeDigits = defineGuardrailAction({
+	phase: 'output',
+	valueSchema: classifySupportMessageOutputSchema,
+	evaluate: ({ value }) => {
+		const reason = value.reason.replace(cardLikeDigits, '[redacted]')
+		return reason === value.reason
+			? { decision: 'allow' }
+			: {
+					decision: 'transform',
+					target: 'bot_message',
+					value: { ...value, reason },
+					reasonCode: 'card_digits_redacted',
+				}
+	},
+})
+
+export const classificationGuardrails = defineGuardrails({
+	config: {
+		rails: {
+			input: { flows: ['block instruction override'] },
+			output: { flows: ['redact card-like digits'] },
+		},
+	},
+	actions: {
+		'block instruction override': blockInstructionOverride,
+		'redact card-like digits': redactCardLikeDigits,
+	},
+	actionTimeoutMs: 2_000,
+})
+```
+
+The transform target must match the phase: `bot_message` for output. The
+replacement value must still satisfy the action's schema and the agent output
+schema. Guardrails do not search arbitrary nested values automatically; this
+action deliberately owns one reviewed field.
+
+This small digit detector demonstrates lifecycle and typing. It is not a full
+card-data policy. Production privacy detection needs a reviewed detector,
+evaluation dataset, retention policy, and the relevant optional adapter.
+
+Continue with [Test Guardrail enforcement](../testing/test-guardrails/).

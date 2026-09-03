@@ -103,7 +103,11 @@ describe('support account lookup', () => {
 					accountId: 'AC-42',
 					question: 'Which support level applies?',
 				}),
-			).resolves.toEqual({ answer: 'Priority support is available.' })
+			).resolves.toEqual({
+				status: 'completed',
+				runId: expect.any(String),
+				output: { answer: 'Priority support is available.' },
+			})
 
 			expect(lookupAccount).toHaveBeenCalledWith('AC-42', expect.any(AbortSignal))
 			expect(provider.requests).toHaveLength(2)

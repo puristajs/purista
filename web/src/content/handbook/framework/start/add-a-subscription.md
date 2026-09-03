@@ -63,6 +63,7 @@ Use `retry` only when the operation is safe to run again. Before requesting retr
 | [`getSubscriptionBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getsubscriptionbuilder) | The named subscription and its operator-facing description. | The name identifies this consumer in service registration and operations; it is not the event name. |
 | [`subscribeToEvent(eventName, serviceVersion?)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#subscribetoevent) | The event-name filter, optionally scoped to the producing service's version. | The second argument is a service version, not an event-payload version. Match the producer's success-event contract deliberately. |
 | [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addpayloadschema) / [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addparameterschema) | Event body and parameter validation plus inferred handler inputs. | A custom event has `parameter: undefined`, so use `z.undefined()` or omit the parameter schema. |
+| [`addOutputSchema(eventName, schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addoutputschema) | A validated follow-up event emitted only after the subscription succeeds. | Use it only when another consumer needs a fact from this completed reaction. The CLI's `--response-event <name>` option generates this declaration. |
 | [`setSubscriptionFunction(handler)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction) | The side-effect implementation. A normal fulfilled result lets the bridge follow its configured acknowledgement path. | Use `async function` when the handler needs its service receiver. For durable delivery, acknowledgement, retry, and dead-letter choices, continue with [subscriptions](/handbook/framework/build-services/subscriptions/). |
 
 ## Start both participating services
@@ -72,23 +73,39 @@ cannot receive the incident event until both services share a started
 EventBridge:
 
 ```ts title="src/index.ts"
-import { DefaultEventBridge } from '@purista/core'
-import { incidentV1Service } from './service/incident/v1/index.js'
-import { notificationV1Service } from './service/notification/v1/index.js'
+import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import { incidentV1Service } from './service/incident/v1/incidentV1Service.js'
+import { notificationV1Service } from './service/notification/v1/notificationV1Service.js'
+import { pingV1Service } from './service/ping/v1/pingV1Service.js'
 
-const eventBridge = new DefaultEventBridge()
-await eventBridge.start()
+export const main = async () => {
+  const logger = initLogger()
+  const eventBridge = await getEventBridge(logger)
+  const services: Service[] = []
 
-const notificationService = await notificationV1Service.getInstance(eventBridge)
-await notificationService.start()
+  const pingService = await pingV1Service.getInstance(eventBridge)
+  await pingService.start()
+  services.push(pingService)
 
-const incidentService = await incidentV1Service.getInstance(eventBridge)
-await incidentService.start()
+  const notificationService = await notificationV1Service.getInstance(eventBridge)
+  await notificationService.start()
+  services.push(notificationService)
+
+  const incidentService = await incidentV1Service.getInstance(eventBridge)
+  await incidentService.start()
+  services.push(incidentService)
+
+  gracefulShutdown(logger, [eventBridge, ...services])
+}
+
+main()
 ```
 
-Starting the subscriber first means it has registered before this local process
-sends its first incident. Both services must finish starting before any command
-is invoked.
+Starting the notification service before the incident service means the
+subscriber is registered before this local process sends its first incident.
+The `ping` service remains in the generated application. All services must
+finish starting before any command is invoked.
 
 ## Run one incident through the local runtime
 

@@ -1,7 +1,7 @@
 ---
 title: Understand the generated project
 description: Find the composition root, service definitions, generated artifacts, and local CLI commands.
-order: 120
+order: 170
 ---
 
 The generator keeps application composition separate from business definitions. Keep that separation: application startup owns adapters and credentials; services own business contracts and handlers.
@@ -51,16 +51,20 @@ to write into a second tree.
 
 ## Use the local CLI
 
-The generated `package.json` provides local commands. Use them instead of relying on a globally installed CLI so every contributor uses the project version.
+The generated `package.json` provides local scripts backed by the project's
+`@purista/cli` development dependency. Use these scripts instead of a globally
+installed CLI so every contributor uses the same version.
 
-```bash title="Generate service"
-npm run add:service -- incident --description "Manage reported incidents"
-npm run add:command -- create-incident --service incident --service-version 1
-npm run add:subscription -- notify-on-incident --service incident --service-version 1 --event incidentCreated
-```
+| Script | Creates | First use in this path |
+| --- | --- | --- |
+| `npm run add:service -- <name> ...` | A versioned service builder, service class, exports, and registration files | The earlier service step created `incident`. |
+| `npm run add:command -- <name> ...` | Command schemas, types, builder, handler, test, and service registration | [Add a command](/handbook/framework/start/add-a-command/). |
+| `npm run add:subscription -- <name> ...` | Subscription schemas, types, builder, handler, test, and service registration | [Add a subscription](/handbook/framework/start/add-a-subscription/). |
+| `npm run add:stream -- <name> ...` | A typed stream definition and test | [Streams](/handbook/framework/build-services/streams/). |
+| `npm run add:agent -- <name> ...` | A native Harness target, test, and one service mount | [AI-powered services](/handbook/framework/build-ai-powered-services/). |
 
-The CLI writes the builder, schema, type, test, and service registration files.
-Edit the generated business function and schemas. The next page adds the
-`incident` service beside the generated `ping` service.
+The first path has already used the service, command, and subscription scripts.
+Use the focused capability chapters for streams, queues, and agents so their
+schemas, runtime wiring, and tests are added as complete steps.
 
-Next: [create the first service](/handbook/framework/start/create-the-first-service/).
+Next: [move from the local result to production](/handbook/framework/start/from-zero-to-production/).

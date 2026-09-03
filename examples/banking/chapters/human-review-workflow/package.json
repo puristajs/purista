@@ -1,0 +1,30 @@
+{
+	"name": "@purista/tutorial-human-review-workflow",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"build": "tsc --noEmit",
+		"lint": "biome check .",
+		"start": "node --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "^4.0.0",
+		"@purista/harness": "^3.0.0",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.8",
+		"@purista/cli": "^4.0.0",
+		"@types/node": "^26.2.0",
+		"tsx": "^4.23.12",
+		"typescript": "^7.0.2",
+		"vitest": "^4.1.10"
+	}
+}

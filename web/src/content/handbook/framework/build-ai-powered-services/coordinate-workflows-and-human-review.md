@@ -64,6 +64,44 @@ outcome and can emit a corresponding stream event. The application should:
 4. re-check the action, identity, expiry, and current revision;
 5. resume the same workflow run idempotently.
 
+The reviewer who submits the decision is often different from the principal
+who started the durable run. Opt in to run-owner resume only for that workflow
+target, and keep the current reviewer in the mount guard:
+
+```ts title="Authorize a cross-principal durable resume"
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
+  publish: { workflows: ['review_rollback'] },
+  targets: {
+    workflows: {
+      review_rollback: {
+        durableResume: { identity: 'run-owner' },
+        beforeGuards: { reviewAccess: requireReviewWorkflowAccess },
+      },
+    },
+  },
+})
+```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+publishes only the selected workflow and applies this target policy at the
+EventBridge boundary.
+
+`durableResume: { identity: 'run-owner' }` restores only the original Harness
+run owner after the guard authorizes the current caller. The current caller's
+tenant and principal remain in the guard and host-integration context. PURISTA
+rejects cross-tenant resume. The stored review record must bind the tenant,
+session ID, run ID, wait ID, action digest, revision, expiry, requester, and
+reviewer policy before a signal or business effect is accepted.
+
+The option is part of
+[`HarnessTargetPolicy`](/handbook/api/types/_purista_core.HarnessTargetPolicy/)
+and applies only to the target where it is declared.
+
+Without this explicit policy, Harness applies its normal immutable session
+owner check and a different principal cannot resume the run. Do not weaken the
+session owner globally or copy the requester's identity into an approval
+request.
+
 The HTTP adapter must not throw merely because approval is needed. Standard AI
 UI clients can render the tool or approval state and submit the user's decision
 through the application endpoint.

@@ -14,6 +14,30 @@ flowchart LR
   Handler --> Resource[Least-privilege resource]
 ```
 
+Protected endpoint metadata does not authenticate by itself. Configure Hono's
+protection middleware and reject invalid credentials with a handled error:
+
+```ts title="src/http/configureProtection.ts"
+import { HandledError, StatusCode } from '@purista/core'
+
+honoService.setProtectMiddleware(async function (context, next) {
+  const identity = await verifyAccessToken(context.req.header('authorization'))
+  if (!identity) {
+    throw new HandledError(StatusCode.Unauthorized, 'Authentication required')
+  }
+  context.set('principalId', identity.subject)
+  context.set('tenantId', identity.tenantId)
+  return next()
+})
+```
+
+[`setProtectMiddleware(handler)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware)
+establishes the transport boundary. Without this call (or an equivalent
+`protectHandler` in service configuration), the Hono service's default handler
+simply continues and protected endpoints accept unauthenticated requests. A
+service guard must then enforce the business-level access rule for every
+transport path.
+
 Start with one protected command. Have the transport authenticate the request and
 set its trusted identity, let a guard decide whether that identity may perform
 the operation, and give the handler only its required resource. Apply the same
@@ -23,7 +47,7 @@ or internal invocation.
 | Boundary | Responsible for | Must not decide |
 | --- | --- | --- |
 | HTTP middleware or calling application | Authenticate a credential and set a trusted principal/tenant | Which invoice, account, or record the caller may change |
-| Command, stream, subscription, or worker guard | Reject an unauthenticated or unauthorized operation | How a gateway token is decoded |
+| Command, stream, subscription, or worker guard | Enforce business access using trusted principal, tenant, payload, and resources | How a gateway token is decoded |
 | Handler and its resource | Load the record and enforce data-level scope | Trusting a caller-supplied tenant field |
 | Adapter/workload identity | Limit broker, store, and cloud access | End-user authorization |
 

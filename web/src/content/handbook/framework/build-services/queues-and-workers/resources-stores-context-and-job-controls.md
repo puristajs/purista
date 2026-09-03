@@ -26,9 +26,68 @@ to prove the expected boundary until the Framework builder is corrected.
 
 For an idempotent report worker, the runtime sequence is: read a durable result
 by the business key; stop upstream work if `signal` is aborted; persist the
-result; then return `success`. The direct worker test shows the same resource
-and payload fixture without presenting a handler that the current fluent type
-surface cannot validate.
+result; then settle success. A separately typed function keeps that contract
+compile-time visible while the fluent worker builder does not yet infer queue
+schemas and service resources:
+
+```ts title="Typed worker logic and direct context test"
+import {
+  createQueueWorkerContextMock,
+  type QueueJobContext,
+  type QueueMessage,
+} from '@purista/core'
+import { expect, test } from 'vitest'
+
+type ReportJob = { reportId: string }
+type ReportResources = {
+  reports: { generate(reportId: string, signal: AbortSignal): Promise<{ reportId: string }> }
+}
+
+async function runReportJob(
+  context: QueueJobContext<ReportJob, undefined, ReportResources>,
+  message: QueueMessage<ReportJob>,
+) {
+  const stateKey = `report:${message.payload.reportId}`
+  const state = await context.states.getState(stateKey)
+  const previous = state[stateKey] as { reportId: string } | undefined
+  if (previous) {
+    await context.job.complete(previous)
+    return
+  }
+
+  if (context.signal.aborted || context.job.cancelRequested()) {
+    await context.job.retry({ reason: 'worker cancellation requested', delayMs: 1_000 })
+    return
+  }
+
+  const result = await context.resources.reports.generate(
+    message.payload.reportId,
+    context.signal,
+  )
+  await context.states.setState(stateKey, result)
+  await context.job.complete(result)
+}
+
+test('persists before completing the lease', async () => {
+  const reports = { generate: async (reportId: string) => ({ reportId }) }
+  const mocked = createQueueWorkerContextMock(generateReportWorkerBuilder, {
+    queueName: 'generateReport',
+    payload: { reportId: 'report-1' },
+    parameter: undefined,
+    resources: { reports },
+  })
+  mocked.stubs.getState.resolves({})
+  mocked.stubs.setState.resolves()
+
+  await runReportJob(mocked.context, mocked.message)
+
+  expect(mocked.stubs.setState.calledBefore(mocked.stubs.job.complete)).toBe(true)
+  expect(mocked.stubs.job.complete.calledWith({ reportId: 'report-1' })).toBe(true)
+})
+```
+
+Store accessors in the mock reject until the test re-arms them. This keeps an
+undeclared persistence dependency from passing silently.
 
 | Job control | Runtime effect |
 | --- | --- |

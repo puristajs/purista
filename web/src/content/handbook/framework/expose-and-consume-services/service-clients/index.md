@@ -4,6 +4,18 @@ description: Choose a direct, EventBridge, REST, or fetch client based on the ac
 order: 440
 ---
 
+## Choose a focused client task
+
+| You need to | Continue with |
+| --- | --- |
+| Produce or load the contract artifact | [Obtain, export, and load definitions](/handbook/framework/expose-and-consume-services/service-clients/obtain-export-and-load-definitions/) |
+| Decide between direct, EventBridge, REST, and generic fetch | [Choose a client boundary](/handbook/framework/expose-and-consume-services/service-clients/choose-a-client-boundary/) |
+| Call within one process without bypassing routing | [Use a direct or embedded client](/handbook/framework/expose-and-consume-services/service-clients/use-a-direct-or-embedded-client/) |
+| Generate typed address-first command calls | [Use an EventBridge client](/handbook/framework/expose-and-consume-services/service-clients/use-an-eventbridge-client/) |
+| Generate a browser/external HTTP package | [Generate and use a REST client](/handbook/framework/expose-and-consume-services/service-clients/generate-and-use-a-rest-client/) |
+| Call a non-PURISTA external HTTP API | [Use the fetch-based client](/handbook/framework/expose-and-consume-services/service-clients/use-the-fetch-based-client/) |
+| Verify generated and runtime behavior | [Test client behavior](/handbook/framework/expose-and-consume-services/service-clients/test-client-behavior/) |
+
 Use a client to invoke a service contract from another application component.
 Choose the boundary first: a generated EventBridge client invokes a PURISTA
 command through the application's EventBridge; a generated HTTP client calls
@@ -55,6 +67,9 @@ import type { Config } from '@purista/core'
 export const invoiceClientConfig = {
   definitionPath: './definitions',
   outputPath: './packages/invoice-client',
+  httpClient: {
+    clientName: 'InvoiceHttpClient',
+  },
   package: {
     name: '@acme/invoice-client',
     description: 'Typed client for the invoice service contract',
@@ -158,11 +173,10 @@ Run your normal package test and publish steps after reviewing that output.
 The HTTP generator defaults each generated client to
 `http://localhost:3000/api`, a 30-second timeout, keep-alive, JSON content
 headers, and `x-trace-id`. Pass its generated constructor options for the real
-gateway. Its current contract has two known limitations: an asynchronous
-command is typed as that command's declared output rather than the gateway's
-`202` acceptance metadata, and it sends a `DELETE` payload although the Hono
-server does not parse one. Use an application-owned HTTP client/type for those
-two shapes until the generated and gateway contracts align.
+gateway. An asynchronous command is typed as the normalized queue acceptance
+result returned with `202`. A generated `DELETE` method never sends a body;
+client generation fails when such an endpoint declares a non-empty payload,
+so move required input to declared path or query parameters.
 
 For an EventBridge client, the generated package imports `EventBridge` from
 `@purista/core` and calls `eventBridge.invoke(...)`. The EventBridge must be
@@ -186,6 +200,44 @@ types come from the definition artifact. For example, a service named
 third argument carries generated `traceId`, `principalId`, and `tenantId` into
 the EventBridge invocation. Pass only identity established at the application
 boundary; command authorization must still run in the receiving service.
+
+### Keep embedded production calls on the EventBridge
+
+Using one Node.js process does not change the service contract. Start a
+`DefaultEventBridge`, register the provider service, and give the generated
+EventBridge client that same bridge. The call still follows address-based
+routing, schema validation, identity propagation, tracing, and the command
+lifecycle. This also keeps the caller unchanged if the service later moves to
+a broker-backed deployment.
+
+Do not import a command handler and call it directly from another production
+service. [`getCommandFunction()`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#getcommandfunction)
+and [`getCommandFunctionPlain()`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#getcommandfunctionplain)
+are narrow testing helpers. The first validates command input and output and
+runs before guards; the second returns the raw handler. Neither reproduces the
+full service lifecycle: input/output transforms, after guards, EventBridge
+delivery, command-result event publication, and transport behavior are outside
+that direct call. See [test a command](/handbook/framework/build-services/commands/test-a-command/)
+for the supported unit-test boundary.
+
+### Handle generated HTTP failures explicitly
+
+The generated HTTP client includes its own `HttpError` class. A non-successful
+HTTP response rejects with the response status in `errorCode`, the request
+method and URL, the parsed JSON or text response in `data`, and the trace ID.
+An aborted request rejects with status `408`. `getErrorResponse()`, `toString()`,
+and `toJSON()` provide stable serializable forms, but applications should map
+them to their own user-facing error contract instead of showing upstream data
+unchanged.
+
+The generated client sends fetch requests with `credentials: 'include'`, so a
+browser can attach cookies allowed by its origin and cookie policy. It can also
+send basic authentication or a bearer token configured on the client. Those
+transport credentials establish identity only when the HTTP server's
+authentication middleware validates them; business authorization still
+belongs to command guards. Generated command methods do not expose arbitrary
+per-request options; configure `defaultTimeout`, headers, and credentials on the
+client instance (or wrap a special-case call in application-owned code).
 
 ### Generate directly in a controlled monorepo
 
@@ -263,7 +315,26 @@ retry policy.
 | `logger`, `logLevel`, `name` | Supply the application's logger, or let PURISTA construct one with the selected level; `name` scopes logs, spans, and metrics. | Do not use customer data or secrets for the name or trace ID. |
 | `spanProcessor`, `metricsRecorder`, `traceId` | Connect to application telemetry and optionally set a custom trace identifier. | The constructor creates and registers a tracer provider. Do not present `enableOpentelemetry` as an off switch: it is accepted by the type but does not currently control that construction. |
 | [`get`](/handbook/api/classes/_purista_core.HttpClient/#get), [`post`](/handbook/api/classes/_purista_core.HttpClient/#post), [`put`](/handbook/api/classes/_purista_core.HttpClient/#put), [`patch`](/handbook/api/classes/_purista_core.HttpClient/#patch), [`delete`](/handbook/api/classes/_purista_core.HttpClient/#delete) | Use the HTTP verb required by the external API. `post`, `put`, `patch`, and `delete` can carry a payload; all return parsed JSON or text. | Non-2xx responses and transport failures reject as `UnhandledError`; `204` resolves `undefined`. |
-| [`HttpClientRequestOptions`](/handbook/api/types/_purista_core.HttpClientRequestOptions/) | Per-call `headers`, `query`, `hash`, and a declared `timeout` field. | Headers and query values can reach telemetry or logs. The current implementation uses `defaultTimeout` for every request; the per-request `timeout` field does **not** override it yet. |
+| [`HttpClientRequestOptions`](/handbook/api/types/_purista_core.HttpClientRequestOptions/) | Per-call `headers`, `query`, `hash`, and `timeout`. A supplied timeout overrides `defaultTimeout` for that request. | Headers and query values can reach telemetry or logs. Choose a finite timeout for each remote dependency and make retries an explicit caller policy. |
+| [`getTracer()`](/handbook/api/classes/_purista_core.HttpClient/#gettracer) / [`startActiveSpan(...)`](/handbook/api/classes/_purista_core.HttpClient/#startactivespan) | Access the client's configured OpenTelemetry tracer or run application work in one active child span. | Prefer automatic request spans for normal calls. Use these methods only when an application-owned operation needs an explicit span and keep sensitive values out of attributes. |
+
+[`HttpClient`](/handbook/api/classes/_purista_core.HttpClient/) implements the
+portable [`RestClient`](/handbook/api/interfaces/_purista_core.RestClient/)
+contract: [`get`](/handbook/api/interfaces/_purista_core.RestClient/#get),
+[`post`](/handbook/api/interfaces/_purista_core.RestClient/#post),
+[`put`](/handbook/api/interfaces/_purista_core.RestClient/#put),
+[`patch`](/handbook/api/interfaces/_purista_core.RestClient/#patch),
+[`delete`](/handbook/api/interfaces/_purista_core.RestClient/#delete), and
+[`setBearerToken`](/handbook/api/interfaces/_purista_core.RestClient/#setbearertoken).
+Type a resource as `RestClient` when business code should depend on that
+transport abstraction and construct `HttpClient` in the application root.
+
+`HttpClient` also sends fetch requests with `credentials: 'include'`. In a
+browser-like runtime, cookies are therefore governed by that runtime's origin
+and cookie rules. In a server runtime, configure explicit authorization rather
+than assuming browser session behavior. A non-2xx response rejects as
+`UnhandledError` with request and response details in `data`; an expired
+default timeout rejects with status `408`.
 
 Do not retry a failed POST, PUT, PATCH, or DELETE blindly. First establish the
 external API's idempotency key and duplicate-side-effect behavior. Treat a

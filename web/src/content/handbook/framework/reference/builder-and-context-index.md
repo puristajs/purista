@@ -24,13 +24,14 @@ then enforces the same contract at execution time.
 
 | Declaration | Context surface | Runtime boundary |
 | --- | --- | --- |
-| `defineResource(name)` | `context.resources[name]` | The resource is required in `getInstance(...)`. |
+| `defineResource<'name', ResourceType>()` | `context.resources.name` | The resource is required in `getInstance(...)`. The declaration is type-level; no implementation is created. |
 | `defineMetric(name, definition)` | `context.metrics[name]` | Recording needs an application-owned Meter/exporter. |
 | `canInvoke(...)` | `context.service.<name>[version].<target>(...)` | The call uses EventBridge and propagates principal and tenant identity. |
 | `canConsumeStream(...)` | `context.stream.<name>[version].<target>(...)` | The EventBridge must advertise stream support. |
 | `canEnqueue(...)` | `context.queue.enqueue.<queue>(...)` | The named queue must be registered and the QueueBridge started. |
 | `canEmit(...)` | `context.emit(eventName, payload)` | The payload is checked against the declared event schema. |
 | `canInvokeAgent(...)` / `canInvokeWorkflow(...)` | `context.agent` / `context.workflow` | Address-first calls use EventBridge and the mounted Harness contract. |
+| `canUseHarnessModel(...)` | `context.model` | Exposes only the named mounted-Harness model handle declared by the caller. |
 
 Common logger, tracing, stores, message metadata, `principalId`, and `tenantId`
 are described in [Handler inputs and context](/handbook/framework/build-services/handler-context/).

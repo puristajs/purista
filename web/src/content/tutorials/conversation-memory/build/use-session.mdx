@@ -1,0 +1,59 @@
+---
+title: Use a stable conversation session
+description: Derive the Harness session from trusted identity and invoke the agent through EventBridge.
+order: 222
+kind: lesson
+status: draft
+---
+
+Generate a normal PURISTA command before editing it. The command remains the
+application boundary; the agent remains a native Harness definition.
+
+```bash title="Generate the conversation command" replay="project"
+npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
+```
+
+The browser supplies a small `conversationId`, but it never supplies tenant or
+principal identity. Build the storage session id from the authenticated PURISTA
+message.
+
+```ts title="src/service/support/v1/conversationSessionId.ts"
+import { HandledError, StatusCode } from '@purista/core'
+
+export function conversationSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	conversationId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	return `support:${identity.tenantId}:${identity.principalId}:${conversationId}`
+}
+```
+
+Declare the versioned agent address and invoke it through EventBridge. Reusing
+the same session id loads earlier complete turns. A different principal or
+conversation id cannot accidentally join that transcript.
+
+```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts"
+export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('continueSupportConversation', 'Continue a bounded support conversation')
+	.addPayloadSchema(answerSupportQuestionInputSchema)
+	.addOutputSchema(answerSupportQuestionOutputSchema)
+	.canInvokeAgent('Support', '1', 'answer_support_question', supportHarness.contracts.agents.answer_support_question)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'support/conversations')
+	.setCommandFunction(async function (context, payload) {
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		const outcome = await context.agent.Support['1'].answer_support_question.run(payload, { sessionId })
+		if (outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
+		return outcome.output
+	})
+```
+
+`release()` closes live session resources but keeps persisted history. It is a
+runtime lifecycle operation, not a user-facing delete. The mounted Framework
+runtime releases sessions after requests while the configured storage retains
+their transcript.
+
+Continue with [Export and clear conversation history](../export-and-clear/).

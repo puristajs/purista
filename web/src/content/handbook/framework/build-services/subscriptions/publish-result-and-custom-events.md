@@ -15,6 +15,8 @@ normal handler result. After after-guards and an optional output transform, the
 runtime returns a custom EventBridge message with that event name.
 
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.ts"
+import { z } from 'zod'
+
 const ledgerEntryCreatedSchema = z.object({ ledgerEntryId: z.string() })
 
 recordInvoiceSubscriptionBuilder
@@ -30,8 +32,32 @@ installs the service-bound handler that returns this normal result. The result
 event is produced only after that handler completes its normal validation and
 post-handler stages.
 
-This is not `context.emit(...)`, it does not run for a control result, and it
-is not transactional with a resource write. The EventBridge may deliver it to
+`Service.executeSubscription(...)` returns the message to the EventBridge
+callback; the adapter publishes it. The shipped Default, AMQP, NATS, MQTT, and
+HTTP adapters implement that callback boundary. Verify the result-event route
+with the selected adapter because its publish confirmation and delivery
+guarantees differ.
+
+The returned message has `messageType: CustomMessage`, the configured
+`eventName`, no receiver, and this sender address:
+
+```ts title="Generated result-event sender address"
+{
+  serviceName: accountingV1ServiceInfo.serviceName,
+  serviceVersion: accountingV1ServiceInfo.serviceVersion,
+  serviceTarget: 'recordInvoice',
+  instanceId: eventBridge.instanceId,
+}
+```
+
+Its content type and encoding come from the third and fourth
+`addOutputSchema(...)` arguments and default to `application/json` and `utf-8`.
+Use those sender fields when a downstream subscription calls
+`filterSentFrom(...)`.
+
+This is not `context.emit(...)`. It does not run for a control result, handler
+failure, failed after guard, or failed output transform, and it is not
+transactional with a resource write. The publishing adapter may deliver it to
 matching subscriptions; this handler does not wait for those subscribers.
 
 ## Emit a separate fact deliberately
@@ -40,6 +66,8 @@ Declare every custom event before the handler uses it. The declaration types
 `context.emit` and makes the dependency visible in the service definition.
 
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.ts"
+import { z } from 'zod'
+
 const ledgerPostingPreparedSchema = z.object({ invoiceId: z.string(), ledgerEntryId: z.string() })
 
 recordInvoiceSubscriptionBuilder
@@ -57,7 +85,17 @@ recordInvoiceSubscriptionBuilder
 creates the typed event allow-list, while
 [`setSubscriptionFunction(fn)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction)
 installs the handler that may use it. A declaration does not publish anything;
-the explicit `context.emit(...)` call performs that separate operation.
+the explicit `context.emit(eventName, payload, contentType?, contentEncoding?)`
+call validates its payload against the registered schema before publishing.
+Repeated declarations merge distinct event names. Reusing an event name replaces
+its registered schema, so keep one declaration per name.
+
+In a direct handler test, assert
+`stubs.emit['accounting.ledgerPostingPrepared'].calledOnce`. For a result event,
+run the service with the selected EventBridge and subscribe a capture handler to
+`accounting.ledgerEntryCreated`; assert its event name, payload, and sender
+address. A direct `getSubscriptionFunction()` call cannot prove result-event
+construction or adapter publication.
 
 | Need | Choose | Why |
 | --- | --- | --- |

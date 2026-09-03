@@ -1,0 +1,91 @@
+---
+title: Fan out with an explicit concurrency budget
+description: Allowlist child agents and use the workflow fan-out API to cap simultaneous work.
+order: 262
+kind: lesson
+status: draft
+---
+
+Add a workflow to the same portable Harness definition. `delegation.agents`
+is the exact allowlist available through `context.agents`. The two numerical
+budgets protect against accidental loops and excessive simultaneous calls.
+
+```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
+.workflow('analyze_support_case', {
+	input: supportCaseInputSchema,
+	output: supportCaseAnalysisOutputSchema,
+	delegation: {
+		agents: ['assess_support_risk', 'plan_support_response'],
+		maxChildAgentCalls: 2,
+		maxParallelChildAgentCalls: 2,
+	},
+	handler: async (context) => {
+		// fan-out is added in the next snippet
+	},
+})
+```
+
+Use `context.fanOut`. It preserves input order, cancels remaining work when the
+workflow fails, and enforces the workflow child-agent budget. `concurrency: 2`
+means at most two worker functions run at once.
+
+```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
+const results = await context.fanOut(
+	['risk', 'response'] as const,
+	async (focus) =>
+		focus === 'risk'
+			? { kind: 'risk' as const, value: await context.agents.assess_support_risk(context.input) }
+			: { kind: 'response' as const, value: await context.agents.plan_support_response(context.input) },
+	{ concurrency: 2 },
+)
+```
+
+This limit controls child work inside one workflow. Configure model admission
+or a queue as well when many service instances and workflows share provider
+rate limits. The two controls solve different levels of concurrency.
+
+Publish only the workflow. The specialists remain internal implementation
+details and receive no PURISTA address. Put business authorization on the
+published workflow target, so HTTP commands and direct service callers cross
+the same guard.
+
+```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts"
+export async function requireSupportCaseAnalysis(
+	policy: SupportCasePolicy,
+	input: { tenantId?: string; principalId?: string; caseId: string },
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (!(await policy.canAnalyze({
+		tenantId: input.tenantId,
+		principalId: input.principalId,
+		caseId: input.caseId,
+	}))) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case analysis is not allowed')
+	}
+}
+```
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts"
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['analyze_support_case'] },
+	targets: {
+		agents: {},
+		workflows: {
+			analyze_support_case: {
+				beforeGuards: {
+					caseAccess: async (context, input) => {
+						await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+Continue with [Merge typed evidence](../merge-evidence/).

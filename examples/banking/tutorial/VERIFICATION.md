@@ -1,6 +1,17 @@
 # Verified tutorial scope
 
-Eighteen of 29 planned capability chapters are published. Each retained project was
+Eighteen of 29 planned capability chapters are published. All eleven remaining
+AI chapters are represented as page-level draft packets in `course.json`.
+The classification packet also has focused source under
+`chapters/classification-agent`; its local typecheck, lint, native Harness
+tests, command-context tests, and real EventBridge routing test pass against
+the release worktrees. The Guardrails packet has focused source under
+`chapters/ai-guardrails`; its input-block/provider-suppression and typed
+output-transform tests, typecheck, and lint also pass. Both remain draft until
+the v4 Framework and v3 Harness
+packages can be installed by registry name in a clean consumer replay.
+
+Each published retained project was
 built by replaying the written tutorial from a clean directory. The replay runs
 the shown PURISTA CLI commands, writes the documented files, executes the shown
 tests and builds, and checks the documented HTTP behavior.

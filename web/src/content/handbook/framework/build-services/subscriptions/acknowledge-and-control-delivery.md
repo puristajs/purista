@@ -31,6 +31,8 @@ failure path.
 import { HandledError, StatusCode } from '@purista/core'
 
 recordInvoiceSubscriptionBuilder
+  .adviceDurable(true)
+  .adviceAutoacknowledgeMessage(false)
   .adviceConsumerFailureHandling({
     mode: 'strict',
     maxAttempts: 5,
@@ -54,6 +56,11 @@ recordInvoiceSubscriptionBuilder
 })
 ```
 
+This exact delayed-retry configuration targets NATS with JetStream enabled.
+For AMQP, keep durable/manual acknowledgement but omit `retryDelayMs` because
+the adapter does not advertise delayed retry. Auto-acknowledged AMQP delivery
+cannot act on a control result after the message was already accepted.
+
 [`setSubscriptionFunction(fn)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction)
 installs the service-bound handler whose normal value or explicit control
 result the runtime interprets. It does not configure retries by itself; pair a
@@ -67,15 +74,17 @@ then detect the existing effect.
 
 ## Know the bridge boundary
 
-Only AMQP and NATS currently act on subscription control errors. The default,
-MQTT, and HTTP/Dapr EventBridges log the control error; they do not retry,
-dead-letter, drop, or pause the delivery.
+AMQP with manual acknowledgement and NATS with JetStream currently act on
+subscription control errors. The default, core NATS without JetStream, MQTT,
+and HTTP/Dapr EventBridges do not implement PURISTA retry, dead-letter, drop, or
+pause semantics for these results.
 
 | EventBridge | `retry` / delayed retry | `deadLetter` | `drop` | `stop-consumer` |
 | --- | --- | --- | --- | --- |
 | Default | Logged only | Logged only | Logged only | Logged only |
-| AMQP | Adapter-controlled | Adapter-controlled | Adapter-controlled | Adapter-controlled |
-| NATS | Adapter-controlled | Adapter-controlled | Adapter-controlled | Adapter-controlled |
+| AMQP with manual ack | Retry; strict delayed retry unsupported | Adapter-controlled | Adapter-controlled | Adapter-controlled |
+| NATS with JetStream | Adapter-controlled, including delay | Adapter-controlled | Adapter-controlled | Adapter-controlled |
+| Core NATS without JetStream | No supported strict consumer path | No supported strict consumer path | No effect | No effect |
 | MQTT | Logged only | Logged only | Logged only | Logged only |
 | HTTP / Dapr | Logged only | Logged only | Logged only | Logged only |
 

@@ -1,0 +1,24 @@
+---
+title: Give an agent PURISTA tools
+description: Bind native Harness tool contracts to address-first commands, streams, queues, and events without losing caller identity.
+order: 230
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches the boundary between a model-facing Harness tool and the
+PURISTA capability that performs the real work.
+
+The Example Bank support agent will read a transaction summary. The model may
+choose the tool and supply an account and transaction id. It never supplies the
+trusted tenant or principal. The mount binding sends the request through
+EventBridge to a guarded `Transaction` command with the caller identity intact.
+
+1. [Declare a native host-tool contract](./build/declare-host-tool/)
+2. [Bind the tool to a PURISTA command](./build/bind-command/)
+3. [Limit effects and make retries safe](./build/limit-effects/)
+4. [Test identity, events, and denied effects](./testing/test-tools/)
+
+The retained source is in `examples/banking/chapters/agent-tools`. Its
+integration test uses a real `DefaultEventBridge` and a strict fake model.

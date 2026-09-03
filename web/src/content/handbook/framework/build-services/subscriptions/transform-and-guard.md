@@ -35,7 +35,13 @@ recordInvoiceSubscriptionBuilder.setTransformInput(
 )
 ```
 
-The input-transform context intentionally has only message/base runtime facilities, resources, stores, logging, metrics, and tracing. It cannot invoke declared services, consume streams, or emit events. Keep the conversion pure and let the domain schema reject a `NaN`, negative amount, or other invalid result.
+The input-transform context intentionally has only message/base runtime
+facilities, resources, stores, logging, metrics, and tracing. It cannot invoke
+declared services, consume streams, or emit events. A queue namespace is also
+present and is not restricted by a subscription declaration list in this
+transform context. Do not enqueue from a transform; keep the conversion pure
+and let the domain schema reject a `NaN`, negative amount, or other invalid
+result.
 
 ## Stop unsafe work with guards
 
@@ -55,13 +61,17 @@ recordInvoiceSubscriptionBuilder.setBeforeGuardHooks({
 
 All transforms and guard callbacks must be `async function`, not arrows, so they can be bound to the service instance. Parallel hooks must not depend on each other’s mutations or ordering. Put a required durable write in the handler, not an after guard.
 
+Repeated guard-registration calls merge hooks by name. Reusing a name throws a
+definition-time duplicate-hook error with the registering method name, so give
+each independent policy check one stable name.
+
 ## Transform output only for a declared result event
 
 [`setTransformOutput(schema, fn, contentType?, encoding?)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#settransformoutput) owns a second result contract. `addOutputSchema(eventName,
-schema, ...)` validates the handler's domain result before after guards; see
+schema, ...)` validates the handler's domain result, then after guards run; see
 [`addOutputSchema(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addoutputschema).
-The
-transform then receives that validated domain result and its own `schema`
+The output transform runs after those guards. It receives the validated domain
+result, and its own `schema`
 validates the transformed event payload. Generated event metadata uses the
 transform schema, not the domain-result schema.
 

@@ -29,8 +29,10 @@ of the definition.
 
 Guardrails do not decide whether a principal may read an account, initiate a
 transfer, or approve a review. Use mount before/after guards and authorization
-inside the command that owns each business effect. A blocked content decision
-may be a normal typed outcome; an unavailable detector is an operational error.
+inside the command that owns each business effect. An explicit content block
+crossing a PURISTA mount becomes a handled `403` with stable, content-free
+error data. A detector or decision callback failure remains an internal
+operational error and fails closed.
 
 Capture prompts, model outputs, and tool inputs only when an explicit data
 policy allows it. Production telemetry should default to no content capture.

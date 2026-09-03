@@ -1,0 +1,31 @@
+---
+title: Run specialist agents in parallel
+description: Define focused agents, bound workflow fan-out, and merge typed evidence through a protected PURISTA command.
+order: 260
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches bounded parallel agent work. One workflow asks a risk
+specialist and a response-planning specialist to inspect the same support case.
+Their independent, schema-validated results are merged in ordinary TypeScript.
+
+The Example Bank case stays small so the framework behavior remains visible.
+You will learn how to:
+
+- give each specialist one responsibility and one output schema;
+- allowlist child agents on the workflow;
+- cap total and simultaneous child calls;
+- use `context.fanOut` instead of unmanaged concurrency;
+- merge evidence without asking another model to reinterpret it;
+- keep business authorization in a PURISTA command guard.
+
+1. [Define the specialist agents](./build/define-specialists/)
+2. [Fan out with an explicit concurrency budget](./build/fan-out/)
+3. [Merge typed evidence](./build/merge-evidence/)
+4. [Test both specialists and the denied path](./testing/test-parallel/)
+
+The retained project is in `examples/banking/chapters/parallel-agents`. Its
+tests use two strict fake providers and a real EventBridge.
+

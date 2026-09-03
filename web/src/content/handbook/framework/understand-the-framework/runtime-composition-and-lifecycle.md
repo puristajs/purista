@@ -1,7 +1,7 @@
 ---
 title: Runtime composition and lifecycle
 description: Start adapters first, then instantiate and start services with explicit dependencies.
-order: 240
+order: 250
 ---
 
 The composition root is usually `src/index.ts`. It is the one place that joins concrete infrastructure to service definitions.

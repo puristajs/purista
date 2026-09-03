@@ -16,8 +16,24 @@ dependencies the handler actually owns.
 | Progressive frames from another service | [`canConsumeStream(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canconsumestream) | The handler must consume/cancel an upstream session deliberately. |
 | Durable work that can complete later | [`canEnqueue(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canenqueue) | Queue acceptance is not completion of the work. |
 | An independent fact | [`canEmit(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canemit) | Publication is separate from a database transaction. |
+| A mounted agent or workflow | [`canInvokeAgent(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent) or [`canInvokeWorkflow(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeworkflow) | The call remains address-first through EventBridge and may itself stream. |
+| One mounted model handle | [`canUseHarnessModel(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canuseharnessmodel) | Deterministic stream logic needs a declared model operation without an agent wrapper. |
 
 ## Declare then use the capability
+
+`canEnqueue(...)` creates the handler allow-list entry. The same service must
+also register the queue definition before it resolves definitions:
+
+```ts title="Register the queue on the owning service"
+export const searchV1ServiceBuilder = new ServiceBuilder(searchV1ServiceInfo)
+  .addQueueDefinition(refreshIndexQueue)
+```
+
+[`addQueueDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueuedefinition)
+registers the queue contract on the owning service builder.
+
+Without that registration, enqueueing fails with `UnhandledError(404, 'queue
+"refreshIndex" is not registered in this service')`.
 
 ```ts title="src/service/search/v1/stream/searchUsers/searchUsersStreamBuilder.ts"
 export const searchUsersStreamBuilder = searchV1ServiceBuilder
@@ -47,8 +63,8 @@ matching typed context namespace when the handler runs.
 
 | Method | Parameters and validation | Context member and outcome |
 | --- | --- | --- |
-| [`canInvoke(service, version, target, outputSchema?, payloadSchema?, parameterSchema?)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvoke) | All three address segments are required and non-empty. A supplied payload or parameter schema validates the outbound request before it leaves this service. A supplied output schema validates the reply; any mismatch is an error. | `context.service[service][version][target](payload, parameter)`. Use all three schemas for a versioned business contract; omit a schema only when that boundary is intentionally untyped. |
-| [`canConsumeStream(service, version, target, chunkSchema?, payloadSchema?, parameterSchema?, finalSchema?, validateChunk = true, validateFinal = true)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canconsumestream) | Request payload and parameter schemas validate before opening the upstream stream. Chunk/final validation defaults to `true` when the respective schema exists; setting either flag to `false` trusts that frame type and removes this consumer-side check. | An async-iterable session with `sessionId` and `cancel(reason?)`. Consume frames deliberately; cancellation is a request to stop upstream work, not proof it already stopped. |
+| [`canInvoke(service, version, target, outputSchema?, payloadSchema?, parameterSchema?)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvoke) | A supplied payload or parameter schema validates the outbound request before it leaves this service. A supplied output schema validates the reply; any mismatch is an error. The current stream builder does not reject blank address parts at definition time. | `context.service[service][version][target](payload, parameter)`. Supply stable non-empty address parts; a blank address produces an invocation that cannot resolve. |
+| [`canConsumeStream(service, version, target, chunkSchema?, payloadSchema?, parameterSchema?, finalSchema?, validateChunk = true, validateFinal = true)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canconsumestream) | Request payload and parameter schemas validate before opening the upstream stream. Chunk/final validation defaults to `true` when the respective schema exists; setting either flag to `false` trusts that frame type and removes this consumer-side check. | An async-iterable session with `sessionId` and [`cancel(reason?)`](/handbook/api/interfaces/_purista_core.StreamHandle/#cancel). Consume frames deliberately; cancellation is a request to stop upstream work, not proof it already stopped. |
 | [`canEnqueue(queueName, payloadSchema?, parameterSchema?)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canenqueue) | A non-empty queue name and optional payload/parameter schemas. They validate before the queue accepts a job. | `context.queue.enqueue[queueName](payload, parameter?, options?)` or `scheduleAt[queueName](runAt, payload, parameter?, options?)` returns acceptance metadata, never the worker’s final result. |
 | [`canEmit(eventName, schema)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canemit) | A non-empty event name and required payload schema. The payload validates before publishing. | `context.emit(eventName, payload, contentType?, contentEncoding?)`. JSON/UTF-8 are the defaults; use another media type only when subscribers deliberately share that contract. |
 

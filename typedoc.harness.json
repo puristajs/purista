@@ -16,6 +16,7 @@
 		"../ai-harness/packages/harness-memory-redis",
 		"../ai-harness/packages/harness-memory-sqlite",
 		"../ai-harness/packages/harness-google",
+		"../ai-harness/packages/harness-ai-sdk-ui",
 		"../ai-harness/packages/harness-openai",
 		"../ai-harness/packages/harness-policy-opa",
 		"../ai-harness/packages/harness-sandbox-docker",

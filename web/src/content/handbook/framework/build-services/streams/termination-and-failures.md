@@ -4,10 +4,11 @@ description: Stop work cooperatively when the caller cancels, throw terminal fai
 order: 346
 ---
 
-A stream ends with `complete`, `cancel`, or `error`. The runtime emits those
-frames; the handler should write progress, record a successful final value, and
-then return. Do not model a partial or failed operation as a completed final
-payload.
+The runtime frame set is `start`, `chunk`, `heartbeat`, `complete`, `cancel`,
+and `error`. A successful stream ends with `complete`; cancellation ends with
+`cancel`; a thrown failure ends with `error`. The handler should write progress,
+record a successful final value, and then return. Do not model a partial or
+failed operation as a completed final payload.
 
 ## Handle cancellation cooperatively
 
@@ -22,19 +23,26 @@ Cancellation is cooperative. PURISTA marks the writer cancelled and runs
 registered callbacks, but cannot abort your database, provider, or HTTP call
 unless the handler wires its cancellation mechanism.
 
+The cancellation callback runs when the service receives the control message,
+which can be while the handler is still awaiting work. The runtime waits for
+the handler to return before it emits `cancel`. It then returns immediately:
+after guards do not run, no final event is published, and no `complete` frame
+follows.
+
 ## Throw for terminal failure
 
 ```ts title="src/service/document/v1/stream/analyzeDocument/analyzeDocumentStreamBuilder.ts"
 export const failureAwareAnalyzeDocumentStreamBuilder = analyzeDocumentStreamBuilder
   .setStreamFunction(async function (context, payload, _parameter, writer) {
-    try {
-      const result = await context.resources.analyzer.analyze(payload.documentId)
-      if (writer.cancelled) return
-      await writer.close(result)
-    } catch (error) {
+    const result = await context.resources.analyzer.analyze(payload.documentId).catch(error => {
       context.logger.error({ err: error }, 'document analysis failed')
       throw error // Runtime emits the terminal error frame.
-    }
+    })
+
+    if (writer.cancelled) return
+    // Keep writer validation outside the provider catch so a contract failure
+    // is not logged as an analyzer failure.
+    await writer.close({ documentId: result.documentId, status: 'complete' })
   })
 ```
 
@@ -56,3 +64,5 @@ durable retry/replay/lease configuration on its builder; place long-lived,
 retriable work in [queues and workers](/handbook/framework/build-services/queues-and-workers/) and stream only the connected caller’s current progress.
 
 Next, [test a stream](/handbook/framework/build-services/streams/test-a-stream/) to prove cancellation and failure at the correct boundary.
+
+For terminal frame and writer types, see [StreamWriter](/handbook/api/interfaces/_purista_core.StreamWriter/) and [StreamDefinitionBuilder](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/).

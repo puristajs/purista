@@ -1,0 +1,70 @@
+---
+title: Define the specialist agents
+description: Give each agent a narrow task, a dedicated model alias, and a strict output contract.
+order: 261
+kind: lesson
+status: draft
+---
+
+Add the Support service and generate the command that will expose the complete
+analysis, then install Harness with published package names.
+
+```bash title="Create the PURISTA boundary" replay="project"
+npm run add:service -- support --description "Owns support cases and support automation" --non-interactive
+npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
+npm install @purista/harness @purista/harness-openai zod
+```
+
+Define the shared input and two different outputs. Strict schemas make each
+specialist responsibility visible to TypeScript, the runtime, and tests.
+
+```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
+export const supportCaseInputSchema = z.strictObject({
+	caseId: z.string().trim().min(1).max(80),
+	message: z.string().trim().min(1).max(2_000),
+})
+
+export const riskAssessmentSchema = z.strictObject({
+	level: z.enum(['low', 'medium', 'high']),
+	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
+})
+
+export const responsePlanSchema = z.strictObject({
+	customerReply: z.string().trim().min(1).max(500),
+	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
+})
+```
+
+Use separate model aliases even when production binds both aliases to the same
+provider and model. The aliases let you tune, admit, observe, and test the two
+roles independently later.
+
+```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
+export const supportCaseAnalysisHarness = defineHarness({ name: 'support-case-analysis' })
+	.requireModel('risk_model', { capabilities: ['object'] })
+	.requireModel('response_model', { capabilities: ['object'] })
+	.agent('assess_support_risk', {
+		model: 'risk_model',
+		input: supportCaseInputSchema,
+		output: riskAssessmentSchema,
+		instructions: [
+			'Assess security and financial risk in one Example Bank support message.',
+			'Use only facts present in the message and list short evidence statements.',
+		].join(' '),
+	})
+	.agent('plan_support_response', {
+		model: 'response_model',
+		input: supportCaseInputSchema,
+		output: responsePlanSchema,
+		instructions: [
+			'Plan a concise Example Bank support response.',
+			'Do not claim an action happened. Select the next action that a service should perform.',
+		].join(' '),
+	})
+```
+
+These agents produce recommendations only. Commands still own database reads,
+authorization, and effects such as freezing a card.
+
+Continue with [Fan out with an explicit concurrency budget](../fan-out/).
+

@@ -1,8 +1,44 @@
 ---
-title: Graceful shutdown
-description: Drain services and close listeners with a bounded shutdown policy rather than terminating in-flight work blindly.
+title: Graceful startup and shutdown
+description: Fail closed during startup, then drain services and close listeners with a bounded shutdown policy.
 order: 1033
 ---
+
+## Fail closed before advertising readiness
+
+[`Service.start()`](/handbook/api/classes/_purista_core.Service/#start) does not
+start a degraded service. It first rejects a second start, validates declared
+service configuration, checks that the EventBridge is healthy, registers
+commands/subscriptions/streams, starts and checks the QueueBridge when the
+service owns queue features, validates queue capabilities, starts workers, and
+only then publishes `InfoServiceReady`.
+
+An unhealthy EventBridge rejects startup with `UnhandledError(503,
+'eventbridge not healthy')`; an unhealthy QueueBridge uses `queue bridge not
+healthy`. Invalid service configuration and duplicate start are internal
+startup errors. Keep the process out of readiness and fix the adapter,
+configuration, or duplicate composition instead of catching these errors and
+serving partial traffic.
+
+```ts title="src/index.ts"
+await eventBridge.start()
+
+const invoiceService = await invoiceV1Service.getInstance(eventBridge, {
+  queueBridge,
+  serviceConfig,
+})
+
+await invoiceService.start()
+// Only expose readiness after every required service and listener has started.
+```
+
+[`ServiceBuilder.getInstance(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance)
+creates and validates the typed runtime bindings; it does not register the
+service or mark it ready. Probe the EventBridge, QueueBridge, and the
+application's readiness endpoint in an integration test, including one
+deliberately unhealthy dependency.
+
+## Drain in dependency order
 
 PURISTA exports `gracefulShutdown(logger, list, timeoutMs = 30_000)`. It
 installs one-shot `SIGTERM`, `SIGINT`, and `SIGQUIT` handlers, then executes

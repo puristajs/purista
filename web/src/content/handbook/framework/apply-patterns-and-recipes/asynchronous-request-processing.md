@@ -80,7 +80,7 @@ handler returns anything other than the queue receipt, the HTTP projection
 returns an internal error rather than an invented acceptance response. Use a
 durable Redis or NATS QueueBridge before claiming restart recovery; the default
 bridge is only for local behavior and deterministic tests. For queue lifecycle
-and retry options, continue with [define a queue and worker](/handbook/framework/build-services/queues-and-workers/define-a-queue-and-worker/) and [expose queued work](/handbook/framework/build-services/queues-and-workers/expose-queued-work/).
+and retry options, continue with [create a queue and worker](/handbook/framework/build-services/queues-and-workers/create-a-queue-and-worker/) and [expose queued work](/handbook/framework/build-services/queues-and-workers/expose-queued-work/).
 
 ## 2. Make completion a separate contract
 

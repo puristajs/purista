@@ -22,14 +22,9 @@ const output = z.object({
 
 export const supportQuestionHarness = defineHarness({ name: 'support-question' })
 	.sandbox(inMemorySandbox())
-	.models({
-		assistant: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-	})
 	.agent('answerer', {
-		model: 'assistant',
 		input,
 		output,
-		instructions: 'Answer briefly and set confidence to low or high.',
 		// Keeps this focused example runnable without provider credentials.
 		handler: async ({ input }) => ({
 			answer: `We received: ${input.question}`,
@@ -111,12 +106,11 @@ when choosing another validator or checking compatibility.
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Starts the composition and gives logs, telemetry, and diagnostics a stable name. | The optional name defaults to `agent-harness`; do not treat it as request identity or authorization. |
 | [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Binds the files-and-bounded-search sandbox returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/) before any later tool definition could receive sandbox context. | The factory has no options and provides `sandbox.fs` plus `sandbox.text_search`; `exec` and process spawning are unavailable. It keeps this no-tool example independent of automatic adapter detection, but neither validates the schemas nor supplies persistent or isolated storage. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers `assistant` before the agent selects it. | The `object` capability is the operation needed for a schema-validated default-loop result. Keep capabilities minimal; a live provider mismatch raises a capability error when invoked. |
 | [`input`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Rejects malformed application input before the agent handler/default loop receives it. | Use a narrow schema for application data, not as a substitute for caller authorization. |
 | [`output`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Validates the handler/model result before `run()` resolves. | A default-loop agent requires `ModelSchema` JSON Schema support; a custom handler needs only `Schema`. Use structured output when application code needs fields, enums, or bounds—not merely a readable sentence. |
-| [`handler`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Makes this tutorial deterministic and avoids a provider call. | Omit it for the standard model loop. A custom handler owns its own model/tool lifecycle. |
+| [`handler`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Makes this tutorial deterministic and avoids a provider call. | Omit it for the standard model loop. A custom handler owns its own model/tool lifecycle and therefore does not declare `model`, `instructions`, loop controls, interceptors, or Guardrails. |
 | [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Preserves the schemas in `session.agents.answerer.run(...)`. | Keep the definition inline instead of asserting a standalone generic type so the input/output contract remains inferable. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the registry and produces the Harness API. | It fails fast for a missing model registry or invalid agent references, and compiles each model-facing schema once to frozen Draft 2020-12 JSON Schema; validation remains at prompt and result boundaries. |
+| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the registry and produces the Harness API. | A handler-only Harness does not need a model registry. When model-facing schemas exist, build compiles them once to frozen Draft 2020-12 JSON Schema; validation remains at input and result boundaries. |
 
 No tool registry is declared because this task does not need one. Add tools only
 when the agent needs an explicit application capability.

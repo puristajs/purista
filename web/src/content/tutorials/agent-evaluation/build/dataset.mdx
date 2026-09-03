@@ -1,0 +1,58 @@
+---
+title: Create a versioned evaluation dataset
+description: Store stable inputs, expected behavior, and semantic segments without coupling cases to one model.
+order: 291
+kind: lesson
+status: draft
+---
+
+Keep evaluation code beside the portable Harness definition or in a dedicated
+test package. Generate the PURISTA boundary and install the same published
+dependencies that a clean consumer uses.
+
+```bash title="Create the evaluated Support boundary" replay="project"
+npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
+npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the evaluated agent" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify a support message" --non-interactive
+npm install @purista/core @purista/harness @purista/harness-openai zod
+```
+
+Mount the definition once on `Support` and let the generated command invoke its
+address-first target. The evaluation runner imports the same
+`classificationHarness`; it does not maintain a second prompt or schema.
+
+Define the expected fields separately from the complete agent output. The
+reason is free text, so this first dataset checks category and urgency without
+requiring one exact sentence.
+
+```ts title="src/dataset.ts"
+export type ClassificationAssessment = Pick<ClassificationOutput, 'category' | 'urgency'>
+
+export const supportClassificationDataset = {
+	id: 'support-classification-cases',
+	version: '1.0.0',
+	cases: [
+		{
+			id: 'missing-card',
+			input: { messageId: 'message-1', text: 'My card was stolen and someone is using it now.' },
+			assessment: { category: 'card', urgency: 'urgent' },
+			segments: { category: 'card', urgency: 'urgent' },
+		},
+	],
+} as const satisfies EvaluationDataset<ClassificationInput, ClassificationAssessment>
+```
+
+Use stable case ids. Increase the dataset version when case meaning or expected
+behavior changes. Add new examples for production failures, boundary values,
+guardrail blocks, retrieval grounding, tool trajectories, and workflow
+outcomes as those capabilities evolve.
+
+Segments make aggregate gaps visible. An overall score can hide a category
+that fails consistently, so this dataset records category and urgency on each
+case.
+
+Do not place live customer messages or secrets in source-controlled fixtures.
+Use reviewed synthetic or appropriately governed datasets and retain content
+according to application policy.
+
+Continue with [Add deterministic checks](../deterministic-checks/).

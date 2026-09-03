@@ -19,8 +19,8 @@ sequenceDiagram
   Session->>Agent: start typed run
   Agent->>Model: request
   Model-->>Agent: object or tool call
-  Agent-->>Session: validated output
-  Session-->>App: result or typed error
+  Agent-->>Session: validated output or resumable interrupt
+  Session-->>App: RunOutcome or typed error
 ```
 
 Use distinct session IDs for concurrent user threads. A second active run on one

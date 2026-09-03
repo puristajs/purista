@@ -38,8 +38,8 @@ export const acmeQueueCapabilities = {
 
 The capabilities are a typed declaration for the concrete adapter. The class
 must still implement the complete `QueueBridge` interface; there is no queue
-base class. Use the generated [Framework API reference](/handbook/api/) for
-the signatures. Do not publish an adapter that accepts jobs but cannot settle,
+base class. Use the exact interface links below for the signatures. Do not
+publish an adapter that accepts jobs but cannot settle,
 recover, or inspect the work it advertises as durable.
 
 ## Implement the lease lifecycle
@@ -52,6 +52,30 @@ recover, or inspect the work it advertises as durable.
 | Settle work | `ack`, `nack` | Ack removes a successful lease. Nack schedules a retry or moves the job to dead letter when attempts are exhausted. A lost worker must not leave a job invisible forever. |
 | Repair work | `moveToDeadLetter`, `peekDeadLetter`, `redriveDeadLetter`, `purgeDeadLetter`, `inspectLeases` | Implement an operation only if its capability says it is supported; return an explicit safe failure or empty inspection result where the interface contract requires it. |
 | Operate | `metrics(queueName)` | Report pending, leased/in-flight, delayed/retry, and dead-letter state in a way operators can reconcile with provider state. |
+
+Exact interface lookups:
+
+- lifecycle: [`start`](/handbook/api/interfaces/_purista_core.QueueBridge/#start),
+  [`isReady`](/handbook/api/interfaces/_purista_core.QueueBridge/#isready),
+  [`isHealthy`](/handbook/api/interfaces/_purista_core.QueueBridge/#ishealthy), and
+  [`destroy`](/handbook/api/interfaces/_purista_core.QueueBridge/#destroy);
+- acceptance and leases: [`enqueue`](/handbook/api/interfaces/_purista_core.QueueBridge/#enqueue),
+  [`leaseNext`](/handbook/api/interfaces/_purista_core.QueueBridge/#leasenext), and
+  [`extendLease`](/handbook/api/interfaces/_purista_core.QueueBridge/#extendlease);
+- settlement: [`ack`](/handbook/api/interfaces/_purista_core.QueueBridge/#ack),
+  [`nack`](/handbook/api/interfaces/_purista_core.QueueBridge/#nack), and
+  [`moveToDeadLetter`](/handbook/api/interfaces/_purista_core.QueueBridge/#movetodeadletter);
+- operations: [`peekDeadLetter`](/handbook/api/interfaces/_purista_core.QueueBridge/#peekdeadletter),
+  [`redriveDeadLetter`](/handbook/api/interfaces/_purista_core.QueueBridge/#redrivedeadletter),
+  [`purgeDeadLetter`](/handbook/api/interfaces/_purista_core.QueueBridge/#purgedeadletter),
+  [`inspectLeases`](/handbook/api/interfaces/_purista_core.QueueBridge/#inspectleases), and
+  [`metrics`](/handbook/api/interfaces/_purista_core.QueueBridge/#metrics).
+
+Use [`QueueBridge`](/handbook/api/interfaces/_purista_core.QueueBridge/),
+[`QueueBridgeCapabilities`](/handbook/api/types/_purista_core.QueueBridgeCapabilities/),
+[`QueueEnqueueOptions`](/handbook/api/types/_purista_core.QueueEnqueueOptions/),
+and [`QueueRetryRequest`](/handbook/api/types/_purista_core.QueueRetryRequest/)
+as the implementation contract.
 
 The `QueueEnqueueOptions` fields are `queueName`, `payload`, optional
 `parameter`, `delayMs`, `idempotencyKey`, safe string `headers`, `maxAttempts`,
@@ -91,4 +115,4 @@ job becomes recoverable. Then verify that a queue definition requiring an
 unsupported capability fails during service startup instead of silently
 degrading.
 
-Next: return to [Queue delivery](/handbook/framework/connect-distributed-infrastructure/queue-delivery/) or [define a queue and worker](/handbook/framework/build-services/queues-and-workers/define-a-queue-and-worker/).
+Next: return to [Queue delivery](/handbook/framework/connect-distributed-infrastructure/queue-delivery/) or [create a queue and worker](/handbook/framework/build-services/queues-and-workers/create-a-queue-and-worker/).

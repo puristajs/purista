@@ -152,6 +152,9 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   `getHarnessHostToolBuilder(...)`; do not pre-call retrieval in a custom
   agent handler. Keep retrieval authorization in the PURISTA command guard and
   add a mount business guard when the same scope is known before model work.
+  Every published mounted target that can be called directly through
+  EventBridge carries its own business guard; a wrapper command guard does not
+  protect the target address.
 - Teach guards with action/object/state permissions for valid callers, not only
   identity presence. Transforms change representations; handlers own effects
   and atomic state checks. After guards cannot roll back completed mutations.

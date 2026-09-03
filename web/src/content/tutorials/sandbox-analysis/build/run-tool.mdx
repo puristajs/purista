@@ -1,0 +1,119 @@
+---
+title: Run only the required tools
+description: Opt into three built-ins, restrict mutation, and keep business authorization outside the model.
+order: 282
+kind: lesson
+status: draft
+---
+
+Define bounded input and structured output schemas. The agent receives at most
+500 transaction rows and returns ids plus a short summary.
+
+```ts title="src/harness/analysis/transactionAnalysisHarness.ts"
+export const analyzeTransactionsInputSchema = z.strictObject({
+	analysisId: z.string().trim().min(1).max(80),
+	transactions: z.array(transactionRowSchema).min(1).max(500),
+})
+
+export const analyzeTransactionsOutputSchema = z.strictObject({
+	analysisId: z.string(),
+	flaggedTransactionIds: z.array(z.string()).max(500),
+	summary: z.string().trim().min(1).max(500),
+})
+```
+
+Built-in sandbox tools are disabled unless the agent lists them. Enable only
+the three operations needed by this analysis and add mutation policies.
+
+```ts title="src/harness/analysis/transactionAnalysisHarness.ts"
+export const transactionAnalysisHarness = defineHarness({ name: 'transaction-analysis' })
+	.requireModel('analysis_model', { capabilities: ['object', 'tool_use'] })
+	.agent('analyze_transactions', {
+		model: 'analysis_model',
+		input: analyzeTransactionsInputSchema,
+		output: analyzeTransactionsOutputSchema,
+		builtinTools: ['write', 'bash', 'read'],
+		permissions: {
+			write: { mode: 'allow', allow: ['/workspace/**'] },
+			bash: { mode: 'allow', allow: ['python3'] },
+		},
+		instructions: [
+			'Analyze the supplied transaction rows inside the sandbox.',
+			'Write only under /workspace, run only python3, and read the produced result before answering.',
+			'Return only the structured analysis. Never claim a transaction was blocked.',
+		].join(' '),
+		maxSteps: 6,
+	})
+	.define()
+```
+
+The adapter also enforces CPU, memory, process, temporary-storage, output, and
+timeout limits. Agent permissions and adapter limits are complementary: the
+first controls intended tool use, and the second contains the process.
+
+Put business authorization on the published agent target. This protects every
+EventBridge caller before Harness opens a sandbox or invokes a model. The HTTP
+command remains a small protected projection.
+
+```ts title="src/service/analysis/v1/requireTransactionAnalysis.ts"
+export async function requireTransactionAnalysis(
+	policy: AnalysisPolicy,
+	input: { tenantId?: string; principalId?: string; analysisId: string },
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (!(await policy.canRun({
+		tenantId: input.tenantId,
+		principalId: input.principalId,
+		analysisId: input.analysisId,
+	}))) {
+		throw new HandledError(StatusCode.Forbidden, 'Transaction analysis is not allowed')
+	}
+}
+```
+
+```ts title="src/service/analysis/v1/harness/analysisHarnessMount.ts"
+export const analysisHarnessPolicy = {
+	publish: { agents: ['analyze_transactions'], workflows: [] },
+	targets: {
+		agents: {
+			analyze_transactions: {
+				beforeGuards: {
+					analysisAccess: async (context, input) => {
+						await requireTransactionAnalysis(context.resources.analysisPolicy, {
+							...context.identity,
+							analysisId: input.analysisId,
+						})
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+
+```ts title="src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts"
+export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
+	.getCommandBuilder('analyzeTransactions', 'Run an isolated transaction analysis')
+	.addPayloadSchema(analyzeTransactionsInputSchema)
+	.addOutputSchema(analyzeTransactionsOutputSchema)
+	.canInvokeAgent(
+		'Analysis',
+		'1',
+		'analyze_transactions',
+		transactionAnalysisHarness.contracts.agents.analyze_transactions,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'analysis/transactions')
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Analysis['1'].analyze_transactions.run(payload, {
+			sessionId: `transaction-analysis:${payload.analysisId}`,
+		})
+		if (outcome.status !== 'completed') throw new Error('Transaction analysis did not complete')
+		return outcome.output
+	})
+```
+
+Continue with [Release and purge sandbox resources](../cleanup/).

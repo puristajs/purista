@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-border: var(--border);
+	--color-ring: var(--ring);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+	--radius: 0.625rem;
+	--background: oklch(0.985 0.002 247);
+	--foreground: oklch(0.145 0.01 260);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0.01 260);
+	--primary: oklch(0.22 0.04 161);
+	--primary-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.96 0.006 250);
+	--muted-foreground: oklch(0.5 0.02 260);
+	--accent: oklch(0.94 0.015 155);
+	--accent-foreground: oklch(0.22 0.04 161);
+	--border: oklch(0.9 0.008 255);
+	--ring: oklch(0.52 0.11 160);
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply m-0 bg-background text-foreground antialiased;
+		font-family: "DM Sans", ui-sans-serif, sans-serif;
+	}
+}

@@ -1,0 +1,54 @@
+---
+title: Test mounting and failure behavior
+description: Prove catalog disclosure, explicit read access, Skill activation, and fail-closed loading.
+order: 244
+kind: lesson
+status: draft
+---
+
+Script the model to read the mounted file, then return a structured answer.
+
+```ts title="src/harness/support/supportHarness.test.ts"
+provider.enqueueObject({
+	object: {},
+	toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+	usage,
+	finishReason: 'tool_calls',
+})
+provider.enqueueObject({
+	object: {
+		answer: 'A pending transfer can remain under review for up to two business days.',
+		method: 'pending_transfer',
+	},
+	usage,
+	finishReason: 'stop',
+})
+```
+
+Inspect the first provider request. It should contain the compact catalog and
+file location, not the complete procedure. Its tool list should contain only
+`read`.
+
+```ts title="src/harness/support/supportHarness.test.ts"
+const firstRequest = provider.requests[0]
+if (!('messages' in firstRequest) || !('tools' in firstRequest))
+	throw new Error('Expected an object model request.')
+expect(firstRequest.messages[0]?.content).toContain('Location: /skills/support-methods/SKILL.md')
+expect(firstRequest.messages[0]?.content).not.toContain('normal review window')
+expect(firstRequest.tools?.map(tool => tool.name) ?? []).toEqual(['read'])
+```
+
+Create a second definition with a missing directory and assert
+`getInstance(...)` rejects with `SKILL_MANIFEST_ERROR`. Also test malformed
+frontmatter, name mismatches, unsupported sandbox mounting, and file-count or
+byte limits when your application accepts separately packaged Skills.
+
+```bash title="Verify the agent-skills chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained snapshot passes the native Skill test, fail-closed loading test,
+and PURISTA command invocation test. It remains a draft until a fresh registry
+consumer replay is possible with the published major versions.

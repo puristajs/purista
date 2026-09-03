@@ -22,6 +22,27 @@ flowchart LR
   C --> B[Observability backend]
 ```
 
+Wire the same application-owned logger, span processor, and Meter policy into
+each independently constructed component:
+
+```ts title="src/index.ts"
+const eventBridge = new DefaultEventBridge({ logger, spanProcessor, metrics: { meter } })
+await eventBridge.start()
+
+const orderService = await orderV1Service.getInstance(eventBridge, {
+  logger,
+  spanProcessor,
+  metrics: { meter },
+})
+await orderService.start()
+```
+
+[`ServiceBuilder.getInstance(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance)
+configures only that service instance; the EventBridge needs its own matching
+telemetry options. Invoke one command and verify a structured log, a
+`purista.command.invoke` trace, and `purista.command.executions` in the selected
+backend before treating the pipeline as operational.
+
 Start with [OpenTelemetry](/handbook/framework/secure-and-operate/observability/opentelemetry/),
 then [define and record metrics](/handbook/framework/secure-and-operate/observability/define-and-record-metrics/)
 and [trace commands, events, streams, and jobs](/handbook/framework/secure-and-operate/observability/trace-commands-events-streams-and-jobs/).

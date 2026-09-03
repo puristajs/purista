@@ -1,7 +1,7 @@
 ---
 title: Distribution and deployment models
 description: Keep service definitions stable while changing the process and infrastructure topology around them.
-order: 250
+order: 260
 ---
 
 The same service definition can run with in-memory defaults in one process or with a broker-backed EventBridge in multiple processes. The application changes its composition; the service keeps its contracts.

@@ -6,6 +6,25 @@ order: 720
 
 A QueueBridge stores jobs, leases work to workers, and can provide retries, delayed delivery, dead-letter handling, and idempotency. The queue definition remains service-owned; the bridge is application infrastructure.
 
+```mermaid title="Queue job lease and settlement lifecycle"
+stateDiagram-v2
+  [*] --> Pending: enqueue
+  Pending --> Available: delay expires
+  Available --> Leased: worker leases job
+  Leased --> Completed: ack
+  Leased --> Pending: nack with retry delay
+  Leased --> Pending: lease expires before max attempts
+  Leased --> DeadLetter: nack or lease expiry exhausts attempts
+  DeadLetter --> Pending: operator redrives
+  DeadLetter --> [*]: operator purges
+  Completed --> [*]
+```
+
+The bridge owns visibility, leasing, settlement, and recovery. The service owns
+the typed queue and worker definitions. A worker must acknowledge only after
+its business effect is safely complete; lease expiry can cause the same job to
+run again.
+
 | Bridge | Availability | What it can prove | Main limit |
 | --- | --- | --- | --- |
 | Default | Included in core | Local FIFO, delay, lease recovery, and dead-letter flow | Everything disappears with the process; no idempotency-key enforcement |
@@ -14,6 +33,26 @@ A QueueBridge stores jobs, leases work to workers, and can provide retries, dela
 | Custom | Application-owned adapter | A provider with complete, verified leasing and recovery semantics | You own persistence, settlement, capability truthfulness, and repair support |
 
 Pass the selected bridge when creating the service. Installing it without this runtime wiring leaves the service on its default QueueBridge.
+
+```ts title="src/index.ts"
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
+import { reportingV1Service } from './service/reporting/v1/reportingV1Service.js'
+
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+
+const queueBridge = new DefaultQueueBridge()
+const reportingService = await reportingV1Service.getInstance(eventBridge, { queueBridge })
+await reportingService.start()
+```
+
+[`ServiceBuilder.getInstance(eventBridge, { queueBridge })`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance)
+binds the adapter to that service instance. `service.start()` starts and checks
+the QueueBridge, validates queue requirements against its advertised
+capabilities, and registers workers. Verify the smallest path by enqueueing one
+job, observing the worker's effect, and checking that a successful lease is
+acknowledged. Then force a worker failure and confirm the configured retry or
+dead-letter result.
 
 `idempotencyEnforcement` means the **enqueue** boundary deduplicates the same
 queue/idempotency key. It does not make a later provider call, database write,

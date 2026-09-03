@@ -1,0 +1,40 @@
+---
+title: Pause a workflow for human review
+description: Suspend durable work, authorize a reviewer, resume the same run, and execute an approved effect once.
+order: 250
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches a durable human-review boundary. The workflow stops at a
+safe external wait, the HTTP command returns a typed `waiting` result, and a
+later protected command records the reviewer decision before resuming the same
+run.
+
+The Example Bank action is intentionally small: a support user asks to freeze
+a missing card and a reviewer approves or rejects it. The important parts are
+framework capabilities that apply to any review process.
+
+- A **Harness external wait** pauses a durable workflow until an application
+  supplies an external signal.
+- A **tool approval interrupt** asks whether one model-selected tool call may
+  proceed. Use it for model tool approvals rather than a general business
+  review queue.
+- A **guardrail** allows or blocks content. It does not authorize a business
+  action.
+
+The PURISTA application owns reviewer authorization, review records, and the
+approved business effect. Harness storage owns the opaque wait, durable run,
+and workflow checkpoints. A pending review is normal application state, so it
+must not become an exception or an HTTP 500 response.
+
+1. [Define and mount the durable workflow](./build/define-workflow/)
+2. [Return a typed waiting result](./build/interrupt/)
+3. [Authorize, signal, and resume](./build/approve-resume/)
+4. [Test the review boundary](./testing/test-review/)
+
+The complete source is retained in
+`examples/banking/chapters/human-review-workflow`. Its test runs the real
+EventBridge and needs no model provider or API key.
+

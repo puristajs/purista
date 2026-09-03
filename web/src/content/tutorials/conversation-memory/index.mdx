@@ -1,0 +1,35 @@
+---
+title: Persist and manage conversation history
+description: Keep bounded agent transcripts in Harness storage and manage them through protected PURISTA commands.
+order: 220
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches persistent conversation sessions. It extends the `Support`
+service from the classification chapter, but the capability is useful for any
+agent that must understand earlier turns.
+
+You will keep three storage responsibilities separate:
+
+- **Harness storage** owns agent sessions, transcript messages, run receipts,
+  durable checkpoints, and external waits.
+- **Harness memory** stores facts that an agent or tool writes explicitly. It
+  does not automatically contain the transcript.
+- **PURISTA StateStore** remains application state for values such as login
+  sessions. It is not a database for AI conversation history.
+
+By the end, one identity-scoped conversation survives process restarts, retains
+only complete bounded turns, and can be exported or cleared through protected
+PURISTA commands.
+
+1. [Configure durable Harness storage](./build/configure-storage/)
+2. [Use a stable conversation session](./build/use-session/)
+3. [Export and clear conversation history](./build/export-and-clear/)
+4. [Test history, isolation, and deletion](./testing/test-history/)
+
+The complete source is retained in
+`examples/banking/chapters/conversation-memory` and uses published npm package
+names. Its model tests use `FakeModelProvider`, so the verification suite needs
+no API key.

@@ -469,9 +469,18 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/services/create-and-version-a-service",
+    "topicId": "framework/build-services/services/service-lifecycle",
     "parentTopicId": "framework/build-services/services",
     "order": 311,
+    "title": "Service lifecycle",
+    "description": "Follow a service from declarations through instance creation, registration, readiness, and single-use shutdown.",
+    "pageRole": "concept"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/build-services/services/create-and-version-a-service",
+    "parentTopicId": "framework/build-services/services",
+    "order": 312,
     "title": "Create and version a service",
     "description": "Define one stable business boundary, make its public version explicit, and keep deployment concerns outside the service contract.",
     "pageRole": "task"
@@ -480,7 +489,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/add-definitions-to-a-service",
     "parentTopicId": "framework/build-services/services",
-    "order": 312,
+    "order": 313,
     "title": "Add definitions to a service",
     "description": "Register the service's declared capabilities once, bind event-to-queue work deliberately, and resolve the aggregate only after it is complete.",
     "pageRole": "task"
@@ -489,7 +498,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/provide-resources-and-metrics",
     "parentTopicId": "framework/build-services/services",
-    "order": 313,
+    "order": 314,
     "title": "Provide resources and metrics",
     "description": "Declare narrow application dependencies and custom metrics on a service, then supply concrete implementations at the composition root.",
     "pageRole": "task"
@@ -498,7 +507,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/configure-a-service",
     "parentTopicId": "framework/build-services/services",
-    "order": 314,
+    "order": 315,
     "title": "Configure a service",
     "description": "Validate static service-owned settings at creation and startup, while keeping secrets, tenant identity, and mutable runtime data in their correct boundaries.",
     "pageRole": "task"
@@ -507,7 +516,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/customize-service-lifecycle",
     "parentTopicId": "framework/build-services/services",
-    "order": 315,
+    "order": 316,
     "title": "Customize service lifecycle",
     "description": "Extend the Service class only when a long-lived business boundary must start and stop with the service rather than a normal injected resource.",
     "pageRole": "task"
@@ -516,7 +525,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/instantiate-and-start-a-service",
     "parentTopicId": "framework/build-services/services",
-    "order": 316,
+    "order": 317,
     "title": "Instantiate and start a service",
     "description": "Construct concrete dependencies at the composition root, create the service with its runtime bindings, then start and stop it in the required order.",
     "pageRole": "task"
@@ -525,7 +534,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/build-services/services/test-a-service",
     "parentTopicId": "framework/build-services/services",
-    "order": 317,
+    "order": 318,
     "title": "Test a service",
     "description": "Validate the assembled service contract, then prove handler logic, deterministic runtime behavior, and real adapter behavior at separate boundaries.",
     "pageRole": "task"
@@ -905,7 +914,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/configure-applications/secret-stores",
     "order": 526,
     "title": "Store secrets in Infisical",
-    "description": "Enable the Infisical secret-store adapter with a scoped machine identity or token.",
+    "description": "Enable the legacy Infisical service-token adapter only after confirming the project still supports its client-side encryption API.",
     "pageRole": "task"
   },
   {
@@ -1065,18 +1074,81 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/expose-and-consume-services/http-and-rest/runtime-architecture",
     "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
-    "order": 415,
+    "order": 411,
     "title": "HTTP runtime architecture and startup",
     "description": "Choose direct definition registration for a monolith or event-driven endpoint discovery for a separately deployed Hono process.",
     "pageRole": "concept"
   },
   {
     "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/run-hono-in-a-monolith",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 412,
+    "title": "Run Hono in a monolith",
+    "description": "Register in-process service definitions with Hono, start every runtime in dependency order, and bind the network listener last.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/deploy-hono-independently",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 413,
+    "title": "Deploy Hono as an independent service",
+    "description": "Discover HTTP endpoint announcements through a distributed EventBridge and operate Hono as its own gateway workload.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/map-commands-streams-queues-and-agents",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 414,
+    "title": "Map commands, streams, queues, and agents",
+    "description": "Project each PURISTA capability through the HTTP shape that matches its completion and delivery semantics.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/authenticate-and-propagate-identity",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 415,
+    "title": "Authenticate and propagate principals and tenants",
+    "description": "Protect endpoints by default, resolve technical identity at Hono, and enforce business access with service guards.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/map-content-responses-and-errors",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 416,
+    "title": "Map content, responses, and errors",
+    "description": "Understand how Hono parses requests, validates parameters, chooses response status, and renders safe failures.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/generate-openapi-contracts",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 417,
+    "title": "Generate OpenAPI contracts",
+    "description": "Combine service-level OpenAPI metadata with command and stream schemas, security, parameters, and response declarations.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
     "topicId": "framework/expose-and-consume-services/http-and-rest/hono",
     "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
-    "order": 420,
+    "order": 418,
     "title": "Configure Hono",
     "description": "Install and configure the optional Hono projection service, its public boundary, and its OpenAPI and health surfaces.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/http-and-rest/build-a-custom-http-server",
+    "parentTopicId": "framework/expose-and-consume-services/http-and-rest",
+    "order": 419,
+    "title": "Build a custom HTTP server",
+    "description": "Extend the Hono application for HTTP-only routes or implement the base HTTP EventBridge contract for a sidecar platform.",
     "pageRole": "task"
   },
   {
@@ -1105,6 +1177,69 @@ const canonicalContentManifest = [
     "title": "Service clients",
     "description": "Choose a direct, EventBridge, REST, or fetch client based on the actual process and failure boundary.",
     "pageRole": "hub"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/obtain-export-and-load-definitions",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 441,
+    "title": "Obtain, export, and load service definitions",
+    "description": "Produce a reviewed service-definition artifact and load it as the source for generated clients.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/choose-a-client-boundary",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 442,
+    "title": "Choose direct, EventBridge, REST, or fetch execution",
+    "description": "Select the client by process, trust, transport, and failure boundary instead of convenience.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/use-a-direct-or-embedded-client",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 443,
+    "title": "Use a direct or embedded client",
+    "description": "Keep direct command calls inside tests and use a shared EventBridge for production calls inside one process.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/use-an-eventbridge-client",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 444,
+    "title": "Use an EventBridge client",
+    "description": "Generate typed command methods and route them through an already-started compatible EventBridge.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/generate-and-use-a-rest-client",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 445,
+    "title": "Generate and use a REST client",
+    "description": "Generate a fetch-based package for HTTP-exposed commands and configure it for the real Hono gateway.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/use-the-fetch-based-client",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 446,
+    "title": "Use the fetch-based client",
+    "description": "Wrap an external HTTP API as an injected resource with explicit authentication, timeout, tracing, and error ownership.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/expose-and-consume-services/service-clients/test-client-behavior",
+    "parentTopicId": "framework/expose-and-consume-services/service-clients",
+    "order": 447,
+    "title": "Test client behavior",
+    "description": "Verify generated source contracts, address-first routing, and HTTP failure mapping at separate deterministic boundaries.",
+    "pageRole": "task"
   },
   {
     "product": "framework",
@@ -1306,9 +1441,18 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/deploy-applications/kubernetes-and-dapr",
+    "topicId": "framework/deploy-applications/workers-and-scheduled-entry-points",
     "parentTopicId": "framework/deploy-applications",
     "order": 1054,
+    "title": "Deploy workers and scheduled entry points",
+    "description": "Run queue workers as independently scalable service workloads and let an external scheduler invoke one declared PURISTA target.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/deploy-applications/kubernetes-and-dapr",
+    "parentTopicId": "framework/deploy-applications",
+    "order": 1055,
     "title": "Deploy to Kubernetes or Dapr",
     "description": "Operate PURISTA with explicit probes, graceful termination, workload identity, and platform components.",
     "pageRole": "task"
@@ -1317,7 +1461,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/deploy-applications/serverless-and-edge",
     "parentTopicId": "framework/deploy-applications",
-    "order": 1055,
+    "order": 1056,
     "title": "Deploy to serverless and edge runtimes",
     "description": "Match PURISTA component lifecycles, transport support, and durable work to short-lived or restricted runtime environments.",
     "pageRole": "task"
@@ -1435,8 +1579,8 @@ const canonicalContentManifest = [
     "topicId": "framework/secure-and-operate/reliability/graceful-shutdown",
     "parentTopicId": "framework/secure-and-operate/reliability",
     "order": 1033,
-    "title": "Graceful shutdown",
-    "description": "Drain services and close listeners with a bounded shutdown policy rather than terminating in-flight work blindly.",
+    "title": "Graceful startup and shutdown",
+    "description": "Fail closed during startup, then drain services and close listeners with a bounded shutdown policy.",
     "pageRole": "task"
   },
   {
@@ -1540,6 +1684,15 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
+    "topicId": "framework/start/create-a-project",
+    "parentTopicId": "framework/start",
+    "order": 120,
+    "title": "Create a project",
+    "description": "Generate the incident-desk application and prove the untouched scaffold works.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
     "topicId": "framework/start/create-the-first-service",
     "parentTopicId": "framework/start",
     "order": 130,
@@ -1551,7 +1704,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/start/from-zero-to-production",
     "parentTopicId": "framework/start",
-    "order": 170,
+    "order": 180,
     "title": "From local service to production",
     "description": "Move a working local PURISTA service through explicit infrastructure, release, and operating decisions without duplicating the detailed guides.",
     "pageRole": "tutorial"
@@ -1571,7 +1724,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/start",
     "order": 110,
     "title": "Requirements and installation",
-    "description": "Create a supported Node.js or Bun project with the PURISTA generator.",
+    "description": "Prepare a supported runtime and package manager before generating a PURISTA project.",
     "pageRole": "task"
   },
   {
@@ -1587,7 +1740,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/start/understand-the-generated-project",
     "parentTopicId": "framework/start",
-    "order": 120,
+    "order": 170,
     "title": "Understand the generated project",
     "description": "Find the composition root, service definitions, generated artifacts, and local CLI commands.",
     "pageRole": "task"
@@ -1639,9 +1792,18 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
+    "topicId": "framework/understand-the-framework/architecture-and-ownership",
+    "parentTopicId": "framework/understand-the-framework",
+    "order": 210,
+    "title": "Architecture and ownership at a glance",
+    "description": "Place service definitions, runtime adapters, transports, and external systems at their correct ownership boundary.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
     "topicId": "framework/understand-the-framework/commands-events-and-execution-flow",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 230,
+    "order": 240,
     "title": "Commands, events, and execution flow",
     "description": "Choose synchronous, event-driven, streaming, or queued execution based on the caller's required outcome.",
     "pageRole": "task"
@@ -1650,7 +1812,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/understand-the-framework/distribution-and-deployment-models",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 250,
+    "order": 260,
     "title": "Distribution and deployment models",
     "description": "Keep service definitions stable while changing the process and infrastructure topology around them.",
     "pageRole": "task"
@@ -1668,7 +1830,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/understand-the-framework/messages-schemas-and-contracts",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 220,
+    "order": 230,
     "title": "Messages, schemas, and contracts",
     "description": "Define validated inputs and outputs that can survive service, process, and deployment boundaries.",
     "pageRole": "task"
@@ -1677,7 +1839,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/understand-the-framework/reliability-and-delivery-guarantees",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 260,
+    "order": 270,
     "title": "Reliability and delivery guarantees",
     "description": "Design handlers for timeouts, duplicate delivery, retries, and recovery instead of assuming exactly-once execution.",
     "pageRole": "task"
@@ -1686,7 +1848,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/understand-the-framework/runtime-composition-and-lifecycle",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 240,
+    "order": 250,
     "title": "Runtime composition and lifecycle",
     "description": "Start adapters first, then instantiate and start services with explicit dependencies.",
     "pageRole": "task"
@@ -1695,7 +1857,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/understand-the-framework/services-and-boundaries",
     "parentTopicId": "framework/understand-the-framework",
-    "order": 210,
+    "order": 220,
     "title": "Services and boundaries",
     "description": "Use versioned services to keep business ownership, dependencies, and change boundaries explicit.",
     "pageRole": "task"
@@ -1810,6 +1972,15 @@ const canonicalContentManifest = [
   },
   {
     "product": "harness",
+    "topicId": "harness/build-agents/portable-definitions-and-host-bindings",
+    "parentTopicId": "harness/build-agents",
+    "order": 315,
+    "title": "Create a portable Harness definition",
+    "description": "Declare model requirements and host tools once, then bind providers and application operations at the runtime boundary.",
+    "pageRole": "task"
+  },
+  {
+    "product": "harness",
     "topicId": "harness/build-agents/errors-and-failure-behavior",
     "parentTopicId": "harness/build-agents",
     "order": 360,
@@ -1868,7 +2039,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/build-agents",
     "order": 350,
     "title": "Stream progress and cancel runs",
-    "description": "Consume typed run events, expose a safe subset through SSE, and propagate disconnects and time budgets to the running agent.",
+    "description": "Stream the portable execution contract, use AI SDK UI Message Stream v1 for browser clients, and propagate cancellation and time budgets.",
     "pageRole": "task"
   },
   {
@@ -1905,6 +2076,15 @@ const canonicalContentManifest = [
     "order": 270,
     "title": "Configure Azure AI Foundry",
     "description": "Enable the Azure AI Foundry adapter with an endpoint and either an API key or Azure credential.",
+    "pageRole": "task"
+  },
+  {
+    "product": "harness",
+    "topicId": "harness/configure-the-runtime/call-model-operations",
+    "parentTopicId": "harness/configure-the-runtime",
+    "order": 215,
+    "title": "Call model operations",
+    "description": "Use provider-neutral text, structured output, embedding, reranking, and media handles with the correct aggregate and streaming contracts.",
     "pageRole": "task"
   },
   {
@@ -2185,6 +2365,42 @@ const canonicalContentManifest = [
     "title": "Harness reference",
     "description": "Find first-party packages, optional peers, and the public API boundary quickly.",
     "pageRole": "chapter"
+  },
+  {
+    "product": "harness",
+    "topicId": "harness/reference/configuration-and-environment-variables",
+    "parentTopicId": "harness/reference",
+    "order": 1412,
+    "title": "Configuration and environment variables",
+    "description": "Look up Harness defaults, invocation overrides, and the small set of environment variables read by the core runtime.",
+    "pageRole": "reference"
+  },
+  {
+    "product": "harness",
+    "topicId": "harness/reference/provider-and-adapter-compatibility",
+    "parentTopicId": "harness/reference",
+    "order": 1414,
+    "title": "Provider and adapter compatibility",
+    "description": "Match model operations, persistence, sandbox, and browser protocol needs to the first-party adapter that implements them.",
+    "pageRole": "reference"
+  },
+  {
+    "product": "harness",
+    "topicId": "harness/reference/public-api-and-conformance",
+    "parentTopicId": "harness/reference",
+    "order": 1430,
+    "title": "Public API and conformance",
+    "description": "Identify the supported import surface and the evidence required before claiming that a custom adapter or integration conforms.",
+    "pageRole": "reference"
+  },
+  {
+    "product": "harness",
+    "topicId": "harness/reference/glossary",
+    "parentTopicId": "harness/reference",
+    "order": 1440,
+    "title": "Harness glossary",
+    "description": "Use consistent terms for definitions, sessions, execution, adapters, governance, and durable work.",
+    "pageRole": "reference"
   },
   {
     "product": "harness",

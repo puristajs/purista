@@ -41,11 +41,13 @@ flowchart TD
   C --> D[Emit start frame]
   D --> E[Run before guards in parallel]
   E --> F[Run stream handler]
+  C -. cancel control arrives .-> H[Set cancelled; run onCancel callbacks immediately]
+  H -. handler observes cancellation .-> F
   F --> G[writer.write emits validated chunk frames]
   G --> F
-  F --> H{Caller cancelled?}
-  H -->|Yes| I[Run onCancel callbacks; emit cancel frame]
-  H -->|No| J{Final value recorded?}
+  F --> I{Cancelled when handler returns?}
+  I -->|Yes| R[Emit cancel frame; terminate]
+  I -->|No| J{Final value recorded?}
   J -->|No| K[Auto-close; aggregate chunks by default]
   J -->|Yes| L[Use first final value]
   K --> M[Validate final when a final schema exists]
@@ -55,6 +57,7 @@ flowchart TD
   O --> P[Emit complete frame]
   E -. guard failure .-> Q[Emit error frame]
   F -. thrown error .-> Q
+  K -. aggregate mismatches final schema .-> Q
   M -. invalid final .-> Q
   N -. guard failure .-> Q
 ```
@@ -66,6 +69,15 @@ auto-closes the stream. With aggregation disabled, that implicit final is
 `undefined`; the runtime still runs after guards and emits `complete`, but
 does not emit a final event. `writer.fail(...)` emits an error frame but does
 not close the writer—throw an error for normal terminal failure.
+
+A cancel control message runs registered `onCancel` callbacks as soon as the
+service receives it, while the handler may still be awaiting upstream work.
+After that handler returns, the runtime emits `cancel` and stops: after guards
+do not run, no final event is published, and no `complete` frame follows. When
+aggregation is enabled and a domain `addFinalSchema(...)` exists, an implicit
+close validates `{ chunkCount, chunks }` against that schema. A mismatch emits
+an error frame from `UnhandledError(500, 'stream final output validation
+failed')` instead of completing.
 
 ## Start with one verified stream
 

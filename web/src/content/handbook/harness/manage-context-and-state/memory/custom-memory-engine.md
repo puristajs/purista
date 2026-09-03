@@ -141,27 +141,18 @@ export function createTicketMemoryHarness(client: TicketMemoryClient) {
 	return defineHarness({ name: 'custom-memory-example' })
 		.sandbox(inMemorySandbox())
 		.memory(new TicketMemoryEngine(client))
-		.models({
-			unused: {
-				provider: { id: 'not-called', genAiSystem: 'not-called' },
-				model: 'not-called',
-				capabilities: [],
-			},
-		})
 		.build()
 }
 ```
 
 [`HarnessBuilder.memory(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory)
-registers the engine before agents and workflows. The unused alias exists
-because a runnable Harness requires at least one model alias; this memory-only
-example never calls it. In a real application, register the actual model
-aliases instead.
+registers the engine before agents and workflows. This memory-only example has
+no model dependency. Register actual model aliases when an agent or
+model-backed memory configuration needs them.
 
 The composition uses
 [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 [`HarnessBuilder.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
-[`HarnessBuilder.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
 and [`HarnessBuilder.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
 
 Application code uses the scoped facade rather than the database client:

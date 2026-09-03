@@ -30,10 +30,6 @@ export function createArtifactWorkspaceHarness(root: string) {
 			.workspace(local.workspace)
 			.sandbox(local.sandbox)
 			.requires(['storage.persistent', 'workspace.persistent'])
-			// The runtime always requires one alias; this page does not invoke it.
-			.models({
-				local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-			})
 			.build()
 	)
 }
@@ -47,7 +43,6 @@ export function createArtifactWorkspaceHarness(root: string) {
 | [`.workspace(local.workspace)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workspace) | Registers the durable checkpoint store for artifacts. | Call it once and pair it with a sandbox that can bind the same checkpoint contract for restore. A compatible workspace is checked before a sandbox restore; missing state fails rather than starting empty. |
 | [`.sandbox(local.sandbox)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Registers the execution/filesystem boundary that receives workspace bindings. | `exec: false` is the safe local default for artifact persistence. Turning host execution on is a separate trusted-host decision, not a way to make model-directed commands isolated. |
 | [`.requires([...])`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#requires) | Requires adapter capability IDs at build time. `storage.persistent` and `workspace.persistent` make this local example reject an accidental in-memory replacement. | Use requirements for invariants the application cannot safely degrade. Do not list a capability only because a later feature might use it; missing required capability makes composition fail. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers the minimal alias required by the current Harness configuration. The static provider has no invocation methods because this page does not execute an agent. | Replace `local` with a configured provider before adding an agent or workflow that invokes a model. Do not use this placeholder as a production provider adapter. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates registrations and required adapter capabilities, then creates the runnable Harness. | Build-time validation catches an incompatible storage/workspace/sandbox combination before an artifact-bearing run is accepted. |
 
 Create one composition per application process, not per artifact. The Harness

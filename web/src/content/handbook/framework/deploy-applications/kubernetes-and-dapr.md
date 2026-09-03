@@ -1,7 +1,7 @@
 ---
 title: Deploy to Kubernetes or Dapr
 description: Operate PURISTA with explicit probes, graceful termination, workload identity, and platform components.
-order: 1054
+order: 1055
 ---
 
 Kubernetes and Dapr change the operating environment, not PURISTA service

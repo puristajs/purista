@@ -1,0 +1,55 @@
+---
+title: Run and score the agent
+description: Execute the portable agent for each case and aggregate versioned observations.
+order: 293
+kind: lesson
+status: draft
+---
+
+Instantiate the portable Harness definition with the candidate provider. The
+evaluation task opens one isolated session per case and runs the real agent.
+
+```ts title="src/runClassificationEvaluation.ts"
+const harness = await classificationHarness.getInstance({
+	models: { primary: { provider, model: options.model ?? 'evaluation-model' } },
+})
+```
+
+Pass explicit identities for every evaluation component. Candidate version is
+the code, prompt, model configuration, or policy version being compared; it is
+not merely a display label.
+
+```ts title="src/runClassificationEvaluation.ts"
+return await runEvaluation({
+	runId: options.runId ?? 'support-classification-eval-1',
+	dataset: supportClassificationDataset,
+	candidates: [{ id: 'classify-support-message', version: '1.0.0', config: {} }],
+	task: {
+		id: 'run-classification-agent',
+		version: '1.0.0',
+		async run(target) {
+			const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
+			const outcome = await session.agents.classify_support_message.run(target.input)
+			if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
+			return { output: outcome.output, correlation: { runId: outcome.runId } }
+		},
+	},
+	scorers: [categoryScorer, urgencyScorer],
+	aggregateBy: ['category', 'urgency'],
+	maxConcurrency: 1,
+	failurePolicy: 'continue',
+	timeouts: { runMs: 30_000, taskMs: 10_000, scorerMs: 1_000 },
+})
+```
+
+Start with concurrency one for deterministic fixtures and provider safety.
+Raise it only with explicit model admission and rate-limit planning.
+
+Harness returns result records and aggregates; the application decides where
+to persist content-bearing observations. Use `scoreEvaluation` to apply new
+scorer versions to saved observations without rerunning expensive tasks.
+
+Always shut down the Harness in `finally` so adapters and live sessions close
+when a task or scorer fails.
+
+Continue with [Create a change gate](../../testing/change-gate/).

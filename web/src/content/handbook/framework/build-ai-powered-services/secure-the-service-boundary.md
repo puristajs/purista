@@ -37,6 +37,11 @@ attaches these guards to the selected target's receiving boundary. The guard
 runs with trusted message identity and service resources before Harness
 execution starts.
 
+This guard remains required when a command or HTTP route that invokes the
+target already has a business guard. Mounted agents and workflows are normal
+address-first EventBridge capabilities; another authorized service can invoke
+their published address without passing through that wrapper.
+
 After guards validate completed outcomes before publication. Tool-backed
 commands must repeat their own authorization because they protect the actual
 business effect. Never trust a tenant, principal, approval, or role produced by

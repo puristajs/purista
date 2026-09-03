@@ -9,6 +9,8 @@
 	},
 	"scripts": {
 		"test": "node tutorial/verify.mjs",
+		"test:drafts": "node tutorial/verify-drafts.mjs",
+		"check:drafts": "node tutorial/verify-drafts.mjs --structure-only",
 		"check:source": "node tutorial/replay.mjs --check",
 		"build": "node tutorial/replay.mjs --check",
 		"replay": "node tutorial/replay.mjs"

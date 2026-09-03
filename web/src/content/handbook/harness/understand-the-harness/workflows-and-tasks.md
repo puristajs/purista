@@ -20,14 +20,9 @@ const output = z.object({ answer: z.string() })
 
 export const policyAnalysisHarness = defineHarness({ name: 'policy-analysis' })
 	.sandbox(inMemorySandbox())
-	.models({
-		local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-	})
 	.agent('summarize', {
-		model: 'local',
 		input,
 		output,
-		instructions: 'Summarize the policy question.',
 		handler: async ({ input }) => ({ answer: `Policy analysis: ${input.question}` }),
 	})
 	.workflow('answer_with_policy', {
@@ -65,9 +60,8 @@ can request sandbox capabilities. `inMemorySandbox()` has no options and grants
 or isolates tenants. This handler-only example does not need those stronger
 boundaries; bind a suitable application-owned adapter when a workflow actually
 does. Then
-[`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models)
-creates the aliases used by
-[`.agent(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent).
+[`.agent(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent)
+registers the deterministic handler-only agent. It needs no model alias.
 After the required agents exist,
 [`.workflow(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow)
 exposes only registered agent IDs through `ctx.agents` and preserves the
@@ -76,8 +70,8 @@ workflow's input and output schemas. Use the plural `.agents(record)` and
 four methods accumulate and reject duplicate IDs. The
 [`delegation`](/handbook/api/interfaces/_purista_harness.WorkflowDefinition/#delegation)
 allowlist is the important opt-in. [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
-requires a model registry and rejects invalid agent/model references and
-delegation policies before a session runs; it does not make workflow execution
+rejects invalid agent/model references and delegation policies before a
+session runs; it does not make workflow execution
 durable by itself. Add call, parallelism, depth, and model alias limits on
 [Build a workflow](/handbook/harness/orchestrate-work/workflows/) when the task
 can fan out.

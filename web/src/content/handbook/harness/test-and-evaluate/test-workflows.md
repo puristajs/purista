@@ -15,22 +15,17 @@ preserves the input order in the result.
 ## Build a deterministic workflow fixture
 
 ```ts title="src/harness/createInvoiceReviewHarness.ts"
-import { defineHarness, inMemorySandbox, type ModelProvider } from '@purista/harness'
+import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { z } from 'zod'
 
 type ReviewInvoice = (invoiceId: string) => Promise<'approved' | 'review'>
 
-export function createInvoiceReviewHarness(provider: ModelProvider, reviewInvoice: ReviewInvoice) {
+export function createInvoiceReviewHarness(reviewInvoice: ReviewInvoice) {
 	return defineHarness({ name: 'invoice-review' })
 		.sandbox(inMemorySandbox())
-		.models({
-			reviewer: { provider, model: 'reviewer', capabilities: ['object'] },
-		})
 		.agent('review_invoice', {
-			model: 'reviewer',
 			input: z.string(),
 			output: z.enum(['approved', 'review']),
-			instructions: 'Review one invoice.',
 			handler: context => reviewInvoice(context.input),
 		})
 		.workflow('review_batch', {
@@ -47,16 +42,15 @@ export function createInvoiceReviewHarness(provider: ModelProvider, reviewInvoic
 }
 ```
 
-The agent's custom handler is the deterministic seam. The normal model alias,
-schemas, agent registry, workflow registry, delegation policy, session, and
-event path still execute. `fanOut` applies the lower of its requested
+The agent's custom handler is the deterministic seam. The schemas, agent
+registry, workflow registry, delegation policy, session, and event path still
+execute. `fanOut` applies the lower of its requested
 concurrency and the workflow delegation ceiling, so this fixture can verify the
 real budget rule.
 
 The fixture retains
 [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 [`.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
-[`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
 [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent),
 [`.workflow(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow),
 and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
@@ -68,12 +62,11 @@ evidence.
 
 ```ts title="src/harness/createInvoiceReviewHarness.test.ts"
 import { describe, expect, it, vi } from 'vitest'
-import { FakeModelProvider, recordEvents } from '@purista/harness/testing'
+import { recordEvents } from '@purista/harness/testing'
 import { createInvoiceReviewHarness } from './createInvoiceReviewHarness.js'
 
 describe('invoice review workflow', () => {
 	it('limits parallel reviews and preserves result order', async () => {
-		const provider = new FakeModelProvider({ strict: true })
 		let active = 0
 		let peak = 0
 		const reviewInvoice = vi.fn(async (invoiceId: string) => {
@@ -83,19 +76,17 @@ describe('invoice review workflow', () => {
 			active -= 1
 			return invoiceId === 'INV-2' ? ('review' as const) : ('approved' as const)
 		})
-		const harness = createInvoiceReviewHarness(provider, reviewInvoice)
+		const harness = createInvoiceReviewHarness(reviewInvoice)
 
 		try {
 			const session = await harness.getSession('invoice-batch')
-			const events = await recordEvents(session.workflows.review_batch.stream(['INV-1', 'INV-2', 'INV-3']))
+			const events = await recordEvents(session.workflows.review_batch.observe(['INV-1', 'INV-2', 'INV-3']))
 
 			expect(peak).toBeLessThanOrEqual(2)
 			expect(events.find(event => event.type === 'fanout.started')).toMatchObject({ count: 3, concurrency: 2 })
 			expect(events.find(event => event.type === 'run.finished')).toMatchObject({
 				output: ['approved', 'review', 'approved'],
 			})
-			expect(provider.requests).toHaveLength(0)
-			provider.assertExhausted()
 		} finally {
 			await harness.shutdown()
 		}
@@ -103,8 +94,9 @@ describe('invoice review workflow', () => {
 })
 ```
 
-The strict provider also protects the fixture: an accidental fallback from the
-custom handler to a live model path fails because no response is queued.
+Because the fixture has no model registry, an accidental change to a
+default-loop agent fails during composition until the test supplies an
+explicit model alias.
 
 ## Expand by workflow feature
 

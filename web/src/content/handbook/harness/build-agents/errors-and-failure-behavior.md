@@ -171,14 +171,30 @@ export async function handleClassifyCase(request: Request): Promise<Response> {
 		// The transport value is untrusted; Harness validates it against the agent schema.
 		const input = (await request.json()) as { summary: string }
 		const session = await classifyCaseHarness.getSession('http-classifier')
-		const idempotencyKey = request.headers.get('idempotency-key') ?? undefined
+		try {
+			const idempotencyKey = request.headers.get('idempotency-key') ?? undefined
+			const outcome = await session.agents.classify_case.run(input, {
+				...(idempotencyKey ? { idempotencyKey } : {}),
+				timeoutMs: 15_000,
+			})
 
-		const result = await session.agents.classify_case.run(input, {
-			...(idempotencyKey ? { idempotencyKey } : {}),
-			timeoutMs: 15_000,
-		})
+			if (outcome.status === 'interrupted') {
+				return Response.json(
+					{
+						error: {
+							code: 'AGENT_INPUT_REQUIRED',
+							message: 'The run needs additional application input.',
+							runId: outcome.runId,
+						},
+					},
+					{ status: 409 },
+				)
+			}
 
-		return Response.json(result)
+			return Response.json(outcome.output)
+		} finally {
+			await session.release()
+		}
 	} catch (error) {
 		// Send `error` to trusted logging/telemetry before returning the safe view.
 		const failure = toPublicAgentFailure(error)
@@ -186,6 +202,13 @@ export async function handleClassifyCase(request: Request): Promise<Response> {
 	}
 }
 ```
+
+The aggregate endpoint returns only the agent's completed output. It maps an
+interrupt to an application-owned state instead of turning an approval request
+into a `500` response or leaking the complete interrupt payload. A browser chat
+that supports approvals should use the AI SDK UI Message Stream v1 adapter,
+which carries the approval request and resume response in the standard stream
+contract.
 
 The `idempotency-key` header is application policy. Harness accepts
 `idempotencyKey` values matching `^[A-Za-z0-9_.:-]{1,120}$`. Repeating a

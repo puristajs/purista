@@ -1,7 +1,7 @@
 ---
 title: From local service to production
 description: Move a working local PURISTA service through explicit infrastructure, release, and operating decisions without duplicating the detailed guides.
-order: 170
+order: 180
 ---
 
 Take a working local service to production by replacing each local-only assumption deliberately. Start with a command and subscription that pass locally, then choose the stores, delivery, HTTP surface, tests, and operating controls that fit the workload.

@@ -226,6 +226,11 @@ test('updates an invoice through the command runtime', async () => {
 The expected object is the command result. It does not imply that a subscriber,
 queue worker, HTTP server, or production EventBridge has completed work.
 
+After [`defineResource(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#defineresource),
+`resources` becomes a required `getInstance(...)` option. Omitting it rejects
+service creation with `UnhandledError(500, 'This services requires resources
+to be set in getInstance options')`; the service never reaches `start()`.
+
 ## Know the default error behavior
 
 | Situation | PURISTA behavior | Application action |

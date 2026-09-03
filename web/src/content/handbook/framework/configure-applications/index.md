@@ -25,7 +25,7 @@ flowchart LR
 
 | Data | Start here | Use it for | Never use it for |
 | --- | --- | --- | --- |
-| Deployment and bootstrap configuration, including fixed technical credentials | [Service configuration](/handbook/framework/build-services/services/configuration/) and composition-root wiring | Database, broker, provider, and secret-store access needed to start this deployment | Tenant/principal-owned secrets or values that must be managed while the service runs |
+| Deployment and bootstrap configuration, including fixed technical credentials | [Configure a service](/handbook/framework/build-services/services/configure-a-service/) and composition-root wiring | Database, broker, provider, and secret-store access needed to start this deployment | Tenant/principal-owned secrets or values that must be managed while the service runs |
 | Runtime-mutable non-secret configuration | [Configuration stores](/handbook/framework/configure-applications/configuration-stores/) | Feature settings, limits, public endpoints, or controlled operational values | Credentials, tokens, private keys, or business records |
 | Runtime-managed sensitive values | [Secret stores](/handbook/framework/configure-applications/secret-stores/) | Tenant/principal API keys, delegated credentials, or other sensitive business data that services create, rotate, revoke, or resolve at runtime | General business records, ad-hoc configuration, or a replacement for deployment bootstrap credentials |
 | Service-owned state | [State stores](/handbook/framework/configure-applications/state-stores/) | Idempotency records, checkpoints, small durable workflow state | Ad-hoc configuration or secrets |

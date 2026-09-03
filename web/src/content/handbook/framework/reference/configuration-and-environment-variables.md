@@ -13,7 +13,7 @@ definitions portable and makes missing settings fail before traffic is served.
 
 | Value | Owner | Pass it through |
 | --- | --- | --- |
-| Business behavior setting | Service definition | `defineConfig(schema)` and `getInstance(..., { serviceConfig })` |
+| Business behavior setting | Service definition | `setConfigSchema(schema)`, `setDefaultConfig(...)`, and `getInstance(..., { serviceConfig })` |
 | Non-secret deployment setting | Application configuration | Validated `process.env`, configuration store, or deployment config |
 | Credential or key | Secret manager | `secretStore` and least-privilege workload identity |
 | Database/client instance | Application resource | `defineResource(...)` and `getInstance(..., { resources })` |
@@ -41,9 +41,16 @@ const invoiceConfigSchema = z.object({
   reminderWindowDays: z.number().int().positive().default(14),
 })
 
-export const invoiceV1ServiceBuilder = new ServiceBuilder(invoiceServiceInfo)
-  .defineConfig(invoiceConfigSchema)
+const invoiceV1ServiceBuilderInstance = new ServiceBuilder(invoiceServiceInfo)
+invoiceV1ServiceBuilderInstance.setConfigSchema(invoiceConfigSchema)
+
+export const invoiceV1ServiceBuilder = invoiceV1ServiceBuilderInstance
 ```
+
+[`ServiceBuilder.setConfigSchema(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#setconfigschema)
+sets the validated service-level contract. Use
+[`setDefaultConfig(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#setdefaultconfig)
+only for safe application defaults that also satisfy that schema.
 
 Supply `serviceConfig` to
 [`ServiceBuilder.getInstance(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance).

@@ -94,6 +94,12 @@ export const harness = defineHarness({ name: 'support' })
 	.build()
 ```
 
+This uses [`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/),
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
+and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
+The Harness validates the registry shape; the Azure deployment remains the
+authority for model-specific request support.
+
 | Harness field | Foundry chat-completions field | Compatibility guidance |
 | --- | --- | --- |
 | `maxTokens` | `max_tokens` | This is an output cap for the deployment, not a context-window override. |

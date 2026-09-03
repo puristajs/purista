@@ -45,6 +45,36 @@ name; if both are used, the later setter supplies the final name.
 Choose one style consistently in a service. Neither form emits a custom event
 from the handler or waits for subscription completion.
 
+A success-event name must be unique across commands in the same service. If two
+commands use `invoice.updated`, service definition resolution fails with
+`response event "invoice.updated" in <command> is used in other command` before
+the service starts.
+
+## Verify the completed fact
+
+Run the command through
+[`createCommandTestHarness(...)`](/handbook/api/functions/_purista_core.createCommandTestHarness/)
+and inspect the returned success message:
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.runtime.test.ts"
+import { createCommandTestHarness, isCommandSuccessResponse } from '@purista/core'
+
+const harness = await createCommandTestHarness(invoiceV1ServiceBuilder, updateInvoiceCommandBuilder, { resources })
+
+try {
+  const { message, result } = await harness.run({ payload, parameter })
+  expect(result).toEqual(expectedInvoice)
+  if (!isCommandSuccessResponse(message)) throw new Error('expected command success response')
+  expect(message.eventName).toBe('invoice.updated')
+} finally {
+  await harness.destroy()
+}
+```
+
+The event name on the command success response proves the command reached the
+success-response stage. It does not prove that an independent subscriber has
+completed.
+
 ## Choose a success event or a custom event
 
 | You need | Use | Why |

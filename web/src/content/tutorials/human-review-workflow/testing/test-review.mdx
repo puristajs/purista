@@ -1,0 +1,69 @@
+---
+title: Test the review boundary
+description: Prove waiting behavior, reviewer identity, tenant isolation, idempotent approval, and rejection.
+order: 254
+kind: lesson
+status: draft
+---
+
+Test the complete path over a real `DefaultEventBridge`. Use
+`InMemoryHarnessStorage` for durable checkpoints and waits, and bind in-memory
+business resources to the two service instances. No model is involved.
+
+Start with a request from one principal and assert that the command returns a
+waiting result instead of rejecting.
+
+```ts title="src/humanReview.integration.test.ts"
+const waiting = await eventBridge.invoke(
+	getCommandMessageMock({
+		tenantId: 'tenant-example',
+		principalId: 'principal-alex',
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'requestCardFreeze' },
+		payload: {
+			payload: { requestId: 'review-1', cardId: 'card-1', reason: 'Card is missing' },
+			parameter: {},
+		},
+	}),
+)
+expect(waiting).toMatchObject({ status: 'waiting', requestId: 'review-1' })
+```
+
+Deliver the decision as a different authorized principal. Repeat the exact
+message and assert that the business effect ran once.
+
+```ts title="src/humanReview.integration.test.ts"
+await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
+await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
+expect(executor.effects).toHaveBeenCalledTimes(1)
+```
+
+The retained suite adds separate cases for the boundaries that matter:
+
+- a different tenant cannot resume the durable run;
+- a reviewer denied by `supportReviewPolicy` cannot write or signal a decision;
+- a stale database revision returns `409 Conflict`;
+- a conflicting second decision is rejected;
+- an expired or missing wait does not execute the business effect;
+- rejection completes the workflow and never calls `freezeCard`;
+- the Transaction resource deduplicates by the durable run id.
+
+Run all three project gates.
+
+```bash title="Verify the human-review chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained project proves every boundary above. The core framework suite
+also verifies the mounted runtime's identity-derived session binding. This
+chapter remains a draft until the released PURISTA v4 and Harness v3 packages
+pass a clean registry replay.
+
+The retained composition root also starts the Support and Transaction services
+with in-memory tutorial resources. The integration test remains the quickest
+way to drive both the waiting and decision addresses.
+
+```bash title="Run the human-review services" replay="project"
+npm start
+```

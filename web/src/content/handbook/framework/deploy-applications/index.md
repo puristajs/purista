@@ -43,7 +43,9 @@ or release problem worth its new failure modes.
 1. [Compile and run a modular monolith](/handbook/framework/deploy-applications/modular-monolith/) for the first production-shaped process.
 2. [Compile and run distributed services](/handbook/framework/deploy-applications/distributed-services/) when a service must become an independent workload.
 3. [Deploy the HTTP gateway](/handbook/framework/deploy-applications/http-gateway/) with the correct monolith or EventBridge discovery mode and startup order.
-4. [Deploy to Kubernetes or Dapr](/handbook/framework/deploy-applications/kubernetes-and-dapr/) when those platforms own the runtime.
+4. [Deploy workers and scheduled entry points](/handbook/framework/deploy-applications/workers-and-scheduled-entry-points/) as separately scalable workloads and external triggers.
+5. [Deploy to Kubernetes or Dapr](/handbook/framework/deploy-applications/kubernetes-and-dapr/) when those platforms own the runtime.
+6. [Deploy to serverless and edge runtimes](/handbook/framework/deploy-applications/serverless-and-edge/) only within their connection, process, and durability constraints.
 
 Before release, replace local-only stores and bridges where the business needs
 shared state or durability, inject credentials through the selected secret

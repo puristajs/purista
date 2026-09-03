@@ -85,6 +85,7 @@ not sufficient evidence for those business paths.
 | REST-exposed commands | Hosts the projection when the command declares HTTP exposure and `enableRestApiExpose` is enabled. | Put authentication and ingress policy in front of the application listener. |
 | PURISTA streams | Unsupported; the bridge advertises `supportsStreams: false`. | A service that contains a stream cannot start on this bridge. Use a queue plus persisted status/updates instead. |
 | Queues and workers | Not supplied by this EventBridge. | Select and wire a QueueBridge separately when work must outlive the request. |
+| Strict command validation | `commandHandling.strictMode` is `false`. | A successful service start does not prove every requested command-delivery guarantee is supported; test the real sidecar invocation boundary. |
 
 The bridge uses HTTP request/response transport for commands. It does not add
 durable commands or durable subscriptions, manual acknowledgement, bounded
@@ -94,14 +95,15 @@ the real component before making a delivery promise.
 
 ## Configure the application listener and sidecar client
 
-The default listener is `127.0.0.1:8080` (`APP_PORT` overrides the port). The
+The default listener is `127.0.0.1:8080` (`SERVER_HOST` overrides the host and
+`APP_PORT` overrides the port). The
 default sidecar endpoint is `http://127.0.0.1:3500`, using `DAPR_HOST` and
 `DAPR_HTTP_PORT` when they are set. The defaults are useful for a local sidecar
 only; they do not make Dapr available in a container or production cluster.
 
 | Setting | Default | Use it when |
 | --- | --- | --- |
-| `serverHost`, `serverPort` | `127.0.0.1`, `8080` or `APP_PORT` | The sidecar, ingress, or platform runs the application listener at another address. |
+| `serverHost`, `serverPort` | `SERVER_HOST` or `127.0.0.1`; `APP_PORT` or `8080` | The sidecar, ingress, or platform runs the application listener at another address. |
 | `pathPrefix` | `purista` | Internal Dapr invocation routes need a different prefix. Update the matching sidecar/ingress route as well. |
 | `apiPrefix` | `api` | Public REST projections need a different mount path. This does not expose a command by itself. |
 | `enableRestApiExpose` | `true` | Disable every generated REST command projection; command metadata still controls which commands are eligible. |

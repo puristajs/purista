@@ -18,15 +18,23 @@ same declared schema before using it, rather than adding a cast.
 | [`canEnqueue(queue, payload?, parameter?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canenqueue) | `context.queue.enqueue.queue(...)` / `scheduleAt.queue(...)` | Work can be decoupled and retried. |
 | [`canEmit(event, schema)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canemit) | `context.emit(event, payload)` | Another service should react independently. |
 | [`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeagent) | `context.agent.Service['1'].target.run(input)` or `.stream(input)` | A mounted Harness agent owns the next model-driven step. |
+| [`canInvokeWorkflow(service, version, target, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeworkflow) | `context.workflow.Service['1'].target.run(input)` or `.stream(input)` | A mounted Harness workflow coordinates the next typed process. |
+| [`canUseHarnessModel(alias, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canuseharnessmodel) | `context.model[alias]` | Deterministic worker code needs one mounted model operation without invoking an agent. Keep provider policy in the Harness binding. |
 
 ```ts title="src/service/report/v1/queue-worker/generateReport.ts"
+import { validate } from '@purista/core'
+
 export const composedGenerateReportWorkerBuilder = generateReportWorkerBuilder
   .canInvoke('Archive', '1', 'storeReport', archiveResultSchema, archivePayloadSchema)
   .canEnqueue('notifyReport', notificationPayloadSchema)
   .canEmit('report.archived', reportArchivedSchema)
   .canInvokeAgent('Support', '1', 'summarize_report', supportHarness.contracts.agents.summarize_report)
   .setHandler(async function (context, message) {
-    const report = archivePayloadSchema.parse(message.payload)
+    const parsed = await validate(archivePayloadSchema, message.payload)
+    if (!parsed.success) {
+      return { status: 'fail', reason: 'invalid report payload', fatal: true }
+    }
+    const report = parsed.data
     const stored = await context.service.Archive['1'].storeReport(report, {})
     await context.queue.enqueue.notifyReport({ reportId: stored.reportId })
     await context.emit('report.archived', { reportId: stored.reportId })
@@ -44,9 +52,15 @@ message)` receives the leased job message; the capability clients on `context`
 are only those declared earlier in the same chain. Return `undefined` or `{ status: 'success', output?,
 headers? }` for normal acknowledgement; return `retry` or `fail` only when the
 recovery path must change. Use a `function` rather than an arrow when the
-implementation needs the service instance as `this`. `getDefinition()` rejects
-a worker that has no handler, and a capability declaration alone never invokes
-anything.
+implementation needs the service instance as `this`.
+[`getDefinition()`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#getdefinition)
+rejects a worker that has no handler, and a capability declaration alone never
+invokes anything. Tests can retrieve one named
+[`before guard`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#getbeforeguardhook)
+or
+[`after guard`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#getafterguardhook)
+without running the worker; the deterministic worker harness remains the
+correct boundary for lifecycle ordering.
 
 Command and agent calls couple the current lease to another live request.
 Enqueueing and event emission are separate operations, not transactions with

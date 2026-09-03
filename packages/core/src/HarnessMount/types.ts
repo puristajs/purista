@@ -136,7 +136,18 @@ type TargetContract<
 		? HarnessTargetContract<'workflow', any, any, WorkflowInput<S, K>, WorkflowOutput<S, K>>
 		: never
 
-type HarnessTargetPolicy<
+/**
+ * Controls which immutable identity reopens an existing durable Harness run.
+ *
+ * `run-owner` is intended for explicitly guarded review flows in which the
+ * current reviewer differs from the principal that started the run. PURISTA
+ * keeps the current caller in guard and host-tool context and rejects a
+ * cross-tenant resume.
+ */
+export type HarnessDurableResumePolicy = Readonly<{ identity: 'run-owner' }>
+
+/** Business, delivery, and durable-resume policy for one published Harness target. */
+export type HarnessTargetPolicy<
 	C extends HarnessTargetContract<any, any, any, any, any>,
 	Resources extends Record<string, unknown>,
 > = Readonly<{
@@ -159,6 +170,16 @@ type HarnessTargetPolicy<
 	successEvent?: string
 	/** Optional durable queue delivery for this published target. */
 	queue?: HarnessTargetQueueBinding<C>
+	/**
+	 * Reopen a durable run with the immutable identity of the session that
+	 * started it. Use this for explicitly guarded human-review commands where
+	 * an authorized reviewer may differ from the initiating principal.
+	 *
+	 * The current caller remains available to PURISTA guards and host tools.
+	 * Cross-tenant resume is always rejected. An explicit Harness storage
+	 * adapter and `sessionId` are required so the prior owner can be verified.
+	 */
+	durableResume?: HarnessDurableResumePolicy
 }>
 
 /** Harness target contract marked as supporting native PURISTA queue delivery. */
@@ -177,7 +198,8 @@ export type HarnessTargetQueueBinding<
 	worker: Worker
 }>
 
-type HarnessTargetPolicies<
+/** Target-name keyed policies inferred from one portable Harness definition. */
+export type HarnessTargetPolicies<
 	S extends BuilderState,
 	Kind extends 'agents' | 'workflows',
 	Resources extends Record<string, unknown>,

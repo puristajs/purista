@@ -28,14 +28,9 @@ import { z } from 'zod'
 export function createDocumentReviewHarness() {
 	return defineHarness({ name: 'document-review' })
 		.sandbox(inMemorySandbox())
-		.models({
-			local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-		})
 		.agent('reviewer', {
-			model: 'local',
 			input: z.object({ documentId: z.string() }),
 			output: z.object({ documentId: z.string(), verdict: z.enum(['approved', 'needs-changes']) }),
-			instructions: 'Review the document.',
 			handler: async ({ input }) => ({ documentId: input.documentId, verdict: 'approved' }),
 		})
 		.workflow('start_review', {
@@ -55,8 +50,7 @@ export function createDocumentReviewHarness() {
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates the named local composition root. | The name identifies diagnostics; it does not grant a child task access to parent history or files. |
 | [`.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Registers the sandbox contract before agent and workflow sandbox policy is inferred. | The in-memory adapter creates ephemeral files only; choose an explicit workflow/agent policy when a child must not receive the default fresh partition. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers `local` before the reviewer names it. | The static local provider is suitable for this deterministic custom handler only. It cannot service a default-loop model call. |
-| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers `reviewer`, its schemas, and its allowlists before the workflow may delegate to it. | Omit `builtinTools` for this no-action review. An agent must exist before a delegation allowlist can safely name it. |
+| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers the handler-only `reviewer`, its schemas, and its allowlists before the workflow may delegate to it. | A custom handler does not declare a model or model-loop instructions. An agent must exist before a delegation allowlist can safely name it. |
 | [`.workflow(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow) | Registers `start_review` and its child-task delegation policy. | Use `delegation.agents` as an allowlist and bound `maxParallelChildAgentCalls` where fan-out can consume provider capacity. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Performs cross-registry validation and makes the Harness runnable. | Invalid model or delegation references fail before task creation, not after unbounded child work has started. |
 
@@ -67,7 +61,11 @@ const harness = createDocumentReviewHarness()
 
 try {
 	const session = await harness.getSession('review:document-42')
-	const { taskId } = await session.workflows.start_review.run({ documentId: 'document-42' })
+	const outcome = await session.workflows.start_review.run({ documentId: 'document-42' })
+	if (outcome.status === 'interrupted') {
+		throw new Error(`Document review paused for ${outcome.interrupt.type}`)
+	}
+	const { taskId } = outcome.output
 	const review = await (await session.childTasks.get(taskId))?.result()
 	console.log(review)
 } finally {
@@ -81,7 +79,8 @@ try {
 
 ## Configure one task start
 
-`ctx.childTasks.start(agentId, input, options?)` validates the agent ID and
+[`ctx.childTasks.start(agentId, input, options?)`](/handbook/api/interfaces/_purista_harness.WorkflowChildTasks/#start)
+validates the agent ID and
 input from the registered agent. Its options change only this task:
 
 | Option | Default | What it controls |
@@ -109,15 +108,19 @@ The start call returns a typed handle immediately:
 | Handle member | Result |
 | --- | --- |
 | `id` | Stable task ID to return or persist in application state |
-| `status()` | Content-free descriptor and `running`, `succeeded`, `failed`, or `cancelled` status |
-| `result()` | Waits for and returns the schema-validated agent output; rejects with the original live failure |
-| `cancel(reason?)` | Idempotently requests cancellation and waits for terminal settlement |
+| [`status()`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#status) | Content-free descriptor and `running`, `succeeded`, `failed`, or `cancelled` status |
+| [`result()`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#result) | Waits for and returns the schema-validated agent output; rejects with the original live failure |
+| [`cancel(reason?)`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#cancel) | Idempotently requests cancellation and waits for terminal settlement |
 
-Outside the workflow, `session.childTasks.get(taskId)` returns a live handle or
+Outside the workflow,
+[`session.childTasks.get(taskId)`](/handbook/api/interfaces/_purista_harness.SessionChildTasks/#get)
+returns a live handle or
 a terminal persisted handle owned by that session. It returns `undefined` for
 an unknown or different-session task. A persisted task still marked `running`
 after process loss is visible, but `result()` and `cancel()` reject because no
-resident worker owns it. `session.childTasks.list({ limit, before })` returns
+resident worker owns it.
+[`session.childTasks.list({ limit, before })`](/handbook/api/interfaces/_purista_harness.SessionChildTasks/#list)
+returns
 content-free status snapshots for application status pages.
 
 API reference: [`ChildTaskHandle`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/)
@@ -132,8 +135,11 @@ assuming immediate completion.
 
 ## Continue a task in one process
 
-`mode: 'continuable'` returns a handle with `send(input)` and `close()` in
-addition to the common task methods:
+`mode: 'continuable'` returns a handle with
+[`send(input)`](/handbook/api/interfaces/_purista_harness.ContinuableChildTaskHandle/#send)
+and
+[`close()`](/handbook/api/interfaces/_purista_harness.ContinuableChildTaskHandle/#close)
+in addition to the common task methods:
 
 ```ts title="Workflow handler: continue an isolated review"
 const task = await ctx.childTasks.start(
@@ -146,12 +152,13 @@ await task.send({ documentId: `${ctx.input.documentId}:revision-2` })
 const finalReview = await task.close()
 ```
 
-Turns run sequentially and share only the task-owned in-memory conversation
-and selected sandbox. `close()` settles successfully after queued turns;
-`cancel()` stops the task. This mode is not durable and cannot run inside a
-durable workflow. Use a queue/worker integration for work that must survive
-restart, and store only task identifiers and safe status data in transport
-messages.
+Turns submitted with `send(...)` run sequentially and share only the
+task-owned in-memory conversation and selected sandbox. `close()` stops
+accepting turns, waits for queued turns, and returns the schema-valid final
+output; `cancel()` stops the task. This mode is not durable and cannot run
+inside a durable workflow. Use a queue/worker integration for work that must
+survive restart, and store only task identifiers and safe status data in
+transport messages.
 
 When a task shares a sandbox partition, it may only detach from that partition.
 It cannot terminate the parent workflow's resource. The application chooses

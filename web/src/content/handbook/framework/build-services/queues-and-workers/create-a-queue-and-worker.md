@@ -74,8 +74,12 @@ types.
 
 Queue transforms use `(context, payload, parameter)` and return
 `{ payload, parameter? }`. They run with base stores, logging/tracing, and
-resources—not the handler’s typed command, stream, queue, emit, agent, job, or
-signal clients. Use them for deterministic normalization, not side effects.
+resources—not the handler’s typed command, stream, emit, agent, job, or signal
+clients. The transform context does carry a queue client. In the
+before-execute transform it is not restricted by the worker's `canEnqueue(...)`
+allow-list, so it can reach any queue registered on the service. Do not use
+that implementation detail: keep both transforms deterministic and free of
+enqueue side effects.
 
 ```ts title="src/service/report/v1/queue/generateReport.ts"
 export const protectedGenerateReportQueueBuilder = generateReportQueueBuilder
@@ -105,9 +109,12 @@ Use `async function` when the callback needs the service as `this`.
 | [`setBeforeExecuteTransform(fn)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#setbeforeexecutetransform) | Same callback and return shape. | Runs on the leased job before worker guards and the handler. Use only for replay-safe enrichment; changing the payload affects every retry. |
 | [`setBeforeGuardHooks(hooks)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#setbeforeguardhooks) / [`setAfterGuardHooks(hooks)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#setafterguardhooks) | A named map of non-arrow service-bound callbacks. Before hooks receive `(context, message)`; after hooks receive `(context, result)`. | Adds policy checks around the handler. Hook names replace an earlier hook with the same name; named hooks in one stage run concurrently, so do not use their names to encode order. |
 
-`setTags(...)` and `markAsDeprecated()` publish metadata only. They neither
-block jobs nor migrate callers. `addWorkerDefinition(...)` stores metadata on
-a queue definition; use explicit `addQueueWorkerDefinition(...)` for an
-executable worker.
+[`setTags(...)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#settags)
+and
+[`markAsDeprecated()`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#markasdeprecated)
+publish metadata only. They neither block jobs nor migrate callers.
+[`addWorkerDefinition(...)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#addworkerdefinition)
+stores metadata on a queue definition; use explicit
+`addQueueWorkerDefinition(...)` for an executable worker.
 
 For exact signatures, see [QueueDefinitionBuilder](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/) and [QueueWorkerBuilder](/handbook/api/classes/_purista_core.QueueWorkerBuilder/).

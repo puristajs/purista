@@ -9,6 +9,12 @@ real collision or expresses a deliberate addressed-message contract. Filters
 decide which message is delivered; they do not authorize the business record
 inside that message.
 
+`DefaultEventBridge` evaluates every predicate below in process. Broker
+adapters translate the subscription record into native subjects, bindings, or
+consumers and may apply remaining predicates after delivery. Confirm the exact
+mapping in the selected [EventBridge guide](/handbook/framework/connect-distributed-infrastructure/event-delivery/)
+before treating a transport filter as an isolation boundary.
+
 ## Build an additive match
 
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.ts"
@@ -35,6 +41,10 @@ so call it after `subscribeToEvent(...)` when you need sender name, target, or
 instance filtering. Keep every `undefined` criterion intentional: it means
 “do not filter on this value.”
 
+Do not call `subscribeToEvent(...)` after `filterSentFrom(...)`: the former
+always rewrites `sender.serviceVersion`, including with `undefined`, and can
+silently widen the filter.
+
 ## Choose the narrowest useful filter
 
 | Method | Parameters | What it matches | Use it when |
@@ -46,15 +56,53 @@ instance filtering. Keep every `undefined` criterion intentional: it means
 | [`filterPrincipalId(principalId)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#filterprincipalid) | One trusted, non-empty principal ID | The message principal | A trusted identity narrows the allowed message stream. |
 | [`filterTenantId(tenantId)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#filtertenantid) | One trusted, non-empty tenant ID | The message tenant | A trusted tenant narrows the allowed message stream. |
 
+For a command-result subscription, import the protocol enum and still model
+the separate subscription parameter as `undefined`:
+
+```ts title="Match a command success response"
+import { EBMessageType } from '@purista/core'
+import { z } from 'zod'
+
+recordInvoiceSubscriptionBuilder
+  .filterForMessageType(EBMessageType.CommandSuccessResponse)
+  .addParameterSchema(z.undefined())
+```
+
+[`addParameterSchema(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addparameterschema)
+models the runtime's `undefined` parameter for command responses.
+
+The `NonEmptyString` constraint used by principal, tenant, and event-name
+filters is type-level. Validate runtime configuration before passing a value
+that might be an empty string.
+
 Do not use `filterPrincipalId` or `filterTenantId` as record-level access
 control. Check tenant ownership and the actual business permission at the
 resource or service boundary as well.
 
 ## Prove both sides of the boundary
 
-For every non-default filter, test one matching message and one near miss: a
-different event name, sender, receiver, message type, principal, or tenant.
-This catches accidental broadening when a publisher changes its metadata.
+For every non-default filter, send one matching message and one near miss
+through `DefaultEventBridge`. The resource call is the observable boundary:
+
+```ts title="Verify matching and near-miss tenants"
+await eventBridge.emitMessage(getCustomMessageMessageMock(
+  'billing.invoiceCreated',
+  payload,
+  { tenantId: 'tenant-a', sender: billingSender },
+))
+await vi.waitFor(() => expect(ledger.recordInvoice).toHaveBeenCalledOnce())
+
+await eventBridge.emitMessage(getCustomMessageMessageMock(
+  'billing.invoiceCreated',
+  payload,
+  { tenantId: 'tenant-b', sender: billingSender },
+))
+expect(ledger.recordInvoice).toHaveBeenCalledOnce()
+```
+
+Repeat adapter-sensitive routing assertions against the deployed broker. This
+catches accidental broadening when publisher metadata or adapter mapping
+changes.
 
 Next, [transform and guard a subscription](/handbook/framework/build-services/subscriptions/transform-and-guard/) when message data needs a deliberate boundary conversion.
 

@@ -1,0 +1,86 @@
+---
+title: Bind the tool to a PURISTA command
+description: Declare every command and event the host implementation may use, then mount the binding.
+order: 232
+kind: lesson
+status: draft
+---
+
+Generate the command on the service that owns transaction data. Keep database
+access and business authorization inside `Transaction`.
+
+```bash title="Generate the owning command" replay="project"
+npm run add:command -- get-transaction-summary --service transaction --service-version 1 --description "Read an authorized transaction summary" --non-interactive
+```
+
+Use a before guard for account access and an after guard for the returned record
+scope. The model-proposed account id is never trusted on its own.
+
+```ts title="src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.ts"
+export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('getTransactionSummary', 'Read an authorized transaction summary')
+	.addPayloadSchema(getTransactionSummaryPayloadSchema)
+	.addParameterSchema(getTransactionSummaryParameterSchema)
+	.addOutputSchema(getTransactionSummaryOutputSchema)
+	.setBeforeGuardHooks({
+		accountMayRead: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			const allowed = await context.resources.accountReadPolicy.canRead({
+				tenantId,
+				principalId,
+				accountId: payload.accountId,
+			})
+			if (!allowed) throw new HandledError(StatusCode.Forbidden, 'Transaction access is not allowed')
+		},
+	})
+	.setAfterGuardHooks({
+		returnedRecordScope: async function (context, result, payload) {
+			if (result.tenantId !== context.message.tenantId || result.accountId !== payload.accountId) {
+				throw new HandledError(StatusCode.Forbidden, 'Transaction access is not allowed')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const result = await context.resources.transactionSummaryReader.getById(payload.transactionId)
+		if (!result) throw new HandledError(StatusCode.NotFound, 'Transaction not found')
+		return result
+	})
+```
+
+For a direct one-command mapping, use `commandAsHarnessTool(...)`. Use the host
+tool builder when the implementation must map data or use several declared
+PURISTA capabilities. This example invokes a command and emits a typed audit
+fact.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts"
+const lookupTransactionTool = supportV1ServiceBuilder
+	.getHarnessHostToolBuilder(supportHarness.catalog.hostTools.lookup_transaction)
+	.canInvoke(
+		'Transaction',
+		'1',
+		'getTransactionSummary',
+		getTransactionSummaryOutputSchema,
+		getTransactionSummaryPayloadSchema,
+		getTransactionSummaryParameterSchema,
+	)
+	.canEmit('support.transactionSummaryRead', transactionSummaryReadEventSchema)
+	.setHandler(async (context, input) => {
+		const { tenantId: _tenantId, ...summary } = await context.service.Transaction['1'].getTransactionSummary(input, {
+			idempotencyKey: context.idempotencyKey,
+		})
+		await context.emit('support.transactionSummaryRead', {
+			transactionId: input.transactionId,
+			toolCallId: context.callId,
+		})
+		return summary
+	})
+	.getDefinition()
+```
+
+The handler can access only capabilities declared with `canInvoke`,
+`canConsumeStream`, `canEnqueue`, `canInvokeAgent`, `canInvokeWorkflow`, and
+`canEmit`. All of them propagate the trusted caller identity and tracing
+context. Mount the resulting definition under the matching native tool name.
+
+Continue with [Limit effects and make retries safe](../limit-effects/).

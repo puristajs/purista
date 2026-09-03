@@ -1,0 +1,107 @@
+---
+title: Invoke a durable run through PURISTA
+description: Mount the workflow, protect its command, and derive tenant-scoped stable run identity.
+order: 273
+kind: lesson
+status: draft
+---
+
+Publish the workflow and keep the two stage agents private. Reuse one business
+authorization function as the target guard. This protects every EventBridge
+invocation, including callers that do not use the HTTP command.
+
+```ts title="src/service/support/v1/requireSupportCaseResolution.ts"
+export async function requireSupportCaseResolution(
+	policy: SupportCasePolicy,
+	input: { tenantId?: string; principalId?: string; caseId: string },
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (!(await policy.canResolve({
+		tenantId: input.tenantId,
+		principalId: input.principalId,
+		caseId: input.caseId,
+	}))) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case resolution is not allowed')
+	}
+}
+```
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts"
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['resolve_support_case'] },
+	targets: {
+		agents: {},
+		workflows: {
+			resolve_support_case: {
+				beforeGuards: {
+					caseAccess: async (context, input) => {
+						await requireSupportCaseResolution(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+Create stable session and run ids from the trusted tenant and immutable case
+identity. Hashing keeps raw tenant ids out of infrastructure identifiers while
+preventing collisions between tenants.
+
+```ts title="src/service/support/v1/durableIdentity.ts"
+export function durableResolutionIdentity(tenantId: string, caseId: string) {
+	const digest = createHash('sha256')
+		.update(`${tenantId}:${caseId}:support-resolution-v1`)
+		.digest('hex')
+	return {
+		sessionId: `support-resolution:${digest}`,
+		runId: `support-resolution-run:${digest}`,
+	}
+}
+```
+
+Declare the workflow address and protect the HTTP endpoint. The mounted target
+guard runs before any model stage starts.
+
+```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
+export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
+	.addPayloadSchema(supportResolutionInputSchema)
+	.addOutputSchema(supportResolutionOutputSchema)
+	.canInvokeWorkflow(
+		'Support',
+		'1',
+		'resolve_support_case',
+		supportResolutionHarness.contracts.workflows.resolve_support_case,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'support/case-resolution')
+```
+
+Invoke the workflow with both durable identifiers. A repeated command with the
+same tenant, principal, case, and input resumes the same run. Harness rejects a
+changed input bound to that run id.
+
+```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts"
+.setCommandFunction(async function (context, payload) {
+	const tenantId = context.message.tenantId
+	if (!tenantId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	const identity = durableResolutionIdentity(tenantId, payload.caseId)
+	const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
+		sessionId: identity.sessionId,
+		durable: { runId: identity.runId },
+	})
+	if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+	return outcome.output
+})
+```
+
+Bind a persistent Harness storage adapter in production. In-memory storage is
+appropriate only for tests and local disposable runs.
+
+Continue with [Test failure, retry, and checkpoint replay](../../testing/test-workflow/).

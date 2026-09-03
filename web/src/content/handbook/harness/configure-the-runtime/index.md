@@ -13,6 +13,7 @@ defaults, and wires optional infrastructure.
 | Need | Guide |
 | --- | --- |
 | Defaults, validation, timeouts, retries, and model settings | [Configuration and model settings](/handbook/harness/configure-the-runtime/configuration-and-model-settings/) |
+| Direct text, object, embedding, reranking, and media operations | [Call model operations](/handbook/harness/configure-the-runtime/call-model-operations/) |
 | Environment values and secret ownership | [Environment variables and secrets](/handbook/harness/configure-the-runtime/environment-variables-and-secrets/) |
 | Select a provider | [Provider selection](/handbook/harness/configure-the-runtime/provider-selection/) |
 | Configure OpenAI, Google Gemini, Anthropic, Bedrock, or Azure | The focused provider guides below |

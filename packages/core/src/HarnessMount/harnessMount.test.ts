@@ -1,5 +1,11 @@
 import type { ModelProvider, RunOutcome, ToolApprovalInterrupt } from '@purista/harness'
-import { defineHarness, ModelAdmissionRejectedError } from '@purista/harness'
+import {
+	createDecisionEvidence,
+	DecisionBlockedError,
+	defineHarness,
+	InMemoryHarnessStorage,
+	ModelAdmissionRejectedError,
+} from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { z } from 'zod'
 
@@ -35,6 +41,30 @@ const admittedHarness = defineHarness({ name: 'admitted' })
 		input: z.string(),
 		output: z.string(),
 		instructions: 'Answer the request.',
+	})
+	.define()
+
+const blockedHarness = defineHarness({ name: 'blocked' })
+	.agent('blocked', {
+		input: z.string(),
+		output: z.string(),
+		handler: async () => {
+			throw new DecisionBlockedError(
+				createDecisionEvidence({
+					occurrence: {
+						invocationId: 'invocation-1',
+						runId: 'run-1',
+						agentId: 'blocked',
+						sessionId: 'session-1',
+						step: 0,
+					},
+					source: { kind: 'interceptor', id: 'content-policy', version: '1' },
+					phase: 'input',
+					ordinal: 0,
+					reasonCode: 'unsafe_input',
+				}),
+			)
+		},
 	})
 	.define()
 
@@ -78,7 +108,90 @@ const mediaHarness = defineHarness({ name: 'media' })
 	})
 	.define()
 
+const durableReviewHarness = defineHarness({ name: 'durable-review' })
+	.workflow('review_action', {
+		input: z.object({ waitId: z.string(), deadline: z.string() }),
+		output: z.object({ status: z.enum(['approved', 'rejected', 'expired', 'cancelled']) }),
+		handler: async context => ({
+			status: (
+				await context.externalWait.wait({
+					waitId: context.input.waitId,
+					kind: 'human_review',
+					schemaVersion: 'review-v1',
+					definitionVersion: 'review-v1',
+					deadline: context.input.deadline,
+				})
+			).status,
+		}),
+	})
+	.define()
+
 describe('ServiceBuilder.mountHarness', () => {
+	it('can preserve a durable run owner for an explicitly enabled cross-principal review resume', async () => {
+		const storage = new InMemoryHarnessStorage()
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Review',
+			serviceVersion: '1',
+			serviceDescription: 'Durable review service',
+		}).mountHarness(durableReviewHarness, {
+			publish: { workflows: ['review_action'] },
+			targets: { workflows: { review_action: { durableResume: { identity: 'run-owner' } } } },
+		})
+		const service = await builder.getInstance(eventBridge, { ai: { models: {}, storage } })
+		await service.start()
+		const input = { waitId: 'wait-1', deadline: '2099-01-01T00:00:00.000Z' }
+		const receiver = { serviceName: 'Review', serviceVersion: '1', serviceTarget: 'review_action' }
+
+		try {
+			const first = (await eventBridge.invoke(
+				getCommandMessageMock({
+					tenantId: 'tenant-a',
+					principalId: 'requester',
+					receiver,
+					payload: {
+						payload: input,
+						parameter: { sessionId: 'review-1', durable: { runId: 'review-run-1' } },
+					},
+				}),
+			)) as RunOutcome<{ status: 'approved' | 'rejected' }>
+			expect(first).toMatchObject({ status: 'interrupted', interrupt: { type: 'external-wait', id: 'wait-1' } })
+			await storage.signalWait({ waitId: 'wait-1', eventId: 'decision-1', outcome: 'approved' })
+
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-a',
+						principalId: 'reviewer',
+						receiver,
+						payload: {
+							payload: input,
+							parameter: { sessionId: 'review-1', durable: { runId: 'review-run-1' } },
+						},
+					}),
+				),
+			).resolves.toMatchObject({ status: 'completed', output: { status: 'approved' } })
+
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-b',
+						principalId: 'reviewer',
+						receiver,
+						payload: {
+							payload: input,
+							parameter: { sessionId: 'review-1', durable: { runId: 'review-run-1' } },
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
 	it('publishes an explicitly selected agent at its versioned EventBridge address', async () => {
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
@@ -182,6 +295,35 @@ describe('ServiceBuilder.mountHarness', () => {
 			data: { code: 'MODEL_ADMISSION_REJECTED', retriable: true, retryAfterMs: 2_500 },
 		})
 		await service.destroy()
+	})
+
+	it('exposes an explicit Harness decision block as a handled 403 response', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Policy',
+			serviceVersion: '1',
+			serviceDescription: 'Decision mapping test service',
+		}).mountHarness(blockedHarness, { publish: { agents: ['blocked'] } })
+		const service = await builder.getInstance(eventBridge, { ai: { models: {} } })
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						receiver: { serviceName: 'Policy', serviceVersion: '1', serviceTarget: 'blocked' },
+						payload: { payload: 'unsafe', parameter: {} },
+					}),
+				),
+			).rejects.toMatchObject({
+				errorCode: 403,
+				data: { code: 'DECISION_BLOCKED', retriable: false },
+			})
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
 	})
 
 	it('exposes only explicitly declared mounted model handles to native handlers', async () => {

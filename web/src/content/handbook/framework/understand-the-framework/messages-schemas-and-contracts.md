@@ -1,7 +1,7 @@
 ---
 title: Messages, schemas, and contracts
 description: Define validated inputs and outputs that can survive service, process, and deployment boundaries.
-order: 220
+order: 230
 ---
 
 Schemas make a command, event, stream frame, or queue job a contract instead of an untyped object. Define the smallest payload that the receiving capability needs and validate it at the boundary.

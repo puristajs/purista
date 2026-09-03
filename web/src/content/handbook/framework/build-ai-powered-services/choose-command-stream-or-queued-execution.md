@@ -58,26 +58,40 @@ export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarn
 })
 ```
 
+[`getQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueuebuilder)
+declares the queue contract, and
+[`setLifecycleConfig(config)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#setlifecycleconfig)
+sets delivery rules such as `maxAttempts`.
+[`getQueueWorkerBuilder(queueName, workerName)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerbuilder)
+creates the worker definition, while
+[`setMaxParallelHandlers(count)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#setmaxparallelhandlers)
+bounds concurrent executions in this worker instance. These declarations do
+not replace the QueueBridge or a provider-level rate limit.
+
 Declare `queuedTriage.contract` at a caller to receive typed queue delivery:
 
 ```ts title="Declare queued agent delivery"
 const classifyCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('classifyTicket', 'Queue ticket classification')
   .canInvokeAgent('Support', '1', 'triage_ticket', queuedTriage.contract)
-.setCommandFunction(async function ({ agent }, input) {
-  return agent.Support['1'].triage_ticket.enqueue(
-    input,
-    { sessionId: `ticket:${input.ticketId}` },
-    { idempotencyKey: `triage:${input.ticketId}` },
-  )
-})
+  .setCommandFunction(async function ({ agent }, input) {
+    return agent.Support['1'].triage_ticket.enqueue(
+      input,
+      { sessionId: `ticket:${input.ticketId}` },
+      { idempotencyKey: `triage:${input.ticketId}` },
+    )
+  })
 ```
 
 [`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
 publishes the selected target and owns its queue worker.
+[`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
+creates the addressable command contract, and
 [`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
 declares the EventBridge address and exposes `.enqueue(...)` only for the
 wrapped queued contract.
+[`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction)
+installs the command handler after its invocation capabilities are declared.
 
 The queue worker still calls the published service address through EventBridge.
 Tenant and principal identity come from trusted queue metadata. A caller that

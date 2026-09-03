@@ -24,7 +24,7 @@ const service = await incidentV1Service.getInstance(eventBridge, { configStore }
 
 | Call | Parameters, defaults, and intent | Runtime boundary |
 | --- | --- | --- |
-| [`new AWSConfigStore(options)`](/handbook/api/classes/_purista_aws-config-store.AWSConfigStore/) | `client` is required and is passed to the AWS SDK `SSMClient`; `region` is the common setting. Inherited reads default on, writes/removals off. The constructor sets `enableCache: true`, but the current `ConfigStoreBaseClass` does not implement read caching. | The adapter uses the AWS SDK credential chain or supplied SDK client settings. It does not resolve a parameter until `getConfig` is called. |
+| [`new AWSConfigStore(options)`](/handbook/api/classes/_purista_aws-config-store.AWSConfigStore/) | `client` is required and is passed to the AWS SDK `SSMClient`; `region` is the common setting. Inherited reads default on, writes/removals off. In-process caching defaults on; set `enableCache: false` for every read to reach SSM or set `cacheTtl` in milliseconds. | The adapter uses the AWS SDK credential chain or supplied SDK client settings. It does not resolve a parameter until `getConfig` is called. Expired entries refresh on the next read. |
 | [`serviceBuilder.getInstance(eventBridge, { configStore })`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance) | Supplies the adapter as this instance's runtime configuration store. | The service's `context.configs` calls use the process identity; IAM policy is the effective authorization boundary. |
 
 Provision the parameter path and IAM policy before deployment. `getConfig(...)`
@@ -39,6 +39,6 @@ configuration; use a secret-store adapter for those values.
 | Value representation | Reads `Parameter.Value` as a string; do not rely on automatic JSON serialization for arbitrary configuration values. |
 | Missing value | The adapter returns `undefined`. |
 | Write/remove when the base operations are enabled | Writes an SSM `String` parameter with overwrite; removal deletes the named parameter. Review IAM and rollback before enabling either. |
-| `enableCache` / `cacheTtl` | The adapter constructor supplies `enableCache: true`, but the current configuration-store base class does not implement read caching. Do not rely on either setting for cache or TTL behavior. |
+| `enableCache` / `cacheTtl` | The adapter enables the Core in-process configuration cache by default. Successful writes refresh the entry, removals invalidate it, and a TTL is checked lazily on the next read. Remote changes cannot invalidate a running process before that TTL. |
 
 Next: [chapter overview](/handbook/framework/configure-applications/configuration-stores/).

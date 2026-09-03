@@ -41,4 +41,12 @@ MQTT currently has no PURISTA stream capability. A service containing a stream
 cannot register against this bridge; use a queue-backed result flow for
 distributed work that would otherwise stream.
 
+MQTT also advertises `commandHandling.strictMode: false`. PURISTA therefore
+does not reject every incompatible command-delivery requirement during startup
+the way Default, AMQP, and NATS do. Treat MQTT command durability and response
+behavior as an adapter contract to test with the real broker; do not infer a
+fail-fast guarantee from a successful service start. Consumer-failure strict
+mode remains enabled, although MQTT advertises no bounded retry, delayed retry,
+dead-letter target, drop, or stop-consumer capability.
+
 Next: [chapter overview](/handbook/framework/connect-distributed-infrastructure/event-delivery/).

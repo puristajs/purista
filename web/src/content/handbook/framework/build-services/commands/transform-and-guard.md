@@ -42,7 +42,12 @@ their positions in both cases.
 | [`setAfterGuardHooks(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setafterguardhooks) | Full command context, validated handler result, payload, parameter | After output-schema validation; before output transform/success. | A bounded post-result assertion or audit check. |
 | [`setTransformOutput(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#settransformoutput) | Transform context, validated result, parameter | After after guards; its returned representation is then validated before success. | Convert the verified domain result to a supported response representation. |
 
-Transforms receive the base runtime context, original message, and service resources. They do not receive command, stream, or custom-event capability proxies. Guards receive the full command context.
+Transforms receive the base runtime context, original message, and service
+resources. They do not receive command, stream, or custom-event capability
+proxies. The output transform receives the runtime queue context, including the
+typed declared queue namespace; the input transform receives only the untyped
+base queue context. Keep queueing business work in the handler even though the
+output runtime can expose that client. Guards receive the full command context.
 
 The before-guard phase does not run before the input transform. If a signature
 or certificate must be checked before parsing or decrypting the received value,
@@ -123,9 +128,11 @@ export const exportInvoiceCommandBuilder = invoiceV1ServiceBuilder
 | `transformFunction` | A non-arrow async function receiving base transform context, the validated domain result, and validated parameter. It returns the public representation. |
 | `outputContentType`, `outputContentEncoding` | Optional media metadata. An explicit value replaces the previous output setting; otherwise the earlier setting or definition default applies. |
 
-The output transform does not give the callback command, stream, queue, or
-custom-event clients. It is a representation boundary, not a place to initiate
-new business work. Use the content type only with an HTTP runtime that can
+The output transform does not receive command, stream, or custom-event clients.
+At runtime it does receive the typed queue namespace declared by the command,
+although the public transform context type currently exposes only the base
+queue shape. Treat this as a representation boundary and keep new business work
+in the handler. Use the content type only with an HTTP runtime that can
 serve it, as described in [Expose a command](/handbook/framework/build-services/commands/expose-a-command/).
 
 [`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder) still creates the local service contract; [`addPayloadSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema) and [`addParameterSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema) validate input, while [`addOutputSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema) validates the domain result before this output transform. [`setCommandFunction(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction) installs the service-bound producer of that domain result.
@@ -157,7 +164,15 @@ export const updateInvoiceCommandBuilder = invoiceV1ServiceBuilder
   })
 ```
 
-All transform and guard callbacks must be non-arrow functions. A guard failure prevents later stages and a success response. See [Handle command errors](/handbook/framework/build-services/commands/handle-errors/) for safe error classification and [Test a command](/handbook/framework/build-services/commands/test-a-command/) to test a hook in isolation.
+All transform and guard callbacks must be non-arrow functions. A guard failure
+prevents later stages and a success response. `getCommandFunction()` runs before
+guards but does not run after guards or the output transform; those stages are
+owned by `Service.executeCommand`. Use
+[`createCommandTestHarness(...)`](/handbook/api/functions/_purista_core.createCommandTestHarness/)
+to prove their real ordering, or retrieve one named hook for a narrow unit test.
+See [Handle command errors](/handbook/framework/build-services/commands/handle-errors/)
+for safe error classification and [Test a command](/handbook/framework/build-services/commands/test-a-command/)
+for both test boundaries.
 
 | Call | Required argument | Effect |
 | --- | --- | --- |

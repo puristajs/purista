@@ -40,4 +40,4 @@ transport. Add an [HTTP server and exposed command](/handbook/framework/expose-a
 | `InvalidCommand` or a timeout | The receiver address in `verify-first-result.ts` | Derive the service name and version from `incidentService.serviceInfo`; keep `createIncident` equal to the command builder name. |
 | Repeated external side effect | Subscription retry path | Add an idempotency key or a persisted deduplication strategy before retrying. |
 
-Next: [understand the Framework](/handbook/framework/understand-the-framework/), or build a [queue and worker](/handbook/framework/build-services/queues-and-workers/) for durable background work.
+Next: [understand the generated project](/handbook/framework/start/understand-the-generated-project/).

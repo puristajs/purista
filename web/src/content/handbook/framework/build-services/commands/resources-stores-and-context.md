@@ -16,7 +16,7 @@ command builder adds only the typed downstream clients it declares.
 | Before guard | `(context, payload, parameter)` | Full command context after domain input validation and before the handler. |
 | After guard | `(context, result, payload, parameter)` | Full command context after domain output validation and before an optional output transform. |
 | Input transform | `(context, rawPayload, rawParameter)` | Base runtime context, message, resources, and stores; no declared command/stream/queue/event clients. |
-| Output transform | `(context, result, parameter)` | The same base transform context and validated domain result; no declared downstream clients. |
+| Output transform | `(context, result, parameter)` | Base transform context and validated domain result; no command, stream, or emit clients. Runtime supplies the declared typed queue namespace, while the public transform context type currently shows the base queue shape. |
 
 The full execution order is on the [Commands lifecycle](/handbook/framework/build-services/commands/#follow-the-complete-command-lifecycle).
 
@@ -76,4 +76,12 @@ a payment, tenant, request, or payload identifier.
 owns the cross-primitive model. This page owns only the command-specific
 callback and capability map.
 
+In a unit test, create the context with
+[`createCommandContextMock(...)`](/handbook/api/functions/_purista_core.createCommandContextMock/),
+call the bound handler, and assert the specific resource or logger stub. This
+proves declared context wiring; use `createCommandTestHarness(...)` when schema,
+after-guard, output-transform, and response ordering matter.
+
 For the builder API, see [CommandDefinitionBuilder](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/).
+
+Next: [expose a command](/handbook/framework/build-services/commands/expose-a-command/).

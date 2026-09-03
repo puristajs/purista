@@ -1,7 +1,7 @@
 ---
 title: Provide resources and metrics
 description: Declare narrow application dependencies and custom metrics on a service, then supply concrete implementations at the composition root.
-order: 313
+order: 314
 ---
 
 A resource is an application-owned dependency a handler needs: a repository,

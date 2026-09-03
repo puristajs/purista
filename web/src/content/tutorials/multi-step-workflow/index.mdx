@@ -1,0 +1,31 @@
+---
+title: Build a durable multi-step agent workflow
+description: Sequence typed agents, checkpoint completed stages, retry transient work, and invoke the workflow through PURISTA.
+order: 270
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches recoverable multi-step AI work. A classification stage
+runs first. A planning stage consumes the validated classification. Each stage
+has a named durable checkpoint, so a later retry does not repeat completed
+model work.
+
+The Example Bank workflow resolves one support case, but the focus is the
+Harness and PURISTA execution model:
+
+- schema-validated output becomes the next stage input;
+- `context.step` creates explicit durable checkpoint boundaries;
+- step retry is bounded and counts against the child-agent call budget;
+- stable run identity makes a repeated command resume the same work;
+- the workflow remains addressable through EventBridge.
+
+1. [Define the sequential workflow](./build/define-workflow/)
+2. [Add retries and checkpoints](./build/retry-checkpoint/)
+3. [Invoke a durable run through PURISTA](./build/invoke/)
+4. [Test failure, retry, and checkpoint replay](./testing/test-workflow/)
+
+The retained project is in
+`examples/banking/chapters/multi-step-workflow`.
+

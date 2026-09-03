@@ -14,26 +14,72 @@ flow. A real HTTP/adapter test proves only the selected deployment boundary.
 | `createStreamTestHarness` | Service instance creation, direct stream registration/execution, and—when it owns its EventBridge mock—frame ordering, writer validation, guards, auto-close, cancellation, and terminal result flow | Service startup/readiness, a production broker/HTTP server guarantee, or captured frames when you supply your own EventBridge. |
 | Selected HTTP/adapter integration | Hono projection, disconnect propagation, and documented server/bridge behavior | Nondeterministic provider/model quality. |
 
+## Test handler decisions with a capture writer
+
+`createStreamContextMock(builder, { payload, parameter, sandbox?, resources?,
+message? })` requires the payload and parameter values. It returns
+`{ context, writer, stubs, chunks, finalValue, failedWith, cancel }`; the partial
+`message` overrides a generated `StreamOpenRequest`.
+
+```ts title="Direct stream-handler test"
+import { createStreamContextMock } from '@purista/core'
+import { expect, test } from 'vitest'
+import { analyzeDocumentStreamBuilder } from './analyzeDocumentStreamBuilder.js'
+
+test('records direct handler output', async () => {
+  const mocked = createStreamContextMock(analyzeDocumentStreamBuilder, {
+    payload: { documentId: '8c4de89e-aa58-47cd-8d6b-b99997c73a32' },
+    parameter: { requestId: 'd1002143-4d6d-4f06-9384-3d27682b2f52' },
+  })
+
+  await analyzeDocumentStreamBuilder.getStreamFunction().call(
+    {} as never,
+    mocked.context,
+    { documentId: '8c4de89e-aa58-47cd-8d6b-b99997c73a32' },
+    { requestId: 'd1002143-4d6d-4f06-9384-3d27682b2f52' },
+    mocked.writer,
+  )
+
+  expect(mocked.chunks).toEqual([
+    { stage: 'extracting', progress: 25 },
+    { stage: 'classifying', progress: 75 },
+  ])
+  expect(mocked.finalValue).toEqual({
+    documentId: '8c4de89e-aa58-47cd-8d6b-b99997c73a32',
+    status: 'complete',
+  })
+})
+```
+
+This helper records what the raw handler asked the writer to do. It does not
+run builder/runtime validation, guards, auto-close, frame construction, or
+final-event publication.
+
 ## Capture a deterministic runtime result
 
 ```ts title="src/service/document/v1/stream/analyzeDocument/analyzeDocumentStreamBuilder.test.ts"
 import { createStreamTestHarness } from '@purista/core'
 import { describe, expect, test } from 'vitest'
+import { documentV1ServiceBuilder } from '../../documentV1ServiceBuilder.js'
+import { analyzeDocumentStreamBuilder } from './analyzeDocumentStreamBuilder.js'
 
 describe('analyzeDocument stream', () => {
   test('emits ordered progress and a final result', async () => {
     const harness = await createStreamTestHarness(documentV1ServiceBuilder, analyzeDocumentStreamBuilder)
     try {
       const result = await harness.run({
-        payload: { documentId: 'document-42' },
-        parameter: { requestId: 'request-42' },
+        payload: { documentId: '8c4de89e-aa58-47cd-8d6b-b99997c73a32' },
+        parameter: { requestId: 'd1002143-4d6d-4f06-9384-3d27682b2f52' },
       })
 
       expect(result.chunks).toEqual([
         { stage: 'extracting', progress: 25 },
         { stage: 'classifying', progress: 75 },
       ])
-      expect(result.final).toEqual({ documentId: 'document-42', status: 'complete' })
+      expect(result.final).toEqual({
+        documentId: '8c4de89e-aa58-47cd-8d6b-b99997c73a32',
+        status: 'complete',
+      })
     } finally {
       await harness.destroy()
     }
@@ -58,8 +104,7 @@ release the service and any helper-owned bridge.
 | Upstream stream failure | Handler cancels/stops deliberately and throws/returns the chosen outcome. |
 | HTTP aggregate or SSE projection | A selected Hono integration test proves that transport’s behavior. |
 
-Do not use a live LLM response, token timing, or provider output as a
-deterministic stream assertion. Test your stream flow here; measure agent/model
-quality in [AI Harness evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/).
+Do not use a live remote provider response or timing as a deterministic stream
+assertion. Keep this test focused on the stream lifecycle.
 
 For helper signatures, see [createStreamContextMock](/handbook/api/functions/_purista_core.createStreamContextMock/) and [createStreamTestHarness](/handbook/api/functions/_purista_core.createStreamTestHarness/).

@@ -72,6 +72,12 @@ export const harness = defineHarness({ name: 'support' })
 	.build()
 ```
 
+This uses [`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/),
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
+and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
+The alias default applies to calls through `assistant`; it does not change the
+provider or model selected for another alias.
+
 | Harness field | Bedrock Converse field | Compatibility guidance |
 | --- | --- | --- |
 | `maxTokens` | `inferenceConfig.maxTokens` | Model-specific output limits apply. This setting does not authorize an output beyond the model’s available context. |

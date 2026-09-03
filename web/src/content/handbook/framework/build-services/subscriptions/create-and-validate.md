@@ -80,10 +80,39 @@ export const accountingV1Service = accountingV1ServiceBuilder
   .addSubscriptionDefinition(recordInvoiceSubscriptionBuilder.getDefinition())
 ```
 
-Start the EventBridge and the consumer service, then publish one schema-valid
-synthetic event. The result event above is returned to the EventBridge only
-after the handler and normal runtime stages complete; it is not proof that
-another subscriber has finished.
+Despite its conventional aggregate name, `accountingV1Service` is still a
+`ServiceBuilder`. Create the running instance with
+`await accountingV1Service.getInstance(eventBridge, { resources: { ledger } })`,
+then call `start()` on that instance.
+
+Start the EventBridge and consumer service, then publish one schema-valid
+synthetic event. This focused integration assertion proves that the selected
+bridge routed the event and the handler reached its resource:
+
+```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoice.integration.test.ts"
+import { getCustomMessageMessageMock } from '@purista/core'
+import { expect, vi } from 'vitest'
+
+await eventBridge.emitMessage(getCustomMessageMessageMock('billing.invoiceCreated', {
+  invoiceId: 'invoice-42',
+  customerId: 'customer-42',
+  amountCents: 4_200,
+}, {
+  sender: {
+    serviceName: 'Billing',
+    serviceVersion: '1',
+    serviceTarget: 'createInvoice',
+    instanceId: 'billing-test',
+  },
+}))
+
+await vi.waitFor(() => expect(ledger.recordInvoice).toHaveBeenCalledOnce())
+```
+
+The configured result event is returned to the EventBridge only after the
+handler and normal runtime stages complete; it is not proof that another
+subscriber has finished. The [subscription testing guide](/handbook/framework/build-services/subscriptions/test-subscriptions/)
+shows a Sinon-based unit test and the full runtime boundary.
 
 ## Inspect, test, and evolve a definition
 
@@ -93,6 +122,21 @@ another subscriber has finished.
 | [`markAsDeprecated()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#markasdeprecated) | Deprecation metadata on the definition. | Marking a replaced public subscription while a compatible migration path still exists. | It does not block delivery, remove the registration, or notify publishers. |
 | [`getSubscriptionFunction()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptionfunction) | The handler wrapped with input/output validation and before guards. | A focused direct test of the normal handler boundary. | It does not run input/output transforms, after guards, result-event construction, registration, or adapter delivery. |
 | [`getSubscriptionFunctionPlain()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptionfunctionplain) | The raw handler. | A narrow unit test that intentionally supplies all validation and guard conditions itself. | It runs neither validation nor hooks. |
+
+`getSubscriptionFunction()` throws `UnhandledError(501, "No function
+implementation for <name>")` when no handler exists. `getDefinition()` instead
+throws the plain definition-time error `SubscriptionDefinitionBuilder: missing
+function implementation for <name>`.
+
+The remaining public methods have one focused owner:
+
+| Capability | Methods | Guide |
+| --- | --- | --- |
+| Routing | `filterSentFrom`, `filterReceivedBy`, `filterForMessageType`, `filterPrincipalId`, `filterTenantId` | [Match and filter events](/handbook/framework/build-services/subscriptions/match-and-filter-events/) |
+| Boundary conversion and policy | `setTransformInput`, `setTransformOutput`, `setBeforeGuardHooks`, `setAfterGuardHooks` | [Transform and guard a subscription](/handbook/framework/build-services/subscriptions/transform-and-guard/) |
+| Delivery advice | `adviceDurable`, `adviceAutoacknowledgeMessage`, `receiveMessageOnEveryInstance`, `adviceConsumerFailureHandling` | [Configure delivery failures and idempotency](/handbook/framework/build-services/subscriptions/delivery-failures-and-idempotency/) |
+| Outbound capabilities | `canInvoke`, `canConsumeStream`, `canEmit` | [Call other capabilities](/handbook/framework/build-services/subscriptions/call-other-capabilities/) |
+| Transform tests | `getTransformInputFunction`, `getTransformOutputFunction`, `getSubscriptionTransformContextMock` | [Test subscriptions](/handbook/framework/build-services/subscriptions/test-subscriptions/) |
 
 The transform helper getters belong to a transform-specific test; the
 [testing guide](/handbook/framework/build-services/subscriptions/test-subscriptions/) names their exact boundary.

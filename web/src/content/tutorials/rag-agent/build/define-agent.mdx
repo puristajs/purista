@@ -1,0 +1,108 @@
+---
+title: Let the agent retrieve evidence
+description: Let the model choose the search tool, then stream a cited answer from the returned evidence.
+order: 212
+kind: lesson
+status: draft
+---
+
+Replace the generated agent with a narrow retrieval agent. It must call the
+declared tool and return only evidence supplied by that tool.
+
+```ts title="src/harness/knowledge/agent/retrieveEvidenceAgent.ts" write
+import { type BuilderState, defineHarnessModule, type HostToolDefinition, type ModelAlias } from '@purista/harness'
+import {
+	answerKnowledgeQuestionInputSchema,
+	retrievedEvidenceSchema,
+	type searchKnowledgeInputSchema,
+	type searchKnowledgeOutputSchema,
+} from '../../../service/knowledge/v1/schema.js'
+
+type RetrieveEvidenceState = BuilderState & {
+	models: { primary: ModelAlias }
+	tools: {
+		search_knowledge: HostToolDefinition<typeof searchKnowledgeInputSchema, typeof searchKnowledgeOutputSchema>
+	}
+}
+
+export const retrieveEvidenceAgent = defineHarnessModule<RetrieveEvidenceState>()('knowledge.agent.retrieve-evidence', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.agent('retrieve_evidence', {
+			model: 'primary',
+			input: answerKnowledgeQuestionInputSchema,
+			output: retrievedEvidenceSchema,
+			tools: ['search_knowledge'],
+			maxSteps: 3,
+			instructions: [
+				'You retrieve evidence for a grounded answer.',
+				'Call search_knowledge with the supplied collectionId and question.',
+				'Return the question and only the evidence returned by the tool.',
+				'Do not answer from memory and do not invent sources.',
+			].join(' '),
+		})
+	},
+})
+```
+
+`tools: ['search_knowledge']` makes the tool available to the model. Application
+code does not invoke it manually. `maxSteps` limits the model loop even when a
+provider keeps asking for more tool calls.
+
+The safe tool loop uses structured aggregate model calls. A second, small
+Harness workflow streams the final text after retrieval. This gives one public
+target with both consumer modes:
+
+- `.run(...)` waits and returns the complete answer;
+- `.stream(...)` returns lifecycle, tool, and text-delta events.
+
+```ts title="src/harness/knowledge/knowledgeHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { answerKnowledgeQuestionInputSchema } from '../../service/knowledge/v1/schema.js'
+import { retrieveEvidenceAgent } from './agent/retrieveEvidenceAgent.js'
+import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
+
+export const knowledgeHarness = defineHarness({ name: 'knowledge' })
+	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
+	.use(searchKnowledgeTool)
+	.use(retrieveEvidenceAgent)
+	.workflow('answer_knowledge_question', {
+		input: answerKnowledgeQuestionInputSchema,
+		output: answerKnowledgeQuestionInputSchema.shape.question,
+		updates: 'text-delta',
+		delegation: { agents: ['retrieve_evidence'] },
+		handler: async (context) => {
+			const research = await context.agents.retrieve_evidence(context.input)
+			let answer = ''
+			for await (const chunk of context.models.primary.textStream(
+				{
+					messages: [
+						{
+							role: 'system',
+							content:
+								'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
+						},
+						{ role: 'user', content: JSON.stringify(research) },
+					],
+				},
+				context.signal,
+				{ emitRunEvents: true },
+			)) {
+				if (chunk.kind === 'delta') answer += chunk.text
+			}
+			return answer
+		},
+	})
+	.define()
+```
+
+`emitRunEvents: true` is deliberate. It publishes provider-neutral text deltas
+to the portable Harness execution stream. Provider diagnostic events stay
+separate from this consumer contract.
+
+Add a mount-level business guard for `answer_knowledge_question` as well as the
+command guard. The target guard rejects unauthorized work before the first
+model call; the command guard remains the final protection at the data access
+boundary.
+
+Continue with [Stream to a standard chat UI](./stream-ui/).

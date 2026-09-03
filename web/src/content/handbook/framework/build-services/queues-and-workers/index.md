@@ -23,6 +23,13 @@ deterministic tests. It is process-local, so durable work needs a selected and
 wired QueueBridge. Installing an optional bridge package alone does not move
 jobs. See [choose a QueueBridge](/handbook/framework/connect-distributed-infrastructure/queue-delivery/) before making a production delivery promise.
 
+A producer can enqueue only a queue definition registered on the **same service
+instance**. `context.queue.enqueue` and `scheduleAt` look up that service's own
+queue map and otherwise throw `UnhandledError(404, 'queue "<name>" is not
+registered in this service')`. For a cross-service handoff, publish a business
+event and use `ServiceBuilder.bindEventToQueue(...)` on the service that owns
+the queue.
+
 ## Follow one job through the runtime
 
 ```mermaid title="Queue and worker lifecycle"

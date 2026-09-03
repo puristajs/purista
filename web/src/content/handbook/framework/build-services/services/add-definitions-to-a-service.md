@@ -1,7 +1,7 @@
 ---
 title: Add definitions to a service
 description: Register the service's declared capabilities once, bind event-to-queue work deliberately, and resolve the aggregate only after it is complete.
-order: 312
+order: 313
 ---
 
 The service aggregate is a small registration index. It owns no business logic;
@@ -39,7 +39,7 @@ them in [Queues and workers](/handbook/framework/build-services/queues-and-worke
 | `idempotencyKey` | Omitted; `'none'`, `'messageId'`, `'correlationId'`, `'eventField'`, or a function of the incoming event | Produce a stable queue deduplication key. Use an explicit function when none of the built-in identity strategies matches the business effect. |
 | `mapPayload` | Omitted; the event payload is passed through | Map a narrow event fact to the queue contract. Keep the mapper deterministic and validate the resulting queue payload. |
 | `mapParameter` | Omitted | Derive a queue parameter from the event when the queue contract requires one. |
-| `onEnqueueFailure` | Omitted; enqueue failure follows the generated subscription error path | Return retry metadata or `{ status: 'fail', reason }` when the event-to-queue handoff needs a deliberate recovery decision. |
+| `onEnqueueFailure` | Omitted; enqueue failure follows the generated subscription error path | Supply a static `QueueRetryRequest` or `{ status: 'fail', reason }`. It is not a callback. PURISTA uses this value when enqueueing fails. |
 
 ## Resolve only after assembly is complete
 
@@ -52,11 +52,27 @@ throws. This makes a service definition immutable for a running instance.
 Do not conditionally add a feature after application startup. Build a complete
 aggregate for each intended service shape, then construct and start it.
 
-[`getFullServiceDefinition()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getfullservicedefinition) is the aggregate-inspection entry point after resolution. The individual
-`getCommandDefinitions()`, `getSubscriptionDefinitions()`,
-`getStreamDefinitions()`, `getQueueDefinitions()`,
-`getQueueWorkerDefinitions()`, and `getScheduleDefinitions()` accessors are
-exact post-resolution lookup APIs; each throws before definitions are resolved.
-They inspect the completed aggregate—they do not register or start a service.
+[`getFullServiceDefinition()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getfullservicedefinition)
+is the aggregate-inspection entry point after resolution. The individual
+post-resolution accessors are:
+
+| Resolved accessor | Returns |
+| --- | --- |
+| [`getCommandDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommanddefinitions) | Command definitions |
+| [`getSubscriptionDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getsubscriptiondefinitions) | Subscription definitions |
+| [`getStreamDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getstreamdefinitions) | Stream definitions |
+| [`getQueueDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueuedefinitions) | Queue contracts |
+| [`getQueueWorkerDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerdefinitions) | Executable queue workers |
+| [`getScheduleDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getscheduledefinitions) | External scheduler contracts |
+| [`getEventToQueueBindings()`](/handbook/api/classes/_purista_core.ServiceBuilder/#geteventtoqueuebindings) | Event-to-queue handoff metadata |
+
+Each accessor throws before definitions are resolved. They inspect the
+completed aggregate; they do not register or start a service. Prefer
+[`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup)
+for validation. The deprecated
+[`validateCommandDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#validatecommanddefinitions)
+and
+[`validateSubscriptionDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#validatesubscriptiondefinitions)
+only print a migration warning and perform no validation.
 
 For signatures, see [ServiceBuilder](/handbook/api/classes/_purista_core.ServiceBuilder/).

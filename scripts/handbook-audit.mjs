@@ -4,6 +4,8 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { auditHandbookPublicSurface } from './handbook-public-surface-audit.mjs'
+
 const handbookProducts = ['framework', 'harness']
 const handbookRoles = new Set([
 	'landing',
@@ -542,7 +544,7 @@ export async function auditHandbookManifest(root = process.cwd()) {
 }
 
 async function main() {
-	const issues = await auditHandbookManifest()
+	const issues = [...(await auditHandbookManifest()), ...auditHandbookPublicSurface()]
 	if (issues.length) {
 		process.stderr.write(`PURISTA handbook audit found ${issues.length} issue(s):\n`)
 		for (const issue of issues) {

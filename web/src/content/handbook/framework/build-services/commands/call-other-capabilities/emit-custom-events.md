@@ -40,6 +40,26 @@ The local definition uses [`getCommandBuilder(name, description, eventName?)`](/
 
 [`canEmit(eventName, schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#canemit) requires a non-empty name and records the payload contract. `context.emit(eventName, payload, contentType?, contentEncoding?)` validates the payload before asking the EventBridge to emit it. The media defaults are `application/json` and `utf-8`.
 
+An invalid emitted payload or a missing registered event schema is an
+application defect. It aborts the command with an `UnhandledError(500)`; the
+caller receives a generic internal error rather than event-schema issues.
+
+Verify the declared interaction in a direct handler test:
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.test.ts"
+const { context, stubs } = createCommandContextMock(updateInvoiceCommandBuilder, {
+  payload,
+  parameter,
+  resources,
+})
+
+await safeBind(updateInvoiceCommandBuilder.getCommandFunction(), service)(context, payload, parameter)
+expect(stubs.emit['invoice.review-requested'].calledOnce).toBe(true)
+```
+
+The stub proves the handler requested the declared event with a valid payload;
+an adapter integration test must separately prove broker delivery.
+
 ## Do not confuse the two event forms
 
 | Event form | Configure it with | Use it for |

@@ -21,7 +21,10 @@ export const exposedAnalyzeDocumentStreamBuilder = analyzeDocumentStreamBuilder
 [`exposeAsHttpStreamEndpoint(method, path, contentTypeRequest?,
 contentEncodingRequest?)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#exposeashttpstreamendpoint) records route and request media metadata. Request
 media defaults from the input schema metadata, then JSON/UTF-8; it does not
-perform request schema validation itself.
+perform request schema validation itself. The builder initially records an SSE
+response, but `getDefinition()` resolves the effective response content type
+from the selected mode: `text/event-stream` for `stream` and
+`application/json` for `aggregate`.
 
 ## Choose the response and security metadata
 
@@ -29,13 +32,19 @@ perform request schema validation itself.
 | --- | --- | --- |
 | [`setHttpStreamingMode('stream' \| 'aggregate')`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#sethttpstreamingmode) | `'stream'` | `stream` projects `text/event-stream`; `aggregate` collects the terminal result into JSON. Aggregate is not durability. |
 | [`setHttpStreamProtocol(protocol, documentationUrl?)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#sethttpstreamprotocol) | A protocol name and optional public specification URL | Documents the stream protocol/OpenAPI contract. The method has no argument default; when an HTTP endpoint exists and no protocol was set, generated metadata uses `purista`. Use a meaningful, stable protocol name. |
-| [`makeEndpointPublic()`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#makeendpointpublic) | Endpoint is secure | Marks metadata public. |
-| [`enableHttpSecurity(enabled = true)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#enablehttpsecurity) | `true` | Controls whether Hono invokes its configured protection hook. |
+| [`makeEndpointPublic()`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#makeendpointpublic), [`enableHttpSecurity(enabled = true)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#enablehttpsecurity) | Endpoint is secure | `makeEndpointPublic()` is shorthand for `enableHttpSecurity(false)`. Both update the one `isSecure` flag consumed by OpenAPI metadata and Hono's protection hook. |
+| [`setHttpResponseHeaders(headers)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#sethttpresponseheaders) | No custom headers | Adds validated static protocol headers. Server-managed `content-type`, `cache-control`, and `connection` headers are rejected. |
 | [`setOpenApiSummary`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setopenapisummary), [`addOpenApiTags`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addopenapitags), [`setOpenApiOperationId`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setopenapioperationid), [`addOpenApiErrorStatusCodes`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addopenapierrorstatuscodes), [`addQueryParameters`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addqueryparameters) | Summary/operation ID begin with stream name; lists begin empty | Adds documentation/routing metadata, not authorization or query validation. |
 
-Hono needs a stream-capable EventBridge. Its protection hook, request limits,
+Hono must be composed separately, and the service that owns the stream needs a
+stream-capable EventBridge. Otherwise service registration fails with
+`UnhandledError(501, 'stream "<name>" cannot be registered because <bridge>
+does not support streams')`. Its protection hook, request limits,
 rate limits, route collision behavior, disconnect propagation, and server
 readiness belong to the HTTP server configuration—not this builder chain.
+Endpoints are marked protected by default, but protection is effective only
+after the Hono service configures a protection middleware/handler; follow
+[authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/).
 
 For `stream` mode, Hono consumes the internal `open`, `start`, `close`, and
 `complete` transport-control frames. A browser receives chunk and error SSE

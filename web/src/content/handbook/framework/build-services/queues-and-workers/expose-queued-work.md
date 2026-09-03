@@ -40,7 +40,10 @@ command with [`addCommandDefinition(...)`](/handbook/api/classes/_purista_core.S
 before the service resolves definitions. Then
 [`addPayloadSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema),
 and [`addOutputSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema)
-define the HTTP-facing command input and accepted-result shape.
+define the command input and its raw `QueueEnqueueResult` output
+(`jobId`, `queueName`, optional `scheduledAt`). For async HTTP mode, Hono uses
+its own accepted-job OpenAPI schema and maps that raw receipt to the public
+response below.
 [`canEnqueue(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#canenqueue)
 declares the queue client that the handler may use; it requires a non-empty
 queue name and optional queue payload/parameter schemas. Finally,
@@ -57,10 +60,24 @@ security metadata, and OpenAPI choices are in [Expose a command](/handbook/frame
 
 ## Return an acceptance contract, not the eventual result
 
-The async command must return a valid queue enqueue result. Hono maps it to a
-`202` response containing `jobId`, `queueName`, and—where available—scheduled
-time or run metadata. A queue definition cannot be projected directly, and the
-worker never runs synchronously for that HTTP request.
+The async command must return a valid queue enqueue result. Hono maps it to this
+`202` body:
+
+```json title="Async job acceptance response"
+{
+  "jobId": "job-42",
+  "status": "queued",
+  "queue": "generateReport",
+  "queueName": "generateReport",
+  "scheduledAt": 1788256800000
+}
+```
+
+`runId` is included when an agent enqueue receipt supplies it. `scheduledAt`
+is omitted from JSON when the bridge did not provide it. `queue` is a deprecated
+compatibility alias; clients should use `queueName`. A queue definition cannot
+be projected directly, and the worker never runs synchronously for that HTTP
+request.
 
 Give clients a deliberate next step:
 

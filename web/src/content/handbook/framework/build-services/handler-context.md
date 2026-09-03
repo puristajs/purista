@@ -7,8 +7,10 @@ order: 370
 Each handler receives a small set of positional inputs: a context, validated
 payload, and validated parameters; stream handlers also receive a writer and
 queue workers receive a leased job message. The context is not a global service
-locator. Its typed clients appear only after the corresponding capability or
-resource has been declared on the service or builder.
+locator. Command and stream clients become callable only after the dependency
+has been declared. Queue and custom-event calls are also checked at runtime;
+their base signatures remain visible in TypeScript even when a target was not
+declared.
 
 ```mermaid title="Builder declarations determine the handler context"
 flowchart LR
@@ -26,6 +28,8 @@ flowchart LR
 | `setSubscriptionFunction(fn)` | `(context, payload, parameter)` | Optional output or a subscription handling result when the delivery policy needs one. |
 | `setStreamFunction(fn)` | `(context, payload, parameter, writer)` | `Promise<void>`; write chunks and close the writer with the final result. |
 | `setHandler(fn)` on a queue worker | `(context, message)` | Optional queue handler result; use `context.job` for explicit completion/retry/failure control. |
+| `setTransformInput(fn)` / `setTransformOutput(fn)` | `(context, payload, parameter)` where `context` contains `ContextBase`, `message`, and `resources` | The transformed payload/parameter or output. A transform has no `service`, `stream`, `emit`, `agent`, `workflow`, or `model` client. Keep it deterministic and side-effect-free. |
+| `addBeforeGuardHook(...)` / `addAfterGuardHook(...)` | The full primitive handler context plus the hook's validated inputs | `void`; throw a `HandledError` for a deliberate business rejection. |
 
 `payload` and `parameter` are readonly, post-transform values. Treat
 `context.message` (or a queue worker’s `message`) as the immutable received
@@ -47,19 +51,55 @@ worker needs that receiver; use an arrow only when it deliberately does not.
 | --- | --- | --- | --- |
 | `message` | All handlers | Runtime | Trusted message envelope, trace/principal/tenant context, and original metadata. |
 | `resources` | All handlers | `ServiceBuilder.defineResource(...)` plus `getInstance(..., { resources })` | Narrow, injected database/repository/SDK interfaces. |
-| `service` | All handlers | `canInvoke(...)` | Typed request/reply calls to declared commands. |
-| `stream` | All handlers | `canConsumeStream(...)` | Typed consumption of a declared service stream. |
-| `queue` | Commands, streams, and queue workers | `canEnqueue(...)` | Typed enqueue and schedule helpers for declared queues. The current subscription builder has no `canEnqueue(...)`; bind the subscribed event to a queue at the service level instead. |
-| `emit` | All handlers | `canEmit(...)` | Typed custom event publication. A command success event is emitted automatically after success; it does not add a callable `context.emit` target. |
-| `agent` | Commands, streams, workers, and host tools | `canInvokeAgent(service, version, target, contract)` | Typed address-first mounted-agent invocation through EventBridge. |
+| `service` | Main command, subscription, stream, and worker handlers | `canInvoke(...)` | `service.<service>['<version>'].<command>(payload, parameter)` sends a typed request/reply call through EventBridge. An undeclared entry is not callable. |
+| `stream` | Main command, subscription, stream, and worker handlers | `canConsumeStream(...)` | `stream.<service>['<version>'].<stream>(payload, parameter)` consumes a declared stream. An undeclared entry is not callable. |
+| `queue` | Every context because it is part of `ContextBase` | `canEnqueue(...)` on commands, streams, and workers | `queue.enqueue(queueName, payload, parameter?, options?)` and `queue.scheduleAt(queueName, runAt, payload, parameter?, options?)`. A subscription has no `canEnqueue(...)`; its queue allow-list is empty, so either call throws `Forbidden`. Bind an event to a queue at the service level instead. |
+| `emit` | Main command, subscription, stream, and worker handlers | `canEmit(...)` | `emit(eventName, payload, contentType?, contentEncoding?)` publishes a custom event. The callable base signature accepts a string, so PURISTA validates the declared event and payload again at runtime. A command success event is separate and emitted automatically after success. |
+| `agent`, `workflow` | Main command, subscription, stream, and worker handlers | `canInvokeAgent(...)` / `canInvokeWorkflow(...)` | Address-first mounted Harness invocation through EventBridge. |
+| `model` | Main command, subscription, stream, and worker handlers | `canUseHarnessModel(...)` | Deterministic model handles explicitly exposed by the mounted Harness runtime. |
 | `logger`, `wrapInSpan`, `startActiveSpan`, `metrics` | All handlers | Runtime; metrics need their builder declaration | Safe operational logs, spans, and low-cardinality custom metrics. |
-| `configs`, `secrets`, `states` | All handlers | Runtime stores | Store operations permitted by the configured adapter; their write/cache defaults are adapter-specific. |
-| `job`, `signal` | Queue workers | Queue worker runtime | Lease completion/retry/failure/dead-letter/extension and cooperative cancellation. |
+| `configs` | All contexts | Runtime configuration store | `getConfig(...names)`, `setConfig(name, value)`, and `removeConfig(name)`. |
+| `secrets` | All contexts | Runtime secret store | `getSecret(...names)`, `setSecret(name, stringValue)`, and `removeSecret(name)`. |
+| `states` | All contexts | Runtime state store | `getState(...names)`, `setState(name, value)`, and `removeState(name)`. Use it for short-lived application/session state, not as a domain database. |
+| `job`, `signal` | Queue workers | Queue worker runtime | `job.complete(output?, headers?)`, `retry(request?)`, `fail(reason, fatal?)`, `moveToDeadLetter(reason?)`, `extendLease(durationMs)`, `cancelRequested()`, plus the cooperative `AbortSignal`. |
 
-Calling an undeclared downstream command, stream, queue, event, or agent is
-not an escape hatch: it is absent from the typed context. Declare its schema at
-the builder first, which makes the dependency visible in the service contract
-and lets PURISTA validate it at runtime.
+Custom metrics are keyed by the name declared on the builder. Counters and
+up/down counters expose `add(value, attributes?)`; histograms expose
+`record(value, attributes?)`. When an attribute schema is declared, TypeScript
+requires that exact attribute object.
+
+## Know the runtime failures for undeclared calls
+
+The builder declaration is part of the service contract. The runtime still
+checks calls because messages, JavaScript callers, and the generic queue/event
+signatures can bypass compile-time guidance.
+
+| Call | Runtime result |
+| --- | --- |
+| Enqueue a queue that is not in this handler's `canEnqueue(...)` declarations | `UnhandledError(StatusCode.Forbidden, 'queue "<name>" is not allowed in this handler')` |
+| Enqueue an allowed name that has no queue definition on the service | `UnhandledError(StatusCode.NotFound, 'queue "<name>" is not registered in this service')` |
+| Emit a name without a `canEmit(...)` schema | `UnhandledError(StatusCode.InternalServerError, 'No schema for <event> found')` |
+| Emit a payload that fails the declared event schema | `UnhandledError(StatusCode.InternalServerError, 'Payload validation for event <event> failed')` |
+
+Declare the target first and test both the expected call and a near-miss. For a
+subscription, use `ServiceBuilder.bindEventToQueue(...)` when delivery must
+enter a queue; the subscription's direct queue namespace deliberately rejects
+all names.
+
+## Use the bound service instance through `this`
+
+PURISTA binds command, subscription, stream, and worker functions to the
+running `Service` instance. A normal `async function` can therefore read:
+
+- `this.config`, the merged and schema-validated service configuration;
+- `this.resources`, the resources supplied to `getInstance(...)`;
+- `this.logger`, `this.serviceInfo`, and `this.isStarted`; and
+- `this.getTracer()`, `this.wrapInSpan(...)`, and `this.startActiveSpan(...)`.
+
+Prefer the context's logger, resource, and tracing members for ordinary handler
+work because they carry the current execution context. Use `this.config` for
+service configuration and the receiver only when the service instance itself
+is the intended owner. See [configure a service](/handbook/framework/build-services/services/configure-a-service/).
 
 ## Continue at the owning primitive
 

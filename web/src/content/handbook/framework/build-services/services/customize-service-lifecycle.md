@@ -1,7 +1,7 @@
 ---
 title: Customize service lifecycle
 description: Extend the Service class only when a long-lived business boundary must start and stop with the service rather than a normal injected resource.
-order: 315
+order: 316
 ---
 
 Most services need a resource, not a subclass. Use [`setCustomClass(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#setcustomclass) when

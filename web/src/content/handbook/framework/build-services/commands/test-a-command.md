@@ -8,7 +8,7 @@ Use two test levels. A direct handler test makes business decisions fast and det
 
 ## Test handler logic directly
 
-`createCommandContextMock(builder, input)` creates a typed context from the command builder declarations. Its input requires `payload` and `parameter`; `resources`, a Sinon `sandbox`, and a `message` override for those two values are optional. It does **not** override message ID, trace, principal, tenant, or other trusted envelope metadata. It returns `context`/`mock` plus stubs for resources, emitted events, downstream services, queues, stores, logger, spans, and metrics.
+`createCommandContextMock(builder, input)` creates a typed context from the command builder declarations. Its input requires `payload` and `parameter`; `resources`, a Sinon `sandbox`, and a `message` override for those two values are optional. It does **not** override message ID, trace, principal, tenant, or other trusted envelope metadata. It returns `context`/`mock` plus stubs for resources, emitted events, downstream services, queues, stores, logger, and spans. Custom metrics are available on `context.metrics`; there is no separate metrics entry in `stubs`.
 
 ```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.test.ts"
 import {
@@ -28,7 +28,7 @@ test('updates an invoice through the handler', async () => {
   const eventBridge = new DefaultEventBridge()
   const resources = {
     invoices: {
-      update: async (invoiceId, changes) => ({
+      update: async (invoiceId: string, changes: { dueDate: string; note?: string }) => ({
         invoiceId,
         ...changes,
         updatedAt: '2026-08-28T10:00:00.000Z',
@@ -81,6 +81,11 @@ that broader boundary.
 Bind every retrieved callback to the service with `safeBind(...)` and provide the
 context shape for that callback. A direct helper is useful for a narrow branch;
 the deterministic harness below proves the complete Framework path.
+
+No direct helper executes the full after-guard and output-transform sequence.
+Only `createCommandTestHarness(...)` below calls the real
+`Service.executeCommand` lifecycle that orders those stages around response
+creation.
 
 ## Test transforms and guards directly
 

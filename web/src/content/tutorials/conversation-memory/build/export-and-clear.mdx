@@ -1,0 +1,67 @@
+---
+title: Export and clear conversation history
+description: Add protected PURISTA commands for identity-scoped transcript access and deletion.
+order: 223
+kind: lesson
+status: draft
+---
+
+History access is an application capability, so expose it through commands with
+normal authentication and authorization. Do not give the model a transcript
+deletion tool.
+
+Generate both commands.
+
+```bash title="Generate history management commands" replay="project"
+npm run add:command -- get-conversation-history --service support --service-version 1 --description "Export the caller support conversation history" --non-interactive
+npm run add:command -- clear-conversation-history --service support --service-version 1 --description "Clear the caller support conversation transcript" --non-interactive
+```
+
+Wrap the storage port in a narrow service resource. The wrapper exposes only
+the operations these commands need and removes internal message and run ids from
+the public response.
+
+```ts title="src/resources/HarnessConversationHistory.ts"
+import type { HarnessStorage } from '@purista/harness'
+
+export class HarnessConversationHistory implements SupportConversationHistory {
+	public constructor(private readonly storage: HarnessStorage) {}
+
+	public async list(sessionId: string) {
+		return (await this.storage.listMessages(sessionId)).map(({ role, content, timestamp }) => ({
+			role,
+			content,
+			timestamp,
+		}))
+	}
+
+	public async clear(sessionId: string) {
+		await this.storage.clearMessages(sessionId)
+	}
+}
+```
+
+The clear command derives the same identity-scoped id as the agent invocation.
+It cannot clear a conversation belonging to another tenant or principal.
+
+```ts title="src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts"
+export const clearConversationHistoryCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('clearConversationHistory', "Clear the current caller's support conversation transcript")
+	.addPayloadSchema(conversationHistoryRequestSchema)
+	.addOutputSchema(clearedConversationHistorySchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'support/conversations/clear')
+	.setCommandFunction(async function (context, payload) {
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		await context.resources.supportConversationHistory.clear(sessionId)
+		return { cleared: true as const }
+	})
+```
+
+Clearing messages keeps the session record and run receipts. `Session.destroy()`
+is the destructive Harness operation for deleting the complete session,
+including persisted runs and events. Use that only for a deliberate full-delete
+policy. `Session.release()` keeps all persisted state and only frees live
+sandbox, MCP, and child-task resources.
+
+Continue with [Test history, isolation, and deletion](../../testing/test-history/).

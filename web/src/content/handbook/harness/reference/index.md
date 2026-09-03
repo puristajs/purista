@@ -13,7 +13,8 @@ additions; the core package does not activate them by default.
 | Package | Purpose | Extra requirement |
 | --- | --- | --- |
 | `@purista/harness` | Core builder/runtime | An application-owned Standard Schema validator; see [schema-library compatibility](/handbook/harness/start/requirements-and-installation/#choose-the-schema-library-your-application-owns). |
-| `@purista/harness-openai`, `-anthropic`, `-bedrock`, `-azure-foundry` | First-party model providers | Provider credentials and service access. |
+| `@purista/harness-openai`, `-google`, `-anthropic`, `-bedrock`, `-azure-foundry` | First-party model providers | Provider credentials and service access. |
+| `@purista/harness-ai-sdk-ui` | AI SDK UI Message Stream v1 adapter | Matching `@purista/harness@3` and `ai@7`. |
 | `@purista/harness-memory-sqlite`, `-postgres`, `-redis`, `-nats` | Persistent memory | See the [memory selection guide](/handbook/harness/manage-context-and-state/memory/). |
 | `@purista/harness-guardrails` | Typed policy rails | Optional privacy detector package as required. |
 | `@purista/harness-guardrails-native-privacy`, `-presidio`, `-local-ner` | Sensitive-data detection | Native prebuild; Presidio service; or local model assets/Transformers. |
@@ -30,6 +31,12 @@ labels.
 For the complete included/default/optional matrix, exact peer ranges, external
 prerequisites, missing-dependency behavior, and focused enablement links, use
 [Packages and feature availability](./packages-and-feature-availability/).
+
+Use [configuration and environment variables](./configuration-and-environment-variables/)
+for defaults and process settings, [provider and adapter compatibility](./provider-and-adapter-compatibility/)
+before selecting runtime ports, [public API and conformance](./public-api-and-conformance/)
+when implementing an adapter or checking a release, and the [glossary](./glossary/)
+for the exact meaning of Harness terms.
 
 Use the [error catalog](./error-catalog/) to look up stable runtime codes,
 categories, retry signals, and the first safe response. The accompanying

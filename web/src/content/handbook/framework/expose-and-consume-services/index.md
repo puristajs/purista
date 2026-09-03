@@ -42,4 +42,7 @@ commands and raw error details must stay behind an authenticated application
 boundary. A public route, GraphQL field, or generated package is a compatibility
 commitment: version it deliberately and test it at the actual transport.
 
-Next: [HTTP and REST](/handbook/framework/expose-and-consume-services/http-and-rest/), [GraphQL](/handbook/framework/expose-and-consume-services/graphql/), or [service clients](/handbook/framework/expose-and-consume-services/service-clients/).
+Next: [HTTP and REST](/handbook/framework/expose-and-consume-services/http-and-rest/),
+[GraphQL](/handbook/framework/expose-and-consume-services/graphql/),
+[service clients](/handbook/framework/expose-and-consume-services/service-clients/),
+or [service discovery and contracts](/handbook/framework/expose-and-consume-services/service-discovery/).

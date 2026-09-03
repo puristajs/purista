@@ -1,0 +1,5 @@
+{
+	"$schema": "https://purista.dev/schemas/purista.schema.json",
+	"runtime": "node",
+	"eventBridge": "default"
+}

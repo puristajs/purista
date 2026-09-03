@@ -73,6 +73,13 @@ Missing directories, a missing `SKILL.md`, invalid frontmatter, or a sandbox
 without mount support prevent the skill from being used; they do not silently
 turn it into prompt text.
 
+Use [`.skill(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#skill)
+for one inline directory and
+[`.skills(record)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#skills)
+for a cohesive pre-typed group. Both forms accumulate and reject duplicate
+IDs. Skill IDs follow the same lowercase model-facing registry rules as tool
+and agent IDs; collisions with a custom or built-in tool fail composition.
+
 | Call or field | What it establishes | When to use it |
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Starts the named composition that owns the skill filesystem and session registries. | Its name defaults to `agent-harness`; use it for diagnostics, never as a user, tenant, or authorization value. |

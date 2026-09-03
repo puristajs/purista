@@ -1,0 +1,166 @@
+---
+title: Declare an authorized search tool
+description: Generate a PURISTA search command and expose its typed contract to the native Harness.
+order: 211
+kind: lesson
+status: draft
+---
+
+Start from the `Knowledge` service built in
+[Ingest content for retrieval](/tutorials/retrieval-ingestion/). Install the
+published Framework, Harness, provider, and UI protocol packages by their npm
+names.
+
+```bash title="Install the RAG dependencies" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 @purista/harness-ai-sdk-ui@3.0.0 ai@7.0.90
+npm install --save-dev --save-exact @purista/cli@4.0.0
+```
+
+Generate the Framework command and the native Harness agent scaffold.
+
+```bash title="Generate the read-side artifacts" replay="project"
+npm run add:command -- search-knowledge --service knowledge --service-version 1 --description "Search authorized knowledge chunks for a grounded answer" --non-interactive
+npm run add:agent -- retrieve-evidence --service knowledge --service-version 1 --description "Retrieve evidence for a grounded answer" --non-interactive
+```
+
+Keep model input separate from trusted identity. The model may propose a
+collection id and query, but the command obtains tenant and principal ids from
+the PURISTA message.
+
+```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
+import type { KnowledgeMatch } from './schema.js'
+
+export interface KnowledgeEmbeddingProvider {
+	readonly model: string
+	readonly dimensions: number
+	embedQuery(input: Readonly<{ text: string; signal?: AbortSignal }>): Promise<number[]>
+}
+
+export interface KnowledgeRepository {
+	search(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			embeddingModel: string
+			queryEmbedding: number[]
+			limit: number
+			signal?: AbortSignal
+		}>,
+	): Promise<KnowledgeMatch[]>
+}
+
+export interface KnowledgeCollectionPolicy {
+	canSearch(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			collectionId: string
+		}>,
+	): Promise<boolean>
+}
+```
+
+The command guard is business authorization. It decides whether this principal
+may search this collection. Authentication has already established the
+identity; a Harness content guardrail would solve a different problem.
+
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts" write
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../schema.js'
+
+export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
+	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
+	.addPayloadSchema(searchKnowledgeInputSchema)
+	.addOutputSchema(searchKnowledgeOutputSchema)
+	.setBeforeGuardHooks({
+		collectionAccess: async function (context, payload) {
+			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				collectionId: payload.collectionId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const queryEmbedding = await context.resources.knowledgeEmbeddingProvider.embedQuery({
+			text: payload.query,
+		})
+		const matches = await context.resources.knowledgeRepository.search({
+			tenantId: context.message.tenantId ?? '',
+			collectionId: payload.collectionId,
+			embeddingModel: context.resources.knowledgeEmbeddingProvider.model,
+			queryEmbedding,
+			limit: payload.limit,
+		})
+		return { matches }
+	})
+```
+
+Now declare the model-facing contract. This native Harness module knows the
+tool name, description, and schemas. It contains no PURISTA invocation and no
+database client.
+
+```ts title="src/harness/knowledge/tool/searchKnowledgeTool.ts" write
+import { defineHarnessModule } from '@purista/harness'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../../service/knowledge/v1/schema.js'
+
+export const searchKnowledgeTool = defineHarnessModule()('knowledge.tool.search', {
+	version: '1.0.0',
+	register(builder) {
+		return builder.hostTool('search_knowledge', {
+			kind: 'host',
+			description: 'Search an authorized knowledge collection and return source chunks with stable document ids.',
+			input: searchKnowledgeInputSchema,
+			output: searchKnowledgeOutputSchema,
+		})
+	},
+})
+```
+
+The service mount binds that portable contract to a location-independent
+command address.
+
+```ts title="src/service/knowledge/v1/harness/knowledgeHarnessMount.ts" write
+import { commandAsHarnessTool, type HarnessBusinessGuardContext } from '@purista/core'
+import type { z } from 'zod'
+import { knowledgeHarness } from '../../../../harness/knowledge/knowledgeHarness.js'
+import type { KnowledgeCollectionPolicy } from '../KnowledgeResources.js'
+import { requireKnowledgeCollectionAccess } from '../requireKnowledgeCollectionAccess.js'
+import type { answerKnowledgeQuestionInputSchema } from '../schema.js'
+
+export { knowledgeHarness }
+
+export const knowledgeHarnessPolicy = {
+	publish: { workflows: ['answer_knowledge_question'] },
+	hostTools: {
+		search_knowledge: commandAsHarnessTool('Knowledge', '1', 'searchKnowledge'),
+	},
+	targets: {
+		workflows: {
+			answer_knowledge_question: {
+				beforeGuards: {
+					collectionAccess: async (
+						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+						input: z.output<typeof answerKnowledgeQuestionInputSchema>,
+					) => {
+						await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+							...context.identity,
+							collectionId: input.collectionId,
+						})
+					},
+				},
+			},
+		},
+	},
+} as const
+```
+
+When the tool runs, the adapter invokes the command through EventBridge and
+propagates the caller's tenant, principal, trace, and correlation context. The
+tool never receives permission to invent those values. The target guard rejects
+an unauthorized collection before the workflow starts a model call. The command
+guard remains the final authorization boundary around the stored data, including
+when another command or agent reuses it.
+
+Continue with [Let the agent retrieve evidence](./define-agent/).

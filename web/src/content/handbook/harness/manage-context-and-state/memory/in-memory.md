@@ -18,9 +18,6 @@ import { defineHarness, inMemoryMemoryEngine, inMemorySandbox } from '@purista/h
 export const testHarness = defineHarness({ name: 'claims-review-test' })
 	.sandbox(inMemorySandbox())
 	.memory(inMemoryMemoryEngine())
-	.models({
-		noop: { provider: { id: 'test', genAiSystem: 'test' }, model: 'not-called', capabilities: [] },
-	})
 	.build()
 ```
 
@@ -30,15 +27,13 @@ export const testHarness = defineHarness({ name: 'claims-review-test' })
 | [`inMemoryMemoryEngine()`](/handbook/api/functions/_purista_harness.inMemoryMemoryEngine/) | Creates the explicit core in-process key/value/list/delete/TTL engine. | Omit `.memory(...)` to receive the same default, or call it explicitly when a test should make the ephemeral dependency visible. It has no search or persistence capability. |
 | [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Adds an ephemeral files-and-bounded-search sandbox to this otherwise minimal composition. | It is optional for memory itself. Do not infer a persistent filesystem or tenant isolation from this test/runtime adapter. |
 | [`.memory(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory) | Registers a direct engine instance; the other accepted forms are a configuration object or an alias-aware callback. | Use the direct instance when no embedding alias is needed. Register models before the callback form so the builder can type-check the declared alias. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers the required non-empty model registry without making a provider call. | The `noop` alias deliberately has no capabilities and no consumer. `.build()` always requires a model alias, but this memory fixture must not prompt it. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the composition and returns the Harness. | With the inert required model but no tool, agent, or workflow registry, it makes a valid storage/memory test fixture—not an agent runtime. |
+| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the composition and returns the Harness. | A memory-only Harness needs no model alias. Add a model registry only when an agent or alias-aware memory configuration consumes it. |
 
 [`memory(engine)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory)
 accepts either a memory engine, a configuration object, or a callback that uses
 already-registered model aliases. This direct engine form has no *memory-model*
-requirement. The Harness builder still requires the inert `noop` model alias
-shown above, while this verification has no agent, tool, or workflow consumer.
-Empty registry calls do not enable anything.
+requirement. This verification has no agent, tool, or workflow consumer, so it
+does not register an unused model. Empty registry calls do not enable anything.
 
 It is lost on restart, is not shared across instances, and has no text, vector,
 or hybrid search. Use it for unit tests, examples, or explicitly ephemeral

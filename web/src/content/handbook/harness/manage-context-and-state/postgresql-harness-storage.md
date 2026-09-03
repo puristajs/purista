@@ -34,6 +34,18 @@ export const harness = defineHarness({ name: 'payments' })
 	.build()
 ```
 
+[`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/)
+creates the composition root.
+[`.storage(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#storage)
+binds the control-state adapter,
+[`.requires(capabilities)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#requires)
+fails startup when its advertised guarantees are absent,
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models)
+and [`.workflows(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflows)
+register the executable definitions, and
+[`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
+validates the completed graph.
+
 The first operation applies the package-owned migration under a PostgreSQL
 advisory lock. Concurrent replicas wait for the same initialization result.
 Startup or the first request fails closed when PostgreSQL is unavailable or
@@ -75,6 +87,18 @@ const harness = defineHarness({ name: 'artifact-worker' })
 	.workflows(workflows)
 	.build()
 ```
+
+The same [`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/)
+graph combines
+[`.storage(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#storage),
+[`.workspace(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workspace),
+[`.sandbox(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
+[`.requires(capabilities)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#requires),
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
+[`.workflows(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflows),
+and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
+Storage persists Harness control state; workspace persists files; sandbox owns
+execution isolation. Listing all three does not merge their responsibilities.
 
 For Kubernetes, use the matched sandbox/workspace bundle documented in
 [run a Kubernetes sandbox](/handbook/harness/secure-and-govern/kubernetes-sandbox/).

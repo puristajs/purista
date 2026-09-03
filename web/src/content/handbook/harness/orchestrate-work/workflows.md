@@ -30,21 +30,14 @@ import { z } from 'zod'
 
 export const incidentReviewHarness = defineHarness({ name: 'incident-review' })
 	.sandbox(inMemorySandbox())
-	.models({
-		local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-	})
 	.agent('facts', {
-		model: 'local',
 		input: z.object({ report: z.string() }),
 		output: z.object({ confirmed: z.boolean() }),
-		instructions: 'Extract facts.',
 		handler: async () => ({ confirmed: true }),
 	})
 	.agent('risk', {
-		model: 'local',
 		input: z.object({ confirmed: z.boolean() }),
 		output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
-		instructions: 'Assess risk.',
 		handler: async ({ input }) => ({ level: input.confirmed ? 'medium' : 'low' }),
 	})
 	.workflow('review_incident', {
@@ -60,8 +53,17 @@ export const incidentReviewHarness = defineHarness({ name: 'incident-review' })
 import { incidentReviewHarness } from './harness/incidentReview.js'
 
 const session = await incidentReviewHarness.getSession('incident:42')
-console.log(await session.workflows.review_incident.run({ report: 'Checkout errors increased after a deploy.' }))
-await incidentReviewHarness.shutdown()
+try {
+	const outcome = await session.workflows.review_incident.run({
+		report: 'Checkout errors increased after a deploy.',
+	})
+	if (outcome.status === 'interrupted') {
+		throw new Error(`Incident review paused for ${outcome.interrupt.type}`)
+	}
+	console.log(outcome.output)
+} finally {
+	await incidentReviewHarness.shutdown()
+}
 ```
 
 ```text title="Expected deterministic workflow result"
@@ -131,8 +133,7 @@ The presence of a workflow-local `delegation` object enables delegation unless
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates this named composition root; a missing name uses `agent-harness`. | The name helps distinguish local runtime diagnostics. It neither enables delegation nor selects a model. |
 | [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Registers the fixed files-and-bounded-search contract returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/) before workflow or agent sandbox policies are checked. | The factory takes no options and exposes `sandbox.fs` plus `sandbox.text_search`; it has no executor, process spawning, or durable filesystem. Passing it avoids automatic adapter detection for this handler-only workflow. Choose an adapter with the exact required capabilities before adding sandbox-backed tools; this is not a tenant-isolation boundary. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers the `local` alias before either agent names it. | This static provider works because both agents use custom handlers. Replace it with a real provider before removing those handlers. |
-| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers `facts` and `risk` before a workflow refers to them. | Always define delegated agents before workflows so `ctx.agents` is typed from actual IDs. |
+| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers `facts` and `risk` before a workflow refers to them. | These deterministic agents use custom handlers, so they declare no model or model-loop instructions. Always define delegated agents before workflows so `ctx.agents` is typed from actual IDs. |
 | [`.workflow(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow) | Registers `review_incident` as `session.workflows.review_incident`. | Its inline schemas infer `ctx.input` and the returned output; earlier agents infer `ctx.agents`. |
 | [`delegation.enabled`](/handbook/api/interfaces/_purista_harness.WorkflowDelegationPolicy/#enabled) | Enables or disables calls through `ctx.agents` and `ctx.childTasks`. | Omit it inside a workflow-local policy to enable delegation; set `false` to prohibit it explicitly. |
 | [`delegation.agents`](/handbook/api/interfaces/_purista_harness.WorkflowDelegationPolicy/#agents) | Limits child calls to the named agents. | Use an allowlist for production workflows; omitting it permits every registered agent. |
@@ -143,11 +144,14 @@ The presence of a workflow-local `delegation` object enables delegation unless
 | [`delegation.agentModelAliases`](/handbook/api/interfaces/_purista_harness.WorkflowDelegationPolicy/#agentmodelaliases) | Replaces the shared model allowlist for each named agent. | Use only when one child needs a narrower or different approved alias set. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the complete model, agent, and workflow registry graph before returning the Harness. | Run it after the workflow registry. Unknown aliases or disallowed delegation fail before a workflow request is served. |
 
-Use `ctx.fanOut(items, fn, { concurrency })` for independent work and return a
+Use
+[`ctx.fanOut(items, fn, { concurrency })`](/handbook/api/interfaces/_purista_harness.WorkflowContext/#fanout)
+for independent work and return a
 schema-validated result. Handle partial failures deliberately—often with
 `Promise.allSettled` and a result that identifies unavailable sources. Map
-workflow `RunEvent` values to SSE or WebSocket in your application; Harness
-does not define a browser streaming protocol.
+workflow `ExecutionEvent` values through a standard transport adapter. Use the
+AI SDK UI Message Stream v1 adapter for browser chat rather than defining a
+custom consumer protocol.
 
 `fanOut.concurrency` must be a positive integer. Its effective value cannot
 exceed the workflow's `maxParallelChildAgentCalls` budget, and cancellation

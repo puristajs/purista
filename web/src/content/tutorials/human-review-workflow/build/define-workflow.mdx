@@ -1,0 +1,106 @@
+---
+title: Define and mount the durable workflow
+description: Create a native Harness external wait and publish it at a versioned PURISTA address.
+order: 251
+kind: lesson
+status: draft
+---
+
+Start from a PURISTA project and add services for the two business owners. The
+`Support` service owns review requests. The `Transaction` service owns the card
+effect.
+
+```bash title="Create the service boundaries" replay="project"
+npm run add:service -- support --description "Owns support reviews and automation" --non-interactive
+npm run add:service -- transaction --description "Owns transaction and card actions" --non-interactive
+```
+
+Install Harness by its published package name. This workflow does not call a
+model, so it needs no provider package.
+
+```bash title="Install the workflow dependency" replay="project"
+npm install @purista/harness zod
+```
+
+Define the portable workflow in a Harness module. Give the wait an application
+generated id, fixed schema and definition versions, and a deadline. Do not put
+review comments, user profiles, secrets, or mutable business data into the
+wait. Store those in the application database.
+
+```ts title="src/harness/support/reviewSupportActionWorkflow.ts"
+export const reviewSupportActionHarness = defineHarness({ name: 'support-human-review' })
+	.workflow('review_support_action', {
+		input: reviewSupportActionInputSchema,
+		output: reviewSupportActionOutputSchema,
+		handler: async context => {
+			const outcome = await context.externalWait.wait({
+				waitId: context.input.waitId,
+				kind: 'human_review',
+				schemaVersion: 'support-review-signal-v1',
+				definitionVersion: context.input.definitionVersion,
+				deadline: context.input.deadline,
+			})
+			return { status: outcome.status }
+		},
+	})
+	.define()
+```
+
+Mount and publish the workflow on `Support`.
+
+The target guard looks up the tenant-scoped review by its opaque wait id,
+checks the immutable action digest, and then authorizes either the original
+requester or a reviewer. This guard matters because the workflow has its own
+EventBridge address; command guards alone would not protect direct callers.
+
+```ts title="src/service/support/v1/requireReviewWorkflowAccess.ts"
+export async function requireReviewWorkflowAccess(resources, identity, input) {
+	const { tenantId, principalId } = identity
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+
+	const record = await resources.supportReviewStore.getByWaitId(tenantId, input.waitId)
+	if (!record || record.actionDigest !== input.actionDigest) {
+		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+	}
+
+	const allowed =
+		record.principalId === principalId
+			? await resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: record.cardId })
+			: await resources.supportReviewPolicy.canReview({ tenantId, principalId, requestId: record.requestId })
+	if (!allowed) throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+}
+```
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts"
+export const supportHarnessPolicy = {
+	publish: { agents: [], workflows: ['review_support_action'] },
+	targets: {
+		agents: {},
+		workflows: {
+			review_support_action: {
+				beforeGuards: {
+					reviewAccess: async (context, input) => {
+						await requireReviewWorkflowAccess(context.resources, context.identity, input)
+					},
+				},
+				durableResume: { identity: 'run-owner' },
+			},
+		},
+	},
+} as const
+```
+
+`durableResume.identity: 'run-owner'` is an explicit human-review policy. It
+lets an authorized reviewer resume the session created by another principal.
+PURISTA still evaluates target and command guards with the current reviewer,
+and it always rejects a different tenant. The runtime also requires the
+original `sessionId`, durable `runId`, and an explicit Harness storage adapter.
+
+```ts title="src/service/support/v1/supportV1Service.ts"
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(requestCardFreezeCommandBuilder.getDefinition())
+	.addCommandDefinition(decideCardFreezeCommandBuilder.getDefinition())
+	.mountHarness(reviewSupportActionHarness, supportHarnessPolicy)
+```
+
+Continue with [Return a typed waiting result](../interrupt/).

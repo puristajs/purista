@@ -40,3 +40,20 @@ or `object-snapshot`. A consumer chooses `.run(...)` for
 
 An approval or external wait is an interrupted outcome. It is not an exception
 and must not become an HTTP 500 response.
+
+## Error mapping at the mount boundary
+
+PURISTA keeps safe Harness error metadata and maps known failure classes to
+handled status codes:
+
+| Harness failure | PURISTA status | Caller data |
+| --- | --- | --- |
+| input or contract validation | `400 Bad Request` | stable `code` and `retriable` only |
+| permission, policy denial, or explicit `DECISION_BLOCKED` | `403 Forbidden` | stable `code` and `retriable` only |
+| model admission rejection | `429 Too Many Requests` | stable code plus `retryAfterMs` |
+| timeout | `504 Gateway Timeout` | stable `code` and `retriable` only |
+| detector failure, provider failure, invalid output, or unknown error | `500 Internal Server Error` | sanitized handled error |
+
+Tool approval and external wait do not use this table because they are typed
+interrupts in `RunOutcome`. Streaming sends the same safe status and data in
+its terminal error frame.

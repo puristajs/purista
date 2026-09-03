@@ -108,6 +108,12 @@ provide all three schemas unless there is a deliberate reason not to.
 Trace, principal, and tenant metadata propagate to the downstream command. The
 downstream service must still enforce its own authorization and tenant scope.
 
+A downstream `HandledError` is reconstructed and thrown as a `HandledError` in
+this handler. If it is not caught, its status, message, and data become this
+command's caller-visible error. Catch and map a downstream error when its public
+contract must not pass through your boundary. Unexpected downstream errors and
+response-schema mismatches remain internal failures.
+
 ## Keep the contract and failure surface small
 
 Do:

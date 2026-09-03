@@ -90,6 +90,13 @@ produces the validated command parameter
 undeclared query fields. Avoid giving a query and path field the same name;
 Hono merges query values first and path values afterward.
 
+Protection middleware may also set `additionalParameter`; Hono merges those
+trusted values into the same parameter object after query and path values. A
+strict schema must declare every injected field, or every protected request
+carrying that field is rejected with `400`. Keep identity on
+`context.message.principalId`/`tenantId`; use `additionalParameter` only for
+other deliberately declared command parameters.
+
 The request body becomes `payload` for `PATCH`, `POST`, and `PUT` requests.
 Keep route parsing, server startup, and transport authentication in the HTTP
 runtime; keep business authorization near the service/command boundary.
@@ -112,6 +119,15 @@ contract need a name that must remain stable across internal refactors.
 | `contentTypeRequest` / `contentEncodingRequest` | Schema/transform metadata, then `application/json` / `utf-8` | Expected request representation. |
 | `contentTypeResponse` / `contentEncodingResponse` | Schema/transform metadata, then `application/json` / `utf-8` | Declared response representation. |
 | `options.mode` | `sync` | `sync` returns the command result. `async` makes Hono return `202 Accepted` only when the command returns a queue-enqueue result; it does not enqueue work itself. |
+
+## Know what the generated route enforces
+
+| Condition | HTTP result | Where to configure or fix it |
+| --- | --- | --- |
+| `POST`, `PUT`, or `PATCH` body exceeds `maxRequestBodyBytes` | `413 Payload Too Large`; the Hono default is 1 MiB. | Set a deliberate server limit in Hono `serviceConfig`; do not weaken it per command. |
+| Request `content-type` does not include the command's declared request content type | `400` with `Request must be content type <type> <encoding>`. | Send the declared representation or change the command's payload/transform media metadata. |
+| Successful synchronous command resolves to `undefined`, `null`, or `''` | `204 No Content` with an empty body. | Declare and return a non-empty output when callers need a response body. |
+| Another command already owns the same method and versioned path | Startup throws `409` with `HTTP endpoint already registered for <method>:<path>. Configure a unique http path/method combination.` | Give each projection a unique method/path pair before starting Hono. |
 
 ### Return queue acceptance from an async route
 

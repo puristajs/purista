@@ -41,12 +41,11 @@ The helper installs process-level one-shot `SIGTERM` plus
 return `503` after `SIGTERM`. Construct it once at the process composition
 root, not once per service or route.
 
-> **Current limitation:** `addServiceEndpoints(...)` stops scanning all
-> supplied definitions when it encounters the first command without HTTP
-> metadata. In a mixed service, do not rely on this helper to expose later
-> commands. Use the full [Hono service](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
-> for a complete HTTP projection, or ensure the supplied definitions are
-> limited to the supported shape until this implementation is repaired.
+`addServiceEndpoints(...)` skips commands without HTTP metadata and continues
+registering later exposed commands in the same service. It exposes commands
+only. Use the full [Hono service](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
+for streams, protected generated routes, OpenAPI, or dynamic service
+discovery.
 
 The helper returns a Hono app; it does not start a listener. Add the listener package appropriate to the runtime (for Node, `@hono/node-server`) and pass `app.fetch` to it.
 

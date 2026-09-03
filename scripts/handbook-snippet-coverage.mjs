@@ -91,17 +91,30 @@ const frameworkMethodOwners = new Map([
 ])
 
 const harnessBuilderMethods = new Set([
+	'logger',
 	'models',
+	'model',
+	'requireModel',
+	'requireModels',
 	'defaults',
 	'requires',
 	'sandbox',
 	'storage',
 	'workspace',
 	'telemetry',
+	'governance',
+	'memory',
 	'tools',
+	'tool',
+	'hostTool',
 	'skills',
+	'skill',
 	'agents',
+	'agent',
 	'workflows',
+	'workflow',
+	'use',
+	'define',
 	'build',
 ])
 

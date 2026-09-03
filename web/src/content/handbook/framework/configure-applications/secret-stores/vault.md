@@ -36,6 +36,16 @@ const service = await incidentV1Service.getInstance(eventBridge, { secretStore }
 | [`new VaultSecretStore(options)`](/handbook/api/classes/_purista_vault-secret-store.VaultSecretStore/) | `endpoint` and `token` are required. `mount` defaults to `secret`; leading/trailing slashes are normalized. Secret caching defaults on; disable it or set a millisecond `cacheTtl` when rotation/revocation needs a shorter reuse period. | The adapter reads KV v2 at `{mount}/data/{name}` and stores a `value` field. A missing secret is `undefined`; other Vault failures reject the lookup. |
 | [`serviceBuilder.getInstance(eventBridge, { secretStore })`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance) | Replaces the local Core secret store for this service. | The supplied token/policy remains the effective authorization boundary. |
 
+### Mutation semantics
+
+Set `enableSet: true` or `enableRemove: true` only on a narrowly scoped
+administrative instance. `setSecret(...)` writes `{ data: { value } }` to the
+KV v2 data path and therefore creates a new provider-managed version.
+`removeSecret(...)` deletes the KV v2 metadata path; it is not a soft delete of
+only the latest version, and a missing path is treated as already removed.
+Prefer Vault-owned rotation/version workflows when recovery, retention, or
+undelete matters.
+
 Use short-lived tokens and a policy limited to the application's paths. Verify TLS, mount version, token renewal behavior, and denied-path handling before production. An expired token must fail visibly so operators can renew identity; do not fall back to a local secret map.
 
 Next: [chapter overview](/handbook/framework/configure-applications/secret-stores/).

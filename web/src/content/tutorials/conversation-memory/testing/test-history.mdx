@@ -1,0 +1,77 @@
+---
+title: Test history, isolation, and deletion
+description: Verify model context, identity-scoped sessions, retention, and clear behavior without a real provider.
+order: 224
+kind: lesson
+status: draft
+---
+
+Use a strict `FakeModelProvider` and in-memory Harness storage for the fast
+suite. Run two turns in one session and inspect the second provider request.
+
+```ts title="src/harness/support/supportHarness.test.ts"
+const provider = new FakeModelProvider({ strict: true })
+provider.enqueueObject({
+	object: { answer: 'A transfer can remain pending for two business days.' },
+	usage,
+	finishReason: 'stop',
+})
+provider.enqueueObject({
+	object: { answer: 'The same transfer is still within that window.' },
+	usage,
+	finishReason: 'stop',
+})
+
+const runtime = await supportHarness.getInstance({
+	models: { primary: { provider, model: 'fake-support' } },
+	storage: inMemoryHarnessStorage(),
+})
+
+try {
+	const first = await runtime.getSession('support:tenant-example:principal-alex:case-1', {
+		identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+	})
+	await first.agents.answer_support_question.run({
+		conversationId: 'case-1',
+		question: 'How long can it stay pending?',
+	})
+	await first.agents.answer_support_question.run({
+		conversationId: 'case-1',
+		question: 'What about the same transfer?',
+	})
+
+	const secondRequest = provider.requests[1]
+	expect('messages' in secondRequest ? secondRequest.messages : []).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({ role: 'assistant', content: expect.stringContaining('two business days') }),
+		]),
+	)
+	expect(await first.history.list()).toHaveLength(4)
+} finally {
+	await runtime.shutdown()
+}
+```
+
+Open a second session and prove its request does not contain the first answer.
+Then call `session.clearHistory()` and verify `session.history.list()` is empty.
+The retained command tests also prove that both invocation and deletion derive
+the storage id from `context.message.tenantId` and `principalId`.
+
+The retained suite sends nine complete turns through the configured
+`maxTurns: 8` policy and proves that only the newest eight user/assistant pairs
+remain. Before lowering `maxBytes`, also test that the newest complete turn
+fits and that trimming never splits a tool call from its tool result. Test your
+production storage adapter with the Harness storage contract suite before
+using it for shared multi-instance traffic.
+
+Run the complete local gate.
+
+```bash title="Verify the conversation-history chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained snapshot passes two test files with five tests. It remains a draft
+until the published PURISTA v4 and Harness v3 packages can be installed into a
+fresh consumer directory and replayed without workspace links.

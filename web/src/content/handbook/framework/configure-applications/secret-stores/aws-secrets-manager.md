@@ -30,6 +30,16 @@ const service = await incidentV1Service.getInstance(eventBridge, { secretStore }
 | [`new AWSSecretStore(options)`](/handbook/api/classes/_purista_aws-secret-store.AWSSecretStore/) | `client` is required AWS SDK `SecretsManagerClient` configuration, commonly `{ region }`. This adapter enables the secret-store cache by default; use `enableCache: false` for a fresh backend read or `cacheTtl` (milliseconds) to bound reuse. | Credentials resolve through AWS SDK configuration and the runtime role. Reads occur at handler execution; a missing secret returns `undefined`, while other SDK failures become an error. |
 | [`serviceBuilder.getInstance(eventBridge, { secretStore })`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance) | Supplies the selected store to the service instance. | This is the step that replaces Core's local default for `context.secrets`. |
 
+### Mutation semantics
+
+Remote mutation is disabled unless the store is constructed with
+`enableSet: true` or `enableRemove: true`. `setSecret(...)` updates an existing
+secret and creates it when AWS reports it missing. `removeSecret(...)` sends
+`ForceDeleteWithoutRecovery: true`, so it deliberately bypasses the normal AWS
+recovery window. Grant these operations only to a dedicated administrative
+process after reviewing retry and rollback behavior; normal application
+instances should read secrets rotated by the platform.
+
 Create the secret and an IAM policy limited to the exact secret ARN/path before deployment. Verify a non-production secret read using the workload role, then inspect CloudTrail and access-denied errors rather than logging the resolved value. Rotate through Secrets Manager and restart/refresh the application according to its secret-resolution lifecycle.
 
 Next: [chapter overview](/handbook/framework/configure-applications/secret-stores/).

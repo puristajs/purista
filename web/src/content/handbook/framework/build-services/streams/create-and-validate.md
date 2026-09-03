@@ -22,12 +22,20 @@ credentials, or unredacted personal data.
 ## Define the public contracts
 
 ```ts title="src/service/document/v1/stream/analyzeDocument/analyzeDocumentStreamBuilder.ts"
+import { documentV1ServiceBuilder } from '../../documentV1ServiceBuilder.js'
+import {
+  documentV1AnalyzeDocumentChunkPayloadSchema,
+  documentV1AnalyzeDocumentFinalPayloadSchema,
+  documentV1AnalyzeDocumentInputParameterSchema,
+  documentV1AnalyzeDocumentInputPayloadSchema,
+} from './schema.js'
+
 export const analyzeDocumentStreamBuilder = documentV1ServiceBuilder
   .getStreamBuilder('analyzeDocument', 'Stream document analysis progress')
-  .addPayloadSchema(analyzeDocumentPayloadSchema)
-  .addParameterSchema(analyzeDocumentParameterSchema)
-  .addChunkSchema(progressChunkSchema)
-  .addFinalSchema(completedDocumentSchema)
+  .addPayloadSchema(documentV1AnalyzeDocumentInputPayloadSchema)
+  .addParameterSchema(documentV1AnalyzeDocumentInputParameterSchema)
+  .addChunkSchema(documentV1AnalyzeDocumentChunkPayloadSchema)
+  .addFinalSchema(documentV1AnalyzeDocumentFinalPayloadSchema)
   .setStreamFunction(async function (_context, payload, _parameter, writer) {
     await writer.write({ stage: 'extracting', progress: 25 })
     if (writer.cancelled) return
@@ -52,6 +60,21 @@ writer.
 | [`setBeforeGuardHooks(hooks)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setbeforeguardhooks) | Named functions | Merges hooks and runs them in parallel before the handler. |
 | [`setAfterGuardHooks(hooks)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setafterguardhooks) | Named functions | Merges hooks and runs them in parallel after the writer closes and any declared final schema validates. With aggregation disabled, an implicit close can pass `undefined`; do not assume this hook always receives a business final value. |
 | [`setStreamFunction(fn)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setstreamfunction) | Service-bound non-arrow handler | Installs the required implementation. |
+
+[`getStreamFunction()`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#getstreamfunction)
+returns that raw handler. Unlike command and subscription builders, a stream
+builder has no validating wrapper or `getStreamFunctionPlain()` pair. Chunk and
+final validation live in the runtime writer, so a direct call to
+`getStreamFunction()` does not prove either contract.
+
+The remaining public methods have focused owners:
+
+| Capability | Methods | Guide |
+| --- | --- | --- |
+| Completion | `enableChunkAggregation`, `setFinalEventName` | [Write chunks and complete the stream](/handbook/framework/build-services/streams/write-chunks-and-complete/) |
+| Dependencies | `canInvoke`, `canConsumeStream`, `canEnqueue`, `canEmit` | [Invoke, enqueue, emit, and consume](/handbook/framework/build-services/streams/invoke-enqueue-emit-and-consume/) |
+| HTTP/OpenAPI | `exposeAsHttpStreamEndpoint`, `setHttpStreamingMode`, `setHttpStreamProtocol`, `setHttpResponseHeaders`, `makeEndpointPublic`, `enableHttpSecurity`, `setOpenApiSummary`, `addOpenApiTags`, `setOpenApiOperationId`, `addOpenApiErrorStatusCodes`, `addQueryParameters` | [Expose a stream](/handbook/framework/build-services/streams/expose-a-stream/) |
+| Inspection/evolution | [`getBeforeGuardHook(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#getbeforeguardhook), [`getAfterGuardHook(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#getafterguardhook), [`markAsDeprecated()`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#markasdeprecated), [`getDefinition()`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#getdefinition) | Retrieve one hook for a focused test, publish deprecation metadata, or materialize the complete definition for service registration. None starts a stream. |
 
 The payload/parameter schemas do not currently validate inbound values in
 `Service.executeStream` or Hono before guards and the handler. They remain a

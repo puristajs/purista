@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -51,6 +51,23 @@ describe('createPuristaCliEngine', () => {
 		expect(result.ok).toBe(true)
 		expect(result.command).toBe('add-service')
 		expect(result.createdFiles.length + result.updatedFiles.length).toBeGreaterThan(0)
+	})
+
+	it('accepts the CLI service-version spelling when adding another service version', async () => {
+		createMinimalProject()
+		const engine = createPuristaCliEngine({
+			cwd: TEST_DIR,
+			mode: 'non-interactive',
+		})
+
+		const result = await engine.runPuristaCommand('add-service', {
+			name: 'user',
+			description: 'User service',
+			serviceVersion: '2',
+		})
+
+		expect(result.ok).toBe(true)
+		expect(existsSync(join(TEST_DIR, 'src', 'service', 'user', 'v2', 'userV2Service.ts'))).toBe(true)
 	})
 
 	it('fails fast when a non-interactive required value is missing', async () => {

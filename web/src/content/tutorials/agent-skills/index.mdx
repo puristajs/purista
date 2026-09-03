@@ -1,0 +1,24 @@
+---
+title: Load agent Skills
+description: Mount reviewed procedures into a Harness agent without turning their content into authority or executable capability.
+order: 240
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches Harness Skills: version-controlled directories that contain
+procedures, references, and optional assets for an agent.
+
+A Skill is not a PURISTA command and it grants no business permission. Harness
+mounts its files into the configured sandbox, adds a compact catalog to the
+agent instructions, and lets the model read a relevant `SKILL.md`. The agent
+still receives only the tools that the application explicitly allows.
+
+1. [Create a versioned Skill](./build/create-skill/)
+2. [Bind the Skill to an agent](./build/bind-skill/)
+3. [Treat Skill content as untrusted data](./build/secure-content/)
+4. [Test mounting and failure behavior](./testing/test-skills/)
+
+The retained project lives in `examples/banking/chapters/agent-skills` and can
+run its complete verification suite without model credentials.

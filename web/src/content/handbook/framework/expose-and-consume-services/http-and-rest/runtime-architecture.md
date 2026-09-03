@@ -1,7 +1,7 @@
 ---
 title: HTTP runtime architecture and startup
 description: Choose direct definition registration for a monolith or event-driven endpoint discovery for a separately deployed Hono process.
-order: 415
+order: 411
 ---
 
 Hono is a PURISTA service that owns the HTTP listener-facing application. It
@@ -55,6 +55,12 @@ the service registers it again (for example, after a restart); a request then
 returns `404`, not a safe proxy retry. Treat the Hono listener as ready only
 after `await honoService.start()` has completed. Each Hono replica receives the
 announcement and maintains its own route table.
+
+An announcement is initial route discovery, not a live route-update protocol.
+Re-announcing the same service target is ignored. If that target's method,
+path, security metadata, or OpenAPI contract changes, restart Hono with a fresh
+route table after the new service definition is deployed. A different target
+claiming an existing method and path is rejected as a conflict.
 
 Do not call `registerService(...)` in this deployment. It requires the actual
 in-memory `Service` instances and cannot discover remote instances.

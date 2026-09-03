@@ -1,0 +1,107 @@
+---
+title: Return a typed waiting result
+description: Start the durable run from a guarded command and map its external wait to application state.
+order: 252
+kind: lesson
+status: draft
+---
+
+Generate the command that creates a review request.
+
+```bash title="Generate the request command" replay="project"
+npm run add:command -- request-card-freeze --service support --service-version 1 --description "Create a durable human review request" --non-interactive
+```
+
+Define service resources for the application database and the business policy.
+The example uses an in-memory store only in its test; a deployed application
+binds a transactional database implementation through `getInstance`.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts"
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support review requests and support automation',
+})
+	.defineResource<'supportReviewStore', SupportReviewStore>()
+	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
+	.defineResource<'reviewWaitSignal', ReviewWaitSignal>()
+```
+
+Create stable workflow identities from the immutable request identity. A retry
+must select the same wait, session, and run. Include the action content in a
+digest so the store can reject reuse of a request id for a different action.
+
+```ts title="src/service/support/v1/reviewIdentity.ts"
+const actionDigest = createHash('sha256')
+	.update(JSON.stringify([input.tenantId, input.requestId, input.cardId, input.reason, 'support-card-freeze-v1']))
+	.digest('hex')
+const identityDigest = createHash('sha256')
+	.update(`${input.tenantId}:${input.requestId}:support-card-freeze-v1`)
+	.digest('hex')
+const workflowInput: ReviewWorkflowInput = {
+	waitId: `support-review-wait:${identityDigest}`,
+	deadline,
+	actionDigest,
+	definitionVersion: 'support-card-freeze-v1',
+}
+return {
+	actionDigest,
+	sessionId: `support-review:${identityDigest}`,
+	runId: `support-review-run:${identityDigest}`,
+	workflowInput,
+}
+```
+
+Declare the workflow address, protect the HTTP endpoint, and validate access
+in a business guard. Authentication supplies trusted identity; the guard asks
+whether that principal may request this card action.
+
+```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts"
+export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
+	.addPayloadSchema(requestCardFreezeInputSchema)
+	.addOutputSchema(reviewRequestResultSchema)
+	.canInvokeWorkflow(
+		'Support',
+		'1',
+		'review_support_action',
+		reviewSupportActionHarness.contracts.workflows.review_support_action,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'support/card-freeze-reviews')
+	.setBeforeGuardHooks({
+		callerMayRequest: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: payload.cardId }))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This card action is not allowed')
+			}
+		},
+	})
+```
+
+Persist the review before invoking the workflow. Then map the external-wait
+interrupt to the command output.
+
+```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.ts"
+const outcome = await context.workflow.Support['1'].review_support_action.run(record.workflowInput, {
+	sessionId: record.sessionId,
+	durable: { runId: record.runId },
+})
+
+if (outcome.status === 'interrupted' && outcome.interrupt.type === 'external-wait') {
+	return {
+		status: 'waiting',
+		requestId: record.requestId,
+		waitId: outcome.interrupt.id,
+		runId: outcome.runId,
+		deadline: outcome.interrupt.deadline,
+	}
+}
+```
+
+The UI receives an ordinary successful response with `status: 'waiting'`. It
+can show the pending action, deadline, and review controls without interpreting
+an exception. Continue with [Authorize, signal, and resume](../approve-resume/).

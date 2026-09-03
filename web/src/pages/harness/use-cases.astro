@@ -30,6 +30,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="rag" />
     </div>
+    <div slot="actions" class="mt-8">
+      <a class="btn btn-ghost" href="/handbook/harness/configure-the-runtime/grounded-retrieval/">Build grounded Q&amp;A <span aria-hidden="true">→</span></a>
+    </div>
   </HarnessStory>
 
   <HarnessStory
@@ -46,6 +49,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
   >
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="review" />
+    </div>
+    <div slot="actions" class="mt-8">
+      <a class="btn btn-ghost" href="/handbook/harness/orchestrate-work/human-review/">Build a human review workflow <span aria-hidden="true">→</span></a>
     </div>
   </HarnessStory>
 
@@ -65,7 +71,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <HarnessFlow variant="triage" />
     </div>
     <div slot="actions" class="mt-8">
-      <a class="btn btn-ghost" href="/tutorials/">Explore PURISTA Framework tutorials <span aria-hidden="true">→</span></a>
+      <a class="btn btn-ghost" href="/handbook/harness/build-agents/inputs-and-structured-outputs/">Build typed classification <span aria-hidden="true">→</span></a>
     </div>
   </HarnessStory>
 
@@ -84,6 +90,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="parallel" />
     </div>
+    <div slot="actions" class="mt-8">
+      <a class="btn btn-ghost" href="/handbook/harness/orchestrate-work/workflows/">Build bounded parallel agents <span aria-hidden="true">→</span></a>
+    </div>
   </HarnessStory>
 
   <HarnessStory
@@ -101,6 +110,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="reasoning" />
     </div>
+    <div slot="actions" class="mt-8">
+      <a class="btn btn-ghost" href="/handbook/harness/orchestrate-work/durable-workflows/">Build a multi-step workflow <span aria-hidden="true">→</span></a>
+    </div>
   </HarnessStory>
 
   <HarnessStory
@@ -117,6 +129,10 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
   >
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="wiki" />
+    </div>
+    <div slot="actions" class="mt-8 flex flex-wrap gap-3">
+      <a class="btn btn-ghost" href="/tutorials/retrieval-ingestion/">Build the ingestion pipeline <span aria-hidden="true">→</span></a>
+      <a class="btn btn-ghost" href="/handbook/harness/configure-the-runtime/grounded-retrieval/">Add grounded answers <span aria-hidden="true">→</span></a>
     </div>
   </HarnessStory>
 

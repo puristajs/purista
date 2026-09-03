@@ -1,7 +1,7 @@
 ---
 title: Configure a service
 description: Validate static service-owned settings at creation and startup, while keeping secrets, tenant identity, and mutable runtime data in their correct boundaries.
-order: 314
+order: 315
 ---
 
 Service configuration is the validated setting set for one running service

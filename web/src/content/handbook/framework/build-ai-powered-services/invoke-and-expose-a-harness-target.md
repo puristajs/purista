@@ -22,6 +22,9 @@ const triageCommandBuilder = supportV1ServiceBuilder
 [`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
 declares the address and adds a typed aggregate and streaming client to this
 command's handler context.
+[`canUseHarnessModel(alias, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#canuseharnessmodel)
+is the separate choice for deterministic command code that needs one mounted
+model handle without an agent invocation; it does not publish a target address.
 [`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
 creates that caller-owned command contract.
 
@@ -77,6 +80,10 @@ Here,
 [`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
 adds the same typed EventBridge client to the stream handler. It does not
 bypass the mounted target's schemas or business guards.
+The returned execution's
+[`cancel(reason?)`](/handbook/api/interfaces/_purista_core.HarnessExecutionStream/#cancel)
+requests cancellation through the EventBridge stream session; it is not a
+rollback guarantee for provider or tool side effects that already started.
 
 The adapter owns only AI SDK UI Message Stream v1 encoding. PURISTA stream and Harness execution
 contracts stay provider-neutral, so another protocol can be added later as a

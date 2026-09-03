@@ -17,11 +17,9 @@ ephemeral in-memory memory. Install it in the application, before importing it:
 npm install @purista/harness-memory-sqlite
 ```
 
-Create the Harness at the composition root. This complete example uses a model
-that is deliberately never called, so you can verify persistence without model
-credentials. Replace `noop` with the model configuration from [configure the
-runtime](/handbook/harness/configure-the-runtime/) when an agent also needs to
-run.
+Create the Harness at the composition root. This memory-only example needs no
+model credentials. Add the model configuration from [configure the
+runtime](/handbook/harness/configure-the-runtime/) when an agent also needs to run.
 
 ```ts title="src/harness/claimsReview.ts"
 import { defineHarness, inMemorySandbox } from '@purista/harness'
@@ -30,9 +28,6 @@ import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
 export const claimsReviewHarness = defineHarness({ name: 'claims-review' })
 	.sandbox(inMemorySandbox())
 	.memory(sqliteMemoryEngine({ file: '.purista/claims-memory.sqlite' }))
-	.models({
-		noop: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: [] },
-	})
 	.build()
 ```
 
@@ -42,8 +37,7 @@ export const claimsReviewHarness = defineHarness({ name: 'claims-review' })
 | [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Explicitly selects the files-and-bounded-search adapter returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/). | The factory has no options and provides `sandbox.fs` plus `sandbox.text_search`; it is not where this SQLite file is persisted. The memory engine owns the SQLite path, while this sandbox remains ephemeral and cannot execute commands or provide tenant isolation. |
 | [`sqliteMemoryEngine(options)`](/handbook/api/functions/_purista_harness-memory-sqlite.sqliteMemoryEngine/) | Opens one SQLite-backed memory engine. [`file`](/handbook/api/interfaces/_purista_harness-memory-sqlite.SqliteMemoryEngineOptions/#file) is required; its parent directory is created when the engine opens. | Use one durable, deployment-controlled file for a single-host process. An empty path, unavailable built-in SQLite driver, missing FTS5, or incompatible existing schema fails construction; the engine never falls back to in-memory memory. |
 | [`.memory(engine)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory) | Registers the one engine used by every session memory facade. | The direct engine form has no model dependency. A second `.memory(...)` call is invalid. Choose it before `.build()`; changing it while sessions are running is not a migration mechanism. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Supplies the non-empty registry that every built Harness requires. | `noop` has no capabilities and no agent consumes it, so this persistence check makes no provider call. Add a real alias only when an agent or embedding configuration needs it. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the full composition and returns the session API. | It fails for a missing model registry or invalid shared definitions; it does not open a model connection merely because `noop` is registered. |
+| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the full composition and returns the session API. | A direct memory engine has no model dependency. Add an alias only when an agent or embedding configuration needs it. |
 | `vector: true` | Opts into the overload that advertises vector and hybrid search capabilities. | Only enable it after installing the pinned `sqlite-vec` peer and verifying the Node/Bun extension policy. Without it, vector writes/searches fail explicitly rather than degrading to text search. |
 
 [`memory(engine)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory)
@@ -51,8 +45,8 @@ registers one memory engine for the Harness; a second call fails configuration.
 The `file` option selects the application-owned SQLite path. It is relative to
 the process working directory in this example, so use an absolute,
 deployment-controlled path when the working directory is not stable. The
-persistence verification has no tool or agent consumer. It includes the inert
-`noop` model alias only because `.build()` requires a non-empty model registry.
+persistence verification has no tool or agent consumer, so it does not register
+an unused model alias.
 
 The adapter uses the SQLite implementation built into supported Node.js and
 Bun runtimes. Key/value records, lists, TTL, and FTS5 text search need no

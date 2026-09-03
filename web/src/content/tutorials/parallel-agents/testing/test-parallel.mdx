@@ -1,0 +1,52 @@
+---
+title: Test both specialists and the denied path
+description: Script each model alias independently and prove authorization runs before fan-out.
+order: 264
+kind: lesson
+status: draft
+---
+
+Bind a separate strict `FakeModelProvider` to each model alias. This avoids a
+timing-dependent shared response queue and makes an unexpected specialist call
+fail immediately.
+
+```ts title="src/parallelAgents.integration.test.ts"
+const riskProvider = new FakeModelProvider({ strict: true })
+const responseProvider = new FakeModelProvider({ strict: true })
+
+riskProvider.enqueueObject({
+	object: { level: 'high', evidence: ['The customer reports a missing card.'] },
+	usage,
+	finishReason: 'stop',
+})
+responseProvider.enqueueObject({
+	object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+	usage,
+	finishReason: 'stop',
+})
+```
+
+Start the mounted Support service on a real `DefaultEventBridge`, invoke the
+command with identity, and assert the complete merged output. Also assert each
+provider received exactly one request and call `assertExhausted()`.
+
+The second test returns `false` from `supportCasePolicy.canAnalyze`. It expects
+a handled `403` and asserts both provider request arrays remain empty. That
+proves business authorization occurs before either parallel model effect.
+
+```bash title="Verify the parallel-agent chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained source passes both tests. This chapter remains a draft until the
+released PURISTA v4 and Harness v3 packages pass a clean registry replay.
+
+Copy the environment template, add the provider key, and start the mounted
+workflow service.
+
+```bash title="Run the parallel-agent service" replay="project"
+cp .env.example .env
+npm start
+```

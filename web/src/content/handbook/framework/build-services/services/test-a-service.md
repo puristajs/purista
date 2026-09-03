@@ -1,7 +1,7 @@
 ---
 title: Test a service
 description: Validate the assembled service contract, then prove handler logic, deterministic runtime behavior, and real adapter behavior at separate boundaries.
-order: 317
+order: 318
 ---
 
 Test the aggregate before testing a handler. [`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup) resolves the
@@ -29,6 +29,21 @@ describe('Invoice v1 service', () => {
 [`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup) is not a non-mutating inspection: it resolves and caches
 definitions. Build a fresh builder for a test shape that needs to add different
 definitions after an aggregate test.
+
+The method returns `true` or throws an `AssertionError`; it never returns
+`false`. Its actionable messages are:
+
+- `duplicate command name <name>`;
+- `response event "<event>" in <command> is used in other command`;
+- `duplicate subscription name <name>`;
+- `duplicate stream name <name>`;
+- `duplicate queue name <name>`;
+- `queue worker <worker> references unknown queue <queue>`; and
+- `duplicate queue worker name <worker>`.
+
+It does not validate schedule semantics, attached Harness targets, or the
+generated event-to-queue subscriptions. Prove those at instance/start or the
+specific adapter/runtime boundary.
 
 Use a narrow fake resource for handler tests. Test a custom service class's
 start/destroy behavior separately, and add adapter integration tests for the

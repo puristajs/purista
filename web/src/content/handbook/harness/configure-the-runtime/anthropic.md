@@ -68,6 +68,12 @@ export const harness = defineHarness({ name: 'support' })
 	.build()
 ```
 
+This uses [`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/),
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
+and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
+The registered alias owns these defaults; individual agents still declare
+which alias and capabilities they require.
+
 | Harness field | Anthropic Messages field | Compatibility guidance |
 | --- | --- | --- |
 | `maxTokens` | `max_tokens` | Required by the API. The adapter default is `1024`, but use an explicit, tested limit for production workloads. |

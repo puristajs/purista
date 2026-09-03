@@ -12,8 +12,13 @@ the scheduler platform.
 export const billingV1Service = billingV1ServiceBuilder
   .addScheduleDefinition(monthlyBillingSchedule)
   .bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
-    idempotencyMode: 'strict',
-    idempotencyKey: 'correlationId',
+    // DefaultQueueBridge does not enforce keys. Upgrade this to `strict` only
+    // with the Redis or NATS QueueBridge.
+    idempotencyMode: 'advisory',
+    idempotencyKey: message => {
+      const event = message.payload as { cycleId: string }
+      return `monthly-cycle:${event.cycleId}`
+    },
     mapPayload: event => event,
   })
 ```
@@ -33,12 +38,19 @@ strict. `idempotencyKey` accepts `messageId`, `correlationId`, `eventField`,
 `none`, or a function. `mapPayload`, `mapParameter`, and `onEnqueueFailure`
 make the queued contract and recovery explicit.
 
+The callback inputs are intentionally different: `mapPayload` and
+`mapParameter` receive the event payload, while a custom `idempotencyKey`
+function receives the full EventBridge message and must read
+`message.payload`. The built-in `eventField` strategy reads only the literal
+`payload.id` property; use a function for every other business field.
+
 The schedule definition records payload and parameter schemas for export, but
 does not construct or validate scheduled input at runtime. The external trigger
 must emit a `billing.monthlyCycleDue` event that matches the application’s
 published contract. Use a custom key function only after the event shape is
 known and validated at the receiving boundary; `bindEventToQueue` currently
-receives the event as an untyped transport value.
+receives the event as an untyped transport value. Validate the scheduled event
+at the receiving boundary before relying on a field in mapping or idempotency.
 
 Keep the scheduled event payload and idempotency key safe: do not derive a key
 from raw headers, secrets, or sensitive payload fields. A bridge accepting one

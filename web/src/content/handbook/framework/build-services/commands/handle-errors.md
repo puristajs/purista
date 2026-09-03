@@ -27,10 +27,28 @@ The first command task shows the reviewed `404` branch beside the handler in
 Keep that mapping close to the domain decision. Do not catch a database or
 provider exception only to expose its message through `HandledError`.
 
+```ts title="src/service/invoice/v1/command/updateInvoice/assertInvoiceEditable.ts"
+import { HandledError, StatusCode } from '@purista/core'
+
+export const assertInvoiceEditable = (status: string) => {
+  if (status === 'paid') {
+    throw new HandledError(StatusCode.Conflict, 'A paid invoice cannot be changed', {
+      rule: 'invoice-is-paid',
+    })
+  }
+}
+```
+
+A handled command response carries `{ status, message, data?, traceId }` and is
+marked as handled on the EventBridge envelope. Keep `data` stable and safe for
+the caller; do not include provider errors, database records, credentials, or
+stacks.
+
 ## Know what the caller receives
 
 | Failure stage | Command error payload | Later stages skipped |
 | --- | --- | --- |
+| No registered `serviceTarget` | `501 Not Implemented` and a trace ID. | Every command lifecycle stage; no handler was resolved. |
 | Raw parameter or payload schema | Handled `400`, validation issues in `data`, and the trace ID. | Input transform, domain validation, guards, handler, and every output stage. |
 | Input transform | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Domain validation, guards, handler, and every output stage. |
 | Domain payload or parameter schema | Handled `400`, validation issues in `data`, and the trace ID. | Guards, handler, and every output stage. |
@@ -49,12 +67,55 @@ The [complete command lifecycle](/handbook/framework/build-services/commands/#fo
 shows these stages in execution order. The builder chain records the
 configuration; it does not change that order.
 
+### Failures from declared outbound capabilities
+
+| Outbound failure | Internal classification | Caller-visible result when uncaught |
+| --- | --- | --- |
+| Custom event payload fails its declared schema, or no event schema exists | `UnhandledError(500)` | Generic `500`; event-schema details remain internal. |
+| Invoked payload/parameter fails the caller-owned downstream schema | `UnhandledError` with internal `400` classification | Generic `500`, because this handler constructed invalid downstream input. |
+| Invoked response fails the caller-owned output schema | `UnhandledError(500)` | Generic `500`. |
+| Downstream command returns `HandledError` | Reconstructed `HandledError` | The downstream status/message/data pass through unless this handler catches and maps them. |
+| Queue is not declared by the handler / not registered by the service | `UnhandledError` with internal `403` / `404` | Generic `500`; fix service composition. |
+| Consumed stream chunk/final fails its configured schema | `UnhandledError(500)` during iteration | Generic `500` if the command does not catch and safely map it. |
+
 ## Keep recovery at the owning boundary
 
 Commands are request-response operations. [`adviceAutoacknowledgeMessages(acknowledge = true)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#adviceautoacknowledgemessages)
 supplies delivery advice to the EventBridge; its default is `true`. Setting it
 to `false` does not create command-local retry or exactly-once delivery—provider
 support and response delivery decide whether redelivery is possible.
+
+`adviceAutoacknowledgeMessages(false)` requires an EventBridge whose
+`manualAckSupported` capability is true. `DefaultEventBridge`, MQTT, Dapr, and
+NATS without JetStream cannot honor it; strict command registration throws
+`501` with `command "<name>" requires manual acknowledgement, but <bridge> does
+not support it`. AMQP supports manual acknowledgement, and NATS enables it after
+JetStream starts successfully.
+
+## Verify the error envelope
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.runtime.test.ts"
+import { createCommandTestHarness, isCommandErrorResponse, StatusCode } from '@purista/core'
+
+const harness = await createCommandTestHarness(invoiceV1ServiceBuilder, updateInvoiceCommandBuilder, { resources })
+
+try {
+  const { message, result } = await harness.run({ payload: paidInvoiceUpdate, parameter })
+  expect(result).toBeUndefined()
+  if (!isCommandErrorResponse(message)) throw new Error('expected command error response')
+  expect(message.isHandledError).toBe(true)
+  expect(message.payload).toMatchObject({
+    status: StatusCode.Conflict,
+    message: 'A paid invoice cannot be changed',
+  })
+} finally {
+  await harness.destroy()
+}
+```
+
+This deterministic test proves command classification and serialization. Test
+the Hono problem-details projection and the selected EventBridge separately at
+their actual transport boundaries.
 
 For a business conflict, return the known result now. For durable retry, dead-lettering, or backoff, move the work to a [queue and worker](/handbook/framework/build-services/queues-and-workers/) or use a [subscription delivery policy](/handbook/framework/build-services/subscriptions/). Make an external side effect idempotent before allowing any retry path.
 

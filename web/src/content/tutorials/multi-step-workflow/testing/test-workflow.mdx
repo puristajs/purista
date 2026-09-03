@@ -1,0 +1,63 @@
+---
+title: Test failure, retry, and checkpoint replay
+description: Force a stage failure, repeat the command, and prove the completed stage does not run twice.
+order: 274
+kind: lesson
+status: draft
+---
+
+Use separate strict fake providers and `InMemoryHarnessStorage`. Make the first
+two planning calls reject with a retriable `ModelError`. The first command
+performs classification once and makes two planning attempts because of the
+bounded step retry policy.
+
+```ts title="src/multiStepWorkflow.integration.test.ts"
+await expect(eventBridge.invoke(message())).rejects.toBeDefined()
+expect(classificationProvider.requests).toHaveLength(1)
+expect(resolutionObject).toHaveBeenCalledTimes(2)
+```
+
+Queue a planning response and invoke the same PURISTA command again. The stable
+tenant-scoped session and run ids select the recoverable durable run. Harness
+replays `classify-case-v1` from its checkpoint and runs only the unfinished
+planning step.
+
+```ts title="src/multiStepWorkflow.integration.test.ts"
+resolutionProvider.enqueueObject({
+	object: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+	usage,
+	finishReason: 'stop',
+})
+
+await expect(eventBridge.invoke(message())).resolves.toEqual({
+	caseId: 'case-1',
+	classification: { category: 'card', urgency: 'urgent' },
+	plan: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+})
+expect(classificationProvider.requests).toHaveLength(1)
+expect(resolutionObject).toHaveBeenCalledTimes(3)
+```
+
+The retained suite also proves that changed input cannot reuse the same durable
+run, invalid structured model output is not retried, and a denied caller is
+rejected before either model runs. For production, repeat the recovery case
+across a process restart with the persistent storage adapter used by your
+deployment.
+
+```bash title="Verify the multi-step workflow chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained test passes without an API key. This chapter remains a draft
+until the released PURISTA v4 and Harness v3 packages pass a clean registry
+replay.
+
+Copy the environment template, add the provider key, and start the composition
+that provides durable storage and both model aliases.
+
+```bash title="Run the multi-step workflow service" replay="project"
+cp .env.example .env
+npm start
+```

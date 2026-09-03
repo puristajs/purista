@@ -1,0 +1,63 @@
+---
+title: Test the complete tool loop
+description: Script write, process, and read calls against a private temporary sandbox without Docker.
+order: 284
+kind: lesson
+status: draft
+---
+
+Bind `localDirectorySandbox` in the test with an explicit `python3` allowlist.
+This exercises the same built-in tool loop without requiring a Docker daemon.
+The temporary root is private to the test and removed afterward.
+
+Script four strict model rounds:
+
+1. call `write` for `/workspace/transactions.csv`;
+2. call `bash` with the allowed `python3` command;
+3. call `read` for `/workspace/summary.json`;
+4. return the final structured analysis.
+
+```ts title="src/sandboxAnalysis.integration.test.ts"
+sandbox: localDirectorySandbox({
+	root,
+	exec: { allowCommands: ['python3'], timeoutMs: 5_000 },
+})
+```
+
+Invoke the protected command over `DefaultEventBridge`, assert the structured
+output, and inspect the first provider request. The available model tools must
+be exactly `bash`, `read`, and `write`.
+
+```ts title="src/sandboxAnalysis.integration.test.ts"
+const firstRequest = provider.requests[0]
+expect(
+	firstRequest && 'tools' in firstRequest
+		? firstRequest.tools?.map(tool => tool.name).sort()
+		: [],
+).toEqual(['bash', 'read', 'write'])
+provider.assertExhausted()
+```
+
+Add negative tests for a denied business guard, a command outside the
+allowlist, a write outside `/workspace`, timeout, cancellation, and output
+truncation. Adapter package integration tests should separately cover the real
+Docker lifecycle and image contract.
+
+```bash title="Verify the sandbox chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained test passes without Docker or an API key. This chapter remains a
+draft until the released PURISTA v4 and Harness v3 packages pass a clean
+registry replay.
+
+After building the pinned sandbox image in the configuration lesson, copy the
+environment template, set its immutable image id, and start the Analysis
+service.
+
+```bash title="Run the sandbox analysis service" replay="project"
+cp .env.example .env
+npm start
+```

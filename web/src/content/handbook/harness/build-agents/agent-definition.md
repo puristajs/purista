@@ -12,31 +12,34 @@ the model classifies a case but cannot read files, call tools, or take action.
 
 ```ts title="src/harness/classifyCase.ts"
 import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const caseInput = z.object({ summary: z.string().min(1) })
 const caseOutput = z.object({ priority: z.enum(['low', 'normal', 'high']) })
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the classifier.')
 
 export const classifyCaseHarness = defineHarness({ name: 'support-classification' })
 	.sandbox(inMemorySandbox())
 	.models({
-		assistant: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
+		assistant: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			capabilities: ['object'],
+		},
 	})
 	.agent('classify_case', {
 		model: 'assistant',
 		input: caseInput,
 		output: caseOutput,
-		instructions: 'Classify the support case by urgency only.',
-		handler: async ({ input }) => ({
-			priority: input.summary.includes('cannot sign in') ? 'high' : 'normal',
-		}),
+		instructions: 'Classify the support case as low, normal, or high priority.',
 	})
 	.build()
 ```
 
-The deterministic handler makes this exact example runnable without credentials.
-Replace it with a configured live provider-backed agent before using model
-reasoning. The alias must declare the capabilities an agent uses. An agent can
+This default-loop agent uses the configured provider to create the structured
+classification. The alias must declare the capabilities an agent uses. An agent can
 use TypeScript tools, built-ins, skills, or MCP tools only after those are
 explicitly configured; each adds a different trust boundary.
 
@@ -46,7 +49,7 @@ explicitly configured; each adds a different trust boundary.
 | [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Explicitly binds the fixed files-and-bounded-search sandbox returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/). | The factory takes no options and exposes `sandbox.fs` plus `sandbox.text_search`; its session executor is unavailable. Passing it avoids environment-dependent auto-detection. This classifier has no tool authority, so do not mistake the sandbox for durable storage, command execution, or tenant isolation. |
 | [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | The `assistant` alias the agent may select. | Define models before agents so `model` is restricted to registered alias keys. |
 | [`.agent(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | The `classify_case` definition and session API. | The inline definition carries `caseInput` and `caseOutput` through the fluent chain; a separate cast would lose useful checking. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Runs composition validation and returns the session-facing Harness. | It requires a non-empty model registry and rejects unknown agent model/tool references and invalid policies before the first prompt. It does not invoke the model. |
+| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Runs composition validation and returns the session-facing Harness. | It rejects a default-loop agent whose selected alias is missing, along with unknown tool references and invalid policies, before the first prompt. It does not invoke the model. |
 
 ## Choose every agent field deliberately
 
@@ -71,9 +74,10 @@ identity-helper callback.
 
 | Agent field | Required/default | Runtime effect | Detailed guide |
 | --- | --- | --- | --- |
-| `model` | Required registered alias | Selects the provider-neutral alias used by the default loop and available to typed loop controls. The field is still required for a custom handler even though the handler decides whether to call a model. | [Models and capabilities](/handbook/harness/configure-the-runtime/configuration-and-model-settings/) |
+| `model` | Required for a default-loop agent; forbidden with `handler` | Selects the provider-neutral alias used by the built-in loop and typed loop controls. A custom handler chooses among `context.models` explicitly instead. | [Models and capabilities](/handbook/harness/configure-the-runtime/configuration-and-model-settings/) |
 | `input` | Optional; defaults to a string schema | Validates application input before instructions, handler, model, or tools receive it. | [Inputs and structured outputs](/handbook/harness/build-agents/inputs-and-structured-outputs/) |
 | `output` | Optional; defaults to a string schema | Validates the final candidate before the caller receives it. A default-loop output must also project to JSON Schema. | [Inputs and structured outputs](/handbook/harness/build-agents/inputs-and-structured-outputs/) |
+| `updates` | Optional; defaults to `none` | Allowlists portable `text-delta` or `object-snapshot` updates for `stream(...)`. It does not start a model stream by itself. | [Stream progress and cancel runs](/handbook/harness/build-agents/streaming-cancellation-and-timeouts/) |
 | `instructions` | Required string or synchronous callback | Defines the model-facing job for the default loop. A custom handler does not automatically execute this text. | [Instructions and context](/handbook/harness/build-agents/instructions-and-runtime-context/) |
 | `tools` | Optional; defaults to none | Allowlists registered TypeScript or MCP tool IDs for this agent. It cannot add unregistered tools. | [Create typed tools](/handbook/harness/add-capabilities/tools/) |
 | `builtinTools` | Optional; omission or `false` enables none | Allowlists `bash`, `read`, `write`, `edit`, `glob`, `grep`, or `list`. Skills require explicit `read`. | [Set tool permissions](/handbook/harness/secure-and-govern/tool-permissions/) |
@@ -104,4 +108,4 @@ needed.
 | --- | --- |
 | One model conversation, tool loop, schema-valid result | Sequencing, approval, retries around side effects, durable writes, queue delivery |
 
-Next: [instructions and runtime context](/handbook/harness/build-agents/instructions-and-runtime-context/).
+Next: [create a portable definition](/handbook/harness/build-agents/portable-definitions-and-host-bindings/).

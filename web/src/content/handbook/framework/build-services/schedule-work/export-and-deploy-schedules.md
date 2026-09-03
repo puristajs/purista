@@ -7,7 +7,12 @@ order: 363
 PURISTA has no default in-process production scheduler, but Core and the
 project-local CLI can export schedule contracts. The export is an artifact for
 your scheduler platform; it does not deploy a trigger or execute a schedule.
-There is no additional `@purista/*` scheduler package to install.
+There is no scheduler runtime package. Install the CLI that provides the
+`purista` executable:
+
+```bash title="Install the PURISTA CLI for schedule export"
+npm install --save-dev @purista/cli
+```
 
 ## Export the contract before deploying it
 
@@ -51,7 +56,7 @@ npm exec purista export kubernetes-cronjob \
 
 | Export behavior | What the generated CronJob does | What your deployment must still own |
 | --- | --- | --- |
-| Cron expression and timezone | Sets `spec.schedule` and `spec.timeZone`. | Use a Kubernetes-compatible cron expression. Interval and one-shot schedules cannot be exported as CronJobs. |
+| Cron expression and timezone | Sets `spec.schedule` and `spec.timeZone`. | Use a Kubernetes-compatible cron expression. One interval or one-shot schedule makes the entire CronJob export throw; split manifests or export those schedules for another platform. |
 | `allow`, `forbid`, `replace` | Maps to Kubernetes `Allow`, `Forbid`, `Replace`. | Verify the platform's overlap behavior matches the business effect. |
 | `enabledByDefault: false` | Sets `spec.suspend: true`. | Review and unsuspend the real CronJob deliberately. |
 | Missed runs, catch-up, jitter, idempotency key, provider hints | Copies the values into `purista.dev/*` annotations. | Implement and verify any required enforcement in the trigger or platform; annotations do not enforce it. |
@@ -60,6 +65,9 @@ npm exec purista export kubernetes-cronjob \
 [`exportKubernetesCronJobs(...)`](/handbook/api/functions/_purista_core.exportKubernetesCronJobs/)
 is a pure JSON generator. It never supplies the image, credentials, URL,
 service account, namespace, or target implementation.
+
+The export also aborts as a whole when any schedule has an unsupported target
+kind. It does not skip incompatible entries and continue with a partial set.
 
 ## Do not skip the platform enablement boundary
 

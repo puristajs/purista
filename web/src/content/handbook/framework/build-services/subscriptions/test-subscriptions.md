@@ -9,7 +9,7 @@ thing; none substitutes for the others.
 
 | Boundary | Proves | Does not prove |
 | --- | --- | --- |
-| Direct builder/handler test | Schema validation, before guards, handler logic, declared context, and normal/control result choices | Input/output transforms, after guards, result-event construction, or bridge delivery. |
+| Direct builder/handler test | Schema validation, before guards, handler logic, declared context, and the returned normal/control value | Input/output transforms, after guards, control-result conversion, result-event construction, or bridge delivery. |
 | Service runtime test | Framework lifecycle: transforms, after guards, result-event construction, handled errors, and control conversion | The deployed broker’s registration, retention, retry timing, or dead-letter implementation. |
 | Selected EventBridge integration | Real registration, routing, and the documented adapter behavior | Agent/provider/database correctness outside the configured scope. |
 
@@ -67,6 +67,12 @@ rejects unconfigured store, service, and queue calls. That is intentional: the
 test must declare the dependency it exercises rather than accidentally relying
 on an invented context.
 
+The helper returns `{ context, mock, stubs }`, with `context === mock`. Its
+stubs include declared `emit` events, nested `service` invocations, stream and
+Harness invocation proxies, `enqueue`, `scheduleAt`, state/config/secret access,
+spans, logger, metrics, and supplied resources. Only configure the stubs the
+test actually exercises.
+
 ## Cover the decision paths
 
 | Case | Deterministic assertion |
@@ -86,21 +92,60 @@ validation and guard setup. It does not run validation or hooks.
 | [`getSubscriptionFunction()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptionfunction) | Input/output validation and before guards plus the handler; no transforms, after guards, result event, registration, or bridge delivery. |
 | [`getSubscriptionFunctionPlain()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptionfunctionplain) | Raw handler only. |
 | [`getTransformInputFunction()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#gettransforminputfunction) and [`getTransformOutputFunction()`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#gettransformoutputfunction) | One configured transform function only; validate its input and output schemas in the test. Each returns `undefined` when that transform is not configured. |
-| [`getSubscriptionTransformContextMock({ message, resources?, sandbox? })`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptiontransformcontextmock) | A base transform context with message, stores, logger, metrics, traces, resources, and queue stubs. It has no declared `service`, `stream`, or `emit` capabilities; unconfigured store/queue calls reject. |
+| [`builder.getSubscriptionTransformContextMock({ message, resources?, sandbox? })`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#getsubscriptiontransformcontextmock) | A base transform context with message, stores, logger, metrics, traces, resources, and queue stubs. It has no declared `service`, `stream`, or `emit` capabilities; unconfigured store/queue calls reject. |
 
 ## Prove the runtime and adapter separately
 
-A service/runtime test should feed a synthetic message through the service and
-assert input/output transforms, after guards, `HandledError` completion,
+There is currently no `createSubscriptionTestHarness`. For the complete runtime
+boundary, create the application with `DefaultEventBridge`, start it, and send a
+synthetic message through the bridge:
+
+```ts title="Subscription runtime integration test"
+import { DefaultEventBridge, getCustomMessageMessageMock, initLogger } from '@purista/core'
+import { expect, test, vi } from 'vitest'
+import { accountingV1Service } from '../../accountingV1Service.js'
+
+test('routes one invoice event through the subscription runtime', async () => {
+  const logger = initLogger('fatal')
+  const eventBridge = new DefaultEventBridge({ logger })
+  const ledger = { recordInvoice: vi.fn().mockResolvedValue({ id: 'ledger-42' }) }
+  const service = await accountingV1Service.getInstance(eventBridge, {
+    logger,
+    resources: { ledger },
+  })
+
+  await eventBridge.start()
+  await service.start()
+  try {
+    await eventBridge.emitMessage(getCustomMessageMessageMock(
+      'billing.invoiceCreated',
+      { invoiceId: 'invoice-42', customerId: 'customer-42', amountCents: 4_200 },
+      {
+        sender: {
+          serviceName: 'Billing', serviceVersion: '1',
+          serviceTarget: 'createInvoice', instanceId: 'billing-test',
+        },
+      },
+    ))
+
+    await vi.waitFor(() => expect(ledger.recordInvoice).toHaveBeenCalledOnce())
+  } finally {
+    await service.destroy()
+    await eventBridge.destroy()
+  }
+})
+```
+
+For a larger composition root, destroy its services, stores, resources, and
+EventBridge in reverse dependency order. This test can assert
+input/output transforms, after guards, `HandledError` completion,
 control-result conversion, and configured result-event construction. Add a
 real-adapter integration test only for adapter claims: matching/non-matching
 routing, consumer registration, supported retry/delay/dead-letter behavior,
 and a bounded recovery procedure.
 
-Use disposable broker namespaces and synthetic data. Do not test an LLM or a
-remote provider’s nondeterministic result here; the test proves your
-subscription’s implementation and flow. Measure AI result quality in the
-[AI Harness evaluation guidance](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/).
+Use disposable broker namespaces and synthetic data. Keep this test focused on
+the subscription implementation and delivery flow.
 
 Next, choose [an EventBridge](/handbook/framework/connect-distributed-infrastructure/event-delivery/) for adapter-specific production evidence.
 

@@ -62,19 +62,25 @@ owns loop limits, tools, skills, handlers, and interception options.
 const session = await harness.getSession('support-demo')
 
 try {
-	const result = await session.agents.summarize.run({
+	const outcome = await session.agents.summarize.run({
 		question: 'What does a model alias provide?',
 	})
 
-	console.log(result.answer)
+	if (outcome.status === 'interrupted') {
+		console.log(`Run ${outcome.runId} needs application input: ${outcome.interrupt.type}`)
+	} else {
+		console.log(outcome.output.answer)
+	}
 } finally {
 	await harness.shutdown()
 }
 ```
 
-Expected result: one concise answer. It need not match exact wording, but it
-must satisfy the `output` schema. The session is the application API; do not
-call a provider adapter directly from route handlers or business workflows.
+Expected completed output: one concise answer. It need not match exact wording,
+but it must satisfy the `output` schema. `run(...)` returns a discriminated
+outcome because a run can pause for an approval or another resumable external
+wait. The session is the application API; do not call a provider adapter
+directly from route handlers or business workflows.
 
 ## If the first run fails
 

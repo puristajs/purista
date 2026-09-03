@@ -188,6 +188,8 @@ This composition starts with
 [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 registers the protected tool through
 [`HarnessBuilder.tool(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tool),
+attaches the typed policy registry through
+[`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance),
 and materializes the immutable runtime with
 [`HarnessBuilder.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
 

@@ -72,7 +72,9 @@ describe('case classifier', () => {
 			const session = await harness.getSession('high-priority-case')
 
 			await expect(session.agents.classify_case.run({ summary: 'Customers cannot sign in.' })).resolves.toEqual({
-				priority: 'high',
+				status: 'completed',
+				runId: expect.any(String),
+				output: { priority: 'high' },
 			})
 
 			expect(provider.requests).toHaveLength(1)

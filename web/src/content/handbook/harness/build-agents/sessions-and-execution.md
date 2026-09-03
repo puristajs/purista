@@ -20,7 +20,7 @@ flowchart LR
   C --> D[Invoke typed agent or workflow]
   D --> E[Validate input]
   E --> F[Run and persist events]
-  F --> G[Return typed output]
+  F --> G[Return completed or interrupted outcome]
   G --> H[Inspect summary if needed]
   H --> I[release live resources]
 
@@ -86,7 +86,7 @@ Each registered agent appears under `session.agents` with the input and output
 types inferred from its schemas.
 
 ```ts title="src/transport/classifySupportCase.ts"
-const result = await session.agents.classify_case.run(
+const outcome = await session.agents.classify_case.run(
 	{
 		summary: 'The customer cannot sign in after a password reset.',
 	},
@@ -100,13 +100,19 @@ const result = await session.agents.classify_case.run(
 	},
 )
 
-console.log(result.priority)
+if (outcome.status === 'completed') {
+	console.log(outcome.output.priority)
+} else {
+	console.log(`Run ${outcome.runId} paused for ${outcome.interrupt.type}`)
+}
 ```
 
 [`run(input, options)`](/handbook/api/interfaces/_purista_harness.AgentInvoker/#run)
-waits for the final schema-valid output or throws. The same shared invocation
-options are accepted by agent/workflow `run(...)` and `stream(...)`, except
-that `durable` is workflow-only.
+waits until the run completes, reaches a durable resumable interrupt, or
+throws. A completed outcome contains the schema-valid value under `output`; an
+interrupted outcome contains the typed reason under `interrupt`. The same
+shared invocation options are accepted by agent/workflow `run(...)` and
+`stream(...)`, except that `durable` is workflow-only.
 
 | Invocation option | Default | Use it for | Important constraint |
 | --- | --- | --- | --- |

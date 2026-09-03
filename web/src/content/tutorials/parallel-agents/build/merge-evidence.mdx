@@ -1,0 +1,59 @@
+---
+title: Merge typed evidence
+description: Validate each specialist result, combine it deterministically, and invoke the workflow through PURISTA.
+order: 263
+kind: lesson
+status: draft
+---
+
+Locate both tagged results and validate them before returning the workflow
+output. This merge is deterministic: it does not add another model round that
+could omit or rewrite evidence.
+
+```ts title="src/harness/support/supportCaseAnalysisHarness.ts"
+const risk = results.find((result) => result.kind === 'risk')
+const response = results.find((result) => result.kind === 'response')
+if (!risk || !response) throw new Error('Support analysis did not return both specialist results')
+
+return {
+	caseId: context.input.caseId,
+	risk: riskAssessmentSchema.parse(risk.value),
+	response: responsePlanSchema.parse(response.value),
+}
+```
+
+Define a Support resource for the business decision. The workflow target guard
+from the previous step asks whether the trusted principal may analyze this
+case. The command is a protected HTTP projection and an address-first caller;
+it does not duplicate that business guard.
+
+```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
+export const analyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('analyzeSupportCase', 'Run bounded specialist analysis for one support case')
+	.addPayloadSchema(supportCaseInputSchema)
+	.addOutputSchema(supportCaseAnalysisOutputSchema)
+	.canInvokeWorkflow(
+		'Support',
+		'1',
+		'analyze_support_case',
+		supportCaseAnalysisHarness.contracts.workflows.analyze_support_case,
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'support/case-analysis')
+```
+
+Invoke the workflow by its address-first typed client. The explicit session id
+keeps the case transcript and run history isolated by trusted tenant and
+principal inside the mounted runtime.
+
+```ts title="src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts"
+.setCommandFunction(async function (context, payload) {
+	const outcome = await context.workflow.Support['1'].analyze_support_case.run(payload, {
+		sessionId: `support-case:${payload.caseId}`,
+	})
+	if (outcome.status !== 'completed') throw new Error('Support case analysis did not complete')
+	return outcome.output
+})
+```
+
+Continue with [Test both specialists and the denied path](../../testing/test-parallel/).

@@ -1,0 +1,70 @@
+---
+title: Test identity, events, and denied effects
+description: Run the complete model-tool-command path over EventBridge and prove denial stops protected work.
+order: 234
+kind: lesson
+status: draft
+---
+
+Script two strict model rounds. The first chooses `lookup_transaction`; the
+second returns the final structured answer.
+
+```ts title="src/agentTools.integration.test.ts"
+provider.enqueueObject({
+	object: {},
+	toolCalls: [
+		{
+			id: 'lookup-1',
+			name: 'lookup_transaction',
+			arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+		},
+	],
+	usage,
+	finishReason: 'tool_calls',
+})
+provider.enqueueObject({
+	object: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+	usage,
+	finishReason: 'stop',
+})
+```
+
+Start `Transaction` and `Support` on one `DefaultEventBridge`, then invoke the
+Support command with trusted identity. Assert that the Transaction policy saw
+that identity and that the declared custom event kept it too.
+
+```ts title="src/agentTools.integration.test.ts"
+expect(accountPolicy.canRead).toHaveBeenCalledWith({
+	tenantId: 'tenant-example',
+	principalId: 'principal-alex',
+	accountId: 'account-operating',
+})
+expect(emitted).toEqual([{
+	payload: { transactionId: 'tx-100', toolCallId: 'lookup-1' },
+	tenantId: 'tenant-example',
+	principalId: 'principal-alex',
+}])
+```
+
+The denied test invokes `getTransactionSummary` with a policy that returns
+`false` and asserts `transactionSummaryReader.getById` was never called. This
+proves the guard prevents the protected resource effect instead of merely
+changing the response afterward.
+
+```bash title="Verify the agent-tools chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained snapshot passes both the permitted end-to-end path and the denied
+business path. It remains a draft until the released PURISTA v4 and Harness v3
+packages pass a clean consumer replay.
+
+To run the real-provider composition, copy `.env.example`, add the provider
+key, and start both capability services on the same EventBridge.
+
+```bash title="Run the agent-tool services" replay="project"
+cp .env.example .env
+npm start
+```

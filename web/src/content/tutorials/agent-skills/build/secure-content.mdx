@@ -1,0 +1,37 @@
+---
+title: Treat Skill content as untrusted data
+description: Separate procedure guidance from authorization, tools, credentials, and executable access.
+order: 243
+kind: lesson
+status: draft
+---
+
+`trust: 'trusted'` records provenance. It does not make every instruction an
+authorization decision. A reviewed Skill can still quote customer text or link
+to external documents that contain prompt injection.
+
+Keep the boundaries explicit:
+
+- A Skill explains a procedure.
+- A PURISTA business guard decides whether the caller may perform an action.
+- A host-tool binding exposes only declared commands, streams, queues, agents,
+  workflows, and events.
+- A sandbox controls filesystem and execution capability.
+- Secrets and provider credentials remain runtime configuration and are never
+  mounted as Skill files.
+
+The retained Skill includes a
+`skills/support-methods/scripts/not-executable.sh` file to make the
+boundary visible. Because the agent receives only `read`, the model cannot run
+that script. Adding `bash` later would be a separate security decision.
+
+Do not use broad project discovery in production unless the project root is a
+reviewed deployment input. Prefer explicit bindings such as the one in this
+chapter. When discovery is useful for local tooling, inspect every diagnostic
+and reject untrusted roots rather than silently accepting them.
+
+The Skill may tell the agent to call a command, but the command must still use
+the business guards from [Give an agent PURISTA tools](/tutorials/agent-tools/).
+The model and the Skill cannot create tenant or principal identity.
+
+Continue with [Test mounting and failure behavior](../../testing/test-skills/).

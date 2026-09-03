@@ -13,7 +13,14 @@ import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 type CommandDefinition = Parameters<typeof theServiceServiceBuilder.addCommandDefinition>[number]
 type SubscriptionDefinition = Parameters<typeof theServiceServiceBuilder.addSubscriptionDefinition>[number]
 
+const internalCommandBuilder = theServiceServiceBuilder
+	.getCommandBuilder('internal', 'Deliberately not exposed through HTTP')
+	.setCommandFunction(async function () {
+		return undefined
+	})
+
 const commandDefinitions: CommandDefinition[] = [
+	internalCommandBuilder.getDefinition(),
 	pingCommandBuilder.getDefinition(),
 	postCommandBuilder.getDefinition(),
 	putCommandBuilder.getDefinition(),

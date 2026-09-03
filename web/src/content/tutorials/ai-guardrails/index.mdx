@@ -1,0 +1,37 @@
+---
+title: Apply AI guardrails
+description: Add explicit, fail-closed input and output content controls to a native Harness agent.
+order: 190
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter adds content controls to the classifier from
+[Add a classification agent](/tutorials/classification-agent/). An input rail
+blocks one instruction-override pattern before the provider runs. An output
+rail removes long card-like digit sequences from the final structured reason
+before it reaches the caller.
+
+Guardrails answer a content question: may this exact value enter or leave the
+agent? They do not authenticate the caller and do not decide whether a
+principal may perform a business action. PURISTA business guards keep that
+separate responsibility.
+
+```text title="Guardrail placement"
+validated agent input
+  -> input content rail
+  -> model provider
+  -> schema-valid final candidate
+  -> output content rail
+  -> PURISTA caller
+```
+
+You will install the optional package, define typed actions and ordered flows,
+attach them to the native agent, and prove that a blocked request never reaches
+the model.
+
+The focused source is retained in
+`examples/banking/chapters/ai-guardrails`.
+
+Start with [Install the Guardrails package](./build/install/).

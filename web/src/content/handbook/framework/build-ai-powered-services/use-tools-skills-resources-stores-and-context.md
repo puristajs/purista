@@ -37,15 +37,23 @@ const transferTool = transactionV1ServiceBuilder
 ```
 
 [`getHarnessHostToolBuilder(contract)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getharnesshosttoolbuilder)
-starts a service-owned binding for one declared Harness host-tool contract. The
-following capability declarations restrict which resources, commands, and
-events its handler can use.
-[`setHandler(handler)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#sethandler)
-provides the implementation after those capabilities have been declared.
-[`canInvoke(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#caninvoke)
-and
-[`canEmit(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#canemit)
-add only those two host capabilities to its typed context.
+starts a service-owned binding for one declared Harness host-tool contract. Its
+capability declarations restrict what the handler can call:
+
+| Host-tool builder member | Adds to the typed handler context |
+| --- | --- |
+| [`canInvoke(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#caninvoke) | One address-first command client under `context.service`. |
+| [`canConsumeStream(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#canconsumestream) | One address-first stream client under `context.stream`; the handler must consume or cancel it. |
+| [`canEnqueue(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#canenqueue) | One queue client under `context.queue`; acceptance is not completion. |
+| [`canEmit(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#canemit) | One schema-validated custom event through `context.emit`. |
+| [`canInvokeAgent(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#caninvokeagent) | One mounted agent address under `context.agent`, using its portable contract. |
+| [`canInvokeWorkflow(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#caninvokeworkflow) | One mounted workflow address under `context.workflow`, using its portable contract. |
+| [`setHandler(handler)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#sethandler) | The required service-bound implementation after dependencies are declared. |
+| [`getDefinition()`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#getdefinition) | The completed binding consumed by `mountHarness`; it rejects when no handler was set. |
+
+These calls declare availability and types; they do not execute the target at
+build time. Every command, stream, queue, agent, and workflow call still uses
+its normal Framework routing boundary at runtime.
 
 The host-tool context carries trusted `tenantId`, `principalId`, `traceId`,
 and `correlationId`, plus declared service resources. The model cannot supply

@@ -49,9 +49,26 @@ your database update or the queue acknowledgement. Persist the business effect
 first and let an idempotent subscriber consume its notification.
 
 State mode needs a `queueJobStore` passed when the service instance is created.
-Without that store, the generic runtime has nowhere to persist a result. Verify
-the result lookup/retention path with the configured store before advertising a
-polling API.
+Core provides a StateStore-backed implementation:
+
+```ts title="Provide queue result state storage"
+import { createStateStoreQueueJobStore, initDefaultStateStore } from '@purista/core'
+
+const stateStore = initDefaultStateStore({ logger })
+const report = await reportV1Service.getInstance(eventBridge, {
+  logger,
+  stateStore,
+  queueJobStore: createStateStoreQueueJobStore(stateStore),
+})
+```
+
+[`createStateStoreQueueJobStore(stateStore, prefix = 'purista:queue-job')`](/handbook/api/functions/_purista_core.createStateStoreQueueJobStore/)
+implements `get(jobId)` and `set(record, ttlMs?)`. The runtime record contains
+the job/queue names, status, attempt, timestamps, result/error, trace and
+correlation IDs, identity IDs, and optional run ID. Read a result with
+`await queueJobStore.get(jobId)`. The built-in StateStore adapter currently
+does not apply the `ttlMs` argument itself, so verify retention with the chosen
+store before advertising a polling API.
 
 Use [subscriptions](/handbook/framework/build-services/subscriptions/) to
 react to a result event, and [configure recovery](/handbook/framework/build-services/queues-and-workers/configure-leases-retries-idempotency-and-dead-letters/)

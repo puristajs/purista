@@ -15,7 +15,7 @@ All first-party Harness 3 packages use the same major. Keep them aligned with
 
 | Capability | After installing `@purista/harness` | Enable or replace it |
 | --- | --- | --- |
-| Models | No provider or alias is selected. A non-empty model registry is required. | Install one provider package or implement `ModelProvider`, then register an alias with `.models(...)`. |
+| Models | No provider or alias is selected. Handler-only agents, deterministic workflows, and memory-only compositions need no model registry. | Install one provider package or implement `ModelProvider`, then register an alias when a default-loop agent, embedding, reranker, media operation, or model-backed memory/control uses it. |
 | Harness storage | An in-memory store is created when `.storage(...)` is omitted. | Register a durable `HarnessStorage` for restart-safe sessions, runs, steps, and waits. |
 | Memory | A dependency-free in-memory engine is used when `.memory(...)` is omitted. | Register a persistent engine package and any embedding or summary model references. |
 | Sandbox | Auto-detection uses `bashSandbox()` when the optional `just-bash` peer is importable; otherwise it uses the files-and-bounded-search in-memory sandbox. | Register an explicit sandbox when capability or isolation guarantees matter. |
@@ -40,6 +40,16 @@ isolation.
 | `@purista/harness-bedrock` | Bedrock Runtime adapter and AWS SDK dependency | AWS region, credentials, and model access | [Configure Amazon Bedrock](/handbook/harness/configure-the-runtime/amazon-bedrock/) |
 | `@purista/harness-azure-foundry` | Azure AI Foundry inference adapter and Azure client dependencies | Endpoint, credentials, and deployment access | [Configure Azure AI Foundry](/handbook/harness/configure-the-runtime/azure-ai-foundry/) |
 | Application-owned adapter | The core `ModelProvider` port only | SDK or HTTP client selected by the application | [Build a custom model provider](/handbook/harness/configure-the-runtime/custom-model-provider/) |
+
+## Browser stream protocol
+
+| Package | Includes | External prerequisite | Enablement guide |
+| --- | --- | --- | --- |
+| `@purista/harness-ai-sdk-ui` | Versioned `/v1` conversion from portable `ExecutionEvent` values to AI SDK UI Message Stream v1, including text, tools, status, structured output, files, media progress, and tool approvals | Matching `@purista/harness@3` and `ai@7`; an HTTP transport that forwards the prescribed headers and SSE chunks | [Stream progress and use the standard browser protocol](/handbook/harness/build-agents/streaming-cancellation-and-timeouts/#4-use-ai-sdk-ui-message-stream-v1-for-a-browser) |
+
+The adapter is transport-neutral: native Harness can return its `Response`,
+while PURISTA can pass its data-only SSE events through an HTTP stream. Import
+from `@purista/harness-ai-sdk-ui/v1` to pin the wire protocol explicitly.
 
 ## Memory engines
 

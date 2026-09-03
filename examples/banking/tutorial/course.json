@@ -395,6 +395,34 @@
       ]
     },
     {
+      "id": "classification-agent",
+      "title": "Add a classification agent",
+      "status": "draft",
+      "requires": [
+        "create-project"
+      ],
+      "pages": [
+        "classification-agent/build/scaffold",
+        "classification-agent/build/define",
+        "classification-agent/build/invoke",
+        "classification-agent/testing/test-classification"
+      ]
+    },
+    {
+      "id": "ai-guardrails",
+      "title": "Apply AI guardrails",
+      "status": "draft",
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+        "ai-guardrails/build/install",
+        "ai-guardrails/build/input",
+        "ai-guardrails/build/output",
+        "ai-guardrails/testing/test-guardrails"
+      ]
+    },
+    {
       "id": "retrieval-ingestion",
       "title": "Ingest content for retrieval",
       "status": "published",
@@ -423,6 +451,136 @@
         "retrieval-ingestion/build/process",
         "retrieval-ingestion/build/store",
         "retrieval-ingestion/testing/test-ingestion"
+      ]
+    },
+    {
+      "id": "rag-agent",
+      "title": "Build a retrieval-augmented generation agent",
+      "status": "draft",
+      "requires": [
+        "retrieval-ingestion"
+      ],
+      "pages": [
+        "rag-agent/build/declare-search-tool",
+        "rag-agent/build/define-agent",
+        "rag-agent/build/stream-ui",
+        "rag-agent/build/run-application",
+        "rag-agent/testing/test-rag"
+      ]
+    },
+    {
+      "id": "conversation-memory",
+      "title": "Persist and manage conversation history",
+      "status": "draft",
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+        "conversation-memory/build/configure-storage",
+		"conversation-memory/build/use-session",
+		"conversation-memory/build/export-and-clear",
+		"conversation-memory/testing/test-history"
+      ]
+    },
+    {
+      "id": "agent-tools",
+      "title": "Give an agent PURISTA tools",
+      "status": "draft",
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+        "agent-tools/build/declare-host-tool",
+        "agent-tools/build/bind-command",
+        "agent-tools/build/limit-effects",
+        "agent-tools/testing/test-tools"
+      ]
+    },
+    {
+      "id": "agent-skills",
+      "title": "Load agent Skills",
+      "status": "draft",
+      "requires": [
+        "agent-tools"
+      ],
+      "pages": [
+        "agent-skills/build/create-skill",
+        "agent-skills/build/bind-skill",
+        "agent-skills/build/secure-content",
+        "agent-skills/testing/test-skills"
+      ]
+    },
+    {
+      "id": "human-review-workflow",
+      "title": "Pause a workflow for human review",
+      "status": "draft",
+      "requires": [
+        "agent-tools"
+      ],
+      "pages": [
+        "human-review-workflow/build/define-workflow",
+        "human-review-workflow/build/interrupt",
+        "human-review-workflow/build/approve-resume",
+        "human-review-workflow/testing/test-review"
+      ]
+    },
+    {
+      "id": "parallel-agents",
+      "title": "Run specialist agents in parallel",
+      "status": "draft",
+      "requires": [
+        "classification-agent"
+      ],
+      "pages": [
+        "parallel-agents/build/define-specialists",
+        "parallel-agents/build/fan-out",
+        "parallel-agents/build/merge-evidence",
+        "parallel-agents/testing/test-parallel"
+      ]
+    },
+    {
+      "id": "multi-step-workflow",
+      "title": "Build a multi-step agent workflow",
+      "status": "draft",
+      "requires": [
+        "human-review-workflow",
+        "parallel-agents"
+      ],
+      "pages": [
+        "multi-step-workflow/build/define-workflow",
+        "multi-step-workflow/build/retry-checkpoint",
+        "multi-step-workflow/build/invoke",
+        "multi-step-workflow/testing/test-workflow"
+      ]
+    },
+    {
+      "id": "sandbox-analysis",
+      "title": "Run analysis in a sandbox",
+      "status": "draft",
+      "requires": [
+        "multi-step-workflow"
+      ],
+      "pages": [
+        "sandbox-analysis/build/configure",
+        "sandbox-analysis/build/run-tool",
+        "sandbox-analysis/build/cleanup",
+        "sandbox-analysis/testing/test-sandbox"
+      ]
+    },
+    {
+      "id": "agent-evaluation",
+      "title": "Evaluate agent behavior",
+      "status": "draft",
+      "requires": [
+        "ai-guardrails",
+        "rag-agent",
+        "multi-step-workflow"
+      ],
+      "pages": [
+        "agent-evaluation/build/dataset",
+        "agent-evaluation/build/deterministic-checks",
+        "agent-evaluation/build/scoring",
+        "agent-evaluation/testing/change-gate"
       ]
     }
   ],

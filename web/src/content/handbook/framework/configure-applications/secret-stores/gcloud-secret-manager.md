@@ -31,4 +31,21 @@ const service = await incidentV1Service.getInstance(eventBridge, { secretStore }
 
 Provision the secret and grant the workload the least-privilege Secret Manager role. Verify a read in the deployed identity context and monitor audit logs. The `project` value identifies the scope; it does not grant access by itself.
 
+When writes are enabled, keep reads enabled as well. This adapter's
+`setSecretImpl(...)` calls the public `getSecret(...)` method to decide whether
+it must create the secret resource before adding a version. Configuring
+`enableSet: true` with `enableGet: false` therefore makes every write fail the
+store's unauthorized read guard. This coupling is specific to the current
+Google adapter.
+
+### Mutation semantics
+
+`enableSet: true` allows `setSecret(...)` to create an automatically replicated
+secret resource when missing, then add a new version. `enableRemove: true`
+allows `removeSecret(...)` to delete the complete secret resource, including
+its versions according to Google Secret Manager behavior. These operations are
+not equivalent to rotating or disabling one version. Keep normal application
+instances read-only and use a reviewed platform workflow for rotation,
+version-state changes, and destructive deletion.
+
 Next: [chapter overview](/handbook/framework/configure-applications/secret-stores/).

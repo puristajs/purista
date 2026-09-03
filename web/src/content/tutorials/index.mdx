@@ -47,10 +47,19 @@ small: one transaction fact, one monitoring signal, and one short statement.
 
 ### Add AI capabilities
 
-The AI path starts with the data pipeline behind retrieval. It uses an ordinary
-PURISTA command, queue, worker, and injected resources to accept, chunk, embed,
-and store reviewed content. Later chapters add service-owned agents and
-workflows after their Framework integration is stable and fully verified.
+The AI path keeps native Harness definitions and PURISTA orchestration as
+separate layers. A service mounts one composed Harness definition. Commands,
+streams, queues, and workers consume published agents and workflows through
+versioned EventBridge addresses. Provider credentials and runtime adapters stay
+in the application composition root.
+
+The first verified chapter builds the deterministic data pipeline behind
+retrieval with an ordinary command, queue, worker, and injected resources. The
+remaining packets add structured classification, AI guardrails, a model-chosen
+retrieval tool, standard browser streaming, memory, PURISTA-backed tools,
+Skills, human review, parallel agents, workflows, sandboxing, and evaluation.
+They are published only after their package versions and clean consumer replays
+are available.
 
 ## How every chapter works
 
@@ -91,6 +100,11 @@ source, tests, runtime behavior, and navigation pass together.
 ### Add AI capabilities
 
 18. [Ingest content for retrieval](/tutorials/retrieval-ingestion/).
+
+The native Harness classification packet and the ten chapters that build on it
+are present in the course manifest as draft build packets. Draft routes are not
+shown on the public website until their retained examples pass the same clean
+consumer gate as the Framework chapters.
 
 ## Start here
 

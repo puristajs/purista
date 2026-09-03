@@ -195,9 +195,9 @@ do not replace lost inference with `any` or type assertions.
 
 | Harness 2.1.1 | Harness 3 | Consequence |
 | --- | --- | --- |
-| `session.agents.id.prompt(input, options)` | `session.agents.id.run(input, options)` | Same validated result contract; explicit non-streaming verb. |
-| `session.workflows.id.prompt(input, options)` | `session.workflows.id.run(input, options)` | Update HTTP handlers, queue workers and tests as well as application calls. |
-| `session.agents.id.stream(...)` / workflow `.stream(...)` | Unchanged | Consume run events; test cancellation and terminal failure separately. |
+| `session.agents.id.prompt(input, options)` | `session.agents.id.run(input, options)` | Handle `RunOutcome`: read `output` after `status === 'completed'`, or persist and resume an `interrupted` run. |
+| `session.workflows.id.prompt(input, options)` | `session.workflows.id.run(input, options)` | Apply the same outcome handling in HTTP handlers, queue workers, tests, and application calls. |
+| `session.agents.id.stream(...)` / workflow `.stream(...)` | Portable `ExecutionEvent` stream | Consume client-safe execution events and the terminal `run.finished.outcome`; use `.observe(...)` for operational `RunEvent` diagnostics. |
 | `session.close()` | `session.destroy()` **only for intentional deletion** | Do not turn a request-finally cleanup into conversation deletion. |
 | `session.release()` | Unchanged | Retains persisted history; reacquire with `harness.getSession(...)` before the next use. |
 | Workflow `ctx.log` | `ctx.logger` | Agent, tool and workflow handlers use consistent logger naming. |

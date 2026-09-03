@@ -452,14 +452,11 @@ runtime test for the complete order.
   For AI integration, separately verify native Harness definition, synchronous
   `mountHarness(...)`, address-first invocation, and explicit HTTP projection;
   do not turn generic dot calls into a noisy heuristic.
-- For a handbook coverage pass, run
-  `node scripts/handbook-snippet-coverage.mjs` before and after the work. It
-  inventories source-verified Framework primitive builders and complete
-  `defineHarness(...)` chains, reporting the exact API lookup nearest each
-  snippet. Treat a missing row as a review task—not proof that prose is absent
-  and not an excuse to add a vague package link. Record the before/after count,
-  fix high-impact clusters first, and promote only a fully clean, unambiguous
-  method family into the blocking handbook audit.
+- For a coverage pass, run `node scripts/handbook-snippet-coverage.mjs` before
+  and after changes, then `npm run audit:handbook` against rebuilt TypeDoc.
+  The first inventories local snippet lookups; the second blocks missing
+  curated public-surface lookups. Neither proves prose quality. Follow
+  `references/coverage-and-traceability.md` for interpretation and repair.
 - Before adding an exact API link for a first-party package, confirm that the
   generated API pipeline actually includes that package and exposes the target
   symbol. Extend the pipeline and regenerate its evidence when it does not;

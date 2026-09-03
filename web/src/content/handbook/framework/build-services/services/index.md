@@ -20,28 +20,12 @@ not use it as a global dependency container or as a deployment version label.
 | What is its result? | Registered capability contracts and a running instance that handles only those definitions. |
 | What stays external? | Concrete bridges, stores, resources, credentials, telemetry SDK/exporters, process topology, and callers. |
 
-## Follow a service from definition to shutdown
+## Follow the lifecycle once
 
-```mermaid title="Service lifecycle and ownership"
-flowchart TD
-  A[Service information] --> B[ServiceBuilder declarations]
-  B --> C[Add command, subscription, stream, queue, schedule, or agent definitions]
-  C --> D[Application starts EventBridge]
-  D --> E[getInstance: merge/validate config and provide runtime dependencies]
-  E --> F[Service.start]
-  F --> G[Check EventBridge health and register service capabilities]
-  G --> H{Queues or workers declared?}
-  H -->|yes| I[Start and check QueueBridge; start workers]
-  H -->|no| J[Announce service ready]
-  I --> J
-  J --> K[Handle declared work]
-  K --> L[destroy: cancel streams, stop workers, destroy started QueueBridge]
-```
-
-`getInstance(...)` creates a service but does not start it. The application
-starts the EventBridge first; the service checks its health before registering
-commands, subscriptions, and streams. QueueBridge startup happens inside
-`Service.start()` only when the service declares queues or workers.
+The complete order, startup failures, readiness proof, Harness mount ownership,
+and shutdown boundary live in [Service lifecycle](/handbook/framework/build-services/services/service-lifecycle/).
+`getInstance(...)` creates a single-use instance; `start()` registers it and
+publishes readiness.
 
 ## Build the smallest useful service
 
@@ -49,8 +33,23 @@ Start with a generated service identity, one builder, and one command. The
 aggregate registers all definitions before `getInstance(...)` resolves them.
 
 ```ts title="src/service/invoice/v1/invoiceV1Service.ts"
+import { createInvoiceCommandBuilder } from './command/createInvoice/createInvoiceCommandBuilder.js'
+import { invoiceV1ServiceBuilder } from './invoiceV1ServiceBuilder.js'
+
 export const invoiceV1Service = invoiceV1ServiceBuilder
   .addCommandDefinition(createInvoiceCommandBuilder.getDefinition())
+```
+
+```ts title="src/index.ts"
+import { DefaultEventBridge } from '@purista/core'
+import { invoiceV1Service } from './service/invoice/v1/invoiceV1Service.js'
+
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+const service = await invoiceV1Service.getInstance(eventBridge)
+await service.start()
+
+console.log(service.isStarted) // true; InfoServiceReady was published
 ```
 
 [`addCommandDefinition(...commands)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addcommanddefinition)
@@ -75,6 +74,7 @@ composition root before depending on those properties.
 
 | You need to | Read |
 | --- | --- |
+| Understand creation, startup, readiness, failure, and shutdown order | [Service lifecycle](/handbook/framework/build-services/services/service-lifecycle/) |
 | Define a stable identity and version | [Create and version a service](/handbook/framework/build-services/services/create-and-version-a-service/) |
 | Register capabilities and event-to-queue bindings | [Add definitions to a service](/handbook/framework/build-services/services/add-definitions-to-a-service/) |
 | Inject a repository, provider, or custom metric | [Provide resources and metrics](/handbook/framework/build-services/services/provide-resources-and-metrics/) |

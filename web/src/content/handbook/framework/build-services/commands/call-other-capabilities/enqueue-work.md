@@ -44,6 +44,12 @@ The local command calls are [`getCommandBuilder(name, description, eventName?)`]
 
 [`canEnqueue(queueName, payloadSchema?, parameterSchema?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#canenqueue) requires a non-empty queue name. The queue must also be configured on the service; an undeclared queue is forbidden and an absent service queue is not found.
 
+Those two conditions are internal capability/configuration errors. The internal
+`UnhandledError` carries `403` for a queue not allowed in this handler or `404`
+for a queue not registered in the service, but an external command caller sees
+a generic `500`. Fix the declaration/registration instead of treating either
+case as a caller authorization or missing-resource response.
+
 ## Choose enqueue options deliberately
 
 | Option | Purpose |

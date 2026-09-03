@@ -22,6 +22,7 @@ The service owns business behavior. The application composition root owns bridge
 
 | Question | Page |
 | --- | --- |
+| Which layer owns business definitions, adapters, and external systems? | [Architecture and ownership at a glance](/handbook/framework/understand-the-framework/architecture-and-ownership/) |
 | What is the unit of business ownership? | [Services and boundaries](/handbook/framework/understand-the-framework/services-and-boundaries/) |
 | What is validated and transported? | [Messages, schemas, and contracts](/handbook/framework/understand-the-framework/messages-schemas-and-contracts/) |
 | When should I use a command, event, stream, queue, or agent? | [Commands, events, and execution flow](/handbook/framework/understand-the-framework/commands-events-and-execution-flow/) |
@@ -30,4 +31,4 @@ The service owns business behavior. The application composition root owns bridge
 | What delivery behavior can I rely on? | [Reliability and delivery guarantees](/handbook/framework/understand-the-framework/reliability-and-delivery-guarantees/) |
 | How should I classify an expected rejection or inspect failures? | [Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/) and [observability](/handbook/framework/secure-and-operate/observability/) |
 
-Next: [services and boundaries](/handbook/framework/understand-the-framework/services-and-boundaries/).
+Next: [architecture and ownership at a glance](/handbook/framework/understand-the-framework/architecture-and-ownership/).

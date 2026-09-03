@@ -11,19 +11,29 @@ OpenTelemetry Meter. A service may also declare typed application metrics with
 ## Define an application metric
 
 ```ts title="src/service/order/v1/orderV1ServiceBuilder.ts"
+import { ServiceBuilder } from '@purista/core'
+import { z } from 'zod'
+import { orderV1ServiceInfo } from './orderV1ServiceInfo.js'
+
+const orderMetricAttributesSchema = z.object({
+  channel: z.enum(['web', 'partner']),
+})
+
 export const orderV1ServiceBuilder = new ServiceBuilder(orderV1ServiceInfo)
   .defineMetric('app.orders.created', {
     kind: 'counter',
     unit: '{order}',
     description: 'Accepted orders',
-    attributes: ['channel'],
+    attributes: orderMetricAttributesSchema,
   })
 ```
 
 [`defineMetric(name, definition)`](/handbook/api/classes/_purista_core.ServiceBuilder/#definemetric)
 adds a typed instrument to every handler context built from this service. Use a
 counter for totals, a histogram for distributions such as duration, and an
-up-down counter for a value that can increase and decrease.
+up-down counter for a value that can increase and decrease. `attributes` is an
+optional Standard Schema object, not a list of names; it validates the
+attribute values and gives `context.metrics` its argument type.
 
 ```ts title="src/service/order/v1/command/createOrder/createOrderCommandBuilder.ts"
 export const createOrderCommandBuilder = orderV1ServiceBuilder

@@ -1,0 +1,50 @@
+---
+title: Add deterministic checks
+description: Score exact structured behavior with ordinary, versioned scorer adapters.
+order: 292
+kind: lesson
+status: draft
+---
+
+Start with deterministic scoring whenever the expected behavior can be checked
+in code. It is fast, reproducible, inexpensive, and easy to debug.
+
+```ts title="src/scorers.ts"
+export const categoryScorer = createDeterministicEvaluationScorer<
+	ClassificationAssessment,
+	ClassificationOutput
+>({
+	id: 'classification-category',
+	version: '1.0.0',
+	dimension: { id: 'category_exact', kind: 'boolean' },
+	evaluate: observation => {
+		const passed = observation.assessment?.category === observation.output.category
+		return {
+			outcome: 'scored',
+			dimensionId: 'category_exact',
+			kind: 'boolean',
+			value: passed,
+			passed,
+		}
+	},
+})
+```
+
+Create a separate versioned scorer for urgency. Separate dimensions let the
+gate set different thresholds and let reports show which behavior changed.
+
+All scorer implementations use the same `EvaluationScorer` interface. When a
+quality property requires judgment, add a model-backed or external scorer
+adapter with:
+
+- an explicit id and version;
+- declared dimensions;
+- a bounded timeout and retry policy;
+- provider-reported accounting and trace correlation;
+- an `inconclusive` result when evidence is insufficient.
+
+Keep judge prompts and judge models versioned as part of the scorer contract.
+Do not turn an uncertain judge answer into a false deterministic pass.
+
+Continue with [Run and score the agent](../scoring/).
+

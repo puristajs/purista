@@ -1,7 +1,7 @@
 ---
 title: Configure Hono
 description: Install and configure the optional Hono projection service, its public boundary, and its OpenAPI and health surfaces.
-order: 420
+order: 418
 ---
 
 Choose Hono when a Node application needs HTTP command and stream projections,
@@ -175,16 +175,20 @@ types visible and keep executable policy next to the composition code.
 
 ### OpenAPI document settings
 
-The complete `openApi` object is enabled by default. Without configuration,
-Hono serves `/api/openapi.json` and `/api/openapi.yaml` with OpenAPI `3.1.0`
-and `Server api` / `1.0.0` document information. Disable it only when another
-release process owns the published contract.
+The complete `openApi` object is enabled by default. If you omit `openApi`
+entirely, Hono serves `/api/openapi.json` and `/api/openapi.yaml` with OpenAPI
+`3.1.0` and `Server api` / `1.0.0` document information. If you provide an
+`openApi` object but omit its `info` object, schema parsing instead uses the
+title `PURISTA` with the same default description and version. Set `info`
+explicitly for every published API so that this two-level default cannot change
+the document identity by accident. Disable OpenAPI only when another release
+process owns the published contract.
 
 | `serviceConfig.openApi` option | Default | Effect |
 | --- | --- | --- |
 | `enabled` | `true` | Publishes JSON and YAML below `apiMountPath`. `false` leaves the in-memory builder available but does not register those routes. |
 | `openapi` | `3.1.0` | Document specification version written to the root document. |
-| `info.title`, `info.description`, `info.version` | `Server api`, `OpenApi definition for server endpoints`, `1.0.0` | Release identity displayed by OpenAPI tools. Supply these for every published API. |
+| `info.title`, `info.description`, `info.version` | Omitting all of `openApi`: `Server api`, `OpenApi definition for server endpoints`, `1.0.0`. Supplying `openApi` without `info`: `PURISTA`, the same description, and `1.0.0`. | Release identity displayed by OpenAPI tools. Supply these for every published API. |
 | `info.termsOfService`, `info.contact`, `info.license` | Unset | Optional ownership and legal metadata. |
 | `servers` | Unset | Server URLs and optional descriptions/variables. Use public gateway URLs, not internal service addresses. |
 | `components`, `security`, `externalDocs`, `tags`, `paths` | Unset | Additional OpenAPI fragments merged with generated operation metadata. Keep endpoint schemas and operation security on the command/stream builder; do not use this to bypass a missing runtime contract. |
@@ -290,6 +294,57 @@ protection at the edge. Hono’s `maxRequestBodyBytes` and protected-route
 middleware are application-level controls, not a substitute for those boundary
 controls.
 
+### Find the complete Hono service surface
+
+The Hono service intentionally installs its not-found and error handlers during
+`start()`. There is no PURISTA `setErrorHandler` configuration hook: throw
+`HandledError` for an expected public failure and let the installed RFC 9457
+pipeline render it. Use ordinary Hono middleware or routes for application HTTP
+concerns, while keeping business operations as commands or streams.
+
+| Public member | Intended application use | Lifecycle boundary |
+| --- | --- | --- |
+| [`app`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#app) | Register Hono middleware, static files, and HTTP-only handlers. | Add middleware/routes before `start()` so ordering is deterministic. |
+| [`openApi`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#openapi) | Add metadata for an application-owned custom route. | Generated operations are added during endpoint registration. |
+| [`setHonoTypes<...>()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#sethonotypes) | Narrow Hono binding/variable types without changing runtime behavior. | Call after `getInstance(...)`; it returns the same instance. |
+| [`setHealthFunction(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#sethealthfunction) | Check application dependencies when `enableHealth` is enabled. | Configure before traffic; throwing makes the health request fail. |
+| [`setProtectMiddleware(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware) | Authenticate protected generated routes and set trusted identity fields. | Configure before generated routes register. |
+| [`registerService(...services)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#registerservice) | Project in-process command and stream definitions in a monolith. | Must run before `start()`; a later call fails. |
+| [`start()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#start) | Install generated routes, not-found and RFC 9457 error handling, register configured services, and mark the HTTP service available. | Configure middleware, protection, health, and projected services first. The service instance is single-use. |
+| [`addEndpoint(metadata, address)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#addendpoint) | Project one already-declared command/stream, including dynamic discovery. | Advanced API; duplicate target registration is ignored and a conflicting method/path fails. |
+| [`invoke(input, endpoint)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#invoke) | Invoke a PURISTA command on behalf of custom edge middleware. | It builds the Hono sender address and uses EventBridge; prefer generated routes for normal operations. |
+| [`openStream(input, endpoint, timeoutMs?)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#openstream) | Open a PURISTA stream for a custom edge adapter. | Fails with `501` behavior when the selected EventBridge has no stream support. |
+| [`setServiceUnavailable()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setserviceunavailable) / [`setServiceAvailable()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setserviceavailable) | Control whether requests are accepted. | `start()` makes the service available; shutdown makes it unavailable. Do not use these as business feature flags. |
+| [`prepareDestroy()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#preparedestroy) / [`destroy()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#destroy) | Reject new requests before the listener and services are drained, then destroy the service. | Register the prepare entry before the listener and main service teardown entries. |
+
+### Configure cross-origin browser access explicitly
+
+The PURISTA Hono service does not install CORS middleware and has no
+`serviceConfig` CORS option. A same-origin UI needs no CORS configuration. If a
+browser application calls the API from another origin, add Hono as an explicit
+application dependency and register its middleware before
+`honoService.start()`:
+
+```sh title="Install Hono for application-owned middleware"
+npm install hono
+```
+
+```ts title="src/http/configureCors.ts"
+import { cors } from 'hono/cors'
+
+honoService.app.use('/api/*', cors({
+  origin: ['https://app.example.com'],
+  allowHeaders: ['authorization', 'content-type', 'x-trace-id'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}))
+```
+
+Use a reviewed allow-list. CORS controls which browsers may read a response; it
+does not authenticate a caller, authorize a business action, or protect a
+non-browser client. Protected generated endpoints still pass through
+`setProtectMiddleware(...)`, and service guards still enforce business access.
+
 ## Extend and stop the HTTP process deliberately
 
 `honoService.app` is the real typed Hono application. Use it for HTTP-only
@@ -378,6 +433,8 @@ const httpListener = {
 }
 
 gracefulShutdown(logger, [
+	// Reject new HTTP work before the listening socket and services are closed.
+	honoService.prepareDestroy(),
   httpListener,
   honoService,
   businessService,

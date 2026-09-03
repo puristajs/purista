@@ -1,0 +1,72 @@
+---
+title: Define the sequential workflow
+description: Compose typed specialist stages inside one native Harness workflow.
+order: 271
+kind: lesson
+status: draft
+---
+
+Generate the Support service and its command, then install the provider-neutral
+Harness and the OpenAI adapter by their published package names.
+
+```bash title="Create the workflow boundary" replay="project"
+npm run add:service -- support --description "Owns support cases and resolution workflows" --non-interactive
+npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
+npm install @purista/harness @purista/harness-openai zod
+```
+
+Define strict schemas for the request, the intermediate classification, the
+planner input, and the final result. Passing a typed intermediate object keeps
+the second stage independent from the first agent's prose or transcript.
+
+```ts title="src/harness/support/supportResolutionWorkflow.ts"
+export const supportClassificationSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+})
+
+export const resolutionPlanInputSchema = z.strictObject({
+	caseId: z.string(),
+	message: z.string(),
+	classification: supportClassificationSchema,
+})
+```
+
+Register the two focused agents and allowlist both on the workflow.
+
+```ts title="src/harness/support/supportResolutionWorkflow.ts"
+export const supportResolutionHarness = defineHarness({ name: 'support-resolution' })
+	.requireModel('classification_model', { capabilities: ['object'] })
+	.requireModel('resolution_model', { capabilities: ['object'] })
+	.agent('classify_support_case', {
+		model: 'classification_model',
+		input: supportResolutionInputSchema,
+		output: supportClassificationSchema,
+		instructions: 'Classify one Example Bank support case using only the supplied message.',
+	})
+	.agent('plan_support_resolution', {
+		model: 'resolution_model',
+		input: resolutionPlanInputSchema,
+		output: resolutionPlanSchema,
+		instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
+	})
+	.workflow('resolve_support_case', {
+		input: supportResolutionInputSchema,
+		output: supportResolutionOutputSchema,
+		delegation: {
+			agents: ['classify_support_case', 'plan_support_resolution'],
+			maxChildAgentCalls: 3,
+			maxParallelChildAgentCalls: 1,
+		},
+		handler: async context => {
+			// Add durable stages in the next lesson.
+		},
+	})
+	.define()
+```
+
+The workflow is sequential, so parallel child calls remain one. The total
+budget is three: one classification call and up to two planning attempts.
+
+Continue with [Add retries and checkpoints](../retry-checkpoint/).
+

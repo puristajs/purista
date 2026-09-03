@@ -69,6 +69,20 @@ await harness.shutdown()
 await execution.close()
 ```
 
+[`defineHarness(options)`](/handbook/api/functions/_purista_harness.defineHarness/)
+creates the composition root.
+[`.storage(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#storage),
+[`.sandbox(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
+and [`.workspace(adapter)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workspace)
+bind separate runtime ports.
+[`.requires(capabilities)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#requires)
+checks the guarantees this deployment depends on,
+[`.models(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models)
+and [`.workflows(registry)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflows)
+register executable definitions, and
+[`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
+validates the completed graph before use.
+
 `runtimeId` is part of every control record and provider resource name. Give
 each independently administered Harness runtime a stable, distinct value when
 it shares a namespace. Replicas of the same application use the same value so

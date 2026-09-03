@@ -1,7 +1,7 @@
 ---
 title: Deploy to serverless and edge runtimes
 description: Match PURISTA component lifecycles, transport support, and durable work to short-lived or restricted runtime environments.
-order: 1055
+order: 1056
 ---
 
 Serverless and edge platforms can host a bounded HTTP adapter or trigger, but

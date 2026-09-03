@@ -1,0 +1,47 @@
+---
+title: Create a change gate
+description: Convert aggregate thresholds and execution health into a test or CI failure.
+order: 294
+kind: lesson
+status: draft
+---
+
+A gate must fail when the evaluation did not complete cleanly, even if some
+available case scores look good. Then compare the all-cases aggregate for each
+required dimension.
+
+```ts title="src/changeGate.ts"
+export function assertClassificationGate(
+	result: EvaluationRunResult,
+	thresholds: ClassificationGateThresholds = { categoryRate: 1, urgencyRate: 1 },
+) {
+	if (result.status !== 'completed') throw new Error(`Evaluation did not complete cleanly: ${result.status}`)
+	const categoryRate = passRate(result, 'category_exact')
+	const urgencyRate = passRate(result, 'urgency_exact')
+	if (categoryRate < thresholds.categoryRate || urgencyRate < thresholds.urgencyRate) {
+		throw new Error(
+			`Classification gate failed: category=${categoryRate.toFixed(3)}, urgency=${urgencyRate.toFixed(3)}`,
+		)
+	}
+	return { categoryRate, urgencyRate }
+}
+```
+
+The retained suite has one passing candidate and one intentional regression.
+Both execute the real portable agent with a strict fake provider. The second
+case proves the gate throws when category accuracy drops.
+
+For a production release gate, also inspect critical segment thresholds,
+scorer errors, latency, token use, cost, guardrail behavior, citation
+grounding, tool trajectories, and required workflow steps. Keep threshold
+changes under review rather than weakening them automatically when a candidate
+fails.
+
+```bash title="Verify the evaluation chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```
+
+The retained project passes two tests without an API key. This chapter remains
+a draft until the released Harness v3 package passes a clean registry replay.

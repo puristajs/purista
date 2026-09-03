@@ -67,7 +67,7 @@ Use a database-generated identifier in a real application. Do not derive identif
 
 | Declaration | What it establishes | Options and boundary |
 | --- | --- | --- |
-| [`getCommandBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder) | The service-owned command name and operator-facing description. | The name becomes part of the address clients invoke; change it as a contract migration, not a refactor. |
+| [`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder) | The service-owned command name and operator-facing description. | The name becomes part of the address clients invoke; change it as a contract migration, not a refactor. The optional third argument is a shorthand for `setSuccessEventName(...)`. |
 | [`setSuccessEventName(name)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setsuccesseventname) | A success event published only after the command succeeds. | Omit it when no independent consumer needs notification. The event uses the successful response flow, so consumers should still validate their own event contract. |
 | [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema) / [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema) | The validated body and parameter contracts, and the inferred `payload`/`parameter` handler types. | The parameter schema may be empty for a command with no path/query data. Do not include trusted identity or secrets in either externally supplied contract. |
 | [`addOutputSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema) | The validated successful result and the type returned to the caller. | A result outside this schema fails the command instead of becoming an undocumented response. |
@@ -81,4 +81,11 @@ The generator creates a command test. Update it with a valid payload and run:
 npm test
 ```
 
+The updated command test should resolve to
+`{ incidentId: 'incident-8' }` for a payload whose title is `API down`. A schema
+error means the test payload no longer satisfies the declared input; a different
+result means the assertion and handler are out of sync.
+
 Choose a [subscription](/handbook/framework/start/add-a-subscription/) when the creation should trigger independent work. Choose a queue when it must be processed later or with durable retry.
+
+Next: [add a subscription](/handbook/framework/start/add-a-subscription/).

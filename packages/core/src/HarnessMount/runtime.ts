@@ -51,6 +51,7 @@ type RuntimeTargetPolicy = Readonly<{
 		Record<string, (context: HarnessBusinessGuardContext<any>, outcome: RunOutcome<unknown>) => void | Promise<void>>
 	>
 	successEvent?: string
+	durableResume?: Readonly<{ identity: 'run-owner' }>
 }>
 
 /** Service-owned lifecycle for one mounted portable Harness definition. */
@@ -238,12 +239,7 @@ export class HarnessMountRuntime {
 			const parameter = parseParameter(message.payload.parameter)
 			const context = this.guardContext(kind, target, message)
 			await runBeforeGuards(policy, context, message.payload.payload)
-			const session = await harness.getSession(sessionKey(message, parameter.sessionId), {
-				identity: {
-					...(message.tenantId ? { tenantId: message.tenantId } : {}),
-					...(message.principalId ? { principalId: message.principalId } : {}),
-				},
-			})
+			const session = await this.resolveSession(harness, kind, target, message, parameter, policy)
 			const options: InvokeOptions = {
 				hostContext: hostContext(message, this.logger, this.resources),
 				...(parameter.idempotencyKey ? { idempotencyKey: parameter.idempotencyKey } : {}),
@@ -293,12 +289,7 @@ export class HarnessMountRuntime {
 			const parameter = parseParameter(message.payload.parameter)
 			const context = this.guardContext(kind, target, message)
 			await runBeforeGuards(policy, context, message.payload.payload)
-			const session = await harness.getSession(sessionKey(message, parameter.sessionId), {
-				identity: {
-					...(message.tenantId ? { tenantId: message.tenantId } : {}),
-					...(message.principalId ? { principalId: message.principalId } : {}),
-				},
-			})
+			const session = await this.resolveSession(harness, kind, target, message, parameter, policy)
 			const options: InvokeOptions = {
 				signal: controller.signal,
 				hostContext: hostContext(message, this.logger, this.resources),
@@ -348,6 +339,53 @@ export class HarnessMountRuntime {
 		} finally {
 			this.activeStreams.delete(message.correlationId)
 		}
+	}
+
+	private async resolveSession(
+		harness: Harness<any>,
+		kind: 'agent' | 'workflow',
+		target: string,
+		message: Command | StreamOpenRequest,
+		parameter: HarnessInvokeParameter,
+		policy?: RuntimeTargetPolicy,
+	) {
+		const callerIdentity = {
+			...(message.tenantId ? { tenantId: message.tenantId } : {}),
+			...(message.principalId ? { principalId: message.principalId } : {}),
+		}
+		const requestedSessionId = parameter.sessionId ?? message.correlationId ?? message.id
+		const openCallerSession = () =>
+			harness.getSession(sessionKeyForIdentity(callerIdentity, requestedSessionId), { identity: callerIdentity })
+		if (policy?.durableResume?.identity !== 'run-owner') return openCallerSession()
+
+		const runId = parameter.resume?.runId ?? parameter.durable?.runId
+		if (!runId) return openCallerSession()
+		const storage = this.config.storage
+		if (!storage) {
+			throw new HandledError(
+				StatusCode.InternalServerError,
+				'Run-owner resume requires an explicit Harness storage adapter.',
+			)
+		}
+		const previous = await storage.getRun(runId)
+		if (!previous) return openCallerSession()
+		if (previous.kind !== kind || previous.target !== target) {
+			throw new HandledError(StatusCode.BadRequest, 'Durable run does not belong to this Harness target.')
+		}
+		if (!parameter.sessionId) {
+			throw new HandledError(StatusCode.BadRequest, 'Run-owner resume requires the original sessionId.')
+		}
+		const ownerSession = await storage.getSession(previous.sessionId)
+		if (!ownerSession) throw new HandledError(StatusCode.Conflict, 'Durable run session is unavailable.')
+		if (ownerSession.identity?.tenantId !== message.tenantId) {
+			throw new HandledError(StatusCode.Forbidden, 'Durable run belongs to a different tenant.')
+		}
+		if (sessionKeyForIdentity(ownerSession.identity ?? {}, parameter.sessionId) !== previous.sessionId) {
+			throw new HandledError(StatusCode.BadRequest, 'Durable run sessionId does not match the original invocation.')
+		}
+		return harness.getSession(previous.sessionId, {
+			...(ownerSession.identity ? { identity: ownerSession.identity } : {}),
+		})
 	}
 
 	private guardContext(
@@ -423,15 +461,9 @@ function parseParameter(value: unknown): HarnessInvokeParameter {
 	return value as HarnessInvokeParameter
 }
 
-function sessionKey(message: Command | StreamOpenRequest, requested: string | undefined) {
+function sessionKeyForIdentity(identity: Readonly<{ tenantId?: string; principalId?: string }>, requested: string) {
 	return createHash('sha256')
-		.update(
-			JSON.stringify([
-				message.tenantId ?? null,
-				message.principalId ?? null,
-				requested ?? message.correlationId ?? message.id,
-			]),
-		)
+		.update(JSON.stringify([identity.tenantId ?? null, identity.principalId ?? null, requested]))
 		.digest('hex')
 }
 
@@ -484,13 +516,15 @@ function toHandledError(error: unknown) {
 		const status =
 			error.code === 'MODEL_ADMISSION_REJECTED'
 				? StatusCode.TooManyRequests
-				: error.category === 'validation'
-					? StatusCode.BadRequest
-					: error.category === 'permission'
-						? StatusCode.Forbidden
-						: error.category === 'timeout'
-							? StatusCode.GatewayTimeout
-							: StatusCode.InternalServerError
+				: error.code === 'DECISION_BLOCKED'
+					? StatusCode.Forbidden
+					: error.category === 'validation'
+						? StatusCode.BadRequest
+						: error.category === 'permission'
+							? StatusCode.Forbidden
+							: error.category === 'timeout'
+								? StatusCode.GatewayTimeout
+								: StatusCode.InternalServerError
 		const retryAfterMs = error.meta?.retryAfterMs
 		return new HandledError(status, error.message, {
 			code: error.code,

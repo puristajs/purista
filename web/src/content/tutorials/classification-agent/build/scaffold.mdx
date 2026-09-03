@@ -1,0 +1,45 @@
+---
+title: Generate the service and agent
+description: Install the AI packages and let the PURISTA CLI create the native Harness and service mount.
+order: 181
+kind: lesson
+status: draft
+---
+
+Start from the project created in
+[Create a PURISTA project](/tutorials/create-project/). The classification
+lesson needs PURISTA v4 and Harness v3. Install the packages by their registry
+names. Do not copy package folders or add local `file:` dependencies.
+
+```bash title="Install the published Framework and Harness packages" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0
+npm install --save-dev --save-exact @purista/cli@4.0.0
+```
+
+Generate a service for the new capability owner. `Support` owns support
+classification and later support conversations. It does not own identity,
+transactions, or knowledge documents.
+
+```bash title="Generate Support and its first agent" replay="project"
+npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with a structured result" --non-interactive
+```
+
+The second command creates four connected pieces:
+
+- a native Harness module below
+  `src/harness/support/agent/classifySupportMessage`;
+- the service-level `supportHarness` composition;
+- a service-owned mount policy below `src/service/support/v1/harness`; and
+- one `.mountHarness(...)` call on the generated service.
+
+It also adds a standalone Harness test. Keep those generated files and refine
+them. Do not introduce a PURISTA `AgentBuilder`: native Harness is the agent
+definition API.
+
+At this point the agent is published at the address
+`Support / 1 / classify_support_message`. No HTTP route was generated. Mounting
+an agent publishes an EventBridge capability; the application decides which
+command, stream, or queue should consume it.
+
+Continue with [Define the structured classifier](./define/).

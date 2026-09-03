@@ -41,6 +41,17 @@ sandbox?, resources?, message? })` and returns `{ context, message, stubs }`.
 Its `moveToDeadLetter` mock is represented by `stubs.job.fail(..., true)`, not
 a separate dead-letter stub.
 
+Config, secret, and state accessor stubs reject by default. Re-arm every store
+operation the handler intentionally uses, for example:
+
+```ts title="Configure deterministic worker store stubs"
+stubs.getState.resolves({ 'report:report-1': undefined })
+stubs.setState.resolves()
+```
+
+This makes persistence part of the test contract instead of silently returning
+invented state.
+
 ## Run one deterministic worker cycle
 
 ```ts title="src/service/report/v1/queue-worker/generateReport.runtime.test.ts"

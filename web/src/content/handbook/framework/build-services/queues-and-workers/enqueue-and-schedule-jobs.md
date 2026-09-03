@@ -31,21 +31,28 @@ The generic form is also available: `context.queue.enqueue(queueName, payload,
 parameter?, options?)`. An undeclared queue is rejected by the runtime; a
 declared queue that the service has not registered is not found.
 
+The target queue must belong to that same service instance. Use an event plus
+`bindEventToQueue(...)` when another service owns the queue.
+
 ## Pick delivery options from the business need
 
 | Option | Meaning | Caveat |
 | --- | --- | --- |
 | `delayMs` | Delay before the job is available | The selected bridge must support meaningful delayed delivery. |
-| `idempotencyKey` | Stable duplicate-acceptance key | It does not make the business effect exactly-once. |
+| `idempotencyKey` | Stable duplicate-acceptance key | `DefaultQueueBridge` stores the key but does not deduplicate. Redis and NATS queue bridges enforce it. It never makes the business effect exactly-once. |
 | `headers` | Safe low-cardinality transport metadata | Never place secrets, raw HTTP headers, or sensitive data here. |
 | `maxAttempts` | Override lifecycle attempt limit for this job | Recovery still follows the queue lifecycle policy. |
-| `priority` | Provider-specific priority hint | Current strict startup checks do not validate priority support. |
+| `priority` | Carried provider hint | No currently shipped QueueBridge implements priority ordering (`priorities: false` on Default, Redis, and NATS). The value is metadata only. |
 | `leaseTtlMs` | Initial lease duration | Prefer lifecycle configuration for normal policy. |
 
 Use a business identifier for the idempotency key—such as one report per
 report ID—not an auto-generated queue message ID. Test duplicate acceptance
 against the selected QueueBridge and make the downstream side effect idempotent
 as well.
+
+Local tests using `DefaultQueueBridge` cannot prove duplicate rejection: each
+enqueue receives a new job ID even when the key repeats. Run that assertion
+against Redis or NATS when the application depends on acceptance deduplication.
 
 ## Send work later or on a schedule
 

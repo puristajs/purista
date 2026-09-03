@@ -1,7 +1,7 @@
 ---
 title: Create and version a service
 description: Define one stable business boundary, make its public version explicit, and keep deployment concerns outside the service contract.
-order: 311
+order: 312
 ---
 
 Create a service for one business capability: invoices, shipment tracking, or
@@ -13,6 +13,31 @@ or database migration number.
 npm run add:service -- invoice --description "Manage invoices"
 ```
 
+Add another contract version without replacing the shared service identity:
+
+```sh title="Generate Invoice service version 2"
+npm run add:service -- invoice --description "Manage invoices" --service-version 2
+```
+
+The CLI leaves the existing general service-info file untouched and creates a
+new `v2` directory. File and directory casing follows `puristaConfig`, and the
+service root follows `puristaConfig.servicePath`.
+
+```text title="Generated service files with camelCase casing"
+src/service/invoice/
+├── generalInvoiceServiceInfo.ts
+├── v1/
+│   ├── invoiceServiceConfig.ts
+│   ├── invoiceV1ServiceBuilder.ts
+│   ├── invoiceV1Service.ts
+│   └── invoiceV1Service.test.ts
+└── v2/
+    ├── invoiceServiceConfig.ts
+    ├── invoiceV2ServiceBuilder.ts
+    ├── invoiceV2Service.ts
+    └── invoiceV2Service.test.ts
+```
+
 The generated service gives you general identity information, a versioned
 builder, an aggregate module, configuration schema, and setup test. Define the
 service-wide contracts in the builder module; keep definition registration in
@@ -22,14 +47,23 @@ the aggregate.
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 import { generalInvoiceServiceInfo } from '../generalInvoiceServiceInfo.js'
+import { invoiceServiceV1ConfigSchema } from './invoiceServiceConfig.js'
 
 export const invoiceServiceInfo = {
   serviceVersion: '1',
   ...generalInvoiceServiceInfo,
 } as const satisfies ServiceInfoType
 
-export const invoiceV1ServiceBuilder = new ServiceBuilder(invoiceServiceInfo)
+const invoiceV1ServiceBuilderInstance = new ServiceBuilder(invoiceServiceInfo)
+invoiceV1ServiceBuilderInstance.setConfigSchema(invoiceServiceV1ConfigSchema)
+
+export const invoiceV1ServiceBuilder = invoiceV1ServiceBuilderInstance
 ```
+
+[`ServiceBuilder.setConfigSchema(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#setconfigschema)
+binds the versioned service configuration contract before definitions or an
+instance are resolved. The generated separate statement also preserves the
+builder instance's inferred config type for later registration.
 
 `ServiceInfoType` supplies the service name, description, and version. The
 service constructor validates that identity when an instance is created, so a

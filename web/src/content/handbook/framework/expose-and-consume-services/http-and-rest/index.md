@@ -14,6 +14,47 @@ The first decision is deployment topology, because it changes how Hono learns
 which routes exist. Read [HTTP runtime architecture and startup](/handbook/framework/expose-and-consume-services/http-and-rest/runtime-architecture/)
 before wiring the server.
 
+## Choose the HTTP task
+
+| You need to | Continue with |
+| --- | --- |
+| Compose one process with business services and Hono | [Run Hono in a monolith](/handbook/framework/expose-and-consume-services/http-and-rest/run-hono-in-a-monolith/) |
+| Run Hono as a separately deployed gateway | [Deploy Hono as an independent service](/handbook/framework/expose-and-consume-services/http-and-rest/deploy-hono-independently/) |
+| Choose sync, queued, stream, or attached-Harness projection | [Map commands, streams, queues, and agents](/handbook/framework/expose-and-consume-services/http-and-rest/map-commands-streams-queues-and-agents/) |
+| Establish identity and pass principal/tenant metadata | [Authenticate and propagate identity](/handbook/framework/expose-and-consume-services/http-and-rest/authenticate-and-propagate-identity/) |
+| Understand payload, status, and error mapping | [Map content, responses, and errors](/handbook/framework/expose-and-consume-services/http-and-rest/map-content-responses-and-errors/) |
+| Publish a generated contract | [Generate OpenAPI contracts](/handbook/framework/expose-and-consume-services/http-and-rest/generate-openapi-contracts/) |
+| Set every Hono service option and add middleware | [Configure Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/) |
+| Add UI/static routes or implement a platform HTTP bridge | [Build a custom HTTP server](/handbook/framework/expose-and-consume-services/http-and-rest/build-a-custom-http-server/) |
+
+## Follow the HTTP projection lifecycle
+
+The command or stream definition remains the source of truth. Hono registers
+only definitions that declare HTTP exposure, applies protection to secure
+endpoints, converts the HTTP request into a PURISTA message, and sends that
+message through the EventBridge. The business service then runs the normal
+schema, guard, handler, and result lifecycle before Hono maps the result back to
+HTTP.
+
+```mermaid title="HTTP projection lifecycle"
+flowchart LR
+  A[Command or stream declares HTTP exposure] --> B[Hono registers the route and OpenAPI operation]
+  B --> C[Client sends an HTTP request]
+  C --> D{Endpoint protected?}
+  D -->|yes| E[Protection middleware authenticates and sets trusted identity]
+  D -->|no| F[Parse the declared HTTP representation]
+  E --> F
+  F --> G[Send a PURISTA message through the EventBridge]
+  G --> H[Service validates, authorizes, and executes]
+  H --> I{Execution result}
+  I -->|success| J[Map status, headers, and response body]
+  I -->|handled failure| K[Return RFC 9457 problem details]
+  I -->|unexpected failure| L[Log details and return a generic 500 problem]
+```
+
+Protection decides whether a caller is authenticated at the HTTP edge. A
+command guard still decides whether that caller may perform the business action.
+
 ## Expose one validated command
 
 `@purista/core` stores HTTP/OpenAPI metadata but does not listen on a port.
@@ -56,11 +97,15 @@ its service is registered.
 | [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema) | The request shape validated before the handler runs. `extendApi` retains the Zod validation while adding an OpenAPI title. | Keep externally supplied values in this schema. Identity and trusted routing metadata come from the HTTP/service context, not the JSON body. |
 | [`addOutputSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema) | The successful synchronous result contract and its OpenAPI schema. | The Hono projection validates the command result through the command runtime; use a stable, deliberately small public result. |
 | [`exposeAsHttpEndpoint(method, path, requestType?, requestEncoding?, responseType?, responseEncoding?, options?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#exposeashttpendpoint) | HTTP and OpenAPI metadata only; the Hono service later turns it into a route. | `method` is `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`; `path` is relative to Hono’s API mount and service version. The four optional representation arguments default to `application/json` and `utf-8`. `options.mode` defaults to `sync`; choose `async` only for an acceptance receipt. |
+| [`makeEndpointPublic()`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#makeendpointpublic) | Removes generated-route protection from this one command. | Generated endpoints are protected by default. Use this only for an intentionally anonymous operation such as login or a public health-oriented command. `disableHttpSecurity()` is deprecated. |
 | [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction) | The business implementation that the EventBridge invokes. | Its receiver is the service; use `async function`, not an arrow, when the handler needs the service receiver. See [create and validate a command](/handbook/framework/build-services/commands/create-and-validate/) for lifecycle hooks, errors, parameters, and response behavior. |
 
 The shown endpoint retains Hono’s default protected status. Configure the edge
-middleware and make an endpoint public only through the explicit security
-decision described in [authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/).
+middleware for protected endpoints. Add `.makeEndpointPublic()` only when the
+operation is intentionally anonymous; it is the explicit per-endpoint opt-out,
+not a global authentication switch. Continue with [authentication and
+authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/)
+for the trust boundary and business-authorization split.
 
 ## Enable a server adapter
 

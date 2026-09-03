@@ -1,0 +1,48 @@
+---
+title: Build a retrieval-augmented generation agent
+description: Let a native Harness agent search authorized data and stream a grounded answer through PURISTA.
+order: 210
+kind: chapter
+group: ai
+status: draft
+---
+
+This chapter teaches retrieval-augmented generation as a set of clear PURISTA
+boundaries. The model does not read the database directly, and application code
+does not call a tool on the model's behalf.
+
+```text title="The retrieval and answer path"
+protected PURISTA HTTP stream
+  -> mounted Harness answer workflow
+  -> retrieval agent chooses search_knowledge
+  -> PURISTA host-tool adapter
+  -> authorized Knowledge.searchKnowledge command
+  -> embedding and repository resources
+  -> answer workflow streams grounded text
+  -> AI SDK UI Message Stream v1
+```
+
+The previous ingestion chapter stored reviewed chunks and vectors. This chapter
+adds the read side. `Knowledge` still owns the records, the collection access
+rule, the search command, and the mounted Harness definition.
+
+## What you will build
+
+You will:
+
+1. generate an authorized `searchKnowledge` command;
+2. declare a provider-neutral Harness host-tool contract;
+3. bind that tool to the command by its PURISTA address;
+4. let a native retrieval agent decide when to call the tool;
+5. add one workflow that returns the same answer through `.run(...)` or
+   `.stream(...)`;
+6. expose the stream as AI SDK UI Message Stream v1;
+7. compose Identity, Knowledge, Hono, StateStore, PostgreSQL, and the React UI
+   into a runnable application; and
+8. test authorization, tool choice, grounding, and the wire protocol without a
+   paid model or database.
+
+The complete focused source is in `examples/banking/chapters/rag-agent`. Its
+Compose file starts the only external dependency.
+
+Start with [Declare an authorized search tool](./build/declare-search-tool/).

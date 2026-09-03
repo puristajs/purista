@@ -1,7 +1,7 @@
 ---
 title: Commands, events, and execution flow
 description: Choose synchronous, event-driven, streaming, or queued execution based on the caller's required outcome.
-order: 230
+order: 240
 ---
 
 Choose the primitive from the caller's contract, not from the code you already have.

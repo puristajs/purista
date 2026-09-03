@@ -1,0 +1,40 @@
+---
+title: Install the Guardrails package
+description: Add the optional Harness content-control package without changing the PURISTA service mount.
+order: 191
+kind: lesson
+status: draft
+---
+
+Guardrails are an optional Harness capability. Install their package in the
+application that owns the Support Harness definition.
+
+```bash title="Install Harness Guardrails" replay="project"
+npm install --save-exact @purista/harness-guardrails@3.0.0
+```
+
+No new PURISTA service, command, or mount is needed. The existing `Support`
+service still owns one Harness definition and one mount. Guardrails are part of
+the native agent definition, while the PURISTA command continues to invoke the
+published target through EventBridge.
+
+Move the classification schemas into a small shared file. This avoids an import
+cycle when both the agent and its guardrail actions need the same exact
+contracts.
+
+```ts title="src/harness/support/agent/classifySupportMessage/schema.ts" write
+import { z } from 'zod'
+
+export const classifySupportMessageInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classifySupportMessageOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+```
+
+Continue with [Block unsafe input](./input/).

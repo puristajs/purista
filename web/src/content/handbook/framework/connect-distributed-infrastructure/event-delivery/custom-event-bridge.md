@@ -43,7 +43,6 @@ export abstract class AcmeEventBridgeBase extends EventBridgeBaseClass<AcmeBridg
       },
     }
   }
-
 }
 ```
 
@@ -51,9 +50,8 @@ This abstract base configures only the shared observability and capability
 contract. A concrete subclass must implement the complete `EventBridge`
 interface before it can be passed to a service. A partly implemented bridge can
 acknowledge a command, lose a response, or claim durable delivery without a
-recoverable consumer; it is not a production bridge. Use the generated
-[Framework API reference](/handbook/api/) as the typed method surface while
-implementing it.
+recoverable consumer; it is not a production bridge. Use the exact interface
+links below as the typed method surface while implementing it.
 
 ## Implement the complete transport boundary
 
@@ -64,6 +62,31 @@ implementing it.
 | Streams | `openStream`, `registerStream`, `unregisterStream` | Implement only when incremental frames, final delivery, cancellation, draining, and late frames can all follow the declared stream capabilities. |
 | Events and subscriptions | `emitMessage`, `registerSubscription`, `unregisterSubscription` | Serialize the full message envelope, recover registrations after reconnect, and preserve the declared acknowledgement and failure model. |
 | Operator controls | `getInFlightExecutionCount`, `getInFlightExecutionCounts`, `getPausedSubscriptionConsumers`, `resumeSubscriptionConsumer` | Report the runtime state truthfully; do not return empty state when the adapter can pause or strand a consumer. |
+
+Exact interface lookups:
+
+- lifecycle: [`start`](/handbook/api/interfaces/_purista_core.EventBridge/#start),
+  [`isReady`](/handbook/api/interfaces/_purista_core.EventBridge/#isready),
+  [`isHealthy`](/handbook/api/interfaces/_purista_core.EventBridge/#ishealthy), and
+  [`destroy`](/handbook/api/interfaces/_purista_core.EventBridge/#destroy);
+- commands: [`invoke`](/handbook/api/interfaces/_purista_core.EventBridge/#invoke),
+  [`registerCommand`](/handbook/api/interfaces/_purista_core.EventBridge/#registercommand), and
+  [`unregisterCommand`](/handbook/api/interfaces/_purista_core.EventBridge/#unregistercommand);
+- streams: [`openStream`](/handbook/api/interfaces/_purista_core.EventBridge/#openstream),
+  [`registerStream`](/handbook/api/interfaces/_purista_core.EventBridge/#registerstream), and
+  [`unregisterStream`](/handbook/api/interfaces/_purista_core.EventBridge/#unregisterstream);
+- events/subscriptions: [`emitMessage`](/handbook/api/interfaces/_purista_core.EventBridge/#emitmessage),
+  [`registerSubscription`](/handbook/api/interfaces/_purista_core.EventBridge/#registersubscription), and
+  [`unregisterSubscription`](/handbook/api/interfaces/_purista_core.EventBridge/#unregistersubscription); and
+- operations: [`getInFlightExecutionCount`](/handbook/api/interfaces/_purista_core.EventBridge/#getinflightexecutioncount),
+  [`getInFlightExecutionCounts`](/handbook/api/interfaces/_purista_core.EventBridge/#getinflightexecutioncounts),
+  [`getPausedSubscriptionConsumers`](/handbook/api/interfaces/_purista_core.EventBridge/#getpausedsubscriptionconsumers), and
+  [`resumeSubscriptionConsumer`](/handbook/api/interfaces/_purista_core.EventBridge/#resumesubscriptionconsumer).
+
+The shared constructor and capability contracts are
+[`EventBridgeBaseClass`](/handbook/api/classes/_purista_core.EventBridgeBaseClass/),
+[`EventBridgeConfig`](/handbook/api/types/_purista_core.EventBridgeConfig/), and
+[`EventBridgeCapabilities`](/handbook/api/types/_purista_core.EventBridgeCapabilities/).
 
 `registerCommand` receives the target address, handler callback, definition
 metadata, and definition-level bridge configuration. `registerStream` receives

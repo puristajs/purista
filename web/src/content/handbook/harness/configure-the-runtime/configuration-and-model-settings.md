@@ -74,6 +74,17 @@ provider-neutral names at the model alias. Omit a field to preserve the selected
 model and endpoint default. The Harness forwards a configured field; it cannot
 make an unsupported provider, endpoint, or model accept it.
 
+Both registration forms accumulate and reject duplicate alias IDs:
+
+| Method | Use it for |
+| --- | --- |
+| [`.model(id, alias)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#model) | One inline alias with literal ID inference. |
+| [`.models(aliases)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | A non-empty, already typed group of aliases. |
+
+Portable definitions use `.requireModel(...)` or `.requireModels(...)`
+instead. Concrete model registrations and portable requirements cannot be
+mixed in one definition.
+
 | Harness setting | First-party request mapping | Important limit |
 | --- | --- | --- |
 | `maxTokens` | OpenAI Chat Completions: `max_tokens` or configured `max_completion_tokens`; OpenAI Responses: `max_output_tokens`; Gemini: `maxOutputTokens`; Anthropic: `max_tokens`; Bedrock: `inferenceConfig.maxTokens`; Azure Foundry: `max_tokens`. | This is a ceiling, not a promise of exactly that many visible words. OpenAI Responses includes reasoning tokens in its limit. Anthropic receives `1024` when no value is configured. |
@@ -148,6 +159,7 @@ documented default; a value of `0` disables only `runTimeoutMs`.
 | `decisionTimeoutMs` | `10_000` | A guardrail, policy, or audit callback has a shorter safety budget. | An expired decision fails the control path. |
 | `skillTimeoutMs` | `60_000` | Skill loading or reading needs a bounded budget. | Keep it finite; a skill is input, not a trusted execution authority. |
 | `historyWindow` | all non-system messages | The model needs less transient conversation context. | This changes what reaches the model, not what durable history retains. Use `historyRetention` for storage bounds. |
+| `contextProjection` | disabled | Retried provider calls should prune only oversized tool results from transient model context. | This affects retry context, not persisted history or tool output. Invalid byte budgets and head/tail combinations fail composition. |
 | `historyRetention` | disabled | Persisted session history needs finite turn and byte bounds. | It requires storage with atomic message replacement; see [bound conversation history](/handbook/harness/manage-context-and-state/conversation-history/). |
 | `delegation` | disabled | Workflows should have a default child-agent policy. | A workflow-level policy can narrow or override these budgets; see [build a workflow](/handbook/harness/orchestrate-work/workflows/). |
 
@@ -165,6 +177,12 @@ documented default; a value of `0` disables only `runTimeoutMs`.
 | `file_input` | The application has authorized and prepared a file for the provider. | Unscanned or unauthorized attachments. |
 | `embeddings` | Retrieval, similarity, or indexing generates vectors. | A normal agent loop with no vector operation. |
 | `rerank` | The application orders an existing candidate set. | A request with no candidates to order. |
+| `image_generation` | The application generates images and publishes them through an artifact store. | Image understanding; use `vision_input` for that. |
+| `speech_generation` | The application converts text to published speech audio. | Audio understanding; use `audio_input` for that. |
+| `video_generation` | The application creates a completed video or consumes video-job progress. | Video input or a normal text stream. |
+
+See [call model operations](../call-model-operations/) for the exact aggregate,
+streaming, embedding, reranking, media, and artifact contracts.
 
 ## Choose a retry policy for the caller
 
