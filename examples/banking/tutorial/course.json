@@ -419,6 +419,7 @@
         "ai-guardrails/build/install",
         "ai-guardrails/build/input",
         "ai-guardrails/build/output",
+		"ai-guardrails/build/integrate",
         "ai-guardrails/testing/test-guardrails"
       ]
     },

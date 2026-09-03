@@ -7,8 +7,7 @@ group: ai
 status: draft
 ---
 
-This chapter adds content controls to the classifier from
-[Add a classification agent](/tutorials/classification-agent/). An input rail
+This chapter builds a small classifier with content controls. An input rail
 blocks one instruction-override pattern before the provider runs. An output
 rail removes long card-like digit sequences from the final structured reason
 before it reaches the caller.
@@ -27,11 +26,18 @@ validated agent input
   -> PURISTA caller
 ```
 
-You will install the optional package, define typed actions and ordered flows,
-attach them to the native agent, and prove that a blocked request never reaches
-the model.
+You will generate the complete PURISTA and Harness structure, install the
+optional package, define typed actions and ordered flows, attach them to the
+native agent, protect its published address, and prove that blocked content or
+denied business access never reaches the model.
 
 The focused source is retained in
 `examples/banking/chapters/ai-guardrails`.
 
-Start with [Install the Guardrails package](./build/install/).
+1. [Generate the guarded agent project](./build/install/)
+2. [Block unsafe input](./build/input/)
+3. [Redact final output](./build/output/)
+4. [Mount and invoke the guarded agent](./build/integrate/)
+5. [Test authorization and content enforcement](./testing/test-guardrails/)
+
+Start with [Generate the guarded agent project](./build/install/).

@@ -1,26 +1,38 @@
 ---
-title: Install the Guardrails package
-description: Add the optional Harness content-control package without changing the PURISTA service mount.
+title: Generate the guarded agent project
+description: Create the Support service, agent, and command, then install the optional Harness Guardrails package.
 order: 191
 kind: lesson
 status: draft
 ---
 
-Guardrails are an optional Harness capability. Install their package in the
-application that owns the Support Harness definition.
+You can follow this chapter without completing the classification chapter.
+Start from the project created in
+[Create a PURISTA project](/tutorials/create-project/) and install the public
+packages used by this focused example.
 
-```bash title="Install Harness Guardrails" replay="project"
-npm install --save-exact @purista/harness-guardrails@3.0.0
+```bash title="Install the published packages" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-guardrails@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 typescript@7.0.2 vitest@4.1.10 tsx@4.23.12 @biomejs/biome@2.5.8
 ```
 
-No new PURISTA service, command, or mount is needed. The existing `Support`
-service still owns one Harness definition and one mount. Guardrails are part of
-the native agent definition, while the PURISTA command continues to invoke the
-published target through EventBridge.
+Use the PURISTA CLI to create the capability owner, its native Harness agent,
+and the application command that will invoke the published agent address.
 
-Move the classification schemas into a small shared file. This avoids an import
-cycle when both the agent and its guardrail actions need the same exact
-contracts.
+```bash title="Generate Support, the agent, and its caller" replay="project"
+npm run add:service -- support --description "Own support conversations and support automation" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with content guardrails" --non-interactive
+npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the guarded agent" --non-interactive
+```
+
+The agent generator creates the native module, the service-level Harness
+composition, the mount policy, and the `.mountHarness(...)` registration. The
+command generator creates and registers the command builder. We will replace
+their placeholders in the following pages.
+
+Move the input and output contracts into a shared file. Both the agent and the
+guardrail actions need the same schemas, and this layout avoids an import
+cycle.
 
 ```ts title="src/harness/support/agent/classifySupportMessage/schema.ts" write
 import { z } from 'zod'
@@ -36,5 +48,8 @@ export const classifySupportMessageOutputSchema = z.strictObject({
 	reason: z.string().trim().min(1).max(240),
 })
 ```
+
+At this checkpoint, `npm run build` may still report errors in the generated
+agent imports. The next page replaces that agent file and adds its input rail.
 
 Continue with [Block unsafe input](./input/).
