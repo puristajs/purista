@@ -1,15 +1,3 @@
----
-title: Declare the native tool and agent
-description: Define a portable model-facing tool contract and attach it to a structured native Harness agent.
-order: 232
-kind: lesson
-status: draft
----
-
-Replace the generated agent file. This file describes what the model may ask
-the host to do. It does not know that PURISTA will implement the tool.
-
-```ts title="src/harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts" write
 import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
 import { z } from 'zod'
 
@@ -67,30 +55,3 @@ export const answerTransactionQuestionAgent = defineHarnessModule<PrimaryModelSt
 		},
 	},
 )
-```
-
-`lookup_transaction` is only a contract here: name, description, input, and
-output. The model chooses when to call it. The agent handler does not call a
-tool manually.
-
-Compose the module in the generated service-level Harness definition.
-
-```ts title="src/harness/support/supportHarness.ts" write
-import { defineHarness } from '@purista/harness'
-import { answerTransactionQuestionAgent } from './agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
-
-export const supportHarness = defineHarness({ name: 'support-tools' })
-	.requireModel('primary', { capabilities: ['object', 'tool_use'] })
-	.use(answerTransactionQuestionAgent)
-	.define()
-```
-
-The definition remains usable by native Harness. A host must supply a model
-for `primary` and an implementation for `lookup_transaction`. PURISTA will
-supply both when the same definition is mounted.
-
-```bash title="Check the portable definition" replay="project"
-npm run build
-```
-
-Continue with [Build the guarded owning command](./bind-command/).

@@ -1,24 +1,48 @@
 ---
 title: Give an agent PURISTA tools
-description: Bind native Harness tool contracts to address-first commands, streams, queues, and events without losing caller identity.
+description: Let a native Harness agent call guarded PURISTA capabilities through typed, address-first host-tool bindings.
 order: 230
 kind: chapter
 group: ai
 status: draft
 ---
 
-This chapter teaches the boundary between a model-facing Harness tool and the
-PURISTA capability that performs the real work.
+An agent often needs information that belongs to another service. The agent
+must not import that service, open its database, or trust identity proposed by
+the model. In PURISTA, the tool implementation invokes the owning service by
+address through EventBridge. The command's business guards still decide
+whether the caller may read the requested data.
 
-The Example Bank support agent will read a transaction summary. The model may
-choose the tool and supply an account and transaction id. It never supplies the
-trusted tenant or principal. The mount binding sends the request through
-EventBridge to a guarded `Transaction` command with the caller identity intact.
+This chapter adds one read-only tool to the Example Bank support agent. The
+banking story stays small so the framework boundary is easy to see:
 
-1. [Declare a native host-tool contract](./build/declare-host-tool/)
-2. [Bind the tool to a PURISTA command](./build/bind-command/)
-3. [Limit effects and make retries safe](./build/limit-effects/)
-4. [Test identity, events, and denied effects](./testing/test-tools/)
+```text title="Execution path"
+Support command
+  -> Support / 1 / answer_transaction_question agent (EventBridge)
+  -> model chooses lookup_transaction
+  -> typed PURISTA host-tool binding
+  -> Transaction / 1 / getTransactionSummary command (EventBridge)
+  -> account business guard
+  -> injected transaction reader
+```
 
-The retained source is in `examples/banking/chapters/agent-tools`. Its
-integration test uses a real `DefaultEventBridge` and a strict fake model.
+The model supplies `accountId` and `transactionId` as untrusted tool input.
+PURISTA supplies `tenantId` and `principalId` from the original message. The
+tool cannot replace those trusted values.
+
+## What you will build
+
+You will:
+
+1. [generate the two services, the agent, and both commands](./setup/scaffold/);
+2. [declare a portable native Harness tool and agent](./build/declare-host-tool/);
+3. [build the guarded owning command](./build/bind-command/);
+4. [bind the host tool to that command](./build/mount-tool/);
+5. [invoke the mounted agent through a normal PURISTA command](./build/invoke-agent/); and
+6. [test the native Harness and PURISTA boundaries](./testing/test-tools/).
+
+The retained source is in `examples/banking/chapters/agent-tools`. Its default
+demo uses a strict fake model, so a learner can run the complete path without a
+provider account or network request.
+
+Start with [Generate the capability owners](./setup/scaffold/).

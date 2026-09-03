@@ -10,7 +10,12 @@ npm install
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The integration test uses a strict fake model and a real `DefaultEventBridge`.
-It needs no model key or external service.
+The default demo and tests use a strict fake model. The integration test also
+uses a real `DefaultEventBridge`, so the complete model-tool-command path needs
+no model key or external service.
+
+To try the same composition with OpenAI, copy `.env.example`, set
+`OPENAI_API_KEY`, and run `npm start`.

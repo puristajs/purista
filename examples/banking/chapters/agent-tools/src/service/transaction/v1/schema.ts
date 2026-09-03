@@ -5,9 +5,7 @@ export const getTransactionSummaryPayloadSchema = z.strictObject({
 	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
 })
 
-export const getTransactionSummaryParameterSchema = z.strictObject({
-	idempotencyKey: z.string().regex(/^tool_[a-f0-9]{64}$/),
-})
+export const getTransactionSummaryParameterSchema = z.strictObject({})
 
 export const getTransactionSummaryOutputSchema = z.strictObject({
 	transactionId: z.string(),

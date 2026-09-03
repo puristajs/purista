@@ -1,0 +1,106 @@
+---
+title: Bind the tool to the command
+description: Implement the portable host-tool contract with a declared PURISTA command invocation and protect the published agent.
+order: 234
+kind: lesson
+status: draft
+---
+
+The native Harness definition knows the tool contract. The Support mount now
+supplies the PURISTA implementation.
+
+First define the business policy used to publish the agent itself.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportQuestionPolicy {
+	canAsk(input: Readonly<{ tenantId: string; principalId: string }>): Promise<boolean>
+}
+```
+
+Declare that resource on the generated Support service builder.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportQuestionPolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support conversations and support automation',
+}).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
+```
+
+Replace the generated mount file with the complete binding and mount policy.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import {
+	getTransactionSummaryOutputSchema,
+	getTransactionSummaryParameterSchema,
+	getTransactionSummaryPayloadSchema,
+} from '../../../transaction/v1/schema.js'
+import type { SupportQuestionPolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
+
+export { supportHarness }
+
+const lookupTransactionTool = supportV1ServiceBuilder
+	.getHarnessHostToolBuilder(supportHarness.catalog.hostTools.lookup_transaction)
+	.canInvoke(
+		'Transaction',
+		'1',
+		'getTransactionSummary',
+		getTransactionSummaryOutputSchema,
+		getTransactionSummaryPayloadSchema,
+		getTransactionSummaryParameterSchema,
+	)
+	.setHandler(async (context, input) => {
+		const { tenantId: _tenantId, ...summary } = await context.service.Transaction['1'].getTransactionSummary(input, {})
+		return summary
+	})
+	.getDefinition()
+
+export const supportHarnessPolicy = {
+	publish: { agents: ['answer_transaction_question'], workflows: [] },
+	hostTools: { lookup_transaction: lookupTransactionTool },
+	targets: {
+		agents: {
+			answer_transaction_question: {
+				beforeGuards: {
+					mayUseSupportAgent: async (
+						context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
+					) => {
+						const { tenantId, principalId } = context.identity
+						if (!tenantId || !principalId) {
+							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+						}
+						if (!(await context.resources.supportQuestionPolicy.canAsk({ tenantId, principalId }))) {
+							throw new HandledError(StatusCode.Forbidden, 'Support agent access is not allowed')
+						}
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+
+`.canInvoke(...)` is the capability declaration. It gives this tool handler a
+typed `context.service.Transaction['1'].getTransactionSummary(...)` function.
+That call goes through EventBridge and carries the current trace, correlation,
+tenant, and principal values. The handler does not accept identity from the
+model input.
+
+The published agent has its own business guard because callers can address a
+mounted target directly. The Transaction command keeps its separate account
+guard because every caller of that data capability must pass the same rule.
+
+For a tool that only forwards one command without changing input or output,
+`commandAsHarnessTool(...)` is a shorter adapter. The builder used here is
+appropriate because the tool removes the internal `tenantId` field from the
+model-visible result. The same builder can explicitly declare streams, queue
+jobs, agents, workflows, and emitted events when a tool really needs them.
+
+Continue with [Invoke the agent from a command](./invoke-agent/).

@@ -1,0 +1,104 @@
+---
+title: Invoke the agent from a command
+description: Add a normal application command that calls the mounted agent through its declared EventBridge address.
+order: 235
+kind: lesson
+status: draft
+---
+
+The agent is now a published PURISTA capability. Application code should call
+it by address. Replace the generated Support command builder with this code.
+
+```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.ts" write
+import {
+	answerTransactionQuestionInputSchema,
+	answerTransactionQuestionOutputSchema,
+} from '../../../../../harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const answerTransactionQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('answerTransactionQuestion', 'Answer a support question with authorized PURISTA tools')
+	.addPayloadSchema(answerTransactionQuestionInputSchema)
+	.addOutputSchema(answerTransactionQuestionOutputSchema)
+	.canInvokeAgent(
+		'Support',
+		'1',
+		'answer_transaction_question',
+		supportHarness.contracts.agents.answer_transaction_question,
+	)
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].answer_transaction_question.run(payload, {
+			sessionId: `support-question:${payload.questionId}`,
+		})
+		if (outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
+		return outcome.output
+	})
+```
+
+`canInvokeAgent(...)` declares one versioned address and adds only that target
+to `context.agent`. The call crosses EventBridge even though the command and
+agent are mounted on the same Support service instance. The EventBridge may
+route a later deployment to another instance without changing this command.
+
+Register the command and keep the one generated Harness mount.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { answerTransactionQuestionCommandBuilder } from './command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(answerTransactionQuestionCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+The command uses aggregate `.run(...)` because its contract returns one
+structured answer. A chat UI that needs status and token events should expose a
+stream boundary and consume `.stream(...)`; that is covered by the RAG and
+streaming AI chapters.
+
+At application startup, inject the database adapter, both policies, and the
+model provider. Definitions contain aliases and contracts; the composition
+root owns concrete infrastructure.
+
+```ts title="src/createSupportApplication.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+
+export async function createSupportApplication(
+	eventBridge: EventBridge,
+	logger: Logger,
+	resources: Readonly<{
+		accountReadPolicy: AccountReadPolicy
+		transactionSummaryReader: TransactionSummaryReader
+		supportQuestionPolicy: SupportQuestionPolicy
+	}>,
+	model: Readonly<{ provider: ModelProvider; model: string }>,
+) {
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			accountReadPolicy: resources.accountReadPolicy,
+			transactionSummaryReader: resources.transactionSummaryReader,
+		},
+	})
+	const support = await supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
+		ai: {
+			models: { primary: model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+	await transaction.start()
+	await support.start()
+	return { support, transaction }
+}
+```
+
+Continue with [Test all three boundaries](../testing/test-tools/).

@@ -121,6 +121,17 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   Later steps identify that existing artifact; do not repeatedly generate it.
 - Long chapters use step pages. A landing page or step must teach something,
   not merely list links or repeat the previous page.
+- Maintain a chapter artifact ledger while authoring. For every CLI-generated
+  artifact, record the generated path, the page that replaces or extends it,
+  the file that registers it, the composition-root dependency that makes it
+  run, the focused test that proves it, and the first observable result. Do not
+  publish a definition, handler, resource, model alias, mount, or invocation
+  that is absent from this end-to-end trace.
+- Treat each code fence as a reproducible edit. Mark whether it creates,
+  replaces, or extends the titled file; include required imports and nearby
+  registration; and never use an undeclared placeholder in a command the
+  learner is expected to run. At each page boundary, the exit state must be the
+  next page's entry state.
 - Keep a short required path, nesting optional variations and deeper checks
   beneath their owner. Do not require unrelated chapters or grow the teaching
   domain into a production bank.
@@ -155,6 +166,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   Every published mounted target that can be called directly through
   EventBridge carries its own business guard; a wrapper command guard does not
   protect the target address.
+- Before accepting an AI integration chapter, trace all of these artifacts:
+  portable native target, service-level Harness composition, published mount
+  policy, direct-target business guard, host-tool implementation when used,
+  owning PURISTA capability and guard, address-first caller, runtime model and
+  resource bindings, deterministic native Harness test, focused PURISTA helper
+  test, and real EventBridge integration test. Omit only items the chapter does
+  not claim to teach, and state the reason in internal review evidence.
 - Teach RAG as one complete index-to-answer path. Ingestion remains deterministic
   PURISTA command or worker logic, but embeddings come from a declared Harness
   model alias through `canUseHarnessModel(...)`; do not invent an embedding

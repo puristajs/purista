@@ -1,7 +1,7 @@
 import {
 	answerTransactionQuestionInputSchema,
 	answerTransactionQuestionOutputSchema,
-} from '../../../../../harness/support/supportHarness.js'
+} from '../../../../../harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
 import { supportHarness } from '../../harness/supportHarnessMount.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -15,8 +15,6 @@ export const answerTransactionQuestionCommandBuilder = supportV1ServiceBuilder
 		'answer_transaction_question',
 		supportHarness.contracts.agents.answer_transaction_question,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/transaction-question')
 	.setCommandFunction(async function (context, payload) {
 		const outcome = await context.agent.Support['1'].answer_transaction_question.run(payload, {
 			sessionId: `support-question:${payload.questionId}`,

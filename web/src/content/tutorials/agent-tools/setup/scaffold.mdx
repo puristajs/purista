@@ -1,0 +1,78 @@
+---
+title: Generate the capability owners
+description: Install the published packages and use the PURISTA CLI to create the services, commands, and native Harness agent.
+order: 231
+kind: lesson
+status: draft
+---
+
+Start from the application created in
+[Create a PURISTA project](/tutorials/create-project/). Install the packages by
+their public npm names. The tutorial never copies packages from the monorepo.
+
+```bash title="Install PURISTA and Harness" replay="project"
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 typescript@7.0.2 vitest@4.1.10 tsx@4.23.12 @biomejs/biome@2.5.8
+```
+
+Make sure the generated project exposes the CLI scripts used below.
+
+```json title="package.json" write
+{
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	}
+}
+```
+
+Create two narrow capability owners. `Support` owns support automation.
+`Transaction` owns transaction records and the rules for reading them.
+
+```bash title="Generate the services" replay="project"
+npm run add:service -- support --description "Own support conversations and support automation" --non-interactive
+npm run add:service -- transaction --description "Own transaction records and transaction business rules" --non-interactive
+```
+
+Generate the native agent and the two commands before editing their generated
+files.
+
+```bash title="Generate the agent and commands" replay="project"
+npm run add:agent -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized transaction data" --non-interactive
+npm run add:command -- get-transaction-summary --service transaction --service-version 1 --description "Read an authorized transaction summary" --non-interactive
+npm run add:command -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized PURISTA tools" --non-interactive
+```
+
+The agent generator creates a native Harness module, a service-level Harness
+composition, a mount policy, and the `.mountHarness(...)` registration on
+`Support`. The command generators create command builders and register their
+definitions on the correct services. We will replace the placeholder schemas
+and handlers, while keeping that generated structure.
+
+At the end of this page, these are the important roots:
+
+```text title="Generated structure"
+src/
+├── harness/support/
+│   ├── agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts
+│   └── supportHarness.ts
+└── service/
+    ├── support/v1/
+    │   ├── command/answerTransactionQuestion/
+    │   ├── harness/supportHarnessMount.ts
+    │   └── supportV1Service.ts
+    └── transaction/v1/
+        ├── command/getTransactionSummary/
+        └── transactionV1Service.ts
+```
+
+Run `npm run build` now. Generated placeholder code should compile before you
+replace it.
+
+Continue with [Declare the native tool and agent](../../build/declare-host-tool/).

@@ -462,9 +462,11 @@
         "classification-agent"
       ],
       "pages": [
+		"agent-tools/setup/scaffold",
         "agent-tools/build/declare-host-tool",
         "agent-tools/build/bind-command",
-        "agent-tools/build/limit-effects",
+		"agent-tools/build/mount-tool",
+		"agent-tools/build/invoke-agent",
         "agent-tools/testing/test-tools"
       ]
     },
