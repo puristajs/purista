@@ -428,6 +428,7 @@
         "classification-agent/build/define",
 		"classification-agent/build/mount",
         "classification-agent/build/invoke",
+		"classification-agent/build/compose-runtime",
 		"classification-agent/build/run-application",
 		"classification-agent/testing/test-classification",
 		"classification-agent/testing/test-eventbridge"
@@ -636,9 +637,11 @@
       "pages": [
 		"agent-tools/setup/scaffold",
         "agent-tools/build/declare-host-tool",
+		"agent-tools/build/transaction-resource",
         "agent-tools/build/bind-command",
 		"agent-tools/build/mount-tool",
 		"agent-tools/build/invoke-agent",
+		"agent-tools/build/compose-runtime",
 		"agent-tools/build/run-application",
 		"agent-tools/testing/test-tools",
 		"agent-tools/testing/test-eventbridge"

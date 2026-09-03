@@ -41,12 +41,14 @@ You will:
 
 1. [create the project and generate every Framework artifact](./setup/scaffold/);
 2. [declare the portable model-facing tool and agent](./build/declare-host-tool/);
-3. [implement the guarded Transaction command](./build/bind-command/);
-4. [bind the tool to the command at the Support mount](./build/mount-tool/);
-5. [invoke the mounted agent from a Support command](./build/invoke-agent/);
-6. [wire the runtime and run the complete path](./build/run-application/);
-7. [test each small boundary](./testing/test-tools/); and
-8. [prove both EventBridge hops together](./testing/test-eventbridge/).
+3. [define the Transaction service boundary](./build/transaction-resource/);
+4. [implement the guarded Transaction command](./build/bind-command/);
+5. [bind the tool to the command at the Support mount](./build/mount-tool/);
+6. [invoke the mounted agent from a Support command](./build/invoke-agent/);
+7. [compose the PURISTA runtime](./build/compose-runtime/);
+8. [run the complete path](./build/run-application/);
+9. [test each small boundary](./testing/test-tools/); and
+10. [prove both EventBridge hops together](./testing/test-eventbridge/).
 
 Every code block that creates or replaces a file contains the complete file.
 The retained source is in `examples/banking/chapters/agent-tools` and follows

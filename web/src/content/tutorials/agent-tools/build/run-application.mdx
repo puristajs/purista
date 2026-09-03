@@ -1,113 +1,14 @@
 ---
-title: Wire and run the application
-description: Bind concrete resources and a model at startup, then call the complete agent-tool-command path through EventBridge.
-order: 236
+title: Run the complete application
+description: Use deterministic local adapters first, then optionally replace only the model binding with OpenAI.
+order: 238
 kind: lesson
 status: draft
 ---
 
-Definitions describe what the application can do. The composition root chooses
-the concrete EventBridge, model provider, policies, and transaction reader for
-this process.
-
-This page first creates a reusable application factory. It then adds a
-credential-free demo and an optional OpenAI entry point. Both run the same
-PURISTA services and Harness definition.
-
-## Create the service factory
-
-Create the complete file below. It receives infrastructure as arguments so
-tests and demos can inject safe local implementations.
-
-```ts title="src/createSupportApplication.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
-import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
-import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
-import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
-
-export async function createSupportApplication(
-	eventBridge: EventBridge,
-	logger: Logger,
-	resources: Readonly<{
-		accountReadPolicy: AccountReadPolicy
-		transactionSummaryReader: TransactionSummaryReader
-		supportQuestionPolicy: SupportQuestionPolicy
-	}>,
-	model: Readonly<{ provider: ModelProvider; model: string }>,
-) {
-	const transaction = await transactionV1Service.getInstance(eventBridge, {
-		logger,
-		resources: {
-			accountReadPolicy: resources.accountReadPolicy,
-			transactionSummaryReader: resources.transactionSummaryReader,
-		},
-	})
-	const support = await supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
-		ai: {
-			models: { primary: model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-	await transaction.start()
-	await support.start()
-	return { support, transaction }
-}
-```
-The Transaction instance receives only its database reader and account policy.
-The Support instance receives its question policy and an `ai.models.primary`
-binding. `contentCaptureMode: 'NO_CONTENT'` keeps prompts and model output out
-of telemetry by default.
-
-## Add one address-first caller
-
-Create a small terminal adapter. It constructs a normal PURISTA invocation for
-`Support / 1 / answerTransactionQuestion`. In an HTTP application, the Hono
-webserver would construct the same message from the command's endpoint metadata.
-
-```ts title="src/invokeSupportQuestion.ts" write
-import { type EventBridge, getNewInstanceId } from '@purista/core'
-import type { z } from 'zod'
-import type {
-	answerTransactionQuestionInputSchema,
-	answerTransactionQuestionOutputSchema,
-} from './harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
-
-type Question = z.infer<typeof answerTransactionQuestionInputSchema>
-type Answer = z.infer<typeof answerTransactionQuestionOutputSchema>
-
-/** A small outer adapter used by the terminal demos to address the Support command. */
-export function invokeSupportQuestion(
-	eventBridge: EventBridge,
-	identity: Readonly<{ tenantId: string; principalId: string }>,
-	payload: Question,
-) {
-	return eventBridge.invoke<Answer>({
-		contentType: 'application/json',
-		contentEncoding: 'utf-8',
-		tenantId: identity.tenantId,
-		principalId: identity.principalId,
-		sender: {
-			serviceName: 'TutorialClient',
-			serviceVersion: '1',
-			serviceTarget: 'askSupport',
-			instanceId: getNewInstanceId(),
-		},
-		receiver: {
-			serviceName: 'Support',
-			serviceVersion: '1',
-			serviceTarget: 'answerTransactionQuestion',
-		},
-		payload: { payload, parameter: {} },
-	})
-}
-```
-The identity values represent trusted server-side identity. A browser must not
-be allowed to choose these message fields directly. The authentication layer
-verifies a credential and adds them before invoking the command.
+The composition root is ready. First run it with deterministic local adapters.
+This gives you a reliable proof of the full integration before you spend money
+or debug provider credentials.
 
 ## Run the complete path without an API key
 

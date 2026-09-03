@@ -130,6 +130,10 @@ structural documentation check cannot replace this replay.
   Later steps identify that existing artifact; do not repeatedly generate it.
 - Long chapters use step pages. A landing page or step must teach something,
   not merely list links or repeat the previous page.
+- Split a page when it asks the reader to establish more than one independent
+  boundary, such as persistence plus command behavior, or runtime composition
+  plus provider operation. Give each page one named outcome and end it with a
+  build, test, request, or observable result before the next concept begins.
 - Maintain a chapter artifact ledger while authoring. For every CLI-generated
   artifact, record the generated path, the page that replaces or extends it,
   the file that registers it, the composition-root dependency that makes it

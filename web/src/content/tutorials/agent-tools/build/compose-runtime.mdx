@@ -1,0 +1,123 @@
+---
+title: Compose the PURISTA runtime
+description: Inject the EventBridge, service resources, and model binding through one reusable application factory.
+order: 237
+kind: lesson
+status: draft
+---
+
+The definitions are complete, but definitions do not start processes or choose
+infrastructure. The composition root supplies the concrete EventBridge,
+policies, transaction reader, and model provider used by this process.
+
+Keeping this wiring in a factory gives the demo, live entry point, and
+integration tests the same application shape. Only their injected adapters
+change.
+
+## Create the service factory
+
+Create `createSupportApplication.ts` at the root of `src`.
+
+```ts title="src/createSupportApplication.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+
+export async function createSupportApplication(
+	eventBridge: EventBridge,
+	logger: Logger,
+	resources: Readonly<{
+		accountReadPolicy: AccountReadPolicy
+		transactionSummaryReader: TransactionSummaryReader
+		supportQuestionPolicy: SupportQuestionPolicy
+	}>,
+	model: Readonly<{ provider: ModelProvider; model: string }>,
+) {
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			accountReadPolicy: resources.accountReadPolicy,
+			transactionSummaryReader: resources.transactionSummaryReader,
+		},
+	})
+	const support = await supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
+		ai: {
+			models: { primary: model },
+			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+		},
+	})
+	await transaction.start()
+	await support.start()
+	return { support, transaction }
+}
+```
+
+The Transaction instance receives only its reader and account policy. The
+Support instance receives only its question policy and the `primary` model
+binding required by `supportHarness`. This keeps service dependencies visible
+at startup.
+
+`contentCaptureMode: 'NO_CONTENT'` keeps prompts, tool arguments, and model
+output out of telemetry by default. Operational metadata can still be
+recorded.
+
+## Add an address-first caller
+
+Create a small terminal adapter for the demos. It invokes the Support command
+by service name, version, and target through EventBridge.
+
+```ts title="src/invokeSupportQuestion.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	answerTransactionQuestionInputSchema,
+	answerTransactionQuestionOutputSchema,
+} from './harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+
+type Question = z.infer<typeof answerTransactionQuestionInputSchema>
+type Answer = z.infer<typeof answerTransactionQuestionOutputSchema>
+
+/** A small outer adapter used by the terminal demos to address the Support command. */
+export function invokeSupportQuestion(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: Question,
+) {
+	return eventBridge.invoke<Answer>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'askSupport',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: {
+			serviceName: 'Support',
+			serviceVersion: '1',
+			serviceTarget: 'answerTransactionQuestion',
+		},
+		payload: { payload, parameter: {} },
+	})
+}
+```
+
+The identity here represents trusted server-side identity. In an HTTP
+application, authentication middleware verifies a credential and places its
+tenant and principal on the PURISTA message. A browser must not choose these
+fields directly.
+
+Verify the complete static wiring before starting it.
+
+```bash title="Verify the runtime composition" replay="project"
+npm run build
+```
+
+Continue with [Run the complete application](../run-application/).

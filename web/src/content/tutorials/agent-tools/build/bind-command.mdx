@@ -1,91 +1,15 @@
 ---
 title: Build the guarded owning command
-description: Keep transaction access and account authorization inside the Transaction service that owns them.
-order: 233
+description: Implement and test the command that reads one transaction after checking business access.
+order: 234
 kind: lesson
 status: draft
 ---
 
-The tool needs transaction data, but Support does not own that data. Build the
-read capability on `Transaction` first. The command will use an injected reader
-for persistence and an injected policy for business authorization.
+The previous step defined the Transaction service boundary. Now replace the
+generated command builder with its behavior. This command is the only operation
+the agent tool will be allowed to invoke.
 
-The example keeps both contracts small. A real database adapter can implement
-the same reader later without changing the command or agent.
-
-## Declare the injected resources
-
-Create the resource contracts below.
-
-```ts title="src/service/transaction/v1/TransactionResources.ts" write
-import type { z } from 'zod'
-import type { getTransactionSummaryOutputSchema } from './command/getTransactionSummary/schema.js'
-
-export type StoredTransactionSummary = z.output<typeof getTransactionSummaryOutputSchema>
-
-export interface TransactionSummaryReader {
-	getById(transactionId: string): Promise<StoredTransactionSummary | undefined>
-}
-
-export interface AccountReadPolicy {
-	canRead(input: Readonly<{ tenantId: string; principalId: string; accountId: string }>): Promise<boolean>
-}
-```
-`TransactionSummaryReader` is the database-facing port. `AccountReadPolicy`
-answers the business question “may this principal read this account?” Neither
-interface chooses infrastructure. Transaction records belong behind a database
-resource rather than in a PURISTA StateStore.
-
-## Replace the generated command schema
-
-Replace the generated schema beside the command. The command output includes
-`tenantId` because the after guard must verify the loaded record. The
-model-facing tool schema deliberately omits that internal field.
-
-```ts title="src/service/transaction/v1/command/getTransactionSummary/schema.ts" write
-import { z } from 'zod'
-
-export const getTransactionSummaryPayloadSchema = z.strictObject({
-	accountId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
-	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
-})
-
-export const getTransactionSummaryParameterSchema = z.strictObject({})
-
-export const getTransactionSummaryOutputSchema = z.strictObject({
-	transactionId: z.string(),
-	accountId: z.string(),
-	tenantId: z.string(),
-	status: z.enum(['pending', 'booked', 'rejected']),
-	amount: z.number(),
-	currency: z.string().length(3),
-})
-```
-The builder will infer its types from these Zod schemas, so the generated
-`types.ts` file is unused. Remove it now to keep one source of truth.
-
-```bash title="Remove unused Transaction command aliases" replay="project"
-rm src/service/transaction/v1/command/getTransactionSummary/types.ts
-```
-
-## Declare the resources on Transaction
-
-Replace the generated service builder with the complete definition below.
-`defineResource` makes each resource available as a typed property on command
-contexts. It does not create the concrete implementation.
-
-```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
-import { ServiceBuilder } from '@purista/core'
-import type { AccountReadPolicy, TransactionSummaryReader } from './TransactionResources.js'
-
-export const transactionV1ServiceBuilder = new ServiceBuilder({
-	serviceName: 'Transaction',
-	serviceVersion: '1',
-	serviceDescription: 'Owns transaction records and transaction business rules',
-})
-	.defineResource<'transactionSummaryReader', TransactionSummaryReader>()
-	.defineResource<'accountReadPolicy', AccountReadPolicy>()
-```
 ## Implement the command and its guards
 
 Replace the generated command builder. The before guard decides whether the
