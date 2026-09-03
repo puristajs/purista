@@ -35,6 +35,38 @@ const result = await context.agent.Support['1'].triage_ticket.run(input)
 const events = await context.agent.Support['1'].triage_ticket.stream(input)
 ```
 
+## Session identity and stored history
+
+Pass an application-owned logical `sessionId` when later calls should share a
+Harness conversation or run context:
+
+```ts title="Use one logical conversation id"
+const logicalSessionId = `support:${conversationId}`
+const result = await context.agent.Support['1'].triage_ticket.run(input, {
+  sessionId: logicalSessionId,
+})
+```
+
+The mounted runtime combines that value with trusted tenant and principal
+identity and stores the session under an opaque id. Two callers therefore do
+not share a session merely because they supply the same logical id.
+
+An authorized application command that reads or clears the same data directly
+through `HarnessStorage` must derive the identical storage id:
+
+```ts title="Resolve the mounted Harness storage id"
+import { createHarnessSessionStorageId } from '@purista/core'
+
+const storageSessionId = createHarnessSessionStorageId(
+  context.message,
+  `support:${conversationId}`,
+)
+const messages = await harnessStorage.listMessages(storageSessionId)
+```
+
+Use trusted message identity and apply a business guard before storage access.
+The logical or opaque session id is correlation data, not proof of authority.
+
 ## Aggregate HTTP
 
 Wrap `.run(...)` in a normal command, add the command schemas, and call

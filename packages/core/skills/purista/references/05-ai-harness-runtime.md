@@ -185,6 +185,14 @@ PURISTA StateStore owns supported application/session key-value state.
 resource owns transactional domain records. A sandbox/workspace owns execution
 files. Do not substitute one boundary for another.
 
+A mounted target accepts an application-owned logical `sessionId`, then scopes
+it with trusted tenant and principal identity before opening Harness storage.
+When an authorized application command must inspect or delete that same
+session through `HarnessStorage`, derive its opaque storage id with
+`createHarnessSessionStorageId(context.message, logicalSessionId)`. Do not
+duplicate the hashing algorithm, query storage with the logical id, or use the
+session id as authorization.
+
 ## Queue admission and retry
 
 Harness admission controls provider-call capacity through that adapter. Put a

@@ -1,5 +1,6 @@
-import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
 
 export { supportHarness }
@@ -14,14 +15,12 @@ export const supportHarnessPolicy = {
 						context: HarnessBusinessGuardContext<{
 							supportClassificationPolicy: SupportClassificationPolicy
 						}>,
+						input: { messageId: string },
 					) => {
-						const { tenantId, principalId } = context.identity
-						if (!tenantId || !principalId) {
-							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-						}
-						if (!(await context.resources.supportClassificationPolicy.canClassify({ tenantId, principalId }))) {
-							throw new HandledError(StatusCode.Forbidden, 'Support classification is not allowed')
-						}
+						await requireSupportClassification(context.resources.supportClassificationPolicy, {
+							...context.identity,
+							messageId: input.messageId,
+						})
 					},
 				},
 			},

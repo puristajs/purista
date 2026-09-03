@@ -68,9 +68,12 @@ describe('mounted PURISTA agent tools', () => {
 				answer: 'Transaction tx-100 is pending for EUR 42.',
 				transactionIds: ['tx-100'],
 			})
+			expect(supportQuestionPolicy.canAsk).toHaveBeenCalledTimes(2)
 			expect(supportQuestionPolicy.canAsk).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
 			})
 			expect(accountReadPolicy.canRead).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
@@ -112,7 +115,7 @@ describe('mounted PURISTA agent tools', () => {
 						receiver: {
 							serviceName: 'Support',
 							serviceVersion: '1',
-							serviceTarget: 'answerTransactionQuestion',
+							serviceTarget: 'answer_transaction_question',
 						},
 						payload: {
 							payload: {

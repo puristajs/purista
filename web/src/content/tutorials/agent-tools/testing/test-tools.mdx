@@ -36,11 +36,13 @@ describe('supportHarness', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
 			object: {},
-			toolCalls: [{
-				id: 'lookup-1',
-				name: 'lookup_transaction',
-				arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
-			}],
+			toolCalls: [
+				{
+					id: 'lookup-1',
+					name: 'lookup_transaction',
+					arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+				},
+			],
 			usage,
 			finishReason: 'tool_calls',
 		})
@@ -75,11 +77,14 @@ describe('supportHarness', () => {
 
 			expect(lookupTransaction).toHaveBeenCalledWith(
 				expect.objectContaining({ agentId: 'answer_transaction_question' }),
-				{ accountId: 'account-operating', transactionId: 'tx-100' },
+				{
+					accountId: 'account-operating',
+					transactionId: 'tx-100',
+				},
 			)
 			expect(outcome).toMatchObject({
 				status: 'completed',
-				output: { transactionIds: ['tx-100'] },
+				output: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
 			})
 			provider.assertExhausted()
 		} finally {
@@ -100,9 +105,14 @@ unexpected model call occurs.
 declaration and creates the matching typed invocation stub.
 
 ```ts title="src/service/support/v1/command/answerTransactionQuestion/answerTransactionQuestionCommandBuilder.test.ts" write
-import { createCommandContextMock } from '@purista/core'
-import { describe, expect, it } from 'vitest'
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportQuestionSessionId } from '../../requireSupportQuestion.js'
 import { answerTransactionQuestionCommandBuilder } from './answerTransactionQuestionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
 
 describe('answerTransactionQuestion command', () => {
 	it('invokes the mounted agent through its declared PURISTA address', async () => {
@@ -115,6 +125,13 @@ describe('answerTransactionQuestion command', () => {
 		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportQuestionPolicy: { canAsk: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		const run = (stubs.agent as any).Support['1'].answer_transaction_question.run
 		run.resolves({
@@ -126,7 +143,9 @@ describe('answerTransactionQuestion command', () => {
 		await expect(
 			answerTransactionQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual({ answer: 'It is pending.', transactionIds: ['tx-100'] })
-		expect(run.calledOnceWith(payload, { sessionId: 'support-question:question-1' })).toBe(true)
+		expect(
+			run.calledOnceWith(payload, { sessionId: supportQuestionSessionId(context.message, payload.questionId) }),
+		).toBe(true)
 	})
 })
 ```
@@ -145,6 +164,8 @@ and the reader.
 expect(supportQuestionPolicy.canAsk).toHaveBeenCalledWith({
 	tenantId: 'tenant-example',
 	principalId: 'principal-alex',
+	accountId: 'account-operating',
+	transactionId: 'tx-100',
 })
 expect(accountReadPolicy.canRead).toHaveBeenCalledWith({
 	tenantId: 'tenant-example',
@@ -168,7 +189,7 @@ await expect(
 			receiver: {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				serviceTarget: 'answerTransactionQuestion',
+				serviceTarget: 'answer_transaction_question',
 			},
 			payload: {
 				payload: {

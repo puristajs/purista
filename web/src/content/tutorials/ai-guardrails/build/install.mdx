@@ -7,9 +7,14 @@ status: draft
 ---
 
 You can follow this chapter without completing the classification chapter.
-Start from the project created in
-[Create a PURISTA project](/tutorials/create-project/) and install the public
-packages used by this focused example.
+Start in an empty parent directory and create its standalone application.
+
+```bash title="Create and enter the Guardrails project" replay="parent"
+npm create purista@latest guarded-classification -- --runtime node --event-bridge default --non-interactive --defaults
+cd guarded-classification
+```
+
+Install the public packages used by this focused example.
 
 ```bash title="Install the published packages" replay="project"
 npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-guardrails@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3

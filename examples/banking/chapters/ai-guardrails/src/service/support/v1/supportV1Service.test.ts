@@ -60,7 +60,7 @@ describe('guarded support service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
 						payload: {
 							payload: { messageId: 'MSG-304', text: 'Please classify this message.' },
 							parameter: {},
@@ -71,6 +71,7 @@ describe('guarded support service', () => {
 			expect(policy.canClassify).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
 				principalId: 'principal-other',
+				messageId: 'MSG-304',
 			})
 			provider.assertExhausted()
 		} finally {

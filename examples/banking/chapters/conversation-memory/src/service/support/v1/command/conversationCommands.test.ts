@@ -1,6 +1,7 @@
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
+import { conversationStorageSessionId } from '../conversationSessionId.js'
 import { clearConversationHistoryCommandBuilder } from './clearConversationHistory/clearConversationHistoryCommandBuilder.js'
 import { continueSupportConversationCommandBuilder } from './continueSupportConversation/continueSupportConversationCommandBuilder.js'
 
@@ -33,7 +34,7 @@ describe('support conversation commands', () => {
 		).resolves.toEqual({ answer: 'We discussed a pending transfer.' })
 		expect(
 			(stubs.agent as any).Support['1'].answer_support_question.run.calledOnceWith(payload, {
-				sessionId: 'support:tenant-example:principal-alex:case-1',
+				sessionId: 'support:case-1',
 			}),
 		).toBe(true)
 		expect(
@@ -65,7 +66,9 @@ describe('support conversation commands', () => {
 		await expect(
 			clearConversationHistoryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual({ cleared: true })
-		expect(history.clear.calledOnceWith('support:tenant-example:principal-alex:case-2')).toBe(true)
+		expect(history.clear.calledOnceWith(conversationStorageSessionId(context.message, payload.conversationId))).toBe(
+			true,
+		)
 		expect(
 			policy.canAccess.calledOnceWith({
 				tenantId: 'tenant-example',

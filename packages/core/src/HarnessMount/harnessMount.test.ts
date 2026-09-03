@@ -15,7 +15,24 @@ import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.imp
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { defineHarnessQueueBinding } from './queueBinding.js'
+import { createHarnessSessionStorageId } from './runtime.js'
 import { commandAsHarnessTool } from './types.js'
+
+describe('createHarnessSessionStorageId', () => {
+	it('is stable for one caller and isolates tenants, principals, and logical sessions', () => {
+		const identity = { tenantId: 'tenant-a', principalId: 'principal-a' }
+		const sessionId = createHarnessSessionStorageId(identity, 'support:case-1')
+
+		expect(sessionId).toBe(createHarnessSessionStorageId(identity, 'support:case-1'))
+		expect(sessionId).not.toBe(createHarnessSessionStorageId({ ...identity, tenantId: 'tenant-b' }, 'support:case-1'))
+		expect(sessionId).not.toBe(
+			createHarnessSessionStorageId({ ...identity, principalId: 'principal-b' }, 'support:case-1'),
+		)
+		expect(sessionId).not.toBe(createHarnessSessionStorageId(identity, 'support:case-2'))
+		expect(sessionId).not.toContain('tenant-a')
+		expect(sessionId).not.toContain('principal-a')
+	})
+})
 
 const echoHarness = defineHarness({ name: 'echo' })
 	.agent('echo', {

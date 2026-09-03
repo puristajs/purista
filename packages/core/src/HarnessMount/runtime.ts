@@ -355,7 +355,9 @@ export class HarnessMountRuntime {
 		}
 		const requestedSessionId = parameter.sessionId ?? message.correlationId ?? message.id
 		const openCallerSession = () =>
-			harness.getSession(sessionKeyForIdentity(callerIdentity, requestedSessionId), { identity: callerIdentity })
+			harness.getSession(createHarnessSessionStorageId(callerIdentity, requestedSessionId), {
+				identity: callerIdentity,
+			})
 		if (policy?.durableResume?.identity !== 'run-owner') return openCallerSession()
 
 		const runId = parameter.resume?.runId ?? parameter.durable?.runId
@@ -380,7 +382,7 @@ export class HarnessMountRuntime {
 		if (ownerSession.identity?.tenantId !== message.tenantId) {
 			throw new HandledError(StatusCode.Forbidden, 'Durable run belongs to a different tenant.')
 		}
-		if (sessionKeyForIdentity(ownerSession.identity ?? {}, parameter.sessionId) !== previous.sessionId) {
+		if (createHarnessSessionStorageId(ownerSession.identity ?? {}, parameter.sessionId) !== previous.sessionId) {
 			throw new HandledError(StatusCode.BadRequest, 'Durable run sessionId does not match the original invocation.')
 		}
 		return harness.getSession(previous.sessionId, {
@@ -461,9 +463,26 @@ function parseParameter(value: unknown): HarnessInvokeParameter {
 	return value as HarnessInvokeParameter
 }
 
-function sessionKeyForIdentity(identity: Readonly<{ tenantId?: string; principalId?: string }>, requested: string) {
+/**
+ * Derive the opaque storage id used by a mounted Harness session.
+ *
+ * Use this helper when application-owned commands need to inspect or remove
+ * Harness session data through the configured storage adapter. Supply only
+ * trusted identity from the PURISTA message and the same logical session id
+ * passed to an agent or workflow invocation.
+ *
+ * @example
+ * ```ts
+ * const storageId = createHarnessSessionStorageId(context.message, `support:${conversationId}`)
+ * const messages = await storage.listMessages(storageId)
+ * ```
+ */
+export function createHarnessSessionStorageId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	requestedSessionId: string,
+) {
 	return createHash('sha256')
-		.update(JSON.stringify([identity.tenantId ?? null, identity.principalId ?? null, requested]))
+		.update(JSON.stringify([identity.tenantId ?? null, identity.principalId ?? null, requestedSessionId]))
 		.digest('hex')
 }
 

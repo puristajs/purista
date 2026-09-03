@@ -1,6 +1,7 @@
-import { createCommandContextMock } from '@purista/core'
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
 
 const sandbox = createSandbox()
@@ -16,7 +17,13 @@ describe('classifySupportMessageCommandBuilder', () => {
 		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
 			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		const expected = {
 			category: 'account_access' as const,
@@ -34,7 +41,7 @@ describe('classifySupportMessageCommandBuilder', () => {
 		).resolves.toEqual(expected)
 		expect(
 			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
-				sessionId: 'support-message:MSG-123',
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
 			}),
 		).toBe(true)
 	})
@@ -44,7 +51,13 @@ describe('classifySupportMessageCommandBuilder', () => {
 		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
 			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
 			status: 'interrupted',

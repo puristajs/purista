@@ -108,7 +108,14 @@ Run the complete local gate.
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
+
+The demo starts a real local EventBridge, performs two turns through the
+protected command, and exports all four stored messages. It uses an in-memory
+adapter and strict fake model, so the default proof needs no API key. The
+optional `npm start` path uses SQLite and OpenAI from the application
+composition root.
 
 The retained snapshot passes three test files with seven tests. It remains a draft
 until the published PURISTA v4 and Harness v3 packages can be installed into a

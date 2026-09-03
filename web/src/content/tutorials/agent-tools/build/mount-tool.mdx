@@ -13,7 +13,14 @@ First define the business policy used to publish the agent itself.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportQuestionPolicy {
-	canAsk(input: Readonly<{ tenantId: string; principalId: string }>): Promise<boolean>
+	canAsk(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			accountId: string
+			transactionId: string
+		}>,
+	): Promise<boolean>
 }
 ```
 
@@ -30,16 +37,62 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 }).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
 ```
 
+Create one helper for the outer command and the directly published agent. Its
+policy input names the account and transaction being requested. The separate
+session helper includes trusted caller identity before hashing the value.
+
+```ts title="src/service/support/v1/requireSupportQuestion.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportQuestionPolicy } from './SupportResources.js'
+
+export async function requireSupportQuestion(
+	policy: SupportQuestionPolicy,
+	input: Readonly<{
+		tenantId?: string
+		principalId?: string
+		accountId: string
+		transactionId: string
+	}>,
+) {
+	if (!input.tenantId || !input.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	if (
+		!(await policy.canAsk({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			accountId: input.accountId,
+			transactionId: input.transactionId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This transaction question is not allowed')
+	}
+}
+
+export function supportQuestionSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	questionId: string,
+) {
+	if (!identity.tenantId || !identity.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${questionId}:support-question-v1`)
+		.digest('hex')
+	return `support-question:${digest}`
+}
+```
+
 Replace the generated mount file with the complete binding and mount policy.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
 } from '../../../transaction/v1/schema.js'
+import { requireSupportQuestion } from '../requireSupportQuestion.js'
 import type { SupportQuestionPolicy } from '../SupportResources.js'
 import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 
@@ -70,14 +123,13 @@ export const supportHarnessPolicy = {
 				beforeGuards: {
 					mayUseSupportAgent: async (
 						context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
+						input: { accountId: string; transactionId: string },
 					) => {
-						const { tenantId, principalId } = context.identity
-						if (!tenantId || !principalId) {
-							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-						}
-						if (!(await context.resources.supportQuestionPolicy.canAsk({ tenantId, principalId }))) {
-							throw new HandledError(StatusCode.Forbidden, 'Support agent access is not allowed')
-						}
+						await requireSupportQuestion(context.resources.supportQuestionPolicy, {
+							...context.identity,
+							accountId: input.accountId,
+							transactionId: input.transactionId,
+						})
 					},
 				},
 			},
@@ -94,7 +146,8 @@ tenant, and principal values. The handler does not accept identity from the
 model input.
 
 The published agent has its own business guard because callers can address a
-mounted target directly. The Transaction command keeps its separate account
+mounted target directly. The outer Support command uses the same policy before
+it invokes the agent. The Transaction command keeps its separate account
 guard because every caller of that data capability must pass the same rule.
 
 For a tool that only forwards one command without changing input or output,

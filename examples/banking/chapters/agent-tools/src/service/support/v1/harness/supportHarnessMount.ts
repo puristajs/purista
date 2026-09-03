@@ -1,10 +1,11 @@
-import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
 } from '../../../transaction/v1/schema.js'
+import { requireSupportQuestion } from '../requireSupportQuestion.js'
 import type { SupportQuestionPolicy } from '../SupportResources.js'
 import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 
@@ -35,14 +36,13 @@ export const supportHarnessPolicy = {
 				beforeGuards: {
 					mayUseSupportAgent: async (
 						context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
+						input: { accountId: string; transactionId: string },
 					) => {
-						const { tenantId, principalId } = context.identity
-						if (!tenantId || !principalId) {
-							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-						}
-						if (!(await context.resources.supportQuestionPolicy.canAsk({ tenantId, principalId }))) {
-							throw new HandledError(StatusCode.Forbidden, 'Support agent access is not allowed')
-						}
+						await requireSupportQuestion(context.resources.supportQuestionPolicy, {
+							...context.identity,
+							accountId: input.accountId,
+							transactionId: input.transactionId,
+						})
 					},
 				},
 			},

@@ -47,9 +47,11 @@ describe('supportV1Service', () => {
 				urgency: 'normal',
 				reason: 'The message asks about a replacement card without an immediate deadline.',
 			})
+			expect(policy.canClassify).toHaveBeenCalledTimes(2)
 			expect(policy.canClassify).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
+				messageId: 'MSG-200',
 			})
 			provider.assertExhausted()
 		} finally {
@@ -75,7 +77,7 @@ describe('supportV1Service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
 						payload: {
 							payload: { messageId: 'MSG-201', text: 'Please classify this message.' },
 							parameter: {},

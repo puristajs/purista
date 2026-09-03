@@ -80,10 +80,12 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
 ```
 
-Build the storage session id from the authenticated PURISTA message.
+Build one logical conversation id, then derive the opaque storage id only when
+an application command needs to inspect stored messages. The mounted runtime
+uses the same `createHarnessSessionStorageId(...)` helper internally.
 
 ```ts title="src/service/support/v1/conversationSessionId.ts" write
-import { HandledError, StatusCode } from '@purista/core'
+import { createHarnessSessionStorageId, HandledError, StatusCode } from '@purista/core'
 
 export function conversationSessionId(
 	identity: Readonly<{ tenantId?: string; principalId?: string }>,
@@ -92,7 +94,14 @@ export function conversationSessionId(
 	if (!identity.tenantId || !identity.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	return `support:${identity.tenantId}:${identity.principalId}:${conversationId}`
+	return `support:${conversationId}`
+}
+
+export function conversationStorageSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	conversationId: string,
+) {
+	return createHarnessSessionStorageId(identity, conversationSessionId(identity, conversationId))
 }
 ```
 
@@ -135,9 +144,10 @@ export const supportHarnessPolicy = {
 ```
 
 Declare the versioned agent address on the command and invoke it through
-EventBridge. Reusing
-the same session id loads earlier complete turns. A different principal or
-conversation id cannot accidentally join that transcript.
+EventBridge. Reusing the same logical session id loads earlier complete turns.
+The mounted runtime scopes it with trusted tenant and principal identity, so a
+different caller cannot join the transcript by supplying the same
+`conversationId`.
 
 ```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts" write
 import {

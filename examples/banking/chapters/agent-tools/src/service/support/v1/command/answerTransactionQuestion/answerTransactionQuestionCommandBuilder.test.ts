@@ -1,6 +1,11 @@
-import { createCommandContextMock } from '@purista/core'
-import { describe, expect, it } from 'vitest'
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportQuestionSessionId } from '../../requireSupportQuestion.js'
 import { answerTransactionQuestionCommandBuilder } from './answerTransactionQuestionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
 
 describe('answerTransactionQuestion command', () => {
 	it('invokes the mounted agent through its declared PURISTA address', async () => {
@@ -13,6 +18,13 @@ describe('answerTransactionQuestion command', () => {
 		const { context, stubs } = createCommandContextMock(answerTransactionQuestionCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportQuestionPolicy: { canAsk: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		const run = (stubs.agent as any).Support['1'].answer_transaction_question.run
 		run.resolves({
@@ -24,6 +36,8 @@ describe('answerTransactionQuestion command', () => {
 		await expect(
 			answerTransactionQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual({ answer: 'It is pending.', transactionIds: ['tx-100'] })
-		expect(run.calledOnceWith(payload, { sessionId: 'support-question:question-1' })).toBe(true)
+		expect(
+			run.calledOnceWith(payload, { sessionId: supportQuestionSessionId(context.message, payload.questionId) }),
+		).toBe(true)
 	})
 })

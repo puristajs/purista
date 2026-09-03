@@ -70,9 +70,10 @@ creates a typed stub for every declared invocation. Resolve that address with a
 completed outcome, then verify the command passed the stable session id.
 
 ```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts" write
-import { createCommandContextMock } from '@purista/core'
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
 
 const sandbox = createSandbox()
@@ -88,7 +89,13 @@ describe('classifySupportMessageCommandBuilder', () => {
 		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
 			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		const expected = {
 			category: 'account_access' as const,
@@ -106,7 +113,7 @@ describe('classifySupportMessageCommandBuilder', () => {
 		).resolves.toEqual(expected)
 		expect(
 			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
-				sessionId: 'support-message:MSG-123',
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
 			}),
 		).toBe(true)
 	})
@@ -116,7 +123,13 @@ describe('classifySupportMessageCommandBuilder', () => {
 		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
 			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
 		})
 		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
 			status: 'interrupted',
@@ -137,7 +150,7 @@ service, but still supplies the deterministic fake model.
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { FakeModelProvider } from '@purista/harness/testing'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { supportV1Service } from './supportV1Service.js'
 
 describe('supportV1Service', () => {
@@ -184,10 +197,44 @@ describe('supportV1Service', () => {
 				urgency: 'normal',
 				reason: 'The message asks about a replacement card without an immediate deadline.',
 			})
+			expect(policy.canClassify).toHaveBeenCalledTimes(2)
 			expect(policy.canClassify).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
+				messageId: 'MSG-200',
 			})
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('denies the published agent before the model is called', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await supportV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
+			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-other',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
+						payload: {
+							payload: { messageId: 'MSG-201', text: 'Please classify this message.' },
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
 			provider.assertExhausted()
 		} finally {
 			await service.destroy()

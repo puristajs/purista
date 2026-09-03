@@ -1,4 +1,4 @@
-import { conversationSessionId } from '../../conversationSessionId.js'
+import { conversationStorageSessionId } from '../../conversationSessionId.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
 import { conversationHistoryRequestSchema, conversationHistorySchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
@@ -18,6 +18,6 @@ export const getConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		const sessionId = conversationStorageSessionId(context.message, payload.conversationId)
 		return { messages: await context.resources.supportConversationHistory.list(sessionId) }
 	})

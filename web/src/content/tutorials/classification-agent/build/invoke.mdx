@@ -22,6 +22,7 @@ import {
 	classifySupportMessageOutputSchema,
 } from '../../../../../harness/support/agent/classifySupportMessage/classifySupportMessageAgent.js'
 import { supportHarness } from '../../../../../harness/support/supportHarness.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
@@ -29,9 +30,18 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(classifySupportMessageInputSchema)
 	.addOutputSchema(classifySupportMessageOutputSchema)
 	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
-	.setCommandFunction(async function ({ agent }, payload) {
-		const outcome = await agent.Support['1'].classify_support_message.run(payload, {
-			sessionId: `support-message:${payload.messageId}`,
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
 		})
 		if (outcome.status !== 'completed') {
 			throw new Error('Message classification was interrupted unexpectedly.')
@@ -51,12 +61,13 @@ step, so an interruption is unexpected here. A later workflow chapter will
 show how to expose an interrupted outcome as an ordinary review state rather
 than an HTTP 500 response.
 
-The agent address is published directly, so it needs its own business guard.
-Create the policy resource and declare it on the Support service builder.
+Both the command and the directly published agent address need business
+authorization. Define one policy contract and reuse one helper so the two
+entry points make the same decision.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportClassificationPolicy {
-	canClassify(input: Readonly<{ tenantId: string; principalId: string }>): Promise<boolean>
+	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
 }
 ```
 
@@ -76,13 +87,54 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
 
+```ts title="src/service/support/v1/requireSupportClassification.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportClassificationPolicy } from './SupportResources.js'
+
+export async function requireSupportClassification(
+	policy: SupportClassificationPolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; messageId: string }>,
+) {
+	if (!input.tenantId || !input.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	if (
+		!(await policy.canClassify({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			messageId: input.messageId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support message classification is not allowed')
+	}
+}
+
+export function supportClassificationSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	messageId: string,
+) {
+	if (!identity.tenantId || !identity.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	const digest = createHash('sha256')
+		.update(`${identity.tenantId}:${identity.principalId}:${messageId}:support-classification-v1`)
+		.digest('hex')
+	return `support-classification:${digest}`
+}
+```
+
+The policy receives the message identifier because authorization may depend on
+the specific business object. The derived Harness session id includes trusted
+tenant and principal identity before it is hashed, so two callers cannot share
+a session merely by choosing the same `messageId`.
+
 Replace the generated mount policy. It selects the reachable agent and checks
 whether the authenticated principal may use support automation before the
 model runs.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import { HandledError, type HarnessBusinessGuardContext, StatusCode } from '@purista/core'
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
 
 export { supportHarness }
@@ -97,14 +149,12 @@ export const supportHarnessPolicy = {
 						context: HarnessBusinessGuardContext<{
 							supportClassificationPolicy: SupportClassificationPolicy
 						}>,
+						input: { messageId: string },
 					) => {
-						const { tenantId, principalId } = context.identity
-						if (!tenantId || !principalId) {
-							throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-						}
-						if (!(await context.resources.supportClassificationPolicy.canClassify({ tenantId, principalId }))) {
-							throw new HandledError(StatusCode.Forbidden, 'Support classification is not allowed')
-						}
+						await requireSupportClassification(context.resources.supportClassificationPolicy, {
+							...context.identity,
+							messageId: input.messageId,
+						})
 					},
 				},
 			},
@@ -114,7 +164,9 @@ export const supportHarnessPolicy = {
 } as const
 ```
 
-This guard performs business authorization. An HTTP protection middleware is
+The command guard protects the normal application entry point. The mount guard
+protects callers that address the published agent directly. Both perform
+business authorization. An HTTP protection middleware is
 responsible for authenticating a token and placing trusted tenant and principal
 ids on the PURISTA message. The model input never grants access.
 
