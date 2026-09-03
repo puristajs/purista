@@ -6,13 +6,18 @@ kind: lesson
 status: draft
 ---
 
-Create an Analysis service and command, then install the optional Docker
-sandbox adapter using published package names.
+Create a fresh project and install published packages. Then generate the
+Analysis capability, its native Harness agent, and the PURISTA command that
+invokes the mounted agent through EventBridge.
 
 ```bash title="Create the analysis boundary" replay="project"
+npm create purista@latest sandbox-analysis
+cd sandbox-analysis
+npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-openai@3.0.0 @purista/harness-sandbox-docker@3.0.0 zod@4.4.3
+npm install --save-dev --save-exact @purista/cli@4.0.0 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
 npm run add:service -- analysis --description "Owns isolated transaction analysis requests" --non-interactive
+npm run add:agent -- analyze-transactions --service analysis --service-version 1 --description "Analyze transaction rows with sandbox tools" --non-interactive
 npm run add:command -- analyze-transactions --service analysis --service-version 1 --description "Run an isolated transaction analysis" --non-interactive
-npm install @purista/harness @purista/harness-openai @purista/harness-sandbox-docker zod
 ```
 
 Build a small non-root image. The retained Compose file builds it locally.
@@ -33,39 +38,43 @@ Copy the returned `sha256:...` value into
 `PURISTA_DOCKER_SANDBOX_IMAGE`. The adapter deliberately rejects mutable image
 tags. In a release pipeline, pin the base image by repository digest too.
 
-Create the adapter at the composition root and retain the instance for trusted
-administration. Networking is disabled by default; do not enable it unless the
-analysis has an explicit, reviewed need.
+Keep the reusable service composition provider-neutral. It accepts the model
+and sandbox as typed inputs, so tests can bind a strict fake provider and the
+live process can bind Docker.
 
 ```ts title="src/createAnalysisService.ts"
-const sandbox = dockerSandbox({
-	root: resolve(environment.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
-	image,
-	user: '10001:10001',
-})
-
-return {
-	sandbox,
-	service: analysisV1Service.getInstance(eventBridge, {
+export function createAnalysisService(eventBridge: EventBridge, logger: Logger, options: Readonly<{
+	analysisPolicy: AnalysisPolicy
+	analysisModel: { provider: ModelProvider; model: string }
+	sandbox: Sandbox
+}>) {
+	return analysisV1Service.getInstance(eventBridge, {
 		logger,
-		resources: { analysisPolicy },
+		resources: { analysisPolicy: options.analysisPolicy },
 		ai: {
-			models: {
-				analysis_model: {
-					provider: openai({ apiKey }),
-					model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini',
-				},
-			},
-			sandbox,
+			models: { analysis_model: options.analysisModel },
+			sandbox: options.sandbox,
 			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
-	}),
+	})
 }
 ```
 
-The portable Harness definition contains no Docker path, image, or credential.
-Tests and other deployments can bind another adapter with the same declared
-capabilities.
+At the live entry point, validate the provider key and immutable image id, then
+create the adapter. Retain the adapter variable for trusted administration.
+Networking is disabled by default; do not enable it unless the analysis has an
+explicit, reviewed need.
+
+```ts title="src/index.ts"
+const sandbox = dockerSandbox({
+	root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
+	image,
+	user: '10001:10001',
+})
+```
+
+The native Harness definition contains no Docker path, image, or credential.
+Another deployment can bind an adapter with the required capabilities without
+changing the agent.
 
 Continue with [Run only the required tools](../run-tool/).
-

@@ -186,6 +186,12 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   disposable tests or demos. Prove recovery by closing and recreating the
   complete runtime bundle before resuming the same run, rather than retrying
   only within one process.
+- Match sandbox language to the adapter actually under test. A local directory
+  adapter with an allowlisted host executor can prove tool wiring, paths, and
+  permission results, but it does not prove process isolation. Keep that fast
+  default test, label its boundary, and add an opt-in integration test for the
+  real container or remote sandbox adapter. Purge adapter-owned resources
+  through its administration API before removing private lifecycle metadata.
 - Treat Agent Skills as model-readable context only. Register explicit
   directories, validate them at startup, expose only the required sandbox
   tools, and prove the initial prompt contains the compact catalog rather than

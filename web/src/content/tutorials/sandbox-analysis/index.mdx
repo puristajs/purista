@@ -7,10 +7,16 @@ group: ai
 status: draft
 ---
 
-This chapter teaches isolated agent execution. A transaction-analysis agent
-writes an input file, runs a small Python program, reads the result, and
-returns a structured recommendation. It cannot access the application host
-filesystem or execute arbitrary commands.
+This chapter teaches how to give an agent a deliberately small code-execution
+surface. You create a fresh PURISTA project, generate the service, agent, and
+command with the CLI, then bind a Docker sandbox only at runtime. The example
+agent writes an input file, runs a small Python program, reads the result, and
+returns a structured recommendation.
+
+The production-style composition runs the program in a non-root container with
+networking disabled and a pinned image. The fast default demo uses a local
+directory adapter to prove the tool loop and permission policy without Docker;
+it does not claim process isolation.
 
 The analysis is advisory. A separate guarded PURISTA command would own any
 business effect such as blocking a transaction.
@@ -20,8 +26,11 @@ You will learn how to:
 - configure the Docker sandbox adapter at the composition root;
 - expose only the `write`, `bash`, and `read` built-in tools;
 - restrict writes and executable commands;
-- protect the agent behind a business guard;
-- test tool calls without a Docker daemon;
+- protect both the command and directly addressable agent with business guards;
+- scope the Harness session to tenant, principal, and analysis;
+- test the native agent, PURISTA command, and EventBridge integration without
+  credentials;
+- run an opt-in Docker integration test for the real process boundary;
 - retain and purge sandbox resources deliberately.
 
 1. [Configure an isolated sandbox](./build/configure/)
@@ -31,4 +40,3 @@ You will learn how to:
 
 The retained project is in `examples/banking/chapters/sandbox-analysis` and
 includes a Dockerfile and Compose build target.
-

@@ -51,9 +51,10 @@ The adapter also enforces CPU, memory, process, temporary-storage, output, and
 timeout limits. Agent permissions and adapter limits are complementary: the
 first controls intended tool use, and the second contains the process.
 
-Put business authorization on the published agent target. This protects every
-EventBridge caller before Harness opens a sandbox or invokes a model. The HTTP
-command remains a small protected projection.
+Put business authorization on both public addresses. The command guard protects
+the command even if its implementation changes. The mounted target guard
+protects direct EventBridge callers before Harness opens a sandbox or invokes a
+model.
 
 ```ts title="src/service/analysis/v1/requireTransactionAnalysis.ts"
 export async function requireTransactionAnalysis(
@@ -105,15 +106,29 @@ export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 		'analyze_transactions',
 		transactionAnalysisHarness.contracts.agents.analyze_transactions,
 	)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'analysis/transactions')
+	.setBeforeGuardHooks({
+		analysisAccess: async function (context, payload) {
+			await requireTransactionAnalysis(context.resources.analysisPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				analysisId: payload.analysisId,
+			})
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const outcome = await context.agent.Analysis['1'].analyze_transactions.run(payload, {
-			sessionId: `transaction-analysis:${payload.analysisId}`,
+			sessionId: transactionAnalysisSessionId(context.message, payload.analysisId),
 		})
 		if (outcome.status !== 'completed') throw new Error('Transaction analysis did not complete')
 		return outcome.output
 	})
 ```
+
+`transactionAnalysisSessionId` requires trusted tenant and principal ids and
+hashes them together with the analysis id. Two tenants choosing the same
+application id therefore never share a Harness session or sandbox owner.
+
+The command returns advice only. A separate capability and guarded command
+would own an effect such as blocking a transaction.
 
 Continue with [Release and purge sandbox resources](../cleanup/).

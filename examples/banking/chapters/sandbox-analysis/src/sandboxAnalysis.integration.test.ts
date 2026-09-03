@@ -6,6 +6,7 @@ import { localDirectorySandbox } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
+import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
 
 const roots: string[] = []
 afterEach(async () => Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true }))))
@@ -14,50 +15,7 @@ describe('sandbox analysis over PURISTA', () => {
 	it('exposes only the declared built-ins and completes the analysis in a private sandbox', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-analysis-'))
 		roots.push(root)
-		const provider = new FakeModelProvider({ strict: true })
-		const usage = { inputTokens: 5, outputTokens: 3, totalTokens: 8 }
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [
-				{
-					id: 'write-1',
-					name: 'write',
-					arguments: { path: '/workspace/transactions.csv', content: 'id,amount,country\ntx-1,1250,DE\n' },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [
-				{
-					id: 'bash-1',
-					name: 'bash',
-					arguments: {
-						command: `python3 -c "import json; json.dump({'flagged':['tx-1']},open('summary.json','w'))"`,
-						cwd: '/workspace',
-					},
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [{ id: 'read-1', name: 'read', arguments: { path: '/workspace/summary.json' } }],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: {
-				analysisId: 'analysis-1',
-				flaggedTransactionIds: ['tx-1'],
-				summary: 'One high-value transaction was flagged for human review.',
-			},
-			usage,
-			finishReason: 'stop',
-		})
+		const provider = scriptedAnalysisProvider()
 		const policy = { canRun: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
@@ -92,7 +50,7 @@ describe('sandbox analysis over PURISTA', () => {
 				flaggedTransactionIds: ['tx-1'],
 				summary: 'One high-value transaction was flagged for human review.',
 			})
-			expect(policy.canRun).toHaveBeenCalledOnce()
+			expect(policy.canRun).toHaveBeenCalledTimes(2)
 			expect(provider.requests).toHaveLength(4)
 			const firstRequest = provider.requests[0]
 			expect(

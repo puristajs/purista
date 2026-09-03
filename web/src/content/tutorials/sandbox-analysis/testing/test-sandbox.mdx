@@ -1,14 +1,17 @@
 ---
-title: Test the complete tool loop
-description: Script write, process, and read calls against a private temporary sandbox without Docker.
+title: Test permissions, integration, and Docker isolation
+description: Test the native tool loop, PURISTA boundaries, and the opt-in container process boundary separately.
 order: 284
 kind: lesson
 status: draft
 ---
 
-Bind `localDirectorySandbox` in the test with an explicit `python3` allowlist.
-This exercises the same built-in tool loop without requiring a Docker daemon.
-The temporary root is private to the test and removed afterward.
+Start with the native Harness definition. Bind `localDirectorySandbox` with an
+explicit `python3` allowlist and a strict fake model. This fast test exercises
+the same built-in tool loop without requiring a Docker daemon. The adapter
+restricts files to the temporary test root, but its optional executor runs an
+allowlisted host process. It proves tool wiring and permission handling, not
+container isolation.
 
 Script four strict model rounds:
 
@@ -17,16 +20,27 @@ Script four strict model rounds:
 3. call `read` for `/workspace/summary.json`;
 4. return the final structured analysis.
 
-```ts title="src/sandboxAnalysis.integration.test.ts"
+```ts title="src/harness/analysis/transactionAnalysisHarness.test.ts"
 sandbox: localDirectorySandbox({
 	root,
 	exec: { allowCommands: ['python3'], timeoutMs: 5_000 },
 })
 ```
 
-Invoke the protected command over `DefaultEventBridge`, assert the structured
-output, and inspect the first provider request. The available model tools must
-be exactly `bash`, `read`, and `write`.
+Add a second native test where the model tries to write `/outside.txt`. Harness
+returns a standard `PERMISSION_DENIED` tool result to the model, allowing it to
+recover. Inspect that tool message instead of expecting the entire agent run to
+become an exception.
+
+Test the command separately with `createCommandContextMock`. Inject a policy
+resource, set the trusted tenant and principal on the message, and assert the
+exact caller-scoped session passed to the declared agent client.
+
+Then invoke the command over `DefaultEventBridge`, assert the structured output,
+and inspect the first provider request. The model tool surface must be exactly
+`bash`, `read`, and `write`. The successful path crosses both business guards;
+the direct-agent denial test proves no model request occurs when authorization
+fails.
 
 ```ts title="src/sandboxAnalysis.integration.test.ts"
 const firstRequest = provider.requests[0]
@@ -38,18 +52,20 @@ expect(
 provider.assertExhausted()
 ```
 
-Add negative tests for a denied business guard, a command outside the
-allowlist, a write outside `/workspace`, timeout, cancellation, and output
-truncation. Adapter package integration tests should separately cover the real
-Docker lifecycle and image contract.
+The opt-in Docker integration binds the same scripted model to `dockerSandbox`.
+It runs the Python tool call in the prepared non-root image, then purges the
+tenant's exact sandbox resources before deleting the private adapter journal.
 
 ```bash title="Verify the sandbox chapter" replay="project"
 npm run build
 npm test
 npm run lint
+npm run demo
 ```
 
-The retained test passes without Docker or an API key. This chapter remains a
+The retained tests and demo pass without Docker or an API key. The demo crosses
+the real PURISTA EventBridge and mounted Harness boundary with the local test
+adapter and labels no output as container-isolated. This chapter remains a
 draft until the released PURISTA v4 and Harness v3 packages pass a clean
 registry replay.
 
@@ -59,5 +75,6 @@ service.
 
 ```bash title="Run the sandbox analysis service" replay="project"
 cp .env.example .env
+npm run test:docker
 npm start
 ```

@@ -11,9 +11,11 @@
 		"add:command": "purista add command",
 		"add:agent": "purista add agent",
 		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
 		"lint": "biome check .",
 		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:docker": "vitest run src/sandboxAnalysis.docker.integration.test.ts"
 	},
 	"dependencies": {
 		"@purista/core": "^4.0.0",
@@ -26,6 +28,8 @@
 		"@biomejs/biome": "^2.5.8",
 		"@purista/cli": "^4.0.0",
 		"@types/node": "^26.2.0",
+		"@types/sinon": "^22.0.0",
+		"sinon": "^22.1.0",
 		"tsx": "^4.23.12",
 		"typescript": "^7.0.2",
 		"vitest": "^4.1.10"
