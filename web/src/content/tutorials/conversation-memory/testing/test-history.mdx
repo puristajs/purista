@@ -9,53 +9,91 @@ status: draft
 Use a strict `FakeModelProvider` and in-memory Harness storage for the fast
 suite. Run two turns in one session and inspect the second provider request.
 
-```ts title="src/harness/support/supportHarness.test.ts"
-const provider = new FakeModelProvider({ strict: true })
-provider.enqueueObject({
-	object: { answer: 'A transfer can remain pending for two business days.' },
-	usage,
-	finishReason: 'stop',
-})
-provider.enqueueObject({
-	object: { answer: 'The same transfer is still within that window.' },
-	usage,
-	finishReason: 'stop',
-})
+```ts title="src/harness/support/supportHarness.test.ts" extend
+import { inMemoryHarnessStorage } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from './supportHarness.js'
 
-const runtime = await supportHarness.getInstance({
-	models: { primary: { provider, model: 'fake-support' } },
-	storage: inMemoryHarnessStorage(),
+const usage = { inputTokens: 10, outputTokens: 5, totalTokens: 15 }
+
+describe('support conversation history', () => {
+	it('reuses one session history and keeps another session isolated', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { answer: 'A transfer can remain pending for two business days.' },
+			usage,
+			finishReason: 'stop',
+		})
+		provider.enqueueObject({
+			object: { answer: 'The same transfer is still within that window.' },
+			usage,
+			finishReason: 'stop',
+		})
+		provider.enqueueObject({
+			object: { answer: 'Please tell me which transfer you mean.' },
+			usage,
+			finishReason: 'stop',
+		})
+		const runtime = await supportHarness.getInstance({
+			models: { primary: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const first = await runtime.getSession('support:tenant-example:principal-alex:case-1', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			await first.agents.answer_support_question.run({
+				conversationId: 'case-1',
+				question: 'How long can it stay pending?',
+			})
+			await first.agents.answer_support_question.run({
+				conversationId: 'case-1',
+				question: 'What about the same transfer?',
+			})
+
+			const secondRequest = provider.requests[1]
+			expect('messages' in secondRequest ? secondRequest.messages : []).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ role: 'assistant', content: expect.stringContaining('two business days') }),
+				]),
+			)
+			expect(await first.history.list()).toHaveLength(4)
+
+			const isolated = await runtime.getSession('support:tenant-example:principal-alex:case-2', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			await isolated.agents.answer_support_question.run({
+				conversationId: 'case-2',
+				question: 'What about the same transfer?',
+			})
+			const isolatedRequest = provider.requests[2]
+			expect('messages' in isolatedRequest ? isolatedRequest.messages : []).not.toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ role: 'assistant', content: expect.stringContaining('two business days') }),
+				]),
+			)
+			provider.assertExhausted()
+		} finally {
+			await runtime.shutdown()
+		}
+	})
 })
-
-try {
-	const first = await runtime.getSession('support:tenant-example:principal-alex:case-1', {
-		identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
-	})
-	await first.agents.answer_support_question.run({
-		conversationId: 'case-1',
-		question: 'How long can it stay pending?',
-	})
-	await first.agents.answer_support_question.run({
-		conversationId: 'case-1',
-		question: 'What about the same transfer?',
-	})
-
-	const secondRequest = provider.requests[1]
-	expect('messages' in secondRequest ? secondRequest.messages : []).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({ role: 'assistant', content: expect.stringContaining('two business days') }),
-		]),
-	)
-	expect(await first.history.list()).toHaveLength(4)
-} finally {
-	await runtime.shutdown()
-}
 ```
 
 Open a second session and prove its request does not contain the first answer.
 Then call `session.clearHistory()` and verify `session.history.list()` is empty.
-The retained command tests also prove that both invocation and deletion derive
-the storage id from `context.message.tenantId` and `principalId`.
+The retained command tests also prove that invocation and deletion derive the
+storage id from `context.message.tenantId` and `principalId`, and that the
+business policy receives distinct `continue` and `clear` actions.
+
+Run a service-level EventBridge test as a separate boundary. The allowed case
+proves both the command guard and mounted-agent guard run. The denied case calls
+the published `answer_support_question` address directly and proves the mount
+guard stops execution before the fake provider receives a request. This matters
+because another service can invoke the published address without using the
+wrapper command.
 
 The retained suite sends nine complete turns through the configured
 `maxTurns: 8` policy and proves that only the newest eight user/assistant pairs
@@ -72,6 +110,6 @@ npm test
 npm run lint
 ```
 
-The retained snapshot passes two test files with five tests. It remains a draft
+The retained snapshot passes three test files with seven tests. It remains a draft
 until the published PURISTA v4 and Harness v3 packages can be installed into a
 fresh consumer directory and replayed without workspace links.

@@ -7,6 +7,7 @@
 		"node": ">=24.15.0"
 	},
 	"scripts": {
+		"add:service": "purista add service",
 		"add:command": "purista add command",
 		"add:agent": "purista add agent",
 		"build": "tsc --noEmit",

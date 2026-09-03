@@ -1,15 +1,15 @@
 ---
 title: Persist and manage conversation history
-description: Keep bounded agent transcripts in Harness storage and manage them through protected PURISTA commands.
+description: Keep bounded agent transcripts in Harness storage and manage them through authorized PURISTA commands.
 order: 220
 kind: chapter
 group: ai
 status: draft
 ---
 
-This chapter teaches persistent conversation sessions. It extends the `Support`
-service from the classification chapter, but the capability is useful for any
-agent that must understand earlier turns.
+This chapter teaches persistent conversation sessions in a standalone PURISTA
+project. The small `Support` service keeps the example concrete, but the
+capability applies to any agent that must understand earlier turns.
 
 You will keep three storage responsibilities separate:
 
@@ -21,11 +21,11 @@ You will keep three storage responsibilities separate:
   sessions. It is not a database for AI conversation history.
 
 By the end, one identity-scoped conversation survives process restarts, retains
-only complete bounded turns, and can be exported or cleared through protected
-PURISTA commands.
+only complete bounded turns, and can be exported or cleared through
+business-authorized PURISTA commands.
 
-1. [Configure durable Harness storage](./build/configure-storage/)
-2. [Use a stable conversation session](./build/use-session/)
+1. [Create the project and retention policy](./build/configure-storage/)
+2. [Invoke an authorized conversation session](./build/use-session/)
 3. [Export and clear conversation history](./build/export-and-clear/)
 4. [Test history, isolation, and deletion](./testing/test-history/)
 

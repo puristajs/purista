@@ -4,6 +4,7 @@ import {
 } from '../../../../../harness/support/answerSupportQuestionAgent.js'
 import { conversationSessionId } from '../../conversationSessionId.js'
 import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
@@ -11,8 +12,16 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(answerSupportQuestionInputSchema)
 	.addOutputSchema(answerSupportQuestionOutputSchema)
 	.canInvokeAgent('Support', '1', 'answer_support_question', supportHarness.contracts.agents.answer_support_question)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/conversations')
+	.setBeforeGuardHooks({
+		conversationAccess: async function (context, payload) {
+			await requireSupportConversationAccess(
+				context.resources.supportConversationPolicy,
+				context.message,
+				payload.conversationId,
+				'continue',
+			)
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const sessionId = conversationSessionId(context.message, payload.conversationId)
 		const outcome = await context.agent.Support['1'].answer_support_question.run(payload, { sessionId })

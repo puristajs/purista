@@ -10,9 +10,11 @@ afterEach(() => sandbox.restore())
 describe('support conversation commands', () => {
 	it('derives the agent session from trusted caller identity', async () => {
 		const payload = { conversationId: 'case-1', question: 'What did we discuss?' }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
 		const { context, stubs } = createCommandContextMock(continueSupportConversationCommandBuilder, {
 			payload,
 			parameter: {},
+			resources: { supportConversationPolicy: policy },
 			sandbox,
 		})
 		context.message = getCommandMessageMock({
@@ -34,15 +36,24 @@ describe('support conversation commands', () => {
 				sessionId: 'support:tenant-example:principal-alex:case-1',
 			}),
 		).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-1',
+				action: 'continue',
+			}),
+		).toBe(true)
 	})
 
 	it('clears only the identity-scoped transcript', async () => {
 		const history = { list: sandbox.stub(), clear: sandbox.stub().resolves() }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
 		const payload = { conversationId: 'case-2' }
 		const { context } = createCommandContextMock(clearConversationHistoryCommandBuilder, {
 			payload,
 			parameter: {},
-			resources: { supportConversationHistory: history },
+			resources: { supportConversationHistory: history, supportConversationPolicy: policy },
 			sandbox,
 		})
 		context.message = getCommandMessageMock({
@@ -55,5 +66,13 @@ describe('support conversation commands', () => {
 			clearConversationHistoryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual({ cleared: true })
 		expect(history.clear.calledOnceWith('support:tenant-example:principal-alex:case-2')).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-2',
+				action: 'clear',
+			}),
+		).toBe(true)
 	})
 })

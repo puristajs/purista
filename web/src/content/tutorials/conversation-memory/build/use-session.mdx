@@ -1,6 +1,6 @@
 ---
-title: Use a stable conversation session
-description: Derive the Harness session from trusted identity and invoke the agent through EventBridge.
+title: Invoke an authorized conversation session
+description: Add business authorization, derive a stable Harness session from trusted identity, and invoke the agent through EventBridge.
 order: 222
 kind: lesson
 status: draft
@@ -13,11 +13,76 @@ application boundary; the agent remains a native Harness definition.
 npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
 ```
 
-The browser supplies a small `conversationId`, but it never supplies tenant or
-principal identity. Build the storage session id from the authenticated PURISTA
-message.
+The caller supplies a small `conversationId`, while trusted tenant and
+principal identity come from the PURISTA message. First declare the business
+policy used by both the command and the directly addressable agent.
 
-```ts title="src/service/support/v1/conversationSessionId.ts"
+```ts title="src/service/support/v1/SupportConversationPolicy.ts" write
+export type SupportConversationAction = 'continue' | 'read' | 'clear'
+
+export interface SupportConversationPolicy {
+	canAccess(input: {
+		tenantId: string
+		principalId: string
+		conversationId: string
+		action: SupportConversationAction
+	}): Promise<boolean>
+}
+```
+
+Keep the fail-closed authorization rule in one helper. Authentication must
+establish identity before this command is called; the policy then decides
+whether that valid caller may continue this particular conversation.
+
+```ts title="src/service/support/v1/requireSupportConversationAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportConversationAction, SupportConversationPolicy } from './SupportConversationPolicy.js'
+
+export async function requireSupportConversationAccess(
+	policy: SupportConversationPolicy,
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	conversationId: string,
+	action: SupportConversationAction,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAccess({
+			tenantId: identity.tenantId,
+			principalId: identity.principalId,
+			conversationId,
+			action,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This support conversation is not available')
+	}
+}
+```
+
+Declare the policy and transcript reader as service resources.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportConversationHistory } from './SupportConversationHistory.js'
+import type { SupportConversationPolicy } from './SupportConversationPolicy.js'
+import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
+
+export const supportServiceInfo = {
+	serviceVersion: '1',
+	...generalSupportServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportConversationHistory', SupportConversationHistory>()
+	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
+```
+
+Build the storage session id from the authenticated PURISTA message.
+
+```ts title="src/service/support/v1/conversationSessionId.ts" write
 import { HandledError, StatusCode } from '@purista/core'
 
 export function conversationSessionId(
@@ -31,18 +96,74 @@ export function conversationSessionId(
 }
 ```
 
-Declare the versioned agent address and invoke it through EventBridge. Reusing
+Protect the published agent address itself. A wrapper command guard cannot
+protect callers that invoke `Support / 1 / answer_support_question` directly.
+
+```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import type { z } from 'zod'
+import type { answerSupportQuestionInputSchema } from '../../../../harness/support/answerSupportQuestionAgent.js'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
+import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'
+
+export { supportHarness }
+
+export const supportHarnessPolicy = {
+	publish: { agents: ['answer_support_question'], workflows: [] },
+	targets: {
+		agents: {
+			answer_support_question: {
+				beforeGuards: {
+					conversationAccess: async (
+						context: HarnessBusinessGuardContext<{ supportConversationPolicy: SupportConversationPolicy }>,
+						input: z.output<typeof answerSupportQuestionInputSchema>,
+					) => {
+						await requireSupportConversationAccess(
+							context.resources.supportConversationPolicy,
+							context.identity,
+							input.conversationId,
+							'continue',
+						)
+					},
+				},
+			},
+		},
+		workflows: {},
+	},
+} as const
+```
+
+Declare the versioned agent address on the command and invoke it through
+EventBridge. Reusing
 the same session id loads earlier complete turns. A different principal or
 conversation id cannot accidentally join that transcript.
 
-```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts"
+```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts" write
+import {
+	answerSupportQuestionInputSchema,
+	answerSupportQuestionOutputSchema,
+} from '../../../../../harness/support/answerSupportQuestionAgent.js'
+import { conversationSessionId } from '../../conversationSessionId.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
 export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('continueSupportConversation', 'Continue a bounded support conversation')
 	.addPayloadSchema(answerSupportQuestionInputSchema)
 	.addOutputSchema(answerSupportQuestionOutputSchema)
 	.canInvokeAgent('Support', '1', 'answer_support_question', supportHarness.contracts.agents.answer_support_question)
-	.enableHttpSecurity(true)
-	.exposeAsHttpEndpoint('POST', 'support/conversations')
+	.setBeforeGuardHooks({
+		conversationAccess: async function (context, payload) {
+			await requireSupportConversationAccess(
+				context.resources.supportConversationPolicy,
+				context.message,
+				payload.conversationId,
+				'continue',
+			)
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const sessionId = conversationSessionId(context.message, payload.conversationId)
 		const outcome = await context.agent.Support['1'].answer_support_question.run(payload, { sessionId })
@@ -50,6 +171,11 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
+
+This focused chapter leaves the command transport-independent. To expose it
+over HTTP, add `.exposeAsHttpEndpoint(...)` and reuse the authenticated Hono
+setup from the sessions chapter. Protected endpoints are already the default;
+authentication sets identity, while the policy above performs authorization.
 
 `release()` closes live session resources but keeps persisted history. It is a
 runtime lifecycle operation, not a user-facing delete. The mounted Framework

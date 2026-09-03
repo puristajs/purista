@@ -17,7 +17,13 @@ export function createSupportService(
 
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
-		resources: { supportConversationHistory: new HarnessConversationHistory(storage) },
+		resources: {
+			supportConversationHistory: new HarnessConversationHistory(storage),
+			supportConversationPolicy: {
+				canAccess: async ({ tenantId, principalId }) =>
+					tenantId === 'tenant-example' && principalId === 'principal-alex',
+			},
+		},
 		ai: {
 			models: {
 				primary: {
