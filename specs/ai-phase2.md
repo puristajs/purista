@@ -17,5 +17,5 @@ The implemented direction is:
   `AiSdkProvider`, `streamProtocolAdapter`, `ui-message`, `context.ai`,
   `invokeAgent`, and `context.invoke.agents.*` are removed historical terms.
 
-Use `specs/20-agents/80-core-ai-migration-plan.md` for migration history and
-current agent ownership details.
+Use `specs/20-agents/88-harness-first-service-integration.md` for the current
+clean-break ownership and implementation contract.

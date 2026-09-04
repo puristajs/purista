@@ -10,9 +10,9 @@ skills and user-facing documentation.
 
 ## Active Decision
 
-PURISTA mounts one native `@purista/harness` definition on a service. Native
-Harness modules compose agents, workflows, tools, Skills, and guardrails before
-that single deployment boundary. Core owns addresses, EventBridge delivery,
+PURISTA mounts one native `@purista/harness` definition on a service. Immutable
+definitions and optional catalogs compose agents, workflows, tools, Skills,
+MCP, and Guardrails before that single deployment boundary. Core owns addresses, EventBridge delivery,
 trusted identity, business guards, resources, queue bindings, lifecycle, and
 testing adapters. Harness owns its definitions and runtime behavior.
 
@@ -37,9 +37,8 @@ the active plan. In particular, future agents must not follow guidance that:
 - makes AI SDK UI Message Stream v1 part of the portable Harness execution
   contract instead of a separate browser adapter
 
-The older `77-ai-harness-integration-strategy.md`,
-`78-clean-ai-package-architecture.md`, and `80-core-ai-migration-plan.md`
-documents are retained only as superseded history.
+The older 77, 78, and 80 design documents were deleted so autonomous
+implementation does not inherit their superseded package and builder models.
 
 ## Routing
 
@@ -51,5 +50,3 @@ documents are retained only as superseded history.
 - The `purista-skill-maintainer` workflow is the exception: it may use active
   specs to keep implementation, public docs, examples, and user-facing skills
   aligned.
-- Historical documents may be read for rationale only. Treat their public API
-  designs as superseded unless the active contract explicitly retains them.
