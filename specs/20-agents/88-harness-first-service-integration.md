@@ -488,6 +488,7 @@ inspection metadata. Core instantiates the graph with
 `instantiateHostedHarness(...)`, supplying the exact
 `HarnessHostBindings<PuristaHostInvocation, PuristaToolContext>` contract: its
 service-builder owner token, EventBridge `HarnessTargetDispatcher`, a
+pure `projectIdentity` function, a pure `projectTraceContext` function, a
 per-tool-call `createHostContext` factory, service logger, and telemetry bridge.
 `PuristaHostInvocation` is created by the
 receiving target adapter from its trusted message and service resources; it is
@@ -495,6 +496,16 @@ opaque to Harness and never enters model input, persistence, or public
 invocation parameters. The context factory binds the declared resource and
 outgoing-operation helpers plus the current target/tool/session/run/root/
 invocation/deadline/signal values.
+
+Core's identity projector reads only the authenticated sender identity from the
+trusted message and returns `{tenantId?,principalId?}`. Its trace projector
+reads only the EventBridge/telemetry W3C carrier and returns
+`{traceparent,tracestate?}`. Harness calls each projector once at hosted entry,
+normalizes and freezes the result, and never inspects `PuristaHostInvocation`
+itself. Projected values are absent from the service payload and cannot be
+supplied by application callers. The Core dispatcher places the same trusted
+identity and the current W3C trace carrier into every nested
+`HarnessTargetDispatchRequest`.
 
 Core enters Harness only through the integrator-only `runHosted` and
 `streamHosted` methods. Each call supplies the mounted target contract,
