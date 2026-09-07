@@ -1,14 +1,16 @@
 # Harness-first service integration
 
-**Status:** repository-owner-approved v4 clean-break contract, independently verified.
+**Status:** active repository-owner-approved v4 clean-break contract; readiness
+evidence must bind this exact revision.
 
-**Decision date:** 2026-09-04.
+**Decision date:** 2026-09-07.
 
 This is the PURISTA companion to
-`ai-harness/specs/42-composable-definitions-and-catalogs.md`. It replaces specs
-77, 78, and 80 and every conflicting part of the former version of this file.
-There is no compatibility API, deprecated alias, generated migration adapter,
-or legacy runtime path.
+`ai-harness/specs/42-composable-definitions-and-catalogs.md` and is the only
+active PURISTA agent-integration contract. Obsolete alternative integration
+specs are removed rather than retained with precedence rules. There is no
+compatibility API, deprecated alias, generated migration adapter, dual path, or
+legacy runtime behavior.
 
 ## 1. Goal and ownership
 
@@ -20,6 +22,12 @@ Harness owns definition factories, catalogs, model loops, workflows, model and
 tool execution, Skills, MCP, Guardrails, storage, memory, sandbox/workspace,
 portable events, interrupted outcomes, and standalone execution.
 
+The native immutable Harness catalog is the only public registry-like authoring
+surface. It packages strongly typed definition references for reuse. PURISTA
+does not add a tool, Skill, agent, workflow, model, or runtime registry. Mutable
+global registries, string lookup, general service locators, and late-bound
+capability discovery are outside this contract.
+
 Framework Core owns service/version/target addresses, EventBridge routing,
 business guards, trusted tenant/principal propagation, service resources,
 queues, subscriptions, events, HTTP/OpenAPI projection, service lifecycle,
@@ -29,13 +37,14 @@ exported service metadata, testing helpers, and host-aware tool context.
 provider-neutral public contracts. Provider and deployment adapters remain
 application dependencies.
 
-`@purista/core@4` has a normal runtime dependency on
+`@purista/core@4.0.0` has a normal runtime dependency on
 `@purista/harness@^4.0.0`; no separate integration package exists. Core imports
 only public provider-neutral SPI and runtime symbols. OpenAI, Anthropic, Google,
 Bedrock, Azure, storage, memory, sandbox, MCP transport, and UI adapters remain
-separate application-selected packages. Release verification packs the Harness
-packages, installs their tarballs into PURISTA, starter, create-purista, Voyage,
-and fresh generated fixtures, then runs without workspace links.
+separate application-selected packages. Release verification first packs and
+installs Harness v4 tarballs into PURISTA without workspace links.
+Registry-clean downstream lockfile and scaffold proofs run only after the
+corresponding Harness and PURISTA packages are published.
 
 ## 2. Minimal mounted agent
 
@@ -47,6 +56,13 @@ export const supportAgent = defineAgent('support', {
   instructions: 'Answer the customer clearly and concisely.',
 })
 ```
+
+This is a complete text agent. Harness supplies the documented default string
+input/output schemas, uses the validated string directly as the prompt, selects
+the `primary` model alias, derives text streaming, and applies bounded safe loop
+defaults. A beginner does not need a prompt mapper, catalog, output-mode flag,
+tool list, storage, memory, sandbox, queue, or mount policy. Adding any of those
+later refines the same definition and bootstrap shape.
 
 ```ts
 // service/support/v1/harness/supportHarness.ts
@@ -84,11 +100,44 @@ Harness definition before mounting. One service instance creates one Harness
 runtime and shuts it down exactly once.
 
 The mounted definition contributes its exact runtime requirements to
-`ServiceBuilder.getInstance(...)`. A default-only definition accepts
-`ai.model` and rejects `ai.models`; every other alias set requires the exact
-`ai.models` record and rejects `ai.model`. MCP bindings, storage, memory,
-sandbox, durable workspace, artifact store, optional agent admission, and model
-admission appear only when accepted or required by the definition.
+`ServiceBuilder.getInstance(...)`. Runtime model configuration is additive and
+stable as the graph grows:
+
+- `ai.model` binds the `primary` alias and is required exactly when the graph
+  requires `primary`;
+- `ai.models` is the exact readonly record of required non-primary aliases;
+- a graph that requires both accepts both fields without moving `primary` into
+  `ai.models`;
+- a graph without `primary` rejects `ai.model`; and
+- missing, duplicate, unknown, or capability-incompatible model bindings fail
+  before target registration.
+
+For example, adding retrieval to a basic text agent extends the same bootstrap
+instead of rewriting it:
+
+```ts
+const support = await supportV1Service.getInstance(eventBridge, {
+  ai: {
+    model: {
+      provider: openaiProvider,
+      model: 'gpt-5.5',
+    },
+    models: {
+      embeddings: {
+        provider: openaiProvider,
+        model: 'text-embedding-3-large',
+      },
+    },
+  },
+})
+```
+
+`ai.storage` and `ai.memory` remain legal optional production upgrades when the
+graph can use Harness defaults. They become required when compiled durability
+or memory capabilities require them. Supplying either adapter does not grant an
+undeclared agent or workflow capability. MCP bindings, sandbox, durable
+workspace, artifact store, optional agent admission, and model admission appear
+only when accepted or required by the definition.
 
 MCP definitions statically require server ids and tool contracts only. The
 application chooses each server's HTTP or stdio binding in `ai.mcp`. Selecting
@@ -108,18 +157,23 @@ ownership contracts.
 
 ## 4. Address-first agents and workflows
 
-Every mounted agent and workflow has the normal service/version/target address.
-All PURISTA target calls and all workflow/subagent agent dispatch go through
-EventBridge, including same-service and same-process calls. Portable and
-host-aware model tool handlers execute inside the receiving Harness run;
-PURISTA operations declared by a host-aware tool use EventBridge. The receiver
-is the input trust boundary. It validates and transforms the raw logical input
-exactly once with the mounted target contract, applies target business guards
-to that validated value, executes the Harness target, validates the outcome,
-and applies after guards. The EventBridge dispatcher transports raw logical
-input and never validates or transforms it. The hosted Harness entry points
-receive the already validated value, verify the exact contract identity, and
-do not run input validation or transformation again.
+Each explicit Harness agent or workflow root has the normal public
+service/version/target address. Each executable dependency needed for workflow
+or subagent dispatch also has an exact Core-owned internal route. All PURISTA
+root calls, workflow calls, model-selected subagent calls, and host-tool nested
+target calls go through EventBridge, including same-service and same-process
+calls. No client, dispatcher, workflow, tool, or mount runtime has a direct
+local-execution fallback.
+
+Portable and host-aware model tool handlers execute inside the receiving
+Harness run; PURISTA operations declared by a host-aware tool use EventBridge.
+The receiver is the input trust boundary. It validates and transforms the raw
+logical input exactly once with the mounted target contract, applies root target
+business guards to that validated value, executes the Harness target, validates
+the outcome, and applies after guards. The EventBridge dispatcher transports
+raw logical input and never validates or transforms it. The hosted Harness entry
+points receive the already validated value, verify the exact contract identity,
+and do not run input validation or transformation again.
 
 The Framework propagates trusted tenant id, principal id, trace/correlation
 context, deadlines, session/run ancestry, idempotency, and handled errors.
@@ -136,7 +190,6 @@ const command = supportV1ServiceBuilder
   .canInvokeAgent(
     'Support',
     '1',
-    'support',
     supportHarness.contracts.agents.support,
   )
   .setCommandFunction(async function ({ message, agent }) {
@@ -144,10 +197,14 @@ const command = supportV1ServiceBuilder
   })
 ```
 
-`canInvokeWorkflow` follows the same pattern. These declare outgoing
-application dependencies; they do not wrap, register, or locally call an
-agent. A model-selected subagent relation is declared on `defineAgent` and is
-compiled into an EventBridge-backed `HarnessTargetDispatcher` when mounted.
+`canInvokeAgent(serviceName, serviceVersion, contract)` and
+`canInvokeWorkflow(serviceName, serviceVersion, contract)` derive
+`serviceTarget` from the contract's literal `id`. Callers do not repeat a target
+string that could disagree with the contract. The mounted address has no alias
+in v4. These methods declare outgoing application dependencies; they do not
+wrap, register, or locally call a target. A model-selected subagent relation is
+declared on `defineAgent` and is compiled into an EventBridge-backed
+`HarnessTargetDispatcher` when mounted.
 
 Core implements `HarnessTargetDispatcher.open` for model-selected subagents,
 workflow-declared agent calls, and scoped host-tool target calls. It calls
@@ -159,11 +216,19 @@ lineage, budgets, and deadline are added by Core and cannot be supplied by the
 model.
 
 The Core dispatcher owns an immutable binding table keyed by each contract's
-hidden Harness identity. Mount compilation binds every contract in the
-completed graph to its service/version/target address. Builder declarations
-such as `canInvokeAgent` and `canInvokeWorkflow` add their exact remote contract
+hidden Harness identity. Mount compilation binds each executable contract in
+the private completed dependency closure to one service/version/target route.
+Only explicit root contracts are exposed for application declarations, service
+metadata, and generated clients. Builder declarations such as
+`canInvokeAgent` and `canInvokeWorkflow` add their exact remote root-contract
 identity and address. An unknown or structurally copied contract fails before
 EventBridge dispatch; routing never falls back to `(kind, id)` strings.
+
+An internal-only child route accepts only a Core-authored nested dispatch
+envelope carrying the exact compiled contract identity. It rejects ordinary
+root invocation. Making that definition an explicit `.addAgent(...)`,
+`.addWorkflow(...)`, or catalog root promotes it to a public target without
+creating a second definition or execution path.
 
 The serialized invocation parameter is deliberately smaller than Harness
 `InvokeOptions`:
@@ -182,41 +247,52 @@ type HarnessInvocationParameter = Readonly<{
 `signal`, trusted identity, lineage, trace context, and opaque host context are
 host-created and never serialized in model input. `resume` and
 `idempotencyKey` are mutually exclusive; resume replay protection uses the
-approval event id. Aggregate EventBridge replies contain
-`RunOutcome<LogicalOutput>`; failed and cancelled aggregate execution rejects
-and follows the handled-error mapping in section 12. Once a stream passes input
-validation, before guards, and Harness startup, it relays
-`ExecutionEvent<LogicalOutput, HarnessInterrupt>` and includes exactly one
+approval event id. Aggregate EventBridge replies contain the exact
+`HarnessTargetRunOutcome<Contract>` imported from Harness; failed and cancelled
+aggregate execution rejects and follows the handled-error mapping in section
+12. Once a stream passes input validation, before guards, and Harness startup,
+it relays the exact `HarnessTargetExecutionEvent<Contract>` and includes one
 terminal `run.finished`. Validation, before-guard, and startup failures occur
 before `run.started` and use the normal EventBridge stream error; they do not
 manufacture a Harness run id or terminal event. The EventBridge
 `complete.final` value is the same
-`ExecutionTerminalOutcome<LogicalOutput, HarnessInterrupt>` carried by that
-terminal event, including sanitized `failed` and `cancelled` variants.
+`HarnessTargetExecutionTerminalOutcome<Contract>` carried by that terminal
+event, including sanitized `failed` and `cancelled` variants.
 
-The generated address-first client has this semantic shape:
+`HarnessTargetContract.$infer` is the sole contract-only type source and
+contains exact `input`, `validatedInput`, `output`, `update`, and `interrupt`
+members. It is a compile-time phantom with the Harness-defined frozen empty
+runtime value; Core never reads or serializes it. Core imports Harness's
+`HarnessTargetRunOutcome<Contract>` and
+`HarnessTargetExecutionEvent<Contract>` projections rather than copying their
+conditional-type equations or widening interruption to all Harness interrupt
+families. The generated address-first client has this semantic shape:
 
 ```ts
-interface HarnessExecutionStream<Output, Interrupt = HarnessInterrupt>
-  extends AsyncIterable<ExecutionEvent<Output, Interrupt>> {
+interface HarnessExecutionStream<C extends AnyHarnessTargetContract>
+  extends AsyncIterable<HarnessTargetExecutionEvent<C>> {
   readonly sessionId: CorrelationId
   cancel(reason?: string): Promise<void>
 }
 
-interface HarnessTargetClient<Input, Output, Interrupt = HarnessInterrupt> {
-  run(input: Input, options?: HarnessInvocationParameter): Promise<RunOutcome<Output, Interrupt>>
-  stream(
-    input: Input,
+interface HarnessTargetClient<C extends AnyHarnessTargetContract> {
+  run(
+    input: C['$infer']['input'],
     options?: HarnessInvocationParameter,
-  ): Promise<HarnessExecutionStream<Output, Interrupt>>
+  ): Promise<HarnessTargetRunOutcome<C>>
+  stream(
+    input: C['$infer']['input'],
+    options?: HarnessInvocationParameter,
+  ): Promise<HarnessExecutionStream<C>>
 }
 ```
 
 Internally the corresponding EventBridge handle is typed as
-`StreamHandle<ExecutionEvent<Output, Interrupt>,
-ExecutionTerminalOutcome<Output, Interrupt>>`. The client verifies that the
-terminal event and `complete.final` have the same run id and status before
-ending iteration.
+`StreamHandle<HarnessTargetExecutionEvent<C>,
+HarnessTargetExecutionTerminalOutcome<C>>`. These three public Harness
+projections preserve the root contract's exact update and reachable-interrupt
+types. The client verifies that the terminal event and `complete.final` have
+the same run id and status before ending iteration.
 
 Nested dispatch adds a reserved internal transport envelope beside the logical
 payload and public invocation parameter:
@@ -263,14 +339,68 @@ nonpositive budget rejects before EventBridge dispatch. A host-tool call itself 
 depth, but an agent/workflow call made by that tool does. Replaying a completed
 logical child call does not consume depth again.
 
-## 5. Mounted targets and HTTP
+## 5. Executable roots, dependency closure, and HTTP
 
-Mounting registers every agent and workflow in the completed Harness graph as
-both aggregate and stream EventBridge targets. The target name is exactly the
-definition id. There is no `publish` setting or private EventBridge namespace:
-guards are the authorization boundary, while declaration-first builder methods
-are the typed consumer boundary. Mounting rejects any agent/workflow id that
-collides with another mounted graph member or an existing command/stream target.
+Harness keeps explicit executable roots separate from their recursive dependency
+closure:
+
+- `.addAgent(definition)` and `.addWorkflow(definition)` add one public root;
+- `.use(catalog)` adds only the agent and workflow roots explicitly packaged by
+  that catalog;
+- tools, Skills, MCP servers, subagents, and other definitions reached from a
+  root enter the private compiled dependency closure without becoming public
+  roots; and
+- catalog membership alone grants no runtime capability and publishes no
+  target.
+
+A leaf-only catalog remains valid for typed reuse but cannot be passed to
+`.use(...)`, because it would activate no root. Type checking rejects that call;
+erased JavaScript fails graph composition with a stable configuration error.
+
+The Harness authoring surface has no `.addTool(...)`, `.addSkill(...)`, or
+`.addMcpServer(...)`. Small applications reference those definitions directly
+from an agent or workflow. Reusable applications package them in
+`defineCatalog(...)` and then reference the typed catalog member from a root.
+Both paths compile the same hidden definition identity.
+
+```ts
+const bankingCapabilities = defineCatalog('bankingCapabilities', {
+  tools: [lookupTransaction],
+  skills: [customerSupportPolicy],
+})
+
+const answerQuestion = defineAgent('answerQuestion', {
+  instructions: 'Answer using verified account information.',
+  tools: [bankingCapabilities.tools.lookupTransaction],
+  skills: [bankingCapabilities.skills.customerSupportPolicy],
+})
+
+const supportTargets = defineCatalog('supportTargets', {
+  agents: [answerQuestion],
+})
+
+const supportHarness = defineHarness({ name: 'support' })
+  .use(supportTargets)
+```
+
+Using `bankingCapabilities` as a typed value grants only the definitions
+referenced by `answerQuestion`. Using `supportTargets` makes its explicitly
+listed agent a Harness root. Neither catalog creates a second registry.
+
+`harness.contracts` and `harness.$infer` contain executable roots only. Public
+`inspect()` output separates roots from sanitized dependency ids. The integrator
+SPI exposes Core only the typed private closure metadata required for host-tool
+binding and internal EventBridge child routing; it does not expose a mutable
+registry or an application invocation surface.
+
+Mounting registers every explicit root as both an aggregate and stream
+EventBridge target. The public target name is exactly the definition id. It also
+registers the minimum internal routes required by workflow and subagent edges.
+Those routes are absent from exported service definitions and ClientBuilder and
+reject application-root invocation. There is no mount `publish` setting:
+promotion to a public target happens only by making the definition an explicit
+Harness root. Mounting rejects public target collisions with another root or an
+existing command/stream target and rejects ambiguous internal route identity.
 
 The optional policy is exact and target keyed:
 
@@ -291,12 +421,14 @@ supportV1ServiceBuilder.mountHarness(supportHarness, {
 })
 ```
 
-Only graph target ids are accepted. `beforeGuards` receive validated logical
-input. `afterGuards` receive the validated complete `RunOutcome`, including an
-interrupted outcome. They do not run for failed or cancelled execution. A
-success event is emitted only for `completed` and its payload is that completed
-`RunOutcome`. The queue binding adds explicit typed enqueue support; it does
-not change direct run/stream routing.
+Only exact explicit-root ids are accepted by `targets`. The option is inferred
+from the Harness root contracts, so a dependency-only subagent is a compile-time
+error. `beforeGuards` receive validated logical input. `afterGuards` receive the
+exact validated `HarnessTargetRunOutcome<Contract>`, including only the
+interrupt variants reachable from that root. They do not run for failed or
+cancelled execution. A success event is emitted only for `completed` and its
+payload is that completed outcome. The queue binding adds explicit typed enqueue
+support; it does not change direct run/stream routing.
 
 For streaming, Core completes input validation and `beforeGuards` before it
 publishes the EventBridge start frame. `openStream` waits for that start or a
@@ -306,9 +438,10 @@ immediately but withholds the Harness `run.finished` event and
 `complete.final` while it evaluates `afterGuards`. If they pass, Core forwards
 that terminal event and the identical final value. If an after guard rejects,
 Core suppresses the Harness terminal, emits one replacement `run.finished`
-with the same run id and a sanitized `failed` `ExecutionTerminalOutcome`, and
-uses that exact value for `complete.final`. It does not emit an EventBridge
-error frame after progressive delivery.
+with the same run id and a sanitized failed
+`HarnessTargetExecutionTerminalOutcome<Contract>`, and uses that exact value
+for `complete.final`. It does not emit an EventBridge error frame after
+progressive delivery.
 
 After guards are terminal postconditions. They may prevent an aggregate result
 or turn a stream's terminal status into failure, but they cannot retract content
@@ -533,6 +666,42 @@ Portable tools use `defineTool` from `@purista/harness`. Both kinds look
 identical to the model and traverse the same validation, permission,
 governance, approval, Guardrail, telemetry, and cancellation pipeline.
 
+Workflows declare an exact tool array. This is the only way a workflow receives
+a tool invoker:
+
+```ts
+const ingestKnowledge = defineWorkflow('ingestKnowledge', {
+  input: ingestKnowledgeInputSchema,
+  output: ingestKnowledgeOutputSchema,
+  models: {
+    embeddings: { capabilities: ['embeddings'] },
+  },
+  tools: [storeChunks],
+  async handler(context) {
+    const result = await context.models.embeddings.embed(
+      { input: context.input.chunks.map(chunk => chunk.text) },
+      { callId: 'embedChunks' },
+    )
+
+    await context.tools.storeChunks.run(
+      { chunks: context.input.chunks, embeddings: result.embeddings },
+      { callId: 'storeChunks' },
+    )
+
+    return { stored: context.input.chunks.length }
+  },
+})
+```
+
+`context.tools` is keyed by each tool's literal definition id; duplicate ids are
+rejected and v4 adds no workflow-local aliases. Each invoker preserves the
+tool's exact input/output types and requires a stable `callId`. It runs through
+the same Harness validation, checkpoint, permission, approval, Guardrail,
+telemetry, cancellation, and error pipeline as a model-selected tool. A
+host-aware tool receives only the PURISTA resources and address-first helpers
+declared on its service builder. A workflow never receives a service resource,
+EventBridge client, or registry directly.
+
 ## 7. Business guards and events
 
 Mount target policies attach typed before and after guards. Guards verify
@@ -545,20 +714,102 @@ than duplicating successful command completion. Interrupted, rejected, failed,
 and cancelled outcomes do not emit a success event.
 
 `successEvent` is a literal event name. Core deterministically derives its
-schema as `CompletedRunOutcome<LogicalOutput>` from the mounted target contract,
-adds the resulting event contract to service definitions, and uses that same
-schema for subscription typing and export. Reusing an existing event name with
-a different canonical JSON Schema fails mount composition before registration.
+schema as
+`Extract<HarnessTargetRunOutcome<Contract>, { status: 'completed' }>` from the
+root contract, adds the resulting event contract to service definitions, and
+uses that same schema for subscription typing and export. Reusing an existing
+event name with a different canonical JSON Schema fails mount composition
+before registration.
 
 ## 8. Queues and admission
 
-An optional target queue binding adds
-`target.enqueue(input, invocationOptions?, enqueueOptions?)` to the typed
-application client and returns the normal typed PURISTA queue receipt. A queue
-worker later calls the immediate target. Direct `run` and `stream`, workflow
-calls, and model-selected subagents remain EventBridge stream operations and do
-not traverse the durable queue. Queue delivery retains identity, tracing,
-idempotency, retry/defer metadata, and the logical input contract.
+Queueing is an explicit PURISTA delivery option on a root. The complete binding
+uses normal queue and worker builders:
+
+```ts
+const supportAnswerQueueBinding = defineHarnessQueueBinding(
+  supportHarness.contracts.agents.support,
+  supportV1ServiceBuilder.getQueueBuilder(
+    'support.answer',
+    'Run support answers in the background',
+  ),
+  supportV1ServiceBuilder
+    .getQueueWorkerBuilder('support.answer', 'support-answer-worker')
+    .setMaxParallelHandlers(4),
+)
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(
+  supportHarness,
+  {
+    targets: {
+      agents: {
+        support: { queue: supportAnswerQueueBinding },
+      },
+    },
+  },
+)
+```
+
+`defineHarnessQueueBinding(contract, queueBuilder, workerBuilder)` is pure and
+synchronous. It rejects different queue names or a contract/binding mismatch
+before service composition and returns one frozen value with:
+
+```ts
+type HarnessTargetQueueBinding<
+  C extends AnyHarnessTargetContract,
+  Queue = QueueDefinitionBuilder,
+  Worker = QueueWorkerBuilder,
+> = Readonly<{
+  targetContract: C
+  contract: C & Readonly<{
+    queue: Readonly<{ name: string }>
+  }>
+  queue: Queue
+  worker: Worker
+}>
+```
+
+The queue payload is inferred from `C.$infer.input`; invocation options are the
+queue parameter and never contain trusted identity. Mounting adds those schemas
+to the supplied builders and adds the queue and one generated worker exactly
+once. The worker declares the immediate target
+with `canInvokeAgent(serviceName, serviceVersion, C)` or
+`canInvokeWorkflow(serviceName, serviceVersion, C)`, so execution returns
+through EventBridge even when worker and target share a process. It calls
+`client.run(message.payload, message.parameter)`. A completed or interrupted
+outcome settles the queue job successfully with that typed outcome. A retriable
+`AgentAdmissionRejectedError` with `retryAfterMs` becomes the normal delayed
+`QueueRetry`; other handled or unknown failures retain ordinary queue-worker
+retry, nack, and dead-letter behavior. The supplied worker's
+`setMaxParallelHandlers(...)` remains the first coarse concurrency control.
+
+Using the returned queued contract in an outgoing declaration adds enqueue
+without changing aggregate or stream behavior:
+
+```ts
+const command = apiV1ServiceBuilder
+  .getCommandBuilder('requestSupportAnswer', 'Queue a support answer')
+  .canInvokeAgent(
+    'Support',
+    '1',
+    supportAnswerQueueBinding.contract,
+  )
+  .setCommandFunction(async function ({ agent, message }) {
+    return agent.Support['1'].support.enqueue(
+      message.payload,
+      { sessionId: message.correlationId },
+      { idempotencyKey: message.id },
+    )
+  })
+```
+
+The returned promise resolves to the normal typed PURISTA queue receipt.
+Declaring the original root contract instead exposes only `run` and `stream`;
+queue support never appears by inference from the target alone. Direct `run`
+and `stream`, workflow calls, and model-selected subagents remain EventBridge
+operations and do not traverse the durable queue. Queue delivery retains
+trusted identity, tracing, idempotency, retry/defer metadata, and the logical
+input contract.
 
 Harness `AgentAdmission` limits concurrent root execution trees regardless of
 direct or queued entry. Descendants with the same `rootRunId` join the
@@ -570,9 +821,11 @@ it is retriable and includes `retryAfterMs`. These are distinct controls.
 
 ## 9. Exported service definitions
 
-`exportServiceDefinitions` adds `agents` and `workflows` maps to
-`ServiceDefinitions` and `FullServiceDefinition`. Each entry has this canonical
-shape; the enclosing service/version supplies the rest of the address:
+`exportServiceDefinitions` adds root-only `agents` and `workflows` maps to
+`ServiceDefinitions` and `FullServiceDefinition`. A dependency-only subagent is
+never serialized into either callable-target map. Each root entry has this
+canonical shape; the enclosing service/version supplies the rest of the
+address:
 
 ```ts
 type MountedHarnessTargetDefinition = Readonly<{
@@ -595,13 +848,44 @@ type MountedHarnessTargetDefinition = Readonly<{
 }>
 ```
 
+The service export also includes one sanitized, non-callable composition view:
+
+```ts
+type MountedHarnessDefinition = Readonly<{
+  name: string
+  roots: Readonly<{
+    agents: readonly string[]
+    workflows: readonly string[]
+  }>
+  dependencies: Readonly<{
+    tools: readonly string[]
+    skills: readonly string[]
+    mcpServers: readonly string[]
+    agents: readonly string[]
+    workflows: readonly string[]
+  }>
+}>
+
+type ServiceDefinitions = Readonly<{
+  // existing service metadata and root-only agents/workflows maps
+  harness?: MountedHarnessDefinition
+}>
+```
+
+`roots` is identical to the keys in the callable maps. `dependencies` lists the
+sanitized recursive closure excluding those roots. These arrays support
+architecture inspection only: they carry no schemas, addresses, handlers, or
+invocation rights, and ClientBuilder does not create clients from them.
+
 Core copies the frozen `harnessExecutionEventTypesV1` inventory from Harness
-for every mounted target. It derives `outputUpdates` only from the target
-contract: `updates: 'none'` becomes `[]`; otherwise it becomes the one-element
-array `[contract.updates]`. File artifacts and progress remain ordinary
-`output.file` and `output.progress` execution event types and are never listed
-as target output-update modes. `HarnessInterruptKind` is imported from Harness;
-Core does not declare a parallel interrupt vocabulary.
+for every root. It derives `outputUpdates` and `resumableInterrupts` only from
+that exact root contract: `updates: 'none'` becomes `[]`; otherwise it becomes
+the one-element array `[contract.updates]`. File artifacts and progress remain
+ordinary `output.file` and `output.progress` execution event types and are never
+listed as target output-update modes. `HarnessInterruptKind` and the exact
+contract `$infer.interrupt` relation are imported from Harness; Core does not
+declare a parallel interrupt vocabulary or widen every target to all interrupt
+kinds.
 
 `mergeServiceDefinition`, `mergeIntoServiceDefinition`,
 `ServiceBuilder.getFullServiceDefinition`, JSON export, and architecture
@@ -615,8 +899,9 @@ The input direction therefore describes `InferIn` values accepted at the
 public boundary, while the output direction describes validated `Infer`
 values. Missing JSON Schema support or conversion failure aborts service
 composition and definition export atomically.
-ClientBuilder generates address-first typed
-`agent` and `workflow` namespaces from them; it never generates HTTP routes.
+ClientBuilder generates address-first typed `agent` and `workflow` namespaces
+from explicit root contracts only; it never generates HTTP routes or clients
+for dependency metadata.
 
 It never exports prompts, Skill files, tool handlers, resources, credentials,
 provider configuration, MCP authentication, sandbox references, memory, or
@@ -628,6 +913,7 @@ conversation content.
 src/service/support/v1/
 ├── supportV1ServiceBuilder.ts
 ├── supportV1Service.ts
+├── contract/
 ├── command/
 ├── subscription/
 ├── stream/
@@ -647,18 +933,37 @@ src/service/support/v1/
     └── mcp/<serverName>/<serverName>Mcp.test.ts
 ```
 
-The base service builder never imports its Harness. Host-aware tools import the
-base builder; agents import tool/Skill/agent definitions; the Harness imports
-agents/workflows/catalogs; the final service imports the builder and Harness to
-mount them. Another service is referenced only through its exported address
-and contract, never its builder or runtime.
+The import graph is a directed set of layers:
+
+1. `contract/**` owns reusable schemas and address/contract-only exports and
+   imports no builder or runtime module.
+2. `supportV1ServiceBuilder.ts` owns service info and resource types. It may
+   import `contract/**` but never imports commands, tools, agents, workflows,
+   catalogs, the Harness, or the final service.
+3. Host-aware tool files import the base builder and contract-only modules.
+4. Agent and workflow files import schemas, tools, Skills, MCP definitions, and
+   lower-level agent definitions through direct files. They never import the
+   Harness or final service. Agent-to-agent cycles fail Harness compilation.
+5. Catalog files import definitions they package. `supportHarness.ts` imports
+   catalog and target definitions and selects roots.
+6. `supportV1Service.ts` is the composition root. It imports the base builder,
+   command/subscription/stream definitions, and Harness, then calls
+   `mountHarness(...)` once.
+
+A command, stream, subscription, or queue worker that invokes a mounted target
+imports the target's contract-only public export or the Harness root-contract
+view; it never imports an agent/workflow definition or runtime instance. The
+base builder does not import that consumer, so this remains acyclic. Another
+service is referenced only through its exported address and root contract,
+never its builder, dependency closure, or runtime.
 
 Only required directories exist; generators do not create empty placeholders
 or service-local barrel files. Tests are colocated. Contract schemas used by
 another service live in a builder-free exported schema/contract module. Every
 model-selectable subagent is part of the same Harness graph and service version;
-cross-service agent calls are application-controlled address-first calls in
-this release.
+it is internal unless explicitly promoted to a root. Cross-service agent calls
+are application-controlled address-first calls to exported roots in this
+release.
 
 ## 11. CLI and generated applications
 
@@ -678,9 +983,11 @@ projection.
 The default Harness name is the lower-camel service name. `add agent` and
 `add workflow` create and mount it when absent and add their definition as a
 root. `add tool --kind portable|purista`, `add skill`, and `add mcp` create
-reusable leaf definitions but do not grant or register them; a later typed
-agent/workflow reference brings them into the graph. Agent, workflow, tool,
-Skill, and MCP tests use the colocated filenames in section 10. An empty
+reusable leaf definitions but do not add them to a Harness or grant them; a
+later typed agent/workflow reference brings them into the dependency closure.
+The CLI never emits `.addTool(...)`, `.addSkill(...)`, or `.addMcpServer(...)`.
+Agent, workflow, tool, Skill, and MCP tests use the colocated filenames in
+section 10. An empty
 Harness command creates no test.
 
 `--http command` creates protected target `run<AgentPascal>` in
@@ -702,12 +1009,28 @@ is not rewritten: the CLI makes no partial graph change and prints the exact
 manual composition required. The release package map uses
 `@purista/harness@^4.0.0`; the standard first-agent path also installs
 `@purista/harness-openai@^4.0.0`, adds `OPENAI_API_KEY` to `.env.example`, and
-adds the canonical `ai.model` bootstrap. Generated tests use
+adds the canonical additive `ai.model` bootstrap. Generated wrappers use
+`canInvokeAgent(serviceName, serviceVersion, contract)` without a repeated
+target string. Generated tests use
 `@purista/harness/testing` and need no credentials.
 
 Generated projects use published-package installation commands and never
 workspace links or copied packages. `starter`, `create-purista`, Voyage, and
 all maintained examples use the same structure and APIs.
+
+This clean break releases `create-purista@3.0.0`. Reproducible tutorial setup
+uses its published pinned form:
+
+```sh
+npm create purista@3.0.0 example-bank -- --runtime node --event-bridge default --non-interactive --defaults
+```
+
+Release order is fixed: publish Harness v4; converge, verify, and publish all
+public PURISTA packages at `4.0.0`; publish `create-purista@3.0.0`; then
+regenerate downstream and tutorial lockfiles from the public npm registry. A
+local workspace link, copied package, tarball substitution, or unpublished
+version never counts as registry-clean tutorial or generated-project evidence.
+Merge, tag, and publish remain explicit repository-owner actions.
 
 ## 12. Error and outcome mapping
 
@@ -730,21 +1053,35 @@ data. Unknown provider or tool details are not exposed.
 
 ## 13. Testing and clean removal
 
-Core tests cover mount lifecycle, exact `ai` option inference, aggregate and
-stream target registration, EventBridge-only nested dispatch, identity and
-trace propagation, cancellation, queues, business guards, successful-result
-events, host-aware context inference, approval/resume, validation and
-before-guard rejection before stream start, after-guard terminal replacement
-without buffering progressive output, AI SDK UI stream
-conformance, exported definitions, CLI snapshots, and fresh generated-project
-installation.
+Core tests cover mount lifecycle; additive `ai.model` plus `ai.models`
+inference; optional production `storage` and `memory` upgrades; aggregate and
+stream root registration; dependency-only non-public routes; EventBridge-only
+workflow, subagent, and host-tool nested dispatch; identity and trace
+propagation; cancellation; queues; business guards; successful-result events;
+host-aware agent and workflow tool context inference; approval/resume;
+validation and before-guard rejection before stream start; after-guard terminal
+replacement without buffering progressive output; AI SDK UI stream conformance;
+root-versus-dependency inspection/export; CLI snapshots; and fresh generated
+project installation.
+
+Compile-time tests prove that root contracts expose exact `$infer.input`,
+`validatedInput`, `output`, `update`, and `interrupt` types; clients preserve
+the Harness target outcome/event projections; a dependency-only target cannot
+be declared, guarded, queued, exported, or generated as an application client;
+workflow tools expose only declared literal ids and exact types; and invalid
+model/storage/memory configurations fail where expected. Runtime tests fail if
+a same-process child call bypasses EventBridge or if any registry/string lookup
+can grant an undeclared capability.
 
 The release removes the former attached-agent builders and generated target
 expansion, `AgentQueueBuilder`, raw Harness merging, top-level
 `src/harness/<service>` guidance, `defineHarnessModule`, `BuilderState`-based
 application code, `.define()`, `.build()`, custom agent handlers,
 `getHarnessHostToolBuilder`, normal-use manual host-tool bindings, and every
-compatibility shim or stale generated artifact.
+public tool/Skill/agent registry, Harness `.addTool(...)`, `.addSkill(...)`, or
+`.addMcpServer(...)`, direct local target fallback, four-argument
+`canInvokeAgent`/`canInvokeWorkflow` call, compatibility shim, or stale
+generated artifact.
 
 Migration pages show concise before/after source changes. No compatibility or
 migration behavior exists in Core or Harness runtime code.
@@ -780,7 +1117,8 @@ The RAG chapter is one complete Harness-based path:
 
 1. a PURISTA ingestion command obtains approved source content;
 2. a Harness workflow uses a declared embeddings model;
-3. a database/vector resource stores chunks, metadata, and embeddings;
+3. a declared host-aware workflow tool stores chunks, metadata, and embeddings
+   through a database/vector resource;
 4. a host-aware retrieval tool queries that resource with trusted tenant data;
 5. the answer agent receives the retrieval tool and the model chooses when to
    call it;
@@ -809,7 +1147,9 @@ before-examples, internal implementation names, and negative fixtures. They
 fail on recommended uses of `defineHarnessModule`, `HarnessModuleBuilder`,
 public `BuilderState`, terminal Harness `.define()`/`.build()`, custom agent
 handlers, top-level `src/harness`, `getHarnessHostToolBuilder`, manual host-tool
-binding maps, or mounted-target `publish` policies.
+binding maps, mounted-target `publish` policies, Harness `.addTool(...)`,
+`.addSkill(...)`, `.addMcpServer(...)`, direct target execution inside a
+PURISTA service, or public mutable registries.
 
 `scripts/check-harness-v4-authoring.mjs` owns that audit. It scans source and
 documentation extensions under `packages/**`, `examples/**`,

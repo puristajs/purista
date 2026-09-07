@@ -1,52 +1,39 @@
-# Agent Specifications
+# Agent specifications
 
-Status: active routing document.
+**Status:** active routing index.
 
-Use
 [88-harness-first-service-integration.md](./88-harness-first-service-integration.md)
-as the active implementation contract for PURISTA Harness work. Current
-implementation and public handbook/API docs remain the source material for
-skills and user-facing documentation.
+is the single authoritative PURISTA contract for Harness v4 integration. This
+directory contains no alternative agent architecture or retained historical
+implementation plan.
 
-## Active Decision
+## Contract summary
 
-PURISTA mounts one native `@purista/harness` definition on a service. Immutable
-definitions and optional catalogs compose agents, workflows, tools, Skills,
-MCP, and Guardrails before that single deployment boundary. Core owns addresses, EventBridge delivery,
-trusted identity, business guards, resources, queue bindings, lifecycle, and
-testing adapters. Harness owns its definitions and runtime behavior.
+- Native `@purista/harness` factories and immutable catalogs own AI definitions.
+- A service mounts one Harness definition with
+  `ServiceBuilder.mountHarness(...)`; Core owns its lifecycle.
+- `.addAgent(...)`, `.addWorkflow(...)`, and catalog roots define public
+  callable targets. Recursive tools, Skills, MCP servers, agents, and workflows
+  remain dependencies until explicitly promoted to roots.
+- Every PURISTA agent, workflow, and subagent call uses an exact address and the
+  EventBridge. Same-process execution has no local fallback.
+- Harness target contracts carry exact input, validated-input, output, update,
+  and reachable-interrupt inference.
+- `ai.model` binds `primary`; `ai.models` adds the exact non-primary aliases.
+  Storage and memory accept optional production adapters and become mandatory
+  only when compiled requirements demand them.
+- Host-aware tools expose only builder-declared PURISTA resources and
+  operations. Workflows receive only explicitly declared typed tool invokers.
+- Hono protection middleware authenticates and establishes trusted principal
+  and tenant identity. Command, stream, subscription, workflow, mounted-root,
+  and resource guards enforce business authorization.
+- The release is a clean break. Runtime packages contain no compatibility,
+  legacy, or migration path.
 
-The unreleased `@purista/ai` and `AgentQueueBuilder` designs are removed without
-compatibility wrappers. Provider, persistent storage, MCP transport, sandbox,
-artifact, and browser protocol adapters remain application dependencies.
+## Ownership
 
-## Superseded Guidance
-
-All older guidance in `specs/20-agents` is superseded where it conflicts with
-the active plan. In particular, future agents must not follow guidance that:
-
-- keeps PURISTA agent integration in `@purista/ai`
-- preserves `@purista/ai` as an optional integration package
-- adds a PURISTA-owned agent or workflow builder
-- mounts more than one Harness definition on a service
-- wraps every target in a generated command, stream, queue, or worker
-- defines `@purista/ai/protocol` or `AgentProtocolEnvelope` as an active runtime
-  boundary
-- treats `context.ai` as the canonical handler surface
-- emits or depends on `purista-ai:*` run-state artifacts
-- makes AI SDK UI Message Stream v1 part of the portable Harness execution
-  contract instead of a separate browser adapter
-
-The older 77, 78, and 80 design documents were deleted so autonomous
-implementation does not inherit their superseded package and builder models.
-
-## Routing
-
-- Framework implementation, architecture, CLI, docs, and examples should use
-  [88-harness-first-service-integration.md](./88-harness-first-service-integration.md).
-- User-facing skill updates must not reference internal specs. They should use
-  current implementation and public handbook/API docs, then run
-  `npm run audit:skills` and `npm run audit:knowledge`.
-- The `purista-skill-maintainer` workflow is the exception: it may use active
-  specs to keep implementation, public docs, examples, and user-facing skills
-  aligned.
+Harness implementation and standalone behavior follow the companion Harness
+specification. PURISTA implementation, CLI generation, service metadata, HTTP
+projection, examples, tutorials, documentation, and tests follow spec 88.
+User-facing skills must be derived from implemented public APIs and handbook
+content rather than requiring this internal specification.
