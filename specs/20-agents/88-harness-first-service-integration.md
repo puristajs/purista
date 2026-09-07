@@ -430,6 +430,15 @@ cancelled execution. A success event is emitted only for `completed` and its
 payload is that completed outcome. The queue binding adds explicit typed enqueue
 support; it does not change direct run/stream routing.
 
+`durableResume: { identity: 'run-owner' }` is the sole v4 identity override for
+an explicitly guarded human-review flow. It adds a durable Harness storage
+requirement and requires a stable `sessionId`. On resume, Harness reopens with
+the immutable tenant/principal identity that owns the stored run while PURISTA
+still supplies the current authenticated caller to before/after guards and
+host-aware tools. Core rejects a cross-tenant resume before Harness execution.
+Without this option, normal trusted caller identity is projected for every
+invocation and resume.
+
 For streaming, Core completes input validation and `beforeGuards` before it
 publishes the EventBridge start frame. `openStream` waits for that start or a
 handled error, so an HTTP adapter can return the normal error response before
