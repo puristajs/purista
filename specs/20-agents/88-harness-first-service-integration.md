@@ -182,7 +182,8 @@ control. Aggregate `run` propagates its deadline, but caller-side cancellation
 after dispatch is not guaranteed by an EventBridge adapter that lacks
 cancellable command invocation. Model input cannot supply or replace identity.
 
-Application-controlled calls retain declaration-first builder methods:
+Application-controlled calls within the producer's source graph retain
+declaration-first builder methods:
 
 ```ts
 const command = supportV1ServiceBuilder
@@ -215,17 +216,158 @@ execution fallback. Stream control carries cancellation. Trusted identity,
 lineage, budgets, and deadline are added by Core and cannot be supplied by the
 model.
 
-The Core dispatcher owns an immutable binding table keyed by each contract's
-hidden Harness identity. Mount compilation binds each executable contract in
+### Generated cross-service contracts
+
+A service in another package does not import the producer's Harness, agent,
+workflow, service builder, or final service. `ClientBuilder` writes
+one builder-free branded artifact per exported root to this canonical path:
+
+```text
+src/generated/purista/<service-kebab>/v<service-version>/harness/
+  <agent|workflow>/<target-kebab>TargetContract.ts
+```
+
+For example, the Support v1 agent above produces:
+
+```ts
+// generated file; do not edit
+import {
+  createRemoteHarnessTargetContract,
+  harnessExecutionEventTypesV1,
+} from '@purista/core'
+
+export const supportTargetContract = createRemoteHarnessTargetContract({
+  schemaVersion: 1,
+  address: {
+    serviceName: 'Support',
+    serviceVersion: '1',
+    serviceTarget: 'support',
+  },
+  target: {
+    targetName: 'support',
+    kind: 'agent',
+    inputSchema: { type: 'string' },
+    validatedInputSchema: { type: 'string' },
+    outputSchema: { type: 'string' },
+    updateSchema: { type: 'string' },
+    interruptSchema: false,
+    invocation: {
+      aggregate: true,
+      stream: true,
+      resumableInterrupts: [],
+    },
+    stream: {
+      protocol: 'harness-execution-events-v1',
+      eventTypes: harnessExecutionEventTypesV1,
+      outputUpdates: ['text-delta'],
+    },
+    exportDigest: 'sha256:4f3a…',
+  },
+})
+```
+
+The generated call carries the complete exported wire-input, validated-input,
+output, update, interrupt, invocation, and stream contract; the abbreviated
+digest above stands for the full 64 lowercase hexadecimal characters. The
+existing client generator compiles the JSON Schemas into its
+Standard Schema validators and emits the exact TypeScript types. The generated
+module imports only `@purista/core` and generated schema/type helpers; it has no
+import into `src/service/**`. `createRemoteHarnessTargetContract` is a pure Core
+hydration function intended for generated files. It verifies the embedded
+schemas and digest, freezes the value, adds a module-private Core brand, and
+returns a `RemoteHarnessTargetContract` whose `$infer` comes from the generated
+contract. It is not another builder, definition factory, registry, or executable
+Harness target. Hand-authored calls to the hydration function are unsupported,
+and checked generated files are always overwritten.
+
+Its public type is an addressed refinement of the sole Harness contract type,
+not a parallel inference contract:
+
+```ts
+declare const remoteHarnessTargetContractBrand: unique symbol
+
+type HarnessTargetAddress = Readonly<{
+  serviceName: string
+  serviceVersion: string
+  serviceTarget: string
+}>
+
+type RemoteHarnessTargetContract<
+  C extends AnyHarnessTargetContract,
+  Address extends HarnessTargetAddress,
+> = C & Readonly<{
+  address: Address
+  exportDigest: `sha256:${string}`
+  [remoteHarnessTargetContractBrand]: true
+}>
+```
+
+The generated `C` owns the same `$infer` and discriminants as its local
+`HarnessTargetContract`; Core and clients keep using the Harness-exported
+outcome and event helper types. The remote brand proves the value came through
+the generated hydration boundary inside the current process. It is never a
+wire credential.
+
+The remote declaration contains its address, so the cross-service form is
+concise and cannot pair a valid contract with another address:
+
+```ts
+const command = apiV1ServiceBuilder
+  .getCommandBuilder('answerQuestion', 'Answer a question')
+  .canInvokeAgent(supportTargetContract)
+  .setCommandFunction(async function ({ message, agent }) {
+    return agent.Support['1'].support.run(message.payload)
+  })
+```
+
+`canInvokeWorkflow(remoteContract)` is identical for a workflow. The local
+three-argument overload remains useful when producer and consumer share the
+direct Harness root contract. Both overloads add one exact address-first
+outgoing dependency and infer clients from the contract's `$infer`; neither
+imports or registers executable code.
+
+Every exported root has an `exportDigest`. Core computes it as lowercase
+SHA-256 over the UTF-8 RFC 8785 canonical JSON representation of
+`['purista.harness-target-export.v1', addressedTargetExport]`. The closed
+`addressedTargetExport` contains the complete service/version/target address
+and the root export from section 9, excluding only `exportDigest`. Absent
+optional members are omitted and ordered arrays retain contract order. The
+digest therefore changes when any public schema, update, interrupt, invocation,
+stream, queue, kind, or address contract changes.
+
+For a dependency-only child target, mount compilation calculates the same
+addressed contract digest for its private route. That digest is shared only by
+Core-authored nested dispatch and never appears in service exports, generated
+artifacts, ClientBuilder output, or root invocation declarations. Knowing a
+digest does not promote the child or make its internal EventBridge route accept
+an application-root call.
+
+The normal EventBridge receiver address remains the routing authority. Core
+adds only the public `exportDigest` to a reserved invocation-contract envelope;
+it never serializes a hidden Harness identity, Core brand, definition token, or
+implementation object. The receiver resolves the local mounted root by the
+EventBridge address, compares the supplied digest with that root's current
+export digest, validates and transforms input with its local contract, applies
+guards, and dispatches with the receiver-local Harness identity. An unknown
+address is `404`; a digest mismatch is a handled `409`
+`harness_contract_mismatch` before guard, handler, tool, or model effects.
+Digest matching detects generated-client drift and is not authentication or
+authorization. Trusted identity and business guards remain authoritative.
+
+The Core dispatcher owns an immutable local binding table keyed by each direct
+contract's hidden Harness identity or generated remote contract's Core brand.
+Mount compilation binds each executable contract in
 the private completed dependency closure to one service/version/target route.
 Only explicit root contracts are exposed for application declarations, service
 metadata, and generated clients. Builder declarations such as
 `canInvokeAgent` and `canInvokeWorkflow` add their exact remote root-contract
-identity and address. An unknown or structurally copied contract fails before
-EventBridge dispatch; routing never falls back to `(kind, id)` strings.
+identity, address, and export digest. An unknown, structurally copied, or
+digest-invalid contract fails before EventBridge dispatch; routing never falls
+back to `(kind, id)` strings.
 
 An internal-only child route accepts only a Core-authored nested dispatch
-envelope carrying the exact compiled contract identity. It rejects ordinary
+envelope selected from the exact compiled identity. The wire envelope carries
+its address and export digest, never that hidden identity. It rejects ordinary
 root invocation. Making that definition an explicit `.addAgent(...)`,
 `.addWorkflow(...)`, or catalog root promotes it to a public target without
 creating a second definition or execution path.
@@ -308,10 +450,18 @@ type HarnessDispatchContext = Readonly<{
   remainingDepth: number
   deadline?: number
 }>
+
+type HarnessInvocationContractEnvelope = Readonly<{
+  schemaVersion: 1
+  exportDigest: `sha256:${string}`
+}>
 ```
 
-Core alone serializes and validates this envelope. The receiver reconstructs
-the Harness dispatch request from it and EventBridge identity/trace headers,
+Core alone serializes and validates these envelopes. The contract envelope is
+required for root and internal child calls; the dispatch-context envelope is
+present only for nested calls. Neither contains a hidden definition identity
+or brand. The receiver reconstructs
+the Harness dispatch request from them and EventBridge identity/trace headers,
 then validates and transforms the raw logical payload exactly once before
 calling `runHosted` or `streamHosted`. It is never passed to a model, accepted
 from HTTP input, or exposed as a command payload/parameter schema. Harness emits
@@ -416,12 +566,14 @@ supportV1ServiceBuilder.mountHarness(supportHarness, {
         durableResume: { identity: 'run-owner' },
       },
     },
-    workflows: {},
   },
 })
 ```
 
-Only exact explicit-root ids are accepted by `targets`. The option is inferred
+`targets`, `targets.agents`, and `targets.workflows` are optional exact maps.
+Generators and examples omit an empty map instead of emitting `{}`. If every
+root uses defaults, the entire policy argument is omitted. Only exact
+explicit-root ids are accepted by `targets`. The option is inferred
 from the Harness root contracts, so a dependency-only subagent is a compile-time
 error. `beforeGuards` receive validated logical input. `afterGuards` receive the
 exact validated `HarnessTargetRunOutcome<Contract>`, including only the
@@ -842,7 +994,10 @@ type MountedHarnessTargetDefinition = Readonly<{
   kind: 'agent' | 'workflow'
   description?: string
   inputSchema: JSONSchema
+  validatedInputSchema: JSONSchema
   outputSchema: JSONSchema
+  updateSchema: JSONSchema
+  interruptSchema: JSONSchema
   invocation: Readonly<{
     aggregate: true
     stream: true
@@ -854,6 +1009,7 @@ type MountedHarnessTargetDefinition = Readonly<{
     outputUpdates: readonly ('text-delta' | 'object-snapshot')[]
   }>
   queue?: Readonly<{ name: string }>
+  exportDigest: `sha256:${string}`
 }>
 ```
 
@@ -902,15 +1058,25 @@ inspection preserve these maps. `getFullServiceDefinition()` resolves Standard
 Schemas to serializable JSON Schema and never returns validator functions. For
 every target, Core exports `inputSchema` from
 `contract.input['~standard'].jsonSchema.input({ target: 'draft-2020-12' })`
-and exports `outputSchema` from
+and `validatedInputSchema` from
+`contract.input['~standard'].jsonSchema.output({ target: 'draft-2020-12' })`.
+It exports `outputSchema` from
 `contract.output['~standard'].jsonSchema.output({ target: 'draft-2020-12' })`.
 The input direction therefore describes `InferIn` values accepted at the
 public boundary, while the output direction describes validated `Infer`
-values. Missing JSON Schema support or conversion failure aborts service
-composition and definition export atomically.
-ClientBuilder generates address-first typed `agent` and `workflow` namespaces
-from explicit root contracts only; it never generates HTTP routes or clients
-for dependency metadata.
+values. `updateSchema` is the JSON Schema for the exact `$infer.update` value;
+`updates: 'none'` uses the always-invalid JSON Schema `false` for `never`.
+`interruptSchema` is the JSON Schema for the exact reachable
+`$infer.interrupt` union and likewise uses `false` when no interruption is
+reachable. Missing JSON Schema support or conversion failure aborts service
+composition and definition export atomically. Core computes `exportDigest`
+only after this closed addressed export is complete, using section 4's
+canonical algorithm.
+
+ClientBuilder generates the branded target-contract artifact plus the
+address-first typed `agent` or `workflow` namespace for each explicit root. It
+regenerates both atomically from the same export and digest and never generates
+HTTP routes or clients for dependency metadata.
 
 It never exports prompts, Skill files, tool handlers, resources, credentials,
 provider configuration, MCP authentication, sandbox references, memory, or
@@ -919,33 +1085,39 @@ conversation content.
 ## 10. File and dependency structure
 
 ```text
-src/service/support/v1/
-├── supportV1ServiceBuilder.ts
-├── supportV1Service.ts
-├── contract/
-├── command/
-├── subscription/
-├── stream/
-└── harness/
-    ├── supportHarness.ts
-    ├── catalog/<catalogName>/<catalogName>Catalog.ts
-    ├── agent/<agentName>/<agentName>Agent.ts
-    ├── agent/<agentName>/<agentName>Agent.test.ts
-    ├── workflow/<workflowName>/<workflowName>Workflow.ts
-    ├── workflow/<workflowName>/<workflowName>Workflow.test.ts
-    ├── tool/<toolName>/<toolName>Tool.ts
-    ├── tool/<toolName>/<toolName>Tool.test.ts
-    ├── skill/<skill-name>/<skillName>Skill.ts
-    ├── skill/<skill-name>/SKILL.md
-    ├── skill/<skill-name>/<skillName>Skill.test.ts
-    ├── mcp/<serverName>/<serverName>Mcp.ts
-    └── mcp/<serverName>/<serverName>Mcp.test.ts
+src/
+├── service/support/v1/
+│   ├── supportV1ServiceBuilder.ts
+│   ├── supportV1Service.ts
+│   ├── contract/
+│   ├── command/
+│   ├── subscription/
+│   ├── stream/
+│   └── harness/
+│       ├── supportHarness.ts
+│       ├── catalog/<catalogName>/<catalogName>Catalog.ts
+│       ├── agent/<agentName>/<agentName>Agent.ts
+│       ├── agent/<agentName>/<agentName>Agent.test.ts
+│       ├── workflow/<workflowName>/<workflowName>Workflow.ts
+│       ├── workflow/<workflowName>/<workflowName>Workflow.test.ts
+│       ├── tool/<toolName>/<toolName>Tool.ts
+│       ├── tool/<toolName>/<toolName>Tool.test.ts
+│       ├── skill/<skill-name>/<skillName>Skill.ts
+│       ├── skill/<skill-name>/SKILL.md
+│       ├── skill/<skill-name>/<skillName>Skill.test.ts
+│       ├── mcp/<serverName>/<serverName>Mcp.ts
+│       └── mcp/<serverName>/<serverName>Mcp.test.ts
+└── generated/purista/support/v1/harness/
+    ├── agent/supportTargetContract.ts
+    └── workflow/<target-kebab>TargetContract.ts
 ```
 
 The import graph is a directed set of layers:
 
-1. `contract/**` owns reusable schemas and address/contract-only exports and
-   imports no builder or runtime module.
+1. `contract/**` owns producer schemas shared within the service and imports no
+   builder or runtime module. `generated/**` is a separate consumer-side layer
+   generated only from serialized service exports; it never imports
+   `service/**`.
 2. `supportV1ServiceBuilder.ts` owns service info and resource types. It may
    import `contract/**` but never imports commands, tools, agents, workflows,
    catalogs, the Harness, or the final service.
@@ -959,16 +1131,17 @@ The import graph is a directed set of layers:
    command/subscription/stream definitions, and Harness, then calls
    `mountHarness(...)` once.
 
-A command, stream, subscription, or queue worker that invokes a mounted target
-imports the target's contract-only public export or the Harness root-contract
-view; it never imports an agent/workflow definition or runtime instance. The
-base builder does not import that consumer, so this remains acyclic. Another
-service is referenced only through its exported address and root contract,
-never its builder, dependency closure, or runtime.
+A same-service command, stream, subscription, or queue worker that invokes a
+mounted target imports the Harness root-contract view; it never imports an
+agent/workflow implementation or runtime instance. A different service imports
+only its generated branded target contract under `generated/**`. The base
+builder imports neither consumer, so both paths remain acyclic. No consumer
+imports another service's builder, dependency closure, Harness composition, or
+runtime.
 
 Only required directories exist; generators do not create empty placeholders
-or service-local barrel files. Tests are colocated. Contract schemas used by
-another service live in a builder-free exported schema/contract module. Every
+or service-local barrel files. Tests are colocated. Cross-service schemas and
+contracts live only in builder-free generated artifacts. Every
 model-selectable subagent is part of the same Harness graph and service version;
 it is internal unless explicitly promoted to a root. Cross-service agent calls
 are application-controlled address-first calls to exported roots in this
@@ -1049,7 +1222,7 @@ Core and Hono use one mapping:
 | --- | --- |
 | schema or invocation validation | handled `400` |
 | missing addressed target | handled `404` |
-| durable revision, replay, or idempotency conflict | handled `409` |
+| target export digest, durable revision, replay, or idempotency conflict | handled `409` |
 | business guard, permission, or policy denial | handled `403` |
 | agent or model admission rejection | handled `429` with retry metadata |
 | timeout or expired deadline | handled `504` |
@@ -1071,7 +1244,12 @@ host-aware agent and workflow tool context inference; approval/resume;
 validation and before-guard rejection before stream start; after-guard terminal
 replacement without buffering progressive output; AI SDK UI stream conformance;
 root-versus-dependency inspection/export; CLI snapshots; and fresh generated
-project installation.
+project installation. ClientBuilder tests snapshot the canonical generated
+artifact path, builder-free imports, deterministic RFC 8785 digest, and exact
+root contract types. Cross-process tests prove address plus matching digest
+dispatches to the receiver-local root, while an altered address, stale digest,
+or modified generated schema fails before business or model effects and no
+hidden identity or brand appears on the wire.
 
 Compile-time tests prove that root contracts expose exact `$infer.input`,
 `validatedInput`, `output`, `update`, and `interrupt` types; clients preserve
@@ -1080,7 +1258,8 @@ be declared, guarded, queued, exported, or generated as an application client;
 workflow tools expose only declared literal ids and exact types; and invalid
 model/storage/memory configurations fail where expected. Runtime tests fail if
 a same-process child call bypasses EventBridge or if any registry/string lookup
-can grant an undeclared capability.
+can grant an undeclared capability. Import-cycle tests fail when generated
+contracts import `service/**` or when a producer imports `generated/**`.
 
 The release removes the former attached-agent builders and generated target
 expansion, `AgentQueueBuilder`, raw Harness merging, top-level
