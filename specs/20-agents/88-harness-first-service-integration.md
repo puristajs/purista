@@ -167,13 +167,19 @@ local-execution fallback.
 
 Portable and host-aware model tool handlers execute inside the receiving
 Harness run; PURISTA operations declared by a host-aware tool use EventBridge.
-The receiver is the input trust boundary. It validates and transforms the raw
-logical input exactly once with the mounted target contract, applies root target
-business guards to that validated value, executes the Harness target, validates
-the outcome, and applies after guards. The EventBridge dispatcher transports
-raw logical input and never validates or transforms it. The hosted Harness entry
-points receive the already validated value, verify the exact contract identity,
-and do not run input validation or transformation again.
+The receiver is the input trust boundary. A public-root receiver validates and
+transforms the raw logical input exactly once with the mounted root contract,
+applies that root's business guards to the validated value, calls the root-only
+Harness `runHosted` or `streamHosted` entry point, validates the outcome, and
+applies after guards. An internal nested receiver authenticates the reserved
+Core dispatch envelope, resolves its exact target from the private compiled
+dependency closure, validates and transforms a fresh delivery exactly once,
+and calls Harness `streamDispatched`. A resume delivery is checked against its
+stored wire input and is not transformed again. The EventBridge dispatcher
+transports raw logical input and never validates or transforms it. Every hosted
+Harness entry point receives the appropriate already validated value or strict
+resume union, verifies the exact contract identity, and does not repeat input
+validation or transformation.
 
 The Framework propagates trusted tenant id, principal id, trace/correlation
 context, deadlines, session/run ancestry, idempotency, and handled errors.
@@ -211,10 +217,15 @@ Core implements `HarnessTargetDispatcher.open` for model-selected subagents,
 workflow-declared agent calls, and scoped host-tool target calls. It calls
 `EventBridge.openStream()` for the mounted child address, relays child Harness
 events with their original child run id and parent invocation correlation, and
-derives the child result from the terminal outcome. It has no direct local
-execution fallback. Stream control carries cancellation. Trusted identity,
-lineage, budgets, and deadline are added by Core and cannot be supplied by the
-model.
+derives the child result from the dispatch stream's canonical terminal result.
+The receiving adapter calls `streamDispatched`, including when the authentic
+target is a dependency-only agent or workflow. The target reference and its
+input, output, update, and interrupt types come from an integrator-only compiled
+closure contract; application code, service exports, generated clients, and
+inspection metadata never receive that contract or an invocation surface for
+private dependencies. There is no direct local-execution fallback. Stream
+control carries cancellation. Trusted identity, lineage, budgets, and deadline
+are added by Core and cannot be supplied by the model.
 
 ### Generated cross-service contracts
 
@@ -345,14 +356,18 @@ an application-root call.
 The normal EventBridge receiver address remains the routing authority. Core
 adds only the public `exportDigest` to a reserved invocation-contract envelope;
 it never serializes a hidden Harness identity, Core brand, definition token, or
-implementation object. The receiver resolves the local mounted root by the
-EventBridge address, compares the supplied digest with that root's current
+implementation object. A public receiver resolves the local mounted root by
+the EventBridge address, compares the supplied digest with that root's current
 export digest, validates and transforms input with its local contract, applies
-guards, and dispatches with the receiver-local Harness identity. An unknown
-address is `404`; a digest mismatch is a handled `409`
-`harness_contract_mismatch` before guard, handler, tool, or model effects.
-Digest matching detects generated-client drift and is not authentication or
-authorization. Trusted identity and business guards remain authoritative.
+the root guards, and calls `runHosted` or `streamHosted` with the
+receiver-local Harness identity. An internal nested receiver instead accepts
+only the authenticated reserved dispatch envelope, resolves its exact compiled
+target, and calls `streamDispatched`; it never promotes that target to a public
+root or calls a root-only hosted entry point. An unknown public address is
+`404`; a digest mismatch is a handled `409` `harness_contract_mismatch` before
+guard, handler, tool, or model effects. Digest matching detects generated-client
+drift and is not authentication or authorization. Trusted identity and
+business guards remain authoritative.
 
 The Core dispatcher owns an immutable local binding table keyed by each direct
 contract's hidden Harness identity or generated remote contract's Core brand.
@@ -389,17 +404,53 @@ type HarnessInvocationParameter = Readonly<{
 `signal`, trusted identity, lineage, trace context, and opaque host context are
 host-created and never serialized in model input. `resume` and
 `idempotencyKey` are mutually exclusive; resume replay protection uses the
-approval event id. Aggregate EventBridge replies contain the exact
-`HarnessTargetRunOutcome<Contract>` imported from Harness; failed and cancelled
-aggregate execution rejects and follows the handled-error mapping in section
-12. Once a stream passes input validation, before guards, and Harness startup,
-it relays the exact `HarnessTargetExecutionEvent<Contract>` and includes one
-terminal `run.finished`. Validation, before-guard, and startup failures occur
-before `run.started` and use the normal EventBridge stream error; they do not
-manufacture a Harness run id or terminal event. The EventBridge
-`complete.final` value is the same
-`HarnessTargetExecutionTerminalOutcome<Contract>` carried by that terminal
-event, including sanitized `failed` and `cancelled` variants.
+approval event id.
+
+Core creates one stable root `invocationId` at the first public aggregate,
+stream, or enqueue ingress. Callers cannot provide or replace it. Before the
+first enqueue or EventBridge dispatch, Core resolves
+`sessionId = suppliedSessionId ?? invocationId` and freezes both values in
+reserved Framework metadata. Transport retry, queue retry, redelivery, and
+approval resume reuse those exact values; no worker or receiver generates a
+replacement. A later conversational turn creates a new invocation id and
+supplies the session id returned by the preceding turn. Harness binds the
+projected tenant/principal identity to that session and fails closed before
+execution when any later call or resume attempts to reuse it with a different
+identity. The logical payload and public parameter never contain the root
+invocation id or trusted identity.
+
+Aggregate EventBridge replies contain the exact
+`HarnessTargetRunOutcome<Contract>` imported from Harness inside a frozen
+Framework result that also returns the resolved session id:
+
+```ts
+type HarnessTargetRunResult<C extends AnyHarnessTargetContract> = Readonly<{
+  sessionId: CorrelationId
+  outcome: HarnessTargetRunOutcome<C>
+}>
+```
+
+Failed and cancelled aggregate execution rejects and follows the handled-error
+mapping in section 12. Once a stream passes input validation, before guards,
+and Harness startup, it relays the exact
+`HarnessTargetExecutionEvent<Contract>` and includes one terminal
+`run.finished`. Validation, before-guard, and startup failures occur before
+`run.started` and use the normal EventBridge stream error; they do not
+manufacture a Harness run id or terminal event.
+
+For every hosted or nested stream, the returned `dispatchStream.result` is the
+single authoritative terminal promise. Core freezes that resolved terminal
+outcome once. It forwards non-terminal events and correlated descendant
+terminals, but withholds the direct target's candidate `run.finished` until
+`result` resolves. It then derives the one public direct-target `run.finished`,
+the EventBridge `complete.final`, aggregate nested-call consumption, and any
+after-guard replacement from that value. If the candidate terminal event and
+`result`, or an independently transported terminal event and `complete.final`,
+arrive through separate transport fields, the receiver requires full RFC 8785
+canonical JSON equality of the complete terminal outcomes. A run-id/status-only
+comparison is insufficient. Missing, duplicated, or unequal terminal
+representations are protocol failures and are never accepted as a successful
+target result.
 
 `HarnessTargetContract.$infer` is the sole contract-only type source and
 contains exact `input`, `validatedInput`, `output`, `update`, and `interrupt`
@@ -422,7 +473,7 @@ interface HarnessTargetClient<C extends AnyHarnessTargetContract> {
   run(
     input: C['$infer']['input'],
     options?: HarnessInvocationParameter,
-  ): Promise<HarnessTargetRunOutcome<C>>
+  ): Promise<HarnessTargetRunResult<C>>
   stream(
     input: C['$infer']['input'],
     options?: HarnessInvocationParameter,
@@ -434,23 +485,34 @@ Internally the corresponding EventBridge handle is typed as
 `StreamHandle<HarnessTargetExecutionEvent<C>,
 HarnessTargetExecutionTerminalOutcome<C>>`. These three public Harness
 projections preserve the root contract's exact update and reachable-interrupt
-types. The client verifies that the terminal event and `complete.final` have
-the same run id and status before ending iteration.
+types. `HarnessExecutionStream.sessionId`, aggregate
+`HarnessTargetRunResult.sessionId`, and the session id on a queued target
+receipt are the same resolved public session identity. The client verifies full
+RFC 8785 canonical equality between the direct-target terminal event and
+`complete.final` before ending iteration.
 
 Nested dispatch adds a reserved internal transport envelope beside the logical
 payload and public invocation parameter:
 
 ```ts
+type HarnessRootInvocationContext = Readonly<{
+  invocationId: CorrelationId
+  sessionId: CorrelationId
+}>
+
 type HarnessDispatchContext = Readonly<{
+  sessionId: string
   rootRunId: string
   parentRunId: string
-  parentAgentId?: string
-  parentWorkflowId?: string
   invocationId: string
   depth: number
   remainingDepth: number
   deadline?: number
-}>
+  idempotencyKey?: string
+} & (
+  | Readonly<{ parentAgentId: string; parentWorkflowId?: never }>
+  | Readonly<{ parentAgentId?: never; parentWorkflowId: string }>
+)>
 
 type HarnessInvocationContractEnvelope = Readonly<{
   schemaVersion: 1
@@ -459,14 +521,18 @@ type HarnessInvocationContractEnvelope = Readonly<{
 ```
 
 Core alone serializes and validates these envelopes. The contract envelope is
-required for root and internal child calls; the dispatch-context envelope is
-present only for nested calls. Neither contains a hidden definition identity
-or brand. The receiver reconstructs
+required for root and internal child calls. The root invocation context is
+required for every public root and queued delivery; the nested dispatch context
+replaces it for child calls and has the exact one-parent ancestry union expected
+by Harness. Neither contains a hidden definition identity or brand. The
+receiver reconstructs
 the Harness dispatch request from them and EventBridge identity/trace headers,
-then validates and transforms the raw logical payload exactly once before
-calling `runHosted` or `streamHosted`. It is never passed to a model, accepted
-from HTTP input, or exposed as a command payload/parameter schema. Harness emits
-parent correlation on child execution events before Core relays them.
+then validates and transforms a fresh raw logical payload exactly once before
+calling `streamDispatched`; a resume skips transformation and supplies the
+strict resume delivery instead. It is never passed to a model, accepted from
+HTTP input, or exposed as a command payload/parameter schema. The ancestry
+union requires exactly one parent target id. Harness emits parent correlation
+on child execution events before Core relays them.
 
 Host-tool `context.agent` and `context.workflow` clients are generated only for
 builder-declared dependencies and bind every call to the current host-tool run.
@@ -588,22 +654,27 @@ an explicitly guarded human-review flow. It adds a durable Harness storage
 requirement and requires a stable `sessionId`. On resume, Harness reopens with
 the immutable tenant/principal identity that owns the stored run while PURISTA
 still supplies the current authenticated caller to before/after guards and
-host-aware tools. Core rejects a cross-tenant resume before Harness execution.
-Without this option, normal trusted caller identity is projected for every
-invocation and resume.
+host-aware tools. Core preserves the original root invocation id and resolved
+session id across resume and rejects a cross-tenant resume before Harness
+execution. Without this option, normal trusted caller identity is projected for
+every invocation and resume; Harness's ordinary immutable session-identity
+binding still rejects cross-identity session reuse.
 
 For streaming, Core completes input validation and `beforeGuards` before it
 publishes the EventBridge start frame. `openStream` waits for that start or a
 handled error, so an HTTP adapter can return the normal error response before
 committing SSE headers. After startup, Core forwards progressive Harness events
-immediately but withholds the Harness `run.finished` event and
-`complete.final` while it evaluates `afterGuards`. If they pass, Core forwards
-that terminal event and the identical final value. If an after guard rejects,
-Core suppresses the Harness terminal, emits one replacement `run.finished`
-with the same run id and a sanitized failed
-`HarnessTargetExecutionTerminalOutcome<Contract>`, and uses that exact value
-for `complete.final`. It does not emit an EventBridge error frame after
-progressive delivery.
+immediately but withholds terminal publication while it awaits the hosted
+stream's authoritative frozen `result` and evaluates `afterGuards`. If they
+pass, Core uses that result object for both the direct-target `run.finished`
+outcome and `complete.final`. If an after guard rejects, Core derives and
+freezes one sanitized failed
+`HarnessTargetExecutionTerminalOutcome<Contract>` with the same run id, uses
+that one object for the replacement `run.finished` and `complete.final`, and
+suppresses the original Harness terminal. It does not emit an EventBridge error
+frame after progressive delivery. Any adapter that transports the two terminal
+representations separately must prove full RFC 8785 canonical equality before
+settling the public stream.
 
 After guards are terminal postconditions. They may prevent an aggregate result
 or turn a stream's terminal status into failure, but they cannot retract content
@@ -656,8 +727,9 @@ React packages and vendored components belong to the optional UI scaffold.
 Approval and human input are typed interrupted outcomes, not generic
 exceptions. HTTP/stream adapters emit the standard approval representation and
 never convert it to an internal-server error. The authenticated AI SDK stream
-endpoint decodes the UI Message Stream v1 request, maps the last user message to
-the agent input and stable session, and uses
+endpoint decodes the UI Message Stream v1 request, uses the standard
+`DefaultChatTransport` body `id` as the stable Harness session id, maps the last
+user message to the agent input, and uses
 `parseHarnessToolApprovalResume(...)` for approval-response parts. It reopens
 the same address-first target stream with `resume`; Harness validates run,
 interrupt, revision, event, and decision ids. A resume request does not also
@@ -816,13 +888,18 @@ supplied by application callers. The Core dispatcher places the same trusted
 identity and the current W3C trace carrier into every nested
 `HarnessTargetDispatchRequest`.
 
-Core enters Harness only through the integrator-only `runHosted` and
-`streamHosted` methods. Each call supplies the mounted target contract,
-validated logical input, invocation options with session id, and the one
-run-scoped `PuristaHostInvocation`. This is how the target adapter supplies the
-opaque value consumed later by `createHostContext`; it is never placed in the
-public service payload or parameter. These hosted methods verify the mounted
-contract identity but do not validate or transform the logical input again.
+Core enters Harness only through the integrator-only `runHosted`,
+`streamHosted`, and `streamDispatched` methods. Public root adapters alone call
+`runHosted` or `streamHosted`; each call supplies an explicit root contract,
+validated logical input, invocation options with the resolved session id, and
+the one run-scoped `PuristaHostInvocation`. An authenticated internal nested
+receiver calls `streamDispatched` with an exact agent or workflow from the
+integrator-only compiled dependency closure plus the strict fresh/resume
+delivery. This is how the target adapter supplies the opaque value consumed
+later by `createHostContext`; it is never placed in the public service payload
+or parameter. These hosted methods verify exact contract identity and do not
+repeat input validation or transformation. Core never converts a
+dependency-only target into a root contract to execute it.
 
 Hosted `ai` configuration cannot contain logger or telemetry fields; the host
 bindings replace them and Harness derives metrics from the telemetry bridge.
@@ -878,17 +955,25 @@ workflow call is trusted application-controlled orchestration: Harness applies
 definition identity, input/output validation, host context, identity and trace,
 timeout, cancellation, correlated events, telemetry, and checkpoint/replay. It
 does not borrow an agent's exposure, permission, governance, approval, or
-Guardrail policy because no agent owns that call. A host-aware tool keeps the
-ordinary PURISTA business guards of every command, stream, queue, event, agent,
-or workflow operation it invokes. Authorization for the workflow as a whole may
-also be declared as a before guard on the mounted workflow root. A workflow
-never receives a service resource, EventBridge client, or registry directly.
+Guardrail policy because no agent owns that call. A host-aware tool definition
+is not a separate business-authorization boundary. Every guarded PURISTA command, stream, mounted
+agent, or mounted workflow it invokes still enters through its address-first
+client and runs that operation's own guards. Queue enqueue and event emission
+remain explicit declared capabilities; authorization that must occur before
+those side effects belongs in the mounted workflow root's `beforeGuards` or in
+a guarded operation invoked before them. Authorization for the workflow as a
+whole may therefore be declared as a before guard on that mounted workflow
+root. A workflow never receives a service resource, EventBridge client, or
+registry directly.
 
 ## 7. Business guards and events
 
 Mount target policies attach typed before and after guards. Guards verify
 business authorization and invariants; authentication remains an HTTP
-transport responsibility.
+transport responsibility. A tool definition does not acquire a synthetic
+authorization boundary. An invoked guarded PURISTA operation keeps and
+evaluates its own guard, and a mounted workflow root may define `beforeGuards`
+for authorization that must cover the workflow and its side effects as a whole.
 
 Successful target completion may be published as the declared command result
 event. Manual emission is reserved for facts produced during execution rather
@@ -958,11 +1043,15 @@ once. The worker declares the immediate target
 with `canInvokeAgent(serviceName, serviceVersion, C)` or
 `canInvokeWorkflow(serviceName, serviceVersion, C)`, so execution returns
 through EventBridge even when worker and target share a process. It calls
-`client.run(message.payload, message.parameter)`. A completed or interrupted
-outcome settles the queue job successfully with that typed outcome. A retriable
-`AgentAdmissionRejectedError` with `retryAfterMs` becomes the normal delayed
-`QueueRetry`; other handled or unknown failures retain ordinary queue-worker
-retry, nack, and dead-letter behavior. The supplied worker's
+`client.run(message.payload, message.parameter)`. Enqueue ingress creates the
+stable root invocation id and resolves the session id before writing the job;
+the reserved queue envelope carries both unchanged through delivery and every
+retry. The generated worker must use those values and never derive them from a
+delivery id or retry attempt. A completed or interrupted outcome settles the
+queue job successfully with the typed `HarnessTargetRunResult`, including the
+same resolved session id. A retriable `AgentAdmissionRejectedError` with
+`retryAfterMs` becomes the normal delayed `QueueRetry`; other handled or unknown
+failures retain ordinary queue-worker retry, nack, and dead-letter behavior. The supplied worker's
 `setMaxParallelHandlers(...)` remains the first coarse concurrency control.
 
 Using the returned queued contract in an outgoing declaration adds enqueue
@@ -985,7 +1074,11 @@ const command = apiV1ServiceBuilder
   })
 ```
 
-The returned promise resolves to the normal typed PURISTA queue receipt.
+The returned promise resolves to the normal typed PURISTA queue receipt refined
+with the resolved `sessionId`. If the caller omits `sessionId`, Core returns the
+root invocation id chosen before enqueue as that value. A later turn or approval
+resume reuses the returned session id; retry and redelivery reuse the original
+root invocation id as well.
 Declaring the original root contract instead exposes only `run` and `stream`;
 queue support never appears by inference from the target alone. Direct `run`
 and `stream`, workflow calls, and model-selected subagents remain EventBridge
@@ -1196,13 +1289,16 @@ Harness command creates no test.
 `--http command` creates protected target `run<AgentPascal>` in
 `command/run<AgentPascal>/run<AgentPascal>CommandBuilder.ts`, exposes
 `POST ai/<agent-kebab>`, accepts `{ input: string, sessionId?: string }`, and
-returns the aggregate outcome. A colocated builder test mocks the address-first
-client and covers input/session and interrupted outcomes. `--http stream` creates protected target
+returns `{ sessionId, outcome }`. The returned session id is the supplied value
+or the root invocation id that Core created before dispatch. A colocated builder
+test mocks the address-first client and covers input/session, generated-session
+reuse, and interrupted outcomes. `--http stream` creates protected target
 `stream<AgentPascal>` in
 `stream/stream<AgentPascal>/stream<AgentPascal>StreamBuilder.ts`, exposes the
 same POST path, parses an AI SDK UI request, invokes the address-first agent
-stream, and writes AI SDK UI v1 SSE events. Its colocated test covers message
-mapping, v1 metadata/events, cancellation, and approval resume. The CLI never marks these public and
+stream with the request's standard transport `id` as `sessionId`, and writes AI
+SDK UI v1 SSE events. Its colocated test covers message mapping, stable transport
+id/session reuse, v1 metadata/events, cancellation, and approval resume. The CLI never marks these public and
 reports that the Hono server needs `setProtectMiddleware(...)` before startup.
 The distinct wrapper target cannot collide with the mounted agent id.
 
@@ -1243,7 +1339,7 @@ Core and Hono use one mapping:
 | --- | --- |
 | schema or invocation validation | handled `400` |
 | missing addressed target | handled `404` |
-| target export digest, durable revision, replay, or idempotency conflict | handled `409` |
+| target export digest, durable revision, replay, idempotency, or session-identity conflict | handled `409` |
 | business guard, permission, or policy denial | handled `403` |
 | agent or model admission rejection | handled `429` with retry metadata |
 | timeout or expired deadline | handled `504` |
@@ -1260,7 +1356,10 @@ Core tests cover mount lifecycle; additive `ai.model` plus `ai.models`
 inference; optional production `storage` and `memory` upgrades; aggregate and
 stream root registration; dependency-only non-public routes; EventBridge-only
 workflow, subagent, and host-tool nested dispatch; identity and trace
-propagation; cancellation; queues; business guards; successful-result events;
+propagation; stable root invocation/session creation before direct dispatch and
+enqueue; unchanged identity across transport retry, queue retry, and approval
+resume; returned session reuse on later turns; cross-identity session rejection;
+cancellation; queues; business guards; successful-result events;
 host-aware agent and workflow tool context inference; approval/resume;
 validation and before-guard rejection before stream start; after-guard terminal
 replacement without buffering progressive output; AI SDK UI stream conformance;
@@ -1270,17 +1369,26 @@ artifact path, builder-free imports, deterministic RFC 8785 digest, and exact
 root contract types. Cross-process tests prove address plus matching digest
 dispatches to the receiver-local root, while an altered address, stale digest,
 or modified generated schema fails before business or model effects and no
-hidden identity or brand appears on the wire.
+hidden identity or brand appears on the wire. Nested cross-process tests prove
+that a dependency-closure target enters only through `streamDispatched`, while
+public root adapters alone call `runHosted` or `streamHosted`. Stream transport
+tests derive completion from `dispatchStream.result` and reject terminal event
+versus `complete.final` pairs that share run id and status but differ anywhere
+else in their RFC 8785 canonical representation.
 
 Compile-time tests prove that root contracts expose exact `$infer.input`,
 `validatedInput`, `output`, `update`, and `interrupt` types; clients preserve
 the Harness target outcome/event projections; a dependency-only target cannot
 be declared, guarded, queued, exported, or generated as an application client;
 workflow tools expose only declared literal ids and exact types; and invalid
-model/storage/memory configurations fail where expected. Runtime tests fail if
-a same-process child call bypasses EventBridge or if any registry/string lookup
-can grant an undeclared capability. Import-cycle tests fail when generated
-contracts import `service/**` or when a producer imports `generated/**`.
+model/storage/memory configurations fail where expected. They also require the
+exact nested ancestry XOR: an agent parent forbids `parentWorkflowId`, a
+workflow parent forbids `parentAgentId`, and neither missing nor dual parent ids
+compile. Runtime tests fail if a same-process child call bypasses EventBridge,
+if an internal child is sent to a root-only hosted entry point, or if any
+registry/string lookup can grant an undeclared capability. Import-cycle tests
+fail when generated contracts import `service/**` or when a producer imports
+`generated/**`.
 
 The release removes the former attached-agent builders and generated target
 expansion, `AgentQueueBuilder`, raw Harness merging, top-level
