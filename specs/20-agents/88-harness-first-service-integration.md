@@ -428,7 +428,21 @@ type HarnessTargetRunResult<C extends AnyHarnessTargetContract> = Readonly<{
   sessionId: CorrelationId
   outcome: HarnessTargetRunOutcome<C>
 }>
+
+export type HarnessTargetQueueEnqueueResult = Readonly<
+  QueueEnqueueResult & {
+    readonly sessionId: CorrelationId
+  }
+>
 ```
+
+Core aggregate command clients and their aggregate HTTP projections return
+`HarnessTargetRunResult<C>`, the `{ sessionId, outcome }` wrapper above. Native
+standalone Harness `run(...)` remains unchanged and returns a raw `RunOutcome`;
+for contract `C`, Core projects that union as `HarnessTargetRunOutcome<C>`.
+The Framework wrapper is not a Harness runtime result. A queued Framework
+invocation returns the separate `HarnessTargetQueueEnqueueResult`, so accepting
+work never masquerades as its eventual run outcome.
 
 Failed and cancelled aggregate execution rejects and follows the handled-error
 mapping in section 12. Once a stream passes input validation, before guards,
@@ -469,7 +483,12 @@ interface HarnessExecutionStream<C extends AnyHarnessTargetContract>
   cancel(reason?: string): Promise<void>
 }
 
-interface HarnessTargetClient<C extends AnyHarnessTargetContract> {
+export type HarnessEnqueueOptions = Omit<
+  QueueEnqueueOptions<unknown, HarnessInvocationParameter>,
+  'queueName' | 'payload' | 'parameter'
+>
+
+type DirectHarnessTargetClient<C extends AnyHarnessTargetContract> = Readonly<{
   run(
     input: C['$infer']['input'],
     options?: HarnessInvocationParameter,
@@ -478,8 +497,27 @@ interface HarnessTargetClient<C extends AnyHarnessTargetContract> {
     input: C['$infer']['input'],
     options?: HarnessInvocationParameter,
   ): Promise<HarnessExecutionStream<C>>
-}
+}>
+
+type HarnessTargetClient<C extends AnyHarnessTargetContract> =
+  DirectHarnessTargetClient<C> &
+  (C extends { readonly queue: { readonly name: string } }
+    ? Readonly<{
+        enqueue(
+          input: C['$infer']['input'],
+          parameter?: HarnessInvocationParameter,
+          options?: HarnessEnqueueOptions,
+        ): Promise<HarnessTargetQueueEnqueueResult>
+      }>
+    : unknown)
 ```
+
+`HarnessEnqueueOptions` is the normal PURISTA queue enqueue options with
+`queueName`, `payload`, and `parameter` omitted because the generated client
+already supplies those values. The conditional branch is used identically for
+local and ClientBuilder-generated remote contracts: only a contract carrying
+the exported queue marker receives `enqueue`, and its return type is exactly
+`HarnessTargetQueueEnqueueResult`.
 
 Internally the corresponding EventBridge handle is typed as
 `StreamHandle<HarnessTargetExecutionEvent<C>,
@@ -1022,19 +1060,28 @@ synchronous. It rejects different queue names or a contract/binding mismatch
 before service composition and returns one frozen value with:
 
 ```ts
-type HarnessTargetQueueBinding<
+type QueuedHarnessTargetContract<C extends AnyHarnessTargetContract> =
+  C & Readonly<{
+    queue: Readonly<{ name: string }>
+  }>
+
+export type HarnessTargetQueueBinding<
   C extends AnyHarnessTargetContract,
   Queue = QueueDefinitionBuilder,
   Worker = QueueWorkerBuilder,
 > = Readonly<{
   targetContract: C
-  contract: C & Readonly<{
-    queue: Readonly<{ name: string }>
-  }>
+  contract: QueuedHarnessTargetContract<C>
   queue: Queue
   worker: Worker
 }>
 ```
+
+The queue result is closed rather than generic: every
+`HarnessTargetQueueBinding` produces a `QueuedHarnessTargetContract`, and that
+marker makes both local and generated address-first clients infer
+`HarnessTargetQueueEnqueueResult`. An application, adapter, or generated
+contract cannot substitute or widen the enqueue receipt type.
 
 The queue payload is inferred from `C.$infer.input`; invocation options are the
 queue parameter and never contain trusted identity. Mounting adds those schemas
@@ -1074,11 +1121,12 @@ const command = apiV1ServiceBuilder
   })
 ```
 
-The returned promise resolves to the normal typed PURISTA queue receipt refined
-with the resolved `sessionId`. If the caller omits `sessionId`, Core returns the
-root invocation id chosen before enqueue as that value. A later turn or approval
-resume reuses the returned session id; retry and redelivery reuse the original
-root invocation id as well.
+The returned promise resolves to exactly
+`HarnessTargetQueueEnqueueResult`. If the caller omits `sessionId`, Core first
+uses the stable root ingress `invocationId` as the session id, writes that value
+into the reserved queue envelope, and returns it on the receipt. A later turn
+or approval resume reuses the returned session id; retry and redelivery reuse
+the original root invocation id as well.
 Declaring the original root contract instead exposes only `run` and `stream`;
 queue support never appears by inference from the target alone. Direct `run`
 and `stream`, workflow calls, and model-selected subagents remain EventBridge
