@@ -357,7 +357,7 @@ authorization. Trusted identity and business guards remain authoritative.
 The Core dispatcher owns an immutable local binding table keyed by each direct
 contract's hidden Harness identity or generated remote contract's Core brand.
 Mount compilation binds each executable contract in
-the private completed dependency closure to one service/version/target route.
+the private compiled dependency closure to one service/version/target route.
 Only explicit root contracts are exposed for application declarations, service
 metadata, and generated clients. Builder declarations such as
 `canInvokeAgent` and `canInvokeWorkflow` add their exact remote root-contract
@@ -414,6 +414,7 @@ families. The generated address-first client has this semantic shape:
 interface HarnessExecutionStream<C extends AnyHarnessTargetContract>
   extends AsyncIterable<HarnessTargetExecutionEvent<C>> {
   readonly sessionId: CorrelationId
+  readonly result: Promise<HarnessTargetExecutionTerminalOutcome<C>>
   cancel(reason?: string): Promise<void>
 }
 
@@ -743,9 +744,25 @@ array. `setHandler` returns that final frozen definition; there is no
   metrics,
   signal,
   trace,
-  tool: { sessionId, runId, agentId, toolId, callId, idempotencyKey },
+  tool: {
+    sessionId,
+    runId,
+    toolId,
+    callId,
+    idempotencyKey,
+    caller:
+      | { kind: 'agent', agentId, workflowId? }
+      | { kind: 'workflow', workflowId },
+  },
 }
 ```
+
+The caller is discriminated because a tool selected by an agent has an agent
+owner, while a tool called directly by workflow code does not. An agent running
+inside a workflow may additionally carry that workflow id for correlation. A
+workflow caller never receives a synthetic agent id. Harness tool events, MCP
+request-header context, portable tool context, and the PURISTA host-tool
+projection use this same owner union.
 
 The tool receives resources declared by its owning `ServiceBuilder`. Outgoing
 command, stream, queue, event, agent, and workflow helpers appear only when
@@ -824,8 +841,10 @@ the integrator testing surface with fake host bindings.
 context exposes a general service locator or runtime registry.
 
 Portable tools use `defineTool` from `@purista/harness`. Both kinds look
-identical to the model and traverse the same validation, permission,
-governance, approval, Guardrail, telemetry, and cancellation pipeline.
+identical to the model. A model-selected call traverses the agent's validation,
+permission, governance, approval, Guardrail, telemetry, and cancellation
+pipeline. A direct workflow call follows the application-controlled boundary
+below.
 
 Workflows declare an exact tool array. This is the only way a workflow receives
 a tool invoker:
@@ -856,12 +875,16 @@ const ingestKnowledge = defineWorkflow('ingestKnowledge', {
 
 `context.tools` is keyed by each tool's literal definition id; duplicate ids are
 rejected and v4 adds no workflow-local aliases. Each invoker preserves the
-tool's exact input/output types and requires a stable `callId`. It runs through
-the same Harness validation, checkpoint, permission, approval, Guardrail,
-telemetry, cancellation, and error pipeline as a model-selected tool. A
-host-aware tool receives only the PURISTA resources and address-first helpers
-declared on its service builder. A workflow never receives a service resource,
-EventBridge client, or registry directly.
+tool's exact input/output types and requires a stable `callId`. A direct
+workflow call is trusted application-controlled orchestration: Harness applies
+definition identity, input/output validation, host context, identity and trace,
+timeout, cancellation, correlated events, telemetry, and checkpoint/replay. It
+does not borrow an agent's exposure, permission, governance, approval, or
+Guardrail policy because no agent owns that call. A host-aware tool keeps the
+ordinary PURISTA business guards of every command, stream, queue, event, agent,
+or workflow operation it invokes. Authorization for the workflow as a whole may
+also be declared as a before guard on the mounted workflow root. A workflow
+never receives a service resource, EventBridge client, or registry directly.
 
 ## 7. Business guards and events
 
