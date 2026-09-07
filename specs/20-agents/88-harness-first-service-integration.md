@@ -750,19 +750,17 @@ array. `setHandler` returns that final frozen definition; there is no
     toolId,
     callId,
     idempotencyKey,
-    caller:
-      | { kind: 'agent', agentId, workflowId? }
-      | { kind: 'workflow', workflowId },
+    caller: HarnessExecutionCaller,
   },
 }
 ```
 
-The caller is discriminated because a tool selected by an agent has an agent
-owner, while a tool called directly by workflow code does not. An agent running
-inside a workflow may additionally carry that workflow id for correlation. A
-workflow caller never receives a synthetic agent id. Harness tool events, MCP
-request-header context, portable tool context, and the PURISTA host-tool
-projection use this same owner union.
+The Harness-owned `HarnessExecutionCaller` is discriminated because a tool
+selected by an agent has an agent owner, while a tool called directly by
+workflow code does not. An agent running inside a workflow may additionally
+carry that workflow id for correlation. A workflow caller never receives a
+synthetic agent id. Harness model and tool events, MCP request-header context,
+portable tool context, and the PURISTA host-tool projection use this same union.
 
 The tool receives resources declared by its owning `ServiceBuilder`. Outgoing
 command, stream, queue, event, agent, and workflow helpers appear only when
