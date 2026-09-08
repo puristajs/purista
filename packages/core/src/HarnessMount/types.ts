@@ -12,7 +12,13 @@ import type {
 	WorkflowInput,
 	WorkflowOutput,
 } from '@purista/harness'
-import type { Command } from '../core/types/commandType/Command.js'
+import type {
+	Command,
+	HarnessDispatchContext,
+	HarnessInvocationContractEnvelope,
+	HarnessRootInvocationContext,
+	HarnessTransportEnvelope,
+} from '../core/types/commandType/Command.js'
 import type { EmitCustomMessageFunction } from '../core/types/EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
@@ -23,6 +29,22 @@ import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import type { Schema } from '../schema/index.js'
 import type { HarnessInvocationClients } from './invocation.js'
+
+export type {
+	GeneratedHarnessSchema,
+	HarnessTargetAddress,
+	HarnessTargetExport,
+	HarnessTargetQueueExport,
+	RemoteHarnessTargetContract,
+	RemoteHarnessTargetContractSource,
+} from './remoteTargetContract.js'
+export { createRemoteHarnessTargetContract } from './remoteTargetContract.js'
+export type {
+	HarnessDispatchContext,
+	HarnessInvocationContractEnvelope,
+	HarnessRootInvocationContext,
+	HarnessTransportEnvelope,
+}
 
 /** Trusted PURISTA values available to a bound host tool for one run. */
 export type HarnessHostContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{

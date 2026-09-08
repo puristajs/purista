@@ -1,3 +1,4 @@
+import type { HarnessTransportEnvelope } from './commandType/Command.js'
 import type { EBMessageAddress } from './EBMessageAddress.js'
 import type { EmptyObject } from './EmptyObject.js'
 
@@ -28,4 +29,5 @@ export type InvokeFunction = <
 	address: EBMessageAddress,
 	payload: PayloadType,
 	parameter: ParameterType,
+	harness?: HarnessTransportEnvelope,
 ) => Promise<InvokeResponseType>

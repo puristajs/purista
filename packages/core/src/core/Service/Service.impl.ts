@@ -43,7 +43,7 @@ import type { StateGetterFunction } from '../StateStore/types/StateGetterFunctio
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
 import type { ContextBase } from '../types/ContextBase.js'
 import type { CustomMessage } from '../types/CustomMessage.js'
-import type { Command } from '../types/commandType/Command.js'
+import type { Command, HarnessTransportEnvelope } from '../types/commandType/Command.js'
 import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
 import type { CommandDefinitionListResolved } from '../types/commandType/CommandDefinitionList.js'
 import type { CommandFunctionContext } from '../types/commandType/CommandFunctionContext.js'
@@ -428,6 +428,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			receiver: EBMessageAddress,
 			invokePayload: Payload,
 			invokeparameter: Parameter,
+			harness?: HarnessTransportEnvelope,
 			contentType = 'application/json',
 			contentEncoding = 'utf-8',
 		): Promise<any> => {
@@ -501,6 +502,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 					},
 					principalId,
 					tenantId,
+					...(harness === undefined ? {} : { harness }),
 				})
 
 				const outputSchema =
@@ -1508,6 +1510,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			receiver: EBMessageAddress,
 			streamPayload: Payload,
 			streamParameter: Parameter,
+			harness?: HarnessTransportEnvelope,
 			contentType = 'application/json',
 			contentEncoding = 'utf-8',
 		) => {
@@ -1555,6 +1558,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				},
 				principalId,
 				tenantId,
+				...(harness === undefined ? {} : { harness }),
 			}
 
 			const handle = await this.eventBridge.openStream(message)
@@ -1615,8 +1619,8 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		const queueInvokes = this.getHarnessQueueInvokes(invokes)
 		const enqueue = this.getHarnessQueueEnqueue(queueInvokes, traceId, principalId, tenantId)
 		return {
-			agent: createHarnessInvocationProxy(invoke, openStream, enqueue, invokes),
-			workflow: createHarnessInvocationProxy(invoke, openStream, enqueue, invokes),
+			agent: createHarnessInvocationProxy('agent', invoke, openStream, enqueue, invokes),
+			workflow: createHarnessInvocationProxy('workflow', invoke, openStream, enqueue, invokes),
 			model: createHarnessModelClients(invokes, (definition, alias) => {
 				if (!this.harnessModelResolver) {
 					throw new Error('Harness models are unavailable before the mounted Harness runtime starts.')
@@ -1679,8 +1683,8 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			resources: this.resources,
 			service: createInvokeFunctionProxy(invoke),
 			stream: createOpenStreamFunctionProxy(openStream),
-			agent: createHarnessInvocationProxy(invoke, openStream, harnessEnqueue, definition.invokes),
-			workflow: createHarnessInvocationProxy(invoke, openStream, harnessEnqueue, definition.invokes),
+			agent: createHarnessInvocationProxy('agent', invoke, openStream, harnessEnqueue, definition.invokes),
+			workflow: createHarnessInvocationProxy('workflow', invoke, openStream, harnessEnqueue, definition.invokes),
 			queue: this.getQueueNamespace(definition.queueInvokes, traceId, principalId, tenantId),
 			emit: this.getEmitFunction(context.toolId, traceId, principalId, tenantId, definition.emitList),
 		} as HarnessHostToolFunctionContext

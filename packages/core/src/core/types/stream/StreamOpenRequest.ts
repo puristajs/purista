@@ -1,4 +1,5 @@
 import type { CorrelationId } from '../CorrelationId.js'
+import type { HarnessTransportEnvelope } from '../commandType/Command.js'
 import type { EBMessageAddress } from '../EBMessageAddress.js'
 import type { EBMessageBase } from '../EBMessageBase.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
@@ -16,5 +17,7 @@ export type StreamOpenRequest<PayloadType = unknown, ParameterType = unknown> = 
 		correlationId: CorrelationId
 		receiver: EBMessageAddress
 		payload: StreamOpenRequestPayload<PayloadType, ParameterType>
+		/** @internal Framework-owned Harness metadata outside public schemas. */
+		harness?: HarnessTransportEnvelope
 	} & EBMessageBase
 >
