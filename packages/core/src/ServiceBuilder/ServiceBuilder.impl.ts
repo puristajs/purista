@@ -1,7 +1,8 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { HarnessDefinition, HarnessInstanceConfig } from '@purista/harness'
+import type { HarnessDefinition, HarnessInstanceConfig, Schema as HarnessSchema, ModelSchema } from '@purista/harness'
+import { assertHarnessHostToolOwner, createHostOwnerToken } from '@purista/harness/integrator'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
 import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
@@ -58,11 +59,13 @@ import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
 import { toHarnessQueueRetry } from '../HarnessMount/queue.js'
 import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
 import type {
+	HarnessDefinitionPublishPolicy,
+	HarnessHostToolSchemaBoundary,
 	HarnessMount,
-	HarnessPublishPolicy,
-	HarnessState,
+	HarnessMountableDefinition,
 	HarnessTargetQueueBinding,
 	MountedHarnessRuntimeConfig,
+	PuristaHostToolRuntimeDefinition,
 } from '../HarnessMount/types.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
@@ -123,6 +126,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private scheduleDefinitionList: ScheduleDefinition[] = []
 	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
 	private harnessMount?: HarnessMount
+	readonly #harnessHostOwner = createHostOwnerToken<unknown>()
+	readonly #harnessHostTools = new Map<string, PuristaHostToolRuntimeDefinition>()
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
@@ -257,9 +262,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * })
 	 * ```
 	 */
-	mountHarness<const D extends HarnessDefinition<any>>(
+	mountHarness<const D extends HarnessMountableDefinition>(
 		definition: D,
-		policy: S['Harnesses'] extends readonly [] ? HarnessPublishPolicy<HarnessState<D>, S['Resources']> : never,
+		policy: S['Harnesses'] extends readonly [] ? HarnessDefinitionPublishPolicy<D, S['Resources']> : never,
 	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -273,24 +278,26 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				'Only one Harness definition can be mounted on a service. Compose additional capabilities with native Harness modules.',
 			)
 		}
+		// Harness authenticates this public mount projection before reading its private compiled graph.
+		assertHarnessHostToolOwner(definition as never, this.#harnessHostOwner)
 		this.addHarnessQueueBindings(definition, policy)
-		this.harnessMount = Object.freeze({ definition, policy }) as HarnessMount
+		this.harnessMount = Object.freeze({ definition, policy }) as unknown as HarnessMount
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
 	}
 
-	private addHarnessQueueBindings<D extends HarnessDefinition<any>>(
+	private addHarnessQueueBindings<D extends HarnessMountableDefinition>(
 		definition: D,
-		policy: HarnessPublishPolicy<HarnessState<D>, S['Resources']>,
+		policy: HarnessDefinitionPublishPolicy<D, S['Resources']>,
 	) {
 		const queueNames = new Set<string>()
 		for (const kind of ['agents', 'workflows'] as const) {
 			const published = new Set((policy.publish[kind] ?? []) as readonly string[])
 			const contracts = definition.contracts[kind] as Record<
 				string,
-				import('@purista/harness').HarnessTargetContract<any>
+				import('@purista/harness').AnyHarnessTargetContract
 			>
 			const targets = policy.targets?.[kind] as
-				| Record<string, { queue?: HarnessTargetQueueBinding<import('@purista/harness').HarnessTargetContract<any>> }>
+				| Record<string, { queue?: HarnessTargetQueueBinding<import('@purista/harness').AnyHarnessTargetContract> }>
 				| undefined
 			for (const [target, targetPolicy] of Object.entries(targets ?? {})) {
 				const binding = targetPolicy.queue
@@ -317,13 +324,13 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 								this.info.serviceName,
 								this.info.serviceVersion,
 								target,
-								contract as import('@purista/harness').HarnessTargetContract<'agent'>,
+								contract as import('@purista/harness').AnyHarnessTargetContract & { readonly kind: 'agent' },
 							)
 						: queueWorker.canInvokeWorkflow(
 								this.info.serviceName,
 								this.info.serviceVersion,
 								target,
-								contract as import('@purista/harness').HarnessTargetContract<'workflow'>,
+								contract as import('@purista/harness').AnyHarnessTargetContract & { readonly kind: 'workflow' },
 							)
 				worker.setHandler(async (context, message) => {
 					try {
@@ -347,21 +354,31 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	}
 
 	/**
-	 * Create a typed function binding for one native Harness host-tool contract.
+	 * Define one resource-aware Harness host tool owned by this service lineage.
 	 *
-	 * @example
-	 * ```ts
-	 * const lookup = serviceBuilder
-	 *   .getHarnessHostToolBuilder(supportAi.catalog.hostTools.lookupAccount)
-	 *   .canInvoke('Account', '1', 'lookup', outputSchema, payloadSchema, parameterSchema)
-	 *   .setHandler(async (context, input) =>
-	 *     context.service.Account['1'].lookup(input, { idempotencyKey: context.idempotencyKey }))
-	 *   .getDefinition()
-	 * ```
+	 * Chain only the outgoing capabilities the handler needs, then call
+	 * `setHandler(...)` to obtain the final frozen definition for an agent or
+	 * workflow tool list.
 	 */
-	getHarnessHostToolBuilder<Contract extends Readonly<{ input: Schema; output: Schema }>>(contract: Contract) {
-		void contract
-		return new HarnessHostToolBuilder<Infer<Contract['input']>, InferIn<Contract['output']>, S['Resources']>()
+	defineTool<const Id extends string, Input extends ModelSchema, Output extends HarnessSchema>(
+		id: Id,
+		options: Readonly<{
+			description: string
+			input: HarnessHostToolSchemaBoundary<Input>
+			output: HarnessHostToolSchemaBoundary<Output>
+		}>,
+	) {
+		return new HarnessHostToolBuilder<Id, Input, Output, S['Resources'], S['Metrics']>(
+			this.#harnessHostOwner,
+			id,
+			options,
+			definition => {
+				if (this.#harnessHostTools.has(id)) {
+					throw new TypeError(`Harness host tool "${id}" is already defined on this ServiceBuilder.`)
+				}
+				this.#harnessHostTools.set(id, definition)
+			},
+		)
 	}
 
 	/** Add one or more schedule contracts to this service. */
@@ -621,6 +638,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
+		service.bindHarnessHostTools(this.#harnessHostTools)
 
 		let harnessMountRuntime: HarnessMountRuntime | undefined
 		if (this.harnessMount) {
@@ -642,8 +660,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				(definition, context) => service.createHarnessHostToolContext(definition, context),
 			)
 			const runtime = harnessMountRuntime
-			service.bindHarnessModelResolver((definition: HarnessDefinition<any>, alias: string) =>
-				runtime.getModel(definition, alias),
+			service.bindHarnessModelResolver((definition: unknown, alias: string) =>
+				runtime.getModel(definition as HarnessDefinition<any>, alias),
 			)
 			const start = service.start.bind(service)
 			service.start = async () => {

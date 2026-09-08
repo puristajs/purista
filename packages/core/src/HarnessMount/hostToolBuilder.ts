@@ -1,4 +1,5 @@
-import type { HarnessTargetContract } from '@purista/harness'
+import type { AnyHarnessTargetContract, HostToolDefinition, ModelSchema, Schema } from '@purista/harness'
+import { defineHostTool, type HostOwnerToken, isHarnessTargetContract } from '@purista/harness/integrator'
 import {
 	registerEmitSchema,
 	registerInvokeCapability,
@@ -6,45 +7,74 @@ import {
 } from '../core/helper/builderRegistry.impl.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
-import type { Infer, InferIn, Schema } from '../schema/index.js'
-import {
-	type HarnessInvokeDeclaration,
-	type HarnessStreamDeclaration,
-	registerHarnessInvocation,
-} from './invocation.js'
-import type { HarnessHostToolFunctionContext, HarnessHostToolFunctionDefinition } from './types.js'
+import type { Infer, InferIn } from '../schema/index.js'
+import type {
+	HarnessHostToolSchemaBoundary,
+	HarnessNestedTargetDeclarations,
+	PuristaHostToolRuntimeDefinition,
+	PuristaToolContext,
+} from './types.js'
+
+type ToolRegistration = (definition: PuristaHostToolRuntimeDefinition) => void
 
 /**
- * Declares the PURISTA capabilities available to one native Harness host tool.
- * The resulting binding remains private to the mount and creates no command,
- * stream, queue, or HTTP endpoint of its own.
+ * Declares the exact service capabilities available to one native Harness host tool.
+ * `setHandler(...)` returns the final owner-branded Harness definition.
  */
 export class HarnessHostToolBuilder<
-	Input,
-	Output,
+	Id extends string,
+	Input extends ModelSchema,
+	Output extends Schema,
 	Resources extends Record<string, unknown> = EmptyObject,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	QueueInvokes extends QueueInvokeList = EmptyObject,
-	EmitList extends Record<string, Schema> = EmptyObject,
+	EmitList extends Record<string, unknown> = EmptyObject,
+	Agents extends HarnessNestedTargetDeclarations = EmptyObject,
+	Workflows extends HarnessNestedTargetDeclarations = EmptyObject,
 > {
-	private invokes: InvokeList = {}
-	private streamInvokes: StreamInvokeList = {}
-	private queueInvokes: QueueInvokeList = {}
-	private emitList: Record<string, Schema> = {}
-	private handler?: (
-		context: HarnessHostToolFunctionContext<Resources, Invokes, StreamInvokes, QueueInvokes, EmitList>,
-		input: Input,
-	) => Promise<Output>
+	#invokes: InvokeList = {}
+	#streamInvokes: StreamInvokeList = {}
+	#queueInvokes: QueueInvokeList = {}
+	#emitSchemas: Record<string, import('../schema/index.js').Schema> = {}
+	#agents: HarnessNestedTargetDeclarations = {}
+	#workflows: HarnessNestedTargetDeclarations = {}
+	readonly #owner: HostOwnerToken<unknown>
+	readonly #id: Id
+	readonly #options: Readonly<{
+		description: string
+		input: HarnessHostToolSchemaBoundary<Input>
+		output: HarnessHostToolSchemaBoundary<Output>
+	}>
+	readonly #register: ToolRegistration
 
-	/** Declare an address-first PURISTA command available to the tool handler. */
+	/** @internal ServiceBuilder owns construction and registration. */
+	constructor(
+		owner: HostOwnerToken<unknown>,
+		id: Id,
+		options: Readonly<{
+			description: string
+			input: HarnessHostToolSchemaBoundary<Input>
+			output: HarnessHostToolSchemaBoundary<Output>
+		}>,
+		register: ToolRegistration,
+	) {
+		this.#owner = owner
+		this.#id = id
+		this.#options = options
+		this.#register = register
+	}
+
+	/** Declare one address-first PURISTA command available to the tool handler. */
 	canInvoke<
-		OutputSchema extends Schema,
-		PayloadSchema extends Schema,
-		ParameterSchema extends Schema,
+		OutputSchema extends import('../schema/index.js').Schema,
+		PayloadSchema extends import('../schema/index.js').Schema,
+		ParameterSchema extends import('../schema/index.js').Schema,
 		ServiceName extends string,
 		ServiceVersion extends string,
 		ServiceTarget extends string,
@@ -56,15 +86,17 @@ export class HarnessHostToolBuilder<
 		payloadSchema?: PayloadSchema,
 		parameterSchema?: ParameterSchema,
 	) {
-		this.invokes = registerInvokeCapability(this.invokes, serviceName, serviceVersion, serviceTarget, {
+		this.#invokes = registerInvokeCapability(this.#invokes, serviceName, serviceVersion, serviceTarget, {
 			outputSchema,
 			payloadSchema,
 			parameterSchema,
 		})
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
 			Resources,
+			Metrics,
 			Invokes &
 				Record<
 					ServiceName,
@@ -72,83 +104,70 @@ export class HarnessHostToolBuilder<
 						ServiceVersion,
 						Record<
 							ServiceTarget,
-							(
-								payload: import('../schema/index.js').InferIn<PayloadSchema>,
-								parameter: import('../schema/index.js').InferIn<ParameterSchema>,
-							) => Promise<import('../schema/index.js').Infer<OutputSchema>>
+							(payload: InferIn<PayloadSchema>, parameter: InferIn<ParameterSchema>) => Promise<Infer<OutputSchema>>
 						>
 					>
 				>,
 			StreamInvokes,
 			QueueInvokes,
-			EmitList
+			EmitList,
+			Agents,
+			Workflows
 		>
 	}
 
-	/** Declare an address-first mounted Harness agent available to the tool handler. */
+	/** Declare one mounted Harness agent available through the run-only nested boundary. */
 	canInvokeAgent<
-		Contract extends HarnessTargetContract<'agent', any, any>,
+		Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'agent' }>,
 		ServiceName extends string,
 		ServiceVersion extends string,
-		ServiceTarget extends string,
-	>(serviceName: ServiceName, serviceVersion: ServiceVersion, serviceTarget: ServiceTarget, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
-		this.invokes = registered.invokes
-		this.streamInvokes = registered.streamInvokes
+	>(serviceName: ServiceName, serviceVersion: ServiceVersion, contract: Contract) {
+		assertTargetContract(contract, 'agent')
+		this.#agents = registerTarget(this.#agents, serviceName, serviceVersion, contract.id, contract)
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
 			Resources,
-			Invokes & Record<ServiceName, Record<ServiceVersion, Record<ServiceTarget, HarnessInvokeDeclaration<Contract>>>>,
-			StreamInvokes &
-				Record<ServiceName, Record<ServiceVersion, Record<ServiceTarget, HarnessStreamDeclaration<Contract>>>>,
+			Metrics,
+			Invokes,
+			StreamInvokes,
 			QueueInvokes,
-			EmitList
+			EmitList,
+			Agents & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>,
+			Workflows
 		>
 	}
 
-	/** Declare an address-first mounted Harness workflow available to the tool handler. */
+	/** Declare one mounted Harness workflow available through the run-only nested boundary. */
 	canInvokeWorkflow<
-		Contract extends HarnessTargetContract<'workflow', any, any>,
+		Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'workflow' }>,
 		ServiceName extends string,
 		ServiceVersion extends string,
-		ServiceTarget extends string,
-	>(serviceName: ServiceName, serviceVersion: ServiceVersion, serviceTarget: ServiceTarget, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
-		this.invokes = registered.invokes
-		this.streamInvokes = registered.streamInvokes
+	>(serviceName: ServiceName, serviceVersion: ServiceVersion, contract: Contract) {
+		assertTargetContract(contract, 'workflow')
+		this.#workflows = registerTarget(this.#workflows, serviceName, serviceVersion, contract.id, contract)
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
 			Resources,
-			Invokes & Record<ServiceName, Record<ServiceVersion, Record<ServiceTarget, HarnessInvokeDeclaration<Contract>>>>,
-			StreamInvokes &
-				Record<ServiceName, Record<ServiceVersion, Record<ServiceTarget, HarnessStreamDeclaration<Contract>>>>,
+			Metrics,
+			Invokes,
+			StreamInvokes,
 			QueueInvokes,
-			EmitList
+			EmitList,
+			Agents,
+			Workflows & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>
 		>
 	}
 
-	/** Declare a PURISTA stream available to the tool handler. */
+	/** Declare one PURISTA stream available to the tool handler. */
 	canConsumeStream<
-		ChunkSchema extends Schema,
-		FinalSchema extends Schema,
-		PayloadSchema extends Schema,
-		ParameterSchema extends Schema,
+		ChunkSchema extends import('../schema/index.js').Schema,
+		FinalSchema extends import('../schema/index.js').Schema,
+		PayloadSchema extends import('../schema/index.js').Schema,
+		ParameterSchema extends import('../schema/index.js').Schema,
 		ServiceName extends string,
 		ServiceVersion extends string,
 		ServiceTarget extends string,
@@ -163,17 +182,19 @@ export class HarnessHostToolBuilder<
 		validateChunk = true,
 		validateFinal = true,
 	) {
-		this.streamInvokes = registerStreamInvokeCapability(
-			this.streamInvokes,
+		this.#streamInvokes = registerStreamInvokeCapability(
+			this.#streamInvokes,
 			serviceName,
 			serviceVersion,
 			serviceTarget,
 			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
 		)
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
 			Resources,
+			Metrics,
 			Invokes,
 			StreamInvokes &
 				Record<
@@ -190,73 +211,146 @@ export class HarnessHostToolBuilder<
 					>
 				>,
 			QueueInvokes,
-			EmitList
+			EmitList,
+			Agents,
+			Workflows
 		>
 	}
 
-	/** Declare a native PURISTA queue available to the tool handler. */
-	canEnqueue<PayloadSchema extends Schema, ParameterSchema extends Schema, QueueName extends string>(
-		queueName: QueueName,
-		payloadSchema?: PayloadSchema,
-		parameterSchema?: ParameterSchema,
-	) {
-		if (queueName.trim() === '') throw new Error('canEnqueue requires non-empty queue name')
-		this.queueInvokes = { ...this.queueInvokes, [queueName]: { payloadSchema, parameterSchema } }
+	/** Declare one PURISTA queue available to the tool handler. */
+	canEnqueue<
+		PayloadSchema extends import('../schema/index.js').Schema,
+		ParameterSchema extends import('../schema/index.js').Schema,
+		QueueName extends string,
+	>(queueName: QueueName, payloadSchema?: PayloadSchema, parameterSchema?: ParameterSchema) {
+		if (queueName.trim() === '') throw new TypeError('canEnqueue requires a non-empty queue name.')
+		this.#queueInvokes = { ...this.#queueInvokes, [queueName]: { payloadSchema, parameterSchema } }
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
 			Resources,
+			Metrics,
 			Invokes,
 			StreamInvokes,
 			QueueInvokes & Record<QueueName, { payloadSchema: PayloadSchema; parameterSchema: ParameterSchema }>,
-			EmitList
+			EmitList,
+			Agents,
+			Workflows
 		>
 	}
 
-	/** Declare a validated custom event available to the tool handler. */
-	canEmit<EventName extends string, EventSchema extends Schema>(eventName: EventName, schema: EventSchema) {
-		this.emitList = registerEmitSchema(this.emitList, eventName, schema)
+	/** Declare one validated custom event available to the tool handler. */
+	canEmit<EventName extends string, EventSchema extends import('../schema/index.js').Schema>(
+		eventName: EventName,
+		schema: EventSchema,
+	) {
+		this.#emitSchemas = registerEmitSchema(this.#emitSchemas, eventName, schema)
 		return this as unknown as HarnessHostToolBuilder<
+			Id,
 			Input,
 			Output,
+			Resources,
+			Metrics,
+			Invokes,
+			StreamInvokes,
+			QueueInvokes,
+			EmitList & Record<EventName, InferIn<EventSchema>>,
+			Agents,
+			Workflows
+		>
+	}
+
+	/** Set the implementation and return the final frozen owner-branded Harness tool. */
+	setHandler(
+		handler: (
+			context: PuristaToolContext<
+				Resources,
+				Invokes,
+				StreamInvokes,
+				QueueInvokes,
+				EmitList,
+				Agents,
+				Workflows,
+				Metrics
+			>,
+			input: import('@purista/harness').Infer<Input>,
+		) => Promise<import('@purista/harness').InferIn<Output>>,
+	): HostToolDefinition<
+		Id,
+		Input,
+		Output,
+		PuristaToolContext<Resources, Invokes, StreamInvokes, QueueInvokes, EmitList, Agents, Workflows, Metrics>
+	> {
+		type Context = PuristaToolContext<
 			Resources,
 			Invokes,
 			StreamInvokes,
 			QueueInvokes,
-			EmitList & Record<EventName, InferIn<EventSchema>>
+			EmitList,
+			Agents,
+			Workflows,
+			Metrics
 		>
+		const hostOptions = {
+			...this.#options,
+			handler,
+		} as unknown as Parameters<typeof defineHostTool<Id, Input, Output, Context>>[2]
+		const definition = defineHostTool<Id, Input, Output, Context>(
+			this.#owner as HostOwnerToken<Context>,
+			this.#id,
+			hostOptions,
+		)
+		this.#register(
+			Object.freeze({
+				definition,
+				invokes: freezeAddressRegistry(this.#invokes),
+				streamInvokes: freezeAddressRegistry(this.#streamInvokes),
+				queueInvokes: freezeNamedRegistry(this.#queueInvokes),
+				emitSchemas: Object.freeze({ ...this.#emitSchemas }),
+				agents: freezeTargetRegistry(this.#agents),
+				workflows: freezeTargetRegistry(this.#workflows),
+			}),
+		)
+		return definition
 	}
+}
 
-	/** Set the function that implements the native Harness host-tool contract. */
-	setHandler(
-		handler: (
-			context: HarnessHostToolFunctionContext<Resources, Invokes, StreamInvokes, QueueInvokes, EmitList>,
-			input: Input,
-		) => Promise<Output>,
-	) {
-		this.handler = handler
-		return this
+function assertTargetContract(
+	contract: unknown,
+	kind: 'agent' | 'workflow',
+): asserts contract is AnyHarnessTargetContract {
+	if (!isHarnessTargetContract(contract)) {
+		throw new TypeError(
+			`canInvoke${kind === 'agent' ? 'Agent' : 'Workflow'} requires an authentic Harness target contract.`,
+		)
 	}
+	if (contract.kind !== kind) {
+		throw new TypeError(
+			`canInvoke${kind === 'agent' ? 'Agent' : 'Workflow'} requires ${kind === 'agent' ? 'an' : 'a'} ${kind} contract.`,
+		)
+	}
+}
 
-	/** Return the synchronous, immutable binding consumed by `mountHarness(...)`. */
-	getDefinition(): HarnessHostToolFunctionDefinition<
-		Input,
-		Output,
-		Resources,
-		Invokes,
-		StreamInvokes,
-		QueueInvokes,
-		EmitList
-	> {
-		if (!this.handler) throw new Error('A Harness host tool requires setHandler(...) before getDefinition().')
-		return Object.freeze({
-			kind: 'purista-host-tool',
-			invokes: freezeAddressRegistry(this.invokes) as Invokes,
-			streamInvokes: freezeAddressRegistry(this.streamInvokes) as StreamInvokes,
-			queueInvokes: freezeNamedRegistry(this.queueInvokes) as QueueInvokes,
-			emitList: Object.freeze({ ...this.emitList }) as EmitList,
-			handler: this.handler,
-		})
+function registerTarget<Contract extends AnyHarnessTargetContract>(
+	registry: HarnessNestedTargetDeclarations,
+	serviceName: string,
+	serviceVersion: string,
+	serviceTarget: string,
+	contract: Contract,
+): HarnessNestedTargetDeclarations {
+	if (!serviceName.trim() || !serviceVersion.trim() || !serviceTarget.trim()) {
+		throw new TypeError('Harness target addresses require non-empty service, version, and target values.')
+	}
+	return {
+		...registry,
+		[serviceName]: {
+			...registry[serviceName],
+			[serviceVersion]: {
+				...registry[serviceName]?.[serviceVersion],
+				[serviceTarget]: contract,
+			},
+		},
 	}
 }
 
@@ -288,4 +382,19 @@ function freezeNamedRegistry<T extends Record<string, object>>(registry: T): T {
 			Object.entries(registry).map(([name, declaration]) => [name, Object.freeze({ ...declaration })]),
 		),
 	) as T
+}
+
+function freezeTargetRegistry(registry: HarnessNestedTargetDeclarations): HarnessNestedTargetDeclarations {
+	return Object.freeze(
+		Object.fromEntries(
+			Object.entries(registry).map(([serviceName, versions]) => [
+				serviceName,
+				Object.freeze(
+					Object.fromEntries(
+						Object.entries(versions).map(([version, targets]) => [version, Object.freeze({ ...targets })]),
+					),
+				),
+			]),
+		),
+	)
 }

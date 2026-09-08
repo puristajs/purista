@@ -1,6 +1,7 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import type { BuilderState, HarnessDefinition, ModelHandle } from '@purista/harness'
+import type { AnyHarnessTargetContract, ModelHandle } from '@purista/harness'
+import type { HarnessNestedTargetInvoker } from '@purista/harness/integrator'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
@@ -8,9 +9,10 @@ import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.imp
 import { createHarnessInvocationProxy } from '../../HarnessMount/invocation.js'
 import { createHarnessModelClients } from '../../HarnessMount/model.js'
 import type {
-	HarnessCommandToolContext,
-	HarnessHostToolFunctionContext,
-	HarnessHostToolFunctionDefinition,
+	HarnessNestedTargetDeclarations,
+	PuristaHostContextRequest,
+	PuristaHostToolRuntimeDefinition,
+	PuristaToolContext,
 } from '../../HarnessMount/types.js'
 import type { Infer, Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
@@ -193,7 +195,8 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
 	private readonly queueJobStore?: QueueJobStore
 	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
-	private harnessModelResolver?: (definition: HarnessDefinition<BuilderState>, alias: string) => ModelHandle
+	private harnessModelResolver?: (definition: unknown, alias: string) => ModelHandle
+	private harnessHostTools = new Map<string, PuristaHostToolRuntimeDefinition>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -243,10 +246,13 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	}
 
 	/** @internal Bind mounted Harness models before the service begins handling messages. */
-	public bindHarnessModelResolver(
-		resolver: (definition: HarnessDefinition<BuilderState>, alias: string) => ModelHandle,
-	): void {
+	public bindHarnessModelResolver(resolver: (definition: unknown, alias: string) => ModelHandle): void {
 		this.harnessModelResolver = resolver
+	}
+
+	/** @internal Bind service-owned host-tool declarations before Harness starts. */
+	public bindHarnessHostTools(definitions: ReadonlyMap<string, PuristaHostToolRuntimeDefinition>): void {
+		this.harnessHostTools = new Map(definitions)
 	}
 
 	private getServiceMetricAttributes(serviceTarget?: string): PuristaMetricAttributes {
@@ -1656,38 +1662,143 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			this.enqueueQueue(queueName, payload, parameter, queueInvokes, traceId, principalId, tenantId, options, true)
 	}
 
-	/** @internal Builds the allowlisted PURISTA context for one mounted Harness host-tool call. */
-	public createHarnessHostToolContext(
-		definition: HarnessHostToolFunctionDefinition,
-		context: HarnessCommandToolContext,
-	): HarnessHostToolFunctionContext {
-		const traceId = context.host.request.traceId
-		const principalId = context.host.identity.principalId
-		const tenantId = context.host.identity.tenantId
-		const invoke = this.getInvokeFunction(context.toolId, traceId, principalId, tenantId, definition.invokes)
+	/** @internal Builds the exact allowlisted context for one mounted Harness host-tool call. */
+	public createHarnessHostToolContext(request: PuristaHostContextRequest): PuristaToolContext {
+		const declaration = this.harnessHostTools.get(request.tool.id)
+		if (!declaration) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				`Harness host tool "${request.tool.id}" is not owned by this service.`,
+			)
+		}
+		const { hostInvocation } = request
+		const traceId = hostInvocation.message.traceId
+		const principalId = hostInvocation.identity.principalId
+		const tenantId = hostInvocation.identity.tenantId
+		const invoke = this.getInvokeFunction(request.tool.id, traceId, principalId, tenantId, declaration.invokes)
 		const openStream = this.getConsumeStreamFunction(
-			context.toolId,
+			request.tool.id,
 			traceId,
 			principalId,
 			tenantId,
-			definition.streamInvokes,
+			declaration.streamInvokes,
 		)
-		const harnessEnqueue = this.getHarnessQueueEnqueue(
-			this.getHarnessQueueInvokes(definition.invokes),
-			traceId,
-			principalId,
-			tenantId,
-		)
-		return {
-			...context,
+		return Object.freeze({
+			message: hostInvocation.message,
+			identity: hostInvocation.identity,
 			resources: this.resources,
-			service: createInvokeFunctionProxy(invoke),
-			stream: createOpenStreamFunctionProxy(openStream),
-			agent: createHarnessInvocationProxy('agent', invoke, openStream, harnessEnqueue, definition.invokes),
-			workflow: createHarnessInvocationProxy('workflow', invoke, openStream, harnessEnqueue, definition.invokes),
-			queue: this.getQueueNamespace(definition.queueInvokes, traceId, principalId, tenantId),
-			emit: this.getEmitFunction(context.toolId, traceId, principalId, tenantId, definition.emitList),
-		} as HarnessHostToolFunctionContext
+			service: this.createHostInvokeClients(declaration.invokes, invoke),
+			stream: this.createHostStreamClients(declaration.streamInvokes, openStream),
+			queue: this.getQueueNamespace(declaration.queueInvokes, traceId, principalId, tenantId),
+			emit: this.getEmitFunction(request.tool.id, traceId, principalId, tenantId, declaration.emitSchemas),
+			agent: this.createHostNestedTargetClients(declaration.agents, request.nestedTargets),
+			workflow: this.createHostNestedTargetClients(declaration.workflows, request.nestedTargets),
+			step: request.checkpointStep,
+			logger: this.logger,
+			metrics: this.metricContext,
+			signal: request.signal,
+			...(hostInvocation.trace ? { trace: hostInvocation.trace } : {}),
+			tool: Object.freeze({
+				sessionId: request.sessionId,
+				runId: request.runId,
+				toolId: request.tool.id,
+				callId: request.tool.callId,
+				caller: request.caller,
+				...(hostInvocation.idempotencyKey ? { idempotencyKey: hostInvocation.idempotencyKey } : {}),
+			}),
+		}) as PuristaToolContext
+	}
+
+	private createHostInvokeClients(invokes: InvokeList, invoke: ReturnType<Service['getInvokeFunction']>): InvokeList {
+		return this.createHostAddressClients(invokes, (address, payload, parameter) =>
+			invoke(address, payload, parameter as EmptyObject),
+		) as InvokeList
+	}
+
+	private createHostStreamClients(
+		streamInvokes: StreamInvokeList,
+		openStream: ReturnType<Service['getConsumeStreamFunction']>,
+	): StreamInvokeList {
+		return this.createHostAddressClients(streamInvokes, (address, payload, parameter) =>
+			openStream(address, payload, parameter as EmptyObject),
+		) as StreamInvokeList
+	}
+
+	private createHostAddressClients(
+		declarations: Record<string, Record<string, Record<string, object>>>,
+		call: (address: EBMessageAddress, payload: unknown, parameter: unknown) => unknown,
+	): Record<string, Record<string, Record<string, (payload: unknown, parameter: unknown) => unknown>>> {
+		return Object.freeze(
+			Object.fromEntries(
+				Object.entries(declarations).map(([serviceName, versions]) => [
+					serviceName,
+					Object.freeze(
+						Object.fromEntries(
+							Object.entries(versions).map(([serviceVersion, targets]) => [
+								serviceVersion,
+								Object.freeze(
+									Object.fromEntries(
+										Object.keys(targets).map(serviceTarget => [
+											serviceTarget,
+											(payload: unknown, parameter: unknown) =>
+												call({ serviceName, serviceVersion, serviceTarget }, payload, parameter),
+										]),
+									),
+								),
+							]),
+						),
+					),
+				]),
+			),
+		)
+	}
+
+	private createHostNestedTargetClients(
+		declarations: HarnessNestedTargetDeclarations,
+		nestedTargets: HarnessNestedTargetInvoker,
+	): Record<
+		string,
+		Record<
+			string,
+			Record<string, Readonly<{ run: (input: unknown, options: Readonly<{ callId: string }>) => Promise<unknown> }>>
+		>
+	> {
+		return Object.freeze(
+			Object.fromEntries(
+				Object.entries(declarations).map(([serviceName, versions]) => [
+					serviceName,
+					Object.freeze(
+						Object.fromEntries(
+							Object.entries(versions).map(([version, targets]) => [
+								version,
+								Object.freeze(
+									Object.fromEntries(
+										Object.entries(targets).map(([targetName, contract]) => [
+											targetName,
+											Object.freeze({
+												run: (input: unknown, options: Readonly<{ callId: string }>) => {
+													if (
+														!options ||
+														Object.keys(options).length !== 1 ||
+														typeof options.callId !== 'string' ||
+														!options.callId.trim()
+													) {
+														throw new TypeError('Nested Harness target calls require exactly one non-empty callId.')
+													}
+													return nestedTargets.run(contract as AnyHarnessTargetContract, input as never, {
+														callId: options.callId,
+													})
+												},
+											}),
+										]),
+									),
+								),
+							]),
+						),
+					),
+				]),
+			),
+		)
 	}
 
 	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(

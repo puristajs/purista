@@ -1,17 +1,17 @@
 import type {
-	AgentInput,
-	AgentOutput,
-	BuilderState,
+	AnyHarnessTargetContract,
+	HarnessCatalogView,
 	HarnessDefinition,
-	HarnessHostToolBindings,
+	HarnessExecutionCaller,
+	HarnessIdentity,
 	HarnessInstanceConfig,
 	HarnessTargetContract,
-	HostToolHandlerContext,
-	InferTypes,
+	HarnessTargetInput,
+	HarnessTargetOutput,
+	HarnessTraceContext,
 	RunOutcome,
-	WorkflowInput,
-	WorkflowOutput,
 } from '@purista/harness'
+import type { HarnessHostContextRequest } from '@purista/harness/integrator'
 import type {
 	Command,
 	HarnessDispatchContext,
@@ -23,12 +23,12 @@ import type { EmitCustomMessageFunction } from '../core/types/EmitCustomMessageF
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { Logger } from '../core/types/Logger.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { QueueContext } from '../core/types/queue/QueueContext.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
-import type { Schema } from '../schema/index.js'
-import type { HarnessInvocationClients } from './invocation.js'
+import type { Infer, InferIn, Schema } from '../schema/index.js'
 
 export type {
 	GeneratedHarnessSchema,
@@ -46,95 +46,111 @@ export type {
 	HarnessTransportEnvelope,
 }
 
-/** Trusted PURISTA values available to a bound host tool for one run. */
-export type HarnessHostContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{
-	identity: Readonly<{ tenantId?: string; principalId?: string }>
-	request: Readonly<{ traceId?: string; correlationId: string }>
-	/** Service-owned dependencies supplied through `ServiceBuilder.getInstance(...)`. */
-	resources: Resources
-	logger: Logger
+/** Opaque service-owned data retained by Harness for one hosted invocation. */
+export type PuristaHostInvocation = Readonly<{
+	message: Readonly<Command | StreamOpenRequest>
+	identity: HarnessIdentity
+	trace?: HarnessTraceContext
+	idempotencyKey?: string
 }>
 
-/** Tool-call context available while mapping a Harness tool into a command. */
-export type HarnessCommandToolContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<
-	Pick<
-		HostToolHandlerContext<HarnessHostContext<Resources>>,
-		'runId' | 'sessionId' | 'agentId' | 'toolId' | 'callId' | 'idempotencyKey'
-	> & {
-		host: HarnessHostContext<Resources>
-	}
+/** Address-first target declarations retained privately by a host-tool builder. */
+export type HarnessNestedTargetDeclarations = Readonly<
+	Record<string, Readonly<Record<string, Readonly<Record<string, AnyHarnessTargetContract>>>>>
 >
 
-/** Address-first adapter that exposes a PURISTA command as a Harness host tool. */
-export type HarnessCommandToolAdapter<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{
-	kind: 'purista-command'
-	serviceName: string
-	serviceVersion: string
-	serviceTarget: string
-	/**
-	 * Map model input into the command contract. Side-effecting commands should
-	 * include `context.idempotencyKey` in a typed command parameter and enforce
-	 * it at the resource or downstream boundary.
-	 */
-	mapInput?: (
-		input: unknown,
-		context: HarnessCommandToolContext<Resources>,
-	) => Readonly<{ payload: unknown; parameter?: unknown }>
-	mapOutput?: (output: unknown) => unknown
-}>
-
-/** Typed context supplied to a PURISTA-implemented native Harness host tool. */
-export type HarnessHostToolFunctionContext<
-	Resources extends Record<string, unknown> = EmptyObject,
-	Invokes extends InvokeList = EmptyObject,
-	StreamInvokes extends StreamInvokeList = EmptyObject,
-	QueueInvokes extends QueueInvokeList = EmptyObject,
-	EmitList extends Record<string, Schema> = EmptyObject,
-> = HarnessCommandToolContext<Resources> &
-	Readonly<{
-		resources: Resources
-		service: Invokes
-		stream: StreamInvokes
-		agent: HarnessInvocationClients<Invokes, 'agent'>
-		workflow: HarnessInvocationClients<Invokes, 'workflow'>
-		queue: QueueContext<QueueInvokes>
-		emit: EmitCustomMessageFunction<EmitList>
-	}>
-
-/** Immutable PURISTA binding for a provider-neutral Harness host-tool contract. */
-export type HarnessHostToolFunctionDefinition<
-	Input = unknown,
-	Output = unknown,
-	Resources extends Record<string, unknown> = EmptyObject,
-	Invokes extends InvokeList = EmptyObject,
-	StreamInvokes extends StreamInvokeList = EmptyObject,
-	QueueInvokes extends QueueInvokeList = EmptyObject,
-	EmitList extends Record<string, Schema> = EmptyObject,
-> = Readonly<{
-	kind: 'purista-host-tool'
-	invokes: Invokes
-	streamInvokes: StreamInvokes
-	queueInvokes: QueueInvokes
-	emitList: EmitList
-	handler: (
-		context: HarnessHostToolFunctionContext<Resources, Invokes, StreamInvokes, QueueInvokes, EmitList>,
-		input: Input,
-	) => Promise<Output>
-}>
-
-type HostToolFunctionDefinition<Binding, Resources extends Record<string, unknown>> = Binding extends (
-	context: any,
-	input: infer Input,
-) => Promise<infer Output>
-	? HarnessHostToolFunctionDefinition<Input, Output, Resources, any, any, any, any>
-	: never
-
-type MountHostToolBindings<S extends BuilderState, Resources extends Record<string, unknown>> = {
-	[K in keyof HarnessHostToolBindings<S, HarnessHostContext<Resources>>]:
-		| HarnessHostToolBindings<S, HarnessHostContext<Resources>>[K]
-		| HarnessCommandToolAdapter<Resources>
-		| HostToolFunctionDefinition<HarnessHostToolBindings<S, HarnessHostContext<Resources>>[K], Resources>
+/** Aggregate-only nested target clients exposed to a host tool. */
+export type HarnessNestedTargetClients<Declarations extends HarnessNestedTargetDeclarations> = {
+	readonly [ServiceName in keyof Declarations]: {
+		readonly [Version in keyof Declarations[ServiceName]]: {
+			readonly [Target in keyof Declarations[ServiceName][Version]]: Declarations[ServiceName][Version][Target] extends infer Contract extends
+				AnyHarnessTargetContract
+				? Readonly<{
+						run(
+							input: HarnessTargetInput<Contract>,
+							options: Readonly<{ callId: string }>,
+						): Promise<HarnessTargetOutput<Contract>>
+					}>
+				: never
+		}
+	}
 }
+
+type HarnessJsonSchemaValue =
+	| null
+	| boolean
+	| number
+	| string
+	| undefined
+	| readonly HarnessJsonSchemaValue[]
+	| { readonly [key: string]: HarnessJsonSchemaValue }
+
+/** Schema boundary accepted by model-visible host tools. */
+export type HarnessHostToolSchemaBoundary<Value extends Schema> =
+	undefined extends InferIn<Value>
+		? never
+		: undefined extends Infer<Value>
+			? never
+			: InferIn<Value> extends HarnessJsonSchemaValue
+				? Infer<Value> extends HarnessJsonSchemaValue
+					? Value
+					: never
+				: never
+
+/** Exact service-owned context supplied to a PURISTA Harness host tool. */
+export type PuristaToolContext<
+	Resources extends Record<string, unknown> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
+	QueueInvokes extends QueueInvokeList = EmptyObject,
+	EmitList extends Record<string, unknown> = EmptyObject,
+	Agents extends HarnessNestedTargetDeclarations = EmptyObject,
+	Workflows extends HarnessNestedTargetDeclarations = EmptyObject,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
+> = Readonly<{
+	message: PuristaHostInvocation['message']
+	identity: HarnessIdentity
+	resources: Resources
+	service: Invokes
+	stream: StreamInvokes
+	queue: QueueContext<QueueInvokes>
+	emit: EmitCustomMessageFunction<EmitList>
+	agent: HarnessNestedTargetClients<Agents>
+	workflow: HarnessNestedTargetClients<Workflows>
+	step: HarnessCheckpointStep
+	logger: Logger
+	metrics: PuristaMetricContext<Metrics>
+	signal: AbortSignal
+	trace?: HarnessTraceContext
+	tool: Readonly<{
+		sessionId: string
+		runId: string
+		toolId: string
+		callId: string
+		idempotencyKey?: string
+		caller: HarnessExecutionCaller
+	}>
+}>
+
+/** @internal Private declaration used to build one tool call's scoped context. */
+export type PuristaHostToolRuntimeDefinition = Readonly<{
+	definition: object
+	invokes: InvokeList
+	streamInvokes: StreamInvokeList
+	queueInvokes: QueueInvokeList
+	emitSchemas: Readonly<Record<string, Schema>>
+	agents: HarnessNestedTargetDeclarations
+	workflows: HarnessNestedTargetDeclarations
+}>
+
+/** @internal Host-tool context factory input bound by the mounted Harness runtime. */
+export type PuristaHostContextRequest =
+	import('@purista/harness/integrator').HarnessHostContextRequest<PuristaHostInvocation>
+
+/** @internal Builds aggregate-only clients from the Harness-owned nested target boundary. */
+export type PuristaNestedTargetInvoker = PuristaHostContextRequest['nestedTargets']
+
+type HarnessCheckpointStep = HarnessHostContextRequest<PuristaHostInvocation>['checkpointStep']
 
 /** Trusted execution context passed to mounted-target business guards. */
 export type HarnessBusinessGuardContext<Resources extends Record<string, unknown>> = Readonly<{
@@ -147,16 +163,10 @@ export type HarnessBusinessGuardContext<Resources extends Record<string, unknown
 }>
 
 type TargetContract<
-	S extends BuilderState,
+	S extends HarnessCatalogView,
 	Kind extends 'agents' | 'workflows',
 	K extends string,
-> = Kind extends 'agents'
-	? K extends keyof NonNullable<S['agents']>
-		? HarnessTargetContract<'agent', any, any, AgentInput<S, K>, AgentOutput<S, K>>
-		: never
-	: K extends keyof NonNullable<S['workflows']>
-		? HarnessTargetContract<'workflow', any, any, WorkflowInput<S, K>, WorkflowOutput<S, K>>
-		: never
+> = K extends keyof S['contracts'][Kind] ? S['contracts'][Kind][K] : never
 
 /**
  * Controls which immutable identity reopens an existing durable Harness run.
@@ -170,7 +180,7 @@ export type HarnessDurableResumePolicy = Readonly<{ identity: 'run-owner' }>
 
 /** Business, delivery, and durable-resume policy for one published Harness target. */
 export type HarnessTargetPolicy<
-	C extends HarnessTargetContract<any, any, any, any, any>,
+	C extends AnyHarnessTargetContract,
 	Resources extends Record<string, unknown>,
 > = Readonly<{
 	beforeGuards?: Readonly<
@@ -205,12 +215,12 @@ export type HarnessTargetPolicy<
 }>
 
 /** Harness target contract marked as supporting native PURISTA queue delivery. */
-export type QueuedHarnessTargetContract<C extends HarnessTargetContract<any, any, any, any, any>> = C &
+export type QueuedHarnessTargetContract<C extends AnyHarnessTargetContract> = C &
 	Readonly<{ queue: Readonly<{ name: string }> }>
 
 /** Opaque native queue and worker binding dedicated to one mounted Harness target. */
 export type HarnessTargetQueueBinding<
-	C extends HarnessTargetContract<any, any, any, any, any>,
+	C extends AnyHarnessTargetContract,
 	Queue = unknown,
 	Worker = unknown,
 > = Readonly<{
@@ -222,7 +232,7 @@ export type HarnessTargetQueueBinding<
 
 /** Target-name keyed policies inferred from one portable Harness definition. */
 export type HarnessTargetPolicies<
-	S extends BuilderState,
+	S extends HarnessCatalogView,
 	Kind extends 'agents' | 'workflows',
 	Resources extends Record<string, unknown>,
 > = Partial<{
@@ -231,7 +241,7 @@ export type HarnessTargetPolicies<
 
 /** Agent or workflow names explicitly published at a PURISTA service address. */
 export type HarnessPublishPolicy<
-	S extends BuilderState,
+	S extends HarnessCatalogView,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 > = Readonly<{
 	publish: Readonly<{
@@ -242,39 +252,54 @@ export type HarnessPublishPolicy<
 		agents?: HarnessTargetPolicies<S, 'agents', Resources>
 		workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
 	}>
-}> &
-	(keyof MountHostToolBindings<S, Resources> extends never
-		? { readonly hostTools?: never }
-		: { readonly hostTools: MountHostToolBindings<S, Resources> })
+}>
+
+/** Minimal executable definition surface used while declaring a service mount. */
+export type HarnessMountableDefinition = Readonly<{
+	kind: 'harness'
+	requirements: Readonly<{ hostTools: readonly string[] }>
+	contracts: Readonly<{
+		agents: Readonly<Record<string, HarnessTargetContract<any, any, any, any, any, any>>>
+		workflows: Readonly<Record<string, HarnessTargetContract<any, any, any, any, any, any>>>
+	}>
+}>
+
+/** Policy inferred directly from one definition's public root contracts. */
+export type HarnessDefinitionPublishPolicy<
+	D extends HarnessMountableDefinition,
+	Resources extends Record<string, unknown>,
+> = Readonly<{
+	publish: Readonly<{
+		agents?: readonly (keyof D['contracts']['agents'] & string)[]
+		workflows?: readonly (keyof D['contracts']['workflows'] & string)[]
+	}>
+	targets?: Readonly<{
+		agents?: Partial<{
+			[K in keyof D['contracts']['agents'] & string]: HarnessTargetPolicy<D['contracts']['agents'][K], Resources>
+		}>
+		workflows?: Partial<{
+			[K in keyof D['contracts']['workflows'] & string]: HarnessTargetPolicy<D['contracts']['workflows'][K], Resources>
+		}>
+	}>
+}>
 
 /** One immutable Harness definition mounted by a service builder. */
-export type HarnessMount<D extends HarnessDefinition<any> = HarnessDefinition<any>> = Readonly<{
+export type HarnessMount<D extends HarnessDefinition<any, any, any> = HarnessDefinition<any, any, any>> = Readonly<{
 	definition: D
 	policy: HarnessPublishPolicy<HarnessState<D>>
 }>
 
 /** Builder state carried by a portable Harness definition. */
-export type HarnessState<D extends HarnessDefinition<any>> = D extends HarnessDefinition<infer S> ? S : never
+export type HarnessState<D extends HarnessDefinition<any, any, any>> =
+	D extends HarnessDefinition<infer S, any, any> ? S : never
 
 /** Inferred input/output catalog carried by a portable Harness definition. */
-export type HarnessTypes<D extends HarnessDefinition<any>> = D extends {
-	readonly $infer: infer I extends InferTypes<any>
-}
+export type HarnessTypes<D extends HarnessDefinition<any, any, any>> = D extends { readonly $infer: infer I }
 	? I
 	: never
 
 /** Runtime AI configuration required by the service's mounted Harness definition. */
-export type MountedHarnessRuntimeConfig<D extends HarnessDefinition<any>> = Omit<
-	HarnessInstanceConfig<HarnessState<D>, HarnessHostContext>,
+export type MountedHarnessRuntimeConfig<D extends HarnessDefinition<any, any, any>> = Omit<
+	HarnessInstanceConfig<D['requirements']>,
 	'hostTools'
 >
-
-/** Create an address-first command adapter for a Harness host tool. */
-export function commandAsHarnessTool<Resources extends Record<string, unknown> = Record<string, unknown>>(
-	serviceName: string,
-	serviceVersion: string,
-	serviceTarget: string,
-	options: Pick<HarnessCommandToolAdapter<Resources>, 'mapInput' | 'mapOutput'> = {},
-): HarnessCommandToolAdapter<Resources> {
-	return Object.freeze({ kind: 'purista-command', serviceName, serviceVersion, serviceTarget, ...options })
-}

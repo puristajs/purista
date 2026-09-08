@@ -900,6 +900,14 @@ and fails composition before target registration on a mismatch. Portable tools
 have no owner brand. A catalog containing a host-aware tool therefore remains
 reusable only by service builders with the matching lineage.
 
+`mountHarness` performs this composition check through the integrator-only
+`assertHarnessHostToolOwner(definition, owner)` function. Harness authenticates
+the definition and owner token, reads its private compiled graph, and compares
+the exact owner of every host tool in stable tool-id order. The function returns
+no graph or owner metadata. The hosted runtime calls the same check again before
+initializing runtime resources, so the early Framework check and the runtime
+boundary use one implementation.
+
 Core creates one owner token per `ServiceBuilder` lineage and passes it through
 `defineHostTool<Id, Input, Output, PuristaToolContext>(owner, ...)` from
 `@purista/harness/integrator`; its handler remains embedded but absent from

@@ -1,52 +1,201 @@
+import { defineAgent, defineWorkflow, type Schema } from '@purista/harness'
+import { defineHostTool } from '@purista/harness/integrator'
 import { z } from 'zod'
 
-import { HarnessHostToolBuilder } from './hostToolBuilder.js'
+import type { PuristaMetricContext } from '../core/types/PuristaMetrics.js'
+import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 
-describe('HarnessHostToolBuilder', () => {
-	it('builds one synchronous immutable capability declaration', () => {
+const serviceInfo = {
+	serviceName: 'Records',
+	serviceVersion: '1',
+	serviceDescription: 'Records service',
+}
+
+function descriptorValues(root: unknown): unknown[] {
+	const values: unknown[] = []
+	const pending = [root]
+	const seen = new WeakSet<object>()
+	while (pending.length > 0) {
+		const current = pending.pop()
+		if ((typeof current !== 'object' || current === null) && typeof current !== 'function') continue
+		if (seen.has(current)) continue
+		seen.add(current)
+		for (const key of Reflect.ownKeys(current)) {
+			const descriptor = Object.getOwnPropertyDescriptor(current, key)
+			if (!descriptor || !('value' in descriptor)) continue
+			values.push(descriptor.value)
+			pending.push(descriptor.value)
+		}
+	}
+	return values
+}
+
+function exposesUsableOwner(root: unknown): boolean {
+	return descriptorValues(root).some(value => {
+		try {
+			defineHostTool(value as never, 'reflectedOwnerProbe', {
+				description: 'Probe.',
+				input: z.string(),
+				output: z.string(),
+				async handler(_context, input) {
+					return input
+				},
+			})
+			return true
+		} catch {
+			return false
+		}
+	})
+}
+
+describe('ServiceBuilder.defineTool', () => {
+	it('does not expose its owner, registration callback, or mutable declarations through reflection', () => {
+		const builder = new ServiceBuilder(serviceInfo).defineTool('privateBuilder', {
+			description: 'Keep declaration state private.',
+			input: z.string(),
+			output: z.string(),
+		})
+		expect(Reflect.ownKeys(builder)).toEqual([])
+		expect(exposesUsableOwner(builder)).toBe(false)
+		expect(
+			Object.values(Object.getOwnPropertyDescriptors(builder)).some(descriptor => {
+				return 'value' in descriptor && typeof descriptor.value === 'function'
+			}),
+		).toBe(false)
+	})
+
+	it('returns the final frozen Harness host tool and retains exact declared context types', () => {
 		const outputSchema = z.object({ value: z.string() })
 		const payloadSchema = z.object({ id: z.string() })
 		const parameterSchema = z.object({ requestId: z.string() })
 		const eventSchema = z.object({ id: z.string() })
+		const childAgent = defineAgent('childAgent', {
+			input: z.object({ question: z.string() }),
+			output: z.object({ answer: z.string() }),
+			instructions: 'Answer.',
+			prompt: input => ({ role: 'user', content: input.question }),
+		})
+		const childWorkflow = defineWorkflow('childWorkflow', {
+			input: z.object({ task: z.string() }),
+			output: z.object({ result: z.string() }),
+			handler: async ({ input }) => ({ result: input.task }),
+		})
 
-		const definition = new HarnessHostToolBuilder<{ id: string }, { value: string }>()
+		const definition = new ServiceBuilder(serviceInfo)
+			.defineResource<'records', { prefix: string }>()
+			.defineMetric('records.lookups', { kind: 'counter', unit: '{lookup}', description: 'Record lookups' })
+			.defineTool('lookupRecord', {
+				description: 'Look up one record.',
+				input: z.object({ id: z.string() }),
+				output: outputSchema,
+			})
 			.canInvoke('Records', '1', 'load', outputSchema, payloadSchema, parameterSchema)
 			.canConsumeStream('Records', '1', 'watch', z.string(), payloadSchema, parameterSchema, z.string())
 			.canEnqueue('records.audit', payloadSchema, parameterSchema)
 			.canEmit('record.loaded', eventSchema)
-			.setHandler(async (_context, input) => ({ value: input.id }))
-			.getDefinition()
+			.canInvokeAgent('Agents', '1', childAgent.contract)
+			.canInvokeWorkflow('Workflows', '1', childWorkflow.contract)
+			.setHandler(async (context, input) => {
+				expectTypeOf(context.resources.records.prefix).toEqualTypeOf<string>()
+				expectTypeOf(context.metrics).toEqualTypeOf<
+					PuristaMetricContext<{
+						'records.lookups': {
+							kind: 'counter'
+							unit: '{lookup}'
+							description: 'Record lookups'
+						}
+					}>
+				>()
+				const loaded = await context.service.Records['1'].load({ id: input.id }, { requestId: context.tool.callId })
+				const agentResult = await context.agent.Agents['1'].childAgent.run(
+					{ question: loaded.value },
+					{ callId: 'agent-child' },
+				)
+				const workflowResult = await context.workflow.Workflows['1'].childWorkflow.run(
+					{ task: agentResult.answer },
+					{ callId: 'workflow-child' },
+				)
+				// @ts-expect-error progressive nested target clients are intentionally unavailable
+				context.agent.Agents['1'].childAgent.stream
+				// @ts-expect-error undeclared commands are unavailable
+				context.service.Records['1'].remove
+				// @ts-expect-error undeclared streams are unavailable
+				context.stream.Records['1'].remove
+				// @ts-expect-error undeclared queues are unavailable
+				context.queue.enqueue['records.missing']
+				// @ts-expect-error undeclared events are unavailable
+				context.emit('record.missing', { id: input.id })
+				// @ts-expect-error undeclared resources are unavailable
+				context.resources.missing
+				// @ts-expect-error undeclared target clients are unavailable
+				context.workflow.Workflows['1'].missing
+				return { value: workflowResult.result }
+			})
 
 		expect(definition).toMatchObject({
-			kind: 'purista-host-tool',
-			invokes: {
-				Records: { '1': { load: { outputSchema, payloadSchema, parameterSchema } } },
-			},
-			streamInvokes: {
-				Records: {
-					'1': {
-						watch: {
-							chunkSchema: expect.anything(),
-							finalSchema: expect.anything(),
-							payloadSchema,
-							parameterSchema,
-							validateChunk: true,
-							validateFinal: true,
-						},
-					},
-				},
-			},
-			queueInvokes: { 'records.audit': { payloadSchema, parameterSchema } },
-			emitList: { 'record.loaded': eventSchema },
+			kind: 'tool',
+			id: 'lookupRecord',
+			description: 'Look up one record.',
 		})
 		expect(Object.isFrozen(definition)).toBe(true)
-		expect(Object.isFrozen(definition.invokes.Records?.['1']?.load)).toBe(true)
-		expect(Object.isFrozen(definition.queueInvokes['records.audit'])).toBe(true)
+		expect(exposesUsableOwner(definition)).toBe(false)
+		expect(Object.keys(definition).sort()).toEqual(['description', 'handler', 'id', 'input', 'kind', 'output'])
+		expect('getDefinition' in definition).toBe(false)
+		expect('invokes' in definition).toBe(false)
+		expectTypeOf(definition.$infer.input).toEqualTypeOf<{ id: string }>()
+		expectTypeOf(definition.$infer.output).toEqualTypeOf<{ value: string }>()
+		const targetBuilder = new ServiceBuilder(serviceInfo).defineTool('aliasedChild', {
+			description: 'Invalid.',
+			input: z.string(),
+			output: z.string(),
+		})
+		const invalidAliasArguments: Parameters<typeof targetBuilder.canInvokeAgent> = [
+			'Agents',
+			'1',
+			// @ts-expect-error target aliases are removed; serviceTarget is always contract.id
+			'alias',
+			childAgent.contract,
+		]
+		void invalidAliasArguments
 	})
 
-	it('fails immediately when no handler was set', () => {
-		expect(() => new HarnessHostToolBuilder<string, string>().getDefinition()).toThrow(
-			'A Harness host tool requires setHandler(...) before getDefinition().',
+	it('rejects copied and wrong-kind nested target contracts before registration', () => {
+		const agent = defineAgent('authenticAgent', { instructions: 'Answer.' })
+		const workflow = defineWorkflow('authenticWorkflow', {
+			async handler() {
+				return 'done'
+			},
+		})
+		const builder = new ServiceBuilder(serviceInfo).defineTool('targetCheck', {
+			description: 'Check targets.',
+			input: z.string(),
+			output: z.string(),
+		})
+		expect(() => builder.canInvokeAgent('Agents', '1', { ...agent.contract } as never)).toThrow(
+			'authentic Harness target contract',
 		)
+		expect(() => builder.canInvokeAgent('Agents', '1', workflow.contract as never)).toThrow(
+			'requires an agent contract',
+		)
+		expect(() => builder.canInvokeWorkflow('Workflows', '1', agent.contract as never)).toThrow(
+			'requires a workflow contract',
+		)
+	})
+
+	it('rejects schemas that are not a defined model JSON boundary', () => {
+		const builder = new ServiceBuilder(serviceInfo)
+		const validationOnly: Schema<string, string> = z.string()
+		builder.defineTool('validationOnlyTool', {
+			description: 'Invalid model input.',
+			// @ts-expect-error host-tool input must implement ModelSchema JSON projection
+			input: validationOnly,
+			output: z.string(),
+		})
+		builder.defineTool('invalidTool', {
+			description: 'Invalid.',
+			// @ts-expect-error optional root input is not a defined model JSON boundary
+			input: z.string().optional(),
+			output: z.string(),
+		})
 	})
 })
