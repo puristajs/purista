@@ -40,8 +40,9 @@ application dependencies.
 `@purista/core@4.0.0` has a normal runtime dependency on
 `@purista/harness@^4.0.0`; no separate integration package exists. Core imports
 only public provider-neutral SPI and runtime symbols. OpenAI, Anthropic, Google,
-Bedrock, Azure, storage, memory, sandbox, MCP transport, and UI adapters remain
-separate application-selected packages. Release verification first packs and
+Bedrock, Azure, storage, memory, sandbox, MCP transport, and the server-side
+`@purista/harness-ai-sdk-ui` adapter remain application-selected packages.
+Release verification first packs and
 installs Harness v4 tarballs into PURISTA without workspace links.
 Registry-clean downstream lockfile and scaffold proofs run only after the
 corresponding Harness and PURISTA packages are published.
@@ -155,11 +156,64 @@ service registers a target. Startup failure unregisters partial registrations
 and closes owned resources. Shutdown is idempotent and follows Harness
 ownership contracts.
 
+Before initialization, the mounted runtime consumes the complete frozen target
+projection set and validates exact one-to-one coverage with
+`visitHostedHarnessTargets`, root/dependency visibility, target identity,
+address uniqueness, policy ownership, completed-event collisions, export
+digests, route revisions, and command/stream address collisions. Validation is
+effect-free. Only after the entire set passes does Core create one dispatcher,
+instantiate one runtime through `instantiateHostedHarness`, and begin route
+registration. Completed-event contracts are composition metadata, not runtime
+registrations. Core never derives a schema, target export, export digest, route
+revision, or completed-event contract in the mounted runtime.
+
+For every root, Core registers one public aggregate receiver and one strict
+dual-envelope stream receiver at the root's normal address. The aggregate
+receiver accepts only a public root invocation. The stream receiver first
+validates a closed discriminated union before any guard, Harness, EventBridge,
+storage, or other effect: a public root envelope calls `streamHosted` and
+applies that root's policies; an authenticated nested envelope targeting that
+same root calls `streamDispatched` and applies no root `beforeGuards`,
+`afterGuards`, `successEvent`, queue, or durable-resume policy. Core does not
+create an additional internal address for a root. For every dependency-only
+target, it registers one internal nested-only stream receiver that calls
+`streamDispatched` and rejects a public root envelope before effects. Reusing
+the same target id for two logical addresses remains a composition error even
+when the targets would have different digests.
+
+The receiver matrix is normative:
+
+| mounted target | Core receiver | accepted envelope | Harness entry point | root policy |
+| --- | --- | --- | --- | --- |
+| explicit root | aggregate | public root only | `runHosted` | before/after guards, durable resume, completed event |
+| explicit root | aggregate | nested dispatch | reject before effects | none |
+| explicit root | stream | public root | `streamHosted` | before/after guards, durable resume, completed event |
+| explicit root | same stream receiver | nested dispatch | `streamDispatched` | none |
+| dependency only | internal stream | nested dispatch only | `streamDispatched` | none |
+| dependency only | internal stream | public root | reject before effects | none |
+
+All receiver branches require matching target export digest, trusted identity
+and W3C trace headers, deadline and cancellation propagation, and exact
+direct-target run/parent correlation. Fresh input is validated and transformed
+exactly once by the receiver; durable resume restores validated input and never
+re-runs the transform. Missing, duplicate, mismatched, descendant-only, or
+post-terminal direct terminals fail the protocol, and aggregate and stream
+completion use the same authoritative frozen outcome.
+
+If any target registration fails, Core unregisters every registration
+made by that startup attempt in reverse order and closes the hosted Harness.
+Shutdown first stops new target ingress, cancels active streams, unregisters
+root and dependency routes, and closes the hosted Harness exactly once; only
+afterward does normal service resource and EventBridge shutdown continue.
+Repeated shutdown is idempotent, and cleanup errors preserve the original
+startup or execution failure as the primary error.
+
 ## 4. Address-first agents and workflows
 
 Each explicit Harness agent or workflow root has the normal public
-service/version/target address. Each executable dependency needed for workflow
-or subagent dispatch also has an exact Core-owned internal route. All PURISTA
+service/version/target address, and nested dispatch to that root uses its same
+stream address. Each dependency-only executable needed for workflow or
+subagent dispatch has an exact Core-owned internal route. All PURISTA
 root calls, workflow calls, model-selected subagent calls, and host-tool nested
 target calls go through EventBridge, including same-service and same-process
 calls. No client, dispatcher, workflow, tool, or mount runtime has a direct
@@ -167,19 +221,115 @@ local-execution fallback.
 
 Portable and host-aware model tool handlers execute inside the receiving
 Harness run; PURISTA operations declared by a host-aware tool use EventBridge.
-The receiver is the input trust boundary. A public-root receiver validates and
-transforms the raw logical input exactly once with the mounted root contract,
-applies that root's business guards to the validated value, calls the root-only
-Harness `runHosted` or `streamHosted` entry point, validates the outcome, and
-applies after guards. An internal nested receiver authenticates the reserved
-Core dispatch envelope, resolves its exact target from the private compiled
-dependency closure, validates and transforms a fresh delivery exactly once,
-and calls Harness `streamDispatched`. A resume delivery is checked against its
+The receiver is the input trust boundary. A public aggregate or public branch
+of a root stream receiver validates and transforms a fresh raw logical input
+exactly once with the mounted root contract, then supplies both `wireInput` and
+the validated `input` to `runHosted` or `streamHosted`. A resume supplies the
+same `wireInput`, forbids `input`, and lets Harness compare the wire value and
+restore the prior validated input from trusted durable state. The nested branch
+of that root stream receiver and each
+dependency-only internal receiver authenticate the reserved Core dispatch
+envelope, resolve the exact target from the private compiled dependency closure,
+validate and transform a fresh delivery exactly once, and call
+`streamDispatched` without root policy. A resume delivery is checked against its
 stored wire input and is not transformed again. The EventBridge dispatcher
 transports raw logical input and never validates or transforms it. Every hosted
 Harness entry point receives the appropriate already validated value or strict
 resume union, verifies the exact contract identity, and does not repeat input
 validation or transformation.
+
+Every public hosted root request has this strict union and required per-request
+authorization callback:
+
+```ts
+type HostedTargetAuthorizationRequest<
+  Target extends AnyHarnessTargetContract,
+> = Readonly<{
+  delivery: 'fresh' | 'resume'
+  target: Target
+  input: HarnessValidatedTargetInput<Target>
+}>
+
+type HostedTargetAuthorizer<
+  Target extends AnyHarnessTargetContract,
+> = (
+  request: HostedTargetAuthorizationRequest<Target>,
+) => void | Promise<void>
+
+type HostedFreshInvokeOptions<
+  Target extends AnyHarnessTargetContract,
+> = Omit<HostedInvokeOptions<Target>, 'resume' | 'resumeIdentity'> &
+  Readonly<{ resume?: never; resumeIdentity?: never }>
+
+type HostedResumeInvokeOptions<
+  Target extends AnyHarnessTargetContract,
+> = Omit<
+  HostedInvokeOptions<Target>,
+  'resume' | 'resumeIdentity' | 'idempotencyKey'
+> & Readonly<{
+  resume: HarnessTargetApprovalResume<Target>
+  resumeIdentity?: 'current-caller' | 'stored-run-owner'
+  idempotencyKey?: never
+}>
+
+type HostedTargetRequest<
+  Target extends AnyHarnessTargetContract,
+  HostInvocation,
+> =
+  | Readonly<{
+      delivery: 'fresh'
+      target: Target
+      wireInput: HarnessTargetInput<Target>
+      input: HarnessValidatedTargetInput<Target>
+      invokeOptions: HostedFreshInvokeOptions<Target>
+      hostInvocation: HostInvocation
+      authorize: HostedTargetAuthorizer<Target>
+    }>
+  | Readonly<{
+      delivery: 'resume'
+      target: Target
+      wireInput: HarnessTargetInput<Target>
+      input?: never
+      invokeOptions: HostedResumeInvokeOptions<Target>
+      hostInvocation: HostInvocation
+      authorize: HostedTargetAuthorizer<Target>
+    }>
+```
+
+Core creates `authorize` for each request and closes over only that root's
+business `beforeGuards` and current authenticated reviewer context. The
+`HostedTargetAuthorizer` receives exactly `{delivery,target,input}`; neither
+`HostInvocation` nor stored owner identity is exposed through its argument.
+Harness invokes it once with the fresh or restored deeply frozen validated
+input.
+
+Every resume mode, `current-caller` and `stored-run-owner`, first validates the
+strict request, loads and validates the addressed run, session, target, original
+wire input, immutable identity, and continuation, compares the supplied wire
+input, and restores the same deeply frozen `RunRecord.validatedInput`. That
+field is required and immutable for agent and workflow runs, is persisted
+atomically beside the canonical pre-transform `RunRecord.input`, and is never
+reconstructed by rerunning the target input schema. The selected mode's complete
+identity comparison then runs before `authorize`; stored-run-owner also requires
+its exact same-tenant check. A resume request forbids an own
+`idempotencyKey` property even when its value is `undefined`.
+
+After asynchronous authorization returns, Harness rechecks abort and absolute
+deadline and re-reads the exact immutable run revision it authorized. A terminal
+approval-receipt replay revalidates that same terminal revision and receipt,
+then returns the stored terminal outcome without acquiring a lease, executing,
+transforming input, or publishing another event. A changed terminal revision,
+receipt, target, input, identity, or session fails before replay. A nonterminal
+continuation instead calls `acquireRun` with the optimistic revision and
+checkpoint expectation; the returned under-lease record must match the same
+immutable fields and validated input before execution. A concurrent loser may
+have completed authorization but can never execute or replay a changed
+terminal. Business guards therefore must be safe to retry and cannot rely on
+exactly-once side effects. Authorization runs before runtime, model, tool,
+memory, sandbox, workspace, or event effects and before a run/stream start is
+published. A callback `HandledError` propagates unchanged through Core; an
+unknown throw or rejection is sanitized. Core `afterGuards` remain terminal
+postconditions outside Harness and are never passed through this callback.
 
 The Framework propagates trusted tenant id, principal id, trace/correlation
 context, deadlines, session/run ancestry, idempotency, and handled errors.
@@ -243,59 +393,215 @@ For example, the Support v1 agent above produces:
 ```ts
 // generated file; do not edit
 import {
+  createGeneratedHarnessSchema,
   createRemoteHarnessTargetContract,
   harnessExecutionEventTypesV1,
+  type SerializedHarnessTargetExportV1,
 } from '@purista/core'
 
-export const supportTargetContract = createRemoteHarnessTargetContract({
-  schemaVersion: 1,
-  address: {
-    serviceName: 'Support',
-    serviceVersion: '1',
-    serviceTarget: 'support',
+const serializedTarget = {
+  targetName: 'support',
+  kind: 'agent',
+  inputSchema: { type: 'string' },
+  validatedInputSchema: { type: 'string' },
+  outputSchema: { type: 'string' },
+  updateSchema: { type: 'string' },
+  interruptSchema: false,
+  invocation: {
+    aggregate: true,
+    stream: true,
+    resumableInterrupts: [],
   },
-  target: {
-    targetName: 'support',
-    kind: 'agent',
-    inputSchema: { type: 'string' },
-    validatedInputSchema: { type: 'string' },
-    outputSchema: { type: 'string' },
-    updateSchema: { type: 'string' },
-    interruptSchema: false,
-    invocation: {
-      aggregate: true,
-      stream: true,
-      resumableInterrupts: [],
-    },
-    stream: {
-      protocol: 'harness-execution-events-v1',
-      eventTypes: harnessExecutionEventTypesV1,
-      outputUpdates: ['text-delta'],
-    },
-    exportDigest: 'sha256:4f3a…',
+  stream: {
+    protocol: 'harness-execution-events-v1',
+    eventTypes: harnessExecutionEventTypesV1,
+    outputUpdates: ['text-delta'],
   },
-})
+  exportDigest: 'sha256:4f3a…',
+} as const satisfies SerializedHarnessTargetExportV1
+
+const targetAddress = {
+  serviceName: 'Support',
+  serviceVersion: '1',
+  serviceTarget: 'support',
+} as const
+
+const inputSchema =
+  createGeneratedHarnessSchema<string>(serializedTarget.inputSchema)
+const validatedInputSchema =
+  createGeneratedHarnessSchema<string>(serializedTarget.validatedInputSchema)
+const outputSchema =
+  createGeneratedHarnessSchema<string>(serializedTarget.outputSchema)
+
+export const supportTargetContract =
+  createRemoteHarnessTargetContract({
+    schemaVersion: 1,
+    address: targetAddress,
+    target: serializedTarget,
+    schemas: {
+      input: inputSchema,
+      validatedInput: validatedInputSchema,
+      output: outputSchema,
+    },
+  })
 ```
 
-The generated call carries the complete exported wire-input, validated-input,
-output, update, interrupt, invocation, and stream contract; the abbreviated
-digest above stands for the full 64 lowercase hexadecimal characters. The
-existing client generator compiles the JSON Schemas into its
-Standard Schema validators and emits the exact TypeScript types. The generated
-module imports only `@purista/core` and generated schema/type helpers; it has no
-import into `src/service/**`. `createRemoteHarnessTargetContract` is a pure Core
-hydration function intended for generated files. It verifies the embedded
-schemas and digest, freezes the value, adds a module-private Core brand, and
-returns a `RemoteHarnessTargetContract` whose `$infer` comes from the generated
-contract. It is not another builder, definition factory, registry, or executable
-Harness target. Hand-authored calls to the hydration function are unsupported,
-and checked generated files are always overwritten.
+`SerializedHarnessTargetExportV1` is the closed raw-JSON transport and export
+shape defined in section 9. It is distinct from every generated Standard Schema
+wrapper. The abbreviated digest above stands for the full 64 lowercase
+hexadecimal characters. The generated module imports only `@purista/core` and
+generated type helpers; it has no import into `src/service/**`.
+
+Core exposes this exact validation-only wrapper for generated artifacts:
+
+```ts
+type GeneratedHarnessSchema<Value extends JsonValue> =
+  StandardSchemaV1<Value, Value> & StandardJSONSchemaV1<Value, Value>
+
+declare function createGeneratedHarnessSchema<Value extends JsonValue>(
+  jsonSchema: JSONSchema,
+): GeneratedHarnessSchema<Value>
+```
+
+`GeneratedHarnessSchema<Value>` is exactly a validation-only
+`ModelSchema<Value, Value>`. The factory canonically clones and deeply freezes
+the supplied JSON Schema once. Both Standard JSON Schema directions return that
+same canonical frozen projection, and Standard Schema `validate` accepts a JSON
+value only when the projection accepts it and returns the identical input
+reference. It performs no transform, coercion, default insertion,
+normalization, or object recreation. It has no output schema distinct from its
+input schema. In particular, the generated artifact does not attempt to recreate
+the producer's possibly transforming input Standard Schema. The producer's
+local mounted contract validates and transforms fresh wire input exactly once,
+inside the receiver. A resume uses stored validated input and does not run that
+transform again. Core does not install the generated input wrapper as an
+EventBridge sender-side payload schema; doing so would add a second validation
+boundary and could transform before the receiver.
+
+The hydration source and result are exact:
+
+```ts
+type RemoteHarnessSerializedTargetV1<
+  Kind extends HarnessTargetKind,
+  Id extends string,
+  Updates extends HarnessOutputUpdateKind,
+  Interrupts extends readonly HarnessInterruptKind[],
+> = Omit<SerializedHarnessTargetExportV1, 'queue'> & Readonly<{
+    targetName: Id
+    kind: Kind
+    invocation: Readonly<{
+      aggregate: true
+      stream: true
+      resumableInterrupts: Interrupts
+    }>
+    stream: Readonly<{
+      protocol: 'harness-execution-events-v1'
+      eventTypes: typeof harnessExecutionEventTypesV1
+      outputUpdates: Updates extends 'none' ? readonly [] : readonly [Updates]
+    }>
+}>
+
+type AnyRemoteHarnessSerializedTargetV1 = RemoteHarnessSerializedTargetV1<
+  HarnessTargetKind,
+  string,
+  HarnessOutputUpdateKind,
+  readonly HarnessInterruptKind[]
+>
+
+type RemoteHarnessTargetContractSourceBaseV1 = Readonly<{
+  schemaVersion: 1
+  address: HarnessTargetAddress
+  target: AnyRemoteHarnessSerializedTargetV1
+  schemas: Readonly<{
+    input: ModelSchema
+    validatedInput: ModelSchema
+    output: ModelSchema
+  }>
+}>
+
+type RemoteHarnessTargetContractSourceV1 =
+  RemoteHarnessTargetContractSourceBaseV1 &
+  Readonly<{ target: Readonly<{ queue?: never }> }>
+
+type QueuedRemoteHarnessTargetContractSourceV1 =
+  RemoteHarnessTargetContractSourceBaseV1 &
+  Readonly<{
+    target: Readonly<{ queue: Readonly<{ name: string }> }>
+  }>
+
+type RemoteHarnessTargetSourceAddressAgreement<
+  S extends RemoteHarnessTargetContractSourceBaseV1,
+> = Readonly<{
+  address: S['address'] & Readonly<{
+    serviceTarget: S['target']['targetName']
+  }>
+}>
+
+type RemoteHarnessTargetAddressFor<
+  S extends RemoteHarnessTargetContractSourceBaseV1,
+> = Readonly<{
+  serviceName: S['address']['serviceName']
+  serviceVersion: S['address']['serviceVersion']
+  serviceTarget: S['target']['targetName']
+}>
+
+type RemoteHarnessTargetUpdatesFor<
+  S extends RemoteHarnessTargetContractSourceBaseV1,
+> = S['target']['stream']['outputUpdates'] extends readonly []
+  ? 'none'
+  : S['target']['stream']['outputUpdates'] extends readonly [
+        infer Update extends Exclude<HarnessOutputUpdateKind, 'none'>,
+      ]
+    ? Update
+    : never
+
+type GeneratedHarnessInferenceForSource<
+  S extends RemoteHarnessTargetContractSourceBaseV1,
+> = HarnessTargetInferenceFor<
+  InferIn<S['schemas']['input']> & JsonValue,
+  Infer<S['schemas']['validatedInput']> & JsonValue,
+  Infer<S['schemas']['output']> & JsonValue,
+  RemoteHarnessTargetUpdatesFor<S>,
+  S['target']['invocation']['resumableInterrupts']
+>
+
+declare function createRemoteHarnessTargetContract<
+  const S extends RemoteHarnessTargetContractSourceV1,
+>(
+  source: S & RemoteHarnessTargetSourceAddressAgreement<S>,
+): UnqueuedRemoteHarnessTargetContract<S>
+
+declare function createRemoteHarnessTargetContract<
+  const S extends QueuedRemoteHarnessTargetContractSourceV1,
+>(
+  source: S & RemoteHarnessTargetSourceAddressAgreement<S>,
+): QueuedRemoteHarnessTargetContract<S>
+```
+
+Hydration requires closed plain JSON for `address` and `target`, exact
+address/target-kind/id agreement, factory-authentic validation-only generated
+schema wrappers for input, validated input, and output, exact
+wrapper/serialized-schema agreement, exact presence and literal name agreement
+for `queue`, and a valid
+export digest before returning. It clones and freezes the raw JSON, adds a
+module-private Core brand, and returns an immutable remote
+contract whose frozen phantom `$infer` is exactly the generated public
+`HarnessTargetInferenceFor`, including `validatedInput`, `update`, and `interrupt`.
+Those phantom types come from generator-owned TypeScript declarations, not from
+a second runtime transform. `createRemoteHarnessTargetContract` is a pure Core
+hydration function intended for generated files. It is not another builder,
+definition factory, registry, or executable Harness target. Hand-authored calls
+are unsupported, and checked generated files are always overwritten.
 
 Its public type is an addressed refinement of the sole Harness contract type,
 not a parallel inference contract:
 
 ```ts
-declare const remoteHarnessTargetContractBrand: unique symbol
+declare class RemoteHarnessTargetAuthenticity<
+  QueueName extends string | null,
+> {
+  private readonly queueName: QueueName
+}
 
 type HarnessTargetAddress = Readonly<{
   serviceName: string
@@ -304,20 +610,134 @@ type HarnessTargetAddress = Readonly<{
 }>
 
 type RemoteHarnessTargetContract<
-  C extends AnyHarnessTargetContract,
-  Address extends HarnessTargetAddress,
-> = C & Readonly<{
-  address: Address
+  S extends RemoteHarnessTargetContractSourceBaseV1,
+  QueueName extends string | null,
+> = HarnessTargetContract<
+  S['target']['kind'],
+  S['target']['targetName'],
+  S['schemas']['input'],
+  S['schemas']['output'],
+  RemoteHarnessTargetUpdatesFor<S>,
+  S['target']['invocation']['resumableInterrupts'],
+  GeneratedHarnessInferenceForSource<S>
+> & RemoteHarnessTargetAuthenticity<QueueName> & Readonly<{
+  address: RemoteHarnessTargetAddressFor<S>
   exportDigest: `sha256:${string}`
-  [remoteHarnessTargetContractBrand]: true
+}>
+
+type UnqueuedRemoteHarnessTargetContract<
+  S extends RemoteHarnessTargetContractSourceV1,
+> = RemoteHarnessTargetContract<S, null> & Readonly<{ queue?: never }>
+
+type QueuedRemoteHarnessTargetContract<
+  S extends QueuedRemoteHarnessTargetContractSourceV1,
+> = RemoteHarnessTargetContract<
+  S,
+  S['target']['queue']['name']
+> & Readonly<{
+  queue: Readonly<{ name: S['target']['queue']['name'] }>
 }>
 ```
 
-The generated `C` owns the same `$infer` and discriminants as its local
-`HarnessTargetContract`; Core and clients keep using the Harness-exported
-outcome and event helper types. The remote brand proves the value came through
-the generated hydration boundary inside the current process. It is never a
-wire credential.
+The overload inference is verified with TypeScript 6.0.3 using one concrete
+generated source. This proof deliberately gives wire input, validated input,
+and output different types and retains the literal queued capability:
+
+```ts
+type Wire = Readonly<{ raw: string }>
+type Validated = Readonly<{ normalized: number }>
+type Output = Readonly<{ accepted: boolean }>
+
+declare const wireSchema: GeneratedHarnessSchema<Wire>
+declare const validatedSchema: GeneratedHarnessSchema<Validated>
+declare const resultSchema: GeneratedHarnessSchema<Output>
+declare const queuedTargetExport:
+  RemoteHarnessSerializedTargetV1<
+    'agent',
+    'typedSupport',
+    'object-snapshot',
+    readonly ['tool-approval']
+  > & Readonly<{
+    queue: Readonly<{ name: 'support-jobs' }>
+  }>
+
+const typedSupport = createRemoteHarnessTargetContract({
+  schemaVersion: 1,
+  address: {
+    serviceName: 'Support',
+    serviceVersion: '1',
+    serviceTarget: 'typedSupport',
+  },
+  target: queuedTargetExport,
+  schemas: {
+    input: wireSchema,
+    validatedInput: validatedSchema,
+    output: resultSchema,
+  },
+} as const)
+
+type Exact<Left, Right> =
+  [Left] extends [Right]
+    ? [Right] extends [Left] ? true : false
+    : false
+type Expect<Condition extends true> = Condition
+
+type _WireIsExact = Expect<
+  Exact<HarnessTargetInput<typeof typedSupport>, Wire>
+>
+type _ValidatedIsExact = Expect<
+  Exact<HarnessValidatedTargetInput<typeof typedSupport>, Validated>
+>
+type _OutputIsExact = Expect<
+  Exact<HarnessTargetOutput<typeof typedSupport>, Output>
+>
+type _QueueCapabilityIsExact = Expect<
+  Exact<typeof typedSupport.queue.name, 'support-jobs'>
+>
+type _QueuedCapabilityIsNominal = Expect<
+  Exact<
+    typeof typedSupport extends RemoteHarnessTargetAuthenticity<
+      infer QueueName
+    > ? QueueName : never,
+    'support-jobs'
+  >
+>
+```
+
+The seventh Harness contract generic is used directly; hydration does not use
+an `Omit`/intersection replacement for `$infer` and accepts no caller-supplied
+inference projection. Each overload infers one concrete generated source and
+extracts its exact `S['schemas']['input']`, `S['schemas']['validatedInput']`,
+and `S['schemas']['output']` witnesses directly; it never constrains an invariant generated
+schema through a broad generated-schema instantiation. The Harness-exported
+`HarnessTargetInferenceFor` helper then derives wire input, validated input,
+output, update, and interrupt from those witnesses plus the literal update and
+interrupt declarations. A mismatched output schema/value, update mode/value,
+or interrupt tuple/value therefore fails at the source boundary rather than
+being repaired by a handwritten inference argument. The hydrator repeats the
+corresponding closed export/schema checks at runtime. It validates the
+generated validated-input witness against `validatedInputSchema` but never
+executes that witness as the producer's transform.
+
+The separate queued and unqueued overloads are equally exact; there is no broad
+or default queue generic and no `never` conditional that can collapse an
+unqueued contract incorrectly. A serialized export with `queue`
+hydrates a nominal remote contract with the same frozen literal `queue.name`
+and records that capability in the remote factory's package-private authentic
+record; its generated client exposes `enqueue`. An export without `queue`
+produces a remote contract with no queue member, no recorded capability, and no
+enqueue operation. Builder validation requires either the exact local WeakMap
+reference or the nominal remote type plus its recorded WeakMap capability; a
+structural `{queue}` member never grants enqueue. Missing, additional, copied,
+or mismatched queue metadata fails before the contract can reach a builder or
+dispatcher.
+
+The generated inference owns the same exact `$infer` and discriminants as its
+local `HarnessTargetContract`; Core and clients keep using the Harness-exported
+outcome and event helper types. A non-exported class private brand provides the
+nominal type boundary, while a module-private WeakMap proves at runtime that the
+value came through the generated hydration boundary in the current process.
+Neither is a wire credential.
 
 The remote declaration contains its address, so the cross-service form is
 concise and cannot pair a valid contract with another address:
@@ -331,23 +751,22 @@ const command = apiV1ServiceBuilder
   })
 ```
 
-`canInvokeWorkflow(remoteContract)` is identical for a workflow. The local
-three-argument overload remains useful when producer and consumer share the
-direct Harness root contract. Both overloads add one exact address-first
-outgoing dependency and infer clients from the contract's `$infer`; neither
-imports or registers executable code.
+`canInvokeWorkflow(remoteContract)` is identical for a workflow. A generated
+remote contract's exact queue member controls whether its client also has
+`enqueue`. For a producer-local root, the three-argument overload accepts either
+the original authentic target contract or an authentic
+`QueuedHarnessTargetReference`; only the latter adds enqueue. These overloads
+add one exact address-first outgoing dependency and infer clients from the
+contract's `$infer`; neither imports or registers executable code.
 
-Every exported root has an `exportDigest`. Core computes it as lowercase
-SHA-256 over the UTF-8 RFC 8785 canonical JSON representation of
-`['purista.harness-target-export.v1', addressedTargetExport]`. The closed
-`addressedTargetExport` contains the complete service/version/target address
-and the root export from section 9, excluding only `exportDigest`. Absent
-optional members are omitted and ordered arrays retain contract order. The
-digest therefore changes when any public schema, update, interrupt, invocation,
-stream, queue, kind, or address contract changes.
+Every exported root has the `exportDigest` already stored in its
+`MountedHarnessTargetProjection`. Its exact canonical preimage is defined in
+section 5. Absent optional members are omitted and ordered arrays retain
+contract order. The digest therefore changes when any public schema, update,
+interrupt, invocation, stream, queue, kind, or address contract changes.
 
-For a dependency-only child target, mount compilation calculates the same
-addressed contract digest for its private route. That digest is shared only by
+For a dependency-only child target, projection computes the same addressed
+contract digest for its private route. That digest is shared only by
 Core-authored nested dispatch and never appears in service exports, generated
 artifacts, ClientBuilder output, or root invocation declarations. Knowing a
 digest does not promote the child or make its internal EventBridge route accept
@@ -358,12 +777,15 @@ adds only the public `exportDigest` to a reserved invocation-contract envelope;
 it never serializes a hidden Harness identity, Core brand, definition token, or
 implementation object. A public receiver resolves the local mounted root by
 the EventBridge address, compares the supplied digest with that root's current
-export digest, validates and transforms input with its local contract, applies
-the root guards, and calls `runHosted` or `streamHosted` with the
-receiver-local Harness identity. An internal nested receiver instead accepts
-only the authenticated reserved dispatch envelope, resolves its exact compiled
-target, and calls `streamDispatched`; it never promotes that target to a public
-root or calls a root-only hosted entry point. An unknown public address is
+export digest, builds the strict fresh/resume request, supplies the root before
+guards through the required per-request `authorize` callback, and calls
+`runHosted` or `streamHosted` with the receiver-local Harness identity. Only the
+fresh branch validates and transforms wire input; the resume branch forwards
+the original wire value and lets Harness restore validated input. A nested
+envelope accepted by a root stream
+receiver, or by a dependency-only internal receiver, resolves the exact compiled
+target and calls `streamDispatched` without root policy; it never promotes a
+dependency to a public root. An unknown public address is
 `404`; a digest mismatch is a handled `409` `harness_contract_mismatch` before
 guard, handler, tool, or model effects. Digest matching detects generated-client
 drift and is not authentication or authorization. Trusted identity and
@@ -371,8 +793,8 @@ business guards remain authoritative.
 
 The Core dispatcher owns an immutable local binding table keyed by each direct
 contract's hidden Harness identity or generated remote contract's Core brand.
-Mount compilation binds each executable contract in
-the private compiled dependency closure to one service/version/target route.
+It consumes the finalized bindings from the frozen mounted projections and
+binds each visited executable contract to one service/version/target route.
 Only explicit root contracts are exposed for application declarations, service
 metadata, and generated clients. Builder declarations such as
 `canInvokeAgent` and `canInvokeWorkflow` add their exact remote root-contract
@@ -417,7 +839,9 @@ supplies the session id returned by the preceding turn. Harness binds the
 projected tenant/principal identity to that session and fails closed before
 execution when any later call or resume attempts to reuse it with a different
 identity. The logical payload and public parameter never contain the root
-invocation id or trusted identity.
+invocation id or trusted identity. This transport invocation id is not a
+Harness run id and is never compared with `outcome.runId`; Harness alone creates
+or restores the root run id.
 
 Aggregate EventBridge replies contain the exact
 `HarnessTargetRunOutcome<Contract>` imported from Harness inside a frozen
@@ -499,25 +923,36 @@ type DirectHarnessTargetClient<C extends AnyHarnessTargetContract> = Readonly<{
   ): Promise<HarnessExecutionStream<C>>
 }>
 
-type HarnessTargetClient<C extends AnyHarnessTargetContract> =
-  DirectHarnessTargetClient<C> &
-  (C extends { readonly queue: { readonly name: string } }
-    ? Readonly<{
-        enqueue(
-          input: C['$infer']['input'],
-          parameter?: HarnessInvocationParameter,
-          options?: HarnessEnqueueOptions,
-        ): Promise<HarnessTargetQueueEnqueueResult>
-      }>
-    : unknown)
+type QueuedHarnessTargetClient<
+  C extends AnyHarnessTargetContract,
+> = DirectHarnessTargetClient<C> & Readonly<{
+  enqueue(
+    input: C['$infer']['input'],
+    parameter?: HarnessInvocationParameter,
+    options?: HarnessEnqueueOptions,
+  ): Promise<HarnessTargetQueueEnqueueResult>
+}>
+
+type HarnessTargetClient<Source> =
+  Source extends QueuedHarnessTargetReference<infer C, string>
+    ? QueuedHarnessTargetClient<C>
+    : Source extends AnyHarnessTargetContract &
+        RemoteHarnessTargetAuthenticity<infer QueueName>
+      ? QueueName extends string
+        ? QueuedHarnessTargetClient<Source>
+        : DirectHarnessTargetClient<Source>
+      : Source extends AnyHarnessTargetContract
+        ? DirectHarnessTargetClient<Source>
+        : never
 ```
 
 `HarnessEnqueueOptions` is the normal PURISTA queue enqueue options with
 `queueName`, `payload`, and `parameter` omitted because the generated client
-already supplies those values. The conditional branch is used identically for
-local and ClientBuilder-generated remote contracts: only a contract carrying
-the exported queue marker receives `enqueue`, and its return type is exactly
-`HarnessTargetQueueEnqueueResult`.
+already supplies those values. The conditional branches inspect only the
+non-exported nominal authenticity class of a hydrated remote contract or the
+non-exported nominal local queued reference. They never infer enqueue from a
+structural `queue` property. Only an authentic queued source receives
+`enqueue`, whose return type is exactly `HarnessTargetQueueEnqueueResult`.
 
 Internally the corresponding EventBridge handle is typed as
 `StreamHandle<HarnessTargetExecutionEvent<C>,
@@ -648,14 +1083,155 @@ SPI exposes Core only the typed private closure metadata required for host-tool
 binding and internal EventBridge child routing; it does not expose a mutable
 registry or an application invocation surface.
 
+Core obtains executable target identity only through the integrator-only
+`visitHostedHarnessTargets(definition, visitor)` function. Harness authenticates
+the exact definition through its package-private compiled blueprint, then visits
+each original agent and workflow target contract in deterministic kind/id order.
+Each visit contains only the exact target contract and `visibility: 'root' |
+'dependency'`; root visibility is decided by exact contract identity against the
+definition's explicit roots. A copied, reflected, foreign, or non-Harness
+definition fails before the visitor runs. The integrator subpath is trusted host
+TCB for Framework integration and is not a supported application API. That
+package boundary is not claimed to be a JavaScript security sandbox: an honest
+host callback may retain an entry it receives. The API nevertheless exposes no
+compiled graph, index, lookup function, mutable registry, handler, tool,
+definition owner token, or invocation helper. It is exported only from
+`@purista/harness/integrator` and never from the Harness root.
+
+The visitor runs once for every target and never after its callback throws. A
+callback failure propagates unchanged and aborts projection before effects. An
+authenticated definition that yields no executable target is an invalid mount
+and fails before dispatcher creation or registration.
+
+Core consumes those visits once to create exactly one projection of this
+normative shape per target:
+
+```ts
+type MountedHarnessTargetPolicyDescriptor = Readonly<{
+  beforeGuardKeys: readonly string[]
+  afterGuardKeys: readonly string[]
+  durableResume: 'stored-run-owner' | null
+  successEvent: string | null
+  queueName: string | null
+}>
+
+type MountedHarnessCompletedEvent<
+  C extends AnyHarnessTargetContract,
+> = Readonly<{
+  name: string
+  schema: StandardSchemaV1<
+    Extract<HarnessTargetRunOutcome<C>, { status: 'completed' }>,
+    Extract<HarnessTargetRunOutcome<C>, { status: 'completed' }>
+  >
+  jsonSchema: JSONSchema
+}>
+
+type MountedHarnessTargetProjection<
+  C extends AnyHarnessTargetContract,
+> = Readonly<{
+  // Borrowed authentic values. Core never clones or freezes these.
+  target: C
+  standardSchemas: Readonly<{
+    input: C['input']
+    output: C['output']
+  }>
+
+  // Core-owned containers and cloned JSON. All are deeply frozen.
+  visibility: 'root' | 'dependency'
+  address: HarnessTargetAddress
+  policy: MountedHarnessTargetPolicyDescriptor | null
+  jsonSchemas: Readonly<{
+    input: JSONSchema
+    validatedInput: JSONSchema
+    output: JSONSchema
+    update: JSONSchema
+    interrupt: JSONSchema
+  }>
+  targetExport: Omit<SerializedHarnessTargetExportV1, 'exportDigest'>
+  exportDigest: `sha256:${string}`
+  mountRevision: string
+  routeBindingRevision: `sha256:${string}`
+  routeBinding: HarnessTargetRouteBinding<C>
+  completedEvent?: MountedHarnessCompletedEvent<C>
+}>
+```
+
+The projection is the sole mounted representation shared by service-definition
+export and runtime registration. `target` and `standardSchemas` are borrowed
+references owned by Harness; Core must not deep-freeze, clone, wrap, or mutate
+them. Core deep-clones and freezes every JSON schema before storing it and
+deep-freezes only its own address, policy, export, route-binding, completed-event,
+and enclosing projection containers. A root projection's policy is exact. Its
+queue name is copied only after the complete mount-policy binding authenticates
+through the private queue-reference WeakMap and its stored contract is the exact
+root contract. Projection snapshots only that binding's frozen literal queue
+name. A dependency projection always has `policy: null` and never receives queue
+metadata, guards, durable policy, or a completed event.
+
+The optional completed-event contract contains the literal event name, a
+Core-owned validation-only Standard Schema over
+`Extract<HarnessTargetRunOutcome<C>, { status: 'completed' }>`, and a cloned
+canonical JSON Schema. It never reuses or calls the target's original output
+schema or transform. The corresponding root service-definition entry is exactly
+`{ ...targetExport, exportDigest }`; dependency projections retain the same
+private projection fields but are never placed in callable maps.
+
+The export digest is lowercase SHA-256 over the UTF-8 RFC 8785 canonical JSON
+representation of this exact preimage:
+
+```ts
+[
+  'purista.harness-target-export.v1',
+  { address, target: targetExport },
+]
+```
+
+Core resolves `mountRevision` once as
+`options.revision ?? definition.revision ?? serviceVersion`. The route-binding
+revision is lowercase SHA-256 over the UTF-8 RFC 8785
+canonical JSON representation of this exact preimage:
+
+```ts
+[
+  'purista.harness-target-route-revision.v1',
+  {
+    address,
+    target: targetExport,
+    exportDigest,
+    visibility,
+    mountRevision,
+    policy,
+    receiverProtocolRevision: 'purista.eventbridge-harness-receiver.v1',
+  },
+]
+```
+
+`policy` is the stored deterministic descriptor shown above. Guard keys are
+sorted lexicographically; absent guard sets are empty arrays, and absent durable
+mode, success event, or queue name are `null`. Function source, closure state,
+object identity, and runtime-generated names are never hashed. An application
+must supply a new explicit `options.revision` when guard or other policy behavior
+changes without a service version or Harness definition revision change.
+
+The fixed receiver protocol revision changes only when receiver routing,
+validation, transformation, correlation, or terminal semantics change. Core
+constructs every EventBridge route binding from the stored projection. Runtime,
+service export, generated artifacts, queue integration, and invocation helpers
+consume the stored fields and never re-run schema conversion or recompute either
+digest.
+
 Mounting registers every explicit root as both an aggregate and stream
-EventBridge target. The public target name is exactly the definition id. It also
-registers the minimum internal routes required by workflow and subagent edges.
-Those routes are absent from exported service definitions and ClientBuilder and
-reject application-root invocation. There is no mount `publish` setting:
-promotion to a public target happens only by making the definition an explicit
-Harness root. Mounting rejects public target collisions with another root or an
-existing command/stream target and rejects ambiguous internal route identity.
+EventBridge target. The public target name is exactly the definition id. Its one
+stream receiver accepts the closed public-root or nested-dispatch envelope union
+described in section 3; a root never gets a second internal route or address.
+Mounting registers a nested-only internal stream route only for each
+dependency-only target required by workflow or subagent edges. Those routes are
+absent from exported service definitions and ClientBuilder and reject
+application-root invocation. There is no mount `publish` setting: promotion to
+a public target happens only by making the definition an explicit Harness root.
+Mounting rejects public target collisions with another root or an existing
+command/stream target, the same target id at conflicting logical addresses, and
+ambiguous internal route identity.
 
 The optional policy is exact and target keyed:
 
@@ -680,26 +1256,59 @@ Generators and examples omit an empty map instead of emitting `{}`. If every
 root uses defaults, the entire policy argument is omitted. Only exact
 explicit-root ids are accepted by `targets`. The option is inferred
 from the Harness root contracts, so a dependency-only subagent is a compile-time
-error. `beforeGuards` receive validated logical input. `afterGuards` receive the
-exact validated `HarnessTargetRunOutcome<Contract>`, including only the
-interrupt variants reachable from that root. They do not run for failed or
-cancelled execution. A success event is emitted only for `completed` and its
-payload is that completed outcome. The queue binding adds explicit typed enqueue
-support; it does not change direct run/stream routing.
+error. Dependency-only targets receive no entry from this map. `beforeGuards`
+receive validated logical input. `afterGuards` receive the exact validated
+`HarnessTargetRunOutcome<Contract>`, including only the interrupt variants
+reachable from that root. They do not run for failed or cancelled execution. A
+success event is emitted only for `completed` and its payload is that completed
+outcome. Queue policy metadata may be retained in the root projection, but the
+mounted runtime ignores it for aggregate, stream, and dependency routing.
+The same options object may contain a nonempty explicit `revision` used only as
+the mount revision described above; it grants no target or runtime capability.
 
 `durableResume: { identity: 'run-owner' }` is the sole v4 identity override for
-an explicitly guarded human-review flow. It adds a durable Harness storage
-requirement and requires a stable `sessionId`. On resume, Harness reopens with
-the immutable tenant/principal identity that owns the stored run while PURISTA
-still supplies the current authenticated caller to before/after guards and
-host-aware tools. Core preserves the original root invocation id and resolved
-session id across resume and rejects a cross-tenant resume before Harness
-execution. Without this option, normal trusted caller identity is projected for
-every invocation and resume; Harness's ordinary immutable session-identity
-binding still rejects cross-identity session reuse.
+an explicitly guarded human-review flow. It is legal only on an explicit root
+whose compiled closure can reach a `tool-approval` interruption and whose exact
+policy declares at least one `beforeGuard`. The mount types reject any other
+use, and erased JavaScript fails composition before schema conversion,
+registration, storage, or execution. The mode adds a durable Harness storage
+requirement and requires a stable `sessionId`.
 
-For streaming, Core completes input validation and `beforeGuards` before it
-publishes the EventBridge start frame. `openStream` waits for that start or a
+On resume, Core authenticates the current reviewer, builds the request-scoped
+`authorize` callback for that root's PURISTA before guards, and asks the
+hosted Harness boundary to resume in `stored-run-owner` mode. Both current and
+stored identities must contain nonempty `tenantId` and `principalId`, and their
+`tenantId` values must match exactly. Harness validates that stored state and
+tenant relationship first, restores the prior validated input, and only then
+invokes the callback exactly once with the current reviewer context. Harness
+rejects a cross-tenant caller, missing or invalid current or stored identity, or
+identity/run mismatch before the callback and before agent, workflow, tool,
+model, or other execution effects. An identity mismatch is a handled `409`, a
+business-guard denial is `403`, and a storage operational failure is a sanitized
+`500`.
+
+Harness restores the immutable stored identity only inside trusted execution
+scopes that must act as the original run owner: Harness storage, memory,
+sandbox/workspace, portable tool context, and nested dispatcher/EventBridge
+authentication metadata. A PURISTA host-tool handler and all PURISTA before and
+after guards instead receive the current reviewer identity. Stored identity is
+forbidden from public payloads, outcomes, handled or unhandled errors,
+inspection, application-visible host context, logs, telemetry, and emitted
+events. This is a data-flow restriction across trusted host code, not a claim
+that the integrator package boundary is a security sandbox. Without this option,
+normal trusted caller identity is projected for every invocation and resume;
+Harness's ordinary immutable session-identity binding still rejects
+cross-identity session reuse.
+
+The Core transport `invocationId` is stable transport correlation and supplies
+the default `sessionId`; it is not a Harness root `runId`. Harness creates or
+restores the root run id. Resume `runId`, target outcomes, execution events, and
+terminal correlation use that Harness-owned run id, while transport retry and
+redelivery retain the independent Core invocation id.
+
+For streaming, the hosted boundary completes input validation/restoration and
+the Core `authorize` callback before it publishes the EventBridge start frame.
+`openStream` waits for that start or a
 handled error, so an HTTP adapter can return the normal error response before
 committing SSE headers. After startup, Core forwards progressive Harness events
 immediately but withholds terminal publication while it awaits the hosted
@@ -739,28 +1348,34 @@ middleware fails server startup. `protectMiddleware` authenticates: it reads,
 verifies, and decrypts the credential, then sets trusted principal and tenant
 identity on the request message. Target guards authorize business actions.
 
-The browser projection is AI SDK UI Message Stream v1. Text and object updates,
-tool and subagent activity, status, artifacts, errors, cancellation, and final
-outcomes use the standard adapter. AI Elements and AI SDK clients work without
-a PURISTA browser package.
+The only UI-facing Framework contract is transport/protocol support for the
+standard AI SDK UI Message Stream v1. The versioned server-side adapter
+`@purista/harness-ai-sdk-ui/v1` maps Harness execution events to that protocol
+for both standalone Harness HTTP integrations and PURISTA HTTP stream
+boundaries. Text and object updates, tool and subagent activity, status,
+artifacts, errors, cancellation, and final outcomes use this one standard
+mapping. The adapter is not a UI application, browser package, component
+library, proprietary protocol, or custom consumer library.
 
-The reference React client uses `DefaultChatTransport`, renders UI message
-`parts`, handles the `approval-requested` tool state with
+The tutorial React UI demonstrates the protocol with `DefaultChatTransport`,
+renders UI message `parts`, handles the `approval-requested` tool state with
 `addToolApprovalResponse`, and may use
 `lastAssistantMessageIsCompleteWithApprovalResponses` to continue after a
-decision. Conformance uses the official AI SDK UI stream reader. The maintained
+decision. Conformance uses the official AI SDK UI stream reader. The tutorial
 UI uses AI Elements components for conversation, message, tool, prompt, and
 confirmation presentation instead of custom chat primitives.
 
-The reference client manifest pins the verified protocol set:
+The tutorial client manifest pins the verified protocol set:
 `ai@7.0.90`, `@ai-sdk/react@4.0.15`, `react@19.2.8`, and
 `react-dom@19.2.8`. It initializes the default shadcn theme with
 `npx shadcn@4.20.1 init --defaults`, then vendors `conversation`, `message`,
 `prompt-input`, `tool`, `confirmation`, and `sources` with
 `npx ai-elements@1.9.0 add ...`. The checked-in generated source and lockfile
 are the reproducible artifact; tutorials show these published commands. Backend
-`--http stream` adds `@purista/harness-ai-sdk-ui@^4.0.0` and `ai@^7.0.0`; the
-React packages and vendored components belong to the optional UI scaffold.
+`--http stream` adds `@purista/harness-ai-sdk-ui@^4.0.0` and its tested
+`ai@^7.0.0` peer for the standard Message Stream protocol. The React packages
+and vendored components belong only to the optional tutorial UI scaffold, not
+to PURISTA or Harness.
 
 Approval and human input are typed interrupted outcomes, not generic
 exceptions. HTTP/stream adapters emit the standard approval representation and
@@ -936,20 +1551,25 @@ identity and the current W3C trace carrier into every nested
 
 Core enters Harness only through the integrator-only `runHosted`,
 `streamHosted`, and `streamDispatched` methods. Public root adapters alone call
-`runHosted` or `streamHosted`; each call supplies an explicit root contract,
-validated logical input, invocation options with the resolved session id, and
-the one run-scoped `PuristaHostInvocation`. An authenticated internal nested
+`runHosted` or `streamHosted`; each call supplies the strict fresh/resume union,
+the original wire input, fresh validated input only when applicable, invocation
+options with the resolved session id, the one run-scoped
+`PuristaHostInvocation`, and the required Core-owned `authorize` callback.
+An authenticated internal nested
 receiver calls `streamDispatched` with an exact agent or workflow from the
 integrator-only compiled dependency closure plus the strict fresh/resume
 delivery. This is how the target adapter supplies the opaque value consumed
 later by `createHostContext`; it is never placed in the public service payload
 or parameter. These hosted methods verify exact contract identity and do not
-repeat input validation or transformation. Core never converts a
+repeat input validation or transformation. On resume, Harness restores
+validated input and invokes the callback only after its stored-state and
+same-tenant checks. Core never converts a
 dependency-only target into a root contract to execute it.
 
 Hosted `ai` configuration cannot contain logger or telemetry fields; the host
 bindings replace them and Harness derives metrics from the telemetry bridge.
-There are no generic lifecycle callbacks. Harness closes only the clients,
+There are no instance-wide generic lifecycle callbacks; `authorize` is the
+single request-scoped authorization seam described above. Harness closes only the clients,
 processes, and internal adapters it creates and never closes Core's dispatcher,
 context-factory dependencies, logger, telemetry, EventBridge, or service
 resources. Service shutdown stops new target calls, shuts down the Harness
@@ -1026,13 +1646,37 @@ event. Manual emission is reserved for facts produced during execution rather
 than duplicating successful command completion. Interrupted, rejected, failed,
 and cancelled outcomes do not emit a success event.
 
-`successEvent` is a literal event name. Core deterministically derives its
-schema as
+`successEvent` is a literal event name. During projection, Core
+deterministically derives its schema as
 `Extract<HarnessTargetRunOutcome<Contract>, { status: 'completed' }>` from the
-root contract, adds the resulting event contract to service definitions, and
-uses that same schema for subscription typing and export. Reusing an existing
-event name with a different canonical JSON Schema fails mount composition
-before registration.
+root contract. Core creates a new validation-only Standard Schema and cloned
+canonical closed JSON Schema for `{ status: 'completed', runId, output }` using
+the already projected `outputSchema`, freezes the optional
+`completedEvent` metadata on the root projection, adds the same metadata to
+service definitions, and uses it for subscription typing and export. This
+schema validates and returns the already frozen completed JSON value unchanged;
+it never invokes or reconstructs the target output schema's transform.
+Projection checks all ordinary and mounted event names and canonical JSON
+Schemas atomically. Reusing an existing event name with a different canonical
+JSON Schema fails composition before instance creation, route registration, or
+runtime effects. Dependency projections never have a completed event.
+
+The completed-event contract is composition metadata only. The mounted runtime
+does not register or unregister it. After a completed outcome passes all after
+guards, a public root receiver makes one publication attempt using the same
+authoritative frozen outcome as the event payload, aggregate result, direct
+`run.finished`, and stream `complete.final` as applicable. The payload includes
+the stable Harness `runId` so consumers can deduplicate. This is not an exactly-once
+delivery guarantee: retrying a receiver execution after an uncertain transport
+failure may publish the event again, so event consumers must be idempotent.
+
+Interrupted, failed, cancelled, guard-replaced, or protocol-failed executions
+publish no completed event. Aggregate publication failure returns a sanitized
+handled `500` and never returns success. A failure after a stream has started
+emits one sanitized failed direct terminal in place of the completed terminal,
+settles the transport result with that same failed terminal rather than a
+completed result, and publishes no success event. Publication failure can never
+be reported as successful completion.
 
 ## 8. Queues and admission
 
@@ -1063,38 +1707,71 @@ export const supportV1Service = supportV1ServiceBuilder.mountHarness(
 )
 ```
 
+Ownership is split deliberately. Canonical mounted-target projection may copy
+the root policy's queue name into `targetExport` so the export digest commits to
+that public capability. The P4-005 projection slice owns the pure
+`defineHarnessQueueBinding` reference factory, its private WeakMap authenticity
+check, and the immutable queue-name snapshot stored in an exact root projection.
+It does not construct a queue, worker, queue receiver, enqueue client, retry
+policy, generated remote marker, or generated client. P4-046 owns queue and
+worker construction, queue delivery runtime, queue-specific service export,
+generated remote queue-marker hydration, and local/generated `enqueue` clients.
+The mounted aggregate/stream lifecycle consumes no queue object and never routes
+`run`, `stream`, workflow, subagent, or host-tool calls through a queue.
+Dependency-only projections cannot carry queue metadata.
+
 `defineHarnessQueueBinding(contract, queueBuilder, workerBuilder)` is pure and
 synchronous. It rejects different queue names or a contract/binding mismatch
 before service composition and returns one frozen value with:
 
 ```ts
-type QueuedHarnessTargetContract<C extends AnyHarnessTargetContract> =
-  C & Readonly<{
-    queue: Readonly<{ name: string }>
-  }>
+declare class QueuedHarnessTargetReferenceAuthenticity {
+  private readonly authenticity: void
+}
+
+type QueuedHarnessTargetReference<
+  C extends AnyHarnessTargetContract,
+  QueueName extends string,
+> = QueuedHarnessTargetReferenceAuthenticity & Readonly<{
+  contract: C
+  queue: Readonly<{ name: QueueName }>
+}>
 
 export type HarnessTargetQueueBinding<
   C extends AnyHarnessTargetContract,
+  QueueName extends string,
   Queue = QueueDefinitionBuilder,
   Worker = QueueWorkerBuilder,
 > = Readonly<{
   targetContract: C
-  contract: QueuedHarnessTargetContract<C>
+  reference: QueuedHarnessTargetReference<C, QueueName>
   queue: Queue
   worker: Worker
 }>
 ```
 
-The queue result is closed rather than generic: every
-`HarnessTargetQueueBinding` produces a `QueuedHarnessTargetContract`, and that
-marker makes both local and generated address-first clients infer
-`HarnessTargetQueueEnqueueResult`. An application, adapter, or generated
-contract cannot substitute or widen the enqueue receipt type.
+The non-exported class above contributes a compile-time private brand and no
+reflectable runtime property. Core creates each reference, freezes its owned containers, preserves
+`reference.contract === targetContract === C`, and records the exact reference,
+contract, and queue-name tuple in a module-private `WeakMap`. That WeakMap is the
+runtime authenticity boundary. Mount policy consumes the complete binding;
+`canInvokeAgent(serviceName, serviceVersion, reference)` and
+`canInvokeWorkflow(serviceName, serviceVersion, reference)` have explicit local
+overloads for the authentic reference and validate it before declaration or
+effects. A plain object, spread copy, reflected copy, different queue name,
+different contract, or reference from another binding is rejected. No public
+predicate, registry, mutable marker, or structural fallback exists.
+
+The queue result is closed rather than generic: an authenticated
+`QueuedHarnessTargetReference` makes the local address-first client infer
+`HarnessTargetQueueEnqueueResult`. The unchanged original `C` continues to infer
+only `run` and `stream`. An application, adapter, or generated contract cannot
+substitute or widen the enqueue receipt type.
 
 The queue payload is inferred from `C.$infer.input`; invocation options are the
-queue parameter and never contain trusted identity. Mounting adds those schemas
-to the supplied builders and adds the queue and one generated worker exactly
-once. The worker declares the immediate target
+queue parameter and never contain trusted identity. Queue integration adds those
+schemas to the supplied builders and adds the queue and one generated worker
+exactly once. The worker declares the immediate target
 with `canInvokeAgent(serviceName, serviceVersion, C)` or
 `canInvokeWorkflow(serviceName, serviceVersion, C)`, so execution returns
 through EventBridge even when worker and target share a process. It calls
@@ -1109,7 +1786,7 @@ same resolved session id. A retriable `AgentAdmissionRejectedError` with
 failures retain ordinary queue-worker retry, nack, and dead-letter behavior. The supplied worker's
 `setMaxParallelHandlers(...)` remains the first coarse concurrency control.
 
-Using the returned queued contract in an outgoing declaration adds enqueue
+Using the returned queued reference in an outgoing declaration adds enqueue
 without changing aggregate or stream behavior:
 
 ```ts
@@ -1118,7 +1795,7 @@ const command = apiV1ServiceBuilder
   .canInvokeAgent(
     'Support',
     '1',
-    supportAnswerQueueBinding.contract,
+    supportAnswerQueueBinding.reference,
   )
   .setCommandFunction(async function ({ agent, message }) {
     return agent.Support['1'].support.enqueue(
@@ -1136,7 +1813,8 @@ into the reserved queue envelope, and returns it on the receipt. A later turn
 or approval resume reuses the returned session id; retry and redelivery reuse
 the original root invocation id as well.
 Declaring the original root contract instead exposes only `run` and `stream`;
-queue support never appears by inference from the target alone. Direct `run`
+queue support never appears by inference from the target alone. The reference
+is a Core declaration capability and is never passed to Harness. Direct `run`
 and `stream`, workflow calls, and model-selected subagents remain EventBridge
 operations and do not traverse the durable queue. Queue delivery retains
 trusted identity, tracing, idempotency, retry/defer metadata, and the logical
@@ -1155,11 +1833,11 @@ it is retriable and includes `retryAfterMs`. These are distinct controls.
 `exportServiceDefinitions` adds root-only `agents` and `workflows` maps to
 `ServiceDefinitions` and `FullServiceDefinition`. A dependency-only subagent is
 never serialized into either callable-target map. Each root entry has this
-canonical shape; the enclosing service/version supplies the rest of the
-address:
+canonical shape assembled from its frozen `MountedHarnessTargetProjection`;
+the enclosing service/version supplies the rest of the address:
 
 ```ts
-type MountedHarnessTargetDefinition = Readonly<{
+type SerializedHarnessTargetExportV1 = Readonly<{
   targetName: string
   kind: 'agent' | 'workflow'
   description?: string
@@ -1182,6 +1860,13 @@ type MountedHarnessTargetDefinition = Readonly<{
   exportDigest: `sha256:${string}`
 }>
 ```
+
+`SerializedHarnessTargetExportV1` is closed, plain JSON. It contains no
+Standard Schema wrapper, validator, transform, brand, target contract, handler,
+or borrowed object reference. The five schema members are canonical JSON Schema
+values cloned into the projection. `queue` is present only for an exact explicit
+root queue binding and is absent from every dependency projection and every
+unbound root.
 
 The service export also includes one sanitized, non-callable composition view:
 
@@ -1212,25 +1897,23 @@ sanitized recursive closure excluding those roots. These arrays support
 architecture inspection only: they carry no schemas, addresses, handlers, or
 invocation rights, and ClientBuilder does not create clients from them.
 
-Core copies the frozen `harnessExecutionEventTypesV1` inventory from Harness
-for every root. It derives `outputUpdates` and `resumableInterrupts` only from
-that exact root contract: `updates: 'none'` becomes `[]`; otherwise it becomes
-the one-element array `[contract.updates]`. File artifacts and progress remain
-ordinary `output.file` and `output.progress` execution event types and are never
-listed as target output-update modes. `HarnessInterruptKind` and the exact
-contract `$infer.interrupt` relation are imported from Harness; Core does not
-declare a parallel interrupt vocabulary or widen every target to all interrupt
-kinds.
+Projection copies the frozen `harnessExecutionEventTypesV1` inventory from
+Harness for every target. It derives `outputUpdates` and
+`resumableInterrupts` only from that exact contract: `updates: 'none'` becomes
+`[]`; otherwise it becomes the one-element array `[contract.updates]`. File
+artifacts and progress remain ordinary `output.file` and `output.progress`
+execution event types and are never listed as target output-update modes.
+`HarnessInterruptKind` and the exact contract `$infer.interrupt` relation are
+imported from Harness; Core does not declare a parallel interrupt vocabulary or
+widen every target to all interrupt kinds.
 
 `mergeServiceDefinition`, `mergeIntoServiceDefinition`,
 `ServiceBuilder.getFullServiceDefinition`, JSON export, and architecture
-inspection preserve these maps. `getFullServiceDefinition()` resolves Standard
-Schemas to serializable JSON Schema and never returns validator functions. For
-every target, Core exports `inputSchema` from
+inspection preserve these maps. Projection obtains `inputSchema` from
 `contract.input['~standard'].jsonSchema.input({ target: 'draft-2020-12' })`
 and `validatedInputSchema` from
 `contract.input['~standard'].jsonSchema.output({ target: 'draft-2020-12' })`.
-It exports `outputSchema` from
+It obtains `outputSchema` from
 `contract.output['~standard'].jsonSchema.output({ target: 'draft-2020-12' })`.
 The input direction therefore describes `InferIn` values accepted at the
 public boundary, while the output direction describes validated `Infer`
@@ -1239,9 +1922,38 @@ values. `updateSchema` is the JSON Schema for the exact `$infer.update` value;
 `interruptSchema` is the JSON Schema for the exact reachable
 `$infer.interrupt` union and likewise uses `false` when no interruption is
 reachable. Missing JSON Schema support or conversion failure aborts service
-composition and definition export atomically. Core computes `exportDigest`
-only after this closed addressed export is complete, using section 4's
-canonical algorithm.
+composition and projection atomically. Projection computes `exportDigest` only
+after this closed addressed export is complete, using section 5's canonical
+preimage. `getFullServiceDefinition()` consumes the already frozen projection
+and never returns validator functions. It, merge helpers, JSON export,
+architecture inspection, generated artifacts, and mounted runtime serialize or
+consume stored fields and never resolve a schema or compute a digest again.
+
+Representation ownership is fixed: Harness owns authentic target contracts and
+the private compiled closure; the P4-005 Core projection layer owns
+`MountedHarnessTargetProjection`, canonical JSON Schema conversion,
+`targetExport`, `exportDigest`, `routeBindingRevision`, and completed-event
+contracts, plus the pure `QueuedHarnessTargetReference` factory/authenticity
+record and queue-name projection snapshot; the P4-004 mounted runtime only
+validates and executes those projections; and P4-046 queue integration only consumes exact root projection
+metadata to construct queue runtime, queue-specific exports, and enqueue
+clients. P4-004 ignores queue metadata for routing and never gives root policy
+to a dependency. No layer defines a parallel target, outcome, event, schema,
+digest, route, or queue-receipt representation.
+
+The prerequisite Harness remediation must include its public `RunRecord` and
+creation/finalization storage request types, strict stored-record validator,
+in-memory and SQLite adapters, fake storage, hosted runtime, and their runtime,
+type, and adapter-conformance tests. For `kind:'agent'|'workflow'`, creation
+requires both canonical wire `input` and the once-transformed deeply frozen
+`validatedInput`; both remain immutable across acquisition, interruption,
+terminalization, exact retry, and replay. Child-task records retain their own
+existing input contract and forbid this root `validatedInput` field. Every
+adapter must persist, clone, validate, and return the field identically; no
+adapter may synthesize it during a read or resume. The implementation plan must
+own those storage paths in the same prerequisite ticket as the hosted
+authorizer/replay change so Core never integrates against a partial record
+contract.
 
 ClientBuilder generates the branded target-contract artifact plus the
 address-first typed `agent` or `workflow` namespace for each explicit root. It
@@ -1304,7 +2016,8 @@ The import graph is a directed set of layers:
 A same-service command, stream, subscription, or queue worker that invokes a
 mounted target imports the Harness root-contract view; it never imports an
 agent/workflow implementation or runtime instance. A different service imports
-only its generated branded target contract under `generated/**`. The base
+only its generated nominally authenticated target contract under
+`generated/**`. The base
 builder imports neither consumer, so both paths remain acyclic. No consumer
 imports another service's builder, dependency closure, Harness composition, or
 runtime.
@@ -1370,8 +2083,8 @@ target string. Generated tests use
 `@purista/harness/testing` and need no credentials.
 
 Generated projects use published-package installation commands and never
-workspace links or copied packages. `starter`, `create-purista`, Voyage, and
-all maintained examples use the same structure and APIs.
+workspace links or copied packages. `starter`, `create-purista`, and all
+maintained examples use the same structure and APIs.
 
 This clean break releases `create-purista@3.0.0`. Reproducible tutorial setup
 uses its published pinned form:
@@ -1395,12 +2108,13 @@ Core and Hono use one mapping:
 | --- | --- |
 | schema or invocation validation | handled `400` |
 | missing addressed target | handled `404` |
-| target export digest, durable revision, replay, idempotency, or session-identity conflict | handled `409` |
+| target export digest, durable revision, replay, idempotency, session-identity, or stored-run-owner tenant/identity conflict | handled `409` |
 | business guard, permission, or policy denial | handled `403` |
 | agent or model admission rejection | handled `429` with retry metadata |
 | timeout or expired deadline | handled `504` |
 | interrupted outcome | successful typed outcome / HTTP `200`, never an error |
 | stream cancellation | stream cancel terminal behavior |
+| durable storage operational failure | sanitized handled `500` |
 | unknown internal failure | sanitized handled `500` |
 
 Thrown application `HandledError` values retain their declared safe status and
@@ -1410,12 +2124,60 @@ data. Unknown provider or tool details are not exposed.
 
 Core tests cover mount lifecycle; additive `ai.model` plus `ai.models`
 inference; optional production `storage` and `memory` upgrades; aggregate and
-stream root registration; dependency-only non-public routes; EventBridge-only
+stream root registration; dependency-only non-public `streamDispatched` routes;
+authentic `visitHostedHarnessTargets` traversal with exact one-projection-per-
+target cardinality; visitor failure propagation; empty-graph rejection; proof
+that an honestly retained callback entry exposes no graph, index, lookup,
+mutable registry, handler, or tool; root/dependency classification by original
+contract identity; canonical Standard and JSON Schema projection; proof that
+borrowed targets and Standard Schemas are neither cloned nor frozen while every
+Core-owned container and cloned JSON value is deeply frozen; fixed export-digest
+and route-revision preimages including resolved mount revision, the complete
+deterministic policy descriptor, and the receiver protocol revision; revision
+changes for every address/schema/visibility/policy input and an explicit
+mount-revision bump when function behavior changes; proof that export, runtime,
+generated clients, and queues consume the same frozen projection without
+recomputation; EventBridge-only
 workflow, subagent, and host-tool nested dispatch; identity and trace
 propagation; stable root invocation/session creation before direct dispatch and
-enqueue; unchanged identity across transport retry, queue retry, and approval
-resume; returned session reuse on later turns; cross-identity session rejection;
-cancellation; queues; business guards; successful-result events;
+enqueue; proof that Core transport invocation id and Harness root run id remain
+distinct and correctly correlated; unchanged identity across transport retry,
+queue retry, and approval resume; returned session reuse on later turns;
+ordinary cross-identity session rejection; strict hosted root fresh/resume union
+validation with `wireInput` on both branches, validated `input` on fresh only,
+and an own resume `idempotencyKey: undefined` rejected before effects; proof
+that current-caller and stored-run-owner resumes both validate run/session/
+target/wire/continuation, restore the identical deeply frozen validated input,
+and invoke the exact `{delivery,target,input}` authorizer with no host invocation
+or stored identity argument; exact authorizer ordering after stored-state and
+identity checks but before execution effects/start events; post-authorization
+abort/deadline recheck; terminal approval replay that re-reads the authorized
+terminal revision and receipt, returns lease-free, and performs no execution,
+event, or transform; nonterminal atomic acquire-run revision/checkpoint CAS
+where a losing request may authorize but never executes; unchanged
+`HandledError` propagation
+and sanitized unknown authorizer errors; compile-time and erased-JavaScript
+rejection of `stored-run-owner` on a dependency, a root without reachable
+tool-approval, or a root without a before guard; `stored-run-owner` resume with
+the current reviewer in PURISTA guards and host-tool context, stored identity in
+Harness storage/memory/sandbox/portable-tool and nested-dispatch authentication
+scopes, exact tenant match, nonempty current and stored tenant/principal ids,
+and cross-tenant/missing/invalid stored-identity rejection before execution;
+deep absence of stored identity from public payloads, outcomes, errors,
+inspection, logs, telemetry, and events, with exact `409`/`403`/sanitized `500`
+mapping; cancellation; pure queue-reference creation and frozen projection
+snapshot; exact `reference.contract === targetContract` identity and queue-name
+parity; plain/spread/reflected binding or reference, wrong-name, wrong-contract,
+and cross-binding reference rejection before declaration or effects;
+original-contract run/stream-only
+clients versus reference-derived enqueue; generated nominal queued/unqueued
+capability parity with no structural `{queue}` capability; queues; business guards; completed-event schema
+collision and one publication attempt per receiver execution only after
+completed outcomes pass after guards; validation-only completed schema with no
+output-transform re-entry; stable run-id payload and consumer deduplication
+across possible retry redelivery; aggregate publication failure with no success
+and post-start stream publication failure replacing completion with one failed
+terminal;
 host-aware agent and workflow tool context inference; approval/resume;
 validation and before-guard rejection before stream start; after-guard terminal
 replacement without buffering progressive output; AI SDK UI stream conformance;
@@ -1426,23 +2188,68 @@ root contract types. Cross-process tests prove address plus matching digest
 dispatches to the receiver-local root, while an altered address, stale digest,
 or modified generated schema fails before business or model effects and no
 hidden identity or brand appears on the wire. Nested cross-process tests prove
-that a dependency-closure target enters only through `streamDispatched`, while
-public root adapters alone call `runHosted` or `streamHosted`. Stream transport
+that a dependency-only target enters only through `streamDispatched`; a root
+aggregate receiver rejects nested envelopes; and a root's one stream address
+routes a public closed envelope to `streamHosted` with root policy while routing
+a nested closed envelope to `streamDispatched` without guards, success event,
+queue, or durable policy. There is no second root address. Malformed, ambiguous,
+or mixed envelopes fail before effects, and same-id route collisions fail
+composition. Stream transport
 tests derive completion from `dispatchStream.result` and reject terminal event
 versus `complete.final` pairs that share run id and status but differ anywhere
-else in their RFC 8785 canonical representation.
+else in their RFC 8785 canonical representation. Failure-matrix tests cover
+malformed or wrong-kind root/nested envelopes, digest and address mismatch,
+fresh versus resume validation and transform counts, identity/trace/deadline/
+cancellation propagation, direct versus descendant correlation, missing/
+duplicate/post-terminal frames, completed/interrupted/failed/cancelled terminal
+outcomes on aggregate and stream roots, internal dependency interruption and
+resume, partial-registration rollback, absence of completed-event runtime
+registration, and idempotent shutdown ordering. Generated-contract tests
+distinguish raw `SerializedHarnessTargetExportV1` JSON from the three concrete
+validation-only Standard Schema witnesses, use asymmetric wire and
+validated-input types, prove each wrapper returns the identical JSON value
+without transform, coercion, or defaults, and prove only the producer receiver invokes its input
+transform exactly once. They also prove that output schema/value, update mode/
+value, and interrupt tuple/value mismatches fail at the remote factory type
+boundary without a handwritten inference escape hatch, that each witness
+matches its serialized schema, and that malformed queue presence/name fails
+hydration.
+
+Harness storage conformance tests cover agent and workflow creation with exact
+wire and validated inputs; deep freezing and readback in memory, SQLite, and
+fake adapters; missing, malformed, mutable, or changed validated input; exact
+create/acquire/finalize retry; nonterminal resume CAS; and terminal approval
+replay after restart. They prove the authorizer always receives the persisted
+validated value, terminal replay performs no lease acquisition or new event,
+and stored-run-owner execution scopes still receive the stored identity while
+the authorizer, host tools, and Core guards receive the current reviewer.
 
 Compile-time tests prove that root contracts expose exact `$infer.input`,
 `validatedInput`, `output`, `update`, and `interrupt` types; clients preserve
 the Harness target outcome/event projections; a dependency-only target cannot
 be declared, guarded, queued, exported, or generated as an application client;
-workflow tools expose only declared literal ids and exact types; and invalid
+the integrator visitor retains the exact compiled target union without exposing
+the graph or appearing at the Harness root entrypoint; mounted projections
+retain the exact borrowed target/Standard Schema types and completed-outcome
+contract while dependency projections cannot carry root policy or queue
+metadata; generated remote contracts derive exact `input`, `validatedInput`,
+`output`, `update`, and `interrupt` phantom inference from three concrete schema
+witnesses without recreating a producer transform or accepting caller-supplied
+inference, and reject every output/update/interrupt mismatch;
+`HostedTargetAuthorizer` exposes only the exact frozen authorization request,
+fresh requests require input, resume requests forbid it and any own
+idempotency-key property, and local queue references retain exact contract and
+queue-name inference while copies cannot satisfy the authentic builder
+overload; workflow tools expose only declared
+literal ids and exact types; and invalid
 model/storage/memory configurations fail where expected. They also require the
 exact nested ancestry XOR: an agent parent forbids `parentWorkflowId`, a
 workflow parent forbids `parentAgentId`, and neither missing nor dual parent ids
 compile. Runtime tests fail if a same-process child call bypasses EventBridge,
-if an internal child is sent to a root-only hosted entry point, or if any
-registry/string lookup can grant an undeclared capability. Import-cycle tests
+if a nested envelope is sent to an aggregate hosted entry point, if either
+branch of a dual-envelope root stream reaches the wrong hosted entry point or
+inherits the wrong policy, or if any registry/string lookup can grant an
+undeclared capability. Import-cycle tests
 fail when generated contracts import `service/**` or when a producer imports
 `generated/**`.
 
@@ -1460,7 +2267,7 @@ Migration pages show concise before/after source changes. No compatibility or
 migration behavior exists in Core or Harness runtime code.
 
 Completion requires aligned Harness/Core implementation, providers/adapters,
-CLI, starter, create-purista, Voyage, every example, Framework and Harness
+CLI, starter, create-purista, every example, Framework and Harness
 handbooks, API reference, migration pages, tutorial prose and runnable banking
 source, navigation/cards/diagrams, package-install proofs, canonical Skills and
 mirrors, generated site output, audits, type/unit/integration/conformance tests,
@@ -1509,10 +2316,14 @@ Documentation ownership is explicit: Harness concepts and standalone examples
 live in the Harness handbook/API; PURISTA mounting, address-first invocation,
 authentication/authorization, host tools, HTTP, queueing, and testing live in
 the Framework handbook/API; worked construction lives in Tutorials. The
+Harness adapter reference documents `@purista/harness-ai-sdk-ui/v1` as a
+server-side standard-protocol boundary, Framework HTTP examples demonstrate
+calling that adapter, and only the tutorial owns a React/AI Elements application
+UI. The
 release updates website navigation and cards, handbook source, all code blocks,
 generated TypeDoc/API output, migration pages, `examples/**`,
-`examples/banking/tutorial/**`, CLI blueprints, starter/create-purista, Voyage,
-and canonical `purista/skills/**` plus mirrors. Public install snippets use npm
+`examples/banking/tutorial/**`, CLI blueprints, starter/create-purista, and
+canonical `purista/skills/**` plus mirrors. Public install snippets use npm
 package names and release versions, never workspace links or copied packages.
 
 Removal audits are scoped to authoring surfaces and use allowlists for migration
@@ -1527,7 +2338,7 @@ PURISTA service, or public mutable registries.
 `scripts/check-harness-v4-authoring.mjs` owns that audit. It scans source and
 documentation extensions under `packages/**`, `examples/**`,
 `web/src/content/**`, `skills/**`, and the sibling `starter`, `create-purista`,
-`voyage`, and `ai-harness` repositories. For `ai-harness`, it scans
+and `ai-harness` repositories. For `ai-harness`, it scans
 `packages/**`, `examples/**`, `specs/**`, and root public Markdown files. It
 excludes `node_modules`, `dist`, generated
 coverage, `web/src/content/migration/**`, and the single negative fixture
