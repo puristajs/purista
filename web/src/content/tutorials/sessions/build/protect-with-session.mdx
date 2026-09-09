@@ -34,21 +34,22 @@ export const createSessionProtectMiddleware = (
 		throw new HandledError(StatusCode.Unauthorized, 'A session bearer token is required')
 	}
 
+	let session: SessionRecord
 	try {
-		const session = await http.invoke({
+		session = await http.invoke({
 			receiver: { serviceName: 'Identity', serviceVersion: '1', serviceTarget: 'resolveSession' },
 			payload: { payload: undefined, parameter: { sessionToken } },
 			contentType: 'application/json',
 			contentEncoding: 'utf-8',
 		}, 'protect-session') as SessionRecord
-
-		c.set('principalId', session.principalId)
-		c.set('tenantId', session.tenantId)
-		c.set('additionalParameter', { sessionToken })
-		await next()
 	} catch {
 		throw new HandledError(StatusCode.Unauthorized, 'The session is invalid or expired')
 	}
+
+	c.set('principalId', session.principalId)
+	c.set('tenantId', session.tenantId)
+	c.set('additionalParameter', { sessionToken })
+	await next()
 }
 ```
 
