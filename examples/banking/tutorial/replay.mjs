@@ -8,6 +8,7 @@ import { createServer } from 'node:net'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
+import { assertFreshReplayProof, assertPublicInstallCommands, readTrackedFreshReplayProof } from './tutorial-contract.mjs'
 
 const directory = dirname(fileURLToPath(import.meta.url))
 const bankRoot = resolve(directory, '..')
@@ -19,6 +20,7 @@ const { values } = parseArgs({
 		chapter: { type: 'string' },
 		out: { type: 'string' },
 		check: { type: 'boolean' },
+		'allow-retained-alignment': { type: 'boolean' },
 		retain: { type: 'boolean' },
 	},
 })
@@ -28,6 +30,7 @@ const excludedArtifactNames = new Set([
 	'dist',
 	'.git',
 	'.tutorial-proof.json',
+	'.tutorial-alignment-proof.json',
 	'coverage',
 	'var',
 	'.DS_Store',
@@ -189,6 +192,7 @@ async function pagesFor(id) {
 			.map(async ({ page, chapter, enforceV4Source }) => {
 				assert(/^[a-z0-9/-]+$/.test(page), `Invalid page path: ${page}`)
 				const source = await readFile(join(contentRoot, `${page}.mdx`), 'utf8')
+				assertPublicInstallCommands(source, page)
 				if (enforceV4Source) {
 					assert(!/\bsrc\/harness\//.test(source), `${page}: tutorial references forbidden top-level src/harness`)
 					assert(!/HarnessMount\.[cm]?[jt]sx?/.test(source), `${page}: tutorial references a removed HarnessMount file`)
@@ -224,7 +228,7 @@ async function pagesFor(id) {
 						assert(['parent', 'project', 'server', 'request'].includes(block.replay), `${page}: unknown replay action`)
 					}
 				}
-				return { id: page, source, blocks, hasPackageWrite: packageWriteBlocks.length > 0 }
+				return { id: page, chapter, source, blocks, hasPackageWrite: packageWriteBlocks.length > 0 }
 			}),
 	)
 }
@@ -257,6 +261,33 @@ async function sourceHashes(root, enforceV4Source, prefix = '') {
 	return result
 }
 
+function alignmentActionRecords(pages) {
+	return pages.flatMap(page => page.blocks.flatMap(block => {
+		if (block.write) return [{ page: page.id, write: block.title }]
+		if (block.replay === 'server') return [{ page: page.id, server: block.body }]
+		if (block.replay) return [{ page: page.id, command: block.body }]
+		if (block.expect) return [{ page: page.id, responseChecked: true, expect: block.expect, body: block.body }]
+		return []
+	}))
+}
+
+function alignmentWriteTargets(pages) {
+	const targets = new Set()
+	for (const page of pages) {
+		for (const block of page.blocks) {
+			if (block.replay) {
+				for (const line of block.body.trim().split('\n')) {
+					const removed = line.trim().match(/^rm ((?:[^\s]+\s*)+)$/)?.[1]?.trim().split(/\s+/) ?? []
+					for (const target of removed) targets.delete(target)
+				}
+			}
+			if (!block.write) continue
+			if (block.title === 'package.json' || block.title.includes('/') || /\.[A-Za-z0-9]+$/.test(block.title)) targets.add(block.title)
+		}
+	}
+	return [...targets].sort()
+}
+
 if (values.check) {
 	const checkedRecipes = values.chapter ? sequence(values.chapter) : recipes
 	let verified = 0
@@ -267,9 +298,32 @@ if (values.check) {
 		const enforceV4Source = enforcesV4Source(chapter)
 		await assertServiceBoundaries(root, enforceV4Source)
 		const proofFile = join(root, '.tutorial-proof.json')
-		assert(await exists(proofFile), `${chapter.id}: no completed instruction replay`)
-		const proof = JSON.parse(await readFile(proofFile, 'utf8'))
+		const alignmentProofFile = join(root, '.tutorial-alignment-proof.json')
+		const useAlignment = values['allow-retained-alignment'] === true && (await exists(alignmentProofFile))
+		assert(useAlignment ? await exists(alignmentProofFile) : await exists(proofFile), `${chapter.id}: no acceptable tutorial proof`)
+		const freshProofSource = useAlignment ? (await readTrackedFreshReplayProof(chapter.id)).source : await readFile(proofFile, 'utf8')
+		const proof = JSON.parse(await readFile(useAlignment ? alignmentProofFile : proofFile, 'utf8'))
+		if (useAlignment) {
+			assert.equal(proof.proofVersion, 1, `${chapter.id}: unsupported alignment proof version`)
+			assert.equal(proof.kind, 'retained-alignment', `${chapter.id}: invalid alignment proof kind`)
+			assert.equal(proof.chapter, chapter.id, `${chapter.id}: alignment proof belongs to another recipe`)
+			assert.equal(proof.freshReplay, false, `${chapter.id}: alignment proof must not claim fresh replay`)
+			assert.equal(proof.baseFreshProofDigest, digest(freshProofSource), `${chapter.id}: alignment proof is based on a different fresh proof`)
+			assert.equal(proof.packageManifestDigest, digest(await readFile(join(root, 'package.json'))), `${chapter.id}: package manifest changed after alignment`)
+			assert(Array.isArray(proof.actions), `${chapter.id}: alignment proof actions are missing`)
+			assert(Array.isArray(proof.writeTargets) && new Set(proof.writeTargets).size === proof.writeTargets.length, `${chapter.id}: alignment proof writeTargets are invalid`)
+			assert(proof.pages && typeof proof.pages === 'object' && proof.files && typeof proof.files === 'object', `${chapter.id}: alignment proof maps are missing`)
+		}
+		else assertFreshReplayProof(proof, chapter.id)
 		const pages = await pagesFor(chapter.id)
+		if (useAlignment) {
+			assert.deepEqual(
+				proof.actions,
+				alignmentActionRecords(pages.filter(page => page.chapter.id === chapter.id)),
+				`${chapter.id}: alignment action evidence differs from the current chapter`,
+			)
+			assert.deepEqual(proof.writeTargets, alignmentWriteTargets(pages), `${chapter.id}: alignment write targets changed`)
+		}
 		const comparablePages = pages.filter(page => !page.hasPackageWrite)
 		const comparableProofPages = Object.fromEntries(
 			Object.entries(proof.pages).filter(([page]) => !pages.some(candidate => candidate.id === page && candidate.hasPackageWrite)),
@@ -428,6 +482,9 @@ try {
 	const enforceV4Source = enforcesV4Source(targetChapter)
 	await assertServiceBoundaries(project, enforceV4Source)
 	const proof = {
+		proofVersion: 2,
+		kind: 'fresh-replay',
+		freshReplay: true,
 		chapter: values.chapter,
 		node: process.version,
 		pages: Object.fromEntries(pages.filter(page => !page.hasPackageWrite).map(page => [page.id, digest(page.source)])),

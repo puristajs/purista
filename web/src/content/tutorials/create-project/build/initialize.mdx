@@ -1,6 +1,6 @@
 ---
 title: Initialize the project
-description: Run the PURISTA CLI, install pinned packages, and understand the generated ESM project.
+description: Run the PURISTA CLI, install the public packages, and understand the generated ESM project.
 order: 10
 kind: lesson
 status: published
@@ -12,14 +12,14 @@ Open a terminal in the directory where you keep projects. You need Node.js
 ## Generate the application
 
 ```bash title="Create the Example Bank project" replay="parent"
-npx --yes --package=@purista/cli@3.2.4 --package=@purista/core@3.2.4 purista init example-bank \
+npm create purista@3.0.0 example-bank -- \
   --runtime node --event-bridge default --package-manager npm \
   --no-webserver --no-install --defaults --non-interactive
 ```
 
 The command creates `example-bank`. `--event-bridge default` selects local
 in-process message delivery. `--no-webserver` keeps HTTP out of this chapter.
-`--no-install` lets us set the exact tested dependency versions first.
+`--no-install` lets us install the reviewed public dependency ranges next.
 
 Enter the generated project:
 
@@ -53,16 +53,17 @@ which is the extension Node will load after compilation.
 
 ## Install and inspect the checkpoint
 
-```bash title="Install the tested package versions" replay="project"
-npm install --save-dev --save-exact @purista/cli@3.2.4 typescript@7.0.2
-npm install --save-exact @purista/core@3.2.4 zod@4.4.3
+```bash title="Install the public package versions" replay="project"
+npm install --save-dev @purista/cli@4.0.0 'typescript@npm:@typescript/typescript6@6.0.2'
+npm install @purista/core@4.0.0 zod@4.4.3
 npm pkg set 'scripts.test=tsc --noEmit && vitest run src'
 npm test
 npm run build
 ```
 
-Expect the generated Ping service tests to pass. Keep `package-lock.json`; later
-replays use `npm ci` to install the same dependency graph.
+Expect the generated Ping service tests to pass. npm records compatible ranges
+in `package.json`. The release process generates the lockfile from the public
+registry after every v4 package is available.
 
 The important generated paths are:
 
