@@ -1,16 +1,16 @@
 import {
+	classifySupportMessageAgent,
 	classifySupportMessageInputSchema,
 	classifySupportMessageOutputSchema,
-} from '../../../../../harness/support/agent/classifySupportMessage/classifySupportMessageAgent.js'
-import { supportHarness } from '../../../../../harness/support/supportHarness.js'
+} from '../../harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
-export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
-	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the mounted agent')
+export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runClassifySupportMessage', 'Classify one support message with the mounted agent')
 	.addPayloadSchema(classifySupportMessageInputSchema)
 	.addOutputSchema(classifySupportMessageOutputSchema)
-	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
+	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
 	.setBeforeGuardHooks({
 		messageAccess: async function (context, payload) {
 			await requireSupportClassification(context.resources.supportClassificationPolicy, {
@@ -21,11 +21,11 @@ export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+		const result = await context.agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: supportClassificationSessionId(context.message, payload.messageId),
 		})
-		if (outcome.status !== 'completed') {
+		if (result.outcome.status !== 'completed') {
 			throw new Error('Message classification was interrupted unexpectedly.')
 		}
-		return outcome.output
+		return result.outcome.output
 	})

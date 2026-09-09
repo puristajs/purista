@@ -1,22 +1,43 @@
 ---
 title: Test classification through EventBridge
-description: Start the mounted Support service and prove normal command routing plus direct-target authorization before model work.
+description: Start a mounted Support service and prove routing plus target authorization.
 order: 188
 kind: lesson
 status: draft
 ---
 
-The unit tests replaced the agent call with a stub. This final test starts the
-real `DefaultEventBridge`, Support service, and mounted Harness runtime while
-keeping model behavior deterministic.
-
-Replace the generated service test with the complete file below.
+This test starts a real `DefaultEventBridge`, PURISTA service, and mounted
+Harness runtime while keeping model behavior deterministic.
 
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
-import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
+import { classifySupportMessageAgent } from './harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
 import { supportV1Service } from './supportV1Service.js'
+
+const directCallerBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Calls the mounted classifier in integration tests',
+}).defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
+const callClassifierCommandBuilder = directCallerBuilder
+	.getCommandBuilder('callClassifier', 'Call the mounted classifier directly')
+	.addPayloadSchema(classifySupportMessageAgent.contract.input)
+	.addOutputSchema(classifySupportMessageAgent.contract.output)
+	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.setCommandFunction(async function ({ agent }, payload) {
+		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
+			sessionId: `direct:${payload.messageId}`,
+		})
+		if (result.outcome.status !== 'completed') throw new Error('The classifier was interrupted unexpectedly.')
+		return result.outcome.output
+	})
+const directCallerService = directCallerBuilder
+	.addCommandDefinition(callClassifierCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
 
 describe('supportV1Service', () => {
 	it('routes the command to the mounted agent through EventBridge', async () => {
@@ -36,7 +57,7 @@ describe('supportV1Service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -48,7 +69,7 @@ describe('supportV1Service', () => {
 					receiver: {
 						serviceName: 'Support',
 						serviceVersion: '1',
-						serviceTarget: 'classifySupportMessage',
+						serviceTarget: 'runClassifySupportMessage',
 					},
 					payload: {
 						payload: { messageId: 'MSG-200', text: 'How do I replace an expiring card?' },
@@ -79,10 +100,10 @@ describe('supportV1Service', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
+		const service = await directCallerService.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -92,7 +113,7 @@ describe('supportV1Service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'callClassifier' },
 						payload: {
 							payload: { messageId: 'MSG-201', text: 'Please classify this message.' },
 							parameter: {},
@@ -108,12 +129,12 @@ describe('supportV1Service', () => {
 	})
 })
 ```
-The first case calls the wrapper command. The policy runs once at that command
-and once at the mounted target, both with the same trusted identity and message
-id. The second case calls the published agent address directly. Its empty strict
-provider proves the mount guard denied access before any model request.
 
-Run the complete chapter verification and demo.
+The first case uses the production wrapper command. The policy runs for the
+command and again for the mounted target. The second case uses an isolated
+test-only Support command to call the same declared agent address. Its denied
+policy and empty strict provider prove the mount guard stops work before the
+model is called.
 
 ```bash title="Verify the complete classification chapter" replay="project"
 npm run build
@@ -122,6 +143,6 @@ npm run lint
 npm run demo
 ```
 
-You now have the smallest complete PURISTA AI path: portable structured agent,
-service-owned mount and guard, address-first command invocation, runtime model
-binding, deterministic demo, and integration proof.
+The chapter now has a portable structured agent, a protected service-owned
+mount, address-first invocation, a startup model binding, and credential-free
+tests.

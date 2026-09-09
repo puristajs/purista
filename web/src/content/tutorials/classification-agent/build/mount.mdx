@@ -1,31 +1,25 @@
 ---
 title: Authorize and mount the agent
-description: Add business authorization to the published mounted target before any model work can begin.
+description: Protect the mounted agent with business authorization before model work begins.
 order: 183
 kind: lesson
 status: draft
 ---
 
-The CLI already created a mount that publishes
-`Support / 1 / classify_support_message`. Published targets can be invoked
-directly through EventBridge, so the mount itself needs a business guard.
+Mounting publishes `Support / 1 / classifySupportMessage` on EventBridge. The
+mount therefore needs its own business guard. Authentication supplies trusted
+identity. This guard answers a different question: may this caller classify
+this support message?
 
-Authentication happens at the transport boundary and places trusted tenant and
-principal ids on the PURISTA message. The guard on this page performs
-authorization: may this valid caller classify this particular support message?
-
-## Declare the policy resource
-
-Create the resource contract. It includes `messageId` so a policy can make a
-decision about the requested business object, not only the presence of a user.
+Create the policy resource contract.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportClassificationPolicy {
 	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
 }
 ```
-Replace the generated service builder and declare the resource. The concrete
-policy is supplied at startup.
+
+Declare that resource on the service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
@@ -42,12 +36,9 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.setConfigSchema(supportServiceV1ConfigSchema)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
-## Centralize the decision and session key
 
-Create one helper that the direct target and the wrapper command can share.
-The separate session helper mixes the trusted caller identity with the business
-message id, then hashes it. A session id correlates model history; it never
-grants access.
+Create one authorization helper and one stable session-id helper. The session
+id correlates model history; it never grants access.
 
 ```ts title="src/service/support/v1/requireSupportClassification.ts" write
 import { createHash } from 'node:crypto'
@@ -83,31 +74,31 @@ export function supportClassificationSessionId(
 	return `support-classification:${digest}`
 }
 ```
-## Protect the directly addressable target
 
-Replace the generated mount policy. `publish.agents` selects the reachable
-target. `targets.agents.classify_support_message.beforeGuards` runs before the
-mounted runtime acquires a model or starts an agent session.
+Assemble the direct agent definition and add a policy for its exact target id.
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
 
-export { supportHarness }
+export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
+	classifySupportMessageAgent,
+)
 
 export const supportHarnessPolicy = {
-	publish: { agents: ['classify_support_message'], workflows: [] },
 	targets: {
 		agents: {
-			classify_support_message: {
+			classifySupportMessage: {
 				beforeGuards: {
 					mayClassifySupport: async (
 						context: HarnessBusinessGuardContext<{
 							supportClassificationPolicy: SupportClassificationPolicy
 						}>,
-						input: { messageId: string },
+						input: z.output<typeof classifySupportMessageAgent.contract.input>,
 					) => {
 						await requireSupportClassification(context.resources.supportClassificationPolicy, {
 							...context.identity,
@@ -121,9 +112,10 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-Run the compiler. This verifies that the guard context can access only the
-resource declared on Support and that the target id exists in the Harness
-catalog.
+
+`targets` is the publication policy. The before guard runs before the model
+provider is called. Later agents, workflows, tools, skills, and MCP servers can
+be added to this same service-owned Harness definition.
 
 ```bash title="Verify the protected mount" replay="project"
 npm run build

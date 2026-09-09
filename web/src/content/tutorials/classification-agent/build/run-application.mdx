@@ -1,19 +1,13 @@
 ---
 title: Run the classification application
-description: Prove the complete EventBridge path with a fake model, then optionally bind OpenAI.
+description: Prove the EventBridge path with a fake model, then optionally bind OpenAI.
 order: 186
 kind: lesson
 status: draft
 ---
 
-The runtime composition is ready. Start with a strict fake model so you can
-prove service routing, authorization, schema validation, and lifecycle without
-an API key. The optional entry point changes only the model binding.
-
-## Run without provider credentials
-
-Create `src/demo.ts`. The fake provider returns one structured response and
-fails if another model call occurs.
+Start with a strict fake model. This proves routing, authorization, validation,
+and lifecycle without an API key.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
@@ -60,7 +54,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Run the complete local path.
 
 ```bash title="Run the deterministic classification demo" replay="project"
 npm run demo
@@ -74,13 +67,10 @@ npm run demo
 }
 ```
 
-That result crossed the outer command address, the mounted agent address, and
-the fake model before returning as validated command output.
+The result crossed the wrapper command address and mounted agent address before
+returning as validated command output.
 
-## Optional: bind OpenAI
-
-Create the optional live entry point. Only this file imports the provider
-adapter and reads credentials.
+For an optional live process, bind OpenAI only at startup.
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
@@ -113,18 +103,16 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-The repository includes this environment template:
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
 
-Copy it to `.env`, add your key, and run `npm start` when you want to make a
-real provider request. The process stays active until it receives a shutdown
-signal.
+Copy the environment template and add your key only when you want a real
+provider request. The process owns graceful shutdown of the service and bridge.
 
-```bash title="Optional live classification service"
+```bash title="Start the optional live classification service"
 cp .env.example .env
 npm start
 ```

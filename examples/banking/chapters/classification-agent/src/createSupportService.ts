@@ -15,8 +15,7 @@ export function createSupportService(
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
 		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+			model: options.model,
 		},
 	})
 }

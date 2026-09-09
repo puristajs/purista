@@ -1,16 +1,3 @@
----
-title: Define the structured classifier
-description: Add strict schemas, instructions, and a structured prompt to a native Harness agent.
-order: 182
-kind: lesson
-status: draft
----
-
-Replace the generated agent with a direct `defineAgent` definition. The input
-contains only the message id and text. Trusted tenant and principal identity
-travel in PURISTA message headers, outside the model prompt.
-
-```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
 import { defineAgent } from '@purista/harness'
 import { z } from 'zod'
 
@@ -35,14 +22,3 @@ export const classifySupportMessageAgent = defineAgent('classifySupportMessage',
 	].join(' '),
 	prompt: (input) => ({ role: 'user', content: `Message ${input.messageId}: ${input.text}` }),
 })
-```
-
-The schemas make the model boundary explicit. The prompt mapper produces the
-structured user message sent to the provider. The definition contains no
-provider credentials and does not choose a deployment model.
-
-```bash title="Check the native Harness definition" replay="project"
-npm run build
-```
-
-Continue with [Authorize and mount the agent](../mount/).

@@ -7,45 +7,33 @@ group: ai
 status: draft
 ---
 
-This chapter teaches the smallest useful PURISTA AI boundary. You will define
-one native Harness agent that turns a support message into a typed
-classification. You will mount it on the narrow `Support` service and invoke
-it from a normal PURISTA command through EventBridge.
-
-The Example Bank text is only a small fixture. The Framework capability is the
-important part:
+This chapter adds one focused AI capability to a PURISTA service. A native
+Harness agent turns a support message into a typed classification. A normal
+Support command invokes that mounted agent through EventBridge.
 
 ```text title="Classification execution path"
 PURISTA command
-  -> declared Support v1 agent address
-  -> EventBridge
+  -> Support / 1 / classifySupportMessage
   -> mounted native Harness agent
-  -> model provider supplied at application startup
+  -> model supplied at service startup
   -> validated structured result
 ```
 
-The command never imports or calls an agent definition directly. The Harness
-definition contains no API key and no OpenAI client. That separation keeps the
-definition usable by native Harness and by a mounted PURISTA service.
-
-You need Node.js 24 or newer and basic TypeScript knowledge. The required path
-uses `FakeModelProvider`, so it needs no API key, HTTP server, database, or
-earlier tutorial.
-
-## What you will build
+The support message is only a small input example. The useful pattern is the
+boundary: the agent owns AI behavior, the service owns the mount and business
+policy, and application startup supplies the model. The required path uses
+`FakeModelProvider`, so it needs no API key, HTTP server, or database.
 
 You will:
 
 1. [create a project and generate Support plus its agent](./build/scaffold/);
-2. [replace the placeholder with a structured classifier](./build/define/);
-3. [authorize and mount the published agent](./build/mount/);
-4. [generate a command that invokes the agent by address](./build/invoke/);
-5. [compose the service runtime and address-first caller](./build/compose-runtime/);
-6. [run a deterministic demo and optionally bind OpenAI](./build/run-application/);
-7. [test the native agent and command helper](./testing/test-classification/); and
-8. [prove the complete EventBridge route and direct-target denial](./testing/test-eventbridge/).
+2. [define the structured classifier](./build/define/);
+3. [protect and mount the agent](./build/mount/);
+4. [invoke it from a PURISTA command](./build/invoke/);
+5. [compose the runtime and an address-first caller](./build/compose-runtime/);
+6. [run a deterministic demo](./build/run-application/);
+7. [test the native and command boundaries](./testing/test-classification/); and
+8. [test the complete EventBridge route](./testing/test-eventbridge/).
 
-Every code block that creates or replaces a file contains the complete file.
-The finished source is in `examples/banking/chapters/classification-agent`.
-
-Start with [Generate the service and agent](./build/scaffold/).
+Every `write` block contains a complete file. The finished source is in
+`examples/banking/chapters/classification-agent`.

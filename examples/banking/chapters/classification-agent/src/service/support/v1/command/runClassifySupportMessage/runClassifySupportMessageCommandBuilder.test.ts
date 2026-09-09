@@ -1,21 +1,22 @@
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
+import { classifySupportMessageAgent } from '../../harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 import { supportClassificationSessionId } from '../../requireSupportClassification.js'
-import { classifySupportMessageCommandBuilder } from './classifySupportMessageCommandBuilder.js'
+import { runClassifySupportMessageCommandBuilder } from './runClassifySupportMessageCommandBuilder.js'
 
 const sandbox = createSandbox()
 
 afterEach(() => sandbox.restore())
 
-describe('classifySupportMessageCommandBuilder', () => {
+describe('runClassifySupportMessageCommandBuilder', () => {
 	it('invokes the mounted agent through its declared address', async () => {
 		const payload = {
 			messageId: 'MSG-123',
 			text: 'I cannot sign in and payroll closes in one hour.',
 		}
 		const supportClassificationPolicy = { canClassify: sandbox.stub().resolves(true) }
-		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+		const { context, stubs } = createCommandContextMock(runClassifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
 			resources: { supportClassificationPolicy },
@@ -31,17 +32,20 @@ describe('classifySupportMessageCommandBuilder', () => {
 			urgency: 'urgent' as const,
 			reason: 'The customer is locked out before payroll closes.',
 		}
-		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
-			status: 'completed',
-			runId: 'run-1',
-			output: expected,
+		stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.resolves({
+			sessionId: 'support-session',
+			outcome: {
+				status: 'completed',
+				runId: 'run-1',
+				output: expected,
+			},
 		})
 
 		await expect(
-			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+			runClassifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual(expected)
 		expect(
-			(stubs.agent as any).Support['1'].classify_support_message.run.calledOnceWith(payload, {
+			stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.calledOnceWith(payload, {
 				sessionId: supportClassificationSessionId(context.message, payload.messageId),
 			}),
 		).toBe(true)
@@ -54,9 +58,9 @@ describe('classifySupportMessageCommandBuilder', () => {
 		).toBe(true)
 	})
 
-	it('does not turn an interrupted outcome into a successful command result', async () => {
+	it('propagates a mounted agent failure', async () => {
 		const payload = { messageId: 'MSG-124', text: 'Please check my card.' }
-		const { context, stubs } = createCommandContextMock(classifySupportMessageCommandBuilder, {
+		const { context, stubs } = createCommandContextMock(runClassifySupportMessageCommandBuilder, {
 			payload,
 			parameter: {},
 			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
@@ -67,14 +71,12 @@ describe('classifySupportMessageCommandBuilder', () => {
 			principalId: 'principal-alex',
 			payload: { payload, parameter: {} },
 		})
-		;(stubs.agent as any).Support['1'].classify_support_message.run.resolves({
-			status: 'interrupted',
-			runId: 'run-2',
-			interrupt: { kind: 'external_wait', waitId: 'review-1' },
-		})
+		stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.rejects(
+			new Error('The model provider is unavailable.'),
+		)
 
 		await expect(
-			classifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
-		).rejects.toThrow('Message classification was interrupted unexpectedly.')
+			runClassifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('The model provider is unavailable.')
 	})
 })

@@ -1,21 +1,24 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
 
-export { supportHarness }
+export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
+	classifySupportMessageAgent,
+)
 
 export const supportHarnessPolicy = {
-	publish: { agents: ['classify_support_message'], workflows: [] },
 	targets: {
 		agents: {
-			classify_support_message: {
+			classifySupportMessage: {
 				beforeGuards: {
 					mayClassifySupport: async (
 						context: HarnessBusinessGuardContext<{
 							supportClassificationPolicy: SupportClassificationPolicy
 						}>,
-						input: { messageId: string },
+						input: z.output<typeof classifySupportMessageAgent.contract.input>,
 					) => {
 						await requireSupportClassification(context.resources.supportClassificationPolicy, {
 							...context.identity,

@@ -3,7 +3,7 @@ import type { z } from 'zod'
 import type {
 	classifySupportMessageInputSchema,
 	classifySupportMessageOutputSchema,
-} from './harness/support/agent/classifySupportMessage/classifySupportMessageAgent.js'
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
 type Classification = z.infer<typeof classifySupportMessageOutputSchema>
@@ -24,7 +24,7 @@ export function invokeClassification(
 			serviceTarget: 'classify',
 			instanceId: getNewInstanceId(),
 		},
-		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
 		payload: { payload, parameter: {} },
 	})
 }
