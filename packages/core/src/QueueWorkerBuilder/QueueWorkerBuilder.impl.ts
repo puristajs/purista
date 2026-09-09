@@ -39,7 +39,10 @@ import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
  *   .setHandler(async (context, job) => ({ status: 'success', output: job.payload }))
  * ```
  */
-export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerBuilderTypes> {
+export class QueueWorkerBuilder<
+	S extends QueueWorkerBuilderTypes = QueueWorkerBuilderTypes,
+	const BoundQueueName extends string = string,
+> {
 	private mode: QueueWorkerMode = 'continuous'
 	private intervalMs?: number
 	private maxParallelHandlers = 1
@@ -61,7 +64,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 	private queueInvokes: QueueInvokeList = {}
 
 	constructor(
-		public readonly queueName: string,
+		public readonly queueName: BoundQueueName,
 		private readonly workerName: string,
 	) {}
 
@@ -150,7 +153,8 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'],
 				S['EmitList'],
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
@@ -169,13 +173,14 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'],
 				S['EmitList'],
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
 	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
 	canInvokeAgent<
-		Contract extends HarnessTargetContract<'agent', any, any>,
+		Contract extends HarnessTargetContract<'agent', any, any, any, any, any, any>,
 		SName extends string,
 		Version extends string,
 		Target extends string,
@@ -199,13 +204,14 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				S['EmitList'],
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
 	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
 	canInvokeWorkflow<
-		Contract extends HarnessTargetContract<'workflow', any, any>,
+		Contract extends HarnessTargetContract<'workflow', any, any, any, any, any, any>,
 		SName extends string,
 		Version extends string,
 		Target extends string,
@@ -229,7 +235,8 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				S['EmitList'],
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
@@ -304,7 +311,8 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 					>,
 				S['EmitList'],
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
@@ -334,7 +342,8 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'],
 				S['EmitList'],
 				S['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
-			>
+			>,
+			BoundQueueName
 		>
 	}
 
@@ -353,7 +362,8 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['StreamInvokes'],
 				S['EmitList'] & Record<EventName, InferIn<T>>,
 				S['QueueInvokes']
-			>
+			>,
+			BoundQueueName
 		>
 	}
 

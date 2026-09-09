@@ -25,7 +25,7 @@ import type { Schema } from '../schema/index.js'
  *   .emitResultAsEvent('billing.monthlyClosing.completed')
  * ```
  */
-export class QueueDefinitionBuilder {
+export class QueueDefinitionBuilder<const QueueName extends string = string> {
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
 	private lifecycleConfig?: QueueLifecycleConfig
@@ -44,7 +44,7 @@ export class QueueDefinitionBuilder {
 	}
 
 	constructor(
-		public readonly queueName: string,
+		public readonly queueName: QueueName,
 		private readonly queueDescription: string,
 	) {}
 

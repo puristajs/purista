@@ -1,7 +1,20 @@
+import { expectTypeOf } from 'vitest'
 import { z } from 'zod'
 import { QueueWorkerBuilder } from './QueueWorkerBuilder.impl.js'
 
 describe('QueueWorkerBuilder', () => {
+	it('retains the exact queue name through every fluent type transition', () => {
+		const builder = new QueueWorkerBuilder('supportQueue', 'execute')
+			.canInvoke('TicketService', '1', 'loadTicket', z.string(), z.string(), z.string())
+			.canConsumeStream('ReportService', '1', 'streamReport', z.string(), z.string(), z.string(), z.string())
+			.canEnqueue('auditQueue', z.string(), z.string())
+			.canEmit('worker.done', z.string())
+			.setBeforeGuardHooks({ async auth() {} })
+			.setAfterGuardHooks({ async audit() {} })
+
+		expectTypeOf(builder.queueName).toEqualTypeOf<'supportQueue'>()
+	})
+
 	it('stores and exposes before and after guard hooks by name', () => {
 		const beforeGuard = async function beforeGuard() {}
 		const afterGuard = async function afterGuard() {}

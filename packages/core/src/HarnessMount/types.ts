@@ -8,10 +8,12 @@ import type {
 	HarnessTargetContract,
 	HarnessTargetInput,
 	HarnessTargetOutput,
+	HarnessTargetRunOutcome,
 	HarnessTraceContext,
-	RunOutcome,
+	harnessExecutionEventTypesV1,
 } from '@purista/harness'
 import type { HarnessHostContextRequest } from '@purista/harness/integrator'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 import type {
 	Command,
 	HarnessDispatchContext,
@@ -29,6 +31,9 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
+import type { HarnessTargetQueueBinding } from './queueBinding.js'
+
+export type { HarnessTargetQueueBinding } from './queueBinding.js'
 
 export type {
 	GeneratedHarnessSchema,
@@ -178,56 +183,109 @@ type TargetContract<
  */
 export type HarnessDurableResumePolicy = Readonly<{ identity: 'run-owner' }>
 
-/** Business, delivery, and durable-resume policy for one published Harness target. */
-export type HarnessTargetPolicy<
-	C extends AnyHarnessTargetContract,
-	Resources extends Record<string, unknown>,
-> = Readonly<{
-	beforeGuards?: Readonly<
-		Record<
-			string,
-			(context: HarnessBusinessGuardContext<Resources>, input: C['$infer']['input']) => void | Promise<void>
-		>
+/** Named business guards evaluated for one explicit Harness root. */
+type HarnessBeforeGuardMap<C extends AnyHarnessTargetContract, Resources extends Record<string, unknown>> = Readonly<
+	Record<
+		string,
+		(context: HarnessBusinessGuardContext<Resources>, input: C['$infer']['validatedInput']) => void | Promise<void>
 	>
+>
+
+type HarnessTargetPolicyBase<C extends AnyHarnessTargetContract, Resources extends Record<string, unknown>> = Readonly<{
 	afterGuards?: Readonly<
 		Record<
 			string,
-			(
-				context: HarnessBusinessGuardContext<Resources>,
-				outcome: RunOutcome<C['$infer']['output']>,
-			) => void | Promise<void>
+			(context: HarnessBusinessGuardContext<Resources>, outcome: HarnessTargetRunOutcome<C>) => void | Promise<void>
 		>
 	>
 	/** Publish the completed terminal outcome as a business fact. */
 	successEvent?: string
-	/** Optional durable queue delivery for this published target. */
+	/** Optional durable queue delivery for this root. */
 	queue?: HarnessTargetQueueBinding<C>
-	/**
-	 * Reopen a durable run with the immutable identity of the session that
-	 * started it. Use this for explicitly guarded human-review commands where
-	 * an authorized reviewer may differ from the initiating principal.
-	 *
-	 * The current caller remains available to PURISTA guards and host tools.
-	 * Cross-tenant resume is always rejected. An explicit Harness storage
-	 * adapter and `sessionId` are required so the prior owner can be verified.
-	 */
-	durableResume?: HarnessDurableResumePolicy
+	beforeGuards?: HarnessBeforeGuardMap<C, Resources>
 }>
 
-/** Harness target contract marked as supporting native PURISTA queue delivery. */
-export type QueuedHarnessTargetContract<C extends AnyHarnessTargetContract> = C &
-	Readonly<{ queue: Readonly<{ name: string }> }>
-
-/** Opaque native queue and worker binding dedicated to one mounted Harness target. */
-export type HarnessTargetQueueBinding<
+/** Business, delivery, and durable-resume policy for one explicit Harness root. */
+export type HarnessTargetPolicy<
 	C extends AnyHarnessTargetContract,
-	Queue = unknown,
-	Worker = unknown,
-> = Readonly<{
-	contract: QueuedHarnessTargetContract<C>
-	targetContract: C
-	queue: Queue
-	worker: Worker
+	Resources extends Record<string, unknown>,
+> = HarnessTargetPolicyBase<C, Resources> &
+	('tool-approval' extends C['interrupts'][number]
+		? Readonly<
+				| { durableResume?: never }
+				| {
+						durableResume: HarnessDurableResumePolicy
+						beforeGuards: HarnessBeforeGuardMap<C, Resources>
+				  }
+			>
+		: Readonly<{ durableResume?: never }>)
+
+/** Canonical JSON Schema value stored in mounted target metadata. */
+export type HarnessTargetJsonSchema = boolean | Readonly<Record<string, unknown>>
+
+/** Deterministic root policy committed to a target's route revision. */
+export type MountedHarnessTargetPolicyDescriptor = Readonly<{
+	beforeGuardKeys: readonly string[]
+	afterGuardKeys: readonly string[]
+	durableResume: 'stored-run-owner' | null
+	successEvent: string | null
+	queueName: string | null
+}>
+
+/** Closed JSON export for one mounted Harness target before its digest is attached. */
+export type SerializedHarnessTargetExportV1 = Readonly<{
+	targetName: string
+	kind: 'agent' | 'workflow'
+	description?: string
+	inputSchema: HarnessTargetJsonSchema
+	validatedInputSchema: HarnessTargetJsonSchema
+	outputSchema: HarnessTargetJsonSchema
+	updateSchema: HarnessTargetJsonSchema
+	interruptSchema: HarnessTargetJsonSchema
+	invocation: Readonly<{
+		aggregate: true
+		stream: true
+		resumableInterrupts: readonly ('tool-approval' | 'external-wait')[]
+	}>
+	stream: Readonly<{
+		protocol: 'harness-execution-events-v1'
+		eventTypes: typeof harnessExecutionEventTypesV1
+		outputUpdates: readonly ('text-delta' | 'object-snapshot')[]
+	}>
+	queue?: Readonly<{ name: string }>
+	exportDigest: `sha256:${string}`
+}>
+
+/** Validation-only completed-result event metadata for one root target. */
+export type MountedHarnessCompletedEvent<C extends AnyHarnessTargetContract> = Readonly<{
+	name: string
+	schema: StandardSchemaV1<
+		Extract<HarnessTargetRunOutcome<C>, { status: 'completed' }>,
+		Extract<HarnessTargetRunOutcome<C>, { status: 'completed' }>
+	>
+	jsonSchema: HarnessTargetJsonSchema
+}>
+
+/** Exact Core-owned transport projection of one authentic hosted target. */
+export type MountedHarnessTargetProjection<C extends AnyHarnessTargetContract> = Readonly<{
+	target: C
+	standardSchemas: Readonly<{ input: C['input']; output: C['output'] }>
+	visibility: 'root' | 'dependency'
+	address: Readonly<{ serviceName: string; serviceVersion: string; serviceTarget: string }>
+	policy: MountedHarnessTargetPolicyDescriptor | null
+	jsonSchemas: Readonly<{
+		input: HarnessTargetJsonSchema
+		validatedInput: HarnessTargetJsonSchema
+		output: HarnessTargetJsonSchema
+		update: HarnessTargetJsonSchema
+		interrupt: HarnessTargetJsonSchema
+	}>
+	targetExport: Omit<SerializedHarnessTargetExportV1, 'exportDigest'>
+	exportDigest: `sha256:${string}`
+	mountRevision: string
+	routeBindingRevision: `sha256:${string}`
+	routeBinding: import('./dispatcher.js').HarnessTargetRouteBinding<C>
+	completedEvent?: MountedHarnessCompletedEvent<C>
 }>
 
 /** Target-name keyed policies inferred from one portable Harness definition. */
@@ -239,15 +297,11 @@ export type HarnessTargetPolicies<
 	[K in keyof NonNullable<S[Kind]> & string]: HarnessTargetPolicy<TargetContract<S, Kind, K>, Resources>
 }>
 
-/** Agent or workflow names explicitly published at a PURISTA service address. */
-export type HarnessPublishPolicy<
+/** Optional business and delivery policy for explicit Harness roots. */
+export type HarnessMountPolicy<
 	S extends HarnessCatalogView,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 > = Readonly<{
-	publish: Readonly<{
-		agents?: readonly (keyof NonNullable<S['agents']> & string)[]
-		workflows?: readonly (keyof NonNullable<S['workflows']> & string)[]
-	}>
 	targets?: Readonly<{
 		agents?: HarnessTargetPolicies<S, 'agents', Resources>
 		workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
@@ -265,14 +319,10 @@ export type HarnessMountableDefinition = Readonly<{
 }>
 
 /** Policy inferred directly from one definition's public root contracts. */
-export type HarnessDefinitionPublishPolicy<
+export type HarnessDefinitionMountPolicy<
 	D extends HarnessMountableDefinition,
 	Resources extends Record<string, unknown>,
 > = Readonly<{
-	publish: Readonly<{
-		agents?: readonly (keyof D['contracts']['agents'] & string)[]
-		workflows?: readonly (keyof D['contracts']['workflows'] & string)[]
-	}>
 	targets?: Readonly<{
 		agents?: Partial<{
 			[K in keyof D['contracts']['agents'] & string]: HarnessTargetPolicy<D['contracts']['agents'][K], Resources>
@@ -286,7 +336,7 @@ export type HarnessDefinitionPublishPolicy<
 /** One immutable Harness definition mounted by a service builder. */
 export type HarnessMount<D extends HarnessDefinition<any, any, any> = HarnessDefinition<any, any, any>> = Readonly<{
 	definition: D
-	policy: HarnessPublishPolicy<HarnessState<D>>
+	policy?: HarnessMountPolicy<HarnessState<D>>
 }>
 
 /** Builder state carried by a portable Harness definition. */
