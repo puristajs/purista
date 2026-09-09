@@ -28,6 +28,7 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
+		"@purista/harness": "^4.0.0",
 		"@types/minimist": "^1.2.5",
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",

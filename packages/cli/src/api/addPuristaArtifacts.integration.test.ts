@@ -1,15 +1,19 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
+import { createPuristaCliEngine } from '../engine.js'
 import { addPuristaAgent } from './addPuristaAgent.js'
 import { addPuristaCommand } from './addPuristaCommand.js'
+import { addPuristaMcp } from './addPuristaMcp.js'
 import { addPuristaQueue } from './addPuristaQueue.js'
 import { addPuristaQueueWorker } from './addPuristaQueueWorker.js'
 import { addPuristaService } from './addPuristaService.js'
+import { addPuristaSkill } from './addPuristaSkill.js'
 import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
+import { addPuristaTool } from './addPuristaTool.js'
 import { addPuristaWorkflow } from './addPuristaWorkflow.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
@@ -60,6 +64,16 @@ const createBaseProject = () => {
 			},
 		}),
 	)
+	writeFileSync(
+		join(TEST_DIR, 'purista.json'),
+		JSON.stringify({
+			servicePath: 'src/service',
+			fileConvention: 'camel',
+			eventConvention: 'dotCase',
+			formatter: 'none',
+			linter: 'none',
+		}),
+	)
 
 	const serviceRoot = join(TEST_DIR, 'src', 'service')
 	mkdirSync(serviceRoot, { recursive: true })
@@ -72,6 +86,19 @@ export enum ServiceEvent {
 }
 `,
 	)
+}
+
+const snapshotFiles = (root: string) => {
+	const snapshot: Record<string, string> = {}
+	const visit = (directory: string) => {
+		for (const entry of readdirSync(directory, { withFileTypes: true })) {
+			const path = join(directory, entry.name)
+			if (entry.isDirectory()) visit(path)
+			else snapshot[relative(root, path)] = readFileSync(path).toString('base64')
+		}
+	}
+	visit(root)
+	return snapshot
 }
 
 afterEach(() => {
@@ -206,6 +233,53 @@ describe('CLI artifact generation (e2e)', () => {
 			agentName: 'summarize',
 			agentDescription: 'Summarize a ticket',
 		})
+		const immutableRootFiles = [
+			join(TEST_DIR, 'package.json'),
+			join(TEST_DIR, 'src', 'service', 'user', 'v1', 'userV1Service.ts'),
+			join(TEST_DIR, 'src', 'service', 'user', 'v1', 'harness', 'userHarness.ts'),
+		].map(path => [path, readFileSync(path, 'utf8')] as const)
+		await addPuristaTool({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			toolName: 'normalize query',
+			toolDescription: 'Normalize a search query',
+			kind: 'portable',
+		})
+		await addPuristaTool({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			toolName: 'load profile',
+			toolDescription: 'Load a profile through the owning service',
+			kind: 'purista',
+		})
+		await addPuristaSkill({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			skillName: 'support-policy',
+			skillDescription: 'Apply the approved support policy.',
+			runtimes: ['node', 'python'],
+		})
+		await addPuristaMcp({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			mcpName: 'knowledge base',
+			mcpDescription: 'Search the approved knowledge base',
+			toolName: 'search knowledge',
+			remoteName: 'search_knowledge.v2',
+		})
+		for (const [path, content] of immutableRootFiles) expect(readFileSync(path, 'utf8')).toBe(content)
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
@@ -319,13 +393,47 @@ describe('CLI artifact generation (e2e)', () => {
 		for (const term of forbiddenAgentTerms) {
 			expect(agentTestContent).not.toContain(term)
 		}
+		const portableTool = readFileSync(join(harnessDirPath, 'tool', 'normalizeQuery', 'normalizeQueryTool.ts'), 'utf-8')
+		expect(portableTool).toContain("import { defineTool } from '@purista/harness'")
+		expect(portableTool).toContain("defineTool('normalizeQuery'")
+		expect(portableTool).toContain('handler: async (_context, input) => input')
+		const hostTool = readFileSync(join(harnessDirPath, 'tool', 'loadProfile', 'loadProfileTool.ts'), 'utf-8')
+		expect(hostTool).toContain("import { userV1ServiceBuilder } from '../../../userV1ServiceBuilder.js'")
+		expect(hostTool).toContain("userV1ServiceBuilder.defineTool('loadProfile'")
+		expect(hostTool).toContain('.setHandler(async (_context, input) => input)')
+		expect(hostTool).not.toContain('defineHostTool')
+		const skillDirectory = join(harnessDirPath, 'skill', 'support-policy')
+		const skillDefinition = readFileSync(join(skillDirectory, 'supportPolicySkill.ts'), 'utf-8')
+		expect(skillDefinition).toContain("defineSkill('support-policy'")
+		expect(skillDefinition).toContain("directory: new URL('./', import.meta.url)")
+		expect(skillDefinition).toContain("runtimes: ['node', 'python']")
+		const skillManifest = readFileSync(join(skillDirectory, 'SKILL.md'), 'utf-8')
+		expect(skillManifest).toContain('name: support-policy')
+		expect(skillManifest).not.toMatch(/^(scripts?|hash|review|approval)(s|_metadata)?:/im)
+		const mcpDefinition = readFileSync(join(harnessDirPath, 'mcp', 'knowledgeBase', 'knowledgeBaseMcp.ts'), 'utf-8')
+		expect(mcpDefinition).toContain("defineMcpServer('knowledgeBase'")
+		expect(mcpDefinition).toContain('searchKnowledge: {')
+		expect(mcpDefinition).toContain('remoteName: "search_knowledge.v2"')
+		for (const forbidden of ['url:', 'token:', 'command:', 'environment:', 'env:'])
+			expect(mcpDefinition).not.toContain(forbidden)
+		for (const leaf of [portableTool, hostTool, skillDefinition, mcpDefinition]) {
+			expect(leaf).not.toContain('.addTool(')
+			expect(leaf).not.toContain('.addSkill(')
+			expect(leaf).not.toContain('.addMcpServer(')
+		}
 		const packageJsonContent = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf-8')) as {
 			dependencies?: Record<string, string>
 		}
 		expect(packageJsonContent.dependencies?.['@purista/ai']).toBeUndefined()
 		expect(packageJsonContent.dependencies?.['@purista/harness']).toBe('^4.0.0')
+		const cliPackageJson = JSON.parse(readFileSync(join(CLI_PACKAGE_ROOT, 'package.json'), 'utf8')) as {
+			devDependencies?: Record<string, string>
+			dependencies?: Record<string, string>
+		}
+		expect(cliPackageJson.devDependencies?.['@purista/harness']).toBe('^4.0.0')
+		expect(cliPackageJson.dependencies?.['@purista/harness']).toBeUndefined()
 
-		expect(readdirSync(harnessDirPath).sort()).toEqual(['agent', 'userHarness.ts', 'workflow'])
+		expect(readdirSync(harnessDirPath).sort()).toEqual(['agent', 'mcp', 'skill', 'tool', 'userHarness.ts', 'workflow'])
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
 		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(
 			'.getQueueWorkerBuilder("processJobs"',
@@ -386,4 +494,279 @@ describe('CLI artifact generation (e2e)', () => {
 			),
 		).not.toThrow()
 	}, 60_000)
+
+	it('resolves mandatory leaf inputs in interactive mode and rejects them non-interactively', async () => {
+		createBaseProject()
+		const puristaConfig = puristaConfigSchema.parse(JSON.parse(readFileSync(join(TEST_DIR, 'purista.json'), 'utf8')))
+		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaService({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceDescription: 'Support',
+		})
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		const input = { serviceName: 'support', serviceVersion: '1', name: 'lookup', description: 'Lookup' }
+		const before = snapshotFiles(TEST_DIR)
+		const nonInteractive = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
+		await expect(nonInteractive.runPuristaCommand('add-tool', input)).rejects.toThrow(
+			'Missing required value for "kind"',
+		)
+		await expect(
+			nonInteractive.runPuristaCommand('add-mcp', { ...input, name: 'knowledge', toolName: 'search' }),
+		).rejects.toThrow('Missing required value for "remoteName"')
+		await expect(
+			nonInteractive.runPuristaCommand('add-mcp', {
+				...input,
+				name: 'knowledge',
+				remoteName: 'search_remote',
+			}),
+		).rejects.toThrow('Missing required value for "toolName"')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		const interactive = createPuristaCliEngine({
+			cwd: TEST_DIR,
+			mode: 'interactive',
+			prompt: {
+				input: async request => {
+					throw new Error(`Unexpected input prompt: ${request.key}`)
+				},
+				confirm: async request => {
+					throw new Error(`Unexpected confirm prompt: ${request.key}`)
+				},
+				select: async request => (request.key === 'kind' ? 'portable' : ''),
+			},
+		})
+		const result = await interactive.runPuristaCommand('add-tool', input)
+		expect(result.ok).toBe(true)
+		expect(result.warnings[0]).toContain("include lookupTool in that definition's tools array")
+		const interactiveMcp = createPuristaCliEngine({
+			cwd: TEST_DIR,
+			mode: 'interactive',
+			prompt: {
+				input: async request => {
+					if (request.key === 'toolName') return 'search'
+					if (request.key === 'remoteName') return 'Search::Remote/v1'
+					throw new Error(`Unexpected input prompt: ${request.key}`)
+				},
+				confirm: async request => {
+					throw new Error(`Unexpected confirm prompt: ${request.key}`)
+				},
+				select: async request => {
+					throw new Error(`Unexpected select prompt: ${request.key}`)
+				},
+			},
+		})
+		await expect(interactiveMcp.runPuristaCommand('add-mcp', { ...input, name: 'knowledge' })).resolves.toMatchObject({
+			ok: true,
+		})
+	})
+
+	it('preserves repeatable Skill runtimes and exact MCP remote names', async () => {
+		createBaseProject()
+		const configInput = JSON.parse(readFileSync(join(TEST_DIR, 'purista.json'), 'utf8'))
+		configInput.fileConvention = 'kebab'
+		writeFileSync(join(TEST_DIR, 'purista.json'), JSON.stringify(configInput))
+		const puristaConfig = puristaConfigSchema.parse(JSON.parse(readFileSync(join(TEST_DIR, 'purista.json'), 'utf8')))
+		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaService({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceDescription: 'Support',
+		})
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
+		await engine.runPuristaCommand('add-skill', {
+			serviceName: 'support',
+			serviceVersion: '1',
+			name: 'incident-review',
+			description: 'Review incidents.',
+			runtimes: ['shell', 'python'],
+		})
+		await engine.runPuristaCommand('add-mcp', {
+			serviceName: 'support',
+			serviceVersion: '1',
+			name: 'knowledge',
+			description: 'Search knowledge.',
+			toolName: 'search',
+			remoteName: 'Search::Knowledge/v2',
+		})
+		const root = join(TEST_DIR, 'src/service/support/v1/harness')
+		expect(readFileSync(join(root, 'skill/incident-review/incident-review-skill.ts'), 'utf8')).toContain(
+			"runtimes: ['shell', 'python']",
+		)
+		expect(readFileSync(join(root, 'mcp/knowledge/knowledge-mcp.ts'), 'utf8')).toContain(
+			'remoteName: "Search::Knowledge/v2"',
+		)
+	})
+
+	it('refuses duplicates, traversal, casing collisions, and ambiguous ids before writing', async () => {
+		createBaseProject()
+		const puristaConfig = puristaConfigSchema.parse(JSON.parse(readFileSync(join(TEST_DIR, 'purista.json'), 'utf8')))
+		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaService({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceDescription: 'Support',
+		})
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		const common = {
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceVersion: '1',
+		}
+		mkdirSync(join(TEST_DIR, 'src/service/support/v1/harness'), { recursive: true })
+		writeFileSync(
+			join(TEST_DIR, 'src/service/support/v1/harness/unrelatedFactories.ts'),
+			"const helper = { defineTool: (id: string) => id, defineSkill: (id: string) => id, defineMcpServer: (id: string) => id }\nconst { defineTool, defineSkill, defineMcpServer } = helper\nexport const unrelatedTool = helper.defineTool('unrelated')\nexport const unrelatedSkill = helper.defineSkill('unrelated-skill')\nexport const unrelatedMcp = helper.defineMcpServer('unrelatedMcp')\nexport const unrelatedDetached = [defineTool('anotherTool'), defineSkill('another-skill'), defineMcpServer('anotherMcp')]\n",
+		)
+		await addPuristaTool({
+			...common,
+			toolName: 'unrelated',
+			toolDescription: 'An unrelated same-name method is not a Harness definition.',
+			kind: 'portable',
+		})
+		await addPuristaSkill({
+			...common,
+			skillName: 'unrelated-skill',
+			skillDescription: 'An unrelated same-name method is not a Harness definition.',
+		})
+		await addPuristaMcp({
+			...common,
+			mcpName: 'unrelated mcp',
+			mcpDescription: 'An unrelated same-name method is not a Harness definition.',
+			toolName: 'search',
+			remoteName: 'search_remote',
+		})
+		await addPuristaTool({ ...common, toolName: 'lookup', toolDescription: 'Lookup', kind: 'portable' })
+		await addPuristaTool({
+			...common,
+			toolName: 'constructor',
+			toolDescription: 'An inherited object key is not a built-in.',
+			kind: 'portable',
+		})
+		await addPuristaSkill({ ...common, skillName: 'lookup', skillDescription: 'Cross-family reuse is valid.' })
+		await addPuristaMcp({
+			...common,
+			mcpName: 'knowledge',
+			mcpDescription: 'Search',
+			toolName: 'lookup',
+			remoteName: 'lookup_remote',
+		})
+		await addPuristaMcp({
+			...common,
+			mcpName: 'documentation',
+			mcpDescription: 'Search docs',
+			toolName: 'lookup',
+			remoteName: 'lookup_docs',
+		})
+		let before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({ ...common, toolName: 'lookup', toolDescription: 'Duplicate', kind: 'purista' }),
+		).rejects.toThrow('already exists')
+		await expect(
+			addPuristaMcp({
+				...common,
+				mcpName: 'knowledge',
+				mcpDescription: 'Duplicate server',
+				toolName: 'differentTool',
+				remoteName: 'different_remote',
+			}),
+		).rejects.toThrow('already exists')
+		await expect(
+			addPuristaSkill({
+				...common,
+				skillName: 'duplicate-runtime',
+				skillDescription: 'Invalid',
+				runtimes: ['node', 'node'],
+			}),
+		).rejects.toThrow('must not contain duplicates')
+		await expect(
+			addPuristaMcp({
+				...common,
+				mcpName: 'spaced-remote',
+				mcpDescription: 'Invalid',
+				toolName: 'search',
+				remoteName: ' remote_search ',
+			}),
+		).rejects.toThrow('provided exactly')
+		await expect(
+			addPuristaTool({ ...common, toolName: '../escape', toolDescription: 'Invalid', kind: 'portable' }),
+		).rejects.toThrow('path separators')
+		await expect(
+			addPuristaTool({ ...common, toolName: 'bash', toolDescription: 'Collision', kind: 'portable' }),
+		).rejects.toThrow('canonical Harness built-in tool')
+		await expect(addPuristaSkill({ ...common, skillName: 'read', skillDescription: 'Collision' })).rejects.toThrow(
+			'canonical Harness built-in tool',
+		)
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		writeFileSync(
+			join(TEST_DIR, 'src/service/support/v1/harness/authenticAlias.ts'),
+			"import { defineTool as makeTool } from '@purista/harness'\nimport { z } from 'zod'\nexport const aliasCollision = makeTool('aliasCollision', { description: 'x', input: z.string(), output: z.string(), async handler(_context, input) { return input } })\n",
+		)
+		before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({
+				...common,
+				toolName: 'alias collision',
+				toolDescription: 'Authentic imported aliases must collide.',
+				kind: 'portable',
+			}),
+		).rejects.toThrow('Definition id "aliasCollision" already exists')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		writeFileSync(
+			join(TEST_DIR, 'src/service/support/v1/harness/authenticHost.ts'),
+			"import { z } from 'zod'\nimport { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'\nexport const hostCollision = supportV1ServiceBuilder.defineTool('hostCollision', { description: 'x', input: z.string(), output: z.string() }).setHandler(async (_context, input) => input)\n",
+		)
+		before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({
+				...common,
+				toolName: 'host collision',
+				toolDescription: 'Authentic ServiceBuilder definitions must collide.',
+				kind: 'portable',
+			}),
+		).rejects.toThrow('Definition id "hostCollision" already exists')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		mkdirSync(join(TEST_DIR, 'src/service/support/v1/harness/tool/CASEONLY'), { recursive: true })
+		before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({ ...common, toolName: 'case only', toolDescription: 'Collision', kind: 'portable' }),
+		).rejects.toThrow('differs only by casing')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		const maliciousProject = structuredClone(project)
+		maliciousProject.services.support['1'].serviceFile = '../../../../outside.ts'
+		before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({
+				...common,
+				puristaProject: maliciousProject,
+				toolName: 'safe name',
+				toolDescription: 'Invalid path',
+				kind: 'portable',
+			}),
+		).rejects.toThrow('outside the project')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+
+		writeFileSync(
+			join(TEST_DIR, 'src/service/support/v1/harness/tool/unresolvedTool.ts'),
+			"import { defineTool } from '@purista/harness'\nimport { z } from 'zod'\nlet id = 'dynamic'\nexport const unresolved = defineTool(id, { description: 'x', input: z.string(), output: z.string(), async handler(_context, input) { return input } })\n",
+		)
+		before = snapshotFiles(TEST_DIR)
+		await expect(
+			addPuristaTool({ ...common, toolName: 'safe name', toolDescription: 'Safe', kind: 'portable' }),
+		).rejects.toThrow('Cannot statically prove the defineTool definition id')
+		expect(snapshotFiles(TEST_DIR)).toEqual(before)
+	})
 })

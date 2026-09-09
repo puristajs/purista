@@ -2,11 +2,14 @@ import type { PuristaCommandId } from '../core/types.js'
 import { addAgentCommand } from './add-agent.js'
 import { addCommandCommand } from './add-command.js'
 import { addHarnessCommand } from './add-harness.js'
+import { addMcpCommand } from './add-mcp.js'
 import { addQueueCommand } from './add-queue.js'
 import { addQueueWorkerCommand } from './add-queue-worker.js'
 import { addServiceCommand } from './add-service.js'
+import { addSkillCommand } from './add-skill.js'
 import { addStreamCommand } from './add-stream.js'
 import { addSubscriptionCommand } from './add-subscription.js'
+import { addToolCommand } from './add-tool.js'
 import { addWorkflowCommand } from './add-workflow.js'
 import {
 	exportAsyncApiCommand,
@@ -27,6 +30,9 @@ export const commandRegistry = {
 	'add-harness': addHarnessCommand,
 	'add-agent': addAgentCommand,
 	'add-workflow': addWorkflowCommand,
+	'add-tool': addToolCommand,
+	'add-skill': addSkillCommand,
+	'add-mcp': addMcpCommand,
 	'export-asyncapi': exportAsyncApiCommand,
 	'export-runtime-capabilities': exportRuntimeCapabilitiesCommand,
 	'export-schedule-manifest': exportScheduleManifestCommand,

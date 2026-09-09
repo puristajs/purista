@@ -27,6 +27,12 @@ const mapAddComponentToCommand = (component: string) => {
 			return 'add-agent'
 		case 'workflow':
 			return 'add-workflow'
+		case 'tool':
+			return 'add-tool'
+		case 'skill':
+			return 'add-skill'
+		case 'mcp':
+			return 'add-mcp'
 		default:
 			throw new PuristaCliError(`Unsupported component "${component}".`)
 	}
@@ -62,7 +68,7 @@ const main = async () => {
 		program
 			.command('add')
 			.description(
-				'Add a new service, command, subscription, stream, queue, queue worker, Harness, agent, or workflow.',
+				'Add a new service, command, subscription, stream, queue, queue worker, Harness, agent, workflow, tool, Skill, or MCP server.',
 			)
 			.addArgument(
 				new Argument('[component]', 'Type of component to add').choices([
@@ -75,10 +81,22 @@ const main = async () => {
 					'harness',
 					'agent',
 					'workflow',
+					'tool',
+					'skill',
+					'mcp',
 				]),
 			)
 			.addArgument(new Argument('[name]', 'Name of component'))
 			.option('--description <description>', 'description of the component')
+			.addOption(new Option('--kind <kind>', 'tool ownership kind').choices(['portable', 'purista']))
+			.option(
+				'--runtime <runtime>',
+				'logical Skill runtime requirement (repeatable)',
+				(value, previous: string[] = []) => [...previous, value],
+				[],
+			)
+			.option('--tool <toolName>', 'local MCP tool name')
+			.option('--remote-name <remoteName>', 'exact remote MCP tool name')
 			.option('--service <serviceName>', 'service name')
 			.option('--service-version <serviceVersion>', 'service version')
 			.option('--response-event <eventName>', 'response event name')
@@ -104,6 +122,10 @@ const main = async () => {
 				const result = await engine.runPuristaCommand(commandId, {
 					name,
 					description: options.description,
+					kind: options.kind,
+					runtimes: options.runtime,
+					toolName: options.tool,
+					remoteName: options.remoteName,
 					serviceName: options.service,
 					serviceVersion: options.serviceVersion,
 					responseEventName: options.responseEvent,
