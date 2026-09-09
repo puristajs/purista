@@ -2,6 +2,20 @@ import type { StreamHandle } from '@purista/core'
 import { StatusCode } from '@purista/core'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
+const SAFE_INTERNAL_STREAM_ERROR_MESSAGE = 'Internal Server Error'
+
+/** Protocol id for the standard AI SDK UI Message Stream v1 transport. */
+export const AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL = 'ai-sdk-ui-message-stream-v1'
+
+/** Required response headers for AI SDK UI Message Stream v1 consumers. */
+export const AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS = Object.freeze({
+	'content-type': 'text/event-stream',
+	'cache-control': 'no-cache',
+	connection: 'keep-alive',
+	'x-vercel-ai-ui-message-stream': 'v1',
+	'x-accel-buffering': 'no',
+})
+
 /**
  * Protocol-native SSE event passed through by stream handlers.
  */
@@ -36,6 +50,8 @@ export type StreamTransportFramePayload = {
 		data?: unknown
 		traceId?: string
 	}
+	/** Cancellation reason supplied by the stream transport. */
+	reason?: string
 }
 
 /**
@@ -65,11 +81,56 @@ export const encodeProtocolSseEvent = (encoder: TextEncoder, event: ProtocolSseE
 }
 
 /**
+ * Maps a PURISTA stream payload to a data-only AI SDK UI Message Stream v1 record.
+ *
+ * Harness adapter chunks already own their UI message representation and pass
+ * through unchanged. Transport failures and cancellation are projected to the
+ * standard AI SDK terminal chunk types after SSE headers have been committed.
+ */
+export const toAiSdkUiMessageStreamEvent = (payload: StreamTransportFramePayload): ProtocolSseEvent | undefined => {
+	if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
+		if (payload.chunk.event !== 'data') {
+			throw new TypeError('AI SDK UI Message Stream v1 accepts data-only SSE records')
+		}
+		return payload.chunk
+	}
+
+	if (payload.frameType === 'error') {
+		return {
+			event: 'data',
+			data: {
+				type: 'error',
+				errorText:
+					payload.error?.isHandledError === true
+						? (payload.error.message ?? SAFE_INTERNAL_STREAM_ERROR_MESSAGE)
+						: SAFE_INTERNAL_STREAM_ERROR_MESSAGE,
+			},
+		}
+	}
+
+	if (payload.frameType === 'cancel') {
+		return {
+			event: 'data',
+			data: {
+				type: 'abort',
+				...(payload.reason === undefined ? {} : { reason: payload.reason }),
+			},
+		}
+	}
+
+	return undefined
+}
+
+/**
  * Identifies stream lifecycle frames that are consumed by the HTTP transport.
  */
 export const isTransportControlFrame = (frameType: unknown): boolean =>
 	typeof frameType === 'string' &&
-	(frameType === 'open' || frameType === 'close' || frameType === 'start' || frameType === 'complete')
+	(frameType === 'open' ||
+		frameType === 'close' ||
+		frameType === 'start' ||
+		frameType === 'complete' ||
+		frameType === 'heartbeat')
 
 /**
  * Narrows a stream frame payload to an error frame.

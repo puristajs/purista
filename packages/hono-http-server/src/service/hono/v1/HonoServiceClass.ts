@@ -15,7 +15,6 @@ import type {
 	QueueEnqueueResult,
 	ServiceClassTypes,
 	ServiceConstructorInput,
-	StreamHandle,
 } from '@purista/core'
 import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
@@ -34,12 +33,15 @@ import {
 	toProblemDetails,
 } from '../../../helper/problemDetails.js'
 import {
+	AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS,
+	AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
 	collectAggregateStreamResult,
 	encodeProtocolSseEvent,
 	isProtocolSseEvent,
 	isTransportControlFrame,
 	resolveHttpStreamingMode,
 	type StreamTransportFramePayload,
+	toAiSdkUiMessageStreamEvent,
 } from '../../../helper/streamTransport.js'
 import type { BindingsBase } from '../../../types/BindingsBase.js'
 import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
@@ -61,6 +63,8 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 			: {}),
 	}
 }
+
+const isProtectedHttpEndpoint = (metadata: HttpExposedServiceMeta) => metadata.expose.http.openApi?.isSecure !== false
 
 /** Service instance accepted by the Hono HTTP projection registry. */
 export type AnyService = Service<any>
@@ -127,21 +131,16 @@ export class HonoServiceClass<
 
 	private knownServices: Set<string> = new Set()
 	private knownEndpoints: Map<string, string> = new Map()
+	private protectedEndpoints: Set<string> = new Set()
 
 	private isAvailable = false
 
-	/** Creates the Hono service runtime and configures routing, health, and protection defaults. */
+	/** Creates the Hono service runtime and configures routing and health defaults. */
 	constructor(config: ServiceConstructorInput<ServiceClassTypes<HonoServiceV1Config, EmptyObject>>) {
 		super(config)
 		this.openApi = new OpenApiBuilder(this.config.openApi)
 
 		this.config.healthFunction = this.config.healthFunction ?? async function () {}
-		this.config.protectHandler =
-			this.config.protectHandler ??
-			async function (c: Parameters<Handler>[0], n: Parameters<Handler>[1]) {
-				void c
-				return n()
-			}
 
 		if (this.config.enableDynamicRoutes) {
 			this.app = new Hono<{ Bindings: Bindings; Variables: Variables }>({ router: new PatternRouter() })
@@ -214,6 +213,28 @@ export class HonoServiceClass<
 		return this
 	}
 
+	private async protectEndpoint(c: Parameters<Handler>[0], next: Parameters<Handler>[1]) {
+		const configuredHandler = this.config.protectHandler
+		if (!configuredHandler) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Protected HTTP endpoints require a configured protect middleware',
+			)
+		}
+		return safeBind(configuredHandler, this)(c, next)
+	}
+
+	private hasProtectedEndpointInConfiguredServices() {
+		if (!this.config.autoRegisterServicesFromConfig) return false
+		return this.config.services.some(service => {
+			const definitions = [...service.commandDefinitionList, ...service.streamDefinitionList]
+			return definitions.some(definition => {
+				if (!isHttpExposedServiceMeta(definition.metadata)) return false
+				return isProtectedHttpEndpoint(definition.metadata)
+			})
+		})
+	}
+
 	private sendProblemResponse(
 		c: Parameters<Handler>[0],
 		error: unknown,
@@ -242,6 +263,16 @@ export class HonoServiceClass<
 	 * the service becomes available.
 	 */
 	async start() {
+		if (
+			!this.config.protectHandler &&
+			(this.protectedEndpoints.size > 0 || this.hasProtectedEndpointInConfiguredServices())
+		) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Protected HTTP endpoints require a configured protect middleware before start',
+			)
+		}
+
 		if (this.config.enableHealth) {
 			this.openApi.addPath(this.config.healthPath, {
 				get: {
@@ -451,10 +482,17 @@ export class HonoServiceClass<
 			isDeclaredStreamDefinition,
 			responseContentType,
 		})
-
-		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config, service)
-
+		const isProtectedEndpoint = isProtectedHttpEndpoint(httpMetadata)
 		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
+		const isAiSdkUiMessageStream = expose.http.stream?.protocol === AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL
+		if (isProtectedEndpoint && this.isStarted && !this.config.protectHandler) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Protected HTTP endpoints require a configured protect middleware',
+			)
+		}
+
+		addPathToOpenApi(this.openApi, httpMetadata, path, this.config, service)
 
 		const endpointOwner = this.knownEndpoints.get(endpointKey)
 		if (endpointOwner && endpointOwner !== serviceRegistrationKey) {
@@ -546,14 +584,104 @@ export class HonoServiceClass<
 						}
 
 						const encoder = new TextEncoder()
+						const iterator = handle[Symbol.asyncIterator]()
+						let cleanupPromise: Promise<void> | undefined
+						let consumerCancelled = false
+						const cleanup = (reason: string) => {
+							if (cleanupPromise) return cleanupPromise
+							cleanupPromise = (async () => {
+								let cleanupError: unknown
+								try {
+									await handle.cancel(reason)
+								} catch (error) {
+									cleanupError = error
+								}
+								try {
+									await iterator.return?.()
+								} catch (error) {
+									cleanupError ??= error
+								}
+								if (cleanupError) throw cleanupError
+							})()
+							return cleanupPromise
+						}
+						// Await startup before constructing a Response so pre-start failures use
+						// the configured Hono error handler. Keep chunk-first handles lossless.
+						let initialFrame: Awaited<ReturnType<typeof iterator.next>> | undefined
+						let startupTimeout: ReturnType<typeof setTimeout> | undefined
+						const startupDeadline = new Promise<never>((_resolve, reject) => {
+							startupTimeout = setTimeout(() => {
+								reject(new HandledError(StatusCode.GatewayTimeout, 'Gateway Timeout'))
+							}, this.config.streamRequestTimeoutMs)
+						})
+						try {
+							while (true) {
+								const next = await Promise.race([iterator.next(), startupDeadline])
+								if (next.done) {
+									initialFrame = next
+									break
+								}
+								const payload = next.value.payload as StreamTransportFramePayload
+								if (payload.frameType === 'error') {
+									const error = payload.error
+									throw error?.isHandledError === true
+										? new HandledError(
+												error.status ?? StatusCode.InternalServerError,
+												error.message,
+												error.data,
+												error.traceId,
+											)
+										: new UnhandledError()
+								}
+								if (payload.frameType === 'start') break
+								if (payload.frameType === 'complete' || !isTransportControlFrame(payload.frameType)) {
+									initialFrame = next
+									break
+								}
+							}
+						} catch (error) {
+							try {
+								await cleanup('HTTP response stream failed before start')
+							} catch {
+								// Cleanup diagnostics must not replace the safe startup failure.
+							}
+							if (error instanceof UnhandledError && error.errorCode === StatusCode.GatewayTimeout) {
+								throw new HandledError(StatusCode.GatewayTimeout, 'Gateway Timeout')
+							}
+							throw error instanceof HandledError ? error : new UnhandledError()
+						} finally {
+							clearTimeout(startupTimeout)
+						}
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
-								const run = async (activeHandle: StreamHandle) => {
+								const run = async () => {
+									let protocolPassthrough = false
+									let aiSdkDoneSeen = false
 									try {
-										let protocolPassthrough = false
-										for await (const frame of activeHandle) {
+										while (true) {
+											if (consumerCancelled) return
+											const next = initialFrame ?? (await iterator.next())
+											initialFrame = undefined
+											if (consumerCancelled) return
+											if (next.done) break
+											const frame = next.value
 											const payload = frame.payload as StreamTransportFramePayload
 											if (isTransportControlFrame(payload.frameType)) {
+												continue
+											}
+
+											if (isAiSdkUiMessageStream) {
+												const event = toAiSdkUiMessageStreamEvent(payload)
+												if (!event) {
+													throw new TypeError('AI SDK UI Message Stream v1 received a non-protocol stream chunk')
+												}
+												if (event.data === '[DONE]') {
+													if (aiSdkDoneSeen) continue
+													aiSdkDoneSeen = true
+												} else if (aiSdkDoneSeen) {
+													throw new TypeError('AI SDK UI Message Stream v1 received data after [DONE]')
+												}
+												controller.enqueue(encodeProtocolSseEvent(encoder, event))
 												continue
 											}
 
@@ -578,15 +706,45 @@ export class HonoServiceClass<
 												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
 											)
 										}
+										if (isAiSdkUiMessageStream && !aiSdkDoneSeen) {
+											controller.enqueue(encodeProtocolSseEvent(encoder, { event: 'data', data: '[DONE]' }))
+										}
 										controller.close()
 									} catch (error) {
-										controller.error(error)
+										if (consumerCancelled) return
+										try {
+											await cleanup('HTTP response stream failed')
+										} catch {
+											// Preserve the sanitized transport failure instead of cleanup diagnostics.
+										}
+										if (consumerCancelled) return
+										if (isAiSdkUiMessageStream) {
+											if (!aiSdkDoneSeen) {
+												const terminal = toAiSdkUiMessageStreamEvent({
+													frameType: 'error',
+													error:
+														error instanceof HandledError
+															? { ...error.getErrorResponse(), isHandledError: true }
+															: {
+																	status: StatusCode.InternalServerError,
+																	message: 'Internal Server Error',
+																	isHandledError: false,
+																},
+												})
+												if (terminal) controller.enqueue(encodeProtocolSseEvent(encoder, terminal))
+												controller.enqueue(encodeProtocolSseEvent(encoder, { event: 'data', data: '[DONE]' }))
+											}
+											controller.close()
+											return
+										}
+										controller.error(error instanceof HandledError ? error : new UnhandledError())
 									}
 								}
-								void run(handle)
+								void run()
 							},
 							cancel: async reason => {
-								await handle.cancel(typeof reason === 'string' ? reason : 'client disconnected')
+								consumerCancelled = true
+								await cleanup(typeof reason === 'string' ? reason : 'client disconnected')
 							},
 						})
 
@@ -594,8 +752,13 @@ export class HonoServiceClass<
 							status: StatusCode.OK,
 							headers: {
 								...(expose.http.stream?.responseHeaders ?? {}),
-								'content-type': `${responseContentType}; charset=${responseEncodingType}`,
-								'cache-control': 'no-cache, no-transform',
+								...(isAiSdkUiMessageStream ? AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS : {}),
+								'content-type': isAiSdkUiMessageStream
+									? AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS['content-type']
+									: `${responseContentType}; charset=${responseEncodingType}`,
+								'cache-control': isAiSdkUiMessageStream
+									? AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS['cache-control']
+									: 'no-cache, no-transform',
 								connection: 'keep-alive',
 							},
 						})
@@ -667,22 +830,22 @@ export class HonoServiceClass<
 						this.logger.debug(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), err.message)
 
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
+						throw err
 					}
 
-					const unhandledError = new UnhandledError()
-					unhandledError.errorCode = StatusCode.InternalServerError
-					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, unhandledError.errorCode)
-
-					this.logger.error(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), 'unhandled error')
-					return this.sendProblemResponse(c, unhandledError, unhandledError.errorCode)
+					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.InternalServerError)
+					throw err
 				}
 			})
 		}
 
+		if (isProtectedEndpoint) {
+			this.protectedEndpoints.add(endpointKey)
+		}
+
 		if (method === 'get' || method === 'delete') {
-			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this)
+			if (isProtectedEndpoint) {
+				const protectHandler = safeBind(this.protectEndpoint, this)
 				this.app[method](path, protectHandler, handler)
 			} else {
 				this.app[method](path, handler)
@@ -698,8 +861,8 @@ export class HonoServiceClass<
 					),
 			})
 
-			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this)
+			if (isProtectedEndpoint) {
+				const protectHandler = safeBind(this.protectEndpoint, this)
 				this.app[method](path, protectHandler, limitRequestBody, handler)
 			} else {
 				this.app[method](path, limitRequestBody, handler)

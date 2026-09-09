@@ -1,3 +1,4 @@
+import { DefaultChatTransport, readUIMessageStream, type UIMessage, type UIMessageChunk } from 'ai'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -7,7 +8,28 @@ import {
 	isStreamErrorPayload,
 	isTransportControlFrame,
 	resolveHttpStreamingMode,
+	toAiSdkUiMessageStreamEvent,
 } from './streamTransport.js'
+
+class InspectableChatTransport extends DefaultChatTransport<UIMessage> {
+	read(stream: ReadableStream<Uint8Array>) {
+		return this.processResponseStream(stream)
+	}
+}
+
+const officialReader = new InspectableChatTransport()
+
+const encodeUiMessageStream = (chunks: readonly (UIMessageChunk | '[DONE]')[]) => {
+	const encoder = new TextEncoder()
+	return new ReadableStream<Uint8Array>({
+		start(controller) {
+			for (const chunk of chunks) {
+				controller.enqueue(encodeProtocolSseEvent(encoder, { event: 'data', data: chunk }))
+			}
+			controller.close()
+		},
+	})
+}
 
 describe('streamTransport helpers', () => {
 	it('detects protocol SSE events', () => {
@@ -30,9 +52,62 @@ describe('streamTransport helpers', () => {
 		expect(value).toBe('data: {"type":"text-delta","delta":"hello"}\n\n')
 	})
 
+	it('produces records consumed directly by the official AI SDK v7 stream reader', async () => {
+		const parsedChunks: UIMessageChunk[] = []
+		const stream = officialReader.read(
+			encodeUiMessageStream([
+				{ type: 'start', messageId: 'assistant-1' },
+				{ type: 'start-step' },
+				{ type: 'text-start', id: 'answer' },
+				{ type: 'text-delta', id: 'answer', delta: 'hello' },
+				{ type: 'text-end', id: 'answer' },
+				{ type: 'finish-step' },
+				{ type: 'finish', finishReason: 'stop' },
+				'[DONE]',
+			]),
+		)
+		for await (const chunk of stream) parsedChunks.push(chunk)
+
+		let finalMessage: UIMessage | undefined
+		for await (const message of readUIMessageStream({
+			stream: officialReader.read(encodeUiMessageStream(parsedChunks)),
+		})) {
+			finalMessage = message
+		}
+
+		expect(parsedChunks.map(chunk => chunk.type)).toEqual([
+			'start',
+			'start-step',
+			'text-start',
+			'text-delta',
+			'text-end',
+			'finish-step',
+			'finish',
+		])
+		expect(finalMessage?.parts).toContainEqual(expect.objectContaining({ type: 'text', text: 'hello' }))
+	})
+
+	it('preserves handled stream errors and redacts unhandled diagnostics', () => {
+		expect(
+			toAiSdkUiMessageStreamEvent({
+				frameType: 'error',
+				error: { status: 403, message: 'Safe permission denial', isHandledError: true },
+			}),
+		).toEqual({ event: 'data', data: { type: 'error', errorText: 'Safe permission denial' } })
+
+		const privateSentinel = 'PRIVATE_DATABASE_CONNECTION_DETAILS'
+		const unhandled = toAiSdkUiMessageStreamEvent({
+			frameType: 'error',
+			error: { status: 500, message: privateSentinel, isHandledError: false },
+		})
+		expect(unhandled).toEqual({ event: 'data', data: { type: 'error', errorText: 'Internal Server Error' } })
+		expect(JSON.stringify(unhandled)).not.toContain(privateSentinel)
+	})
+
 	it('detects transport control frames', () => {
 		expect(isTransportControlFrame('open')).toBe(true)
 		expect(isTransportControlFrame('complete')).toBe(true)
+		expect(isTransportControlFrame('heartbeat')).toBe(true)
 		expect(isTransportControlFrame('chunk')).toBe(false)
 	})
 

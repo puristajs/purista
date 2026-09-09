@@ -36,6 +36,7 @@
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
 		"@hono/swagger-ui": "^0.6.1",
+		"ai": "^7.0.0",
 		"sinon": "^22.1.0",
 		"vitest": "^4.1.10"
 	},
