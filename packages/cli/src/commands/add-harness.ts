@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { addPuristaAgent } from '../api/addPuristaAgent.js'
+import { addPuristaHarness } from '../api/addPuristaHarness.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
 import {
@@ -14,24 +14,20 @@ import {
 } from './shared.js'
 
 const schema = baseAddInputSchema.extend({
-	name: z.string().trim().min(1),
-	description: z.string().trim().min(1),
+	name: z.string().trim().min(1).optional(),
+	description: z.string().trim().optional(),
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
 	responseEventName: z.never().optional(),
 })
 
-export type AddAgentInput = z.input<typeof schema>
+export type AddHarnessInput = z.input<typeof schema>
 
-export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<typeof schema>> = {
-	id: 'add-agent',
-	resolve: async (input, context): Promise<PuristaCommandResolution<AddAgentInput, z.infer<typeof schema>>> => {
+export const addHarnessCommand: PuristaExecutableCommand<AddHarnessInput, z.infer<typeof schema>> = {
+	id: 'add-harness',
+	resolve: async (input, context): Promise<PuristaCommandResolution<AddHarnessInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim())
-			missing.push({ type: 'input', key: 'name', message: 'Name of the agent', required: true } as const)
-		if (!input.description?.trim())
-			missing.push({ type: 'input', key: 'description', message: 'Description of the agent', required: true } as const)
 		if (!input.serviceName?.trim())
 			missing.push({
 				type: 'select',
@@ -49,24 +45,23 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 
 		const parsed = schema.safeParse(input)
 		if (!parsed.success) {
-			return createPendingResolution('add-agent', input, missing, createIssuesFromZod(parsed.error))
+			return createPendingResolution('add-harness', input, missing, createIssuesFromZod(parsed.error))
 		}
-		return createPendingResolution('add-agent', input, missing, [], [], parsed.data)
+		return createPendingResolution('add-harness', input, missing, [], [], parsed.data)
 	},
 	execute: async (resolvedInput, context) => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const puristaConfig = requirePuristaConfig(context)
-		const mutationSnapshot = await addPuristaAgent({
+		const mutationSnapshot = await addPuristaHarness({
 			projectRootPath: context.cwd,
 			puristaConfig,
 			puristaProject: projectSnapshot,
 			serviceName: resolvedInput.serviceName,
 			serviceVersion: resolvedInput.serviceVersion,
-			agentName: resolvedInput.name,
-			agentDescription: resolvedInput.description,
+			harnessName: resolvedInput.name,
 			codeWriterOptions: context.codeWriterOptions,
 		})
 
-		return createResult('add-agent', context.mode, mutationSnapshot)
+		return createResult('add-harness', context.mode, mutationSnapshot)
 	},
 }

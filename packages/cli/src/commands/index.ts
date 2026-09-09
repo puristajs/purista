@@ -1,6 +1,7 @@
 import type { PuristaCommandId } from '../core/types.js'
 import { addAgentCommand } from './add-agent.js'
 import { addCommandCommand } from './add-command.js'
+import { addHarnessCommand } from './add-harness.js'
 import { addQueueCommand } from './add-queue.js'
 import { addQueueWorkerCommand } from './add-queue-worker.js'
 import { addServiceCommand } from './add-service.js'
@@ -23,6 +24,7 @@ export const commandRegistry = {
 	'add-stream': addStreamCommand,
 	'add-queue': addQueueCommand,
 	'add-queue-worker': addQueueWorkerCommand,
+	'add-harness': addHarnessCommand,
 	'add-agent': addAgentCommand,
 	'add-workflow': addWorkflowCommand,
 	'export-asyncapi': exportAsyncApiCommand,

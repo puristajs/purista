@@ -21,6 +21,8 @@ const mapAddComponentToCommand = (component: string) => {
 			return 'add-queue'
 		case 'queue-worker':
 			return 'add-queue-worker'
+		case 'harness':
+			return 'add-harness'
 		case 'agent':
 			return 'add-agent'
 		case 'workflow':
@@ -59,7 +61,9 @@ const main = async () => {
 	registerGlobalModeOptions(
 		program
 			.command('add')
-			.description('Add a new service, command, subscription, stream, queue, queue worker, agent, or workflow.')
+			.description(
+				'Add a new service, command, subscription, stream, queue, queue worker, Harness, agent, or workflow.',
+			)
 			.addArgument(
 				new Argument('[component]', 'Type of component to add').choices([
 					'service',
@@ -68,6 +72,7 @@ const main = async () => {
 					'stream',
 					'queue',
 					'queue-worker',
+					'harness',
 					'agent',
 					'workflow',
 				]),

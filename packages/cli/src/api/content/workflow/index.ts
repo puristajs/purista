@@ -1,4 +1,2 @@
-export * from './getHarnessWorkflowModuleFileContent.js'
+export * from './getHarnessWorkflowFileContent.js'
 export * from './getHarnessWorkflowTestFileContent.js'
-export * from './getWorkflowHarnessFileContent.js'
-export * from './getWorkflowHarnessMountFileContent.js'

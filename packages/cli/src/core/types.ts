@@ -6,6 +6,7 @@ export const puristaCommandIds = [
 	'add-stream',
 	'add-queue',
 	'add-queue-worker',
+	'add-harness',
 	'add-agent',
 	'add-workflow',
 	'export-asyncapi',

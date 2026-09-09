@@ -1,19 +1,14 @@
-import { dirname, join } from 'node:path'
 import { z } from 'zod'
 import { addPuristaWorkflow } from '../api/addPuristaWorkflow.js'
-import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
-import { convertToProjectFileCasing } from '../api/convertToProjectFileCasing.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
 import {
 	baseAddInputSchema,
-	captureMutationSnapshot,
 	createIssuesFromZod,
 	createPendingResolution,
 	createResult,
 	getServiceChoices,
 	getServiceVersionChoices,
-	nonEmptyOptionalStringSchema,
 	requireProjectContext,
 	requirePuristaConfig,
 } from './shared.js'
@@ -23,7 +18,7 @@ const schema = baseAddInputSchema.extend({
 	description: z.string().trim().min(1),
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
-	responseEventName: nonEmptyOptionalStringSchema,
+	responseEventName: z.never().optional(),
 })
 
 export type AddWorkflowInput = z.input<typeof schema>
@@ -66,44 +61,7 @@ export const addWorkflowCommand: PuristaExecutableCommand<AddWorkflowInput, z.in
 	execute: async (resolvedInput, context) => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const puristaConfig = requirePuristaConfig(context)
-		const serviceDirectory = convertToProjectFileCasing(resolvedInput.serviceName, puristaConfig)
-		const workflowDirectory = convertToProjectFileCasing(resolvedInput.name, puristaConfig)
-		if (resolvedInput.responseEventName) {
-			await ensureServiceEvent({
-				projectRootPath: context.cwd,
-				puristaProjectConfig: puristaConfig,
-				puristaProject: projectSnapshot,
-				eventName: resolvedInput.responseEventName,
-				description: `Emitted by ${resolvedInput.serviceName} v${resolvedInput.serviceVersion} workflow ${resolvedInput.name}:\n${resolvedInput.description}`,
-			})
-		}
-
-		const mutationSnapshot = captureMutationSnapshot([
-			join(
-				context.cwd,
-				dirname(puristaConfig.servicePath ?? 'src/service'),
-				'harness',
-				serviceDirectory,
-				`${serviceDirectory}Harness.ts`,
-			),
-			join(
-				context.cwd,
-				dirname(puristaConfig.servicePath ?? 'src/service'),
-				'harness',
-				serviceDirectory,
-				'workflow',
-				workflowDirectory,
-			),
-			join(
-				context.cwd,
-				puristaConfig.servicePath ?? 'src/service',
-				resolvedInput.serviceName,
-				`v${resolvedInput.serviceVersion}`,
-				'harness',
-			),
-			join(context.cwd, 'package.json'),
-		])
-		await addPuristaWorkflow({
+		const mutationSnapshot = await addPuristaWorkflow({
 			projectRootPath: context.cwd,
 			puristaConfig,
 			puristaProject: projectSnapshot,
@@ -111,7 +69,6 @@ export const addWorkflowCommand: PuristaExecutableCommand<AddWorkflowInput, z.in
 			serviceVersion: resolvedInput.serviceVersion,
 			workflowName: resolvedInput.name,
 			workflowDescription: resolvedInput.description,
-			responseEventName: resolvedInput.responseEventName,
 			codeWriterOptions: context.codeWriterOptions,
 		})
 

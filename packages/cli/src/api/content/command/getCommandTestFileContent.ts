@@ -4,7 +4,7 @@ import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
-/** Generate a command unit test using the current command context mock shape. */
+/** Generate an isolated command unit test with the base service builder and its own target definition. */
 export const getCommandTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string
@@ -14,7 +14,7 @@ export const getCommandTestFileContent = (input: {
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 
-	const serviceTemplate = `${input.serviceName} v${input.serviceVersion} service`
+	const serviceTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
 	const serviceFileName = convertToProjectFileCasing(serviceTemplate, input.puristaConfig)
 	const serviceName = camelCase(serviceTemplate)
 
@@ -63,7 +63,9 @@ export const getCommandTestFileContent = (input: {
 				.write(`test('does not throw', async () => `)
 				.inlineBlock(() => {
 					writer
-						.write(`const service = await ${serviceName}.getInstance(getEventBridgeMock(sandbox).mock,`)
+						.write(
+							`const service = await ${serviceName}.addCommandDefinition(${commandBuilderName}.getDefinition()).getInstance(getEventBridgeMock(sandbox).mock,`,
+						)
 						.inlineBlock(() => {
 							writer.writeLine('logger: getLoggerMock(sandbox).mock,')
 						})
