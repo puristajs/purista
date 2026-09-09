@@ -1,23 +1,30 @@
-import { createHash } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 
 import type {
+	AnyHarnessTargetContract,
 	ExecutionEvent,
-	Harness,
-	HarnessDefinition,
-	HarnessInstanceConfig,
-	HostToolBinding,
-	HostToolHandlerContext,
-	InvokeOptions,
-	ModelHandle,
-	RunOutcome,
+	ExecutionTerminalOutcome,
+	HarnessInterrupt,
+	Logger as HarnessLogger,
+	HarnessTraceContext,
+	JsonValue,
 } from '@purista/harness'
-import { isHarnessError } from '@purista/harness'
+import { createTelemetryShim, isHarnessError, normalizeHarnessTraceContext } from '@purista/harness'
+import {
+	type HostedDispatchedTargetRequest,
+	type HostedHarnessInstance,
+	type HostedHarnessInstanceConfig,
+	type HostedTargetRequest,
+	type HostOwnerToken,
+	instantiateHostedHarness,
+	visitHostedHarnessTargets,
+} from '@purista/harness/integrator'
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
 import { createSuccessResponse } from '../core/helper/createSuccessResponse.impl.js'
-import type { Command } from '../core/types/commandType/Command.js'
+import type { Command, HarnessTransportEnvelope } from '../core/types/commandType/Command.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { Logger } from '../core/types/Logger.js'
@@ -27,411 +34,682 @@ import { isStreamOpenRequest } from '../core/types/stream/isStreamOpenRequest.im
 import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamMessage } from '../core/types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
+import { createEventBridgeHarnessTargetDispatcher } from './dispatcher.js'
 import type { HarnessInvokeParameter } from './invokeTypes.js'
+import { canonicalHarnessJson } from './remoteTargetContract.js'
 import type {
 	HarnessBusinessGuardContext,
-	HarnessCommandToolAdapter,
-	HarnessHostContext,
-	HarnessHostToolFunctionContext,
-	HarnessHostToolFunctionDefinition,
 	HarnessMount,
+	HarnessTargetJsonSchema,
+	MountedHarnessTargetProjection,
+	PuristaHostContextRequest,
+	PuristaHostInvocation,
+	PuristaToolContext,
 } from './types.js'
 
-type MountedRuntime = {
-	definition: HarnessDefinition<any>
-	harness: Harness<any>
-	registrations: Array<{ target: string; command: boolean; stream: boolean }>
-}
-
-type RuntimeTargetPolicy = Readonly<{
+type Projection = MountedHarnessTargetProjection<AnyHarnessTargetContract>
+type HostedRuntime = HostedHarnessInstance<any, any, PuristaHostInvocation>
+type Terminal = ExecutionTerminalOutcome<JsonValue, HarnessInterrupt>
+type Event = ExecutionEvent<JsonValue>
+type TargetPolicy = Readonly<{
 	beforeGuards?: Readonly<
-		Record<string, (context: HarnessBusinessGuardContext<any>, input: unknown) => void | Promise<void>>
+		Record<
+			string,
+			(context: HarnessBusinessGuardContext<Record<string, unknown>>, input: unknown) => void | Promise<void>
+		>
 	>
 	afterGuards?: Readonly<
-		Record<string, (context: HarnessBusinessGuardContext<any>, outcome: RunOutcome<unknown>) => void | Promise<void>>
+		Record<
+			string,
+			(context: HarnessBusinessGuardContext<Record<string, unknown>>, outcome: Terminal) => void | Promise<void>
+		>
 	>
-	successEvent?: string
-	durableResume?: Readonly<{ identity: 'run-owner' }>
 }>
+type ActiveInvocation = {
+	message: Command | StreamOpenRequest
+	controller: AbortController
+	completed: Promise<void>
+	finish: () => void
+	deadline?: number
+	cancel?: (reason?: string) => Promise<void>
+	timer?: ReturnType<typeof setTimeout>
+	dispose?: () => void
+}
+type Registration = Readonly<{ kind: 'command' | 'stream'; projection: Projection }>
 
-/** Service-owned lifecycle for one mounted portable Harness definition. */
+/** Service-owned lifecycle and receiving boundary for one hosted Harness graph. */
 export class HarnessMountRuntime {
-	private runtime?: MountedRuntime
-	private readonly activeStreams = new Map<string, AbortController>()
-	private started = false
+	private runtime?: HostedRuntime
+	private readonly registrations: Registration[] = []
+	private readonly active = new Map<string, ActiveInvocation>()
+	private startPromise?: Promise<void>
+	private shutdownPromise?: Promise<void>
+	private preflightComplete = false
+	private accepting = false
+	private closing = false
 
 	constructor(
-		private readonly serviceName: string,
-		private readonly serviceVersion: string,
-		private readonly eventBridge: EventBridge,
-		private readonly logger: Logger,
-		private readonly mount: HarnessMount,
-		private readonly config: Omit<HarnessInstanceConfig<any, HarnessHostContext>, 'hostTools'>,
-		private readonly resources: Record<string, unknown>,
-		private readonly createHostToolContext: (
-			definition: HarnessHostToolFunctionDefinition,
-			context: HostToolHandlerContext<HarnessHostContext>,
-		) => HarnessHostToolFunctionContext,
+		private readonly options: Readonly<{
+			serviceName: string
+			serviceVersion: string
+			eventBridge: EventBridge
+			logger: Logger
+			mount: HarnessMount
+			config: HostedHarnessInstanceConfig<HarnessMount['definition']['requirements']>
+			resources: Record<string, unknown>
+			createHostContext: (request: PuristaHostContextRequest) => PuristaToolContext
+			hostOwner: HostOwnerToken<PuristaToolContext>
+			occupied?: Readonly<{
+				commands: readonly string[]
+				streams: readonly string[]
+				events?: Readonly<Record<string, HarnessTargetJsonSchema>>
+			}>
+		}>,
 	) {}
 
-	/** Instantiate the Harness and register its explicitly published aggregate targets. */
-	async start() {
-		if (this.started) return
-		const occupied = new Set<string>()
+	private get serviceName() {
+		return this.options.serviceName
+	}
+	private get serviceVersion() {
+		return this.options.serviceVersion
+	}
+	private get eventBridge() {
+		return this.options.eventBridge
+	}
+	private get logger() {
+		return this.options.logger
+	}
+	private get mount() {
+		return this.options.mount
+	}
+	private get resources() {
+		return this.options.resources
+	}
+
+	/** Validate the complete stored projection set without creating runtime resources. */
+	preflight(): void {
+		if (this.preflightComplete) return
+		if (!Object.isFrozen(this.mount.projections) || this.mount.projections.length === 0) {
+			throw new TypeError('A mounted Harness requires a complete frozen target projection set.')
+		}
+		const seen = new Set<AnyHarnessTargetContract>()
+		const addresses = new Set<string>()
+		const commandAddresses = new Set(this.options.occupied?.commands ?? [])
+		const streamAddresses = new Set(this.options.occupied?.streams ?? [])
+		const events = new Map(
+			Object.entries(this.options.occupied?.events ?? {}).map(([name, schema]) => [name, canonicalHarnessJson(schema)]),
+		)
+		visitHostedHarnessTargets(this.mount.definition, ({ target, visibility }) => {
+			const matches = this.mount.projections.filter(row => row.target === target)
+			const projection = matches[0]
+			if (matches.length !== 1 || !projection || projection.visibility !== visibility || seen.has(target)) {
+				throw new TypeError('Mounted Harness projections do not exactly cover the authentic target graph.')
+			}
+			seen.add(target)
+			const { address, routeBinding, targetExport } = projection
+			if (
+				!Object.isFrozen(projection) ||
+				!Object.isFrozen(projection.standardSchemas) ||
+				!ownedFrozen(projection.jsonSchemas) ||
+				!ownedFrozen(targetExport) ||
+				!ownedFrozen(projection.policy) ||
+				!ownedFrozen(routeBinding.receipt) ||
+				(projection.completedEvent !== undefined &&
+					(!Object.isFrozen(projection.completedEvent) ||
+						!Object.isFrozen(projection.completedEvent.schema) ||
+						!ownedFrozen(projection.completedEvent.jsonSchema))) ||
+				!Object.isFrozen(address) ||
+				!Object.isFrozen(routeBinding) ||
+				address.serviceName !== this.serviceName ||
+				address.serviceVersion !== this.serviceVersion ||
+				address.serviceTarget !== target.id ||
+				addresses.has(target.id) ||
+				streamAddresses.has(target.id) ||
+				(visibility === 'root' && commandAddresses.has(target.id)) ||
+				projection.standardSchemas.input !== target.input ||
+				projection.standardSchemas.output !== target.output ||
+				routeBinding.target !== target ||
+				routeBinding.visibility !== visibility ||
+				canonicalHarnessJson(routeBinding.address) !== canonicalHarnessJson(address) ||
+				routeBinding.exportDigest !== projection.exportDigest ||
+				routeBinding.routeBindingRevision !== projection.routeBindingRevision ||
+				!/^sha256:[0-9a-f]{64}$/.test(projection.exportDigest) ||
+				!/^sha256:[0-9a-f]{64}$/.test(projection.routeBindingRevision) ||
+				!nonempty(projection.mountRevision) ||
+				targetExport.targetName !== target.id ||
+				targetExport.kind !== target.kind ||
+				routeBinding.receipt.target.id !== target.id ||
+				routeBinding.receipt.target.kind !== target.kind
+			) {
+				throw new TypeError('Mounted Harness target projection has an invalid or colliding route.')
+			}
+			addresses.add(target.id)
+			const policy = this.policyFor(projection)
+			if (visibility === 'dependency') {
+				if (projection.policy !== null || projection.completedEvent !== undefined || targetExport.queue !== undefined) {
+					throw new TypeError('A dependency target cannot carry public root policy.')
+				}
+			} else {
+				const descriptor = projection.policy
+				if (
+					!descriptor ||
+					!Object.isFrozen(descriptor) ||
+					canonicalHarnessJson(descriptor.beforeGuardKeys) !==
+						canonicalHarnessJson(Object.keys(policy?.beforeGuards ?? {}).sort()) ||
+					canonicalHarnessJson(descriptor.afterGuardKeys) !==
+						canonicalHarnessJson(Object.keys(policy?.afterGuards ?? {}).sort()) ||
+					descriptor.successEvent !== (projection.completedEvent?.name ?? null) ||
+					descriptor.queueName !== (targetExport.queue?.name ?? null) ||
+					(descriptor.durableResume === 'stored-run-owner' &&
+						(!target.interrupts.includes('tool-approval') || descriptor.beforeGuardKeys.length === 0))
+				) {
+					throw new TypeError('Mounted Harness root policy does not match its projection.')
+				}
+			}
+			if (projection.completedEvent) {
+				const schema = canonicalHarnessJson(projection.completedEvent.jsonSchema)
+				const previous = events.get(projection.completedEvent.name)
+				if (previous !== undefined && previous !== schema)
+					throw new TypeError('Mounted Harness completed-event schema collision.')
+				events.set(projection.completedEvent.name, schema)
+			}
+		})
+		if (seen.size !== this.mount.projections.length)
+			throw new TypeError('Mounted Harness projection set contains unknown targets.')
+		this.preflightComplete = true
+	}
+
+	/** Instantiate once and register roots and dependency routes only after complete preflight. */
+	start(): Promise<void> {
+		if (this.startPromise) return this.startPromise
+		if (this.closing) return Promise.reject(new Error('Harness mount is closed.'))
+		this.startPromise = this.startOnce()
+		return this.startPromise
+	}
+
+	private async startOnce(): Promise<void> {
 		try {
-			const harness = await this.mount.definition.getInstance(this.configFor())
-			const runtime: MountedRuntime = { definition: this.mount.definition, harness, registrations: [] }
-			this.runtime = runtime
-			for (const agentId of (this.mount.policy.publish.agents ?? []) as readonly string[]) {
-				this.assertFreeAddress(agentId, occupied)
-				await this.register(runtime, 'agent', agentId)
+			this.preflight()
+			const targetDispatcher = createEventBridgeHarnessTargetDispatcher({
+				eventBridge: this.eventBridge,
+				sender: {
+					serviceName: this.serviceName,
+					serviceVersion: this.serviceVersion,
+					serviceTarget: 'harness',
+					instanceId: this.eventBridge.instanceId,
+				},
+				bindings: this.mount.projections.map(row => row.routeBinding),
+			})
+			this.runtime = await instantiateHostedHarness(this.mount.definition, this.options.config, {
+				hostOwner: this.options.hostOwner,
+				targetDispatcher,
+				projectIdentity: (invocation: PuristaHostInvocation) => invocation.identity,
+				projectTraceContext: (invocation: PuristaHostInvocation) => invocation.trace,
+				createHostContext: this.options.createHostContext,
+				logger: hostedLogger(this.logger),
+				telemetry: createTelemetryShim(),
+			})
+			if (this.closing) throw new Error('Harness mount closed during startup.')
+			for (const projection of this.mount.projections) {
+				if (projection.visibility === 'root') {
+					await this.eventBridge.registerCommand(
+						projection.address,
+						message => this.execute(projection, message),
+						{ expose: {} },
+						{ durable: false, autoacknowledge: true, shared: true },
+					)
+					this.registrations.push({ kind: 'command', projection })
+				}
+				await this.eventBridge.registerStream(
+					projection.address,
+					message => this.executeStream(projection, message),
+					{ expose: {} },
+					{ durable: false, autoacknowledge: true, shared: true },
+				)
+				this.registrations.push({ kind: 'stream', projection })
+				if (this.closing) throw new Error('Harness mount closed during startup.')
 			}
-			for (const workflowId of (this.mount.policy.publish.workflows ?? []) as readonly string[]) {
-				this.assertFreeAddress(workflowId, occupied)
-				await this.register(runtime, 'workflow', workflowId)
-			}
-			this.started = true
+			this.accepting = true
 		} catch (error) {
-			await this.shutdown()
+			this.closing = true
+			try {
+				await this.cleanup()
+			} catch {
+				try {
+					this.logger.error('Harness startup rollback failed.')
+				} catch {
+					/* Preserve the original startup failure. */
+				}
+			}
 			throw error
 		}
 	}
 
-	/** Resolve one model from the runtime created for the exact mounted definition. */
-	getModel(definition: HarnessDefinition<any>, alias: string): ModelHandle {
-		const runtime = this.runtime?.definition === definition ? this.runtime : undefined
-		if (!runtime) throw new Error(`Harness definition "${definition.name}" is not mounted on this service instance.`)
-		const model = (runtime.harness.models as Record<string, ModelHandle | undefined>)[alias]
-		if (!model) throw new Error(`Harness model "${alias}" is not available on "${definition.name}".`)
-		return model
+	/** Stop ingress, cancel active work, remove routes in reverse order, then close once. */
+	shutdown(): Promise<void> {
+		if (this.shutdownPromise) return this.shutdownPromise
+		this.closing = true
+		this.accepting = false
+		this.shutdownPromise = (async () => {
+			await this.startPromise?.catch(() => undefined)
+			await this.cleanup()
+		})()
+		return this.shutdownPromise
 	}
 
-	/** Unregister published addresses, then close the Harness runtime. */
-	async shutdown() {
-		const failures: unknown[] = []
+	private async cleanup(): Promise<void> {
+		this.accepting = false
+		const errors: unknown[] = []
+		const active = [...this.active.values()]
+		for (const invocation of active) {
+			invocation.controller.abort(new Error('service_shutdown'))
+			try {
+				await invocation.cancel?.('service_shutdown')
+			} catch (error) {
+				errors.push(error)
+			}
+		}
+		for (const registration of this.registrations.splice(0).reverse()) {
+			try {
+				if (registration.kind === 'command') await this.eventBridge.unregisterCommand(registration.projection.address)
+				else await this.eventBridge.unregisterStream(registration.projection.address)
+			} catch (error) {
+				errors.push(error)
+			}
+		}
 		const runtime = this.runtime
-		if (runtime) {
-			for (const registration of [...runtime.registrations].reverse()) {
-				const address = {
-					serviceName: this.serviceName,
-					serviceVersion: this.serviceVersion,
-					serviceTarget: registration.target,
-				}
-				if (registration.command) {
-					try {
-						await this.eventBridge.unregisterCommand(address)
-					} catch (error) {
-						failures.push(error)
-					}
-				}
-				if (registration.stream) {
-					try {
-						await this.eventBridge.unregisterStream(address)
-					} catch (error) {
-						failures.push(error)
-					}
-				}
-			}
-			const result = await runtime.harness.shutdown()
-			failures.push(...result.errors)
-		}
 		this.runtime = undefined
-		for (const controller of this.activeStreams.values()) controller.abort(new Error('service_shutdown'))
-		this.activeStreams.clear()
-		this.started = false
-		if (failures.length > 0) throw new AggregateError(failures, 'Harness mount shutdown failed.')
-	}
-
-	private configFor(): HarnessInstanceConfig<any, HarnessHostContext> {
-		const models = Object.fromEntries(
-			Object.keys(this.mount.definition.catalog.models).map(alias => [alias, this.config.models[alias]]),
-		)
-		const hostTools = Object.fromEntries(
-			Object.entries(this.mount.policy.hostTools ?? {}).map(([id, binding]) => [
-				id,
-				isCommandToolAdapter(binding)
-					? this.commandToolBinding(binding)
-					: isHostToolFunctionDefinition(binding)
-						? this.hostToolFunctionBinding(binding)
-						: binding,
-			]),
-		)
-		return {
-			...this.config,
-			models,
-			...(Object.keys(hostTools).length > 0 ? { hostTools } : {}),
-		} as HarnessInstanceConfig<any, HarnessHostContext>
-	}
-
-	private commandToolBinding(adapter: HarnessCommandToolAdapter): HostToolBinding<any, any, HarnessHostContext> {
-		return async (context, input) => {
-			const mapped = adapter.mapInput?.(input, context) ?? { payload: input, parameter: {} }
-			const output = await this.eventBridge.invoke({
-				contentType: 'application/json',
-				contentEncoding: 'utf-8',
-				traceId: context.host.request.traceId,
-				principalId: context.host.identity.principalId,
-				tenantId: context.host.identity.tenantId,
-				sender: {
-					serviceName: this.serviceName,
-					serviceVersion: this.serviceVersion,
-					serviceTarget: context.toolId,
-					instanceId: this.eventBridge.instanceId,
-				},
-				receiver: {
-					serviceName: adapter.serviceName,
-					serviceVersion: adapter.serviceVersion,
-					serviceTarget: adapter.serviceTarget,
-				},
-				payload: { payload: mapped.payload, parameter: mapped.parameter ?? {} },
-			})
-			return adapter.mapOutput ? adapter.mapOutput(output) : output
-		}
-	}
-
-	private hostToolFunctionBinding(
-		definition: HarnessHostToolFunctionDefinition,
-	): HostToolBinding<any, any, HarnessHostContext> {
-		return async (context, input) => definition.handler(this.createHostToolContext(definition, context), input)
-	}
-
-	private assertFreeAddress(target: string, occupied: Set<string>) {
-		if (occupied.has(target)) {
-			throw new Error(`Harness target address "${target}" is published more than once.`)
-		}
-		occupied.add(target)
-	}
-
-	private async register(runtime: MountedRuntime, kind: 'agent' | 'workflow', target: string) {
-		const definition = this.mount.definition
-		const catalog = kind === 'agent' ? definition.catalog.agents : definition.catalog.workflows
-		if (!(target in catalog)) throw new Error(`Harness ${kind} "${target}" does not exist in "${definition.name}".`)
-		const policy = (
-			kind === 'agent' ? this.mount.policy.targets?.agents?.[target] : this.mount.policy.targets?.workflows?.[target]
-		) as RuntimeTargetPolicy | undefined
-		const registration = { target, command: false, stream: false }
-		runtime.registrations.push(registration)
-
-		await this.eventBridge.registerCommand(
-			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
-			async message => this.execute(runtime.harness, kind, target, message, policy),
-			{ expose: {} },
-			{ durable: false, autoacknowledge: true, shared: true },
-		)
-		registration.command = true
-		await this.eventBridge.registerStream(
-			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
-			async message => this.executeStream(runtime.harness, kind, target, message, policy),
-			{ expose: {} },
-			{ durable: false, autoacknowledge: true, shared: true },
-		)
-		registration.stream = true
-	}
-
-	private async execute(
-		harness: Harness<any>,
-		kind: 'agent' | 'workflow',
-		target: string,
-		message: Command,
-		policy?: RuntimeTargetPolicy,
-	) {
-		try {
-			const parameter = parseParameter(message.payload.parameter)
-			const context = this.guardContext(kind, target, message)
-			await runBeforeGuards(policy, context, message.payload.payload)
-			const session = await this.resolveSession(harness, kind, target, message, parameter, policy)
-			const options: InvokeOptions = {
-				hostContext: hostContext(message, this.logger, this.resources),
-				...(parameter.idempotencyKey ? { idempotencyKey: parameter.idempotencyKey } : {}),
-				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
-				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
-				...(parameter.durable ? { durable: parameter.durable } : {}),
-				...(parameter.resume ? { resume: parameter.resume } : {}),
+		if (runtime) {
+			try {
+				await runtime.close()
+			} catch (error) {
+				errors.push(error)
 			}
-			const invoker = (kind === 'agent' ? session.agents[target] : session.workflows[target]) as
-				| { run(input: unknown, options?: InvokeOptions): Promise<unknown> }
-				| undefined
-			if (!invoker) throw new Error(`Mounted Harness ${kind} "${target}" is unavailable.`)
-			const outcome = (await invoker.run(message.payload.payload, options)) as RunOutcome<unknown>
-			await runAfterGuards(policy, context, outcome)
-			return createSuccessResponse(
-				this.eventBridge.instanceId,
-				message,
-				outcome,
-				outcome.status === 'completed' ? policy?.successEvent : undefined,
-			)
-		} catch (error) {
-			const handled = toHandledError(error)
-			if (handled.errorCode >= 500) this.logger.error({ err: handled }, handled.message)
-			else this.logger.warn({ err: handled }, handled.message)
-			return createErrorResponse(this.eventBridge.instanceId, message, handled.errorCode, handled)
 		}
+		await Promise.all(active.map(invocation => invocation.completed))
+		if (errors.length) throw new AggregateError(errors, 'Harness mount shutdown failed.')
 	}
 
-	private async executeStream(
-		harness: Harness<any>,
-		kind: 'agent' | 'workflow',
-		target: string,
-		message: StreamMessage,
-		policy?: RuntimeTargetPolicy,
-	) {
-		if (isStreamControl(message)) {
-			this.activeStreams.get(message.correlationId)?.abort(new Error(message.payload.reason ?? 'consumer_cancelled'))
-			return
-		}
-		if (!isStreamOpenRequest(message)) return
-
-		const controller = new AbortController()
-		this.activeStreams.set(message.correlationId, controller)
-		let sequence = 0
-		try {
-			await this.publishStreamFrame(message, target, { frameType: 'start', sequence: sequence++ })
-			const parameter = parseParameter(message.payload.parameter)
-			const context = this.guardContext(kind, target, message)
-			await runBeforeGuards(policy, context, message.payload.payload)
-			const session = await this.resolveSession(harness, kind, target, message, parameter, policy)
-			const options: InvokeOptions = {
-				signal: controller.signal,
-				hostContext: hostContext(message, this.logger, this.resources),
-				...(parameter.idempotencyKey ? { idempotencyKey: parameter.idempotencyKey } : {}),
-				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
-				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
-				...(parameter.durable ? { durable: parameter.durable } : {}),
-				...(parameter.resume ? { resume: parameter.resume } : {}),
-			}
-			const invoker = (kind === 'agent' ? session.agents[target] : session.workflows[target]) as
-				| { stream(input: unknown, options?: InvokeOptions): AsyncIterable<ExecutionEvent<unknown>> }
-				| undefined
-			if (!invoker) throw new Error(`Mounted Harness ${kind} "${target}" is unavailable.`)
-
-			let outcome: RunOutcome<unknown> | undefined
-			for await (const event of invoker.stream(message.payload.payload, options)) {
-				if (event.type === 'run.finished') outcome = event.outcome
-				await this.publishStreamFrame(message, target, { frameType: 'chunk', sequence: sequence++, chunk: event })
-			}
-			if (!outcome) throw new Error(`Mounted Harness ${kind} "${target}" ended without a terminal outcome.`)
-			await runAfterGuards(policy, context, outcome)
-			if (outcome.status === 'completed' && policy?.successEvent) {
-				await this.publishSuccessEvent(message, kind, target, policy.successEvent, outcome)
-			}
-			await this.publishStreamFrame(message, target, { frameType: 'complete', sequence: sequence++, final: outcome })
-		} catch (error) {
-			if (controller.signal.aborted) {
-				await this.publishStreamFrame(message, target, {
-					frameType: 'cancel',
-					sequence: sequence++,
-					reason: controller.signal.reason instanceof Error ? controller.signal.reason.message : 'consumer_cancelled',
-				})
-				return
-			}
-			const handled = toHandledError(error)
-			await this.publishStreamFrame(message, target, {
-				frameType: 'error',
-				sequence: sequence++,
-				error: {
-					status: handled.errorCode,
-					message: handled.message,
-					isHandledError: true,
-					data: handled.data,
-					traceId: handled.traceId,
-				},
-			})
-		} finally {
-			this.activeStreams.delete(message.correlationId)
-		}
-	}
-
-	private async resolveSession(
-		harness: Harness<any>,
-		kind: 'agent' | 'workflow',
-		target: string,
-		message: Command | StreamOpenRequest,
-		parameter: HarnessInvokeParameter,
-		policy?: RuntimeTargetPolicy,
-	) {
-		const callerIdentity = {
-			...(message.tenantId ? { tenantId: message.tenantId } : {}),
-			...(message.principalId ? { principalId: message.principalId } : {}),
-		}
-		const requestedSessionId = parameter.sessionId ?? message.correlationId ?? message.id
-		const openCallerSession = () =>
-			harness.getSession(createHarnessSessionStorageId(callerIdentity, requestedSessionId), {
-				identity: callerIdentity,
-			})
-		if (policy?.durableResume?.identity !== 'run-owner') return openCallerSession()
-
-		const runId = parameter.resume?.runId ?? parameter.durable?.runId
-		if (!runId) return openCallerSession()
-		const storage = this.config.storage
-		if (!storage) {
-			throw new HandledError(
-				StatusCode.InternalServerError,
-				'Run-owner resume requires an explicit Harness storage adapter.',
-			)
-		}
-		const previous = await storage.getRun(runId)
-		if (!previous) return openCallerSession()
-		if (previous.kind !== kind || previous.target !== target) {
-			throw new HandledError(StatusCode.BadRequest, 'Durable run does not belong to this Harness target.')
-		}
-		if (!parameter.sessionId) {
-			throw new HandledError(StatusCode.BadRequest, 'Run-owner resume requires the original sessionId.')
-		}
-		const ownerSession = await storage.getSession(previous.sessionId)
-		if (!ownerSession) throw new HandledError(StatusCode.Conflict, 'Durable run session is unavailable.')
-		if (ownerSession.identity?.tenantId !== message.tenantId) {
-			throw new HandledError(StatusCode.Forbidden, 'Durable run belongs to a different tenant.')
-		}
-		if (createHarnessSessionStorageId(ownerSession.identity ?? {}, parameter.sessionId) !== previous.sessionId) {
-			throw new HandledError(StatusCode.BadRequest, 'Durable run sessionId does not match the original invocation.')
-		}
-		return harness.getSession(previous.sessionId, {
-			...(ownerSession.identity ? { identity: ownerSession.identity } : {}),
-		})
+	private policyFor(projection: Projection): TargetPolicy | undefined {
+		if (projection.visibility !== 'root') return undefined
+		return (
+			projection.target.kind === 'agent'
+				? this.mount.policy?.targets?.agents?.[projection.target.id]
+				: this.mount.policy?.targets?.workflows?.[projection.target.id]
+		) as TargetPolicy | undefined
 	}
 
 	private guardContext(
-		kind: 'agent' | 'workflow',
-		target: string,
-		message: Command | StreamOpenRequest,
+		projection: Projection,
+		host: PuristaHostInvocation,
 	): HarnessBusinessGuardContext<Record<string, unknown>> {
 		return Object.freeze({
-			kind,
-			target,
-			message,
-			identity: Object.freeze({
-				...(message.tenantId ? { tenantId: message.tenantId } : {}),
-				...(message.principalId ? { principalId: message.principalId } : {}),
-			}),
+			kind: projection.target.kind,
+			target: projection.target.id,
+			message: host.message,
+			identity: host.identity,
 			resources: this.resources,
 			logger: this.logger,
 		})
 	}
 
-	private async publishSuccessEvent(
-		message: StreamOpenRequest,
-		kind: 'agent' | 'workflow',
-		target: string,
-		eventName: string,
-		outcome: RunOutcome<unknown>,
+	private receive(projection: Projection, message: Command | StreamOpenRequest, aggregate: boolean) {
+		if (message.messageType !== (aggregate ? EBMessageType.Command : EBMessageType.Stream))
+			throw badRequest('Harness invocation message kind does not match this receiver.')
+		if (!this.accepting || !this.runtime)
+			throw new HandledError(StatusCode.ServiceUnavailable, 'Harness mount is not accepting invocations.')
+		const envelope = parseEnvelope(message.harness)
+		if (
+			message.receiver.serviceName !== projection.address.serviceName ||
+			message.receiver.serviceVersion !== projection.address.serviceVersion ||
+			message.receiver.serviceTarget !== projection.address.serviceTarget
+		) {
+			throw new HandledError(StatusCode.NotFound, 'Harness target address does not match this receiver.')
+		}
+		if (envelope.contract.exportDigest !== projection.exportDigest)
+			throw new HandledError(StatusCode.Conflict, 'Harness target export digest does not match.', {
+				code: 'harness_contract_mismatch',
+			})
+		if (envelope.root === undefined && aggregate)
+			throw badRequest('Aggregate Harness receivers accept public root invocations only.')
+		if (envelope.root !== undefined && projection.visibility !== 'root')
+			throw new HandledError(StatusCode.Forbidden, 'Harness dependency targets require nested dispatch.')
+		const parameter = parseParameter(message.payload.parameter, envelope.root === undefined)
+		const host = createHostInvocation(message, parameter.idempotencyKey ?? envelope.dispatch?.idempotencyKey)
+		try {
+			canonicalHarnessJson(message.payload.payload)
+		} catch {
+			throw badRequest('Harness target wire input must be JSON.')
+		}
+		return { envelope, parameter, host, runtime: this.runtime }
+	}
+
+	private activate(message: Command | StreamOpenRequest, timeoutMs?: number, deadline?: number): ActiveInvocation {
+		if (this.active.has(message.correlationId))
+			throw new HandledError(StatusCode.Conflict, 'Harness transport invocation is already active.')
+		const controller = new AbortController()
+		let finish!: () => void
+		const completed = new Promise<void>(resolve => {
+			finish = resolve
+		})
+		const invocation: ActiveInvocation = { message, controller, completed, finish }
+		const effectiveDeadline = Math.min(
+			deadline ?? Number.POSITIVE_INFINITY,
+			timeoutMs === undefined || timeoutMs === 0 ? Number.POSITIVE_INFINITY : Date.now() + timeoutMs,
+		)
+		if (effectiveDeadline <= Date.now())
+			throw new HandledError(StatusCode.GatewayTimeout, 'Harness invocation deadline expired.')
+		if (Number.isFinite(effectiveDeadline)) {
+			invocation.deadline = effectiveDeadline
+			const expire = () => {
+				const remaining = effectiveDeadline - Date.now()
+				if (remaining <= 0) controller.abort(new Error('deadline_exceeded'))
+				else {
+					invocation.timer = setTimeout(expire, Math.min(remaining, 2_147_483_647))
+					invocation.timer.unref?.()
+				}
+			}
+			expire()
+		}
+		this.active.set(message.correlationId, invocation)
+		return invocation
+	}
+
+	private deactivate(invocation: ActiveInvocation): void {
+		if (invocation.timer) clearTimeout(invocation.timer)
+		invocation.dispose?.()
+		invocation.finish()
+		if (this.active.get(invocation.message.correlationId) === invocation)
+			this.active.delete(invocation.message.correlationId)
+	}
+
+	private async rootRequest(
+		projection: Projection,
+		message: Command | StreamOpenRequest,
+		received: ReturnType<HarnessMountRuntime['receive']>,
+		active: ActiveInvocation,
+	): Promise<HostedTargetRequest<AnyHarnessTargetContract, PuristaHostInvocation>> {
+		const { envelope, parameter, host } = received
+		const sessionId = envelope.root?.sessionId
+		if (!sessionId) throw badRequest('Public Harness invocation requires a session.')
+		const context = this.guardContext(projection, host)
+		const authorize: HostedTargetRequest<AnyHarnessTargetContract, PuristaHostInvocation>['authorize'] =
+			async request => {
+				for (const key of projection.policy?.beforeGuardKeys ?? [])
+					await callBusinessGuard(() => this.policyFor(projection)?.beforeGuards?.[key]?.(context, request.input))
+				assertActive(active)
+			}
+		const { resume, ...ordinary } = parameter
+		const options = { ...ordinary, sessionId, signal: active.controller.signal }
+		const wireInput = message.payload.payload as JsonValue
+		if (resume !== undefined) {
+			const { idempotencyKey: _idempotencyKey, ...resumeOptions } = options
+			return {
+				delivery: 'resume',
+				target: projection.target,
+				wireInput,
+				invokeOptions: {
+					...resumeOptions,
+					resume,
+					...(projection.policy?.durableResume === 'stored-run-owner'
+						? { resumeIdentity: 'stored-run-owner' as const }
+						: {}),
+				},
+				hostInvocation: host,
+				authorize,
+			}
+		}
+		const input = await awaitActive(validatedInput(projection, wireInput), active)
+		assertActive(active)
+		return {
+			delivery: 'fresh',
+			target: projection.target,
+			wireInput,
+			input,
+			invokeOptions: options,
+			hostInvocation: host,
+			authorize,
+		}
+	}
+
+	private async execute(projection: Projection, message: Command) {
+		let active: ActiveInvocation | undefined
+		try {
+			const received = this.receive(projection, message, true)
+			active = this.activate(message, received.parameter.timeoutMs)
+			const request = await this.rootRequest(projection, message, received, active)
+			const outcome = freezeOutcome(
+				await awaitActive(received.runtime.runHosted(request), active),
+				received.parameter.resume?.runId ?? received.parameter.durable?.runId,
+			)
+			assertActive(active)
+			if (outcome.status === 'failed' || outcome.status === 'cancelled') throw outcomeError(outcome)
+			await this.completeRoot(projection, received.host, outcome, active)
+			return createSuccessResponse(
+				this.eventBridge.instanceId,
+				message,
+				Object.freeze({ sessionId: received.envelope.root?.sessionId, outcome }),
+			)
+		} catch (error) {
+			const handled = invocationError(error, active)
+			return createErrorResponse(this.eventBridge.instanceId, message, handled.errorCode, handled)
+		} finally {
+			if (active) this.deactivate(active)
+		}
+	}
+
+	private async executeStream(projection: Projection, message: StreamMessage): Promise<void> {
+		if (message.messageType !== EBMessageType.Stream)
+			throw badRequest('Harness stream receivers require stream messages.')
+		if (isStreamControl(message)) {
+			const active = this.active.get(message.correlationId)
+			if (active && sameCaller(active.message, message) && message.receiver.serviceTarget === projection.target.id) {
+				active.controller.abort(new Error('consumer_cancelled'))
+				await active.cancel?.('consumer_cancelled')
+			}
+			return
+		}
+		if (!isStreamOpenRequest(message)) return
+		let active: ActiveInvocation | undefined
+		let sequence = 0
+		let started = false
+		let terminalPublished = false
+		let directStart: Event | undefined
+		let candidate: Extract<Event, { type: 'run.finished' }> | undefined
+		let dispatch: HarnessTransportEnvelope['dispatch']
+		try {
+			const received = this.receive(projection, message, false)
+			dispatch = received.envelope.dispatch
+			active = this.activate(message, received.parameter.timeoutMs, dispatch?.deadline)
+			let stream: AsyncIterable<Event> & { result: Promise<Terminal>; cancel(reason?: string): Promise<void> }
+			if (dispatch) {
+				const invocation = Object.freeze({ ...dispatch, signal: active.controller.signal })
+				const base = {
+					target: projection.target,
+					wireInput: message.payload.payload as JsonValue,
+					invocation,
+					hostInvocation: received.host,
+				}
+				const resume = received.parameter.resume
+				const request: HostedDispatchedTargetRequest<AnyHarnessTargetContract, PuristaHostInvocation> =
+					resume === undefined
+						? {
+								...base,
+								delivery: 'fresh',
+								input: await awaitActive(validatedInput(projection, base.wireInput), active),
+							}
+						: { ...base, delivery: 'resume', resume }
+				assertActive(active)
+				stream = await awaitActive(received.runtime.streamDispatched(request), active)
+			} else
+				stream = await awaitActive(
+					received.runtime.streamHosted(await this.rootRequest(projection, message, received, active)),
+					active,
+				)
+			void stream.result.catch(() => undefined)
+			let cancellation: Promise<void> | undefined
+			active.cancel = reason => (cancellation ??= Promise.resolve().then(() => stream.cancel(reason)))
+			const cancel = () => {
+				void active?.cancel?.('receiver_cancelled').catch(() => undefined)
+			}
+			active.controller.signal.addEventListener('abort', cancel, { once: true })
+			const signal = active.controller.signal
+			active.dispose = () => signal.removeEventListener('abort', cancel)
+			if (active.controller.signal.aborted) cancel()
+			const expectedRunId =
+				dispatch?.invocationId ?? received.parameter.resume?.runId ?? received.parameter.durable?.runId
+			for await (const event of observeStream(stream, active)) {
+				if (candidate) throw protocolError('Harness stream emitted an event after its direct terminal.')
+				assertEventCorrelation(event, dispatch, directStart?.runId ?? expectedRunId)
+				const direct = isDirectEvent(event, dispatch)
+				if (direct) {
+					if (event.type === 'run.started') {
+						if (directStart || (expectedRunId !== undefined && event.runId !== expectedRunId))
+							throw protocolError('Harness stream has an invalid direct start.')
+						directStart = event
+						await this.publishStreamFrame(message, projection.target.id, { frameType: 'start', sequence: sequence++ })
+						started = true
+					} else if (!directStart) throw protocolError('Harness stream emitted a direct event before its start.')
+					if (event.runId !== directStart?.runId) throw protocolError('Harness stream emitted another direct run.')
+					if (event.type === 'run.finished') {
+						candidate = event
+						continue
+					}
+				}
+				if (!directStart) throw protocolError('Harness stream emitted a descendant before its direct start.')
+				await this.publishStreamFrame(message, projection.target.id, {
+					frameType: 'chunk',
+					sequence: sequence++,
+					chunk: sanitizeExecutionEvent(event),
+				})
+			}
+			if (!directStart || !candidate) throw protocolError('Harness stream ended without its direct terminal.')
+			const authoritative = freezeOutcome(await awaitActive(stream.result, active), directStart.runId)
+			if (canonicalHarnessJson(candidate.outcome) !== canonicalHarnessJson(authoritative))
+				throw protocolError('Harness direct terminal differs from the authoritative stream result.')
+			assertActive(active)
+			const outcome = sanitizeTerminal(authoritative)
+			if (!dispatch) await this.completeRoot(projection, received.host, outcome, active)
+			const terminal = Object.freeze({ ...candidate, outcome })
+			terminalPublished = true
+			await this.publishStreamFrame(message, projection.target.id, {
+				frameType: 'chunk',
+				sequence: sequence++,
+				chunk: terminal,
+			})
+			await this.publishStreamFrame(message, projection.target.id, {
+				frameType: 'complete',
+				sequence: sequence++,
+				final: outcome,
+			})
+		} catch (error) {
+			if (terminalPublished) throw error
+			await active?.cancel?.('receiver_failed').catch(() => undefined)
+			try {
+				const handled = invocationError(error, active)
+				if (started && directStart) {
+					const cancelled =
+						active?.controller.signal.aborted &&
+						active.controller.signal.reason instanceof Error &&
+						active.controller.signal.reason.message !== 'deadline_exceeded'
+					const timeout = handled.errorCode === StatusCode.GatewayTimeout
+					const outcome: Terminal = Object.freeze({
+						status: cancelled ? 'cancelled' : 'failed',
+						runId: directStart.runId,
+						error: Object.freeze({
+							code: cancelled ? 'OPERATION_CANCELLED' : timeout ? 'OPERATION_TIMEOUT' : 'PURISTA_HANDLED_ERROR',
+							message: handled.message,
+							category: cancelled ? 'cancelled' : timeout ? 'timeout' : 'internal',
+							retriable: timeout,
+							meta: Object.freeze({
+								status: handled.errorCode,
+								...(handled.data === undefined ? {} : { data: handled.data }),
+							}),
+						}),
+					})
+					const terminal = Object.freeze({
+						...(candidate ?? directStart),
+						type: 'run.finished' as const,
+						eventId: candidate?.eventId ?? randomUUID(),
+						sequence: candidate?.sequence ?? directStart.sequence + sequence,
+						at: new Date().toISOString(),
+						outcome,
+					})
+					await this.publishStreamFrame(message, projection.target.id, {
+						frameType: 'chunk',
+						sequence: sequence++,
+						chunk: terminal,
+					})
+					await this.publishStreamFrame(message, projection.target.id, {
+						frameType: 'complete',
+						sequence: sequence++,
+						final: outcome,
+					})
+				} else {
+					await this.publishStreamFrame(message, projection.target.id, {
+						frameType: 'error',
+						sequence: sequence++,
+						error: {
+							status: handled.errorCode,
+							message: handled.message,
+							isHandledError: true,
+							data: handled.data,
+							traceId: handled.traceId,
+						},
+					})
+				}
+			} catch {
+				throw error
+			}
+		} finally {
+			if (active) this.deactivate(active)
+		}
+	}
+
+	private async completeRoot(
+		projection: Projection,
+		host: PuristaHostInvocation,
+		outcome: Terminal,
+		active: ActiveInvocation,
 	) {
-		await this.eventBridge.emitMessage({
-			messageType: EBMessageType.CustomMessage,
-			contentType: 'application/json',
-			contentEncoding: 'utf-8',
-			traceId: message.traceId,
-			principalId: message.principalId,
-			tenantId: message.tenantId,
-			sender: {
-				serviceName: this.serviceName,
-				serviceVersion: this.serviceVersion,
-				serviceTarget: target,
-				instanceId: this.eventBridge.instanceId,
-			},
-			eventName,
-			payload: outcome,
-		} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
-		this.logger.debug({ kind, target, eventName }, 'published mounted Harness success event')
+		if (outcome.status === 'failed' || outcome.status === 'cancelled') return
+		assertActive(active)
+		const context = this.guardContext(projection, host)
+		for (const key of projection.policy?.afterGuardKeys ?? []) {
+			assertActive(active)
+			await awaitActive(
+				callBusinessGuard(() => this.policyFor(projection)?.afterGuards?.[key]?.(context, outcome)),
+				active,
+			)
+		}
+		assertActive(active)
+		if (outcome.status === 'completed' && projection.completedEvent) {
+			const result = await projection.completedEvent.schema['~standard'].validate(outcome)
+			if (result.issues || result.value !== outcome)
+				throw protocolError('Harness completed-event outcome failed validation.')
+			assertActive(active)
+			try {
+				await awaitActive(
+					this.eventBridge.emitMessage({
+						messageType: EBMessageType.CustomMessage,
+						contentType: 'application/json',
+						contentEncoding: 'utf-8',
+						traceId: host.message.traceId,
+						otp: host.message.otp,
+						principalId: host.identity.principalId,
+						tenantId: host.identity.tenantId,
+						sender: { ...projection.address, instanceId: this.eventBridge.instanceId },
+						eventName: projection.completedEvent.name,
+						payload: outcome,
+					} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>),
+					active,
+				)
+			} catch {
+				assertActive(active)
+				throw new HandledError(StatusCode.InternalServerError, 'Harness completed-event publication failed.')
+			}
+			assertActive(active)
+		}
 	}
 
 	private async publishStreamFrame(message: StreamOpenRequest, target: string, payload: StreamFrame['payload']) {
@@ -441,6 +719,7 @@ export class HarnessMountRuntime {
 			contentType: 'application/json',
 			contentEncoding: 'utf-8',
 			traceId: message.traceId,
+			otp: message.otp,
 			principalId: message.principalId,
 			tenantId: message.tenantId,
 			sender: {
@@ -451,105 +730,387 @@ export class HarnessMountRuntime {
 			},
 			receiver: message.sender,
 			payload,
-		} as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+		} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
 	}
 }
 
-function parseParameter(value: unknown): HarnessInvokeParameter {
-	if (value === undefined || value === null) return {}
-	if (typeof value !== 'object' || Array.isArray(value)) {
-		throw new HandledError(StatusCode.BadRequest, 'Harness invocation parameters must be an object.')
+function parseEnvelope(value: unknown): HarnessTransportEnvelope {
+	if (
+		!plainFields(value, ['contract'], ['root', 'dispatch']) ||
+		Object.hasOwn(value, 'root') === Object.hasOwn(value, 'dispatch')
+	)
+		throw badRequest('Harness receiver requires exactly one root or nested envelope.')
+	if (
+		!plainFields(value.contract, ['schemaVersion', 'exportDigest']) ||
+		value.contract.schemaVersion !== 1 ||
+		typeof value.contract.exportDigest !== 'string' ||
+		!/^sha256:[0-9a-f]{64}$/.test(value.contract.exportDigest)
+	)
+		throw badRequest('Harness target contract envelope is invalid.')
+	if (Object.hasOwn(value, 'root')) {
+		if (!plainFields(value.root, ['sessionId']) || !nonempty(value.root.sessionId))
+			throw badRequest('Harness root envelope is invalid.')
+	} else {
+		const dispatch = value.dispatch
+		if (
+			!plainFields(
+				dispatch,
+				['sessionId', 'rootRunId', 'parentRunId', 'invocationId', 'depth', 'remainingDepth'],
+				['parentAgentId', 'parentWorkflowId', 'deadline', 'idempotencyKey'],
+			) ||
+			Object.hasOwn(dispatch, 'parentAgentId') === Object.hasOwn(dispatch, 'parentWorkflowId') ||
+			!['sessionId', 'rootRunId', 'parentRunId', 'invocationId'].every(key => nonempty(dispatch[key])) ||
+			!nonempty(dispatch.parentAgentId ?? dispatch.parentWorkflowId) ||
+			!Number.isSafeInteger(dispatch.depth) ||
+			Number(dispatch.depth) < 1 ||
+			!Number.isSafeInteger(dispatch.remainingDepth) ||
+			Number(dispatch.remainingDepth) < 0 ||
+			(Object.hasOwn(dispatch, 'deadline') &&
+				(!Number.isSafeInteger(dispatch.deadline) || Number(dispatch.deadline) <= 0)) ||
+			(Object.hasOwn(dispatch, 'idempotencyKey') && !nonempty(dispatch.idempotencyKey))
+		)
+			throw badRequest('Harness nested envelope is invalid.')
 	}
+	return value as HarnessTransportEnvelope
+}
+
+function parseParameter(value: unknown, nested: boolean): HarnessInvokeParameter {
+	if (!plainFields(value, [], nested ? ['resume'] : ['idempotencyKey', 'timeoutMs', 'metadata', 'durable', 'resume']))
+		throw badRequest('Harness invocation parameters are invalid.')
+	if (Object.hasOwn(value, 'resume') && (value.resume === undefined || Object.hasOwn(value, 'idempotencyKey')))
+		throw badRequest('Harness resume forbids an idempotency key.')
+	if (
+		value.timeoutMs !== undefined &&
+		(typeof value.timeoutMs !== 'number' || !Number.isSafeInteger(value.timeoutMs) || value.timeoutMs < 0)
+	)
+		throw badRequest('Harness invocation timeout is invalid.')
 	return value as HarnessInvokeParameter
 }
 
-/**
- * Derive the opaque storage id used by a mounted Harness session.
- *
- * Use this helper when application-owned commands need to inspect or remove
- * Harness session data through the configured storage adapter. Supply only
- * trusted identity from the PURISTA message and the same logical session id
- * passed to an agent or workflow invocation.
- *
- * @example
- * ```ts
- * const storageId = createHarnessSessionStorageId(context.message, `support:${conversationId}`)
- * const messages = await storage.listMessages(storageId)
- * ```
- */
-export function createHarnessSessionStorageId(
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	requestedSessionId: string,
-) {
-	return createHash('sha256')
-		.update(JSON.stringify([identity.tenantId ?? null, identity.principalId ?? null, requestedSessionId]))
-		.digest('hex')
-}
-
-function hostContext(
-	message: Command | StreamOpenRequest,
-	logger: Logger,
-	resources: Record<string, unknown>,
-): HarnessHostContext {
+function createHostInvocation(message: Command | StreamOpenRequest, idempotencyKey?: string): PuristaHostInvocation {
+	for (const identity of [message.tenantId, message.principalId])
+		if (identity !== undefined && (!nonempty(identity) || identity.length > 256))
+			throw badRequest('Harness authenticated identity is invalid.')
+	let trace: HarnessTraceContext | undefined
+	if (message.otp !== undefined) {
+		let value: unknown
+		try {
+			value = JSON.parse(message.otp)
+		} catch {
+			throw badRequest('Harness W3C trace context is invalid.')
+		}
+		if (
+			!plainFields(value, ['traceparent'], ['tracestate']) ||
+			typeof value.traceparent !== 'string' ||
+			!/^(?!ff)[0-9a-f]{2}-(?!0{32})[0-9a-f]{32}-(?!0{16})[0-9a-f]{16}-[0-9a-f]{2}$/.test(value.traceparent) ||
+			(value.tracestate !== undefined && typeof value.tracestate !== 'string')
+		)
+			throw badRequest('Harness W3C trace context is invalid.')
+		try {
+			trace = normalizeHarnessTraceContext({
+				traceparent: value.traceparent,
+				...(typeof value.tracestate === 'string' ? { tracestate: value.tracestate } : {}),
+			})
+		} catch {
+			throw badRequest('Harness W3C trace context is invalid.')
+		}
+	}
 	return Object.freeze({
+		message,
 		identity: Object.freeze({
-			...(message.tenantId ? { tenantId: message.tenantId } : {}),
-			...(message.principalId ? { principalId: message.principalId } : {}),
+			...(message.tenantId === undefined ? {} : { tenantId: message.tenantId }),
+			...(message.principalId === undefined ? {} : { principalId: message.principalId }),
 		}),
-		request: Object.freeze({
-			...(message.traceId ? { traceId: message.traceId } : {}),
-			correlationId: message.correlationId,
-		}),
-		resources,
-		logger,
+		...(trace === undefined ? {} : { trace }),
+		...(idempotencyKey === undefined ? {} : { idempotencyKey }),
 	})
 }
 
-async function runBeforeGuards(
-	policy: RuntimeTargetPolicy | undefined,
-	context: HarnessBusinessGuardContext<any>,
-	input: unknown,
-) {
-	await Promise.all(Object.values(policy?.beforeGuards ?? {}).map(guard => guard(context, input)))
+async function validatedInput(projection: Projection, wireInput: JsonValue): Promise<JsonValue> {
+	try {
+		const result = await projection.standardSchemas.input['~standard'].validate(wireInput)
+		if (result.issues) throw badRequest('Harness target input is invalid.')
+		canonicalHarnessJson(result.value)
+		return result.value as JsonValue
+	} catch (error) {
+		if (error instanceof HandledError) throw error
+		throw badRequest('Harness target input is invalid.')
+	}
 }
 
-async function runAfterGuards(
-	policy: RuntimeTargetPolicy | undefined,
-	context: HarnessBusinessGuardContext<any>,
-	outcome: RunOutcome<unknown>,
-) {
-	await Promise.all(Object.values(policy?.afterGuards ?? {}).map(guard => guard(context, outcome)))
+function freezeOutcome(value: unknown, expectedRunId?: string): Terminal {
+	if (
+		!plainFields(value, ['status', 'runId'], ['output', 'interrupt', 'error']) ||
+		!nonempty(value.runId) ||
+		(expectedRunId !== undefined && expectedRunId !== value.runId)
+	)
+		throw protocolError('Harness terminal outcome has invalid run identity.')
+	const field =
+		value.status === 'completed'
+			? 'output'
+			: value.status === 'interrupted'
+				? 'interrupt'
+				: value.status === 'failed' || value.status === 'cancelled'
+					? 'error'
+					: undefined
+	if (!field || !plainFields(value, ['status', 'runId', field]))
+		throw protocolError('Harness terminal outcome is invalid.')
+	canonicalHarnessJson(value)
+	return freezeJson(value) as Terminal
 }
 
-function isCommandToolAdapter(value: unknown): value is HarnessCommandToolAdapter {
-	return Boolean(value && typeof value === 'object' && (value as { kind?: unknown }).kind === 'purista-command')
+function freezeJson<Value>(value: Value): Value {
+	if (value !== null && typeof value === 'object') {
+		for (const child of Object.values(value)) freezeJson(child)
+		Object.freeze(value)
+	}
+	return value
 }
 
-function isHostToolFunctionDefinition(value: unknown): value is HarnessHostToolFunctionDefinition {
-	return Boolean(value && typeof value === 'object' && (value as { kind?: unknown }).kind === 'purista-host-tool')
+function assertEventCorrelation(
+	event: Event,
+	dispatch: HarnessTransportEnvelope['dispatch'],
+	expectedRunId?: string,
+): void {
+	if (!nonempty(event.runId) || !nonempty(event.eventId) || !Number.isSafeInteger(event.sequence) || event.sequence < 0)
+		throw protocolError('Harness stream event correlation is invalid.')
+	if (
+		dispatch &&
+		event.parentRunId === dispatch.parentRunId &&
+		event.parentInvocationId === dispatch.invocationId &&
+		event.runId !== dispatch.invocationId
+	)
+		throw protocolError('Harness nested direct event has an invalid run id.')
+	const hasRun = event.parentRunId !== undefined
+	const hasInvocation = event.parentInvocationId !== undefined
+	// Child task activity uses parentRunId as an event payload on the direct run.
+	const childActivity = event.type === 'child_task.started' || event.type === 'child_task.settled'
+	if (
+		!childActivity &&
+		(hasRun !== hasInvocation || (hasRun && (!nonempty(event.parentRunId) || !nonempty(event.parentInvocationId))))
+	)
+		throw protocolError('Harness event has invalid parent correlation.')
+	if (expectedRunId !== undefined && event.runId === expectedRunId && !isDirectEvent(event, dispatch))
+		throw protocolError('Harness direct event has mismatched parent correlation.')
 }
 
-function toHandledError(error: unknown) {
+function isDirectEvent(event: Event, dispatch: HarnessTransportEnvelope['dispatch']): boolean {
+	if (dispatch)
+		return (
+			event.runId === dispatch.invocationId &&
+			event.parentRunId === dispatch.parentRunId &&
+			event.parentInvocationId === dispatch.invocationId
+		)
+	return (
+		event.parentInvocationId === undefined &&
+		(event.parentRunId === undefined || event.type === 'child_task.started' || event.type === 'child_task.settled')
+	)
+}
+
+function sameCaller(left: Command | StreamOpenRequest, right: StreamMessage): boolean {
+	return (
+		left.principalId === right.principalId &&
+		left.tenantId === right.tenantId &&
+		left.sender.instanceId === right.sender.instanceId &&
+		left.sender.serviceName === right.sender.serviceName &&
+		left.sender.serviceVersion === right.sender.serviceVersion &&
+		left.sender.serviceTarget === right.sender.serviceTarget
+	)
+}
+function assertActive(active: ActiveInvocation): void {
+	if (active.deadline !== undefined && Date.now() >= active.deadline && !active.controller.signal.aborted)
+		active.controller.abort(new Error('deadline_exceeded'))
+	if (!active.controller.signal.aborted) return
+	const timeout =
+		active.controller.signal.reason instanceof Error && active.controller.signal.reason.message === 'deadline_exceeded'
+	throw new HandledError(
+		timeout ? StatusCode.GatewayTimeout : StatusCode.RequestTimeout,
+		timeout ? 'Harness invocation deadline expired.' : 'Harness invocation was cancelled.',
+	)
+}
+function plainFields(
+	value: unknown,
+	required: readonly string[],
+	optional: readonly string[] = [],
+): value is Record<string, unknown> {
+	if (
+		typeof value !== 'object' ||
+		value === null ||
+		Array.isArray(value) ||
+		![Object.prototype, null].includes(Object.getPrototypeOf(value))
+	)
+		return false
+	if (required.some(key => !Object.hasOwn(value, key))) return false
+	return Reflect.ownKeys(value).every(key => {
+		if (typeof key !== 'string' || ![...required, ...optional].includes(key)) return false
+		const descriptor = Object.getOwnPropertyDescriptor(value, key)
+		return descriptor?.enumerable === true && Object.hasOwn(descriptor, 'value')
+	})
+}
+function nonempty(value: unknown): value is string {
+	return typeof value === 'string' && value.trim() !== ''
+}
+function badRequest(message: string): HandledError {
+	return new HandledError(StatusCode.BadRequest, message)
+}
+function protocolError(message: string): HandledError {
+	return new HandledError(StatusCode.InternalServerError, message)
+}
+function outcomeError(outcome: Extract<Terminal, { status: 'failed' | 'cancelled' }>): HandledError {
+	return new HandledError(
+		outcome.status === 'cancelled' ? StatusCode.GatewayTimeout : StatusCode.InternalServerError,
+		outcome.status === 'cancelled' ? 'Harness target was cancelled.' : 'Harness target failed.',
+	)
+}
+function toHandledError(error: unknown): HandledError {
 	if (error instanceof HandledError) return error
 	if (isHarnessError(error)) {
-		const status =
-			error.code === 'MODEL_ADMISSION_REJECTED'
+		const conflict =
+			/RESUME|REVISION|REPLAY|IDEMPOTENCY|IDENTITY|ROUTE_RECEIPT/.test(error.code) ||
+			error.meta?.reason === 'session_identity_mismatch' ||
+			error.code === 'SESSION_BUSY'
+		const status = conflict
+			? StatusCode.Conflict
+			: /ADMISSION_REJECTED/.test(error.code)
 				? StatusCode.TooManyRequests
-				: error.code === 'DECISION_BLOCKED'
-					? StatusCode.Forbidden
-					: error.category === 'validation'
-						? StatusCode.BadRequest
-						: error.category === 'permission'
-							? StatusCode.Forbidden
-							: error.category === 'timeout'
-								? StatusCode.GatewayTimeout
-								: StatusCode.InternalServerError
-		const retryAfterMs = error.meta?.retryAfterMs
-		return new HandledError(status, error.message, {
+				: error.category === 'validation'
+					? StatusCode.BadRequest
+					: error.category === 'permission' || error.code === 'DECISION_BLOCKED'
+						? StatusCode.Forbidden
+						: error.category === 'timeout'
+							? StatusCode.GatewayTimeout
+							: StatusCode.InternalServerError
+		return new HandledError(status, status >= 500 ? 'Harness execution failed.' : error.message, {
 			code: error.code,
 			retriable: error.retriable,
-			...(typeof retryAfterMs === 'number' ? { retryAfterMs } : {}),
+			...(typeof error.meta?.retryAfterMs === 'number' ? { retryAfterMs: error.meta.retryAfterMs } : {}),
 		})
 	}
-	return HandledError.fromError(error)
+	return new HandledError(StatusCode.InternalServerError, 'Harness execution failed.')
+}
+
+function hostedLogger(logger: Logger): HarnessLogger {
+	return Object.freeze({
+		trace: logger.trace.bind(logger),
+		debug: logger.debug.bind(logger),
+		info: logger.info.bind(logger),
+		warn: logger.warn.bind(logger),
+		error: logger.error.bind(logger),
+		fatal: logger.fatal.bind(logger),
+		child: (bindings: Record<string, unknown>) => hostedLogger(logger.getChildLogger(bindings)),
+	})
+}
+
+function ownedFrozen(value: unknown): boolean {
+	if (value === null || typeof value !== 'object') return true
+	if (!Object.isFrozen(value)) return false
+	return Object.values(value).every(ownedFrozen)
+}
+
+function sanitizeTerminal(outcome: Terminal): Terminal {
+	if (outcome.status === 'completed' || outcome.status === 'interrupted') return outcome
+	return Object.freeze({
+		status: outcome.status,
+		runId: outcome.runId,
+		error: sanitizedExecutionError(outcome.status === 'cancelled'),
+	})
+}
+
+function sanitizedExecutionError(cancelled = false) {
+	return Object.freeze({
+		code: cancelled ? 'OPERATION_CANCELLED' : 'INTERNAL_ERROR',
+		message: cancelled ? 'Harness execution was cancelled.' : 'Harness execution failed.',
+		category: cancelled ? 'cancelled' : 'internal',
+		retriable: false,
+	})
+}
+
+function sanitizeExecutionEvent(event: Event): Event {
+	if (event.type === 'run.finished')
+		return Object.freeze({ ...event, outcome: sanitizeTerminal(freezeOutcome(event.outcome, event.runId)) })
+	if (
+		(event.type === 'agent.finished' || event.type === 'tool.finished' || event.type === 'child_task.settled') &&
+		event.error !== undefined
+	) {
+		return Object.freeze({
+			...event,
+			error: sanitizedExecutionError(event.type === 'child_task.settled' && event.status === 'cancelled'),
+		})
+	}
+	return event
+}
+
+async function callBusinessGuard(guard: () => void | Promise<void>): Promise<void> {
+	try {
+		await guard()
+	} catch (error) {
+		if (error instanceof HandledError) throw error
+		throw new HandledError(StatusCode.InternalServerError, 'Harness business guard failed.')
+	}
+}
+
+function invocationError(error: unknown, active?: ActiveInvocation): HandledError {
+	if (active !== undefined) {
+		try {
+			assertActive(active)
+		} catch (cancellation) {
+			return toHandledError(cancellation)
+		}
+	}
+	return toHandledError(error)
+}
+
+async function awaitActive<Value>(pending: Promise<Value>, active: ActiveInvocation): Promise<Value> {
+	const signal = active.controller.signal
+	let rejectAbort!: (error: unknown) => void
+	const aborted = new Promise<never>((_resolve, reject) => {
+		rejectAbort = reject
+	})
+	const onAbort = () => {
+		try {
+			assertActive(active)
+		} catch (error) {
+			rejectAbort(error)
+		}
+	}
+	signal.addEventListener('abort', onAbort, { once: true })
+	if (signal.aborted) onAbort()
+	try {
+		return await Promise.race([pending, aborted])
+	} finally {
+		signal.removeEventListener('abort', onAbort)
+	}
+}
+
+async function* observeStream(
+	stream: AsyncIterable<Event> & { result: Promise<Terminal> },
+	active: ActiveInvocation,
+): AsyncIterable<Event> {
+	// A result rejection must interrupt a blocked iterator.next(), but a fulfilled
+	// result must still wait for complete terminal/event validation.
+	const resultFailure = new Promise<never>((_resolve, reject) => {
+		void stream.result.catch(reject)
+	})
+	void resultFailure.catch(() => undefined)
+	const iterator = stream[Symbol.asyncIterator]()
+	let ended = false
+	try {
+		while (true) {
+			const next = await awaitActive(Promise.race([iterator.next(), resultFailure]), active)
+			if (next.done) {
+				ended = true
+				return
+			}
+			yield next.value
+		}
+	} finally {
+		if (!ended) {
+			// An async iterator may be stuck in its pending next call; requesting
+			// return must not block receiver failure or shutdown on that same call.
+			void Promise.resolve()
+				.then(() => iterator.return?.())
+				.catch(() => undefined)
+			void active.cancel?.('receiver_stopped').catch(() => undefined)
+		}
+	}
 }

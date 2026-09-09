@@ -4,17 +4,15 @@ import type {
 	HarnessDefinition,
 	HarnessExecutionCaller,
 	HarnessIdentity,
-	HarnessInstanceConfig,
 	HarnessInterruptKind,
 	HarnessOutputUpdateKind,
-	HarnessTargetContract,
 	HarnessTargetInput,
 	HarnessTargetOutput,
 	HarnessTargetRunOutcome,
 	HarnessTraceContext,
 	harnessExecutionEventTypesV1,
 } from '@purista/harness'
-import type { HarnessHostContextRequest } from '@purista/harness/integrator'
+import type { HarnessHostContextRequest, HostedHarnessInstanceConfig } from '@purista/harness/integrator'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
 import type {
 	Command,
@@ -310,48 +308,30 @@ export type HarnessMountPolicy<
 	}>
 }>
 
-/** Minimal executable definition surface used while declaring a service mount. */
-export type HarnessMountableDefinition = Readonly<{
-	kind: 'harness'
-	requirements: Readonly<{ hostTools: readonly string[] }>
-	contracts: Readonly<{
-		agents: Readonly<Record<string, HarnessTargetContract<any, any, any, any, any, any>>>
-		workflows: Readonly<Record<string, HarnessTargetContract<any, any, any, any, any, any>>>
-	}>
-}>
-
 /** Policy inferred directly from one definition's public root contracts. */
-export type HarnessDefinitionMountPolicy<
-	D extends HarnessMountableDefinition,
-	Resources extends Record<string, unknown>,
-> = Readonly<{
-	targets?: Readonly<{
-		agents?: Partial<{
-			[K in keyof D['contracts']['agents'] & string]: HarnessTargetPolicy<D['contracts']['agents'][K], Resources>
-		}>
-		workflows?: Partial<{
-			[K in keyof D['contracts']['workflows'] & string]: HarnessTargetPolicy<D['contracts']['workflows'][K], Resources>
-		}>
-	}>
-}>
+export type HarnessDefinitionMountPolicy<D, Resources extends Record<string, unknown>> = HarnessMountPolicy<
+	HarnessState<D>,
+	Resources
+>
 
 /** One immutable Harness definition mounted by a service builder. */
-export type HarnessMount<D extends HarnessDefinition<any, any, any> = HarnessDefinition<any, any, any>> = Readonly<{
+export type HarnessMount<
+	D = HarnessDefinition<any, any, any>,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+> = Readonly<{
 	definition: D
-	policy?: HarnessMountPolicy<HarnessState<D>>
+	policy?: HarnessDefinitionMountPolicy<D, Resources>
+	projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[]
 }>
 
 /** Builder state carried by a portable Harness definition. */
-export type HarnessState<D extends HarnessDefinition<any, any, any>> =
-	D extends HarnessDefinition<infer S, any, any> ? S : never
+export type HarnessState<D> = D extends HarnessDefinition<infer S, infer _Name, infer _Graph> ? S : never
 
 /** Inferred input/output catalog carried by a portable Harness definition. */
-export type HarnessTypes<D extends HarnessDefinition<any, any, any>> = D extends { readonly $infer: infer I }
-	? I
-	: never
+export type HarnessTypes<D> = D extends { readonly $infer: infer I } ? I : never
 
 /** Runtime AI configuration required by the service's mounted Harness definition. */
-export type MountedHarnessRuntimeConfig<D extends HarnessDefinition<any, any, any>> = Omit<
-	HarnessInstanceConfig<D['requirements']>,
-	'hostTools'
->
+export type MountedHarnessRuntimeConfig<D> =
+	D extends HarnessDefinition<infer Catalog, infer _Name, infer _Graph>
+		? HostedHarnessInstanceConfig<Catalog['requirements']>
+		: never

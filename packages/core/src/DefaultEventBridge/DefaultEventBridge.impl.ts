@@ -456,7 +456,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 					timestamp: Date.now(),
 					traceId: message.traceId,
 					instanceId: this.instanceId,
-					otp: serializeOtp(),
+					otp: message.otp ?? serializeOtp(),
 				})
 
 				span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
@@ -559,6 +559,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		const streamOpenMessage: Omit<StreamOpenRequest, 'id' | 'timestamp'> = {
 			messageType: EBMessageType.Stream,
+			...(input.harness === undefined ? {} : { harness: input.harness }),
+			...(input.otp === undefined ? {} : { otp: input.otp }),
 			sender: {
 				...input.sender,
 				instanceId: this.instanceId,

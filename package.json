@@ -35,7 +35,7 @@
 		"audit:knowledge": "node ./scripts/knowledge-audit.mjs",
 		"build:doc": "git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && npm run build:api-docs && npm run build -w @purista/web",
 		"preview:doc": "npm run preview -w @purista/web",
-		"check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",
+		"check:cycling": "node scripts/check-typescript-import-cycles.mjs",
 		"sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i",
 		"deps:check": "check-dependency-version-consistency && ncu -ws --root",
 		"deps:update": "ncu -ws --root -u",

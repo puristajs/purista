@@ -413,4 +413,57 @@ describe('DefaultEventBridge', () => {
 
 		await eventBridge.destroy()
 	})
+
+	it('preserves trusted Harness routing metadata and upstream trace context on stream open', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const harness = Object.freeze({
+			contract: Object.freeze({
+				schemaVersion: 1 as const,
+				exportDigest: `sha256:${'a'.repeat(64)}` as `sha256:${string}`,
+			}),
+			root: Object.freeze({ sessionId: 'harness-session' }),
+		})
+		const otp = '{"traceparent":"00-0123456789abcdef0123456789abcdef-0123456789abcdef-01"}'
+		let receivedHarness: unknown
+		let receivedOtp: string | undefined
+
+		await eventBridge.registerStream(
+			receiver,
+			async message => {
+				if (message.payload.frameType !== 'open') return
+				receivedHarness = message.harness
+				receivedOtp = message.otp
+				await eventBridge.emitMessage({
+					messageType: EBMessageType.Stream,
+					correlationId: message.correlationId,
+					traceId: message.traceId,
+					sender: { ...receiver, instanceId: eventBridge.instanceId },
+					receiver: message.sender,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: { frameType: 'complete', sequence: 0, final: { done: true } },
+				} as any)
+			},
+			{ expose: {} },
+		)
+
+		const handle = await eventBridge.openStream({
+			sender,
+			receiver,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: 'trace-test',
+			otp,
+			harness,
+			payload: { frameType: 'open', payload: { value: 'test' }, parameter: {} },
+		})
+		for await (const _frame of handle) {
+			// Exhaust the complete frame so the bridge closes the pending stream session.
+		}
+
+		expect(receivedHarness).toBe(harness)
+		expect(receivedOtp).toBe(otp)
+		await eventBridge.destroy()
+	})
 })
