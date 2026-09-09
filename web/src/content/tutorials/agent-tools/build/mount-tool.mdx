@@ -1,26 +1,27 @@
 ---
-title: Bind the tool to the command
-description: Implement the portable host-tool contract with a declared PURISTA command invocation and protect the published agent.
-order: 235
+title: Define a service-owned host tool
+description: Define a service-owned Harness tool that calls a guarded PURISTA command and protect the mounted agent.
+order: 234
 kind: lesson
 status: draft
 ---
 
-The native Harness definition knows the tool contract. The Support mount now
-supplies its PURISTA implementation. This is the adapter layer between the two
-libraries:
+The Support service owns the Harness agent and its host tool. The tool
+definition is attached to the agent, while `ServiceBuilder.defineTool(...)`
+supplies PURISTA resources and an address-first command call.
 
-```text title="Portable definition and PURISTA binding"
-Harness module                      Support service mount
--------------------------------     --------------------------------
-lookup_transaction contract    ->   typed host-tool implementation
-answer_transaction_question    ->   published EventBridge target
-model alias primary            ->   runtime binding on a later page
+```text title="Service-owned Harness definition and PURISTA binding"
+Support Harness definition       Support service builder
+--------------------------       ----------------------
+agent tool reference        ->   service-owned host tool
+answerTransactionQuestion   ->   mounted EventBridge target
+lookupTransaction           ->   Transaction / 1 / getTransactionSummary
 ```
 
-## Define the Support authorization policy
+## Declare the Support resource
 
-First define the business policy used to publish the agent itself.
+Create the business policy port used by the outer command and the mounted agent
+guard. The concrete policy is injected when the service starts.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportQuestionPolicy {
@@ -34,8 +35,8 @@ export interface SupportQuestionPolicy {
 	): Promise<boolean>
 }
 ```
-Declare that resource on the generated Support service builder. The concrete
-policy will be injected when the service instance is created.
+
+Register that port on the Support service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -47,12 +48,12 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support conversations and support automation',
 }).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
 ```
-## Share one business rule across both entry points
 
-Create one helper for the outer command and the directly published agent. Its
-policy input names the account and transaction being requested. The session
-helper combines the question with trusted caller identity, then hashes the
-value so raw identities do not become storage keys.
+## Keep identity and authorization server-side
+
+The model may propose account and transaction ids, but it cannot supply trusted
+tenant or principal identity. Derive the session id from the trusted message and
+use the policy before model or database work starts.
 
 ```ts title="src/service/support/v1/requireSupportQuestion.ts" write
 import { createHash } from 'node:crypto'
@@ -89,31 +90,34 @@ export function supportQuestionSessionId(
 	if (!identity.tenantId || !identity.principalId)
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	const digest = createHash('sha256')
-		.update(`${identity.tenantId}:${identity.principalId}:${questionId}:support-question-v1`)
+		.update(JSON.stringify(['support-question-v1', identity.tenantId, identity.principalId, questionId]))
 		.digest('hex')
 	return `support-question:${digest}`
 }
 ```
-## Implement the mount adapter
 
-Replace the generated mount file with the complete binding and mount policy.
+## Define the service-owned host tool
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
+The model-facing output intentionally omits `tenantId`. The command still
+returns it so the Transaction after-guard can verify the record scope. Derive
+the public tool schema from the command schema instead of duplicating it.
+
+```ts title="src/service/support/v1/harness/tool/lookupTransaction/lookupTransactionTool.ts" write
 import {
 	getTransactionSummaryOutputSchema,
 	getTransactionSummaryParameterSchema,
 	getTransactionSummaryPayloadSchema,
-} from '../../../transaction/v1/command/getTransactionSummary/schema.js'
-import { requireSupportQuestion } from '../requireSupportQuestion.js'
-import type { SupportQuestionPolicy } from '../SupportResources.js'
-import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
+} from '../../../../../transaction/v1/command/getTransactionSummary/schema.js'
+import { supportV1ServiceBuilder } from '../../../supportV1ServiceBuilder.js'
 
-export { supportHarness }
+export const transactionSummaryForAgentSchema = getTransactionSummaryOutputSchema.omit({ tenantId: true })
 
-const lookupTransactionTool = supportV1ServiceBuilder
-	.getHarnessHostToolBuilder(supportHarness.catalog.hostTools.lookup_transaction)
+export const lookupTransactionTool = supportV1ServiceBuilder
+	.defineTool('lookupTransaction', {
+		description: 'Look up one transaction the current caller may read.',
+		input: getTransactionSummaryPayloadSchema,
+		output: transactionSummaryForAgentSchema,
+	})
 	.canInvoke(
 		'Transaction',
 		'1',
@@ -126,59 +130,19 @@ const lookupTransactionTool = supportV1ServiceBuilder
 		const { tenantId: _tenantId, ...summary } = await context.service.Transaction['1'].getTransactionSummary(input, {})
 		return summary
 	})
-	.getDefinition()
-
-export const supportHarnessPolicy = {
-	publish: { agents: ['answer_transaction_question'], workflows: [] },
-	hostTools: { lookup_transaction: lookupTransactionTool },
-	targets: {
-		agents: {
-			answer_transaction_question: {
-				beforeGuards: {
-					mayUseSupportAgent: async (
-						context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
-						input: { accountId: string; transactionId: string },
-					) => {
-						await requireSupportQuestion(context.resources.supportQuestionPolicy, {
-							...context.identity,
-							accountId: input.accountId,
-							transactionId: input.transactionId,
-						})
-					},
-				},
-			},
-		},
-		workflows: {},
-	},
-} as const
 ```
-`.canInvoke(...)` is the capability declaration. It gives this tool handler a
-typed `context.service.Transaction['1'].getTransactionSummary(...)` function.
-That call goes through EventBridge and carries the current trace, correlation,
-tenant, and principal values. The handler does not accept identity from the
-model input.
 
-The handler removes `tenantId` from the command result because that field is
-needed for server-side scope validation but is not part of the model-facing
-tool output contract. Harness validates the returned object against
-`transactionSummarySchema` before it is sent back to the model.
+`.canInvoke(...)` declares the typed address-first capability. The resulting
+`context.service.Transaction['1'].getTransactionSummary(...)` call crosses
+EventBridge and carries the current trusted identity and trace. The handler
+never accepts identity from model input.
 
-The published agent has its own business guard because callers can address a
-mounted target directly. The outer Support command uses the same policy before
-it invokes the agent. The Transaction command keeps its separate account
-guard because every caller of that data capability must pass the same rule.
+Hosted tools require persistent Harness storage because a host-tool graph is
+durable. The next runtime page supplies a persistent adapter; this page only
+defines the service and tool contracts.
 
-For a tool that only forwards one command without changing input or output,
-`commandAsHarnessTool(...)` is a shorter adapter. The builder used here is
-appropriate because the tool removes the internal `tenantId` field from the
-model-visible result. The same builder can explicitly declare streams, queue
-jobs, agents, workflows, and emitted events when a tool really needs them.
-
-Run a typecheck. This proves the host-tool input/output contracts match the
-command call and the published agent guard can access the declared resource.
-
-```bash title="Verify the mounted tool binding" replay="project"
+```bash title="Verify the mounted tool contracts" replay="project"
 npm run build
 ```
 
-Continue with [Invoke the agent from a command](../invoke-agent/).
+Continue with [Define the agent and Harness mount policy](../declare-host-tool/).

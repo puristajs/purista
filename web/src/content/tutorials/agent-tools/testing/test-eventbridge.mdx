@@ -1,20 +1,18 @@
 ---
 title: Test the complete EventBridge path
-description: Start both PURISTA services and prove trusted identity, tool routing, authorization, and denial across the real mounted runtime.
+description: Prove mounted authorization, model tool choice, identity propagation, and cleanup without credentials.
 order: 240
 kind: lesson
 status: draft
 ---
 
-The focused tests deliberately replaced EventBridge and infrastructure with
-stubs. Finish the chapter with one integration test that starts the real
-`DefaultEventBridge`, Transaction service, Support service, and mounted Harness
-runtime.
-
-Create the complete test below at the root of `src`.
+The integration test starts both real service definitions on a local
+EventBridge. It binds a strict fake model and SQLite `:memory:` storage, so the
+test remains deterministic and credential-free.
 
 ```ts title="src/agentTools.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { createSupportApplication } from './createSupportApplication.js'
@@ -29,7 +27,7 @@ describe('mounted PURISTA agent tools', () => {
 			toolCalls: [
 				{
 					id: 'lookup-1',
-					name: 'lookup_transaction',
+					name: 'lookupTransaction',
 					arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
 				},
 			],
@@ -53,6 +51,7 @@ describe('mounted PURISTA agent tools', () => {
 				currency: 'EUR',
 			})),
 		}
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const { support, transaction } = await createSupportApplication(
@@ -60,6 +59,7 @@ describe('mounted PURISTA agent tools', () => {
 			initLogger('fatal'),
 			{ supportQuestionPolicy, accountReadPolicy, transactionSummaryReader },
 			{ provider, model: 'fake-support' },
+			storage,
 		)
 
 		try {
@@ -67,7 +67,7 @@ describe('mounted PURISTA agent tools', () => {
 				getCommandMessageMock({
 					tenantId: 'tenant-example',
 					principalId: 'principal-alex',
-					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerTransactionQuestion' },
+					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerTransactionQuestion' },
 					payload: {
 						payload: {
 							questionId: 'question-1',
@@ -102,6 +102,7 @@ describe('mounted PURISTA agent tools', () => {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
@@ -109,17 +110,22 @@ describe('mounted PURISTA agent tools', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const accountReadPolicy = { canRead: vi.fn(async () => true) }
 		const transactionSummaryReader = { getById: vi.fn() }
+		const supportQuestionPolicy = {
+			canAsk: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
+		}
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const { support, transaction } = await createSupportApplication(
 			eventBridge,
 			initLogger('fatal'),
 			{
-				supportQuestionPolicy: { canAsk: vi.fn(async () => false) },
+				supportQuestionPolicy,
 				accountReadPolicy,
 				transactionSummaryReader,
 			},
 			{ provider, model: 'fake-support' },
+			storage,
 		)
 
 		try {
@@ -131,7 +137,7 @@ describe('mounted PURISTA agent tools', () => {
 						receiver: {
 							serviceName: 'Support',
 							serviceVersion: '1',
-							serviceTarget: 'answer_transaction_question',
+							serviceTarget: 'runAnswerTransactionQuestion',
 						},
 						payload: {
 							payload: {
@@ -145,6 +151,7 @@ describe('mounted PURISTA agent tools', () => {
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
+			expect(supportQuestionPolicy.canAsk).toHaveBeenCalledTimes(2)
 			expect(accountReadPolicy.canRead).not.toHaveBeenCalled()
 			expect(transactionSummaryReader.getById).not.toHaveBeenCalled()
 			provider.assertExhausted()
@@ -152,29 +159,25 @@ describe('mounted PURISTA agent tools', () => {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 })
 ```
-The successful case enters through the outer command. The Support policy runs
-once there and once again at the directly addressable mounted target. The host
-tool then invokes `Transaction / 1 / getTransactionSummary`; its account guard
-receives the same trusted tenant and principal before the reader runs.
 
-The denied case addresses the mounted agent directly. This proves the mount
-guard is a real security boundary rather than protection supplied only by the
-wrapper command. With no queued model response, `provider.assertExhausted()`
-also proves denial occurred before a model request.
 
-Run the complete project verification.
+The successful case enters the wrapper command, passes the mounted-agent guard,
+lets the model choose `lookupTransaction`, and reaches the Transaction command
+with the original tenant and principal. The denied case lets the wrapper guard
+pass and denies the second policy check at the mounted agent, before model or
+tool work.
 
-```bash title="Verify the complete agent-tools chapter" replay="project"
-npm run build
+```bash title="Run all checks" replay="project"
 npm test
+npm run build
 npm run lint
-npm run demo
 ```
 
-You now have a portable Harness agent whose model-selected tool invokes a
-guarded PURISTA command through EventBridge, with trusted identity preserved
-across both calls.
+Each test destroys both services, EventBridge, and storage in `finally`. The
+chapter now keeps data ownership, tool access, model choice, and authorization
+at separate, testable boundaries.

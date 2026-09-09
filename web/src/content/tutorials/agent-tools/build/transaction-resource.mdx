@@ -1,22 +1,14 @@
 ---
-title: Define the Transaction service boundary
-description: Describe the transaction reader, account policy, command schemas, and injected resources before adding behavior.
-order: 233
+title: Define the Transaction contracts
+description: Add schemas and injected resources for an authorized transaction lookup.
+order: 232
 kind: lesson
 status: draft
 ---
 
-The agent needs transaction data, but the Support service does not own that
-data. Before writing the tool adapter, define a small boundary on the
-Transaction service. This keeps the database and the account access rule behind
-the service that owns them.
-
-This step only declares contracts. The next step will add the guarded command
-that uses them.
-
-## Declare the injected resources
-
-Create `TransactionResources.ts` beside the generated Transaction service.
+The Transaction service owns transaction data and the rule that decides who
+may read it. Define small resource interfaces so production code and tests can
+provide different implementations.
 
 ```ts title="src/service/transaction/v1/TransactionResources.ts" write
 import type { z } from 'zod'
@@ -33,20 +25,10 @@ export interface AccountReadPolicy {
 }
 ```
 
-`TransactionSummaryReader` is the database-facing port. It says what the
-command needs without choosing PostgreSQL, an ORM, or an in-memory
-implementation. `AccountReadPolicy` answers the business question “may this
-principal read this account?”
 
-Transaction records are business data. They belong behind a database resource,
-not in a PURISTA StateStore. A StateStore is intended for application state
-such as sessions, locks, and short-lived coordination data.
-
-## Define the command boundary with schemas
-
-Replace the generated schema file. The payload contains the two identifiers a
-caller must provide. The output includes `tenantId` because server-side code
-must verify the loaded record before anything is returned to the agent.
+The command accepts one account and transaction id. Its output includes the
+trusted tenant so an after-guard can verify the returned record still belongs
+to the caller.
 
 ```ts title="src/service/transaction/v1/command/getTransactionSummary/schema.ts" write
 import { z } from 'zod'
@@ -68,18 +50,8 @@ export const getTransactionSummaryOutputSchema = z.strictObject({
 })
 ```
 
-The builder will infer its TypeScript types from these Zod schemas. Remove the
-generated aliases so this command has one source of truth.
 
-```bash title="Remove unused Transaction command aliases" replay="project"
-rm src/service/transaction/v1/command/getTransactionSummary/types.ts
-```
-
-## Make the resources available to Transaction commands
-
-Replace the generated service builder. `defineResource` adds a typed property
-to the command context; it does not create the concrete implementation. The
-composition root will provide implementations later.
+Register the resources on the versioned service builder.
 
 ```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -94,12 +66,19 @@ export const transactionV1ServiceBuilder = new ServiceBuilder({
 	.defineResource<'accountReadPolicy', AccountReadPolicy>()
 ```
 
-At this checkpoint, the Transaction service has a typed persistence boundary,
-a typed authorization boundary, and a validated command contract. Verify that
-the project still compiles before adding behavior.
 
-```bash title="Verify the Transaction contracts" replay="project"
-npm run build
+These are business resources. The agent will reach them through a PURISTA
+command instead of reading a database directly.
+
+This tutorial infers types directly from the schemas where they are used, so
+remove the generated type-alias placeholder before continuing.
+
+```bash title="Remove the unused generated type aliases" replay="project"
+rm src/service/transaction/v1/command/getTransactionSummary/types.ts
 ```
 
-Continue with [Build the guarded owning command](../bind-command/).
+```bash title="Check the Transaction payload schema" replay="project"
+node --import tsx --input-type=module -e "const { getTransactionSummaryPayloadSchema: schema } = await import('./src/service/transaction/v1/command/getTransactionSummary/schema.ts'); schema.parse({ accountId: 'account-operating', transactionId: 'tx-100' })"
+```
+
+Continue with [Build the guarded Transaction command](../bind-command/).

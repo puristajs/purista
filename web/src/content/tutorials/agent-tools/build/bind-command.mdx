@@ -1,20 +1,15 @@
 ---
-title: Build the guarded owning command
-description: Implement and test the command that reads one transaction after checking business access.
-order: 234
+title: Build the guarded Transaction command
+description: Keep transaction authorization and data access inside the service that owns them.
+order: 233
 kind: lesson
 status: draft
 ---
 
-The previous step defined the Transaction service boundary. Now replace the
-generated command builder with its behavior. This command is the only operation
-the agent tool will be allowed to invoke.
-
-## Implement the command and its guards
-
-Replace the generated command builder. The before guard decides whether the
-trusted caller may read the requested account. Authentication happens before
-the command is invoked; this guard performs business authorization.
+The command checks authentication data from the PURISTA message, asks the
+account policy for authorization, and reads the injected transaction resource.
+An after-guard checks the returned tenant and account before the result leaves
+the service.
 
 ```ts title="src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -55,27 +50,10 @@ export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
 		return result
 	})
 ```
-The model-proposed ids are validated input, but they are not authorization.
-The before guard uses trusted message identity. The handler reads the injected
-resource. The after guard verifies that the returned record still belongs to
-the requested tenant and account.
 
-Register the command on the owning service by replacing the generated service
-file. This is what makes the command address
-`Transaction / 1 / getTransactionSummary` available through EventBridge.
 
-```ts title="src/service/transaction/v1/transactionV1Service.ts" write
-import { getTransactionSummaryCommandBuilder } from './command/getTransactionSummary/getTransactionSummaryCommandBuilder.js'
-import { transactionV1ServiceBuilder } from './transactionV1ServiceBuilder.js'
-
-export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefinition(
-	getTransactionSummaryCommandBuilder.getDefinition(),
-)
-```
-## Test the owning command now
-
-Replace the generated command test. The first case proves the guard and reader
-cooperate. The second proves denial stops the reader.
+Test the command with injected resource doubles. The denied case proves that a
+failed business guard stops before data access.
 
 ```ts title="src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -147,12 +125,25 @@ describe('getTransactionSummary command', () => {
 	})
 })
 ```
-Run the focused test and typecheck. At this checkpoint, the Transaction
-capability works without Harness.
 
-```bash title="Verify the guarded Transaction command" replay="project"
-npm test -- src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts
+
+Add the command definition to the Transaction service.
+
+```ts title="src/service/transaction/v1/transactionV1Service.ts" write
+import { getTransactionSummaryCommandBuilder } from './command/getTransactionSummary/getTransactionSummaryCommandBuilder.js'
+import { transactionV1ServiceBuilder } from './transactionV1ServiceBuilder.js'
+
+export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefinition(
+	getTransactionSummaryCommandBuilder.getDefinition(),
+)
+```
+
+
+The successful command result can now cross EventBridge. The agent tool will
+call this public service contract instead of copying the transaction logic.
+
+```bash title="Check the guarded command" replay="project"
 npm run build
 ```
 
-Continue with [Bind the tool to the command](../mount-tool/).
+Continue with [Define the service-owned host tool](../mount-tool/).

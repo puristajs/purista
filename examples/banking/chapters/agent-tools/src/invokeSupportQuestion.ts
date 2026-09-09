@@ -3,7 +3,7 @@ import type { z } from 'zod'
 import type {
 	answerTransactionQuestionInputSchema,
 	answerTransactionQuestionOutputSchema,
-} from './harness/support/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+} from './service/support/v1/harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
 
 type Question = z.infer<typeof answerTransactionQuestionInputSchema>
 type Answer = z.infer<typeof answerTransactionQuestionOutputSchema>
@@ -28,7 +28,7 @@ export function invokeSupportQuestion(
 		receiver: {
 			serviceName: 'Support',
 			serviceVersion: '1',
-			serviceTarget: 'answerTransactionQuestion',
+			serviceTarget: 'runAnswerTransactionQuestion',
 		},
 		payload: { payload, parameter: {} },
 	})

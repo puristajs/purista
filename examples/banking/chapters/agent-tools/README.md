@@ -1,17 +1,12 @@
 # PURISTA agent tools tutorial source
 
-This focused project shows how a native Harness host-tool contract is bound to
+This focused project shows how a PURISTA service-owned Harness tool uses
 address-first PURISTA capabilities. The model can request a transaction summary,
-but the host binding invokes a guarded `Transaction` command through EventBridge.
+and the tool invokes a guarded `Transaction` command through EventBridge.
 Trusted tenant and principal identity come from the PURISTA message.
 
-```bash
-npm install
-npm run build
-npm test
-npm run lint
-npm run demo
-```
+Run `npm install`, then use `npm run build`, `npm test`, and `npm run lint` to
+verify the project. Run `npm run demo` for the credential-free example.
 
 The default demo and tests use a strict fake model. The integration test also
 uses a real `DefaultEventBridge`, so the complete model-tool-command path needs

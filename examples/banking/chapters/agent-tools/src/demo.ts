@@ -1,4 +1,5 @@
 import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { createSupportApplication } from './createSupportApplication.js'
 import { invokeSupportQuestion } from './invokeSupportQuestion.js'
@@ -13,7 +14,7 @@ async function main() {
 		toolCalls: [
 			{
 				id: 'lookup-1',
-				name: 'lookup_transaction',
+				name: 'lookupTransaction',
 				arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
 			},
 		],
@@ -25,6 +26,7 @@ async function main() {
 		usage,
 		finishReason: 'stop',
 	})
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const { support, transaction } = await createSupportApplication(
@@ -45,6 +47,7 @@ async function main() {
 			},
 		},
 		{ provider, model: 'fake-support' },
+		storage,
 	)
 
 	try {
@@ -64,6 +67,7 @@ async function main() {
 		await support.destroy()
 		await transaction.destroy()
 		await eventBridge.destroy()
+		await storage.close()
 	}
 }
 

@@ -1,5 +1,5 @@
 import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
 import type { SupportQuestionPolicy } from './service/support/v1/SupportResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 import type { AccountReadPolicy, TransactionSummaryReader } from './service/transaction/v1/TransactionResources.js'
@@ -14,6 +14,7 @@ export async function createSupportApplication(
 		supportQuestionPolicy: SupportQuestionPolicy
 	}>,
 	model: Readonly<{ provider: ModelProvider; model: string }>,
+	storage: HarnessStorage,
 ) {
 	const transaction = await transactionV1Service.getInstance(eventBridge, {
 		logger,
@@ -26,8 +27,8 @@ export async function createSupportApplication(
 		logger,
 		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
 		ai: {
-			models: { primary: model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+			model,
+			storage,
 		},
 	})
 	await transaction.start()

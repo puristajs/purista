@@ -32,7 +32,7 @@ export function supportQuestionSessionId(
 	if (!identity.tenantId || !identity.principalId)
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	const digest = createHash('sha256')
-		.update(`${identity.tenantId}:${identity.principalId}:${questionId}:support-question-v1`)
+		.update(JSON.stringify(['support-question-v1', identity.tenantId, identity.principalId, questionId]))
 		.digest('hex')
 	return `support-question:${digest}`
 }

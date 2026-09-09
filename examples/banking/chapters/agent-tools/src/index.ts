@@ -1,4 +1,5 @@
 import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { createSupportApplication } from './createSupportApplication.js'
 import { invokeSupportQuestion } from './invokeSupportQuestion.js'
@@ -7,6 +8,7 @@ async function main() {
 	const logger = initLogger()
 	const apiKey = process.env.OPENAI_API_KEY?.trim()
 	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const { support, transaction } = await createSupportApplication(
@@ -38,6 +40,7 @@ async function main() {
 			provider: openai({ apiKey }),
 			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
 		},
+		storage,
 	)
 
 	try {
@@ -56,6 +59,7 @@ async function main() {
 		await support.destroy()
 		await transaction.destroy()
 		await eventBridge.destroy()
+		await storage.close()
 	}
 }
 

@@ -1,23 +1,18 @@
 ---
-title: Run the complete application
-description: Use deterministic local adapters first, then optionally replace only the model binding with OpenAI.
+title: Run the credential-free and live examples
+description: Exercise the complete path with a strict fake model or an optional OpenAI model.
 order: 238
 kind: lesson
 status: draft
 ---
 
-The composition root is ready. First run it with deterministic local adapters.
-This gives you a reliable proof of the full integration before you spend money
-or debug provider credentials.
-
-## Run the complete path without an API key
-
-Create `src/demo.ts`. `FakeModelProvider` returns two queued model responses:
-the first selects `lookup_transaction`; the second returns the final structured
-answer after Harness gives the tool result back to the model loop.
+Start with the credential-free demo. Its strict fake model chooses the real
+host tool, then returns a structured answer. File-backed SQLite supplies the
+persistent Harness storage required by the hosted tool.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { createSupportApplication } from './createSupportApplication.js'
 import { invokeSupportQuestion } from './invokeSupportQuestion.js'
@@ -32,7 +27,7 @@ async function main() {
 		toolCalls: [
 			{
 				id: 'lookup-1',
-				name: 'lookup_transaction',
+				name: 'lookupTransaction',
 				arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
 			},
 		],
@@ -44,6 +39,7 @@ async function main() {
 		usage,
 		finishReason: 'stop',
 	})
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const { support, transaction } = await createSupportApplication(
@@ -64,6 +60,7 @@ async function main() {
 			},
 		},
 		{ provider, model: 'fake-support' },
+		storage,
 	)
 
 	try {
@@ -83,6 +80,7 @@ async function main() {
 		await support.destroy()
 		await transaction.destroy()
 		await eventBridge.destroy()
+		await storage.close()
 	}
 }
 
@@ -91,31 +89,25 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Run it from the project root.
 
-```bash title="Run the credential-free agent tool demo" replay="project"
+
+```bash title="Run the credential-free demo" replay="project"
 npm run demo
 ```
 
-You should receive one validated command result:
-
-```json title="Expected demo output" expect="json"
+```json title="Expected demo result" expect="json"
 {
-	"answer": "Transaction tx-100 is pending for EUR 42.",
-	"transactionIds": ["tx-100"]
+  "answer": "Transaction tx-100 is pending for EUR 42.",
+  "transactionIds": ["tx-100"]
 }
 ```
 
-That output proves the full path ran: outer command, mounted agent, model tool
-selection, host-tool adapter, Transaction command, and final model response.
-
-## Optional: bind a live provider
-
-Create the live entry point below. Only this composition root imports the
+The optional live process uses the same service composition and a published
 OpenAI adapter.
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { createSupportApplication } from './createSupportApplication.js'
 import { invokeSupportQuestion } from './invokeSupportQuestion.js'
@@ -124,6 +116,7 @@ async function main() {
 	const logger = initLogger()
 	const apiKey = process.env.OPENAI_API_KEY?.trim()
 	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const { support, transaction } = await createSupportApplication(
@@ -155,6 +148,7 @@ async function main() {
 			provider: openai({ apiKey }),
 			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
 		},
+		storage,
 	)
 
 	try {
@@ -173,6 +167,7 @@ async function main() {
 		await support.destroy()
 		await transaction.destroy()
 		await eventBridge.destroy()
+		await storage.close()
 	}
 }
 
@@ -181,15 +176,24 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Copy `.env.example` to `.env`, set your key, and run `npm start` only when you
-want to make a provider request.
+
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
 
-The next two pages test the small contracts first and the complete EventBridge
-path last.
 
-Continue with [Test the small boundaries](../../testing/test-tools/).
+Copy `.env.example` to `.env`, add a key, and run `npm start` only when you want
+the live provider.
+
+```bash title="Run the optional live model"
+cp .env.example .env
+npm start
+```
+
+Both programs destroy the Support service, Transaction service, EventBridge,
+and SQLite storage in `finally`. That cleanup is also important in tests and
+long-running processes.
+
+Continue with [Test the command boundary](../../testing/test-tools/).

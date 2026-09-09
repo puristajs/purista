@@ -1,4 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { createSupportApplication } from './createSupportApplication.js'
@@ -13,7 +14,7 @@ describe('mounted PURISTA agent tools', () => {
 			toolCalls: [
 				{
 					id: 'lookup-1',
-					name: 'lookup_transaction',
+					name: 'lookupTransaction',
 					arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
 				},
 			],
@@ -37,6 +38,7 @@ describe('mounted PURISTA agent tools', () => {
 				currency: 'EUR',
 			})),
 		}
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const { support, transaction } = await createSupportApplication(
@@ -44,6 +46,7 @@ describe('mounted PURISTA agent tools', () => {
 			initLogger('fatal'),
 			{ supportQuestionPolicy, accountReadPolicy, transactionSummaryReader },
 			{ provider, model: 'fake-support' },
+			storage,
 		)
 
 		try {
@@ -51,7 +54,7 @@ describe('mounted PURISTA agent tools', () => {
 				getCommandMessageMock({
 					tenantId: 'tenant-example',
 					principalId: 'principal-alex',
-					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerTransactionQuestion' },
+					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerTransactionQuestion' },
 					payload: {
 						payload: {
 							questionId: 'question-1',
@@ -86,6 +89,7 @@ describe('mounted PURISTA agent tools', () => {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
@@ -93,17 +97,22 @@ describe('mounted PURISTA agent tools', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const accountReadPolicy = { canRead: vi.fn(async () => true) }
 		const transactionSummaryReader = { getById: vi.fn() }
+		const supportQuestionPolicy = {
+			canAsk: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
+		}
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const { support, transaction } = await createSupportApplication(
 			eventBridge,
 			initLogger('fatal'),
 			{
-				supportQuestionPolicy: { canAsk: vi.fn(async () => false) },
+				supportQuestionPolicy,
 				accountReadPolicy,
 				transactionSummaryReader,
 			},
 			{ provider, model: 'fake-support' },
+			storage,
 		)
 
 		try {
@@ -115,7 +124,7 @@ describe('mounted PURISTA agent tools', () => {
 						receiver: {
 							serviceName: 'Support',
 							serviceVersion: '1',
-							serviceTarget: 'answer_transaction_question',
+							serviceTarget: 'runAnswerTransactionQuestion',
 						},
 						payload: {
 							payload: {
@@ -129,6 +138,7 @@ describe('mounted PURISTA agent tools', () => {
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
+			expect(supportQuestionPolicy.canAsk).toHaveBeenCalledTimes(2)
 			expect(accountReadPolicy.canRead).not.toHaveBeenCalled()
 			expect(transactionSummaryReader.getById).not.toHaveBeenCalled()
 			provider.assertExhausted()
@@ -136,6 +146,7 @@ describe('mounted PURISTA agent tools', () => {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 })
