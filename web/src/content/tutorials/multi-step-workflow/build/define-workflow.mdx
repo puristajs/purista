@@ -1,17 +1,19 @@
 ---
-title: Create the project and sequential workflow
-description: Scaffold the PURISTA boundary and define typed specialist stages inside one native Harness workflow.
+title: Create the project and its boundaries
+description: Use the PURISTA CLI to generate one Support service, two agents, one workflow, and one distinct wrapper command.
 order: 271
 kind: lesson
 status: draft
 ---
 
-Create a clean project and install the complete published manifest.
+Start in an empty parent directory. This chapter creates an independent project.
 
-```bash title="Create and enter the multi-step workflow project" replay="parent"
-npm create purista@2.2.0 multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 multi-step-support-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd multi-step-support-workflow
 ```
+
+Use published PURISTA and Harness packages. The scripts call the project-local CLI.
 
 ```json title="package.json" write
 {
@@ -58,23 +60,33 @@ cd multi-step-support-workflow
 	}
 }
 ```
-```bash title="Install the multi-step workflow dependencies" replay="project"
+
+```bash title="Install the project dependencies" replay="project"
 npm install
 ```
 
-Generate the service, two specialist agents, owning workflow, and application
-command through the PURISTA CLI.
+Generate each boundary once. `--http none` keeps both agents internal. The command target is `runResolveSupportCase`, while the workflow target is `resolveSupportCase`.
 
-```bash title="Generate workflow definitions and command" replay="project"
+```bash title="Generate the Support boundaries" replay="project"
 npm run add:service -- support --description "Own support case resolution" --non-interactive
-npm run add:agent -- classify-support-case --service support --service-version 1 --description "Classify one support case" --non-interactive
-npm run add:agent -- plan-support-resolution --service support --service-version 1 --description "Plan one support resolution" --non-interactive
+npm run add:agent -- classify-support-case --service support --service-version 1 --http none --description "Classify one support case" --non-interactive
+npm run add:agent -- plan-support-resolution --service support --service-version 1 --http none --description "Plan one support resolution" --non-interactive
 npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
-npm run add:command -- resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
+npm run add:command -- run-resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
 ```
 
-The CLI creates one module and colocated test for each agent and workflow. Keep
-those boundaries. The next page fills the generated files, adds shared schemas,
-and composes the modules in a small service Harness definition.
+This chapter supplies focused final tests and a smaller service surface. Remove the generated placeholders that are not part of the final project.
 
-Continue with [Define the workflow stages](../define-agents/).
+```bash title="Remove generated placeholders" replay="project"
+rm src/service/support/generalSupportServiceInfo.ts
+rm src/service/support/v1/supportServiceConfig.ts
+rm src/service/support/v1/supportV1Service.test.ts
+rm src/service/support/v1/harness/agent/classifySupportCase/classifySupportCaseAgent.test.ts
+rm src/service/support/v1/harness/agent/planSupportResolution/planSupportResolutionAgent.test.ts
+rm src/service/support/v1/harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.test.ts
+rm src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.test.ts
+```
+
+The generated definitions now provide the service-owned layout for the next steps.
+
+Continue with [Define the typed agent stages](../define-agents/).

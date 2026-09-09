@@ -21,13 +21,12 @@ async function main() {
 				tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
 		storage: local.storage,
-		sandbox: local.sandbox,
-		workspace: local.workspace,
 		classificationModel: { provider, model },
 		resolutionModel: { provider, model },
 	})
 	await support.start()
-	gracefulShutdown(logger, [support, eventBridge])
+	const localRuntime = { name: 'local durable runtime', destroy: () => local.close() }
+	gracefulShutdown(logger, [support, eventBridge, localRuntime])
 	logger.info('Durable support resolution service started')
 }
 

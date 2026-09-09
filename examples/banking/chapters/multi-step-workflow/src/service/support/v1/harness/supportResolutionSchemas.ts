@@ -14,6 +14,7 @@ export const resolutionPlanInputSchema = z.strictObject({
 	caseId: z.string(),
 	message: z.string(),
 	classification: supportClassificationSchema,
+	handlingLane: z.enum(['priority', 'standard']),
 })
 
 export const resolutionPlanSchema = z.strictObject({

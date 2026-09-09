@@ -1,14 +1,3 @@
----
-title: Add a durable decision and bounded retry
-description: Run managed agents in order, checkpoint an application decision, and bound temporary model retries.
-order: 273
-kind: lesson
-status: draft
----
-
-This workflow is sequential because the plan needs the classification. Its child-call policy permits exactly two calls and only one active call at a time.
-
-```ts title="src/service/support/v1/harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.ts" write
 import { defineWorkflow } from '@purista/harness'
 import { classifySupportCaseAgent } from '../../agent/classifySupportCase/classifySupportCaseAgent.js'
 import { planSupportResolutionAgent } from '../../agent/planSupportResolution/planSupportResolutionAgent.js'
@@ -48,16 +37,3 @@ export const resolveSupportCaseWorkflow = defineWorkflow('resolveSupportCase', {
 		return { caseId: context.input.caseId, classification, plan }
 	},
 })
-```
-
-The managed agent calls already participate in durable execution. Their call IDs, `classify-case` and `plan-resolution`, stay stable across an attempt.
-
-`select-handling-lane-v1` is different: it is an application-owned durable step between the two model calls. Harness stores its priority or standard routing decision. `resolutionPlanInputSchema.parse` validates the value whether it is fresh or replayed.
-
-The runtime model binding adds a bounded retry for temporary provider server errors. Invalid structured output remains permanent and does not trigger that retry. Do not rename the step ID casually: a new ID describes a new checkpoint.
-
-```bash title="Check the durable sequential workflow" replay="project"
-npm run build
-```
-
-Continue with [Protect and mount the workflow](../publish-workflow/).

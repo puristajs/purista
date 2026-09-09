@@ -1,17 +1,16 @@
 ---
-title: Run durable resolution
-description: Invoke the workflow with deterministic local adapters, then optionally bind persistent SQLite and OpenAI.
+title: Run the demo and live service
+description: Try the workflow with strict fake models, then configure the optional OpenAI process.
 order: 277
 kind: lesson
 status: draft
 ---
 
-The composition is ready. Start with in-memory storage and strict fake models
-so the first complete path is deterministic and needs no provider credential.
+The default demo is deterministic. It uses strict fake providers, invokes `runResolveSupportCase` through `DefaultEventBridge`, and closes the service, EventBridge, and storage.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { inMemoryHarnessStorage } from '@purista/harness'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
@@ -30,7 +29,7 @@ async function main() {
 		usage,
 		finishReason: 'stop',
 	})
-	const storage = inMemoryHarnessStorage()
+	const storage = sqliteHarnessStorage({ file: ':memory:' })
 	const logger = initLogger('fatal')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
@@ -47,7 +46,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
 				payload: {
 					payload: { caseId: 'case-1', message: 'My card is missing.' },
 					parameter: {},
@@ -69,13 +68,24 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Document optional live-provider settings and create the live entry point with
-SQLite Harness storage.
+
+```bash title="Run the credential-free demo" replay="project"
+npm run demo
+```
+
+For an optional live run, keep the provider credential outside source control.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
+
+The CLI may have created a first-agent environment helper. This entry point reads the variables directly, so remove that generated helper before writing the final file.
+
+```bash title="Remove the unused generated environment helper" replay="project"
+rm -f src/config/env.ts
+```
+
 ```ts title="src/index.ts" write
 import { mkdir } from 'node:fs/promises'
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
@@ -100,13 +110,12 @@ async function main() {
 				tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
 		storage: local.storage,
-		sandbox: local.sandbox,
-		workspace: local.workspace,
 		classificationModel: { provider, model },
 		resolutionModel: { provider, model },
 	})
 	await support.start()
-	gracefulShutdown(logger, [support, eventBridge])
+	const localRuntime = { name: 'local durable runtime', destroy: () => local.close() }
+	gracefulShutdown(logger, [support, eventBridge, localRuntime])
 	logger.info('Durable support resolution service started')
 }
 
@@ -115,9 +124,12 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-```bash title="Run the deterministic multi-step workflow" replay="project"
-npm run build
-npm run demo
+
+`localDurableExecution` stores workflow state below `.data/multi-step-workflow`. The shutdown list closes Support, the EventBridge, and the local durable runtime.
+
+```bash title="Start the optional live service"
+cp .env.example .env
+npm start
 ```
 
-Continue with [Test the generated workflow stages](../../testing/test-agents/).
+Continue with [Test the two agents](../../testing/test-agents/).

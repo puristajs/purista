@@ -1,5 +1,5 @@
 import type { EventBridge, Logger } from '@purista/core'
-import type { DurableWorkspace, HarnessStorage, ModelProvider, Sandbox } from '@purista/harness'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
 import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
@@ -9,8 +9,6 @@ export function createSupportService(
 	options: Readonly<{
 		supportCasePolicy: SupportCasePolicy
 		storage: HarnessStorage
-		sandbox?: Sandbox
-		workspace?: DurableWorkspace
 		classificationModel: { provider: ModelProvider; model: string }
 		resolutionModel: { provider: ModelProvider; model: string }
 	}>,
@@ -20,13 +18,20 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			storage: options.storage,
-			...(options.sandbox ? { sandbox: options.sandbox } : {}),
-			...(options.workspace ? { workspace: options.workspace } : {}),
 			models: {
-				classification_model: options.classificationModel,
-				resolution_model: options.resolutionModel,
+				classificationModel: options.classificationModel,
+				resolutionModel: {
+					...options.resolutionModel,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 1,
+						maxDelayMs: 10,
+						maxActiveDelayMs: 100,
+						maxActiveElapsedMs: 1_000,
+						retryOn: { serverError: true },
+					},
+				},
 			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }

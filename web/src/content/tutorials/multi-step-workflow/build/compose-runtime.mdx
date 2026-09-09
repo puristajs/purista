@@ -1,20 +1,16 @@
 ---
-title: Compose the durable runtime
-description: Bind storage, optional durable workspace resources, both models, and the case policy through one service factory.
+title: Bind storage and named models
+description: Supply durable storage, the business policy, and separate model bindings at application composition.
 order: 276
 kind: lesson
 status: draft
 ---
 
-Durable workflow definitions are portable. The composition root selects the
-storage, optional sandbox and workspace lifecycle, model providers, and
-business policy for this process.
-
-Create the provider-neutral factory.
+The workflow stays portable. The application supplies storage and both named model bindings.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
-import type { DurableWorkspace, HarnessStorage, ModelProvider, Sandbox } from '@purista/harness'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
 import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
@@ -24,8 +20,6 @@ export function createSupportService(
 	options: Readonly<{
 		supportCasePolicy: SupportCasePolicy
 		storage: HarnessStorage
-		sandbox?: Sandbox
-		workspace?: DurableWorkspace
 		classificationModel: { provider: ModelProvider; model: string }
 		resolutionModel: { provider: ModelProvider; model: string }
 	}>,
@@ -35,25 +29,31 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			storage: options.storage,
-			...(options.sandbox ? { sandbox: options.sandbox } : {}),
-			...(options.workspace ? { workspace: options.workspace } : {}),
 			models: {
-				classification_model: options.classificationModel,
-				resolution_model: options.resolutionModel,
+				classificationModel: options.classificationModel,
+				resolutionModel: {
+					...options.resolutionModel,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 1,
+						maxDelayMs: 10,
+						maxActiveDelayMs: 100,
+						maxActiveElapsedMs: 1_000,
+						retryOn: { serverError: true },
+					},
+				},
 			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }
 ```
 
-Tests can supply in-memory storage. A restart-safe process must supply
-compatible persistent storage, sandbox, and workspace adapters and close their
-lifecycle during shutdown. Storage alone does not make arbitrary tool work
-recoverable.
+`classificationModel` and `resolutionModel` exactly match the agent definitions. The resolution binding has a short provider retry budget for temporary server failures. The application-owned workflow step records the handling-lane decision and does not add another retry layer.
 
-```bash title="Verify the durable runtime composition" replay="project"
+Tests may use temporary or in-memory storage. A live process should use storage that survives a restart and must close it during shutdown.
+
+```bash title="Check runtime composition" replay="project"
 npm run build
 ```
 
-Continue with [Run durable resolution](../run-application/).
+Continue with [Run the demo and live service](../run-application/).

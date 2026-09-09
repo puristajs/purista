@@ -1,31 +1,29 @@
 ---
-title: Test durable PURISTA routing
-description: Verify command identity, mounted authorization, bounded retry, input idempotency, and checkpoint reuse through EventBridge.
+title: Test command and EventBridge routing
+description: Verify stable identity, bounded retry, replay safety, and both authorization boundaries.
 order: 280
 kind: lesson
 status: draft
 ---
 
-Test the PURISTA command separately with its declared workflow client, trusted
-identity, stable durable ids, and business policy. This test needs no running
-Harness runtime because the generated context mock supplies the workflow
-client.
+The command unit test checks the three-part workflow address and exact durable options. It also proves delimiter-like identity values produce different session and run IDs.
 
-```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts" write
+```ts title="src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
 import { durableResolutionIdentity } from '../../durableIdentity.js'
-import { resolveSupportCaseCommandBuilder } from './resolveSupportCaseCommandBuilder.js'
+import { resolveSupportCaseWorkflow } from '../../harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
+import { runResolveSupportCaseCommandBuilder } from './runResolveSupportCaseCommandBuilder.js'
 
 const sandbox = createSandbox()
 afterEach(() => sandbox.restore())
 
-describe('resolveSupportCaseCommandBuilder', () => {
+describe('runResolveSupportCaseCommandBuilder', () => {
 	it('authorizes the case and invokes the declared durable workflow address', async () => {
 		const payload = { caseId: 'case-1', message: 'My card is missing.' }
 		const policy = { canResolve: sandbox.stub().resolves(true) }
-		const { context, stubs } = createCommandContextMock(resolveSupportCaseCommandBuilder, {
+		const { context, stubs } = createCommandContextMock(runResolveSupportCaseCommandBuilder, {
 			payload,
 			parameter: {},
 			resources: { supportCasePolicy: policy },
@@ -41,14 +39,13 @@ describe('resolveSupportCaseCommandBuilder', () => {
 			classification: { category: 'card' as const, urgency: 'urgent' as const },
 			plan: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' as const },
 		}
-		;(stubs.workflow as any).Support['1'].resolve_support_case.run.resolves({
-			status: 'completed',
-			runId: 'support-run-1',
-			output,
+		stubs.workflow.Support['1'][resolveSupportCaseWorkflow.contract.id].run.resolves({
+			sessionId: 'support-session',
+			outcome: { status: 'completed', runId: 'support-run-1', output },
 		})
 
 		await expect(
-			resolveSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+			runResolveSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
 		).resolves.toEqual(output)
 		expect(
 			policy.canResolve.calledOnceWith({
@@ -59,55 +56,95 @@ describe('resolveSupportCaseCommandBuilder', () => {
 		).toBe(true)
 		const identity = durableResolutionIdentity('tenant-example', 'principal-alex', 'case-1')
 		expect(
-			(stubs.workflow as any).Support['1'].resolve_support_case.run.calledOnceWith(payload, {
+			stubs.workflow.Support['1'][resolveSupportCaseWorkflow.contract.id].run.calledOnceWith(payload, {
 				sessionId: identity.sessionId,
 				durable: { runId: identity.runId },
 			}),
 		).toBe(true)
 	})
+
+	it('keeps delimiter-like identity values distinct', () => {
+		expect(durableResolutionIdentity('tenant:a', 'principal', 'case')).not.toEqual(
+			durableResolutionIdentity('tenant', 'a:principal', 'case'),
+		)
+	})
 })
 ```
-Finally run a mounted EventBridge integration. It proves command routing,
-workflow publication, both authorization boundaries, bounded retry, checkpoint
-reuse, and idempotency protection through the public PURISTA address.
+
+The integration tests use strict fake providers, SQLite Harness storage, and a real `DefaultEventBridge`. They cover bounded transient provider retry, permanent validation failure, completed-run replay, changed input for an existing run, wrapper-command denial, and mounted-workflow denial before model work.
 
 ```ts title="src/multiStepWorkflow.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { InMemoryHarnessStorage, ModelError } from '@purista/harness'
+import { BaseModelProvider, ModelError, sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
+class TransientResolutionProvider extends BaseModelProvider {
+	public declare readonly object: NonNullable<BaseModelProvider['object']>
+	public declare readonly objectStream: NonNullable<BaseModelProvider['objectStream']>
+	private readonly fake = new FakeModelProvider({ strict: true })
+	public attempts = 0
+
+	public constructor() {
+		super({ id: 'fake-retry', genAiSystem: 'fake' })
+	}
+
+	public enqueueObject(response: import('@purista/harness').ObjectResponse): void {
+		this.fake.enqueueObject(response)
+	}
+
+	public assertExhausted(): void {
+		this.fake.assertExhausted()
+	}
+
+	public get requests(): readonly import('@purista/harness').ObjectRequest[] {
+		return this.fake.requests.filter(
+			(request): request is import('@purista/harness').ObjectRequest => 'schema' in request,
+		)
+	}
+
+	protected override async doObject<
+		T extends import('@purista/harness').JsonValue = import('@purista/harness').JsonValue,
+	>(request: import('@purista/harness').ObjectRequest<T>): Promise<import('@purista/harness').ObjectResponse<T>> {
+		this.attempts += 1
+		if (this.attempts === 1) {
+			throw new ModelError('Temporary planning outage.', {
+				provider: 'fake',
+				model: 'resolution-fake',
+				method: 'object',
+				status: 503,
+			})
+		}
+		return this.fake.object(request)
+	}
+
+	protected override doObjectStream<
+		T extends import('@purista/harness').JsonValue = import('@purista/harness').JsonValue,
+	>(
+		request: import('@purista/harness').ObjectRequest<T>,
+	): AsyncIterable<import('@purista/harness').ObjectStreamChunk<T>> {
+		return this.fake.objectStream(request)
+	}
+}
+
 describe('durable multi-step workflow over PURISTA', () => {
-	it('retries a failed step and replays the earlier checkpoint on the next invocation', async () => {
+	it('runs the durable workflow through the command and replays it on the next invocation', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
-		const resolutionProvider = new FakeModelProvider({ strict: true })
-		const resolutionObject = vi.spyOn(resolutionProvider, 'object')
-		resolutionObject
-			.mockRejectedValueOnce(
-				new ModelError('The planning provider is temporarily unavailable.', {
-					provider: 'fake',
-					model: 'resolution-fake',
-					method: 'object',
-					reason: 'provider_unavailable',
-				}),
-			)
-			.mockRejectedValueOnce(
-				new ModelError('The planning provider is temporarily unavailable.', {
-					provider: 'fake',
-					model: 'resolution-fake',
-					method: 'object',
-					reason: 'provider_unavailable',
-				}),
-			)
+		const resolutionProvider = new TransientResolutionProvider()
 		classificationProvider.enqueueObject({
 			object: { category: 'card', urgency: 'urgent' },
 			usage,
 			finishReason: 'stop',
 		})
-		const storage = new InMemoryHarnessStorage()
+		resolutionProvider.enqueueObject({
+			object: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+			usage,
+			finishReason: 'stop',
+		})
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const policy = { canResolve: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
@@ -117,8 +154,19 @@ describe('durable multi-step workflow over PURISTA', () => {
 			ai: {
 				storage,
 				models: {
-					classification_model: { provider: classificationProvider, model: 'classification-fake' },
-					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
+					resolutionModel: {
+						provider: resolutionProvider,
+						model: 'resolution-fake',
+						retry: {
+							maxAttempts: 2,
+							minDelayMs: 1,
+							maxDelayMs: 10,
+							maxActiveDelayMs: 100,
+							maxActiveElapsedMs: 1_000,
+							retryOn: { serverError: true },
+						},
+					},
 				},
 			},
 		})
@@ -127,35 +175,26 @@ describe('durable multi-step workflow over PURISTA', () => {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
-				payload: {
-					payload: { caseId: 'case-1', message: 'My card was stolen and is being used.' },
-					parameter: {},
-				},
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
+				payload: { payload: { caseId: 'case-1', message: 'My card was stolen and is being used.' }, parameter: {} },
 			})
-
 		try {
-			await expect(eventBridge.invoke(message())).rejects.toBeDefined()
-			expect(classificationProvider.requests).toHaveLength(1)
-			expect(resolutionObject).toHaveBeenCalledTimes(2)
-
-			resolutionProvider.enqueueObject({
-				object: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
-				usage,
-				finishReason: 'stop',
-			})
-			await expect(eventBridge.invoke(message())).resolves.toEqual({
+			const output = {
 				caseId: 'case-1',
 				classification: { category: 'card', urgency: 'urgent' },
 				plan: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
-			})
+			}
+			await expect(eventBridge.invoke(message())).resolves.toEqual(output)
+			await expect(eventBridge.invoke(message())).resolves.toEqual(output)
 			expect(classificationProvider.requests).toHaveLength(1)
-			expect(resolutionObject).toHaveBeenCalledTimes(3)
+			expect(resolutionProvider.attempts).toBe(2)
+			expect(resolutionProvider.requests).toHaveLength(1)
 			classificationProvider.assertExhausted()
 			resolutionProvider.assertExhausted()
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
@@ -172,15 +211,16 @@ describe('durable multi-step workflow over PURISTA', () => {
 			usage,
 			finishReason: 'stop',
 		})
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const service = await supportV1Service.getInstance(eventBridge, {
 			resources: { supportCasePolicy: { canResolve: vi.fn(async () => true) } },
 			ai: {
-				storage: new InMemoryHarnessStorage(),
+				storage,
 				models: {
-					classification_model: { provider: classificationProvider, model: 'classification-fake' },
-					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
+					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})
@@ -192,7 +232,7 @@ describe('durable multi-step workflow over PURISTA', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-alex',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
 						payload: {
 							payload: { caseId: 'case-permanent', message: 'My card is damaged.' },
 							parameter: {},
@@ -204,6 +244,7 @@ describe('durable multi-step workflow over PURISTA', () => {
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
@@ -220,15 +261,16 @@ describe('durable multi-step workflow over PURISTA', () => {
 			usage,
 			finishReason: 'stop',
 		})
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const service = await supportV1Service.getInstance(eventBridge, {
 			resources: { supportCasePolicy: { canResolve: vi.fn(async () => true) } },
 			ai: {
-				storage: new InMemoryHarnessStorage(),
+				storage,
 				models: {
-					classification_model: { provider: classificationProvider, model: 'classification-fake' },
-					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
+					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})
@@ -239,7 +281,7 @@ describe('durable multi-step workflow over PURISTA', () => {
 				getCommandMessageMock({
 					tenantId: 'tenant-example',
 					principalId: 'principal-alex',
-					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
 					payload: {
 						payload: { caseId: 'case-stable', message },
 						parameter: {},
@@ -255,21 +297,24 @@ describe('durable multi-step workflow over PURISTA', () => {
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
 	it('rejects a direct workflow invocation before any model call when business access is denied', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		const policy = { canResolve: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const service = await supportV1Service.getInstance(eventBridge, {
-			resources: { supportCasePolicy: { canResolve: vi.fn(async () => false) } },
+			resources: { supportCasePolicy: policy },
 			ai: {
-				storage: new InMemoryHarnessStorage(),
+				storage,
 				models: {
-					classification_model: { provider: classificationProvider, model: 'classification-fake' },
-					resolution_model: { provider: resolutionProvider, model: 'resolution-fake' },
+					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
+					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})
@@ -281,7 +326,7 @@ describe('durable multi-step workflow over PURISTA', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-denied',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolve_support_case' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
 						payload: {
 							payload: { caseId: 'case-denied', message: 'Help with this case.' },
 							parameter: {},
@@ -289,21 +334,25 @@ describe('durable multi-step workflow over PURISTA', () => {
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canResolve).toHaveBeenCalledTimes(2)
 			expect(classificationProvider.requests).toHaveLength(0)
 			expect(resolutionProvider.requests).toHaveLength(0)
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 })
 ```
-Run type checking first, then all five test files, lint, and the deterministic
-demo.
 
-```bash title="Verify the multi-step workflow chapter" replay="project"
+Run the complete credential-free verification.
+
+```bash title="Verify the complete multi-step project" replay="project"
 npm run build
 npm test
 npm run lint
 npm run demo
 ```
+
+You now have a protected durable workflow with managed agent stages and an application-owned checkpointed decision.

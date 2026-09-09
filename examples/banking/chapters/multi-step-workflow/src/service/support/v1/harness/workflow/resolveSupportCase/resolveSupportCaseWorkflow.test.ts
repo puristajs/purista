@@ -1,14 +1,3 @@
----
-title: Test durable replay after restart
-description: Reopen the storage-backed runtime and prove a completed durable run does not repeat model work.
-order: 279
-kind: lesson
-status: draft
----
-
-This test uses a temporary local durable runtime. It completes the workflow, closes the first session and runtime, opens another runtime on the same directory, and repeats the same session, run ID, and input.
-
-```ts title="src/service/support/v1/harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.test.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -85,12 +74,3 @@ describe('resolveSupportCaseWorkflow', () => {
 		}
 	})
 })
-```
-
-Both provider request counts remain at one after the second run. Harness returns the stored completed run instead of repeating either managed agent call. The test also releases each borrowed session before closing its runtime.
-
-```bash title="Run the durable restart test" replay="project"
-npm test -- src/service/support/v1/harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.test.ts
-```
-
-Continue with [Test command and EventBridge routing](../test-routing/).

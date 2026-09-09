@@ -1,24 +1,20 @@
 ---
-title: Invoke the durable workflow
-description: Derive stable caller-scoped run identity and call the mounted workflow from a normal PURISTA command.
+title: Invoke the workflow through a distinct command
+description: Derive stable caller-scoped execution identity and use the three-part workflow address.
 order: 275
 kind: lesson
 status: draft
 ---
 
-The workflow is published and protected. The application command now needs
-stable session and run ids so a repeated request resumes the same durable work.
-
-## Derive durable identity from trusted values
-
-Create one helper that hashes tenant, principal, case, and contract version.
-An application retry for the same case will derive the same ids.
+One logical case should reuse one durable run for the same tenant and principal. Hashing a JSON tuple keeps delimiter-like identity values distinct.
 
 ```ts title="src/service/support/v1/durableIdentity.ts" write
 import { createHash } from 'node:crypto'
 
 export function durableResolutionIdentity(tenantId: string, principalId: string, caseId: string) {
-	const digest = createHash('sha256').update(`${tenantId}:${principalId}:${caseId}:support-resolution-v1`).digest('hex')
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-resolution-v1', tenantId, principalId, caseId]))
+		.digest('hex')
 	return {
 		sessionId: `support-resolution:${digest}`,
 		runId: `support-resolution-run:${digest}`,
@@ -26,30 +22,28 @@ export function durableResolutionIdentity(tenantId: string, principalId: string,
 }
 ```
 
-The ids correlate and resume work. They do not authorize it; the command and
-mounted-target guards still evaluate the current request.
+This command uses the shared Harness schemas. Remove its unused generated local schema and type files before writing the builder.
 
-## Invoke the workflow by address
+```bash title="Remove unused command schema placeholders" replay="project"
+rm src/service/support/v1/command/runResolveSupportCase/schema.ts
+rm src/service/support/v1/command/runResolveSupportCase/types.ts
+```
 
-Replace the generated command. It declares the exact workflow contract and
-uses identity from the PURISTA message, never from the payload.
+Declare the workflow with service name, version, and direct contract. The client uses the same three-part address and preserves the Harness result envelope until the command checks for completion.
 
-```ts title="src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts" write
+```ts title="src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
-import {
-	supportResolutionInputSchema,
-	supportResolutionOutputSchema,
-} from '../../../../../harness/support/supportResolutionSchemas.js'
 import { durableResolutionIdentity } from '../../durableIdentity.js'
-import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { supportResolutionInputSchema, supportResolutionOutputSchema } from '../../harness/supportResolutionSchemas.js'
+import { resolveSupportCaseWorkflow } from '../../harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
 import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
-export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
-	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
+export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runResolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
 	.addOutputSchema(supportResolutionOutputSchema)
-	.canInvokeWorkflow('Support', '1', 'resolve_support_case', supportHarness.contracts.workflows.resolve_support_case)
+	.canInvokeWorkflow('Support', '1', resolveSupportCaseWorkflow.contract)
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
@@ -64,33 +58,31 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 		const principalId = context.message.principalId
 		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 		const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
-		const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
+		const result = await context.workflow.Support['1'][resolveSupportCaseWorkflow.contract.id].run(payload, {
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
 		})
-		if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
-		return outcome.output
+		if (result.outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+		return result.outcome.output
 	})
 ```
 
-`canInvokeWorkflow(...)` creates the typed workflow client. The EventBridge
-call carries trace and trusted identity. The durable option tells Harness to
-use the stable run record and its named checkpoints.
-
-Register the command and mount once.
+Register the command and mount the Harness once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
-import { resolveSupportCaseCommandBuilder } from './command/resolveSupportCase/resolveSupportCaseCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { runResolveSupportCaseCommandBuilder } from './command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 export const supportV1Service = supportV1ServiceBuilder
-	.addCommandDefinition(resolveSupportCaseCommandBuilder.getDefinition())
+	.addCommandDefinition(runResolveSupportCaseCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
 
-```bash title="Verify the durable command invocation" replay="project"
+The command guard protects `runResolveSupportCase`. The Harness policy independently protects `resolveSupportCase` when another allowed service target invokes it.
+
+```bash title="Check the address-first wrapper" replay="project"
 npm run build
 ```
 
-Continue with [Compose the durable runtime](../compose-runtime/).
+Continue with [Bind storage and named models](../compose-runtime/).

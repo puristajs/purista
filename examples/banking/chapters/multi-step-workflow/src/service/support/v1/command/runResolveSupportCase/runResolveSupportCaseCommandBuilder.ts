@@ -1,18 +1,15 @@
 import { HandledError, StatusCode } from '@purista/core'
-import {
-	supportResolutionInputSchema,
-	supportResolutionOutputSchema,
-} from '../../../../../harness/support/supportResolutionSchemas.js'
 import { durableResolutionIdentity } from '../../durableIdentity.js'
-import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { supportResolutionInputSchema, supportResolutionOutputSchema } from '../../harness/supportResolutionSchemas.js'
+import { resolveSupportCaseWorkflow } from '../../harness/workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
 import { requireSupportCaseResolution } from '../../requireSupportCaseResolution.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
-export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
-	.getCommandBuilder('resolveSupportCase', 'Run a durable multi-step support resolution')
+export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runResolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
 	.addOutputSchema(supportResolutionOutputSchema)
-	.canInvokeWorkflow('Support', '1', 'resolve_support_case', supportHarness.contracts.workflows.resolve_support_case)
+	.canInvokeWorkflow('Support', '1', resolveSupportCaseWorkflow.contract)
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
@@ -27,10 +24,10 @@ export const resolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 		const principalId = context.message.principalId
 		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 		const identity = durableResolutionIdentity(tenantId, principalId, payload.caseId)
-		const outcome = await context.workflow.Support['1'].resolve_support_case.run(payload, {
+		const result = await context.workflow.Support['1'][resolveSupportCaseWorkflow.contract.id].run(payload, {
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
 		})
-		if (outcome.status !== 'completed') throw new Error('Support resolution did not complete')
-		return outcome.output
+		if (result.outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+		return result.outcome.output
 	})

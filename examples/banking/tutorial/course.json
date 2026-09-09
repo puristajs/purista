@@ -819,7 +819,7 @@
       "status": "draft",
       "projectDirectory": "multi-step-support-workflow",
       "replayRequires": [],
-      "constructionSourceAligned": false,
+      "constructionSourceAligned": true,
       "requiredWrittenFiles": [
         ".env.example",
         "package.json",
@@ -836,16 +836,15 @@
         "src/index.ts",
         "src/multiStepWorkflow.integration.test.ts",
         "src/service/support/v1/SupportResources.ts",
-        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.test.ts",
-        "src/service/support/v1/command/resolveSupportCase/resolveSupportCaseCommandBuilder.ts",
+        "src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.test.ts",
+        "src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.ts",
         "src/service/support/v1/durableIdentity.ts",
         "src/service/support/v1/requireSupportCaseResolution.ts",
         "src/service/support/v1/supportV1Service.ts",
         "src/service/support/v1/supportV1ServiceBuilder.ts"
       ],
       "requires": [
-        "human-review-workflow",
-        "parallel-agents"
+        "create-project"
       ],
 		"pages": [
 			"multi-step-workflow/build/define-workflow",

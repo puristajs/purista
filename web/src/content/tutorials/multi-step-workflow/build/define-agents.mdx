@@ -1,18 +1,14 @@
 ---
-title: Define the workflow stages
-description: Give each generated agent one typed stage contract and a separate model alias.
+title: Define the typed agent stages
+description: Give classification and planning separate schemas, prompts, and named model requirements.
 order: 272
 kind: lesson
 status: draft
 ---
 
-The CLI created two agent modules. The classification stage receives the
-original case. The planning stage receives that case plus the validated
-classification. Define those contracts before implementing the workflow.
+The first stage classifies a case. The second receives both the original case and the validated classification.
 
-## Create the shared schemas
-
-```ts title="src/harness/support/supportResolutionSchemas.ts" write
+```ts title="src/service/support/v1/harness/supportResolutionSchemas.ts" write
 import { z } from 'zod'
 
 export const supportResolutionInputSchema = z.strictObject({
@@ -29,6 +25,7 @@ export const resolutionPlanInputSchema = z.strictObject({
 	caseId: z.string(),
 	message: z.string(),
 	classification: supportClassificationSchema,
+	handlingLane: z.enum(['priority', 'standard']),
 })
 
 export const resolutionPlanSchema = z.strictObject({
@@ -43,65 +40,46 @@ export const supportResolutionOutputSchema = z.strictObject({
 })
 ```
 
-The second input schema makes the stage dependency visible to TypeScript and
-to runtime validation. The final workflow output preserves both stage results.
+The classification agent uses the lower-camel model name `classificationModel` and maps structured input into a clear prompt.
 
-## Implement the classification stage
-
-Replace the first generated agent definition. It declares the
-`classification_model` alias without choosing a provider.
-
-```ts title="src/harness/support/agent/classifySupportCase/classifySupportCaseAgent.ts" write
-import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+```ts title="src/service/support/v1/harness/agent/classifySupportCase/classifySupportCaseAgent.ts" write
+import { defineAgent } from '@purista/harness'
 import { supportClassificationSchema, supportResolutionInputSchema } from '../../supportResolutionSchemas.js'
 
-type ClassificationModelState = BuilderState & { models: { classification_model: ModelAlias } }
-
-export const classifySupportCaseAgent = defineHarnessModule<ClassificationModelState>()(
-	'support.agent.classify_support_case',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.agent('classify_support_case', {
-				model: 'classification_model',
-				input: supportResolutionInputSchema,
-				output: supportClassificationSchema,
-				instructions: 'Classify one Example Bank support case using only the supplied message.',
-			})
-		},
-	},
-)
+export const classifySupportCaseAgent = defineAgent('classifySupportCase', {
+	model: 'classificationModel',
+	input: supportResolutionInputSchema,
+	output: supportClassificationSchema,
+	instructions: 'Classify one Example Bank support case using only the supplied message.',
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}`,
+	}),
+})
 ```
 
-## Implement the planning stage
+The planning agent uses the separate `resolutionModel` binding. Its prompt includes the earlier stage result.
 
-Replace the second generated agent. Its input proves the workflow must provide
-a valid classification before planning can start.
-
-```ts title="src/harness/support/agent/planSupportResolution/planSupportResolutionAgent.ts" write
-import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+```ts title="src/service/support/v1/harness/agent/planSupportResolution/planSupportResolutionAgent.ts" write
+import { defineAgent } from '@purista/harness'
 import { resolutionPlanInputSchema, resolutionPlanSchema } from '../../supportResolutionSchemas.js'
 
-type ResolutionModelState = BuilderState & { models: { resolution_model: ModelAlias } }
-
-export const planSupportResolutionAgent = defineHarnessModule<ResolutionModelState>()(
-	'support.agent.plan_support_resolution',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.agent('plan_support_resolution', {
-				model: 'resolution_model',
-				input: resolutionPlanInputSchema,
-				output: resolutionPlanSchema,
-				instructions: 'Create a concise next-step plan grounded in the message and validated classification.',
-			})
-		},
-	},
-)
+export const planSupportResolutionAgent = defineAgent('planSupportResolution', {
+	model: 'resolutionModel',
+	input: resolutionPlanInputSchema,
+	output: resolutionPlanSchema,
+	instructions: 'Create a concise next-step plan grounded in the message, validated classification, and handling lane.',
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}\nClassification: ${input.classification.category}, ${input.classification.urgency}\nHandling lane: ${input.handlingLane}`,
+	}),
+})
 ```
 
-```bash title="Verify the generated stage modules" replay="project"
+Both agents are direct, service-owned Harness definitions. The application chooses their providers later.
+
+```bash title="Check the two typed agent stages" replay="project"
 npm run build
 ```
 
-Continue with [Add retries and checkpoints](../retry-checkpoint/).
+Continue with [Add durable steps and bounded retry](../retry-checkpoint/).

@@ -1,5 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { inMemoryHarnessStorage } from '@purista/harness'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
@@ -18,7 +18,7 @@ async function main() {
 		usage,
 		finishReason: 'stop',
 	})
-	const storage = inMemoryHarnessStorage()
+	const storage = sqliteHarnessStorage({ file: ':memory:' })
 	const logger = initLogger('fatal')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
@@ -35,7 +35,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'resolveSupportCase' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runResolveSupportCase' },
 				payload: {
 					payload: { caseId: 'case-1', message: 'My card is missing.' },
 					parameter: {},
