@@ -1,4 +1,4 @@
-import type { AnyHarnessTargetContract, HarnessTargetContract } from '@purista/harness'
+import type { AnyHarnessTargetContract } from '@purista/harness'
 import { isHarnessError } from '@purista/harness'
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
@@ -67,14 +67,12 @@ export function createMountedHarnessQueueDefinitions(mount: HarnessQueueMount): 
 				? binding.worker.canInvokeAgent(
 						projection.address.serviceName,
 						projection.address.serviceVersion,
-						projection.address.serviceTarget,
-						projection.target as HarnessTargetContract<'agent', any, any, any, any, any, any>,
+						projection.target as typeof projection.target & Readonly<{ kind: 'agent' }>,
 					)
 				: binding.worker.canInvokeWorkflow(
 						projection.address.serviceName,
 						projection.address.serviceVersion,
-						projection.address.serviceTarget,
-						projection.target as HarnessTargetContract<'workflow', any, any, any, any, any, any>,
+						projection.target as typeof projection.target & Readonly<{ kind: 'workflow' }>,
 					)
 		declared.setHandler(async (context, message) => {
 			const envelope = requireHarnessQueueDeliveryEnvelope(message.parameter)

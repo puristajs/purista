@@ -148,21 +148,12 @@ export function registerHarnessInvocation<Source extends HarnessInvocationSource
 	serviceVersion: string,
 	source: Source,
 ): { invokes: InvokeList; streamInvokes: StreamInvokeList }
-export function registerHarnessInvocation<C extends AnyTargetContract>(
-	invokes: InvokeList,
-	streamInvokes: StreamInvokeList,
-	serviceName: string,
-	serviceVersion: string,
-	serviceTarget: string,
-	contract: C,
-): { invokes: InvokeList; streamInvokes: StreamInvokeList }
 export function registerHarnessInvocation(
 	invokes: InvokeList,
 	streamInvokes: StreamInvokeList,
 	...args:
 		| readonly [source: AnyRemoteHarnessTargetContract]
 		| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
-		| readonly [serviceName: string, serviceVersion: string, serviceTarget: string, contract: AnyTargetContract]
 ): { invokes: InvokeList; streamInvokes: StreamInvokeList } {
 	const resolved = resolveInvocationDeclaration(args)
 	const { serviceName, serviceVersion, serviceTarget } = resolved.address
@@ -219,8 +210,7 @@ export function registerHarnessInvocation(
 function resolveInvocationDeclaration(
 	args:
 		| readonly [source: AnyRemoteHarnessTargetContract]
-		| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
-		| readonly [serviceName: string, serviceVersion: string, serviceTarget: string, contract: AnyTargetContract],
+		| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource],
 ): HarnessInvocationRecord {
 	if (args.length === 1) {
 		const source = args[0]
@@ -233,63 +223,42 @@ function resolveInvocationDeclaration(
 		})
 	}
 
-	if (args.length === 3) {
-		const [serviceName, serviceVersion, source] = args
-		if (isHarnessTargetContract(source) || isRemoteHarnessTargetContract(source)) {
-			const address = Object.freeze({ serviceName, serviceVersion, serviceTarget: source.id })
-			if (isRemoteHarnessTargetContract(source)) {
-				const remote = requireRemoteHarnessTargetContract(source)
-				if (
-					remote.address.serviceName !== serviceName ||
-					remote.address.serviceVersion !== serviceVersion ||
-					remote.address.serviceTarget !== source.id
-				) {
-					throw new UnhandledError(
-						StatusCode.InternalServerError,
-						'Remote Harness invocation declaration address does not match.',
-					)
-				}
-				return Object.freeze({
-					target: source,
-					address: remote.address,
-					queueName: remote.queueName,
-					...(remote.queueName === null ? {} : { queuePayloadSchema: source.input }),
-				})
+	const [serviceName, serviceVersion, source] = args
+	if (isHarnessTargetContract(source) || isRemoteHarnessTargetContract(source)) {
+		const address = Object.freeze({ serviceName, serviceVersion, serviceTarget: source.id })
+		if (isRemoteHarnessTargetContract(source)) {
+			const remote = requireRemoteHarnessTargetContract(source)
+			if (
+				remote.address.serviceName !== serviceName ||
+				remote.address.serviceVersion !== serviceVersion ||
+				remote.address.serviceTarget !== source.id
+			) {
+				throw new UnhandledError(
+					StatusCode.InternalServerError,
+					'Remote Harness invocation declaration address does not match.',
+				)
 			}
-			return Object.freeze({ target: source, address, queueName: null })
+			return Object.freeze({
+				target: source,
+				address: remote.address,
+				queueName: remote.queueName,
+				...(remote.queueName === null ? {} : { queuePayloadSchema: source.input }),
+			})
 		}
-		const queue = requireQueuedHarnessTargetReference(source)
-		return Object.freeze({
-			target: queue.targetContract,
-			address: Object.freeze({ serviceName, serviceVersion, serviceTarget: queue.targetContract.id }),
-			queueName: queue.queueName,
-		})
+		return Object.freeze({ target: source, address, queueName: null })
 	}
-
-	const [serviceName, serviceVersion, serviceTarget, contract] = args
-	if (isRemoteHarnessTargetContract(contract)) {
-		const remote = requireRemoteHarnessTargetContract(contract)
-		if (
-			remote.address.serviceName !== serviceName ||
-			remote.address.serviceVersion !== serviceVersion ||
-			remote.address.serviceTarget !== serviceTarget
-		) {
-			throw new UnhandledError(
-				StatusCode.InternalServerError,
-				'Remote Harness invocation declaration address does not match.',
-			)
-		}
-		return Object.freeze({
-			target: contract,
-			address: remote.address,
-			queueName: remote.queueName,
-			...(remote.queueName === null ? {} : { queuePayloadSchema: contract.input }),
-		})
+	let queue: ReturnType<typeof requireQueuedHarnessTargetReference>
+	try {
+		queue = requireQueuedHarnessTargetReference(source)
+	} catch {
+		throw new TypeError(
+			'Harness invocation requires an authentic target contract or exact factory-created binding reference.',
+		)
 	}
 	return Object.freeze({
-		target: contract,
-		address: Object.freeze({ serviceName, serviceVersion, serviceTarget }),
-		queueName: null,
+		target: queue.targetContract,
+		address: Object.freeze({ serviceName, serviceVersion, serviceTarget: queue.targetContract.id }),
+		queueName: queue.queueName,
 	})
 }
 
@@ -356,6 +325,69 @@ type HarnessInvocationBinding = Readonly<{
 	address: HarnessInvocationDeclaration['address']
 	exportDigest: `sha256:${string}`
 }>
+
+type HarnessInvocationProjection = Readonly<{
+	target: AnyTargetContract
+	visibility: 'root' | 'dependency'
+	address: Readonly<{ serviceName: string; serviceVersion: string; serviceTarget: string }>
+	exportDigest: `sha256:${string}`
+	targetExport: Readonly<{ queue?: Readonly<{ name: string }> }>
+}>
+
+/**
+ * Resolve every local declaration in a service definition against the exact
+ * immutable projection owned by that service's mounted Harness.
+ *
+ * Generated remote contracts are already bound by their producer-owned export
+ * digest and do not require a local projection.
+ * @internal
+ */
+export function finalizeRegisteredHarnessInvocations(
+	invokes: InvokeList,
+	streamInvokes: StreamInvokeList,
+	projections: readonly HarnessInvocationProjection[],
+): { invokes: InvokeList; streamInvokes: StreamInvokeList } {
+	let resolvedInvokes = invokes
+	let resolvedStreamInvokes = streamInvokes
+	for (const [serviceName, versions] of Object.entries(invokes)) {
+		for (const [serviceVersion, targets] of Object.entries(versions)) {
+			for (const [serviceTarget, rawDescriptor] of Object.entries(targets)) {
+				const descriptor = rawDescriptor as InvocationDescriptor
+				if (descriptor.harnessDeclaration === undefined || descriptor.harnessBinding !== undefined) continue
+				const declaration = invocationDeclarations.get(descriptor.harnessDeclaration)
+				if (!declaration) {
+					throw new UnhandledError(StatusCode.InternalServerError, 'Harness invocation declaration is incomplete.')
+				}
+				const projection = projections.find(
+					entry =>
+						entry.visibility === 'root' &&
+						entry.target === declaration.target &&
+						entry.address.serviceName === serviceName &&
+						entry.address.serviceVersion === serviceVersion &&
+						entry.address.serviceTarget === serviceTarget &&
+						(declaration.queueName === null || entry.targetExport.queue?.name === declaration.queueName),
+				)
+				if (!projection) {
+					throw new UnhandledError(
+						StatusCode.InternalServerError,
+						`Harness invocation ${serviceName}/${serviceVersion}/${serviceTarget} has no matching mounted target projection.`,
+					)
+				}
+				const finalized = finalizeHarnessInvocationBinding(
+					resolvedInvokes,
+					resolvedStreamInvokes,
+					serviceName,
+					serviceVersion,
+					serviceTarget,
+					projection.exportDigest,
+				)
+				resolvedInvokes = finalized.invokes
+				resolvedStreamInvokes = finalized.streamInvokes
+			}
+		}
+	}
+	return { invokes: resolvedInvokes, streamInvokes: resolvedStreamInvokes }
+}
 
 /** Build the `context.agent` or `context.workflow` address-first proxy. */
 export function createHarnessInvocationProxy<T>(

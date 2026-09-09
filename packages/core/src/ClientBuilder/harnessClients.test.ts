@@ -340,7 +340,7 @@ const wrongOutput: typeof supportTargetContract.$infer.output =
 			moduleResolution: ts.ModuleResolutionKind.Bundler,
 			skipLibCheck: true,
 			noEmit: true,
-			paths: { '@purista/core': [resolve('packages/core/src/index.ts')] },
+			paths: { '@purista/core': [resolve(import.meta.dirname, '../index.ts')] },
 		})
 		const diagnostics = ts
 			.getPreEmitDiagnostics(program)

@@ -61,7 +61,7 @@ export function createRemoteHarnessClient<const C extends AnyRemoteHarnessTarget
 ): RemoteHarnessClient<C> {
 	const snapshot = requireRemoteHarnessTargetContract(contract)
 	const { serviceName, serviceVersion, serviceTarget } = snapshot.address
-	const declared = registerHarnessInvocation({}, {}, serviceName, serviceVersion, serviceTarget, contract)
+	const declared = registerHarnessInvocation({}, {}, contract)
 	const finalized = finalizeHarnessInvocationBinding(
 		declared.invokes,
 		declared.streamInvokes,

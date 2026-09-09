@@ -107,7 +107,7 @@ describe('EventBridge Harness target dispatcher', () => {
 		{ parentAgentId: undefined, parentWorkflowId: undefined },
 		{ parentAgentId: 'agent', parentWorkflowId: 'workflow' },
 		{ parentAgentId: '', parentWorkflowId: 'workflow' },
-		{ parentAgentId: 'agent', parentWorkflowId: undefined, remainingDepth: 0 },
+		{ parentAgentId: 'agent', parentWorkflowId: undefined, remainingDepth: -1 },
 		{ parentAgentId: 'agent', parentWorkflowId: undefined, depth: 1.5 },
 		{ parentAgentId: 'agent', parentWorkflowId: undefined, sessionId: '' },
 		{ parentAgentId: 'agent', parentWorkflowId: undefined, deadline: Number.POSITIVE_INFINITY },

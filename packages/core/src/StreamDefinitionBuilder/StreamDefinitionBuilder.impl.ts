@@ -1,4 +1,3 @@
-import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
@@ -23,15 +22,51 @@ import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
 import {
+	type HarnessInvocationContract,
+	type HarnessInvocationSource,
 	type HarnessInvokeDeclaration,
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
+import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
+
+type HarnessSourceOfKind<
+	Source extends HarnessInvocationSource,
+	Kind extends 'agent' | 'workflow',
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+
+type StreamHarnessInvocationBuilder<
+	S extends Service,
+	C extends StreamDefinitionBuilderTypes,
+	Source extends HarnessInvocationSource,
+	ServiceName extends string,
+	ServiceVersion extends string,
+> = StreamDefinitionBuilder<
+	S,
+	StreamDefinitionBuilderTypes<
+		C['PayloadSchema'],
+		C['ParamsSchema'],
+		C['ChunkSchema'],
+		C['FinalSchema'],
+		C['Resources'],
+		C['Invokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessInvokeDeclaration<Source>>>
+			>,
+		C['StreamInvokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessStreamDeclaration<Source>>>
+			>,
+		C['EmitList'],
+		C['QueueInvokes']
+	>
+>
 
 const RESERVED_STREAM_RESPONSE_HEADERS = new Set([
 	'cache-control',
@@ -227,92 +262,60 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
-	/** Declare a capability-projected model from a Harness mounted on this service. */
-	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
-		definition: D,
-		alias: Alias,
-	) {
-		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
-		return this as unknown as StreamDefinitionBuilder<
-			S,
-			StreamDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['ChunkSchema'],
-				C['FinalSchema'],
-				C['Resources'],
-				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
-	}
-
-	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness agent invocation with aggregate and stream access. */
 	canInvokeAgent<
-		Contract extends HarnessTargetContract<'agent', any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness agent invocation. */
+	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as C['Invokes']
 		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
-		return this as unknown as StreamDefinitionBuilder<
-			S,
-			StreamDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['ChunkSchema'],
-				C['FinalSchema'],
-				C['Resources'],
-				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
+		return this
 	}
 
-	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness workflow invocation with aggregate and stream access. */
 	canInvokeWorkflow<
-		Contract extends HarnessTargetContract<'workflow', any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness workflow invocation. */
+	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as C['Invokes']
 		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
-		return this as unknown as StreamDefinitionBuilder<
-			S,
-			StreamDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['ChunkSchema'],
-				C['FinalSchema'],
-				C['Resources'],
-				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
+		return this
 	}
 
 	/**

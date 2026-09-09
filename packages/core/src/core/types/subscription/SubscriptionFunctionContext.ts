@@ -1,5 +1,4 @@
 import type { HarnessInvocationClients } from '../../../HarnessMount/invocation.js'
-import type { HarnessModelClients } from '../../../HarnessMount/model.js'
 import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
@@ -54,8 +53,6 @@ export type SubscriptionFunctionContextEnhancements<
 	agent: HarnessInvocationClients<Invokes, 'agent'>
 	/** Address-first clients for declared Harness workflows. */
 	workflow: HarnessInvocationClients<Invokes, 'workflow'>
-	/** Deterministic model handles explicitly declared with `canUseHarnessModel`. */
-	model: HarnessModelClients<Invokes>
 	queue: QueueContext<QueueInvokes>
 	/**
 	 * Provides resources defined in service builder and set via config during service creation

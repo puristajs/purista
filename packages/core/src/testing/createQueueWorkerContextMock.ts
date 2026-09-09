@@ -15,10 +15,10 @@ import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFun
 import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import type { QueueWorkerBuilderTypes } from '../QueueWorkerBuilder/QueueWorkerBuilderTypes.js'
 import type { Schema } from '../schema/index.js'
+import type { HarnessInvocationMock } from './sharedContextMocks.js'
 import {
 	createBaseContextStubs,
 	createHarnessInvocationMockProxy,
-	createHarnessModelMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -98,9 +98,12 @@ export type QueueWorkerContextMockResult<
 		}
 		service: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['service']
 		stream: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
-		agent: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
-		workflow: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
-		model: Record<string, Record<string, SinonStub>>
+		agent: HarnessInvocationMock<
+			QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
+		>
+		workflow: HarnessInvocationMock<
+			QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
+		>
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 	}
@@ -159,9 +162,6 @@ export const createQueueWorkerContextMock = <
 	const workflowProxy = createHarnessInvocationMockProxy<
 		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
 	>(input.sandbox)
-	const modelProxy = createHarnessModelMockProxy<
-		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['model']
-	>(internalBuilder.invokes, input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 	const message = createQueueMessageMock(input)
 
@@ -195,7 +195,6 @@ export const createQueueWorkerContextMock = <
 		stream: streamProxy.api,
 		agent: agentProxy.api,
 		workflow: workflowProxy.api,
-		model: modelProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -261,9 +260,8 @@ export const createQueueWorkerContextMock = <
 				streamProxy.createApi<
 					QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
 				>(),
-			agent: agentProxy.api,
-			workflow: workflowProxy.api,
-			model: modelProxy.api as Record<string, Record<string, SinonStub>>,
+			agent: agentProxy.stubs,
+			workflow: workflowProxy.stubs,
 			enqueue: base.stubs.enqueue,
 			scheduleAt: base.stubs.scheduleAt,
 		},

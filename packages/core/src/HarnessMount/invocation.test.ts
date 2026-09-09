@@ -51,7 +51,7 @@ const approvalTarget = defineAgent('approval', {
 	permissions: { bash: 'require_approval' },
 }).contract
 const digest = `sha256:${'a'.repeat(64)}` as const
-const agentDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', 'answer', target)
+const agentDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', target)
 const invokes = finalizeHarnessInvocationBinding(
 	agentDeclaration.invokes,
 	agentDeclaration.streamInvokes,
@@ -60,7 +60,7 @@ const invokes = finalizeHarnessInvocationBinding(
 	'answer',
 	digest,
 ).invokes as any
-const workflowDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', 'answer', workflowTarget)
+const workflowDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', workflowTarget)
 const workflowInvokes = finalizeHarnessInvocationBinding(
 	workflowDeclaration.invokes,
 	workflowDeclaration.streamInvokes,
@@ -69,7 +69,7 @@ const workflowInvokes = finalizeHarnessInvocationBinding(
 	'answer',
 	digest,
 ).invokes as any
-const approvalDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', 'approval', approvalTarget)
+const approvalDeclaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', approvalTarget)
 const approvalInvokes = finalizeHarnessInvocationBinding(
 	approvalDeclaration.invokes,
 	approvalDeclaration.streamInvokes,
@@ -79,7 +79,7 @@ const approvalInvokes = finalizeHarnessInvocationBinding(
 	digest,
 ).invokes as any
 const queuedTarget = remoteQueuedTarget()
-const queuedDeclaration = registerHarnessInvocation({}, {}, 'QueueService', '1', 'queued', queuedTarget)
+const queuedDeclaration = registerHarnessInvocation({}, {}, queuedTarget)
 const queuedInvokes = finalizeHarnessInvocationBinding(
 	queuedDeclaration.invokes,
 	queuedDeclaration.streamInvokes,
@@ -411,10 +411,8 @@ describe('address-first Harness invocations', () => {
 	})
 
 	it('rejects unauthentic, misaddressed, and incomplete bindings before transport', async () => {
-		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', 'other', target)).toThrow('contract id')
-		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', 'answer', { ...target } as never)).toThrow(
-			'authentic',
-		)
+		expect(() => registerHarnessInvocation({}, {}, '', '1', target)).toThrow('non-empty')
+		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', { ...target } as never)).toThrow('authentic')
 		expect(() =>
 			finalizeHarnessInvocationBinding(
 				agentDeclaration.invokes,
@@ -480,7 +478,7 @@ describe('address-first Harness invocations', () => {
 		const foreignTarget = foreignHarness.defineAgent('answer', { instructions: 'Answer.' }).contract
 		const invoke = vi.fn()
 
-		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', 'answer', foreignTarget)).toThrow('authentic')
+		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', foreignTarget)).toThrow('authentic')
 		const forged = {
 			Knowledge: { '1': { answer: { harnessTarget: foreignTarget, harnessExportDigest: digest } } },
 		} as any
@@ -559,7 +557,7 @@ describe('address-first Harness invocations', () => {
 			prompt: value => ({ role: 'user', content: value.parsed }),
 		}).contract
 		validate.mockClear()
-		const declaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', 'asymmetric', asymmetric)
+		const declaration = registerHarnessInvocation({}, {}, 'Knowledge', '1', asymmetric)
 		const registered = finalizeHarnessInvocationBinding(
 			declaration.invokes,
 			declaration.streamInvokes,

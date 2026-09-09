@@ -1,11 +1,60 @@
+import { defineAgent, defineHarness, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { createSandbox } from 'sinon'
+import { vi } from 'vitest'
 import { z } from 'zod'
-
 import { Service } from '../core/index.js'
+import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
+import { createHarnessInvocationProxy } from '../HarnessMount/invocation.js'
+import { defineHarnessQueueBinding } from '../HarnessMount/queueBinding.js'
+import {
+	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from '../HarnessMount/remoteTargetContract.js'
 import { safeBind } from '../helper/index.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { getCustomMessageMessageMock } from '../mocks/messages/getCustomMessage.mock.js'
+import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
+import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { createSubscriptionContextMock } from '../testing/createSubscriptionContextMock.js'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
+
+function generatedRemoteAgent() {
+	const inputSchema = { type: 'string' } as const
+	const validatedInputSchema = { type: 'string' } as const
+	const outputSchema = { type: 'string' } as const
+	const source = {
+		schemaVersion: 1 as const,
+		address: { serviceName: 'RemoteSubscription', serviceVersion: '1', serviceTarget: 'answer' } as const,
+		target: {
+			targetName: 'answer' as const,
+			kind: 'agent' as const,
+			inputSchema,
+			validatedInputSchema,
+			outputSchema,
+			updateSchema: false as const,
+			interruptSchema: false as const,
+			invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
+			stream: {
+				protocol: 'harness-execution-events-v1' as const,
+				eventTypes: harnessExecutionEventTypesV1,
+				outputUpdates: [] as const,
+			},
+			queue: { name: 'remote.subscription.answers' } as const,
+		},
+		schemas: {
+			input: createGeneratedHarnessSchema<string>(inputSchema),
+			validatedInput: createGeneratedHarnessSchema<string>(validatedInputSchema),
+			output: createGeneratedHarnessSchema<string>(outputSchema),
+		},
+	}
+	return createRemoteHarnessTargetContract({
+		...source,
+		target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
+	})
+}
 
 describe('SubscriptionDefinitionBuilder', () => {
 	const sandbox = createSandbox()
@@ -378,5 +427,164 @@ describe('SubscriptionDefinitionBuilder', () => {
 		const definition = await b.getDefinition()
 
 		expect(Object.keys(definition.invokes.OtherService[1]).sort()).toStrictEqual(['first', 'second'])
+	})
+
+	it('declares local Harness targets by their authentic source and grants enqueue only to a nominal queue reference', async () => {
+		const agent = defineAgent('answer', { instructions: 'Answer.' })
+		const workflow = defineWorkflow('summarize', {
+			async handler({ input }) {
+				return input
+			},
+		})
+		const binding = defineHarnessQueueBinding(
+			agent.contract,
+			new QueueDefinitionBuilder('support.answer', 'Support answers'),
+			new QueueWorkerBuilder('support.answer', 'answer-worker'),
+		)
+		const builder = new SubscriptionDefinitionBuilder('invokeHarness', 'invoke a mounted Harness target')
+			.canInvokeAgent('Support', '1', binding.reference)
+			.canInvokeWorkflow('Support', '1', workflow.contract)
+			.setSubscriptionFunction(async function (context) {
+				const agentRun = context.agent.Support['1'].answer.run('question')
+				const agentStream = context.agent.Support['1'].answer.stream('question')
+				const agentEnqueue = context.agent.Support['1'].answer.enqueue('question')
+				const workflowRun = context.workflow.Support['1'].summarize.run('question')
+				const workflowStream = context.workflow.Support['1'].summarize.stream('question')
+				void [agentRun, agentStream, agentEnqueue, workflowRun, workflowStream]
+				return undefined
+			})
+
+		const definition = await builder.getDefinition()
+		expect(definition.invokes.Support['1'].answer).toHaveProperty('harnessDeclaration')
+		expect(definition.invokes.Support['1'].summarize).toHaveProperty('harnessDeclaration')
+
+		const invoke = vi.fn()
+		const proxy = createHarnessInvocationProxy<any>('agent', invoke, vi.fn(), undefined, definition.invokes)
+		await expect(proxy.Support['1'].answer.run('question')).rejects.toThrow('binding is incomplete')
+		expect(invoke).not.toHaveBeenCalled()
+
+		const enqueue = vi.fn(async () => ({ jobId: 'job-1', queueName: 'support.answer' }))
+		const queuedProxy = createHarnessInvocationProxy<any>('agent', vi.fn(), vi.fn(), enqueue, definition.invokes)
+		await expect(queuedProxy.Support['1'].answer.enqueue('question')).resolves.toMatchObject({
+			jobId: 'job-1',
+			queueName: 'support.answer',
+			sessionId: expect.any(String),
+		})
+		expect(enqueue).toHaveBeenCalledWith('support.answer', 'question', expect.any(Object), undefined)
+
+		expect(() =>
+			new SubscriptionDefinitionBuilder('copiedHarness', 'reject copied capabilities').canInvokeAgent('Support', '1', {
+				...binding.reference,
+			} as never),
+		).toThrow('exact factory-created binding')
+
+		const direct = new SubscriptionDefinitionBuilder('directHarness', 'direct target').canInvokeAgent(
+			'Support',
+			'1',
+			agent.contract,
+		)
+		// biome-ignore lint/correctness/noConstantCondition: Compile-only capability proof.
+		if (false) {
+			direct.setSubscriptionFunction(async function (context) {
+				// @ts-expect-error Direct target contracts do not grant enqueue capability.
+				await context.agent.Support['1'].answer.enqueue('question')
+				return undefined
+			})
+			new SubscriptionDefinitionBuilder('wrongKind', 'wrong target kind').canInvokeAgent(
+				'Support',
+				'1',
+				// @ts-expect-error Agent declarations cannot accept workflow targets.
+				workflow.contract,
+			)
+		}
+	})
+
+	it('derives a generated remote Harness address directly from the hydrated contract', async () => {
+		const remote = generatedRemoteAgent()
+		const definition = await new SubscriptionDefinitionBuilder('remoteHarness', 'invoke a remote Harness target')
+			.canInvokeAgent(remote)
+			.setSubscriptionFunction(async function (context) {
+				const run = context.agent.RemoteSubscription['1'].answer.run('question')
+				const stream = context.agent.RemoteSubscription['1'].answer.stream('question')
+				const enqueue = context.agent.RemoteSubscription['1'].answer.enqueue('question')
+				void [run, stream, enqueue]
+				return undefined
+			})
+			.getDefinition()
+
+		expect(definition.invokes.RemoteSubscription['1'].answer).toHaveProperty('harnessBinding')
+		// biome-ignore lint/correctness/noConstantCondition: Compile-only target-kind proof.
+		if (false) {
+			new SubscriptionDefinitionBuilder('wrongRemoteKind', 'wrong target kind').canInvokeWorkflow(
+				// @ts-expect-error Workflow declarations cannot accept generated agent targets.
+				remote,
+			)
+		}
+	})
+
+	it('finalizes local agent and workflow declarations for a real subscription service context', async () => {
+		const valueSchema = z.object({ value: z.string() })
+		const agent = defineAgent('classify', {
+			input: valueSchema,
+			output: valueSchema,
+			instructions: 'Return the classified value.',
+			prompt: input => ({ role: 'user', content: input.value }),
+		})
+		const workflow = defineWorkflow('echo', {
+			input: valueSchema,
+			output: valueSchema,
+			async handler({ input }) {
+				return input
+			},
+		})
+		const harness = defineHarness({ name: 'subscriptionInvocation' }).addAgent(agent).addWorkflow(workflow)
+		let resolveCompletion: (value: unknown) => void = () => undefined
+		const completion = new Promise<unknown>(resolve => {
+			resolveCompletion = resolve
+		})
+		const builder = new ServiceBuilder({
+			serviceName: 'SubscriptionInvocation',
+			serviceVersion: '1',
+			serviceDescription: 'finalized subscription invocation test',
+		})
+		const subscription = builder
+			.getSubscriptionBuilder('invokeHarness', 'invoke mounted Harness roots')
+			.subscribeToEvent('subscription.invoke')
+			.addPayloadSchema(valueSchema)
+			.canInvokeAgent('SubscriptionInvocation', '1', agent.contract)
+			.canInvokeWorkflow('SubscriptionInvocation', '1', workflow.contract)
+			.setSubscriptionFunction(async function (context, payload) {
+				const agentResult = await context.agent.SubscriptionInvocation['1'].classify.run(payload)
+				const stream = await context.workflow.SubscriptionInvocation['1'].echo.stream(payload)
+				for await (const _event of stream) {
+					// Consume the complete provider-neutral execution stream.
+				}
+				resolveCompletion({ agentResult, workflowOutcome: await stream.result })
+				return undefined
+			})
+		builder.addSubscriptionDefinition(subscription.getDefinition()).mountHarness(harness)
+		const eventBridge = new DefaultEventBridge()
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { value: 'classified' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		await eventBridge.start()
+		const service = await builder.getInstance(eventBridge, {
+			ai: { model: { provider, model: 'fake' } },
+		} as never)
+		await service.start()
+		try {
+			await eventBridge.emitMessage(getCustomMessageMessageMock('subscription.invoke', { value: 'source' }) as never)
+			await expect(completion).resolves.toMatchObject({
+				agentResult: { outcome: { status: 'completed', output: { value: 'classified' } } },
+				workflowOutcome: { status: 'completed', output: { value: 'source' } },
+			})
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
 	})
 })

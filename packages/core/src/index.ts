@@ -21,8 +21,6 @@ export type {
 	MemoryEngine,
 	ModelCapability,
 	ModelProvider,
-	RunEvent,
-	Session,
 } from '@purista/harness'
 export { inMemoryMemoryEngine } from '@purista/harness'
 export * from './ClientBuilder/index.js'

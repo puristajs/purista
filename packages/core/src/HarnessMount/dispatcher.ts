@@ -290,7 +290,7 @@ function assertNestedInvocation(
 		!Number.isSafeInteger(invocation.depth) ||
 		invocation.depth < 1 ||
 		!Number.isSafeInteger(invocation.remainingDepth) ||
-		invocation.remainingDepth < 1
+		invocation.remainingDepth < 0
 	) {
 		throw new HandledError(StatusCode.BadRequest, 'Harness nested dispatch depth is invalid.')
 	}

@@ -1,4 +1,3 @@
-import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import {
 	getNamedHook,
 	mergeNamedHooks,
@@ -16,13 +15,47 @@ import type {
 	QueueWorkerMode,
 } from '../core/types/queue/QueueWorkerDefinition.js'
 import {
+	type HarnessInvocationContract,
+	type HarnessInvocationSource,
 	type HarnessInvokeDeclaration,
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
+import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
+
+type HarnessSourceOfKind<
+	Source extends HarnessInvocationSource,
+	Kind extends 'agent' | 'workflow',
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+
+type QueueWorkerHarnessInvocationBuilder<
+	S extends QueueWorkerBuilderTypes,
+	BoundQueueName extends string,
+	Source extends HarnessInvocationSource,
+	ServiceName extends string,
+	ServiceVersion extends string,
+> = QueueWorkerBuilder<
+	QueueWorkerBuilderTypes<
+		S['PayloadSchema'],
+		S['ParamsSchema'],
+		S['Resources'],
+		S['Invokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessInvokeDeclaration<Source>>>
+			>,
+		S['StreamInvokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessStreamDeclaration<Source>>>
+			>,
+		S['EmitList'],
+		S['QueueInvokes']
+	>,
+	BoundQueueName
+>
 
 /**
  * Builds a queue worker definition for one queue.
@@ -158,86 +191,72 @@ export class QueueWorkerBuilder<
 		>
 	}
 
-	/** Declare a capability-projected model from a Harness mounted on this service. */
-	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
-		definition: D,
-		alias: Alias,
-	) {
-		this.invokes = registerHarnessModel(this.invokes, definition, alias) as S['Invokes']
-		return this as unknown as QueueWorkerBuilder<
-			QueueWorkerBuilderTypes<
-				S['PayloadSchema'],
-				S['ParamsSchema'],
-				S['Resources'],
-				S['Invokes'] & HarnessModelDeclaration<D, Alias>,
-				S['StreamInvokes'],
-				S['EmitList'],
-				S['QueueInvokes']
-			>,
-			BoundQueueName
-		>
-	}
-
-	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness agent invocation. */
 	canInvokeAgent<
-		Contract extends HarnessTargetContract<'agent', any, any, any, any, any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness agent invocation. */
+	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): QueueWorkerHarnessInvocationBuilder<
+		S,
+		BoundQueueName,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as S['Invokes']
 		this.streamInvokes = registered.streamInvokes as S['StreamInvokes']
-		return this as unknown as QueueWorkerBuilder<
-			QueueWorkerBuilderTypes<
-				S['PayloadSchema'],
-				S['ParamsSchema'],
-				S['Resources'],
-				S['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				S['EmitList'],
-				S['QueueInvokes']
-			>,
-			BoundQueueName
-		>
+		return this
 	}
 
-	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness workflow invocation. */
 	canInvokeWorkflow<
-		Contract extends HarnessTargetContract<'workflow', any, any, any, any, any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness workflow invocation. */
+	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): QueueWorkerHarnessInvocationBuilder<
+		S,
+		BoundQueueName,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as S['Invokes']
 		this.streamInvokes = registered.streamInvokes as S['StreamInvokes']
-		return this as unknown as QueueWorkerBuilder<
-			QueueWorkerBuilderTypes<
-				S['PayloadSchema'],
-				S['ParamsSchema'],
-				S['Resources'],
-				S['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				S['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				S['EmitList'],
-				S['QueueInvokes']
-			>,
-			BoundQueueName
-		>
+		return this
 	}
 
 	/**

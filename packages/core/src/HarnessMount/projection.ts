@@ -353,7 +353,43 @@ function cloneJsonSchema(value: unknown, label: string): HarnessTargetJsonSchema
 	if (typeof value !== 'boolean' && (typeof value !== 'object' || value === null || Array.isArray(value))) {
 		throw new TypeError(`Harness ${label} JSON Schema must be an object or boolean.`)
 	}
-	return deepFreeze(JSON.parse(canonicalHarnessJson(value)) as HarnessTargetJsonSchema)
+	return deepFreeze(JSON.parse(canonicalHarnessJson(copyEnumerableJsonData(value))) as HarnessTargetJsonSchema)
+}
+
+/**
+ * Standard Schema converters may attach non-enumerable library metadata to an
+ * otherwise ordinary JSON Schema object. JSON serialization excludes that
+ * metadata, so projection copies enumerable data properties without invoking
+ * accessors before applying the strict canonical wire validator.
+ */
+function copyEnumerableJsonData(value: unknown, seen = new Set<object>()): unknown {
+	if (value === null || typeof value !== 'object') return value
+	if (seen.has(value)) throw new TypeError('Harness JSON Schema projection must not contain cycles.')
+	seen.add(value)
+	try {
+		if (Array.isArray(value)) {
+			const output: unknown[] = []
+			for (let index = 0; index < value.length; index += 1) {
+				const descriptor = Object.getOwnPropertyDescriptor(value, String(index))
+				if (descriptor?.enumerable !== true || !Object.hasOwn(descriptor, 'value')) {
+					throw new TypeError('Harness JSON Schema arrays must contain enumerable data elements only.')
+				}
+				output.push(copyEnumerableJsonData(descriptor.value, seen))
+			}
+			return output
+		}
+		const output: Record<string, unknown> = Object.create(null)
+		for (const key of Object.keys(value)) {
+			const descriptor = Object.getOwnPropertyDescriptor(value, key)
+			if (descriptor?.enumerable !== true || !Object.hasOwn(descriptor, 'value')) {
+				throw new TypeError('Harness JSON Schema projection must contain enumerable data properties only.')
+			}
+			output[key] = copyEnumerableJsonData(descriptor.value, seen)
+		}
+		return output
+	} finally {
+		seen.delete(value)
+	}
 }
 
 function digest(value: unknown): `sha256:${string}` {

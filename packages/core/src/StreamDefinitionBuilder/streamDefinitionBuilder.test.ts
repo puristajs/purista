@@ -1,9 +1,50 @@
+import { defineAgent, defineHarness, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 import { EBMessageType, Service } from '../core/index.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
+import { createHarnessInvocationProxy } from '../HarnessMount/invocation.js'
+import {
+	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from '../HarnessMount/remoteTargetContract.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
+import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { StreamDefinitionBuilder } from './StreamDefinitionBuilder.impl.js'
+
+function createRemoteTarget<const Kind extends 'agent' | 'workflow', const Id extends string>(kind: Kind, id: Id) {
+	const schema = { type: 'string' } as const
+	const address = { serviceName: 'RemoteAi', serviceVersion: '2', serviceTarget: id } as const
+	const target = {
+		targetName: id,
+		kind,
+		inputSchema: schema,
+		validatedInputSchema: schema,
+		outputSchema: schema,
+		updateSchema: false as const,
+		interruptSchema: false as const,
+		invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
+		stream: {
+			protocol: 'harness-execution-events-v1' as const,
+			eventTypes: harnessExecutionEventTypesV1,
+			outputUpdates: [] as const,
+		},
+	}
+	return createRemoteHarnessTargetContract({
+		schemaVersion: 1,
+		address,
+		target: { ...target, exportDigest: computeHarnessTargetExportDigest({ address, target }) },
+		schemas: {
+			input: createGeneratedHarnessSchema<string>(schema),
+			validatedInput: createGeneratedHarnessSchema<string>(schema),
+			output: createGeneratedHarnessSchema<string>(schema),
+		},
+	})
+}
 
 describe('StreamDefinitionBuilder', () => {
 	const sandbox = createSandbox()
@@ -271,5 +312,211 @@ describe('StreamDefinitionBuilder', () => {
 		} as never)
 
 		expect(events).toEqual(['before:hello', 'handler:hello', 'after:ok'])
+	})
+
+	it('derives local Harness addresses from authentic targets and rejects copied and unfinalized targets', async () => {
+		const cleanBuilder = new StreamDefinitionBuilder('cleanSurface', 'No direct model capability')
+		// @ts-expect-error Model providers belong to mounted Harness runtime configuration.
+		void cleanBuilder.canUseHarnessModel
+		expect((cleanBuilder as any).canUseHarnessModel).toBeUndefined()
+		const localAgent = defineAgent('localAgent', { instructions: 'Answer.' })
+		const localWorkflow = defineWorkflow('localWorkflow', {
+			async handler({ input }) {
+				return input
+			},
+		})
+		const localBuilder = new StreamDefinitionBuilder('localCaller', 'Call local Harness targets')
+			.canInvokeAgent('LocalAi', '1', localAgent.contract)
+			.canInvokeWorkflow('LocalAi', '1', localWorkflow.contract)
+			.setStreamFunction(async function (context, _payload, _parameter, writer) {
+				// @ts-expect-error Providers are configured on the mounted Harness, not exposed to handlers.
+				void context.model
+				expectTypeOf(context.agent.LocalAi['1'].localAgent.run).toBeFunction()
+				expectTypeOf(context.agent.LocalAi['1'].localAgent.stream).toBeFunction()
+				expectTypeOf(context.workflow.LocalAi['1'].localWorkflow.run).toBeFunction()
+				expectTypeOf(context.workflow.LocalAi['1'].localWorkflow.stream).toBeFunction()
+				await writer.close()
+			})
+		const definition = await localBuilder.getDefinition()
+		// @ts-expect-error A workflow declaration rejects agent contracts.
+		new StreamDefinitionBuilder('wrongKind', 'Reject wrong kind').canInvokeWorkflow('LocalAi', '1', localAgent.contract)
+
+		expect(Object.keys(definition.invokes.LocalAi['1']).sort()).toEqual(['localAgent', 'localWorkflow'])
+		expect(Object.keys(definition.streamInvokes.LocalAi['1']).sort()).toEqual(['localAgent', 'localWorkflow'])
+		const invoke = vi.fn()
+		const client = createHarnessInvocationProxy<any>('workflow', invoke, vi.fn(), undefined, definition.invokes)
+		await expect(client.LocalAi['1'].localWorkflow.run('question')).rejects.toThrow('incomplete')
+		expect(invoke).not.toHaveBeenCalled()
+		expect(() =>
+			new StreamDefinitionBuilder('copied', 'Reject copied target').canInvokeWorkflow('LocalAi', '1', {
+				...localWorkflow.contract,
+			} as never),
+		).toThrow('authentic')
+	})
+
+	it('finalizes local agent and workflow declarations for a real stream service context', async () => {
+		const valueSchema = z.object({ value: z.string() })
+		const agent = defineAgent('classify', {
+			input: valueSchema,
+			output: valueSchema,
+			instructions: 'Return the classified value.',
+			prompt: input => ({ role: 'user', content: input.value }),
+		})
+		const workflow = defineWorkflow('echo', {
+			input: valueSchema,
+			output: valueSchema,
+			async handler({ input }) {
+				return input
+			},
+		})
+		const harness = defineHarness({ name: 'streamInvocation' }).addAgent(agent).addWorkflow(workflow)
+		let observed: unknown
+		const builder = new ServiceBuilder({
+			serviceName: 'StreamInvocation',
+			serviceVersion: '1',
+			serviceDescription: 'finalized stream invocation test',
+		})
+		const stream = builder
+			.getStreamBuilder('invokeHarness', 'invoke mounted Harness roots')
+			.addPayloadSchema(valueSchema)
+			.addFinalSchema(z.object({ completed: z.literal(true) }))
+			.canInvokeAgent('StreamInvocation', '1', agent.contract)
+			.canInvokeWorkflow('StreamInvocation', '1', workflow.contract)
+			.setStreamFunction(async function (context, payload, _parameter, writer) {
+				const agentResult = await context.agent.StreamInvocation['1'].classify.run(payload)
+				const workflowStream = await context.workflow.StreamInvocation['1'].echo.stream(payload)
+				for await (const _event of workflowStream) {
+					// Consume the complete provider-neutral execution stream.
+				}
+				observed = { agentResult, workflowOutcome: await workflowStream.result }
+				await writer.close({ completed: true })
+			})
+		builder.addStreamDefinition(stream.getDefinition()).mountHarness(harness)
+		const eventBridge = new DefaultEventBridge()
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { value: 'classified' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		await eventBridge.start()
+		const service = await builder.getInstance(eventBridge, {
+			ai: { model: { provider, model: 'fake' } },
+		} as never)
+		await service.start()
+		try {
+			const command = getCommandMessageMock({
+				receiver: { serviceName: 'StreamInvocation', serviceVersion: '1', serviceTarget: 'invokeHarness' },
+				payload: { payload: { value: 'source' }, parameter: {} },
+			})
+			const {
+				id: _id,
+				messageType: _messageType,
+				timestamp: _timestamp,
+				correlationId: _correlationId,
+				...request
+			} = command
+			const handle = await eventBridge.openStream({
+				...request,
+				payload: { frameType: 'open', payload: { value: 'source' }, parameter: {} },
+			} as never)
+			const frames: unknown[] = []
+			for await (const frame of handle) frames.push(frame.payload)
+
+			expect(frames).toContainEqual(expect.objectContaining({ frameType: 'complete', final: { completed: true } }))
+			expect(observed).toMatchObject({
+				agentResult: { outcome: { status: 'completed', output: { value: 'classified' } } },
+				workflowOutcome: { status: 'completed', output: { value: 'source' } },
+			})
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('runs and streams generated remote agents and workflows through a real stream context', async () => {
+		const remoteAgent = createRemoteTarget('agent', 'remoteAgent')
+		const remoteWorkflow = createRemoteTarget('workflow', 'remoteWorkflow')
+		// @ts-expect-error An agent declaration rejects generated workflow contracts.
+		new StreamDefinitionBuilder('wrongRemoteKind', 'Reject wrong remote kind').canInvokeAgent(remoteWorkflow)
+		const observedSessions: string[] = []
+		const remoteBuilder = new StreamDefinitionBuilder('remoteCaller', 'Call generated remote Harness targets')
+			.canInvokeAgent(remoteAgent)
+			.canInvokeWorkflow(remoteWorkflow)
+			.setStreamFunction(async function (context, _payload, _parameter, writer) {
+				const agentRun = await context.agent.RemoteAi['2'].remoteAgent.run('agent-run', {
+					sessionId: 'agent-run-session',
+				})
+				const agentStream = await context.agent.RemoteAi['2'].remoteAgent.stream('agent-stream', {
+					sessionId: 'agent-stream-session',
+				})
+				const workflowRun = await context.workflow.RemoteAi['2'].remoteWorkflow.run('workflow-run', {
+					sessionId: 'workflow-run-session',
+				})
+				const workflowStream = await context.workflow.RemoteAi['2'].remoteWorkflow.stream('workflow-stream', {
+					sessionId: 'workflow-stream-session',
+				})
+				expectTypeOf(agentRun.outcome).not.toBeAny()
+				expectTypeOf(workflowRun.outcome).not.toBeAny()
+				observedSessions.push(
+					agentRun.sessionId,
+					agentStream.sessionId,
+					workflowRun.sessionId,
+					workflowStream.sessionId,
+				)
+				await writer.close()
+			})
+		const definition = await remoteBuilder.getDefinition()
+		const eventBridge = getEventBridgeMock(sandbox)
+		eventBridge.stubs.invoke.callsFake(async message => ({
+			sessionId: message.harness.root.sessionId,
+			outcome: { status: 'completed', runId: `${message.receiver.serviceTarget}-run`, output: 'done' },
+		}))
+		eventBridge.stubs.openStream.callsFake(async () => ({
+			sessionId: 'transport-session',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {},
+		}))
+		const runtime = new Service({
+			info: {
+				serviceName: 'Caller',
+				serviceVersion: '1',
+				serviceDescription: 'Stream builder Harness test',
+			},
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [definition],
+			logger: getLoggerMock(sandbox).mock,
+			eventBridge: eventBridge.mock,
+			config: {},
+		})
+		await runtime.registerStream(definition)
+		await runtime.executeStream({
+			id: 'remote-stream-open',
+			correlationId: 'remote-stream-correlation',
+			timestamp: Date.now(),
+			traceId: 'remote-stream-trace',
+			messageType: EBMessageType.Stream,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			sender: {
+				serviceName: 'Client',
+				serviceVersion: '1',
+				serviceTarget: 'open',
+				instanceId: 'client-1',
+			},
+			receiver: { serviceName: 'Caller', serviceVersion: '1', serviceTarget: 'remoteCaller' },
+			payload: { frameType: 'open', payload: {}, parameter: {} },
+		} as never)
+
+		expect(observedSessions).toEqual([
+			'agent-run-session',
+			'agent-stream-session',
+			'workflow-run-session',
+			'workflow-stream-session',
+		])
+		expect(eventBridge.stubs.invoke.callCount).toBe(2)
+		expect(eventBridge.stubs.openStream.callCount).toBe(2)
 	})
 })

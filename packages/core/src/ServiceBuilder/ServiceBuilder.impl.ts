@@ -56,6 +56,7 @@ import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.imp
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
+import { finalizeRegisteredHarnessInvocations } from '../HarnessMount/invocation.js'
 import { createMountedHarnessTargetProjections } from '../HarnessMount/projection.js'
 import { createMountedHarnessQueueDefinitions } from '../HarnessMount/queue.js'
 import { canonicalHarnessJson } from '../HarnessMount/remoteTargetContract.js'
@@ -418,12 +419,21 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			Promise.all([...this.queueDefinitionList, ...mountedQueues.queueDefinitions]),
 			Promise.all([...this.queueWorkerDefinitionList, ...mountedQueues.queueWorkerDefinitions]),
 		])
+		const projections = this.harnessMount?.projections ?? []
+		const resolvedCommands = commands.map(definition => finalizeDefinitionHarnessInvocations(definition, projections))
+		const resolvedSubscriptions = subscriptions.map(definition =>
+			finalizeDefinitionHarnessInvocations(definition, projections),
+		)
+		const resolvedStreams = streams.map(definition => finalizeDefinitionHarnessInvocations(definition, projections))
+		const resolvedQueueWorkers = queueWorkers.map(definition =>
+			finalizeDefinitionHarnessInvocations(definition, projections),
+		)
 
-		this.commandDefinitionListResolved = commands
-		this.subscriptionDefinitionListResolved = subscriptions
-		this.streamDefinitionListResolved = streams
+		this.commandDefinitionListResolved = resolvedCommands
+		this.subscriptionDefinitionListResolved = resolvedSubscriptions
+		this.streamDefinitionListResolved = resolvedStreams
 		this.queueDefinitionListResolved = queues
-		this.queueWorkerDefinitionListResolved = queueWorkers
+		this.queueWorkerDefinitionListResolved = resolvedQueueWorkers
 		this.scheduleDefinitionListResolved = this.scheduleDefinitionList
 		this.eventToQueueBindingListResolved = this.eventToQueueBindingList
 
@@ -618,7 +628,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
-		service.bindHarnessHostTools(this.#harnessHostTools)
+		service.bindHarnessHostTools(this.#harnessHostTools, this.harnessMount?.projections ?? [])
 
 		let harnessMountRuntime: HarnessMountRuntime | undefined
 		if (this.harnessMount) {
@@ -992,6 +1002,15 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		// biome-ignore lint/suspicious/noConsole: no logger available
 		console.warn('deprecated: Use testServiceSetup() instead')
 	}
+}
+
+function finalizeDefinitionHarnessInvocations<
+	T extends Readonly<{ invokes: InvokeList; streamInvokes: StreamInvokeList }>,
+>(definition: T, projections: readonly import('../HarnessMount/types.js').MountedHarnessTargetProjection<any>[]): T {
+	const finalized = finalizeRegisteredHarnessInvocations(definition.invokes, definition.streamInvokes, projections)
+	if (finalized.invokes === definition.invokes && finalized.streamInvokes === definition.streamInvokes)
+		return definition
+	return { ...definition, invokes: finalized.invokes, streamInvokes: finalized.streamInvokes }
 }
 
 async function cleanupAndRethrow(

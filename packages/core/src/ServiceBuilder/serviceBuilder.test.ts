@@ -1,5 +1,6 @@
 import { defineAgent, defineHarness, defineWorkflow } from '@purista/harness'
 import { createHostOwnerToken, defineHostTool } from '@purista/harness/integrator'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
@@ -106,24 +107,28 @@ describe('ServiceBuilder', () => {
 			.canConsumeStream('Records', '1', 'watch', z.string(), z.string(), z.object({}), z.string())
 			.canEnqueue('records.audit', z.string(), z.object({}))
 			.canEmit('record.loaded', z.string())
-			.canInvokeAgent('Agents', '1', childAgent.contract)
-			.canInvokeWorkflow('Workflows', '1', childWorkflow.contract)
+			.canInvokeAgent('test-service', '1', childAgent.contract)
+			.canInvokeWorkflow('test-service', '1', childWorkflow.contract)
 			.setHandler(async (context, input) => {
 				observedContext = context
 				await context.step('before-child', async () => 'saved')
-				const agentOutput = await context.agent.Agents['1'].contextChildAgent.run(input, {
+				const agentOutput = await context.agent['test-service']['1'].contextChildAgent.run(input, {
 					callId: 'stable-agent-call',
 				})
-				return context.workflow.Workflows['1'].contextChildWorkflow.run(agentOutput, {
+				return context.workflow['test-service']['1'].contextChildWorkflow.run(agentOutput, {
 					callId: 'stable-workflow-call',
 				})
 			})
 
 		const eventBridge = getEventBridgeMock(sandbox)
 		const logger = getLoggerMock(sandbox)
-		const service = await builder.getInstance(eventBridge.mock, {
+		const mountedBuilder = builder.mountHarness(
+			defineHarness({ name: 'hostToolNestedTargets', revision: '1' }).addAgent(childAgent).addWorkflow(childWorkflow),
+		)
+		const service = await mountedBuilder.getInstance(eventBridge.mock, {
 			logger: logger.mock,
 			resources: { records: { prefix: 'record:' } },
+			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
 		})
 		const message = getCommandMessageMock()
 		const request = {
@@ -184,16 +189,18 @@ describe('ServiceBuilder', () => {
 			idempotencyKey: 'tool-effect-1',
 			caller: { kind: 'agent', agentId: 'rootAgent' },
 		})
-		expect(Object.keys(context.agent)).toEqual(['Agents'])
-		expect(Object.keys(context.workflow)).toEqual(['Workflows'])
+		expect(Object.keys(context.agent)).toEqual(['test-service'])
+		expect(Object.keys(context.workflow)).toEqual(['test-service'])
 		expect((context.service as Record<string, unknown>).Undeclared).toBeUndefined()
 		expect((context.stream as Record<string, unknown>).Undeclared).toBeUndefined()
 		expect('records.audit' in context.queue.enqueue).toBe(true)
 		expect(observedContext).toBe(context)
 		const runtimeAgent = context.agent as unknown as {
-			Agents: { '1': { contextChildAgent: { run(input: string, options: { callId: string }): Promise<string> } } }
+			'test-service': {
+				'1': { contextChildAgent: { run(input: string, options: { callId: string }): Promise<string> } }
+			}
 		}
-		expect(() => runtimeAgent.Agents['1'].contextChildAgent.run('invalid call', { callId: '' })).toThrow(
+		expect(() => runtimeAgent['test-service']['1'].contextChildAgent.run('invalid call', { callId: '' })).toThrow(
 			'non-empty callId',
 		)
 		expect(nestedRun.callCount).toBe(2)
@@ -224,13 +231,9 @@ describe('ServiceBuilder', () => {
 		sameIdBuilder
 			.defineTool('sameLookup', { description: 'Locally owned.', input: z.string(), output: z.string() })
 			.setHandler(async (_context, input) => input)
-		const registerQueues = sandbox.spy(sameIdBuilder as never, 'addHarnessQueueBindings' as never)
 
-		expect(() => sameIdBuilder.mountHarness(definition, { publish: { agents: ['foreignToolAgent'] } })).toThrow(
-			'Host tool owner does not match',
-		)
-		expect(registerQueues.called).toBe(false)
-		expect(() => foreignBuilder.mountHarness(definition, { publish: { agents: ['foreignToolAgent'] } })).not.toThrow()
+		expect(() => sameIdBuilder.mountHarness(definition)).toThrow('Host tool owner does not match')
+		expect(foreignBuilder.mountHarness(definition)).toBe(foreignBuilder)
 
 		const privateBuilder = new ServiceBuilder(serviceInfo)
 		privateBuilder
@@ -270,11 +273,7 @@ describe('ServiceBuilder', () => {
 				tools: [directTool],
 			}),
 		)
-		const directRegistration = sandbox.spy(privateBuilder as never, 'addHarnessQueueBindings' as never)
-		expect(() => privateBuilder.mountHarness(directDefinition, { publish: { agents: ['directToolAgent'] } })).toThrow(
-			'Host tool owner does not match',
-		)
-		expect(directRegistration.called).toBe(false)
+		expect(() => privateBuilder.mountHarness(directDefinition)).toThrow('Host tool owner does not match')
 	})
 
 	it('throws when definitions are not resolved', () => {

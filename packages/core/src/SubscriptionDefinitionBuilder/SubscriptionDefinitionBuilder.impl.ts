@@ -1,4 +1,3 @@
-import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
@@ -28,17 +27,55 @@ import type { SubscriptionTransformInputHook } from '../core/types/subscription/
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
 import {
+	type HarnessInvocationContract,
+	type HarnessInvocationSource,
 	type HarnessInvokeDeclaration,
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
+import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
+
+type HarnessSourceOfKind<
+	Source extends HarnessInvocationSource,
+	Kind extends 'agent' | 'workflow',
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+
+type SubscriptionHarnessInvocationBuilder<
+	S extends Service,
+	C extends SubscriptionDefinitionBuilderTypes,
+	Source extends HarnessInvocationSource,
+	ServiceName extends string,
+	ServiceVersion extends string,
+> = SubscriptionDefinitionBuilder<
+	S,
+	SubscriptionDefinitionBuilderTypes<
+		C['PayloadSchema'],
+		C['ParamsSchema'],
+		C['OutputSchema'],
+		C['TransformInputPayloadSchema'],
+		C['TransformInputParamsSchema'],
+		C['TransformOutputSchema'],
+		C['Resources'],
+		C['Invokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessInvokeDeclaration<Source>>>
+			>,
+		C['StreamInvokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessStreamDeclaration<Source>>>
+			>,
+		C['EmitList'],
+		C['QueueInvokes']
+	>
+>
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -202,98 +239,72 @@ export class SubscriptionDefinitionBuilder<
 		>
 	}
 
-	/** Declare a capability-projected model from a Harness mounted on this service. */
-	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
-		definition: D,
-		alias: Alias,
-	) {
-		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
-	}
-
-	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness agent invocation. */
 	canInvokeAgent<
-		Contract extends HarnessTargetContract<'agent', any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness agent invocation. */
+	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'agent'>,
+	): SubscriptionHarnessInvocationBuilder<
+		S,
+		C,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as C['Invokes']
 		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
+		return this
 	}
 
-	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	/** Declare an address-first local Harness workflow invocation. */
 	canInvokeWorkflow<
-		Contract extends HarnessTargetContract<'workflow', any, any>,
-		SName extends string,
-		Version extends string,
-		Target extends string,
-	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
-		const registered = registerHarnessInvocation(
-			this.invokes,
-			this.streamInvokes,
-			serviceName,
-			serviceVersion,
-			serviceTarget,
-			contract,
-		)
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness workflow invocation. */
+	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		source: HarnessSourceOfKind<Source, 'workflow'>,
+	): SubscriptionHarnessInvocationBuilder<
+		S,
+		C,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
 		this.invokes = registered.invokes as C['Invokes']
 		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
-				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
-				C['EmitList'],
-				C['QueueInvokes']
-			>
-		>
+		return this
 	}
 
 	canConsumeStream<

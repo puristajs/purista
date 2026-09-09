@@ -1,15 +1,15 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import type { AnyHarnessTargetContract, ModelHandle } from '@purista/harness'
+import type { AnyHarnessTargetContract } from '@purista/harness'
 import type { HarnessNestedTargetInvoker } from '@purista/harness/integrator'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
 import { createHarnessInvocationProxy, getHarnessQueueInvokes } from '../../HarnessMount/invocation.js'
-import { createHarnessModelClients } from '../../HarnessMount/model.js'
 import type {
 	HarnessNestedTargetDeclarations,
+	MountedHarnessTargetProjection,
 	PuristaHostContextRequest,
 	PuristaHostToolRuntimeDefinition,
 	PuristaToolContext,
@@ -195,7 +195,6 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
 	private readonly queueJobStore?: QueueJobStore
 	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
-	private harnessModelResolver?: (definition: unknown, alias: string) => ModelHandle
 	private harnessHostTools = new Map<string, PuristaHostToolRuntimeDefinition>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
@@ -245,14 +244,44 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		return `${this.info.serviceName}V${this.info.serviceVersion}`
 	}
 
-	/** @internal Bind mounted Harness models before the service begins handling messages. */
-	public bindHarnessModelResolver(resolver: (definition: unknown, alias: string) => ModelHandle): void {
-		this.harnessModelResolver = resolver
+	/** @internal Bind service-owned host-tool declarations to exact mounted target projections before Harness starts. */
+	public bindHarnessHostTools(
+		definitions: ReadonlyMap<string, PuristaHostToolRuntimeDefinition>,
+		projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[],
+	): void {
+		for (const [toolId, definition] of definitions) {
+			this.assertHostNestedTargetBindings(toolId, 'agent', definition.agents, projections)
+			this.assertHostNestedTargetBindings(toolId, 'workflow', definition.workflows, projections)
+		}
+		this.harnessHostTools = new Map(definitions)
 	}
 
-	/** @internal Bind service-owned host-tool declarations before Harness starts. */
-	public bindHarnessHostTools(definitions: ReadonlyMap<string, PuristaHostToolRuntimeDefinition>): void {
-		this.harnessHostTools = new Map(definitions)
+	private assertHostNestedTargetBindings(
+		toolId: string,
+		kind: 'agent' | 'workflow',
+		declarations: HarnessNestedTargetDeclarations,
+		projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[],
+	): void {
+		for (const [serviceName, versions] of Object.entries(declarations)) {
+			for (const [serviceVersion, targets] of Object.entries(versions)) {
+				for (const [serviceTarget, contract] of Object.entries(targets)) {
+					const projection = projections.find(
+						entry =>
+							entry.target === contract &&
+							entry.target.kind === kind &&
+							entry.address.serviceName === serviceName &&
+							entry.address.serviceVersion === serviceVersion &&
+							entry.address.serviceTarget === serviceTarget,
+					)
+					if (!projection) {
+						throw new UnhandledError(
+							StatusCode.InternalServerError,
+							`Harness host tool "${toolId}" ${kind} invocation ${serviceName}/${serviceVersion}/${serviceTarget} has no matching mounted projection.`,
+						)
+					}
+				}
+			}
+		}
 	}
 
 	private getServiceMetricAttributes(serviceTarget?: string): PuristaMetricAttributes {
@@ -1627,12 +1656,6 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		return {
 			agent: createHarnessInvocationProxy('agent', invoke, openStream, enqueue, invokes),
 			workflow: createHarnessInvocationProxy('workflow', invoke, openStream, enqueue, invokes),
-			model: createHarnessModelClients(invokes, (definition, alias) => {
-				if (!this.harnessModelResolver) {
-					throw new Error('Harness models are unavailable before the mounted Harness runtime starts.')
-				}
-				return this.harnessModelResolver(definition, alias)
-			}),
 		}
 	}
 

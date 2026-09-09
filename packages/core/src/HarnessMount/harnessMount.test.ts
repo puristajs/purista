@@ -1,4 +1,11 @@
-import { defineAgent, defineHarness, defineWorkflow, type JsonValue, type ModelSchema } from '@purista/harness'
+import {
+	defineAgent,
+	defineHarness,
+	defineWorkflow,
+	InMemoryHarnessStorage,
+	type JsonValue,
+	type ModelSchema,
+} from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
@@ -124,6 +131,14 @@ function generatedSchema<Input extends JsonValue, Output extends JsonValue>(
 	return schema as unknown as ModelSchema<Input, Output>
 }
 
+function persistentStorage() {
+	const storage = new InMemoryHarnessStorage()
+	const capabilities = Object.freeze([...storage.capabilities, 'storage.persistent'] as const)
+	Object.defineProperty(storage, 'capabilities', { value: capabilities })
+	Object.defineProperty(storage, 'info', { value: Object.freeze({ ...storage.info, capabilities }) })
+	return storage
+}
+
 describe('P4-004 mounted Harness receivers', () => {
 	it('uses v4 standalone target definitions and projects one aggregate plus one stream root while keeping dependencies nested-only', () => {
 		const rows = projections()
@@ -135,6 +150,231 @@ describe('P4-004 mounted Harness receivers', () => {
 		expect(dependency).toMatchObject({ visibility: 'dependency', address: dependencyAddress })
 		expect(dependency?.completedEvent).toBeUndefined()
 		expect(dependency?.policy).toBeNull()
+	})
+
+	it('finalizes a local workflow declaration and routes command run and stream calls through EventBridge', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Harness',
+			serviceVersion: '1',
+			serviceDescription: 'local Harness invocation service',
+		})
+		const invokeEcho = builder
+			.getCommandBuilder('invokeEcho', 'Invoke the mounted workflow')
+			.addPayloadSchema(objectSchema)
+			.canInvokeWorkflow('Harness', '1', publicEcho.contract)
+			.setCommandFunction(async function ({ workflow }, payload) {
+				const aggregate = await workflow.Harness['1'].echo.run(payload, { sessionId: 'aggregate-session' })
+				const stream = await workflow.Harness['1'].echo.stream(payload, { sessionId: 'stream-session' })
+				for await (const _event of stream) {
+					// The terminal is consumed through the canonical result promise below.
+				}
+				return { aggregate, streamed: { sessionId: stream.sessionId, outcome: await stream.result } }
+			})
+		builder.addCommandDefinition(invokeEcho.getDefinition()).mountHarness(mountedHarness)
+		const service = await builder.getInstance(eventBridge, {
+			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+		} as never)
+		await service.start()
+		try {
+			const request = getCommandMessageMock({
+				receiver: { serviceName: 'Harness', serviceVersion: '1', serviceTarget: 'invokeEcho' },
+				payload: { payload: { value: ' local ' }, parameter: {} },
+			})
+			const { id: _id, messageType: _type, timestamp: _timestamp, correlationId: _correlationId, ...message } = request
+			await expect(eventBridge.invoke(message)).resolves.toEqual({
+				aggregate: {
+					sessionId: 'aggregate-session',
+					outcome: { status: 'completed', runId: expect.any(String), output: { value: 'local' } },
+				},
+				streamed: {
+					sessionId: 'stream-session',
+					outcome: { status: 'completed', runId: expect.any(String), output: { value: 'local' } },
+				},
+			})
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+			transforms = 0
+		}
+	})
+
+	it('rejects an unprojected local Harness declaration before EventBridge registration', async () => {
+		const missing = defineAgent('missing', { instructions: 'Never runs.' })
+		const builder = new ServiceBuilder({
+			serviceName: 'Harness',
+			serviceVersion: '1',
+			serviceDescription: 'invalid local Harness invocation service',
+		})
+		const command = builder
+			.getCommandBuilder('invokeMissing', 'Invoke an unmounted target')
+			.canInvokeAgent('Harness', '1', missing.contract)
+			.setCommandFunction(async function ({ agent }) {
+				return agent.Harness['1'].missing.run('input')
+			})
+		builder.addCommandDefinition(command.getDefinition()).mountHarness(mountedHarness)
+		const eventBridge = new DefaultEventBridge()
+		const registerCommand = vi.spyOn(eventBridge, 'registerCommand')
+		await expect(
+			builder.getInstance(eventBridge, {
+				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			} as never),
+		).rejects.toThrow('has no matching mounted target projection')
+		expect(registerCommand).not.toHaveBeenCalled()
+	})
+
+	it('rejects a dependency-only local agent declaration before EventBridge dispatch', async () => {
+		const builder = new ServiceBuilder({
+			serviceName: 'Harness',
+			serviceVersion: '1',
+			serviceDescription: 'dependency-only local Harness invocation service',
+		})
+		const command = builder
+			.getCommandBuilder('invokePrivateLookup', 'Attempt to invoke a dependency-only agent as a root')
+			.canInvokeAgent('Harness', '1', privateLookup.contract)
+			.setCommandFunction(async function ({ agent }) {
+				return agent.Harness['1'].privateLookup.run({ value: 'must not dispatch' })
+			})
+		builder.addCommandDefinition(command.getDefinition()).mountHarness(mountedHarness)
+		const eventBridge = new DefaultEventBridge()
+		const invoke = vi.spyOn(eventBridge, 'invoke')
+		const registerCommand = vi.spyOn(eventBridge, 'registerCommand')
+
+		await expect(
+			builder.getInstance(eventBridge, {
+				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			} as never),
+		).rejects.toThrow('has no matching mounted target projection')
+		expect(registerCommand).not.toHaveBeenCalled()
+		expect(invoke).not.toHaveBeenCalled()
+	})
+
+	it('rejects a host-tool nested target declared at the wrong address before EventBridge dispatch', async () => {
+		const builder = new ServiceBuilder({
+			serviceName: 'Harness',
+			serviceVersion: '1',
+			serviceDescription: 'wrong host-tool nested target address',
+		})
+		const nestedWorkflow = defineWorkflow('nestedEcho', {
+			input: objectSchema,
+			output: objectSchema,
+			async handler({ input }) {
+				return input
+			},
+		})
+		const hostTool = builder
+			.defineTool('invokeNested', {
+				description: 'Invoke the nested workflow.',
+				input: objectSchema,
+				output: objectSchema,
+			})
+			.canInvokeWorkflow('WrongService', '9', nestedWorkflow.contract)
+			.setHandler(async (context, input) =>
+				context.workflow.WrongService['9'].nestedEcho.run(input, { callId: 'nested-call' }),
+			)
+		const caller = defineAgent('hostToolCaller', {
+			input: objectSchema,
+			instructions: 'Use the nested workflow tool.',
+			tools: [hostTool],
+			prompt: input => ({ role: 'user', content: input.value }),
+		})
+		const definition = defineHarness({ name: 'wrongHostToolAddress', revision: '1' })
+			.addAgent(caller)
+			.addWorkflow(nestedWorkflow)
+		builder.mountHarness(definition)
+		const eventBridge = new DefaultEventBridge()
+		const invoke = vi.spyOn(eventBridge, 'invoke')
+		const registerCommand = vi.spyOn(eventBridge, 'registerCommand')
+
+		await expect(
+			builder.getInstance(eventBridge, {
+				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			} as never),
+		).rejects.toThrow('has no matching mounted projection')
+		expect(registerCommand).not.toHaveBeenCalled()
+		expect(invoke).not.toHaveBeenCalled()
+	})
+
+	it('runs a host-tool nested target through its exact mounted EventBridge route', async () => {
+		const builder = new ServiceBuilder({
+			serviceName: 'Harness',
+			serviceVersion: '1',
+			serviceDescription: 'host-tool nested EventBridge invocation',
+		})
+		const nestedAgent = defineAgent('nestedEcho', {
+			input: objectSchema,
+			instructions: 'Return a short nested response.',
+			prompt: input => ({ role: 'user', content: input.value }),
+		})
+		let hostToolCalls = 0
+		const hostTool = builder
+			.defineTool('invokeNested', {
+				description: 'Invoke the nested agent.',
+				input: objectSchema,
+				output: generatedSchema<string, string>({ type: 'string' }),
+			})
+			.canInvokeAgent('Harness', '1', nestedAgent.contract)
+			.setHandler(async (context, input) => {
+				hostToolCalls += 1
+				return context.agent.Harness['1'].nestedEcho.run(input, { callId: 'nested-call' })
+			})
+		const caller = defineAgent('hostToolCaller', {
+			input: objectSchema,
+			instructions: 'Use invokeNested once, then return a short answer.',
+			tools: [hostTool],
+			subagents: { nestedEcho: nestedAgent },
+			prompt: input => ({ role: 'user', content: input.value }),
+		})
+		const definition = defineHarness({
+			name: 'hostToolNestedEventBridge',
+			revision: '1',
+			defaults: { maxDepth: 1 },
+		}).addAgent(caller)
+		builder.mountHarness(definition)
+		const provider = new FakeModelProvider({ strict: true })
+		const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
+		provider.enqueueText({
+			content: '',
+			toolCalls: [{ id: 'invoke-nested-call', name: hostTool.id, arguments: { value: 'from tool' } }],
+			usage,
+			finishReason: 'tool_calls',
+		})
+		provider.enqueueText({ content: 'nested response', toolCalls: [], usage, finishReason: 'stop' })
+		provider.enqueueText({ content: 'nested complete', toolCalls: [], usage, finishReason: 'stop' })
+		const eventBridge = new DefaultEventBridge()
+		const openStream = vi.spyOn(eventBridge, 'openStream')
+		await eventBridge.start()
+		const service = await builder.getInstance(eventBridge, {
+			ai: { model: { provider, model: 'fake' }, storage: persistentStorage() },
+		} as never)
+		await service.start()
+		try {
+			const projection = createMountedHarnessTargetProjections(definition, {
+				serviceName: 'Harness',
+				serviceVersion: '1',
+			}).find(entry => entry.target === caller.contract)
+			if (!projection) throw new Error('Expected the host-tool caller root projection.')
+			const request = getCommandMessageMock({
+				receiver: projection.address,
+				payload: { payload: { value: 'start' }, parameter: {} },
+				harness: {
+					contract: { schemaVersion: 1, exportDigest: projection.exportDigest },
+					root: { invocationId: getNewCorrelationId(), sessionId: 'host-tool-session' },
+				},
+			})
+			const { id: _id, messageType: _type, timestamp: _timestamp, correlationId: _correlationId, ...message } = request
+			await expect(eventBridge.invoke(message)).resolves.toMatchObject({
+				sessionId: 'host-tool-session',
+				outcome: { status: 'completed', output: 'nested complete' },
+			})
+			expect(hostToolCalls).toBe(1)
+			expect(openStream).toHaveBeenCalled()
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
 	})
 
 	it('rejects malformed policy, a mixed root/dispatch envelope, and an export-digest mismatch before target execution', async () => {
