@@ -1,14 +1,57 @@
 ---
-title: Test Docker isolation
-description: Run an opt-in integration test against the real non-root, network-disabled container boundary.
+title: Optional: test Docker isolation
+description: Run a real non-root container test only when Docker is available.
 order: 292
 kind: lesson
 status: draft
 ---
 
-Keep the Docker test separate from the fast default suite. It checks the actual
-process boundary and should run in an environment with Docker and the tutorial
-image available.
+The default suite does not need Docker. This test is skipped unless an immutable image reference is supplied. It uses the real adapter and its trusted cleanup API. If both the operation and cleanup fail, the test reports their combined errors instead of hiding either one.
+
+```ts title="src/dockerSandboxCleanup.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import {
+	purgeTransactionAnalysisSandbox,
+	transactionAnalysisSandboxCleanupKey,
+	transactionAnalysisSandboxSelector,
+} from './dockerSandboxCleanup.js'
+
+const completed = { state: 'completed' as const, deletedResources: 1, remainingResources: 0 }
+const pending = { state: 'cleanup_pending' as const, deletedResources: 0, remainingResources: 1, retryAfterMs: 1 }
+
+describe('transaction analysis Docker cleanup', () => {
+	it('accepts immediate completion', async () => {
+		const purge = vi.fn().mockResolvedValue(completed)
+		const removeRoot = vi.fn().mockResolvedValue(undefined)
+		await expect(purgeTransactionAnalysisSandbox({ purge }, removeRoot, async () => undefined)).resolves.toBeUndefined()
+		expect(purge).toHaveBeenCalledTimes(1)
+		expect(removeRoot).toHaveBeenCalledOnce()
+	})
+
+	it('retries pending cleanup with the same request identity', async () => {
+		const purge = vi.fn().mockResolvedValueOnce(pending).mockResolvedValueOnce(completed)
+		const removeRoot = vi.fn().mockResolvedValue(undefined)
+		await purgeTransactionAnalysisSandbox({ purge }, removeRoot, async () => undefined)
+		expect(purge).toHaveBeenCalledTimes(2)
+		expect(purge.mock.calls[0]?.[0]).toEqual(purge.mock.calls[1]?.[0])
+		expect(purge.mock.calls[0]?.[0]).toMatchObject({
+			selector: transactionAnalysisSandboxSelector,
+			idempotencyKey: transactionAnalysisSandboxCleanupKey,
+		})
+		expect(removeRoot).toHaveBeenCalledOnce()
+	})
+
+	it('fails closed when cleanup remains pending', async () => {
+		const purge = vi.fn().mockResolvedValue(pending)
+		const removeRoot = vi.fn().mockResolvedValue(undefined)
+		await expect(purgeTransactionAnalysisSandbox({ purge }, removeRoot, async () => undefined)).rejects.toThrow(
+			'did not complete',
+		)
+		expect(purge).toHaveBeenCalledTimes(4)
+		expect(removeRoot).not.toHaveBeenCalled()
+	})
+})
+```
 
 ```ts title="src/sandboxAnalysis.docker.integration.test.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
@@ -18,6 +61,7 @@ import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/
 import { dockerSandbox } from '@purista/harness-sandbox-docker'
 import { describe, expect, it } from 'vitest'
 import { createAnalysisService } from './createAnalysisService.js'
+import { purgeTransactionAnalysisSandbox } from './dockerSandboxCleanup.js'
 import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
 
 const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
@@ -38,13 +82,14 @@ describe.skipIf(!image)('Docker sandbox analysis over PURISTA', () => {
 		})
 		await service.start()
 
+		let operationError: unknown
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-analyst',
-						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 						payload: {
 							payload: {
 								analysisId: 'analysis-1',
@@ -56,36 +101,52 @@ describe.skipIf(!image)('Docker sandbox analysis over PURISTA', () => {
 				),
 			).resolves.toMatchObject({ analysisId: 'analysis-1', flaggedTransactionIds: ['tx-1'] })
 			provider.assertExhausted()
-		} finally {
-			await service.destroy()
-			await sandbox.administration.purge({
-				selector: { kind: 'tenant', namespace: 'transaction-analysis', tenantId: 'tenant-example' },
-				idempotencyKey: 'sandbox-analysis-test-cleanup',
-				limit: 100,
-			})
-			await eventBridge.destroy()
-			await rm(root, { recursive: true, force: true })
+		} catch (error) {
+			operationError = error
+		}
+		const cleanupErrors: unknown[] = []
+		for (const cleanup of [
+			() => service.destroy(),
+			() => purgeTransactionAnalysisSandbox(sandbox.administration, () => rm(root, { recursive: true, force: true })),
+			() => eventBridge.destroy(),
+		]) {
+			try {
+				await cleanup()
+			} catch (error) {
+				cleanupErrors.push(error)
+			}
+		}
+		if (operationError || cleanupErrors.length > 0) {
+			throw new AggregateError(
+				[...(operationError ? [operationError] : []), ...cleanupErrors],
+				'Sandbox analysis operation or cleanup failed.',
+			)
 		}
 	})
 })
+
+describe('Docker sandbox image validation', () => {
+	it.each([`sha256:${'a'.repeat(64)}`, `registry.example/tools@sha256:${'b'.repeat(64)}`])(
+		'accepts immutable image %s',
+		(image) => {
+			expect(() => dockerSandbox({ root: '/private/tmp/purista-sandbox-test', image })).not.toThrow()
+		},
+	)
+
+	it.each([
+		'python:3.12',
+		`sha256:${'A'.repeat(64)}`,
+		`sha256:${'c'.repeat(63)}`,
+		` sha256:${'d'.repeat(64)}`,
+		`sha256:${'e'.repeat(64)}\0`,
+	])('rejects mutable or malformed image %s', (image) => {
+		expect(() => dockerSandbox({ root: '/private/tmp/purista-sandbox-test', image })).toThrow()
+	})
+})
 ```
-
-Run the normal chapter gate first.
-
-```bash title="Verify the sandbox chapter" replay="project"
-npm run build
-npm test
-npm run lint
-npm run demo
-```
-
-Build the image and opt into the Docker integration separately.
-
-```bash title="Run the Docker isolation test" replay="project"
+```bash title="Run the optional Docker test" replay="project"
 docker compose build sandbox-image
-PURISTA_RUN_DOCKER_TESTS=1 npm run test:docker
+PURISTA_DOCKER_SANDBOX_IMAGE="$(docker image inspect --format '{{.Id}}' purista-tutorial-sandbox:local)" npm run test:docker
 ```
 
-A passing local-directory test does not prove container isolation. This test is
-the explicit evidence for the Docker adapter, non-root user, and disabled
-network boundary.
+You now have a protected sandbox analysis service with a deterministic local path and an optional container-isolated path.

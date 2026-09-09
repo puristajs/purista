@@ -1,20 +1,19 @@
 ---
-title: Scaffold isolated analysis
-description: Create a PURISTA project and generate the service, agent, and command boundaries for sandboxed work.
+title: Create the sandbox analysis project
+description: Create one independent PURISTA service with public v4 packages.
 order: 281
 kind: lesson
 status: draft
 ---
 
-Create a fresh project and enter it.
+Create a fresh project. The generated service owns every final agent and Harness file.
 
-```bash title="Create and enter the sandbox-analysis project" replay="parent"
-npm create purista@2.2.0 sandbox-analysis -- --runtime node --event-bridge default --non-interactive --defaults
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 sandbox-analysis -- --runtime node --event-bridge default --non-interactive --defaults
 cd sandbox-analysis
 ```
 
-Use the published Framework, Harness, provider, and Docker sandbox packages.
-The deterministic path added later needs no API key or Docker daemon.
+Use these published packages and project-local scripts.
 
 ```json title="package.json" write
 {
@@ -63,21 +62,83 @@ The deterministic path added later needs no API key or Docker daemon.
 	}
 }
 ```
-```bash title="Install the sandbox-analysis dependencies" replay="project"
+```json title="purista.json" write
+{
+	"$schema": "https://purista.dev/schemas/1.12.0/schema.json",
+	"runtime": "node",
+	"eventBridge": "default",
+	"fileConvention": "camel",
+	"eventConvention": "dot",
+	"linter": "biome",
+	"formatter": "biome",
+	"servicePath": "src/service"
+}
+```
+```json title="tsconfig.json" write
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "vitest/globals"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
+```
+```json title="biome.json" write
+{
+	"root": true,
+	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"files": { "includes": ["**", "!**/dist/**/*", "!**/node_modules/**/*", "!**/*.d.ts"] },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": { "useArrowFunction": "off" },
+			"suspicious": { "noExplicitAny": "off" },
+			"style": { "useNodejsImportProtocol": "off" }
+		}
+	},
+	"formatter": { "enabled": true, "indentStyle": "tab", "lineWidth": 120, "lineEnding": "lf" },
+	"javascript": {
+		"formatter": { "quoteStyle": "single", "semicolons": "asNeeded", "trailingCommas": "all" }
+	},
+	"json": { "formatter": { "trailingCommas": "none" } }
+}
+```
+```gitignore title=".gitignore" write
+node_modules
+dist
+.env
+.env.local
+runtime
+```
+Install once, then generate each boundary once. The agent stays internal; the command is the public service target.
+
+```bash title="Install dependencies" replay="project"
 npm install
 ```
 
-Generate the Analysis service, native Harness agent, and PURISTA command. Keep
-the generated agent module and its colocated test as the capability boundary.
-
-```bash title="Generate the analysis boundaries" replay="project"
-npm run add:service -- analysis --description "Own isolated analysis jobs" --non-interactive
-npm run add:agent -- analyze-transactions --service analysis --service-version 1 --description "Analyze one transaction dataset in a sandbox" --non-interactive
-npm run add:command -- analyze-transactions --service analysis --service-version 1 --description "Run an isolated transaction analysis" --non-interactive
+```bash title="Generate Analysis boundaries" replay="project"
+npm run add:service -- analysis --description "Own isolated transaction analysis" --non-interactive
+npm run add:agent -- analyze-transactions --service analysis --service-version 1 --http none --description "Analyze transactions in a sandbox" --non-interactive
+npm run add:command -- run-analyze-transactions --service analysis --service-version 1 --description "Run protected transaction analysis" --non-interactive
 ```
 
-```bash title="Check the generated project"
-npm run build
+Remove only generated files that this final chapter replaces.
+
+```bash title="Remove generated placeholders" replay="project"
+rm src/service/analysis/generalAnalysisServiceInfo.ts
+rm src/service/analysis/v1/analysisServiceConfig.ts
+rm src/service/analysis/v1/analysisV1Service.test.ts
+rm src/service/analysis/v1/harness/agent/analyzeTransactions/analyzeTransactionsAgent.test.ts
+rm src/service/analysis/v1/command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.test.ts
 ```
 
-Continue with [Configure the Docker boundary](../../build/configure/).
+Continue with [Give the agent a small tool surface](../../build/define-agent/).

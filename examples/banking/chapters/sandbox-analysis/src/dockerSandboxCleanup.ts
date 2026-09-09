@@ -1,16 +1,3 @@
----
-title: Clean up retained containers
-description: Retry administrative cleanup when Docker reports cleanup pending.
-order: 291
-kind: lesson
-status: draft
----
-
-Normal request completion releases an attachment. It does not erase retained container resources. Cleanup is a trusted operator task, never an agent tool.
-
-The application owns cleanup. Purge first installs the adapter revocation state for this tenant namespace. The helper keeps one stable idempotency key and retries `cleanup_pending` at most three times. It deletes the app-owned metadata root only after `completed`; pending or failure retains it for retry and investigation. A completed deletion lets this disposable demo root start clean on a later run.
-
-```ts title="src/dockerSandboxCleanup.ts" write
 import { rm } from 'node:fs/promises'
 import type { ShutdownEntry } from '@purista/core'
 import type { SandboxAdministration } from '@purista/harness'
@@ -55,12 +42,3 @@ export function transactionAnalysisSandboxCleanup(
 			purgeTransactionAnalysisSandbox(administration, () => rm(metadataRoot, { recursive: true, force: true })),
 	}
 }
-```
-
-When adapter administration reports `cleanup_pending`, the helper waits for its retry delay and retries with the same selector and idempotency key. It stops after three retries. On failure it preserves metadata and the configured root instead of hiding evidence with a destructive fallback.
-
-```bash title="Stop local Compose resources" replay="project"
-docker compose down --remove-orphans
-```
-
-Continue with [Optional Docker isolation test](../../testing/test-docker/).

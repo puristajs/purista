@@ -1,13 +1,12 @@
 ---
-title: Run with Docker and a live model
-description: Select a live provider and a non-root Docker sandbox only in the application entry point.
-order: 288
+title: Optional: run a live Docker service
+description: Bind a digest-pinned image and live provider in trusted composition.
+order: 290
 kind: lesson
 status: draft
 ---
 
-Document the optional live settings. `PURISTA_DOCKER_SANDBOX_IMAGE` should be an
-immutable image ID or digest in production.
+This path requires Docker and an API key. Keep both values outside agent definitions. Set `PURISTA_DOCKER_SANDBOX_IMAGE` to the inspected immutable digest, never a mutable tag.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
@@ -15,17 +14,13 @@ OPENAI_MODEL=gpt-5-mini
 PURISTA_DOCKER_SANDBOX_IMAGE=
 PURISTA_DOCKER_SANDBOX_ROOT=./runtime/sandboxes
 ```
-
-Create the long-running entry point. It validates required settings before
-starting the EventBridge, binds the OpenAI provider and Docker adapter, and
-supplies an explicit example business policy.
-
 ```ts title="src/index.ts" write
 import { resolve } from 'node:path'
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
 import { dockerSandbox } from '@purista/harness-sandbox-docker'
 import { createAnalysisService } from './createAnalysisService.js'
+import { transactionAnalysisSandboxCleanup } from './dockerSandboxCleanup.js'
 
 async function main() {
 	const logger = initLogger()
@@ -33,8 +28,9 @@ async function main() {
 	const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
 	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
 	if (!image) throw new Error('PURISTA_DOCKER_SANDBOX_IMAGE is required to start the optional live example.')
+	const root = resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes')
 	const sandbox = dockerSandbox({
-		root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
+		root,
 		image,
 		user: '10001:10001',
 	})
@@ -51,7 +47,7 @@ async function main() {
 		sandbox,
 	})
 	await service.start()
-	gracefulShutdown(logger, [service, eventBridge])
+	gracefulShutdown(logger, [service, transactionAnalysisSandboxCleanup(sandbox.administration, root), eventBridge])
 	logger.info('Sandbox transaction analysis service started')
 }
 
@@ -60,16 +56,10 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
+The shutdown registration contains `[service, sandbox cleanup, eventBridge]`. Purge installs revocation state first; the helper removes this disposable metadata root only after cleanup completes, so a later live demo starts clean. The Docker adapter enforces the container boundary. The agent still receives only its narrow Harness tool allowlist.
 
-Build the image from the earlier page, copy `.env.example` to `.env`, set the
-API key and image, and start the service only when you want the live path.
-
-```bash title="Start the optional live service"
-docker compose build sandbox-image
-npm start
+```bash title="Start the optional live service" replay="project"
+npm run start
 ```
 
-The Docker adapter supplies process isolation. The agent permission policy
-still limits its logical tool surface, so both layers remain necessary.
-
-Continue with [Manage sandbox retention](../cleanup/).
+Continue with [Clean up retained containers](../cleanup/).

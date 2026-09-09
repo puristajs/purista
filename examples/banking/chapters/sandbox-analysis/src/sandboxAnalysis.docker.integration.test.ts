@@ -5,6 +5,7 @@ import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/
 import { dockerSandbox } from '@purista/harness-sandbox-docker'
 import { describe, expect, it } from 'vitest'
 import { createAnalysisService } from './createAnalysisService.js'
+import { purgeTransactionAnalysisSandbox } from './dockerSandboxCleanup.js'
 import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
 
 const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
@@ -25,13 +26,14 @@ describe.skipIf(!image)('Docker sandbox analysis over PURISTA', () => {
 		})
 		await service.start()
 
+		let operationError: unknown
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-analyst',
-						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 						payload: {
 							payload: {
 								analysisId: 'analysis-1',
@@ -43,15 +45,45 @@ describe.skipIf(!image)('Docker sandbox analysis over PURISTA', () => {
 				),
 			).resolves.toMatchObject({ analysisId: 'analysis-1', flaggedTransactionIds: ['tx-1'] })
 			provider.assertExhausted()
-		} finally {
-			await service.destroy()
-			await sandbox.administration.purge({
-				selector: { kind: 'tenant', namespace: 'transaction-analysis', tenantId: 'tenant-example' },
-				idempotencyKey: 'sandbox-analysis-test-cleanup',
-				limit: 100,
-			})
-			await eventBridge.destroy()
-			await rm(root, { recursive: true, force: true })
+		} catch (error) {
+			operationError = error
 		}
+		const cleanupErrors: unknown[] = []
+		for (const cleanup of [
+			() => service.destroy(),
+			() => purgeTransactionAnalysisSandbox(sandbox.administration, () => rm(root, { recursive: true, force: true })),
+			() => eventBridge.destroy(),
+		]) {
+			try {
+				await cleanup()
+			} catch (error) {
+				cleanupErrors.push(error)
+			}
+		}
+		if (operationError || cleanupErrors.length > 0) {
+			throw new AggregateError(
+				[...(operationError ? [operationError] : []), ...cleanupErrors],
+				'Sandbox analysis operation or cleanup failed.',
+			)
+		}
+	})
+})
+
+describe('Docker sandbox image validation', () => {
+	it.each([`sha256:${'a'.repeat(64)}`, `registry.example/tools@sha256:${'b'.repeat(64)}`])(
+		'accepts immutable image %s',
+		(image) => {
+			expect(() => dockerSandbox({ root: '/private/tmp/purista-sandbox-test', image })).not.toThrow()
+		},
+	)
+
+	it.each([
+		'python:3.12',
+		`sha256:${'A'.repeat(64)}`,
+		`sha256:${'c'.repeat(63)}`,
+		` sha256:${'d'.repeat(64)}`,
+		`sha256:${'e'.repeat(64)}\0`,
+	])('rejects mutable or malformed image %s', (image) => {
+		expect(() => dockerSandbox({ root: '/private/tmp/purista-sandbox-test', image })).toThrow()
 	})
 })

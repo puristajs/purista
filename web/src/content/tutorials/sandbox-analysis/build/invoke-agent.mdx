@@ -1,29 +1,56 @@
 ---
-title: Invoke the agent through a command
-description: Declare an address-first agent dependency and call it through EventBridge from a guarded PURISTA command.
-order: 285
+title: Mount and invoke the agent
+description: Expose one guarded wrapper command and one guarded mounted target.
+order: 284
 kind: lesson
 status: draft
 ---
 
-Replace the generated command body. `canInvokeAgent(...)` declares the remote
-address and gives the handler a fully typed client. The command uses the same
-business rule as the published agent and supplies the scoped session ID.
+The agent definition stays in the Analysis service version. `runAnalyzeTransactions` is distinct from `analyzeTransactions`, so the wrapper cannot collide with the agent target. The command declares the remote address first and invokes the typed client.
 
-```ts title="src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.ts" write
-import {
-	analyzeTransactionsInputSchema,
-	analyzeTransactionsOutputSchema,
-} from '../../../../../harness/analysis/analysisSchemas.js'
+```ts title="src/service/analysis/v1/harness/analysisHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import type { AnalysisPolicy } from '../AnalysisResources.js'
+import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
+import { analyzeTransactionsAgent } from './agent/analyzeTransactions/analyzeTransactionsAgent.js'
+
+export const analysisHarness = defineHarness({ name: 'transactionAnalysis', revision: 'v1' }).addAgent(
+	analyzeTransactionsAgent,
+)
+
+export const analysisHarnessPolicy = {
+	targets: {
+		agents: {
+			analyzeTransactions: {
+				beforeGuards: {
+					analysisAccess: async (
+						context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
+						input: z.output<typeof analyzeTransactionsAgent.contract.input>,
+					) =>
+						requireTransactionAnalysis(context.resources.analysisPolicy, {
+							...context.identity,
+							analysisId: input.analysisId,
+						}),
+				},
+			},
+		},
+	},
+} as const
+```
+```ts title="src/service/analysis/v1/command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
 import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
-import { analysisHarness } from '../../harness/analysisHarnessMount.js'
+import { analyzeTransactionsAgent } from '../../harness/agent/analyzeTransactions/analyzeTransactionsAgent.js'
+import { analyzeTransactionsInputSchema, analyzeTransactionsOutputSchema } from '../../harness/analysisSchemas.js'
 import { requireTransactionAnalysis, transactionAnalysisSessionId } from '../../requireTransactionAnalysis.js'
 
-export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
-	.getCommandBuilder('analyzeTransactions', 'Run an isolated transaction analysis')
+export const runAnalyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
+	.getCommandBuilder('runAnalyzeTransactions', 'Run an isolated transaction analysis')
 	.addPayloadSchema(analyzeTransactionsInputSchema)
 	.addOutputSchema(analyzeTransactionsOutputSchema)
-	.canInvokeAgent('Analysis', '1', 'analyze_transactions', analysisHarness.contracts.agents.analyze_transactions)
+	.canInvokeAgent('Analysis', '1', analyzeTransactionsAgent.contract)
 	.setBeforeGuardHooks({
 		analysisAccess: async function (context, payload) {
 			await requireTransactionAnalysis(context.resources.analysisPolicy, {
@@ -34,33 +61,23 @@ export const analyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const outcome = await context.agent.Analysis['1'].analyze_transactions.run(payload, {
-			sessionId: transactionAnalysisSessionId(context.message, payload.analysisId),
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const { outcome } = await context.agent.Analysis['1'][analyzeTransactionsAgent.contract.id].run(payload, {
+			sessionId: transactionAnalysisSessionId({ tenantId, principalId }, payload.analysisId),
 		})
 		if (outcome.status !== 'completed') throw new Error('Transaction analysis did not complete')
 		return outcome.output
 	})
 ```
-
-Register the command and mount the Harness once on the Analysis service.
-
 ```ts title="src/service/analysis/v1/analysisV1Service.ts" write
 import { analysisV1ServiceBuilder } from './analysisV1ServiceBuilder.js'
-import { analyzeTransactionsCommandBuilder } from './command/analyzeTransactions/analyzeTransactionsCommandBuilder.js'
-import { analysisHarness, analysisHarnessPolicy } from './harness/analysisHarnessMount.js'
+import { runAnalyzeTransactionsCommandBuilder } from './command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.js'
+import { analysisHarness, analysisHarnessPolicy } from './harness/analysisHarness.js'
 
 export const analysisV1Service = analysisV1ServiceBuilder
-	.addCommandDefinition(analyzeTransactionsCommandBuilder.getDefinition())
+	.addCommandDefinition(runAnalyzeTransactionsCommandBuilder.getDefinition())
 	.mountHarness(analysisHarness, analysisHarnessPolicy)
 ```
-
-The invocation travels through the EventBridge. Another Analysis instance may
-serve it, and the published-agent guard still runs with the caller identity.
-The agent returns advice only; a different guarded command must own any effect
-such as blocking a transaction.
-
-```bash title="Type-check the service boundary"
-npm run build
-```
-
-Continue with [Compose sandbox and model adapters](../compose-runtime/).
+The command guard protects the public entry point. The mounted policy independently protects the agent if another target reaches it. Continue with [Bind the runtime adapters](../compose-runtime/).

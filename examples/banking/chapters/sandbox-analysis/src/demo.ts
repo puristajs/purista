@@ -24,7 +24,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-analyst',
-				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 				payload: {
 					payload: {
 						analysisId: 'analysis-1',

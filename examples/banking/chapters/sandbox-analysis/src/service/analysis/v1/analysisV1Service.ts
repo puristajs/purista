@@ -1,7 +1,7 @@
 import { analysisV1ServiceBuilder } from './analysisV1ServiceBuilder.js'
-import { analyzeTransactionsCommandBuilder } from './command/analyzeTransactions/analyzeTransactionsCommandBuilder.js'
-import { analysisHarness, analysisHarnessPolicy } from './harness/analysisHarnessMount.js'
+import { runAnalyzeTransactionsCommandBuilder } from './command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.js'
+import { analysisHarness, analysisHarnessPolicy } from './harness/analysisHarness.js'
 
 export const analysisV1Service = analysisV1ServiceBuilder
-	.addCommandDefinition(analyzeTransactionsCommandBuilder.getDefinition())
+	.addCommandDefinition(runAnalyzeTransactionsCommandBuilder.getDefinition())
 	.mountHarness(analysisHarness, analysisHarnessPolicy)

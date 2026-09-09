@@ -1,14 +1,3 @@
----
-title: Test permitted and denied tools
-description: Use a strict fake provider and a temporary local directory.
-order: 287
-kind: lesson
-status: draft
----
-
-This test proves allowed tools finish and a path outside `/workspace` returns a denied tool result before adapter execution. It releases runtime resources and removes its temporary directory.
-
-```ts title="src/service/analysis/v1/harness/agent/analyzeTransactions/analyzeTransactionsAgent.test.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -206,9 +195,3 @@ describe('analyzeTransactionsAgent', () => {
 		}
 	})
 })
-```
-```bash title="Run the agent test" replay="project"
-npx vitest run src/service/analysis/v1/harness/agent/analyzeTransactions/analyzeTransactionsAgent.test.ts
-```
-
-Continue with [Test the protected route](../test-routing/).

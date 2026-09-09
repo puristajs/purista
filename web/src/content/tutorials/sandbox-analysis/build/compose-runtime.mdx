@@ -1,20 +1,20 @@
 ---
-title: Compose sandbox and model adapters
-description: Bind provider-neutral model and sandbox ports when the PURISTA service instance is created.
-order: 286
+title: Bind the runtime adapters
+description: Choose the model and sandbox only when creating the service instance.
+order: 285
 kind: lesson
 status: draft
 ---
 
-Create a provider-neutral service factory. The Harness definition states what
-the agent needs; the composition root selects the concrete model provider and
-sandbox adapter.
+Definitions state requirements. The application composition root supplies the model provider, sandbox adapter, logger, and business policy.
 
 ```ts title="src/createAnalysisService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider, Sandbox } from '@purista/harness'
+import type { LocalExecSandboxCapabilities, ModelProvider, Sandbox } from '@purista/harness'
 import type { AnalysisPolicy } from './service/analysis/v1/AnalysisResources.js'
 import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
+
+type AnalysisSandbox = Sandbox<LocalExecSandboxCapabilities>
 
 export function createAnalysisService(
 	eventBridge: EventBridge,
@@ -22,31 +22,17 @@ export function createAnalysisService(
 	options: Readonly<{
 		analysisPolicy: AnalysisPolicy
 		analysisModel: { provider: ModelProvider; model: string }
-		sandbox: Sandbox
+		sandbox: AnalysisSandbox
 	}>,
 ) {
 	return analysisV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { analysisPolicy: options.analysisPolicy },
 		ai: {
-			models: { analysis_model: options.analysisModel },
+			models: { analysisModel: options.analysisModel },
 			sandbox: options.sandbox,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }
 ```
-
-Keep content capture disabled by default because prompts, tool arguments, and
-files can contain sensitive transaction data. Application telemetry may still
-record operational metadata supported by the adapter.
-
-This factory is also the seam used by tests: they inject a fake model provider,
-a local-directory sandbox, or the Docker sandbox without changing the agent or
-service definition.
-
-```bash title="Type-check runtime composition"
-npm run build
-```
-
-Continue with [Run the deterministic tool loop](../run-application/).
+Tests can inject a strict fake provider and local-directory adapter. Production can inject Docker. Continue with [Run the deterministic demo](../run-application/).

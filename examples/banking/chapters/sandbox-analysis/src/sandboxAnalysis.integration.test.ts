@@ -23,7 +23,7 @@ describe('sandbox analysis over PURISTA', () => {
 			logger: initLogger('fatal'),
 			resources: { analysisPolicy: policy },
 			ai: {
-				models: { analysis_model: { provider, model: 'analysis-fake' } },
+				models: { analysisModel: { provider, model: 'analysis-fake' } },
 				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 			},
 		})
@@ -35,7 +35,7 @@ describe('sandbox analysis over PURISTA', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-analyst',
-						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 						payload: {
 							payload: {
 								analysisId: 'analysis-1',
@@ -63,7 +63,7 @@ describe('sandbox analysis over PURISTA', () => {
 		}
 	})
 
-	it('rejects a direct agent invocation before opening the model loop when business access is denied', async () => {
+	it('rejects the hosted analysis command before opening the model loop when business access is denied', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-analysis-denied-'))
 		roots.push(root)
 		const provider = new FakeModelProvider({ strict: true })
@@ -72,7 +72,7 @@ describe('sandbox analysis over PURISTA', () => {
 		const service = await analysisV1Service.getInstance(eventBridge, {
 			resources: { analysisPolicy: { canRun: vi.fn(async () => false) } },
 			ai: {
-				models: { analysis_model: { provider, model: 'analysis-fake' } },
+				models: { analysisModel: { provider, model: 'analysis-fake' } },
 				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 			},
 		})
@@ -84,7 +84,7 @@ describe('sandbox analysis over PURISTA', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-denied',
-						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyze_transactions' },
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 						payload: {
 							payload: {
 								analysisId: 'analysis-denied',
@@ -95,6 +95,47 @@ describe('sandbox analysis over PURISTA', () => {
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
+			expect(provider.requests).toHaveLength(0)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('rejects at the mounted agent target after the wrapper guard passes', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-analysis-mounted-denied-'))
+		roots.push(root)
+		const provider = new FakeModelProvider({ strict: true })
+		const policy = { canRun: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await analysisV1Service.getInstance(eventBridge, {
+			resources: { analysisPolicy: policy },
+			ai: {
+				models: { analysisModel: { provider, model: 'analysis-fake' } },
+				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-mounted-denied',
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
+						payload: {
+							payload: {
+								analysisId: 'analysis-mounted-denied',
+								transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canRun).toHaveBeenCalledTimes(2)
 			expect(provider.requests).toHaveLength(0)
 		} finally {
 			await service.destroy()

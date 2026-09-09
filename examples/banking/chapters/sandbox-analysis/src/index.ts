@@ -3,6 +3,7 @@ import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
 import { dockerSandbox } from '@purista/harness-sandbox-docker'
 import { createAnalysisService } from './createAnalysisService.js'
+import { transactionAnalysisSandboxCleanup } from './dockerSandboxCleanup.js'
 
 async function main() {
 	const logger = initLogger()
@@ -10,8 +11,9 @@ async function main() {
 	const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
 	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
 	if (!image) throw new Error('PURISTA_DOCKER_SANDBOX_IMAGE is required to start the optional live example.')
+	const root = resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes')
 	const sandbox = dockerSandbox({
-		root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
+		root,
 		image,
 		user: '10001:10001',
 	})
@@ -28,7 +30,7 @@ async function main() {
 		sandbox,
 	})
 	await service.start()
-	gracefulShutdown(logger, [service, eventBridge])
+	gracefulShutdown(logger, [service, transactionAnalysisSandboxCleanup(sandbox.administration, root), eventBridge])
 	logger.info('Sandbox transaction analysis service started')
 }
 

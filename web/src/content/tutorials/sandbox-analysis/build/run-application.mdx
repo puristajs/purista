@@ -1,14 +1,12 @@
 ---
-title: Run the deterministic tool loop
-description: Exercise real write, process, and read tools through EventBridge without credentials or Docker.
-order: 287
+title: Run the deterministic demo
+description: Run the full tool loop without credentials or Docker.
+order: 286
 kind: lesson
 status: draft
 ---
 
-Use a strict scripted provider for the default demo. It requests `write`, then
-`bash`, then `read`, and finally returns the structured analysis. An unexpected
-model call makes the provider fail.
+The scripted provider asks for write, bash, and read in order. An unexpected model request fails the demo.
 
 ```ts title="src/testing/scriptedAnalysisProvider.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -62,12 +60,6 @@ export function scriptedAnalysisProvider() {
 	return provider
 }
 ```
-
-Create a temporary local-directory sandbox and invoke the PURISTA command
-through the EventBridge. The local adapter enforces the configured path,
-command, and timeout policy, but it is a deterministic development adapter
-rather than a container security boundary.
-
 ```ts title="src/demo.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -95,7 +87,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-analyst',
-				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+				receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'runAnalyzeTransactions' },
 				payload: {
 					payload: {
 						analysisId: 'analysis-1',
@@ -119,13 +111,10 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
+The temporary local directory is process-local. It tests the Harness allowlist but does not isolate a hostile process from the host. Use Docker when that boundary is required.
 
-```bash title="Run the deterministic sandbox application" replay="project"
-npm run build
+```bash title="Run the credential-free demo" replay="project"
 npm run demo
 ```
 
-The output is the validated analysis result. The run has exercised the mounted
-agent, both business guards, address-first routing, and the three sandbox tools.
-
-Continue with [Run with Docker and a live model](../run-live/).
+Continue with [Test tools](../../testing/test-agent/).
