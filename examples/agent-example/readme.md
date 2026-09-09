@@ -1,29 +1,31 @@
 # PURISTA Harness Mount Example
 
-This example shows how one native `@purista/harness` definition runs standalone
-and mounts into a PURISTA service without an additional agent builder.
+This example shows how native `@purista/harness` definitions live with their
+owning service version and mount into PURISTA without another agent builder.
 
 The example keeps the incident domain intentionally small:
 
-- `triage_ticket` classifies one support ticket.
-- `analyze_signals` lets the model call the `get_incident_snapshot` host tool.
-- `review_rollback` is a durable workflow that returns an explicit external-wait
+- `triageTicket` classifies one support ticket.
+- `analyzeSignals` lets the model call the `getIncidentSnapshot` and
+  `getRunbook` host tools.
+- `reviewRollback` is a durable workflow that returns an explicit external-wait
   interruption until an application-owned reviewer decides.
 - PURISTA commands own the incident repository, review records, authorization,
   rollback execution, and receipts.
 
 The Harness definition is
-[`src/harness/support/supportHarness.ts`](./src/harness/support/supportHarness.ts).
-It contains schemas, host-tool contracts, agents, and the workflow, but no
-credentials or deployment adapters. The Support service publishes selected
-targets and binds the host tools in
-[`src/service/support/v1/harness/supportHarnessMount.ts`](./src/service/support/v1/harness/supportHarnessMount.ts).
+[`src/service/support/v1/harness/supportHarness.ts`](./src/service/support/v1/harness/supportHarness.ts).
+It composes service-owned agent, workflow, and tool definitions, but no
+credentials or deployment adapters. `ServiceBuilder.defineTool(...)` gives the
+two host tools typed access to the incident repository. The Support service
+mounts the Harness once with an explicit `targets` policy.
 
-`triageTicketCommandBuilder` demonstrates the HTTP boundary. The native command
+`runTriageTicketCommandBuilder` demonstrates the HTTP boundary. The native command
 declares the mounted agent by its versioned address with `canInvokeAgent(...)`,
 invokes it through the EventBridge, unwraps the completed output, and exposes
 the command through Hono/OpenAPI. The Hono server contains no agent-specific
-handler.
+handler. This single demo endpoint opts into public access explicitly; production
+applications should install a Hono protect middleware instead.
 
 ## Run
 
@@ -37,7 +39,7 @@ npm test
 npm start
 ```
 
-Open <http://localhost:3000/api> and use the public `triageTicket` operation:
+Open <http://localhost:3000/api> and use the public `runTriageTicket` operation:
 
 ```json
 {
@@ -46,8 +48,10 @@ Open <http://localhost:3000/api> and use the public `triageTicket` operation:
 }
 ```
 
-Tests require no provider credentials. The Harness test injects
-`FakeModelProvider` and runs the definition standalone. The command test uses
+Tests require no provider credentials. The portable `triageTicket` agent test
+injects `FakeModelProvider` and runs that portable graph standalone. The mounted
+service test drives `analyzeSignals` through EventBridge and proves both hosted
+tools execute with service resources. The command test uses
 `createCommandContextMock(...)` to stub the declared address-first agent call.
 
 ## Durable review
@@ -56,7 +60,7 @@ The review records and rollback receipts remain application state. Harness
 stores only the durable workflow checkpoint and external-wait state.
 
 1. Invoke `requestRollbackReview` to create the immutable business review.
-2. Invoke the published `review_rollback` workflow through its PURISTA address
+2. Invoke the published `reviewRollback` workflow through its PURISTA address
    with a stable durable run id.
 3. Handle the returned `interrupted` outcome as an approval request. It is a
    normal terminal response for this invocation, not an exception or HTTP 500.
@@ -73,13 +77,13 @@ changing the Harness definition or PURISTA mount.
 
 ## Framework capabilities shown
 
-- native `defineHarness(...).define()` composition
+- native additive `defineHarness(...).addAgent(...).addWorkflow(...)` composition
 - `ServiceBuilder.mountHarness(...)`
-- explicit agent and workflow publication
+- explicit per-target mount policy
 - address-first EventBridge invocation
-- `commandAsHarnessTool(...)` with trusted caller identity
+- `ServiceBuilder.defineTool(...)` with typed service resources
 - model-directed host-tool calls
 - explicit `RunOutcome` completion and interruption handling
-- standalone Harness tests and mocked PURISTA command tests
+- standalone portable-agent tests, mounted host-tool tests, and mocked PURISTA command tests
 - application-owned resources and durable business state
 - provider, storage, sandbox, and workspace bindings at the composition root

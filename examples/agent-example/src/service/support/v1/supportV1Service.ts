@@ -4,8 +4,8 @@ import { executeApprovedRollbackCommandBuilder } from './command/executeApproved
 import { getIncidentSnapshotCommandBuilder } from './command/getIncidentSnapshot/getIncidentSnapshotCommandBuilder.js'
 import { getRunbookCommandBuilder } from './command/getRunbook/getRunbookCommandBuilder.js'
 import { requestRollbackReviewCommandBuilder } from './command/requestRollbackReview/requestRollbackReviewCommandBuilder.js'
-import { triageTicketCommandBuilder } from './command/triageTicket/triageTicketCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { runTriageTicketCommandBuilder } from './command/runTriageTicket/runTriageTicketCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 type CommandDefinition = Parameters<typeof supportV1ServiceBuilder.addCommandDefinition>[number]
@@ -17,7 +17,7 @@ const commandDefinitions: CommandDefinition[] = [
 	requestRollbackReviewCommandBuilder.getDefinition(),
 	decideRollbackReviewCommandBuilder.getDefinition(),
 	executeApprovedRollbackCommandBuilder.getDefinition(),
-	triageTicketCommandBuilder.getDefinition(),
+	runTriageTicketCommandBuilder.getDefinition(),
 ]
 
 export const supportV1Service = supportV1ServiceBuilder

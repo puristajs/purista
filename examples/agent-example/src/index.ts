@@ -27,14 +27,11 @@ export const main = async () => {
 				harnessStorage: execution.ai.storage,
 			},
 			ai: {
-				...execution.ai,
-				models: {
-					primary: {
-						provider: createOpenAiIncidentModel(),
-						model,
-					},
+				storage: execution.ai.storage,
+				model: {
+					provider: createOpenAiIncidentModel(),
+					model,
 				},
-				telemetry: { contentCaptureMode: 'NO_CONTENT' },
 			},
 		})
 	} catch (error) {
@@ -76,7 +73,7 @@ export const main = async () => {
 	logger.info(
 		{
 			service: supportV1Service.info.serviceName,
-			harnessTargets: ['triage_ticket', 'analyze_signals', 'review_rollback'],
+			harnessTargets: ['triageTicket', 'analyzeSignals', 'reviewRollback'],
 			commands: definitions.commands.map(command => command.commandName),
 			openApi: 'http://localhost:3000/api',
 			executionMode: execution.mode,
