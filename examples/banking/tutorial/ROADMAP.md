@@ -1,135 +1,97 @@
-# Example Bank PURISTA tutorial roadmap
+# Example Bank tutorial roadmap
 
-This course teaches PURISTA Framework capabilities. Example Bank supplies one
-small, continuous application fixture so learners can see the capabilities work
-together. The application name never becomes a service name.
+The course teaches 28 PURISTA Framework capabilities in order. Example Bank is
+one small application fixture so the reader can see each capability in context.
+Its name never becomes a service name.
 
-## Application composition and capability ownership
+## Service ownership
 
-`Example Bank` names the complete demo application and its UI. It is assembled
-in the composition root; it has no matching PURISTA service. `Hono` is the HTTP
-transport service. Repositories, model providers, and external clients are
-injected resources. The application behavior belongs to the following focused
-PURISTA services:
-
-| Service | Owns |
+| Service | Capability owner |
 | --- | --- |
-| `BankProfile` | The small public profile used to start the course. |
-| `Identity` | Local credential verification and operational sessions. |
-| `Transaction` | Transaction records and transaction business rules. |
-| `Monitoring` | Derived monitoring signals and monitoring reactions. |
-| `Analysis` | Read-only analysis projections and analysis streams. |
-| `Reporting` | Background report jobs and scheduled report requests. |
-| `Support` | Support classification, routing, tools, and support conversations. |
-| `Knowledge` | Knowledge ingestion, retrieval, grounded answers, and collection policy. |
+| `BankProfile` | Small public profile used to start the course. |
+| `Identity` | Local identity verification and operational sessions. |
+| `Transaction` | Transaction records and business rules. |
+| `Monitoring` | Derived signals and event reactions. |
+| `Analysis` | Read-only projections and streams. |
+| `Reporting` | Background jobs and scheduled requests. |
+| `Support` | Classification, tools, Skills, guardrails, and support workflows. |
+| `Knowledge` | Ingestion, retrieval, grounded answers, and collection policy. |
 
-Extend one of these owners when a new artifact uses the same rules and
-resources. Introduce another service only when the chapter establishes a new
-capability owner. For example, login commands belong to `Identity`, transaction
-commands belong to `Transaction`, and retrieval commands and agents belong to
-`Knowledge`. Do not add a `BankingService` that coordinates or contains them.
-`Ping` is generated starter scaffolding and must not receive application
-behavior.
+Repositories, model providers, and external clients are injected resources.
+`StateStore` holds operational sessions, signals, and job state; business
+records use a database resource. `Ping` is starter scaffolding only.
 
-Every root chapter names the Framework capability it teaches. Banking words
-belong in short examples, fixture values, and the demo UI. They do not replace
-the capability in a chapter title.
+## Chapter sequence
 
-## Course sequence
-
-| Order | Chapter | PURISTA capability | Service work |
+| # | Chapter | PURISTA capability | Status |
 | ---: | --- | --- | --- |
-| 1 | Create a PURISTA project | CLI project, service, command, and command test | Add `BankProfile`. |
-| 2 | Use the Hono webserver | Hono service registration and lifecycle | Expose `BankProfile.getProfile`. |
-| 3 | Serve a static React website | Static assets through the PURISTA HTTP service | Keep UI outside domain services. |
-| 4 | Expose commands as REST endpoints | Generated command endpoints | Add `Transaction` commands. |
-| 5 | Persist data with a database resource | Typed resources, persistence, and lifecycle | Give `Transaction` its repository. |
-| 6 | Protect generated HTTP endpoints | Public/protected metadata and Hono authentication | Protect transaction commands. |
-| 7 | Handle sessions with StateStore | Operational session state | Add `Identity`; keep records in the database. |
-| 8 | Authorize actions with guards | Business authorization before and after handlers | Guard `Transaction` actions. |
-| 9 | Transform command input and output | Input and output transforms | Adapt transaction boundary formats. |
-| 10 | Call an external HTTP provider | Outbound client port, secret injection, and provider failure handling | Extend `Transaction`. |
-| 11 | Publish command results as events | Named command results and manual execution events | Extend `Transaction`. |
-| 12 | React to events with subscriptions | Event matching, reactions, and repeat handling | Add `Monitoring`. |
-| 13 | Stream incremental results | Typed chunks, final values, cancellation, and SSE | Add `Analysis`. |
-| 14 | Process work with queues | Producer, queue, worker, retries, and results | Add `Reporting`. |
-| 15 | Declare scheduled work | Provider-neutral schedule intent | Extend `Reporting`. |
-| 16 | Add metrics and tracing | Framework and business observability | Extend existing owners. |
-| 17 | Run services across processes and adapters | Distributed EventBridge, QueueBridge, and StateStore | Deploy existing owners separately. |
-| 18 | Add a classification agent (draft) | Service-local agent definition, model binding, typed result, and guarded command use | Add `Support`. |
-| 19 | Apply AI guardrails (draft) | Input and model-output content policy | Extend `Support`. |
-| 20 | Build a complete RAG pipeline (draft) | Harness embeddings for ingestion and queries, pgvector, an authorized command tool, grounded output, and AI SDK UI | Add `Knowledge`. |
-| 21 | Persist and manage conversation history (draft) | Harness storage, stable conversation sessions, bounded transcripts, export, and deletion | Extend `Support`. |
-| 22 | Give an agent PURISTA tools (draft) | Model-facing command tools and effect limits | Extend `Support` and invoke existing owners through commands. |
-| 23 | Load agent Skills (draft) | Trusted skill binding and untrusted skill content | Extend `Support`. |
-| 24 | Pause a workflow for human review (draft) | External wait, review command, resume, and authorization | Extend `Support`. |
-| 25 | Run specialist agents in parallel (draft) | Child agents, bounded fan-out, and evidence merge | Extend `Support`. |
-| 26 | Build a multi-step agent workflow (draft) | Separate workflow definition, typed steps, retries, checkpoints, and final output | Extend `Support`. |
-| 27 | Run analysis in a sandbox (draft) | Sandbox policy, workspace, limits, and cleanup | Extend `Analysis`. |
-| 28 | Evaluate agent behavior (draft) | Dataset, deterministic checks, scoring, and change gate | Test existing agents; add no service. |
+| 1 | Create a PURISTA project | CLI project, service, command, and command test | published |
+| 2 | Use the Hono webserver | HTTP registration and lifecycle | published |
+| 3 | Serve a static React website | Static assets through PURISTA HTTP | published |
+| 4 | Expose commands as REST endpoints | Generated command endpoints | published |
+| 5 | Persist data with a database resource | Typed resource injection and lifecycle | published |
+| 6 | Protect generated HTTP endpoints | Authentication and public/protected metadata | published |
+| 7 | Handle sessions with StateStore | Operational session state | published |
+| 8 | Authorize actions with guards | Before and after business authorization | published |
+| 9 | Transform command input and output | Boundary representation transforms | published |
+| 10 | Call an external HTTP provider | Client resource, secrets, and failure mapping | published |
+| 11 | Publish command results as events | Named results and distinct execution events | published |
+| 12 | React to events with subscriptions | Matching, reactions, and repeat handling | published |
+| 13 | Stream incremental results | Typed chunks, final values, cancellation, and SSE | published |
+| 14 | Process work with queues | Producer, worker, retry, and results | published |
+| 15 | Declare scheduled work | Provider-neutral schedule intent | published |
+| 16 | Add metrics and tracing | Framework and business observability | published |
+| 17 | Run services across processes and adapters | EventBridge, QueueBridge, and StateStore adapters | published |
+| 18 | Add a classification agent | Native agent definition, model binding, and guarded use | draft |
+| 19 | Apply AI guardrails | Input policy and model-output policy | draft |
+| 20 | Build a complete RAG pipeline | Embeddings, pgvector, authorized tool, and UI stream | draft |
+| 21 | Persist and manage conversation history | Sessions, bounded transcripts, export, and deletion | draft |
+| 22 | Give an agent PURISTA tools | Address-first tools and effect limits | draft |
+| 23 | Load agent Skills | Trusted bindings and untrusted Skill content | draft |
+| 24 | Pause a workflow for human review | Durable wait, authorization, and resume | draft |
+| 25 | Run specialist agents in parallel | Child tasks, bounded fan-out, and merge | draft |
+| 26 | Build a multi-step agent workflow | Typed steps, retry, checkpoints, and output | draft |
+| 27 | Run analysis in a sandbox | Policy, workspace, limits, and cleanup | draft |
+| 28 | Evaluate agent behavior | Deterministic cases, scoring, and change gates | draft |
 
-## AI chapter packets
+## Harness layout for the AI chapters
 
-The Core/Harness ownership model is now fixed:
+AI chapters use the same Framework service layout as the first 17 chapters.
+Definitions live under the owning versioned service:
 
-- native `@purista/harness` is the only definition DSL for agents, workflows,
-  tools, Skills, guardrails, model requirements, and portable update modes;
-- one composed Harness definition is mounted once on its owning PURISTA service;
-- selected agents and workflows are published at versioned EventBridge addresses;
-- commands, streams, queues, and workers declare those addresses before use;
-- providers, model ids, admission, storage, memory, sandbox, workspace,
-  artifacts, and telemetry are application bootstrap bindings; and
-- authentication establishes trusted identity, mount guards enforce business
-  authorization, and Harness guardrails enforce AI content policy.
+```text
+src/service/<service>/v<version>/harness/
+  agent/<name>/
+  workflow/<name>/
+  tool/<name>/
+  skill/<name>/
+  mcp/<name>/
+```
 
-Each draft chapter has a bounded page sequence in `course.json`. Implement it in
-this order:
+Use `@purista/harness` factories for portable definitions. Use
+`ServiceBuilder.defineTool(...)` for tools that need PURISTA service context.
+Compose and mount one service-owned Harness definition. Call targets by their
+versioned address from commands, streams, queues, or workers. Runtime model,
+provider, storage, memory, sandbox, workspace, admission, queue, artifact, and
+telemetry bindings belong in application bootstrap.
 
-| Chapter | Page 1 | Page 2 | Page 3 | Test page |
-| --- | --- | --- | --- | --- |
-| Classification | Generate `Support` and the agent with CLI | Define strict structured input/output | Invoke the address from a command | Fake provider, command mock, real EventBridge |
-| AI guardrails | Install and bind guardrail adapters | Validate/redact input content | Validate final model output | Allow, block, redact, adapter-failure cases |
-| Complete RAG | Configure Harness chat and embedding models | Ingest and store reviewed sources | Let the model call an authorized search command and stream the answer | Model/resource fakes, grounding, tenant scope, stream protocol |
-| Conversation history | Select a Harness storage adapter | Use stable identity-scoped sessions | Export, clear, release, or destroy deliberately | Isolation, retention, deletion, failure |
-| PURISTA tools | Declare typed Harness host tools | Bind tools to address-first commands | Limit business effects and idempotency | Identity propagation and denied effects |
-| Agent Skills | Create a versioned Skill | Bind trusted Skill content at bootstrap | Treat loaded content as untrusted data | Missing binding, integrity, injection cases |
-| Human review | Define a durable workflow | Return an interrupted external wait | Authorize review and resume by run id | Approve, reject, duplicate, expiry cases |
-| Parallel agents | Define focused specialists | Run bounded child tasks | Merge evidence into typed output | Partial failure, cancellation, concurrency |
-| Multi-step workflow | Define typed tasks and data flow | Configure retry and checkpoints | Invoke the workflow by address | Resume, replay, idempotency, terminal result |
-| Sandbox analysis | Bind sandbox and workspace policy | Run a constrained analysis tool | Collect artifacts and clean up | Quota, cancellation, escape, cleanup cases |
-| Evaluation | Define versioned datasets | Add deterministic contract checks | Add explicit scorer thresholds | Run a repeatable change gate |
+The classification chapter is the reference packet: CLI generation, native
+definition, one service mount, address-first caller, deterministic Harness
+test, PURISTA context test, and a local EventBridge test. RAG ingestion remains
+deterministic command or worker work; the answer agent calls an authorized
+retrieval tool. Browser chat uses AI SDK UI Message Stream v1 and AI Elements.
 
-RAG ingestion stays deterministic application work inside a PURISTA command;
-it is not an ingestion agent. Harness still owns the embedding model operation
-used by both ingestion and query search. The answer agent consumes the
-authorized search command as a model-facing tool.
+All 11 AI chapters remain draft until their focused tests and fresh consumer
+replay are proven. A draft can be reviewed or checked in isolation, but it is
+not counted as a published retained application.
 
-The RAG browser boundary emits AI SDK UI Message Stream v1 through the dedicated
-adapter. The React UI uses AI Elements and the standard AI SDK client. Do not
-create a PURISTA-specific browser event protocol or consumer library.
+## Completion rules
 
-The classification packet is the reference shape for subsequent AI chapters:
-CLI first, native Harness definition, one service mount, address-first consumer,
-standalone Harness test, PURISTA context test, and real local bridge test.
+Every chapter must name the Framework capability first, generate Framework
+artifacts before editing them, keep one clear learning outcome per page, and
+end each boundary with a test, build, request, or other observable result.
+Tests cover success and a denied or failed path. External dependencies use
+pinned local fixtures with health checks and cleanup. No page claims paid-model
+quality, regulatory compliance, or production banking behavior.
 
-## Definition of done for every packet
-
-- The title and opening paragraphs state the PURISTA capability before the
-  Example Bank fixture.
-- CLI commands generate every Framework artifact before the lesson edits it.
-- Commands, streams, subscriptions, queues, workers, schedules, and agents stay
-  on their owning service.
-- Hono authenticates and projects generated endpoints; it contains no domain
-  handler that bypasses a PURISTA definition.
-- Business authorization is a guard on the owning action. Authentication and
-  content guardrails are explained as separate boundaries.
-- Domain records use an injected database resource. StateStore contains only
-  operational session, signal, job, or similar short-lived state.
-- Unit tests use PURISTA builder/context helpers and mock resources. At least
-  one test proves a denied or failed path caused no protected effect.
-- External dependencies use pinned Docker Compose services, health checks, and
-  scoped cleanup. The default local path needs no paid credentials.
-- The complete project builds, fast tests pass, named integration checks pass,
-  and the compiled application passes a capability-specific smoke scenario.
-- The chapter remains `draft` until a fresh consumer replay succeeds and its
-  retained source matches the page hashes.
+The retained project package locks are outside this lane and are owned by P4-044.

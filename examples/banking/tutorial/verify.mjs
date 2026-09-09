@@ -115,10 +115,10 @@ try {
 		await cp(join(bankRoot, 'chapters', chapter.id), project, {
 			recursive: true,
 			verbatimSymlinks: true,
-			filter: path => !['node_modules', 'dist', '.git'].includes(path.split(sep).at(-1)),
+			filter: path => !['node_modules', 'dist', '.git', 'package-lock.json'].includes(path.split(sep).at(-1)),
 		})
 		process.stdout.write(`\nVerify retained consumer project: ${chapter.id}\n`)
-		await run('npm', ['ci', '--no-audit', '--no-fund'], project)
+		await run('npm', ['install', '--package-lock=false', '--no-audit', '--no-fund'], project)
 		await run('npm', ['test'], project)
 		for (const verification of chapter.verification ?? []) {
 			assert.equal(typeof verification.command, 'string', `${chapter.id}: verification command must be a string`)

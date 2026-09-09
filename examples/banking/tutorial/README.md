@@ -1,99 +1,83 @@
-# Maintain the tutorial by following it
+# PURISTA tutorial maintenance
 
-Write the MDX lesson first. Explain the purpose, show the project-local CLI
-command, then show the complete edited file with its exact path. Run the
-construction verifier and correct the lesson when an instruction fails.
-Do not hand-edit `chapters/` or `baselines/` and reverse-engineer matching prose.
-Use `ROADMAP.md` for the reviewed capability owners, chapter sequence, and
-bounded work packets for the remaining chapters.
+This tutorial teaches PURISTA Framework capabilities through one small Example
+Bank application. The bank is a fixture for the lessons. It is not a service
+boundary, and the course does not claim to implement payment or regulatory
+software.
 
-Named `baselines` in the course recipe reuse only their listed construction
-pages. For example, `--chapter authenticated-service` replays the CLI foundation
-and the two Identity/Hono pages, then `--retain` saves their result beneath
-`baselines/`. This is a complete independent starting project, not a dependency
-on another chapter's running server. Baseline source and page hashes are checked
-alongside chapter proofs. A shared-page change requires replaying its consumers.
+Read [ROADMAP.md](./ROADMAP.md) for the exact 28 chapter sequence and the
+service that owns each capability. Read [VERIFICATION.md](./VERIFICATION.md)
+for the retained source baseline, draft rules, and release checks.
 
-From the repository root:
+## How to work on a chapter
 
-```sh
-node examples/banking/tutorial/replay.mjs \
-  --chapter command-transforms --out /tmp/my-new-bank-replay
+Write the lesson before changing the retained source. A construction page must
+show the project-local CLI command, the complete edit with its exact path, and
+the command or request that proves the result. Keep each chapter independent:
+its replay recipe must create its own project state and data.
+
+The tutorial uses the PURISTA Framework composition root. Services own
+commands, subscriptions, streams, queues, workers, and their resources. The
+HTTP server is a transport boundary. Agents and workflows are native Harness
+definitions owned by a versioned service:
+
+```text
+src/service/<service>/v<version>/harness/
+  agent/
+  workflow/
+  tool/
+  skill/
+  mcp/
 ```
 
-The output directory must not already exist. The verifier constructs a fresh
-project there by following the replay prerequisites and chapter pages in
-`course.json`. A chapter can keep conceptual learning prerequisites in
-`requires` while declaring an independent construction path with
-`replayRequires: []`; `projectDirectory` names the directory created by its
-setup command. It uses published packages, so it needs registry access and a
-supported Node/npm installation. Port 3000 must be available for the actual
-documented requests. It must not be used for another application during replay.
+Compose one Harness definition for that service version and mount it once with
+`ServiceBuilder.mountHarness(...)`. Bind the primary model as `ai.model` at
+application startup. Providers, storage, memory, sandbox, workspace,
+admission, queues, artifacts, and telemetry are runtime bindings owned by the
+application composition root. Authentication creates trusted identity;
+business guards authorize effects; Harness guardrails govern model content.
 
-The Markdown markers are deliberately simple:
+The first 17 chapters establish the Framework base: project creation, HTTP,
+resources, identity, authorization, transforms, events, streams, queues,
+schedules, observability, and distributed runtime. Chapters 18 through 28 are
+AI capability packets. They stay `draft` in `course.json` until their focused
+source, deterministic tests, and clean consumer replay have passed.
 
-- `title="src/example.ts" write`: replace this entire file in the learner project.
-- `dockerfile` fences use the same full-file write marker for reproducible container builds.
-- `sql` fences use that marker for the database schema shown to the reader.
-- `replay="parent"`: execute the shown shell command in the new parent directory.
-- `replay="project"`: execute it inside the chapter's declared project directory.
-- `replay="server"`: start the shown server until this page's requests finish.
-- `replay="request"`: execute the shown request against that server.
-- `expect="json"`: compare the previous request response with the shown JSON.
+## Replay and source checks
 
-Every fence needs a title. Ordinary explanatory fences have no execution marker.
-The verifier does not invent missing files, generated artifacts, configuration,
-or test fixes. Unsupported instructions should fail rather than be silently
-patched in the solution. Each advertised checkpoint runs its checks, and all
-PURISTA dependencies must resolve through the same public package interface a
-learner uses.
-
-`course.json` also lists the reviewed capability service names. Replay rejects
-an application-wide service such as `BankingService` and any unreviewed vague
-replacement. Extend the catalog only when a chapter introduces a service with
-one explicit capability owner. Starter reference services are listed separately
-as scaffold names and must not receive application behavior.
-
-After reviewing the successful result, use `--retain` during a fresh replay to
-copy it into `chapters/<chapter>/`. Move the former result aside for review
-first: the verifier refuses to overwrite it. Dependencies and build artifacts
-are excluded; source, lockfile, relative CLI skill links, and the proof remain.
-Runtime data under `var/` is also excluded from source provenance. Tests and
-smoke requests can change a database file even when every source file is
-identical.
-
-```sh
-npm run check:source --prefix examples/banking
-npm test --prefix examples/banking
-```
-
-`check:source` only verifies the page and retained-source hashes. `npm test`
-also copies every retained project outside the monorepo, installs its lockfile,
-runs TypeScript and its test suite, builds, and starts the compiled application
-for a loopback HTTP smoke test. Temporary test copies are removed afterward.
-Neither command proves an unpublished chapter or a paid model's answer quality.
-
-While one dependent branch is deliberately frozen, verify another chapter and
-its prerequisites without changing the frozen proof:
+From the PURISTA repository root, check one retained chapter:
 
 ```sh
 node examples/banking/tutorial/replay.mjs --check --chapter command-transforms
 ```
 
-The unfiltered `check:source` command remains required before merging the whole
-course.
+To reconstruct a chapter from its lessons, use a new output directory:
 
-The website navigation uses content metadata; `course.json` lists construction
-recipes, not a second navigation tree. Add a chapter only when its pages and
-independent runtime are ready to replay. Keep optional lessons out of unrelated
-chapters' required setup.
+```sh
+node examples/banking/tutorial/replay.mjs \
+  --chapter command-transforms --out /tmp/purista-bank-replay
+```
 
-A work-in-progress recipe may have `status: "draft"` while its pages also remain
-draft. It can be explicitly replayed, but is not counted as a retained, tested
-application. `constructionSourceAligned` means its complete-file instructions
-match the retained review source; it does not claim that a learner has rebuilt
-the project. Set `constructionVerified` only after a fresh external replay has
-succeeded and its proof matches the retained source. Remove draft status only
-after that required path succeeds. The
-optional `environment` object records public runtime opt-ins used by the compiled
-smoke check, such as `PURISTA_DEMO_LOGIN=1`; it must not contain credentials.
+The replay follows the chapter's declared prerequisites, uses published
+package names, and checks the shown commands, files, tests, builds, and
+loopback requests. It must not invent files or silently repair a broken
+instruction.
+
+Run the retained-course checks with:
+
+```sh
+npm run check:drafts --prefix examples/banking
+npm run check:source --prefix examples/banking
+npm run build -w @purista/web
+npm test --prefix examples/banking
+```
+
+`check:drafts` checks the draft packet structure without publishing it.
+`check:source` verifies page and retained-source hashes. The website build
+checks rendered tutorial content. `npm test` verifies retained projects from
+fresh consumer copies by resolving the declared public ranges without writing
+a lockfile, then running typechecks, tests, builds, and compiled smoke checks.
+Draft chapters are not part of the published retained-course gate.
+
+The retained project package locks are a release concern owned by P4-044. They
+are regenerated from the registry after all v4 packages are available.

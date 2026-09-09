@@ -1,5 +1,6 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import assert from 'node:assert/strict'
+import { join, resolve, sep } from 'node:path'
 
 const chapter = process.argv[2]
 if (!chapter) throw new Error('Pass a chapter id')
@@ -7,6 +8,13 @@ if (!chapter) throw new Error('Pass a chapter id')
 const repoRoot = new URL('../../..', import.meta.url).pathname
 const docsRoot = join(repoRoot, 'web/src/content/tutorials', chapter)
 const sourceRoot = join(repoRoot, 'examples/banking/chapters', chapter)
+const course = JSON.parse(await readFile(join(repoRoot, 'examples/banking/tutorial/course.json'), 'utf8'))
+const chapterDefinition = course.chapters.find(candidate => candidate.id === chapter)
+assert(chapterDefinition, `Unknown chapter: ${chapter}`)
+const enforceV4Source =
+	chapterDefinition.status !== 'draft' ||
+	chapterDefinition.constructionSourceAligned === true ||
+	chapterDefinition.constructionVerified === true
 
 async function visit(directory) {
 	for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -21,7 +29,13 @@ async function visit(directory) {
 					if (!/(?:^|\s)write(?:\s|$)/.test(meta)) return block
 					const title = meta.match(/title="([^"]+)"/)?.[1]
 					if (!title) throw new Error(`Write block in ${path} has no title`)
-					const content = (await readFile(join(sourceRoot, title), 'utf8')).trimEnd()
+					if (enforceV4Source) {
+						assert(!title.startsWith('src/harness/'), `Top-level Harness path is forbidden: ${title}`)
+						assert(!/HarnessMount\.[cm]?[jt]sx?$/.test(title), `HarnessMount file is forbidden: ${title}`)
+					}
+					const sourcePath = resolve(sourceRoot, title)
+					assert(sourcePath.startsWith(`${sourceRoot}${sep}`), `Write block path escapes the retained project: ${title}`)
+					const content = (await readFile(sourcePath, 'utf8')).trimEnd()
 					return `\`\`\`${language}${meta}\n${content}\n\`\`\``
 				},
 			)

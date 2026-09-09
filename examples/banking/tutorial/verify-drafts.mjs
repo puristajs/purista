@@ -11,6 +11,37 @@ const bankRoot = resolve(directory, '..')
 const repoRoot = resolve(bankRoot, '../..')
 const contentRoot = join(repoRoot, 'web/src/content/tutorials')
 const course = JSON.parse(await readFile(join(directory, 'course.json'), 'utf8'))
+const capabilityOrder = [
+	'create-project',
+	'hono-webserver',
+	'static-website',
+	'rest-endpoints',
+	'database-resource',
+	'protected-endpoints',
+	'sessions',
+	'business-guards',
+	'command-transforms',
+	'external-resources',
+	'command-result-events',
+	'subscriptions',
+	'streams',
+	'queue-processing',
+	'schedules',
+	'observability',
+	'distributed-runtime',
+	'classification-agent',
+	'ai-guardrails',
+	'retrieval-ingestion',
+	'conversation-memory',
+	'agent-tools',
+	'agent-skills',
+	'human-review-workflow',
+	'parallel-agents',
+	'multi-step-workflow',
+	'sandbox-analysis',
+	'agent-evaluation',
+]
+const aiChapterIds = new Set(capabilityOrder.slice(17))
 const { values } = parseArgs({
 	options: {
 		chapter: { type: 'string' },
@@ -26,6 +57,53 @@ const snippetMismatches = []
 
 assert(selectedChapters.length > 0, values.chapter ? `Unknown draft chapter: ${values.chapter}` : 'No draft chapters found')
 assert.equal(course.chapters.length, course.plannedChapters, 'plannedChapters must equal the number of declared chapters')
+
+function assertCourseGraph() {
+	assert.equal(course.plannedChapters, 28, 'the course must declare exactly 28 capability chapters')
+	assert.equal(new Set(course.chapters.map(chapter => chapter.id)).size, 28, 'capability chapter ids must be unique')
+	assert.deepEqual(
+		course.chapters.map(chapter => chapter.id),
+		capabilityOrder,
+		'chapters must retain the approved capability order',
+	)
+	assert(
+		(course.forbiddenServiceNames ?? []).some(
+			name => name.replace(/[^a-z0-9]/gi, '').toLowerCase() === 'bankingservice',
+		),
+		'course metadata must forbid the umbrella BankingService',
+	)
+	assert.deepEqual(
+		course.chapters.find(chapter => chapter.id === 'subscriptions')?.requires,
+		['command-result-events'],
+		'subscriptions must build on command-result-events',
+	)
+	const chapterIndex = new Map(course.chapters.map((chapter, index) => [chapter.id, index]))
+	const baselineIds = new Set((course.baselines ?? []).map(baseline => baseline.id))
+	for (const [index, chapter] of course.chapters.entries()) {
+		for (const dependency of [...chapter.requires, ...(chapter.replayRequires ?? [])]) {
+			assert(
+				baselineIds.has(dependency) || (chapterIndex.has(dependency) && chapterIndex.get(dependency) < index),
+				`${chapter.id}: dependency must be a baseline or an earlier capability: ${dependency}`,
+			)
+		}
+		for (const path of chapter.requiredWrittenFiles ?? []) {
+			assert(!path.startsWith('src/harness/'), `${chapter.id}: top-level Harness path is forbidden: ${path}`)
+			assert(!/HarnessMount\.[cm]?[jt]sx?$/.test(path), `${chapter.id}: HarnessMount file is forbidden: ${path}`)
+			if (path.includes('/harness/'))
+				assert.match(
+					path,
+					/^src\/service\/[A-Za-z0-9_-]+\/v[0-9]+\/harness\//,
+					`${chapter.id}: Harness files must be owned by a service version: ${path}`,
+				)
+		}
+	}
+	const aiChapters = course.chapters.filter(chapter => aiChapterIds.has(chapter.id))
+	assert.equal(aiChapters.length, 11, 'the course must retain all 11 AI chapters')
+	for (const chapter of aiChapters)
+		assert.equal(chapter.status, 'draft', `${chapter.id}: AI chapters stay draft until implementation and replay proof`)
+}
+
+assertCourseGraph()
 
 const exists = path =>
 	stat(path).then(
@@ -51,18 +129,93 @@ function run(command, args, cwd) {
 function assertPublishedDependencySpec(chapterId, packageName, version) {
 	assert.equal(typeof version, 'string', `${chapterId}: ${packageName} must have a version`)
 	assert(
-		!/^(?:file|link|workspace):|^(?:\.\.?[/\\]|[/\\])/.test(version),
+		!/^(?:file|link|workspace|copy|portal|patch):|^(?:\.\.?[/\\]|[/\\])/.test(version),
 		`${chapterId}: ${packageName} must use a published npm version, received ${version}`,
+	)
+	assert.notEqual(version, 'latest', `${chapterId}: ${packageName} must use an explicit published range`)
+	if (packageName.startsWith('@purista/'))
+		assert.equal(version, '^4.0.0', `${chapterId}: ${packageName} must use the PURISTA v4 range`)
+}
+
+async function assertAllPackageManifests() {
+	const manifests = []
+	for (const kind of ['chapters', 'baselines']) {
+		const root = join(bankRoot, kind)
+		for (const entry of await readdir(root, { withFileTypes: true })) {
+			if (!entry.isDirectory()) continue
+			const path = join(root, entry.name, 'package.json')
+			if (await exists(path)) manifests.push({ id: entry.name, path })
+		}
+	}
+	assert.equal(manifests.length, 31, 'all 28 chapters and three baselines must have package manifests')
+	for (const manifest of manifests) {
+		const packageJson = JSON.parse(await readFile(manifest.path, 'utf8'))
+		assert(packageJson.dependencies?.['@purista/core'], `${manifest.id}: tutorial backend must use PURISTA Framework`)
+		for (const [name, version] of Object.entries({ ...packageJson.dependencies, ...packageJson.devDependencies }))
+			assertPublishedDependencySpec(manifest.id, name, version)
+		if (aiChapterIds.has(manifest.id))
+			assert.equal(
+				packageJson.dependencies?.['@purista/harness'],
+				'^4.0.0',
+				`${manifest.id}: AI chapter must use the public Harness v4 range`,
+			)
+	}
+}
+
+await assertAllPackageManifests()
+
+function packageWriteBlocks(source) {
+	return [...source.matchAll(/^```json([^\n]*)\n([\s\S]*?)^```\s*$/gm)].filter(
+		match => /title="package\.json"/.test(match[1]) && /(?:^|\s)write(?:\s|$)/.test(match[1]),
 	)
 }
 
-async function assertServiceBoundaries(chapterId, projectRoot) {
+async function assertAllPackageWriteFences() {
+	const seenPages = new Set()
+	let fenceCount = 0
+	for (const recipe of [...course.chapters, ...(course.baselines ?? [])]) {
+		const projectRoot = join(bankRoot, course.chapters.includes(recipe) ? 'chapters' : 'baselines', recipe.id)
+		const packageJson = (await readFile(join(projectRoot, 'package.json'), 'utf8')).trimEnd()
+		for (const page of recipe.pages) {
+			assert(!seenPages.has(page), `${page}: tutorial page belongs to more than one recipe`)
+			seenPages.add(page)
+			const source = await readFile(join(contentRoot, `${page}.mdx`), 'utf8')
+			for (const block of packageWriteBlocks(source)) {
+				assert.equal(block[2].trimEnd(), packageJson, `${page}: package.json write fence differs from ${recipe.id}`)
+				fenceCount++
+			}
+		}
+	}
+	assert(fenceCount > 0, 'tutorial course must contain package.json write fences')
+}
+
+await assertAllPackageWriteFences()
+
+async function assertServiceBoundaries(chapterId, projectRoot, enforceV4Source) {
 	const serviceRoot = join(projectRoot, 'src/service')
-	if (!(await exists(serviceRoot))) return
-	const serviceNames = (await readdir(serviceRoot, { withFileTypes: true }))
-		.filter(entry => entry.isDirectory())
-		.map(entry => entry.name.toLowerCase())
-	assert(!serviceNames.includes('banking'), `${chapterId}: use capability services instead of an umbrella banking service`)
+	const serviceNames = (await exists(serviceRoot))
+		? (await readdir(serviceRoot, { withFileTypes: true }))
+				.filter(entry => entry.isDirectory())
+				.map(entry => entry.name.replace(/[^a-z0-9]/gi, '').toLowerCase())
+		: []
+	if (enforceV4Source) {
+		assert(
+			!serviceNames.some(name => name === 'banking' || name === 'bankingservice'),
+			`${chapterId}: use capability services instead of an umbrella BankingService`,
+		)
+		assert(!(await exists(join(projectRoot, 'src/harness'))), `${chapterId}: top-level src/harness is forbidden`)
+		await assertProjectSourceLayout(chapterId, projectRoot)
+	}
+}
+
+async function assertProjectSourceLayout(chapterId, root, prefix = '') {
+	for (const entry of await readdir(join(root, prefix), { withFileTypes: true })) {
+		const path = join(prefix, entry.name)
+		assert(!/HarnessMount\.[cm]?[jt]sx?$/.test(path), `${chapterId}: removed HarnessMount file remains: ${path}`)
+		if (entry.isDirectory()) await assertProjectSourceLayout(chapterId, root, path)
+		else if (/\.[cm]?[jt]sx?$/.test(path))
+			assert(!/\bBankingService\b/.test(await readFile(join(root, path), 'utf8')), `${chapterId}: ${path} defines BankingService`)
+	}
 }
 
 function sourcePathFromTitle(title) {
@@ -146,6 +299,7 @@ async function inspectTutorialPage(chapter, page) {
 async function inspectChapter(chapter) {
 	const projectRoot = join(bankRoot, 'chapters', chapter.id)
 	const constructionSourceAligned = chapter.constructionSourceAligned || chapter.constructionVerified
+	const enforceV4Source = chapter.status !== 'draft' || constructionSourceAligned
 	assert(await exists(projectRoot), `${chapter.id}: missing retained example project`)
 	const packageJsonPath = join(projectRoot, 'package.json')
 	assert(await exists(packageJsonPath), `${chapter.id}: missing package.json`)
@@ -162,6 +316,11 @@ async function inspectChapter(chapter) {
 	const inspectedPages = []
 	for (const page of chapter.pages) inspectedPages.push(await inspectTutorialPage(chapter, page))
 	const fullTutorial = inspectedPages.map(page => page.source).join('\n')
+	if (enforceV4Source) {
+		assert(!/\bsrc\/harness\//.test(fullTutorial), `${chapter.id}: tutorial references forbidden top-level src/harness`)
+		assert(!/HarnessMount\.[cm]?[jt]sx?/.test(fullTutorial), `${chapter.id}: tutorial references a removed HarnessMount file`)
+		assert(!/\bBankingService\b/.test(fullTutorial), `${chapter.id}: tutorial uses the forbidden umbrella BankingService`)
+	}
 	if (constructionSourceAligned) {
 		assert.match(chapter.projectDirectory ?? '', /^[a-z0-9][a-z0-9-]*$/, `${chapter.id}: missing projectDirectory`)
 		assert(Array.isArray(chapter.replayRequires), `${chapter.id}: replayRequires must explicitly describe construction prerequisites`)
@@ -173,7 +332,7 @@ async function inspectChapter(chapter) {
 	}
 	for (const command of fullTutorial.matchAll(/npm run (add:[a-z0-9:-]+)/g))
 		assert(packageJson.scripts?.[command[1]], `${chapter.id}: tutorial uses missing package script ${command[1]}`)
-	if (constructionSourceAligned) {
+	if (enforceV4Source) {
 		const writes = inspectedPages.flatMap(page => page.writes)
 		assert.equal(new Set(writes).size, writes.length, `${chapter.id}: a complete file is written more than once`)
 		assert.deepEqual(
@@ -196,7 +355,7 @@ async function inspectChapter(chapter) {
 	if (chapter.constructionVerified)
 		assert(await exists(join(projectRoot, '.tutorial-proof.json')), `${chapter.id}: constructionVerified requires replay proof`)
 
-	await assertServiceBoundaries(chapter.id, projectRoot)
+	await assertServiceBoundaries(chapter.id, projectRoot, enforceV4Source)
 	process.stdout.write(`Checked draft tutorial structure: ${chapter.id}\n`)
 	return { chapter, projectRoot }
 }
