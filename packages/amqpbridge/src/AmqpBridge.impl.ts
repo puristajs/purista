@@ -23,7 +23,7 @@ import {
 	EventBridgeResponseConfirmationLevel,
 	EventBridgeStreamLateFrameHandling,
 	getCleanedMessage,
-	getNewCorrelationId,
+	getHarnessTransportCorrelationId,
 	getNewEBMessageId,
 	HandledError,
 	isCommandResponse,
@@ -656,7 +656,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 					throw err
 				}
 
-				const correlationId = getNewCorrelationId()
+				const correlationId = getHarnessTransportCorrelationId(input)
 
 				const command: Command = Object.freeze({
 					...input,

@@ -4,24 +4,16 @@ import { isHarnessTargetContract } from '@purista/harness/integrator'
 import type { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
 import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import type { QueueWorkerBuilderTypes } from '../QueueWorkerBuilder/QueueWorkerBuilderTypes.js'
+import {
+	createQueuedHarnessTargetReference,
+	registerHarnessTargetQueueBinding,
+	requireHarnessTargetQueueBinding as requireRegisteredHarnessTargetQueueBinding,
+	requireQueuedHarnessTargetReference as requireRegisteredQueuedHarnessTargetReference,
+} from './queueReferenceRegistry.js'
 
-class QueuedHarnessTargetReferenceAuthenticity<C extends AnyHarnessTargetContract, QueueName extends string> {
-	private declare readonly authenticity: undefined
-	public readonly contract: C
-	public readonly queue: Readonly<{ name: QueueName }>
+export type { QueuedHarnessTargetReference } from './queueReferenceRegistry.js'
 
-	public constructor(contract: C, queueName: QueueName) {
-		this.contract = contract
-		this.queue = Object.freeze({ name: queueName })
-		Object.freeze(this)
-	}
-}
-
-/** Nominal reference that adds queue declaration authority to one exact local target. */
-export type QueuedHarnessTargetReference<
-	C extends AnyHarnessTargetContract,
-	QueueName extends string,
-> = QueuedHarnessTargetReferenceAuthenticity<C, QueueName>
+import type { QueuedHarnessTargetReference } from './queueReferenceRegistry.js'
 
 /** Opaque native queue and worker binding dedicated to one mounted Harness target. */
 export type HarnessTargetQueueBinding<
@@ -44,9 +36,6 @@ type QueueBindingRecord = Readonly<{
 	worker: QueueWorkerBuilder
 }>
 
-const authenticQueueReferences = new WeakMap<object, QueueBindingRecord>()
-const authenticQueueBindings = new WeakMap<object, QueueBindingRecord>()
-
 /**
  * Bind a native queue and worker policy to one exact Harness target contract.
  *
@@ -68,17 +57,9 @@ export function defineHarnessQueueBinding<
 		throw new TypeError('Harness queue binding requires a non-empty queue name.')
 	}
 
-	const reference = new QueuedHarnessTargetReferenceAuthenticity(contract, queue.queueName)
+	const reference = createQueuedHarnessTargetReference(contract, queue.queueName)
 	const binding = Object.freeze({ targetContract: contract, reference, queue, worker })
-	const record: QueueBindingRecord = Object.freeze({
-		targetContract: contract,
-		reference,
-		queueName: queue.queueName,
-		queue,
-		worker,
-	})
-	authenticQueueReferences.set(reference, record)
-	authenticQueueBindings.set(binding, record)
+	registerHarnessTargetQueueBinding(binding, reference, queue, worker)
 	return binding
 }
 
@@ -87,10 +68,7 @@ export function requireHarnessTargetQueueBinding(
 	value: unknown,
 	targetContract: AnyHarnessTargetContract,
 ): QueueBindingRecord {
-	if (typeof value !== 'object' || value === null) throw invalidQueueBinding()
-	const record = authenticQueueBindings.get(value)
-	assertQueueRecord(record, targetContract)
-	return record
+	return requireRegisteredHarnessTargetQueueBinding(value, targetContract) as QueueBindingRecord
 }
 
 /** @internal Resolve one exact factory-created nominal reference for declaration builders. */
@@ -98,30 +76,5 @@ export function requireQueuedHarnessTargetReference(
 	value: unknown,
 	targetContract?: AnyHarnessTargetContract,
 ): QueueBindingRecord {
-	if (typeof value !== 'object' || value === null) throw invalidQueueBinding()
-	const record = authenticQueueReferences.get(value)
-	assertQueueRecord(record, targetContract ?? record?.targetContract)
-	return record
-}
-
-function assertQueueRecord(
-	record: QueueBindingRecord | undefined,
-	targetContract: AnyHarnessTargetContract | undefined,
-): asserts record is QueueBindingRecord {
-	if (
-		record === undefined ||
-		targetContract === undefined ||
-		record.targetContract !== targetContract ||
-		record.reference.contract !== targetContract ||
-		record.reference.queue.name !== record.queueName ||
-		record.queue.queueName !== record.queueName ||
-		record.worker.queueName !== record.queueName ||
-		authenticQueueReferences.get(record.reference) !== record
-	) {
-		throw invalidQueueBinding()
-	}
-}
-
-function invalidQueueBinding(): TypeError {
-	return new TypeError('Harness target queue binding is not the exact factory-created binding for this contract.')
+	return requireRegisteredQueuedHarnessTargetReference(value, targetContract) as QueueBindingRecord
 }

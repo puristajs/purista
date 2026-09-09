@@ -19,6 +19,37 @@ const getSubscriptionInput = (): Subscription => ({
 })
 
 describe('MqttBridge subscription lifecycle', () => {
+	it('uses a Harness root invocation id as the command transport correlation', async () => {
+		const bridge = new MqttBridge()
+		let sent: { correlationId?: string } | undefined
+		const publishAsync = vi.fn(async (_topic, payload, options) => {
+			sent = JSON.parse(String(payload)) as { correlationId?: string }
+			const correlationId = options?.properties?.correlationData?.toString()
+			if (correlationId) {
+				void bridge.pendingInvocations.resolve(correlationId, { ok: true })
+			}
+		})
+		bridge.client = { publishAsync } as unknown as MqttClient
+
+		await expect(
+			bridge.invoke({
+				sender: { serviceName: 'Client', serviceVersion: '1', serviceTarget: 'api', instanceId: 'client-1' },
+				receiver: { serviceName: 'Users', serviceVersion: '1', serviceTarget: 'create' },
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				payload: { payload: { name: 'Ada' }, parameter: {} },
+				traceId: 'trace-1',
+				harness: {
+					contract: { schemaVersion: 1, exportDigest: `sha256:${'a'.repeat(64)}` },
+					root: { invocationId: 'harness-root-invocation', sessionId: 'harness-session' },
+				},
+			} as never),
+		).resolves.toEqual({ ok: true })
+
+		expect(sent?.correlationId).toBe('harness-root-invocation')
+		expect(publishAsync.mock.calls[0]?.[2]?.properties?.correlationData?.toString()).toBe('harness-root-invocation')
+	})
+
 	it('throws service unavailable for registerCommand when not connected', async () => {
 		const bridge = new MqttBridge()
 

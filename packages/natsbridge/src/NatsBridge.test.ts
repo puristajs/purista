@@ -1,5 +1,5 @@
 import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
-import { StatusCode, type UnhandledError } from '@purista/core'
+import { getCommandSuccessMessageMock, StatusCode, type UnhandledError } from '@purista/core'
 import type { JetStreamClient, JetStreamSubscription, NatsConnection, Subscription as NatsSubscription } from 'nats'
 import { describe, expect, it, vi } from 'vitest'
 import { NatsBridge } from './NatsBridge.js'
@@ -19,6 +19,35 @@ const getSubscriptionInput = (): Subscription => ({
 })
 
 describe('NatsBridge registerSubscription', () => {
+	it('uses a Harness root invocation id as the command transport correlation', async () => {
+		const bridge = new NatsBridge()
+		let sent: { correlationId?: string } | undefined
+		bridge.connection = {
+			request: vi.fn(async (_topic, data) => {
+				sent = bridge.sc.decode(data) as { correlationId?: string }
+				return { data: bridge.sc.encode(getCommandSuccessMessageMock({ ok: true })) }
+			}),
+			info: { headers: false },
+		} as unknown as NatsConnection
+
+		await expect(
+			bridge.invoke({
+				sender: { serviceName: 'Client', serviceVersion: '1', serviceTarget: 'api', instanceId: 'client-1' },
+				receiver: { serviceName: 'Users', serviceVersion: '1', serviceTarget: 'create' },
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				payload: { payload: { name: 'Ada' }, parameter: {} },
+				traceId: 'trace-1',
+				harness: {
+					contract: { schemaVersion: 1, exportDigest: `sha256:${'a'.repeat(64)}` },
+					root: { invocationId: 'harness-root-invocation', sessionId: 'harness-session' },
+				},
+			} as never),
+		).resolves.toEqual({ ok: true })
+
+		expect(sent?.correlationId).toBe('harness-root-invocation')
+	})
+
 	it('throws when the bridge is not connected', async () => {
 		const bridge = new NatsBridge()
 

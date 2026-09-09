@@ -23,7 +23,11 @@ import {
 	type HarnessTargetRunResult,
 	registerHarnessInvocation,
 } from './invocation.js'
-import { computeHarnessTargetExportDigest, createRemoteHarnessTargetContract } from './remoteTargetContract.js'
+import {
+	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from './remoteTargetContract.js'
 
 const answerAgent = defineAgent('answer', { instructions: 'Answer.' })
 const target = answerAgent.contract
@@ -149,7 +153,7 @@ describe('address-first Harness invocations', () => {
 			expect(parameter).not.toHaveProperty('sessionId')
 			expect(harness).toEqual({
 				contract: { schemaVersion: 1, exportDigest: digest },
-				root: { sessionId: 'supplied' },
+				root: { invocationId: expect.any(String), sessionId: 'supplied' },
 			})
 			expect(Object.isFrozen(harness)).toBe(true)
 		},
@@ -171,7 +175,7 @@ describe('address-first Harness invocations', () => {
 		expect(result.sessionId).toBe(generatedSessionId)
 		expect(result.sessionId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u)
 		expect(result.sessionId).not.toBe(result.outcome.runId)
-		expect(rootKeys).toEqual(['sessionId'])
+		expect(rootKeys).toEqual(['invocationId', 'sessionId'])
 	})
 
 	it('reserves queue session identity and returns the closed queue acceptance wrapper', async () => {
@@ -204,13 +208,23 @@ describe('address-first Harness invocations', () => {
 		expect(enqueue).toHaveBeenCalledWith(
 			'target-jobs',
 			'question',
-			{ sessionId: 'queue-session', metadata: { source: 'test' } },
+			{
+				schemaVersion: 1,
+				invocationId: expect.any(String),
+				sessionId: 'queue-session',
+				parameter: { metadata: { source: 'test' } },
+			},
 			{ idempotencyKey: 'queue-dedup' },
 		)
 
 		const generated = await proxy.QueueService['1'].queued.enqueue('next')
 		expect(generated.sessionId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u)
-		expect(enqueue.mock.calls[1]?.[2]).toEqual({ sessionId: generated.sessionId })
+		expect(enqueue.mock.calls[1]?.[2]).toEqual({
+			schemaVersion: 1,
+			invocationId: generated.sessionId,
+			sessionId: generated.sessionId,
+			parameter: {},
+		})
 
 		enqueue.mockImplementationOnce(
 			async () => ({ jobId: 'job-2', queueName: 'target-jobs', scheduledAt: 456, extra: 'not-allowed' }) as never,
@@ -219,6 +233,43 @@ describe('address-first Harness invocations', () => {
 			errorCode: StatusCode.InternalServerError,
 			message: 'Harness target queue returned an invalid acceptance receipt.',
 		})
+	})
+
+	it('keeps the accepted queue identity stable for strict idempotent enqueue across client instances', async () => {
+		const accepted = new Map<string, { receipt: { jobId: string; queueName: string }; parameter: unknown }>()
+		const enqueue = vi.fn(
+			async (queueName: string, _input: unknown, parameter: unknown, options?: { idempotencyKey?: string }) => {
+				const key = options?.idempotencyKey ?? `job-${accepted.size}`
+				const existing = accepted.get(key)
+				if (existing) return existing.receipt
+				const receipt = { jobId: `job-${accepted.size + 1}`, queueName }
+				accepted.set(key, { receipt, parameter })
+				return receipt
+			},
+		)
+		const first = createHarnessInvocationProxy<QueuedClient>(
+			'agent',
+			vi.fn() as any,
+			vi.fn() as any,
+			enqueue,
+			queuedInvokes,
+		)
+		const second = createHarnessInvocationProxy<QueuedClient>(
+			'agent',
+			vi.fn() as any,
+			vi.fn() as any,
+			enqueue,
+			queuedInvokes,
+		)
+
+		const original = await first.QueueService['1'].queued.enqueue('question', {}, { idempotencyKey: 'same-job' })
+		const duplicate = await second.QueueService['1'].queued.enqueue('question', {}, { idempotencyKey: 'same-job' })
+		const distinct = await second.QueueService['1'].queued.enqueue('question', {}, { idempotencyKey: 'other-job' })
+
+		expect(duplicate.jobId).toBe(original.jobId)
+		expect(duplicate.sessionId).toBe(original.sessionId)
+		expect(enqueue.mock.calls[1]?.[2]).toEqual(accepted.get('same-job')?.parameter)
+		expect(distinct.sessionId).not.toBe(original.sessionId)
 	})
 
 	it.each([
@@ -329,7 +380,7 @@ describe('address-first Harness invocations', () => {
 		const open = vi.fn(async (_address, _payload, parameter, harness) => {
 			expect(parameter).toEqual({})
 			const outcome = { status: 'completed' as const, runId: 'harness-run', output: 'done' }
-			expect(harness.root).toEqual({ sessionId: 'stream-session' })
+			expect(harness.root).toEqual({ invocationId: expect.any(String), sessionId: 'stream-session' })
 			return streamHandle(outcome)
 		})
 		const proxy = createHarnessInvocationProxy<Client>('agent', vi.fn() as any, open as any, undefined, invokes)
@@ -614,16 +665,18 @@ function generatedSchema<Input extends JsonValue, Output extends JsonValue>(
 }
 
 function remoteQueuedTarget() {
-	const schema = remoteGeneratedSchema<string, string>({ type: 'string' })
+	const inputSchema = { type: 'string' } as const
+	const validatedInputSchema = { type: 'string' } as const
+	const outputSchema = { type: 'string' } as const
 	const source = {
 		schemaVersion: 1 as const,
 		address: { serviceName: 'QueueService', serviceVersion: '1', serviceTarget: 'queued' } as const,
 		target: {
 			targetName: 'queued' as const,
 			kind: 'agent' as const,
-			inputSchema: schema,
-			validatedInputSchema: { type: 'string' },
-			outputSchema: schema,
+			inputSchema,
+			validatedInputSchema,
+			outputSchema,
 			updateSchema: false as const,
 			interruptSchema: false as const,
 			invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
@@ -634,25 +687,14 @@ function remoteQueuedTarget() {
 			},
 			queue: { name: 'target-jobs' } as const,
 		},
+		schemas: {
+			input: createGeneratedHarnessSchema<string>(inputSchema),
+			validatedInput: createGeneratedHarnessSchema<string>(validatedInputSchema),
+			output: createGeneratedHarnessSchema<string>(outputSchema),
+		},
 	}
 	return createRemoteHarnessTargetContract({
 		...source,
 		target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
 	})
-}
-
-function remoteGeneratedSchema<Input extends JsonValue, Output extends JsonValue>(
-	json: Readonly<Record<string, unknown>>,
-): ModelSchema<Input, Output> {
-	const schema = { ...json }
-	Object.defineProperty(schema, '~standard', {
-		value: Object.freeze({
-			version: 1,
-			vendor: 'test-generated',
-			validate: (value: unknown) => ({ value }),
-			types: undefined as unknown as { input: Input; output: Output },
-			jsonSchema: Object.freeze({ input: () => json, output: () => json }),
-		}),
-	})
-	return Object.freeze(schema) as unknown as ModelSchema<Input, Output>
 }

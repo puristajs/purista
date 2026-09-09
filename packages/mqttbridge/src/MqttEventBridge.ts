@@ -23,7 +23,7 @@ import {
 	EventBridgeLateResponseHandling,
 	EventBridgeResponseConfirmationLevel,
 	EventBridgeStreamLateFrameHandling,
-	getNewCorrelationId,
+	getHarnessTransportCorrelationId,
 	getNewEBMessageId,
 	getNewInstanceId,
 	isCommandResponse,
@@ -298,7 +298,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 			{ kind: SpanKind.PRODUCER },
 			context,
 			async span => {
-				const correlationId = getNewCorrelationId()
+				const correlationId = getHarnessTransportCorrelationId(input)
 
 				const command: Command = Object.freeze({
 					...input,

@@ -1,7 +1,7 @@
 import { defineAgent, defineHarness, defineWorkflow, type JsonValue, type ModelSchema } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-
+import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
@@ -71,7 +71,7 @@ function rootEnvelope(policy?: MountPolicy, sessionId = 'session-1') {
 	if (!root) throw new Error('Expected the echo root projection.')
 	return {
 		contract: { schemaVersion: 1 as const, exportDigest: root.exportDigest },
-		root: { sessionId },
+		root: { invocationId: getNewCorrelationId(), sessionId },
 	}
 }
 

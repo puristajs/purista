@@ -1,422 +1,353 @@
-import { harnessExecutionEventTypesV1, type JsonValue, type ModelSchema } from '@purista/harness'
-import { describe, expect, expectTypeOf, it } from 'vitest'
+import {
+	type HarnessInterruptKind,
+	type HarnessTargetInferenceFor,
+	type HarnessTargetInput,
+	type HarnessTargetOutput,
+	type HarnessValidatedTargetInput,
+	harnessExecutionEventTypesV1,
+	type JsonValue,
+} from '@purista/harness'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 
+import { createHarnessInterruptSchema } from './interruptSchema.js'
 import {
 	canonicalHarnessJson,
 	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
 	isRemoteHarnessTargetContract,
+	requireRemoteHarnessTargetContract,
 } from './remoteTargetContract.js'
-import { createRemoteHarnessTargetContract } from './types.js'
 
-describe('remote Harness target contracts', () => {
-	it('hydrates and freezes one addressed refinement with exact $infer types', () => {
-		const inputSchema = generatedSchema<{ question: string }, { question: string }>({
+type Wire = { raw: string }
+type Validated = { normalized: number }
+type Output = { accepted: boolean }
+
+function sourceForInterrupts<const Interrupts extends readonly HarnessInterruptKind[]>(interrupts: Interrupts) {
+	const address = { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'support' } as const
+	const target = {
+		targetName: 'support',
+		kind: 'agent',
+		inputSchema: {
 			type: 'object',
-			required: ['question'],
-			properties: { question: { type: 'string' } },
-		})
-		const outputSchema = generatedSchema<{ answer: string }, { answer: string }>({
+			properties: { raw: { type: 'string' } },
+			required: ['raw'],
+			additionalProperties: false,
+		},
+		validatedInputSchema: {
 			type: 'object',
-			required: ['answer'],
-			properties: { answer: { type: 'string' } },
-		})
-		const source = exportedTarget(inputSchema, outputSchema)
-		const contract = createRemoteHarnessTargetContract({
-			...source,
-			target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
-		})
-
-		expectTypeOf(contract.$infer.input).toMatchTypeOf<{ question: string }>()
-		expectTypeOf<{ question: string }>().toMatchTypeOf(contract.$infer.input)
-		expectTypeOf(contract.$infer.validatedInput).toMatchTypeOf<{ question: string }>()
-		expectTypeOf<{ question: string }>().toMatchTypeOf(contract.$infer.validatedInput)
-		expectTypeOf(contract.$infer.output).toMatchTypeOf<{ answer: string }>()
-		expectTypeOf<{ answer: string }>().toMatchTypeOf(contract.$infer.output)
-		expect(contract).toMatchObject({
-			kind: 'agent',
-			id: 'support',
-			address: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'support' },
-		})
-		expect(Object.keys(contract)).not.toContain('$infer')
-		expect(Object.isFrozen(contract)).toBe(true)
-		expect(Object.isFrozen(contract.address)).toBe(true)
-		expect(isRemoteHarnessTargetContract(contract)).toBe(true)
-	})
-
-	it('uses RFC 8785 key ordering and the complete addressed export for the digest', () => {
-		const input = generatedSchema<string, string>({ maxLength: 32, type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const reordered = {
-			target: Object.fromEntries(Object.entries(source.target).reverse()),
-			address: Object.fromEntries(Object.entries(source.address).reverse()),
-			schemaVersion: 1,
-		} as typeof source
-
-		expect(computeHarnessTargetExportDigest(source)).toBe(computeHarnessTargetExportDigest(reordered))
-		const changed = {
-			...source,
-			address: { ...source.address, serviceVersion: '2' },
-		}
-		expect(computeHarnessTargetExportDigest(changed)).not.toBe(computeHarnessTargetExportDigest(source))
-	})
-
-	it('matches RFC 8785 number/string vectors and rejects non-JCS values', () => {
-		expect(
-			canonicalHarnessJson({
-				numbers: [Number('333333333.33333329'), 1e30, 4.5, 0.002, 1e-27],
-				string: '€$\u000f\nA\'B"\\\\"/',
-				literals: [null, true, false],
-			}),
-		).toBe(
-			'{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\\u000f\\nA\'B\\"\\\\\\\\\\"/"}',
-		)
-		expect(() => canonicalHarnessJson(new Date())).toThrow()
-		expect(() => canonicalHarnessJson(new Map())).toThrow()
-		expect(() => canonicalHarnessJson(Object.assign(Object.create({}), { value: 1 }))).toThrow()
-		const sparse = Array(2)
-		sparse[1] = 1
-		expect(() => canonicalHarnessJson(sparse)).toThrow()
-		expect(() => canonicalHarnessJson({ value: String.fromCharCode(0xd800) })).toThrow()
-		const hidden = { value: 1 }
-		Object.defineProperty(hidden, 'other', { value: 2 })
-		expect(() => canonicalHarnessJson(hidden)).toThrow()
-		const symbolic = { value: 1, [Symbol('secret')]: 2 }
-		expect(() => canonicalHarnessJson(symbolic)).toThrow()
-	})
-
-	it.each([
-		['invalid digest', 'sha256:not-a-digest'],
-		['mismatched digest', `sha256:${'0'.repeat(64)}`],
-	] as const)('rejects %s before returning a branded contract', (_label, exportDigest) => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: { ...source.target, exportDigest },
-			}),
-		).toThrow()
-	})
-
-	it('rejects unhydrated or inconsistent generated values', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const digest = computeHarnessTargetExportDigest(source)
-
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: { ...source.target, inputSchema: { type: 'string' } as unknown as ModelSchema, exportDigest: digest },
-			}),
-		).toThrow()
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				address: { ...source.address, serviceTarget: 'other' },
-				target: { ...source.target, exportDigest: digest },
-			}),
-		).toThrow()
-		for (const description of [123, '   ']) {
-			const candidate = { ...source, target: { ...source.target, description } }
-			expect(() =>
-				createRemoteHarnessTargetContract({
-					...candidate,
-					target: {
-						...candidate.target,
-						exportDigest: computeHarnessTargetExportDigest(candidate as never),
-					},
-				} as never),
-			).toThrow('description')
-		}
-	})
-
-	it('rejects asymmetric generated schema projections and unknown fields', () => {
-		const input = generatedSchema<{ wire: string }, { value: string }>(
-			{ type: 'object', required: ['wire'], properties: { wire: { type: 'string' } } },
-			{ type: 'object', required: ['value'], properties: { value: { type: 'string' } } },
-		)
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const digest = computeHarnessTargetExportDigest(source)
-
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: { ...source.target, validatedInputSchema: { type: 'string' }, exportDigest: digest },
-			}),
-		).toThrow('does not match')
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				unexpected: true,
-				target: { ...source.target, exportDigest: digest },
-			} as never),
-		).toThrow('Unknown')
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				address: { ...source.address, unexpected: true },
-				target: { ...source.target, exportDigest: digest },
-			} as never),
-		).toThrow('Unknown')
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: {
-					...source.target,
-					invocation: { ...source.target.invocation, unexpected: true },
-					exportDigest: digest,
-				},
-			} as never),
-		).toThrow('Unknown')
-	})
-
-	it('rejects hostile prototypes and property descriptors before reading contract fields', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const digest = computeHarnessTargetExportDigest(source)
-
-		const hiddenAddress = { ...source.address }
-		Object.defineProperty(hiddenAddress, 'serviceName', { value: 'Support', enumerable: false })
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				address: hiddenAddress,
-				target: { ...source.target, exportDigest: digest },
-			} as never),
-		).toThrow('descriptor')
-
-		const target = { ...source.target, exportDigest: digest }
-		Object.defineProperty(target, 'kind', {
-			enumerable: true,
-			get: () => {
-				throw new Error('getter executed')
-			},
-		})
-		expect(() => createRemoteHarnessTargetContract({ ...source, target } as never)).toThrow('descriptor')
-
-		let schemaGetterReads = 0
-		const accessorSchema = { type: 'string' }
-		Object.defineProperty(accessorSchema, '~standard', {
-			get: () => {
-				schemaGetterReads += 1
-				return input['~standard']
-			},
-		})
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: { ...source.target, inputSchema: accessorSchema as unknown as ModelSchema, exportDigest: digest },
-			}),
-		).toThrow('not generated')
-		expect(schemaGetterReads).toBe(0)
-
-		const invocation = Object.assign(Object.create({}), source.target.invocation)
-		expect(() =>
-			createRemoteHarnessTargetContract({
-				...source,
-				target: { ...source.target, invocation, exportDigest: digest },
-			} as never),
-		).toThrow('prototype')
-	})
-
-	it('preserves asymmetric input inference and exact update/interrupt inference', () => {
-		const input = generatedSchema<{ wire: string }, { parsed: number }>(
-			{ type: 'object', required: ['wire'], properties: { wire: { type: 'string' } } },
-			{ type: 'object', required: ['parsed'], properties: { parsed: { type: 'number' } } },
-		)
-		const output = generatedSchema<never, { answer: string }>({ type: 'object' })
-		const base = exportedTarget(input, output)
-		const source = {
-			...base,
-			target: {
-				...base.target,
-				updateSchema: { type: 'object' },
-				interruptSchema: { type: 'object' },
-				invocation: { ...base.target.invocation, resumableInterrupts: ['tool-approval'] as const },
-				stream: { ...base.target.stream, outputUpdates: ['object-snapshot'] as const },
-			},
-		}
-		const contract = createRemoteHarnessTargetContract({
-			...source,
-			target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
-		})
-		expectTypeOf(contract.$infer.input).toMatchTypeOf<{ wire: string }>()
-		expectTypeOf<{ wire: string }>().toMatchTypeOf(contract.$infer.input)
-		expectTypeOf(contract.$infer.validatedInput).toMatchTypeOf<{ parsed: number }>()
-		expectTypeOf<{ parsed: number }>().toMatchTypeOf(contract.$infer.validatedInput)
-		expectTypeOf(contract.$infer.output).toMatchTypeOf<{ answer: string }>()
-		expectTypeOf<{ answer: string }>().toMatchTypeOf(contract.$infer.output)
-		expectTypeOf(contract.updates).toEqualTypeOf<'object-snapshot'>()
-		expectTypeOf(contract.interrupts).toEqualTypeOf<readonly ['tool-approval']>()
-	})
-
-	it('rejects update and interrupt schema presence inconsistent with advertised modes', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		for (const target of [
-			{ ...source.target, updateSchema: false },
-			{ ...source.target, interruptSchema: { type: 'object' } },
-		]) {
-			const candidate = { ...source, target }
-			expect(() =>
-				createRemoteHarnessTargetContract({
-					...candidate,
-					target: { ...target, exportDigest: computeHarnessTargetExportDigest(candidate) },
-				}),
-			).toThrow('does not match')
-		}
-	})
-
-	it('accepts boolean JSON Schemas at generated validated-input, update, and interrupt boundaries', () => {
-		const input = generatedSchema<string, string>({ type: 'string' }, true)
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const base = exportedTarget(input, output)
-		const source = {
-			...base,
-			target: {
-				...base.target,
-				validatedInputSchema: true,
-				updateSchema: true,
-				interruptSchema: true,
-				invocation: { ...base.target.invocation, resumableInterrupts: ['external-wait'] as const },
-			},
-		}
-		const contract = createRemoteHarnessTargetContract({
-			...source,
-			target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
-		})
-
-		expect(contract.id).toBe('support')
-		expect(contract.interrupts).toEqual(['external-wait'])
-	})
-
-	it('clones owned address and interruption arrays before freezing', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const address = { ...source.address }
-		const resumableInterrupts: ('tool-approval' | 'external-wait')[] = ['tool-approval']
-		const withMutableInputs = {
-			...source,
-			address,
-			target: {
-				...source.target,
-				interruptSchema: { type: 'object' },
-				invocation: { ...source.target.invocation, resumableInterrupts },
-			},
-		}
-		const contract = createRemoteHarnessTargetContract({
-			...withMutableInputs,
-			target: {
-				...withMutableInputs.target,
-				exportDigest: computeHarnessTargetExportDigest(withMutableInputs),
-			},
-		})
-
-		expect(Object.isFrozen(address)).toBe(false)
-		expect(Object.isFrozen(resumableInterrupts)).toBe(false)
-		expect(contract.address).not.toBe(address)
-		expect(contract.interrupts).not.toBe(resumableInterrupts)
-	})
-
-	it('preserves optional queue metadata in runtime shape and exact inference', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const base = exportedTarget(input, output)
-		const source = { ...base, target: { ...base.target, queue: { name: 'support-jobs' } as const } }
-		const contract = createRemoteHarnessTargetContract({
-			...source,
-			target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
-		})
-
-		expectTypeOf(contract.queue).toEqualTypeOf<Readonly<{ name: 'support-jobs' }>>()
-		expect(contract.queue).toEqual({ name: 'support-jobs' })
-		expect(Object.isFrozen(contract.queue)).toBe(true)
-	})
-
-	it('changes the digest for every addressed public contract family', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const variants = [
-			{ ...source, address: { ...source.address, serviceName: 'Other' } },
-			{ ...source, target: { ...source.target, description: 'changed' } },
-			{ ...source, target: { ...source.target, validatedInputSchema: { type: 'number' } } },
-			{ ...source, target: { ...source.target, updateSchema: false } },
-			{ ...source, target: { ...source.target, interruptSchema: { type: 'object' } } },
-			{
-				...source,
-				target: {
-					...source.target,
-					invocation: { ...source.target.invocation, resumableInterrupts: ['external-wait'] },
-				},
-			},
-			{ ...source, target: { ...source.target, stream: { ...source.target.stream, outputUpdates: [] } } },
-			{ ...source, target: { ...source.target, queue: { name: 'jobs' } } },
-		]
-		const original = computeHarnessTargetExportDigest(source)
-		expect(variants.map(computeHarnessTargetExportDigest)).not.toContain(original)
-	})
-
-	it('does not transfer the private hydration brand through a structural copy', () => {
-		const input = generatedSchema<string, string>({ type: 'string' })
-		const output = generatedSchema<string, string>({ type: 'string' })
-		const source = exportedTarget(input, output)
-		const contract = createRemoteHarnessTargetContract({
-			...source,
-			target: { ...source.target, exportDigest: computeHarnessTargetExportDigest(source) },
-		})
-
-		expect(isRemoteHarnessTargetContract({ ...contract })).toBe(false)
-	})
-})
-
-function exportedTarget<Input extends ModelSchema, Output extends ModelSchema>(input: Input, output: Output) {
+			properties: { normalized: { type: 'number' } },
+			required: ['normalized'],
+			additionalProperties: false,
+		},
+		outputSchema: {
+			type: 'object',
+			properties: { accepted: { type: 'boolean' } },
+			required: ['accepted'],
+			additionalProperties: false,
+		},
+		updateSchema: true,
+		interruptSchema: createHarnessInterruptSchema(interrupts),
+		invocation: { aggregate: true, stream: true, resumableInterrupts: interrupts },
+		stream: {
+			protocol: 'harness-execution-events-v1',
+			eventTypes: harnessExecutionEventTypesV1,
+			outputUpdates: ['object-snapshot'],
+		},
+	} as const
 	return {
 		schemaVersion: 1 as const,
-		address: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'support' } as const,
-		target: {
-			targetName: 'support' as const,
-			kind: 'agent' as const,
-			inputSchema: input,
-			validatedInputSchema: input['~standard'].jsonSchema.output({ target: 'draft-2020-12' }),
-			outputSchema: output,
-			updateSchema: { type: 'string' },
-			interruptSchema: false as const,
-			invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
-			stream: {
-				protocol: 'harness-execution-events-v1' as const,
-				eventTypes: harnessExecutionEventTypesV1,
-				outputUpdates: ['text-delta'] as const,
-			},
+		address,
+		target: { ...target, exportDigest: computeHarnessTargetExportDigest({ address, target }) },
+		schemas: {
+			input: createGeneratedHarnessSchema<Wire>(target.inputSchema),
+			validatedInput: createGeneratedHarnessSchema<Validated>(target.validatedInputSchema),
+			output: createGeneratedHarnessSchema<Output>(target.outputSchema),
 		},
 	}
 }
 
-function generatedSchema<Input extends JsonValue, Output extends JsonValue>(
-	inputJsonSchema: Readonly<Record<string, unknown>>,
-	outputJsonSchema: Readonly<Record<string, unknown>> | boolean = inputJsonSchema,
-): ModelSchema<Input, Output> {
-	const schema = { ...inputJsonSchema }
-	Object.defineProperty(schema, '~standard', {
-		enumerable: false,
-		value: Object.freeze({
-			version: 1,
-			vendor: 'purista-generated',
-			validate: (value: unknown) => ({ value }),
-			types: undefined as unknown as { input: Input; output: Output },
-			jsonSchema: Object.freeze({
-				input: () => inputJsonSchema,
-				output: () => outputJsonSchema,
-			}),
-		}),
-	})
-	return Object.freeze(schema) as unknown as ModelSchema<Input, Output>
+function source() {
+	return sourceForInterrupts(['tool-approval'] as const)
 }
+
+function queuedSource() {
+	const base = source()
+	const target = { ...base.target, queue: { name: 'support-jobs' } as const }
+	return { ...base, target: { ...target, exportDigest: computeHarnessTargetExportDigest({ ...base, target }) } }
+}
+
+describe('generated validation-only schema witnesses', () => {
+	it('clones and freezes both identical projections and preserves accepted input identity', async () => {
+		const json = {
+			type: 'object',
+			properties: { value: { type: 'number', default: 1 } },
+			required: ['value'],
+			additionalProperties: false,
+		}
+		const schema = createGeneratedHarnessSchema<{ value: number }>(json)
+		const standard = schema['~standard']
+		const input = standard.jsonSchema.input({ target: 'draft-2020-12' })
+		expect(input).toBe(standard.jsonSchema.output({ target: 'draft-2020-12' }))
+		expect(input).not.toBe(json)
+		expect(Object.isFrozen(input)).toBe(true)
+		expect(Object.isFrozen((input as typeof json).properties.value)).toBe(true)
+		json.properties.value.type = 'string'
+		const value = { value: 2 }
+		expect(await standard.validate(value)).toEqual({ value })
+		const accepted = await standard.validate(value)
+		if (accepted.issues) throw new Error('Expected accepted value')
+		expect(accepted.value).toBe(value)
+		for (const invalid of [{}, { value: '2' }, { value: 2, extra: true }, { value: Number.NaN }, new Date()]) {
+			expect((await standard.validate(invalid)).issues).toBeDefined()
+		}
+	})
+
+	it('supports boolean schemas and rejects executable, accessor, and malformed JSON', async () => {
+		expect(await createGeneratedHarnessSchema<JsonValue>(true)['~standard'].validate(null)).toEqual({ value: null })
+		expect((await createGeneratedHarnessSchema<never>(false)['~standard'].validate(null)).issues).toBeDefined()
+		const getter = vi.fn(() => 'string')
+		const malicious = Object.defineProperty({}, 'type', { get: getter, enumerable: true })
+		expect(() => createGeneratedHarnessSchema(malicious)).toThrow()
+		expect(getter).not.toHaveBeenCalled()
+		expect(() => createGeneratedHarnessSchema({ type: 'invalid' })).toThrow()
+	})
+})
+
+describe('remote Harness target contracts', () => {
+	it('derives exact asymmetric inference from three witnesses for queued and unqueued overloads', () => {
+		const unqueued = createRemoteHarnessTargetContract(source())
+		const queued = createRemoteHarnessTargetContract(queuedSource())
+		expectTypeOf<HarnessTargetInput<typeof unqueued>>().toEqualTypeOf<Wire & JsonValue>()
+		expectTypeOf<HarnessValidatedTargetInput<typeof unqueued>>().toEqualTypeOf<Validated & JsonValue>()
+		expectTypeOf<HarnessTargetOutput<typeof unqueued>>().toEqualTypeOf<Output & JsonValue>()
+		expectTypeOf(unqueued.$infer).toEqualTypeOf<
+			HarnessTargetInferenceFor<
+				Wire & JsonValue,
+				Validated & JsonValue,
+				Output & JsonValue,
+				'object-snapshot',
+				readonly ['tool-approval']
+			>
+		>()
+		expectTypeOf(queued.$infer).toEqualTypeOf<typeof unqueued.$infer>()
+		expectTypeOf(queued.queue.name).toEqualTypeOf<'support-jobs'>()
+		expect(unqueued).not.toHaveProperty('queue')
+		expect(queued.queue).toEqual({ name: 'support-jobs' })
+		expect(Object.isFrozen(queued.queue)).toBe(true)
+		expect(Object.isFrozen(queued)).toBe(true)
+		expect(Object.isFrozen(queued.$infer)).toBe(true)
+		expect(Object.keys(queued)).not.toContain('$infer')
+		expect(requireRemoteHarnessTargetContract(queued).queueName).toBe('support-jobs')
+		expect(requireRemoteHarnessTargetContract(unqueued).queueName).toBeNull()
+	})
+
+	it('rejects spread, structural and reflected copies nominally and at runtime', () => {
+		const contract = createRemoteHarnessTargetContract(queuedSource())
+		const spread = { ...contract }
+		const reflected: unknown = Object.create(
+			Object.getPrototypeOf(contract),
+			Object.getOwnPropertyDescriptors(contract),
+		)
+		const requireExact = (_value: typeof contract) => undefined
+		// biome-ignore lint/correctness/noConstantCondition: TypeScript-only rejection proofs must not execute.
+		if (false) {
+			// @ts-expect-error A spread cannot retain the private nominal class field.
+			requireExact(spread)
+			// @ts-expect-error A queue-shaped value has no target authenticity.
+			requireExact({ queue: { name: 'support-jobs' } })
+		}
+		for (const candidate of [spread, reflected, { queue: contract.queue }, null]) {
+			expect(isRemoteHarnessTargetContract(candidate)).toBe(false)
+			expect(() => requireRemoteHarnessTargetContract(candidate)).toThrow('authentic')
+		}
+		expect(isRemoteHarnessTargetContract(contract)).toBe(true)
+	})
+
+	it.each(['input', 'validatedInput', 'output'] as const)(
+		'rejects non-factory and mismatched %s witnesses without executing user functions',
+		key => {
+			const base = source()
+			const execute = vi.fn(() => {
+				throw new Error('executed')
+			})
+			const forged = {
+				'~standard': {
+					version: 1,
+					vendor: 'purista-generated',
+					validate: execute,
+					jsonSchema: { input: execute, output: execute },
+				},
+			}
+			for (const witness of [
+				forged,
+				{ ...base.schemas[key] },
+				Object.create(Object.getPrototypeOf(base.schemas[key]), Object.getOwnPropertyDescriptors(base.schemas[key])),
+			]) {
+				expect(() =>
+					createRemoteHarnessTargetContract({ ...base, schemas: { ...base.schemas, [key]: witness } } as never),
+				).toThrow('authentic')
+			}
+			expect(execute).not.toHaveBeenCalled()
+			const mismatch = createGeneratedHarnessSchema<number>({ type: 'number' })
+			expect(() =>
+				createRemoteHarnessTargetContract({ ...base, schemas: { ...base.schemas, [key]: mismatch } }),
+			).toThrow('does not match')
+		},
+	)
+
+	it('rejects stale digest, address, schemas, queue presence and queue name before granting capability', () => {
+		const base = queuedSource()
+		const { queue: _queue, ...withoutQueue } = base.target
+		const candidates = [
+			{ ...base, target: { ...base.target, exportDigest: 'sha256:invalid' } },
+			{ ...base, target: { ...base.target, exportDigest: `sha256:${'0'.repeat(64)}` } },
+			{ ...base, address: { ...base.address, serviceVersion: '2' } },
+			{ ...base, address: { ...base.address, serviceTarget: 'other' } },
+			{ ...base, target: { ...base.target, inputSchema: { type: 'number' } } },
+			{ ...base, target: withoutQueue },
+			{ ...base, target: { ...base.target, queue: { name: 'other-jobs' } } },
+			{ ...source(), target: { ...source().target, queue: { name: 'injected-jobs' } } },
+		]
+		for (const candidate of candidates) expect(() => createRemoteHarnessTargetContract(candidate as never)).toThrow()
+	})
+
+	it('rejects malformed closed exports even when their digest is recomputed', () => {
+		const base = source()
+		for (const target of [
+			{ ...base.target, unexpected: true },
+			{ ...base.target, queue: { name: '' } },
+			{ ...base.target, queue: undefined },
+			{ ...base.target, kind: 'tool' },
+			{ ...base.target, updateSchema: false },
+			{ ...base.target, updateSchema: { type: 'string' } },
+			{ ...base.target, interruptSchema: false },
+			{ ...base.target, stream: { ...base.target.stream, outputUpdates: ['none'] } },
+			{
+				...base.target,
+				invocation: { ...base.target.invocation, resumableInterrupts: ['tool-approval', 'tool-approval'] },
+			},
+		]) {
+			expect(() =>
+				createRemoteHarnessTargetContract({
+					...base,
+					target: { ...target, exportDigest: computeHarnessTargetExportDigest({ ...base, target }) },
+				} as never),
+			).toThrow()
+		}
+	})
+
+	it.each([
+		['tool approval', ['tool-approval']],
+		['external wait', ['external-wait']],
+		['the tool approval and external wait union', ['tool-approval', 'external-wait']],
+	] as const)('accepts the canonical interrupt schema for %s', (_label, interrupts) => {
+		const contract = createRemoteHarnessTargetContract(sourceForInterrupts(interrupts))
+		expect(contract.interrupts).toEqual(interrupts)
+	})
+
+	it('rejects non-canonical and variant-mismatched interrupt schemas with a recomputed digest', () => {
+		const toolApproval = sourceForInterrupts(['tool-approval'] as const)
+		const externalWait = sourceForInterrupts(['external-wait'] as const)
+		const combined = sourceForInterrupts(['tool-approval', 'external-wait'] as const)
+		const reversedCombinedSchema = sourceForInterrupts(['external-wait', 'tool-approval'] as const).target
+			.interruptSchema
+		const cases = [
+			{ source: toolApproval, interruptSchema: { type: 'string' } },
+			{ source: toolApproval, interruptSchema: externalWait.target.interruptSchema },
+			{ source: externalWait, interruptSchema: toolApproval.target.interruptSchema },
+			{ source: combined, interruptSchema: toolApproval.target.interruptSchema },
+			{ source: combined, interruptSchema: reversedCombinedSchema },
+		]
+		for (const testCase of cases) {
+			const target = { ...testCase.source.target, interruptSchema: testCase.interruptSchema }
+			expect(() =>
+				createRemoteHarnessTargetContract({
+					...testCase.source,
+					target: {
+						...target,
+						exportDigest: computeHarnessTargetExportDigest({ address: testCase.source.address, target }),
+					},
+				} as never),
+			).toThrow('interrupt schema does not match')
+		}
+	})
+
+	it('rejects accessors before any source, array or witness getter executes', () => {
+		const base = source()
+		const getter = vi.fn(() => base.target)
+		const hostile = Object.defineProperty({ ...base }, 'target', { get: getter, enumerable: true })
+		expect(() => createRemoteHarnessTargetContract(hostile)).toThrow('descriptor')
+		const array = ['object-snapshot']
+		Object.defineProperty(array, '0', { get: getter, enumerable: true })
+		expect(() => canonicalHarnessJson(array)).toThrow()
+		expect(getter).not.toHaveBeenCalled()
+	})
+
+	it('clones address and raw metadata without freezing caller-owned data', () => {
+		const base = source()
+		const contract = createRemoteHarnessTargetContract(base)
+		expect(contract.address).not.toBe(base.address)
+		expect(contract.interrupts).not.toBe(base.target.invocation.resumableInterrupts)
+		expect(Object.isFrozen(base.address)).toBe(false)
+		expect(Object.isFrozen(contract.address)).toBe(true)
+		expect(Object.isFrozen(requireRemoteHarnessTargetContract(contract).targetExport)).toBe(true)
+	})
+
+	it('preserves none/empty tuples and rejects incompatible inference and source declarations in TypeScript', () => {
+		const base = source()
+		const target = {
+			...base.target,
+			updateSchema: false,
+			interruptSchema: false,
+			stream: { ...base.target.stream, outputUpdates: [] },
+			invocation: { ...base.target.invocation, resumableInterrupts: [] },
+		} as const
+		const contract = createRemoteHarnessTargetContract({
+			...base,
+			target: { ...target, exportDigest: computeHarnessTargetExportDigest({ ...base, target }) },
+		})
+		expectTypeOf(contract.$infer.update).toEqualTypeOf<never>()
+		expectTypeOf(contract.$infer.interrupt).toEqualTypeOf<never>()
+		// biome-ignore lint/correctness/noConstantCondition: TypeScript-only rejection proofs must not execute.
+		if (false) {
+			// @ts-expect-error Address must retain the literal serialized target id.
+			createRemoteHarnessTargetContract({ ...base, address: { ...base.address, serviceTarget: 'other' } })
+			const invalidUpdates = {
+				...base,
+				target: { ...base.target, stream: { ...base.target.stream, outputUpdates: ['bad'] } },
+			} as const
+			// @ts-expect-error The serialized update declaration is a literal supported singleton tuple.
+			createRemoteHarnessTargetContract(invalidUpdates)
+			const invalidInterrupts = {
+				...base,
+				target: { ...base.target, invocation: { ...base.target.invocation, resumableInterrupts: ['bad'] } },
+			} as const
+			// @ts-expect-error Unsupported interrupt tuples fail the source boundary.
+			createRemoteHarnessTargetContract(invalidInterrupts)
+			const checkInference = (_value: typeof contract.$infer) => undefined
+			// @ts-expect-error Update and interruption capabilities are invariant.
+			checkInference(createRemoteHarnessTargetContract(base).$infer)
+		}
+	})
+
+	it('canonicalizes the full addressed export and rejects non-JSON data', () => {
+		const base = source()
+		expect(
+			computeHarnessTargetExportDigest({
+				address: base.address,
+				target: Object.fromEntries(Object.entries(base.target).reverse()),
+			}),
+		).toBe(base.target.exportDigest)
+		for (const invalid of [
+			new Date(),
+			new Map(),
+			Array(2),
+			{ value: Number.NaN },
+			{ value: String.fromCharCode(0xd800) },
+			{ [Symbol('hidden')]: 1 },
+		])
+			expect(() => canonicalHarnessJson(invalid)).toThrow()
+		expect(canonicalHarnessJson({ z: -0, a: 1e30 })).toBe('{"a":1e+30,"z":0}')
+	})
+})

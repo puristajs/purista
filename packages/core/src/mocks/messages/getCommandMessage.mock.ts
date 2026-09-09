@@ -22,7 +22,7 @@ export const getCommandMessageMock = <Payload, Parameter>(
 		id: getNewEBMessageId(),
 		timestamp: Date.now(),
 		messageType: EBMessageType.Command,
-		correlationId: getNewCorrelationId(),
+		correlationId: input?.harness?.root?.invocationId ?? getNewCorrelationId(),
 		traceId: getNewTraceId(),
 		principalId: 'mocked-principal-id',
 		tenantId: 'mocked-tenant-id',

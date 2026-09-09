@@ -256,11 +256,13 @@ async function startProtocolFixture() {
 			return receiver
 		},
 		openMessage(): StreamOpenRequest {
+			const harness = rootEnvelope(definition, mountedPolicy, 'protocol-session')
 			return unsafeTransport({
 				...getCommandMessageMock({
 					receiver: rootAddress,
+					correlationId: harness.root.invocationId,
 					payload: { payload: { value: 'protocol input' }, parameter: {} },
-					harness: rootEnvelope(definition, mountedPolicy, 'protocol-session'),
+					harness,
 				}),
 				messageType: EBMessageType.Stream,
 				payload: { frameType: 'open', payload: { value: 'protocol input' }, parameter: {} },
@@ -405,7 +407,7 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 			if (!dependencyProjection) throw new Error('Expected the dependency projection.')
 			const publicDependencyEnvelope = {
 				contract: { schemaVersion: 1 as const, exportDigest: dependencyProjection.exportDigest },
-				root: { sessionId: 'public-dependency' },
+				root: { invocationId: 'public-dependency-invocation', sessionId: 'public-dependency' },
 			}
 			const dependencyFrames = await collect(
 				await eventBridge.openStream(
@@ -489,7 +491,10 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 			'malformed contract',
 			(base: Command) => ({
 				...base,
-				harness: { contract: { schemaVersion: 2, exportDigest: 'bad' }, root: { sessionId: 's' } },
+				harness: {
+					contract: { schemaVersion: 2, exportDigest: 'bad' },
+					root: { invocationId: 'malformed-contract', sessionId: 's' },
+				},
 			}),
 		],
 		['wrong message kind', (base: Command) => ({ ...base, messageType: EBMessageType.Stream })],

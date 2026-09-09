@@ -18,6 +18,15 @@ export const mergeIntoServiceDefinition = (current: FullServiceDefinition, add: 
 					queues: { ...val.queues, ...current[serviceName][serviceVersion].queues },
 					queueWorkers: { ...val.queueWorkers, ...current[serviceName][serviceVersion].queueWorkers },
 					schedules: { ...val.schedules, ...current[serviceName][serviceVersion].schedules },
+					...(val.agents === undefined && current[serviceName][serviceVersion].agents === undefined
+						? {}
+						: { agents: { ...val.agents, ...current[serviceName][serviceVersion].agents } }),
+					...(val.workflows === undefined && current[serviceName][serviceVersion].workflows === undefined
+						? {}
+						: { workflows: { ...val.workflows, ...current[serviceName][serviceVersion].workflows } }),
+					...(val.harness === undefined && current[serviceName][serviceVersion].harness === undefined
+						? {}
+						: { harness: current[serviceName][serviceVersion].harness ?? val.harness }),
 					eventToQueueBindings: [
 						...(val.eventToQueueBindings ?? []),
 						...(current[serviceName][serviceVersion].eventToQueueBindings ?? []),

@@ -422,7 +422,7 @@ describe('DefaultEventBridge', () => {
 				schemaVersion: 1 as const,
 				exportDigest: `sha256:${'a'.repeat(64)}` as `sha256:${string}`,
 			}),
-			root: Object.freeze({ sessionId: 'harness-session' }),
+			root: Object.freeze({ invocationId: 'harness-invocation', sessionId: 'harness-session' }),
 		})
 		const otp = '{"traceparent":"00-0123456789abcdef0123456789abcdef-0123456789abcdef-01"}'
 		let receivedHarness: unknown
@@ -431,7 +431,7 @@ describe('DefaultEventBridge', () => {
 		await eventBridge.registerStream(
 			receiver,
 			async message => {
-				if (message.payload.frameType !== 'open') return
+				if (message.payload.frameType !== 'open' || !('harness' in message)) return
 				receivedHarness = message.harness
 				receivedOtp = message.otp
 				await eventBridge.emitMessage({

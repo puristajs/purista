@@ -8,7 +8,7 @@ import {
 	type ModelSchema,
 } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
-
+import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
@@ -110,7 +110,7 @@ export function rootEnvelope(
 	if (!projection) throw new Error(`Expected root projection ${targetName}.`)
 	return Object.freeze({
 		contract: Object.freeze({ schemaVersion: 1 as const, exportDigest: projection.exportDigest }),
-		root: Object.freeze({ sessionId }),
+		root: Object.freeze({ invocationId: getNewCorrelationId(), sessionId }),
 	})
 }
 

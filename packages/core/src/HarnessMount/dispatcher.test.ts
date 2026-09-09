@@ -1,4 +1,4 @@
-import type { ExecutionEvent, JsonValue, ModelSchema, RunOutcome } from '@purista/harness'
+import type { ExecutionEvent, RunOutcome } from '@purista/harness'
 import { defineAgent, harnessExecutionEventTypesV1 } from '@purista/harness'
 import type { HarnessNestedTargetDispatchInvocation, HarnessTargetDispatchStream } from '@purista/harness/integrator'
 import { describe, expect, it, vi } from 'vitest'
@@ -9,7 +9,11 @@ import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
 import { createEventBridgeHarnessTargetDispatcher, createHarnessTargetRouteBinding } from './dispatcher.js'
-import { computeHarnessTargetExportDigest, createRemoteHarnessTargetContract } from './remoteTargetContract.js'
+import {
+	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from './remoteTargetContract.js'
 
 const support = defineAgent('support', { instructions: 'Answer clearly.' }).contract
 const digest = `sha256:${'a'.repeat(64)}` as const
@@ -862,16 +866,18 @@ function completedFrames<Output>(
 }
 
 function remoteSupport() {
-	const schema = generatedSchema<string, string>({ type: 'string' })
+	const inputSchema = { type: 'string' } as const
+	const validatedInputSchema = { type: 'string' } as const
+	const outputSchema = { type: 'string' } as const
 	const source = {
 		schemaVersion: 1 as const,
 		address: { serviceName: 'Remote', serviceVersion: '1', serviceTarget: 'support' } as const,
 		target: {
 			targetName: 'support' as const,
 			kind: 'agent' as const,
-			inputSchema: schema,
-			validatedInputSchema: { type: 'string' },
-			outputSchema: schema,
+			inputSchema,
+			validatedInputSchema,
+			outputSchema,
 			updateSchema: { type: 'string' },
 			interruptSchema: false as const,
 			invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
@@ -881,26 +887,14 @@ function remoteSupport() {
 				outputUpdates: ['text-delta'] as const,
 			},
 		},
+		schemas: {
+			input: createGeneratedHarnessSchema<string>(inputSchema),
+			validatedInput: createGeneratedHarnessSchema<string>(validatedInputSchema),
+			output: createGeneratedHarnessSchema<string>(outputSchema),
+		},
 	}
 	const digest = computeHarnessTargetExportDigest(source)
 	return createRemoteHarnessTargetContract({ ...source, target: { ...source.target, exportDigest: digest } })
-}
-
-function generatedSchema<Input extends JsonValue, Output extends JsonValue>(
-	json: Readonly<Record<string, unknown>>,
-): ModelSchema<Input, Output> {
-	const schema = { ...json }
-	Object.defineProperty(schema, '~standard', {
-		enumerable: false,
-		value: Object.freeze({
-			version: 1,
-			vendor: 'purista-generated',
-			validate: (value: unknown) => ({ value }),
-			types: undefined as unknown as { input: Input; output: Output },
-			jsonSchema: Object.freeze({ input: () => json, output: () => json }),
-		}),
-	})
-	return Object.freeze(schema) as unknown as ModelSchema<Input, Output>
 }
 
 function frame<Output>(

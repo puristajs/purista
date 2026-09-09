@@ -12,6 +12,7 @@ export type HarnessInvocationContractEnvelope = Readonly<{
 
 /** Framework-owned session identity for one public root invocation. */
 export type HarnessRootInvocationContext = Readonly<{
+	invocationId: CorrelationId
 	sessionId: CorrelationId
 }>
 

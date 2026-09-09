@@ -374,6 +374,8 @@ export class HarnessMountRuntime {
 			throw badRequest('Aggregate Harness receivers accept public root invocations only.')
 		if (envelope.root !== undefined && projection.visibility !== 'root')
 			throw new HandledError(StatusCode.Forbidden, 'Harness dependency targets require nested dispatch.')
+		if (envelope.root !== undefined && envelope.root.invocationId !== message.correlationId)
+			throw badRequest('Harness root invocation identity does not match its transport correlation.')
 		const parameter = parseParameter(message.payload.parameter, envelope.root === undefined)
 		const host = createHostInvocation(message, parameter.idempotencyKey ?? envelope.dispatch?.idempotencyKey)
 		try {
@@ -748,7 +750,11 @@ function parseEnvelope(value: unknown): HarnessTransportEnvelope {
 	)
 		throw badRequest('Harness target contract envelope is invalid.')
 	if (Object.hasOwn(value, 'root')) {
-		if (!plainFields(value.root, ['sessionId']) || !nonempty(value.root.sessionId))
+		if (
+			!plainFields(value.root, ['invocationId', 'sessionId']) ||
+			!nonempty(value.root.invocationId) ||
+			!nonempty(value.root.sessionId)
+		)
 			throw badRequest('Harness root envelope is invalid.')
 	} else {
 		const dispatch = value.dispatch

@@ -6,7 +6,7 @@ import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
-import { createHarnessInvocationProxy } from '../../HarnessMount/invocation.js'
+import { createHarnessInvocationProxy, getHarnessQueueInvokes } from '../../HarnessMount/invocation.js'
 import { createHarnessModelClients } from '../../HarnessMount/model.js'
 import type {
 	HarnessNestedTargetDeclarations,
@@ -1622,7 +1622,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	) {
 		const invoke = this.getInvokeFunction(serviceTarget, traceId, principalId, tenantId, invokes)
 		const openStream = this.getConsumeStreamFunction(serviceTarget, traceId, principalId, tenantId, streamInvokes)
-		const queueInvokes = this.getHarnessQueueInvokes(invokes)
+		const queueInvokes = getHarnessQueueInvokes(invokes)
 		const enqueue = this.getHarnessQueueEnqueue(queueInvokes, traceId, principalId, tenantId)
 		return {
 			agent: createHarnessInvocationProxy('agent', invoke, openStream, enqueue, invokes),
@@ -1634,22 +1634,6 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				return this.harnessModelResolver(definition, alias)
 			}),
 		}
-	}
-
-	private getHarnessQueueInvokes(invokes: InvokeList) {
-		return Object.fromEntries(
-			Object.values(invokes).flatMap(versions =>
-				Object.values(versions).flatMap(targets =>
-					Object.values(targets).flatMap(descriptor => {
-						const target = descriptor as unknown as {
-							harnessTarget?: { queue?: { name?: string }; input?: Schema }
-						}
-						const queueName = target.harnessTarget?.queue?.name
-						return queueName ? [[queueName, { payloadSchema: target.harnessTarget?.input }]] : []
-					}),
-				),
-			),
-		) as QueueInvokeList
 	}
 
 	private getHarnessQueueEnqueue(

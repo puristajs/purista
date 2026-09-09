@@ -25,7 +25,7 @@ import {
 	EventBridgeLateResponseHandling,
 	EventBridgeResponseConfirmationLevel,
 	EventBridgeStreamLateFrameHandling,
-	getNewCorrelationId,
+	getHarnessTransportCorrelationId,
 	getNewEBMessageId,
 	HandledError,
 	isCommandResponse,
@@ -647,7 +647,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			{ kind: SpanKind.PRODUCER },
 			context,
 			async span => {
-				const correlationId = getNewCorrelationId()
+				const correlationId = getHarnessTransportCorrelationId(input)
 
 				if (!this.connection) {
 					throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')

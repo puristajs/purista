@@ -173,9 +173,21 @@ describe('AmqpBridge', () => {
 		void messageType
 		void timestamp
 
-		await expect(bridge.invoke(input, 1234)).resolves.toEqual({ ok: true })
+		await expect(
+			bridge.invoke(
+				{
+					...input,
+					harness: {
+						contract: { schemaVersion: 1, exportDigest: `sha256:${'a'.repeat(64)}` },
+						root: { invocationId: 'harness-root-invocation', sessionId: 'harness-session' },
+					},
+				} as never,
+				1234,
+			),
+		).resolves.toEqual({ ok: true })
 		expect(publish).toHaveBeenCalledTimes(1)
 		const publishOptions = publish.mock.calls[0]?.[3] as Record<string, unknown>
+		expect(publishOptions.correlationId).toBe('harness-root-invocation')
 		expect(publishOptions.expiration).toBe('1234')
 	})
 

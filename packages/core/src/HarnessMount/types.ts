@@ -4,13 +4,10 @@ import type {
 	HarnessDefinition,
 	HarnessExecutionCaller,
 	HarnessIdentity,
-	HarnessInterruptKind,
-	HarnessOutputUpdateKind,
 	HarnessTargetInput,
 	HarnessTargetOutput,
 	HarnessTargetRunOutcome,
 	HarnessTraceContext,
-	harnessExecutionEventTypesV1,
 } from '@purista/harness'
 import type { HarnessHostContextRequest, HostedHarnessInstanceConfig } from '@purista/harness/integrator'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
@@ -32,18 +29,31 @@ import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { HarnessTargetQueueBinding } from './queueBinding.js'
+import type { HarnessTargetJsonSchema, SerializedHarnessTargetExportV1 } from './targetExport.js'
 
+export type { JsonValue } from '@purista/harness'
+export { harnessExecutionEventTypesV1 } from '@purista/harness'
 export type { HarnessTargetQueueBinding } from './queueBinding.js'
 
 export type {
+	AnyQueuedRemoteHarnessTargetContract,
+	AnyRemoteHarnessTargetContract,
 	GeneratedHarnessSchema,
 	HarnessTargetAddress,
-	HarnessTargetExport,
 	HarnessTargetQueueExport,
+	QueuedRemoteHarnessTargetContract,
+	QueuedRemoteHarnessTargetContractSourceV1,
+	RemoteHarnessSerializedTargetV1,
 	RemoteHarnessTargetContract,
-	RemoteHarnessTargetContractSource,
+	RemoteHarnessTargetContractSourceBaseV1,
+	RemoteHarnessTargetContractSourceV1,
+	UnqueuedRemoteHarnessTargetContract,
 } from './remoteTargetContract.js'
-export { createRemoteHarnessTargetContract } from './remoteTargetContract.js'
+export {
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from './remoteTargetContract.js'
+export type { HarnessTargetJsonSchema, SerializedHarnessTargetExportV1 } from './targetExport.js'
 export type {
 	HarnessDispatchContext,
 	HarnessInvocationContractEnvelope,
@@ -220,9 +230,6 @@ export type HarnessTargetPolicy<
 			>
 		: Readonly<{ durableResume?: never }>)
 
-/** Canonical JSON Schema value stored in mounted target metadata. */
-export type HarnessTargetJsonSchema = boolean | Readonly<Record<string, unknown>>
-
 /** Deterministic root policy committed to a target's route revision. */
 export type MountedHarnessTargetPolicyDescriptor = Readonly<{
 	beforeGuardKeys: readonly string[]
@@ -230,30 +237,6 @@ export type MountedHarnessTargetPolicyDescriptor = Readonly<{
 	durableResume: 'stored-run-owner' | null
 	successEvent: string | null
 	queueName: string | null
-}>
-
-/** Closed JSON export for one mounted Harness target before its digest is attached. */
-export type SerializedHarnessTargetExportV1 = Readonly<{
-	targetName: string
-	kind: 'agent' | 'workflow'
-	description?: string
-	inputSchema: HarnessTargetJsonSchema
-	validatedInputSchema: HarnessTargetJsonSchema
-	outputSchema: HarnessTargetJsonSchema
-	updateSchema: HarnessTargetJsonSchema
-	interruptSchema: HarnessTargetJsonSchema
-	invocation: Readonly<{
-		aggregate: true
-		stream: true
-		resumableInterrupts: readonly HarnessInterruptKind[]
-	}>
-	stream: Readonly<{
-		protocol: 'harness-execution-events-v1'
-		eventTypes: typeof harnessExecutionEventTypesV1
-		outputUpdates: readonly Exclude<HarnessOutputUpdateKind, 'none'>[]
-	}>
-	queue?: Readonly<{ name: string }>
-	exportDigest: `sha256:${string}`
 }>
 
 /** Validation-only completed-result event metadata for one root target. */

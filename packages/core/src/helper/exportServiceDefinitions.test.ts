@@ -1,5 +1,10 @@
+import { harnessExecutionEventTypesV1 } from '@purista/harness'
 import { describe, expect, it } from 'vitest'
-import { mergeServiceDefinition } from './exportServiceDefinitions.js'
+import {
+	createMountedHarnessServiceExport,
+	type MountedHarnessExportProjection,
+	mergeServiceDefinition,
+} from './exportServiceDefinitions.js'
 import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
 
 const createDefinitions = (input: {
@@ -98,5 +103,119 @@ describe('mergeServiceDefinition', () => {
 			targetServiceName: 'UserService',
 			targetServiceVersion: '1',
 		})
+	})
+
+	it('exports only explicit Harness roots as raw callable target definitions', () => {
+		const exported = createMountedHarnessServiceExport({
+			name: 'support',
+			dependencies: {
+				tools: ['lookupAccount'],
+				skills: ['support-policy'],
+				mcpServers: ['crm'],
+				agents: ['privateResearcher', 'support'],
+				workflows: ['privateEscalation'],
+			},
+			projections: [
+				{
+					visibility: 'root',
+					policy: { queueName: 'support.answer' },
+					targetExport: {
+						targetName: 'support',
+						kind: 'agent',
+						description: 'Answer support questions',
+						inputSchema: { type: 'string' },
+						validatedInputSchema: { type: 'string' },
+						outputSchema: { type: 'object' },
+						updateSchema: false,
+						interruptSchema: false,
+						invocation: { aggregate: true, stream: true, resumableInterrupts: [] },
+						stream: {
+							protocol: 'harness-execution-events-v1',
+							eventTypes: harnessExecutionEventTypesV1,
+							outputUpdates: ['text-delta'],
+						},
+						queue: { name: 'support.answer' },
+					},
+					exportDigest: 'sha256:root',
+					privateTarget: { run: () => 'must not be exported' },
+				} as unknown as MountedHarnessExportProjection,
+				{
+					visibility: 'dependency',
+					policy: null,
+					targetExport: {
+						targetName: 'privateResearcher',
+						kind: 'agent',
+						inputSchema: { type: 'string' },
+						validatedInputSchema: { type: 'string' },
+						outputSchema: { type: 'string' },
+						updateSchema: false,
+						interruptSchema: false,
+						invocation: { aggregate: true, stream: true, resumableInterrupts: [] },
+						stream: {
+							protocol: 'harness-execution-events-v1',
+							eventTypes: harnessExecutionEventTypesV1,
+							outputUpdates: [],
+						},
+					},
+					exportDigest: 'sha256:dependency',
+				},
+			],
+		})
+
+		expect(exported.agents).toEqual({
+			support: expect.objectContaining({
+				targetName: 'support',
+				exportDigest: 'sha256:root',
+				queue: { name: 'support.answer' },
+			}),
+		})
+		expect(exported.workflows).toEqual({})
+		expect(exported.agents?.privateResearcher).toBeUndefined()
+		expect(exported.harness).toEqual({
+			name: 'support',
+			roots: { agents: ['support'], workflows: [] },
+			dependencies: {
+				tools: ['lookupAccount'],
+				skills: ['support-policy'],
+				mcpServers: ['crm'],
+				agents: ['privateResearcher'],
+				workflows: ['privateEscalation'],
+			},
+		})
+		expect(JSON.stringify(exported)).not.toContain('must not be exported')
+	})
+
+	it('preserves callable Harness maps and the sanitized composition view when definitions are merged', () => {
+		const harness = createMountedHarnessServiceExport({
+			name: 'support',
+			dependencies: { tools: [], skills: [], mcpServers: [], agents: [], workflows: [] },
+			projections: [
+				{
+					visibility: 'root',
+					policy: { queueName: null },
+					targetExport: {
+						targetName: 'support',
+						kind: 'agent',
+						inputSchema: false,
+						validatedInputSchema: false,
+						outputSchema: false,
+						updateSchema: false,
+						interruptSchema: false,
+						invocation: { aggregate: true, stream: true, resumableInterrupts: [] },
+						stream: {
+							protocol: 'harness-execution-events-v1',
+							eventTypes: harnessExecutionEventTypesV1,
+							outputUpdates: [],
+						},
+					},
+					exportDigest: 'sha256:support',
+				},
+			],
+		})
+		const first = mergeServiceDefinition({}, { ...createDefinitions({ commandNames: ['create'] }), ...harness })
+		const merged = mergeServiceDefinition(first, createDefinitions({ commandNames: ['update'] }))
+
+		expect(merged.UserService['1'].agents?.support.exportDigest).toBe('sha256:support')
+		expect(merged.UserService['1'].harness).toEqual(harness.harness)
 	})
 })

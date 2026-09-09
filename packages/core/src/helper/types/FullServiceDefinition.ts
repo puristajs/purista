@@ -6,6 +6,8 @@ import type { QueueWorkerDefinition } from '../../core/types/queue/QueueWorkerDe
 import type { ScheduleDefinition } from '../../core/types/schedule/index.js'
 import type { StreamDefinition } from '../../core/types/stream/StreamDefinition.js'
 import type { SubscriptionDefinition } from '../../core/types/subscription/SubscriptionDefinition.js'
+import type { SerializedHarnessTargetExportV1 } from '../../HarnessMount/types.js'
+import type { MountedHarnessDefinition } from './HarnessServiceDefinition.js'
 
 export type FullServiceDefinition<S extends Service = Service> = {
 	[serviceName: string]: {
@@ -31,6 +33,9 @@ export type FullServiceDefinition<S extends Service = Service> = {
 				[scheduleName: string]: ScheduleDefinition
 			}
 			eventToQueueBindings?: EventToQueueBindingDefinition[]
+			agents?: Readonly<Record<string, SerializedHarnessTargetExportV1>>
+			workflows?: Readonly<Record<string, SerializedHarnessTargetExportV1>>
+			harness?: MountedHarnessDefinition
 		}
 	}
 }

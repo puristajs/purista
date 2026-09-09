@@ -57,6 +57,7 @@ import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretS
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
 import { createMountedHarnessTargetProjections } from '../HarnessMount/projection.js'
+import { createMountedHarnessQueueDefinitions } from '../HarnessMount/queue.js'
 import { canonicalHarnessJson } from '../HarnessMount/remoteTargetContract.js'
 import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
 import type {
@@ -67,6 +68,7 @@ import type {
 	MountedHarnessRuntimeConfig,
 	PuristaHostToolRuntimeDefinition,
 } from '../HarnessMount/types.js'
+import { createMountedHarnessServiceExport } from '../helper/exportServiceDefinitions.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
@@ -143,6 +145,15 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private queueWorkerDefinitionListResolved: QueueWorkerDefinitionListResolved<S['ServiceClassType']> = []
 	private scheduleDefinitionListResolved: ScheduleDefinition[] = []
 	private eventToQueueBindingListResolved: EventToQueueBindingDefinition[] = []
+	private definitionsResolution?: Promise<{
+		commands: CommandDefinitionListResolved<S['ServiceClassType']>
+		subscriptions: SubscriptionDefinitionListResolved<S['ServiceClassType']>
+		streams: StreamDefinitionListResolved<S['ServiceClassType']>
+		queues: QueueDefinitionListResolved<S['ServiceClassType']>
+		queueWorkers: QueueWorkerDefinitionListResolved<S['ServiceClassType']>
+		schedules: ScheduleDefinition[]
+		eventToQueueBindings: EventToQueueBindingDefinition[]
+	}>
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -390,13 +401,22 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				eventToQueueBindings: this.eventToQueueBindingListResolved,
 			}
 		}
+		if (this.definitionsResolution) return this.definitionsResolution
 
+		this.definitionsResolution = this.resolveDefinitionsOnce()
+		return this.definitionsResolution
+	}
+
+	private async resolveDefinitionsOnce() {
+		const mountedQueues = this.harnessMount
+			? createMountedHarnessQueueDefinitions(this.harnessMount)
+			: { queueDefinitions: [], queueWorkerDefinitions: [] }
 		const [commands, subscriptions, streams, queues, queueWorkers] = await Promise.all([
 			Promise.all(this.commandDefinitionList),
 			Promise.all(this.subscriptionDefinitionList),
 			Promise.all(this.streamDefinitionList),
-			Promise.all(this.queueDefinitionList),
-			Promise.all(this.queueWorkerDefinitionList),
+			Promise.all([...this.queueDefinitionList, ...mountedQueues.queueDefinitions]),
+			Promise.all([...this.queueWorkerDefinitionList, ...mountedQueues.queueWorkerDefinitions]),
 		])
 
 		this.commandDefinitionListResolved = commands
@@ -939,10 +959,20 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	/** Return service metadata plus all resolved definitions. */
 	async getFullServiceDefinition() {
 		const definitions = await this.resolveDefinitions()
+		let mountedHarness = {}
+		if (this.harnessMount) {
+			const inspection = this.harnessMount.definition.inspect()
+			mountedHarness = createMountedHarnessServiceExport({
+				name: inspection.name,
+				dependencies: inspection.dependencies,
+				projections: this.harnessMount.projections,
+			})
+		}
 
 		return {
 			...this.info,
 			...definitions,
+			...mountedHarness,
 			deprecated: this.deprecated,
 		}
 	}
