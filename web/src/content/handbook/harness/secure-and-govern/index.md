@@ -23,10 +23,9 @@ flowchart LR
   governance -->|blocked| denial[Safe tool denial]
   handler --> effect[External side effect]
 ```
-
 | Layer | Decides | Does not decide |
 | --- | --- | --- |
-| Agent `tools` / `builtinTools` | Which capabilities the model may propose | Whether one occurrence is allowed |
+| Agent `tools` | Which portable, built-in, MCP, or subagent capabilities the model may propose | Whether one occurrence is allowed |
 | Built-in permissions | Simple `bash`, `write`, and `edit` command/path behavior | Domain authorization for custom tools |
 | Governance | Typed execution, exposure, approval, and audit policy | Caller identity or trusted resource ownership |
 | Tool handler | Current authorization, tenant/resource access, transaction, idempotency | Model content safety |
@@ -67,9 +66,9 @@ filesystem/process isolation in the sandbox.
    for every admitted, denied, unmatched, failed, cancelled, timed-out, and
    shadow path.
 
-Native governance is included in `@purista/harness` and disabled until
-`.governance(...)` is configured. Every policy callback is bounded by
+Native governance is included in `@purista/harness` and disabled until a
+policy is configured on the definition and bound at `getInstance(...)`. Every policy callback is bounded by
 `decisionTimeoutMs`; callback failure or an invalid result fails closed.
 
-API reference: [`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance)
+API reference: [`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/)
 and [`GovernanceConfig`](/handbook/api/interfaces/_purista_harness.GovernanceConfig/).

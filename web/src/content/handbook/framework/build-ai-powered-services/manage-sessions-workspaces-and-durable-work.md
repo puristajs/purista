@@ -1,11 +1,10 @@
 ---
 title: Manage sessions and durable work
-description: Keep conversation identity separate from transport identity, bind Harness persistence explicitly, and model waits as resumable outcomes.
+description: Keep conversation identity separate from transport identity, bind persistence explicitly, and model waits as resumable outcomes.
 order: 396
 ---
 
-`traceId`, `correlationId`, `sessionId`, and `runId` serve different
-purposes.
+`traceId`, `correlationId`, `sessionId`, and `runId` have different jobs.
 
 | Value | Meaning |
 | --- | --- |
@@ -14,23 +13,41 @@ purposes.
 | Harness `sessionId` | Product conversation or durable AI context |
 | Harness `runId` | One execution attempt or resumable workflow run |
 
-Choose a stable product-owned session id and pass it in the invocation options.
-Do not reuse an HTTP connection id or arbitrary trace id as conversation
-identity.
+Choose a stable product-owned session id. Do not use an HTTP connection id or
+an arbitrary trace id as conversation identity.
 
 ```ts title="Run a durable workflow session"
-await context.workflow.Support['1'].review_rollback.run(input, {
+const review = context.workflow.Support['1'][reviewRollbackWorkflow.contract.id]
+const result = await review.run(input, {
   sessionId: `incident:${input.incidentId}`,
-  runId: input.reviewRunId,
 })
+
+if (result.outcome.status === 'interrupted' && result.outcome.interrupt.type === 'tool-approval') {
+  await reviewRepository.save(result.sessionId, result.outcome.interrupt)
+  const decision = await reviewRepository.waitForAuthorizedDecision(result.sessionId)
+
+  const request = result.outcome.interrupt.requests[0]
+  if (!request) throw new Error('Expected an approval request')
+
+  const resumed = await review.run(input, {
+    sessionId: result.sessionId,
+    resume: {
+      type: 'tool-approval',
+      runId: result.outcome.runId,
+      interruptId: result.outcome.interrupt.id,
+      revision: result.outcome.interrupt.revision,
+      eventId: decision.id,
+      decisions: [{ approvalId: request.approvalId, approved: decision.approved }],
+    },
+  })
+}
 ```
 
-Bind `HarnessStorage`, memory, workspace, and sandbox adapters through the
-service's `ai` runtime config. PURISTA StateStore is not a replacement for
-Harness checkpoints, and neither store is a transactional domain database.
+Bind Harness storage, memory, workspace, and sandbox adapters through the
+service's `ai` runtime config. PURISTA StateStore is for application key-value
+state. Neither store replaces a transactional domain database.
 
-Durable workflows may return `status: 'interrupted'` with an approval or
-external-wait payload. Persist the application-facing task in a database,
-authorize the reviewer through normal commands, and resume the same run after
-the decision. Rejection and expiry are business outcomes. Infrastructure or
-programming failures remain errors.
+An interrupted outcome can carry an approval or external-wait request. Persist
+the application task, authorize the reviewer through a normal command, and
+resume the same run after the decision. Rejection and expiry are business
+outcomes. Infrastructure and programming failures remain errors.

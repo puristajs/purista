@@ -36,7 +36,6 @@ flowchart LR
   retrieval[Application retrieval] --> retrievalRail[Retrieval rails]
   retrievalRail --> model
 ```
-
 Every rail returns `allow`, `block`, or a transform valid for its phase. A
 block stops that path. An invalid configuration, thrown evaluator, invalid
 result, timeout, or cancellation fails closed instead of silently allowing the
@@ -106,7 +105,7 @@ inspection.
 
 Installation never protects an agent automatically. Set `guardrails: rails`
 inside each protected default-loop agent definition. The Harness resolves that
-binding during agent registration and `.build()` validates every referenced
+binding when the instance is created and validates every referenced
 tool and model alias before the runtime can start.
 
 ## Observe decisions without retaining content

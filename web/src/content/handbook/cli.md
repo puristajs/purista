@@ -1,16 +1,15 @@
 ---
 title: Installation & CLI
-description: Scaffold projects, generate services, and manage PURISTA artifacts from the command line.
+description: Scaffold projects and generate PURISTA services, business capabilities, and service-owned Harness definitions.
 order: 30
 ---
 
 # Installation & CLI
 
-PURISTA provides a blueprint-driven CLI that scaffolds projects and generates services, commands, subscriptions, streams, queues, and AI agents. It supports interactive, non-interactive, and programmatic usage.
+The PURISTA CLI creates a project and adds typed definitions to it. It supports
+interactive use and deterministic non-interactive use.
 
-## Quick start
-
-Create a new project in one command:
+## Create a project
 
 ::: code-group
 
@@ -22,61 +21,16 @@ npm create purista@latest
 bun create purista@latest
 ```
 
-```bash [yarn]
-yarn create purista@latest
-```
-
 ```bash [pnpm]
 pnpm create purista@latest
 ```
 
 :::
 
-This runs the same engine as `purista init my-app`. Both generate an identical project shape.
+You can also run `purista init my-app`. The initializer asks about the runtime,
+EventBridge, HTTP server, linter, formatter, and package manager.
 
-## AI-assisted setup
-
-If you use Codex, Claude, Cursor, or another AI coding assistant, new PURISTA projects are ready by default. The initializer writes `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local skill links for `.agents/skills/purista` and `.claude/skills/purista`.
-
-The skill links target `node_modules/@purista/core/skills/purista`, so normal dependency updates keep project-local skill guidance aligned with the framework. See [Install the PURISTA AI Skill](./install-ai-skill.md) for existing projects and assistant-specific mirrors.
-
-## CLI installation
-
-Generated projects install `@purista/cli` as a dev dependency and expose local scripts such as `add:service`, `add:command`, and `add:agent`. Prefer those scripts inside projects so the CLI version matches the project.
-
-Install globally only when you need an outside-project maintenance command:
-
-::: code-group
-
-```bash [npm]
-npm install -g @purista/cli
-```
-
-```bash [bun]
-bun add --global @purista/cli
-```
-
-```bash [yarn]
-yarn global add @purista/cli
-```
-
-```bash [pnpm]
-pnpm add -g @purista/cli
-```
-
-:::
-
-## Project scaffolding
-
-The CLI guides you through runtime, event bridge, HTTP server, and linter choices. The result is an ESM project skeleton ready for development.
-
-```bash
-purista init my-app
-```
-
-### Non-interactive mode
-
-For CI, scripts, or agentic tooling:
+For scripts and CI, pass every required choice:
 
 ```bash
 purista init my-app \
@@ -91,200 +45,164 @@ purista init my-app \
   --no-install
 ```
 
-Non-interactive mode never prompts. It applies only declared defaults and fails fast when required values are missing.
+Non-interactive mode never prompts. It fails before writing when a required
+value is missing or a generated path or identifier would collide.
 
-### Scaffold options
+Generated projects install `@purista/cli` as a development dependency. Use the
+project scripts so generation follows the version used by the project.
 
-| Option | Values | Default | Description |
-|---|---|---|---|
-| `runtime` | `node`, `bun` | `node` | JavaScript runtime |
-| `event-bridge` | `default`, `amqp`, `mqtt`, `nats`, `dapr` | `default` | Message transport |
-| `webserver` | flag | off | Include Hono-based HTTP server |
-| `linter` | `biome`, `eslint`, `none` | `none` | Code linter |
-| `formatter` | `biome`, `prettier`, `none` | `none` | Code formatter |
-
-## Generating business artifacts
-
-After scaffolding, use the local package scripts to generate services and their artifacts:
+## Add Framework definitions
 
 ```bash
-npm run add:service      # interactive service creation
-npm run add:command      # add command to existing service
-npm run add:subscription # add subscription to existing service
-npm run add:stream       # add stream for live updates
-npm run add:queue        # add queue for async workloads
-npm run add:queue-worker # add worker for existing queue
-npm run add:agent        # add AI agent
-npm run add:workflow     # add Harness workflow
+npm run add:service
+npm run add:command
+npm run add:subscription
+npm run add:stream
+npm run add:queue
+npm run add:queue-worker
 ```
 
-Use the matching package manager and runtime for your project: `npm run ...`, `pnpm run ...`, `yarn ...`, or `bun run ...`.
-
-### Common examples
+For example:
 
 ```bash
-# Create a service
-npm run add:service -- user --description "User management"
-
-# Add a command to the service
 npm run add:command -- sign-up \
   --service user \
   --service-version 1 \
   --description "Register a new user"
+```
 
-# Add a subscription that reacts to events
-npm run add:subscription -- welcome-email \
-  --service email \
-  --service-version 1 \
-  --description "Send welcome email"
+The CLI checks all planned paths and edits before the first write. It keeps the
+service definition lists typed, so later generation can add another definition
+without losing inference.
 
-# Add a queue for background processing
-npm run add:queue -- process-jobs \
-  --service user \
-  --service-version 1 \
-  --description "Background job processor"
+## Add Harness definitions
 
-# Add a queue worker
-npm run add:queue-worker -- process-jobs \
-  --service user \
-  --service-version 1 \
-  --queue processJobs
+Agents, workflows, host tools, portable tools, Skills, and MCP definitions live
+with the service that owns the Harness mount.
 
-# Add an AI agent
-npm run add:agent -- triage \
+```bash
+npm run add:agent -- triage-ticket \
   --service support \
   --service-version 1 \
-  --description "Ticket triage agent"
+  --description "Classify a support ticket" \
+  --http none
 
-# Add a durable Harness workflow
 npm run add:workflow -- resolve-ticket \
   --service support \
   --service-version 1 \
-  --description "Resolve a ticket in explicit workflow steps"
+  --description "Coordinate ticket resolution"
+
+npm run add:tool -- get-incident \
+  --service support \
+  --service-version 1 \
+  --kind purista
+
+npm run add:tool -- calculate-risk \
+  --service support \
+  --service-version 1 \
+  --kind portable
+
+npm run add:skill -- incident-review \
+  --service support \
+  --service-version 1 \
+  --runtime node
+
+npm run add:mcp -- issue-tracker \
+  --service support \
+  --service-version 1 \
+  --tool lookup-issue \
+  --remote-name lookup_issue
 ```
 
-## CLI workflow
+`add:agent --http` accepts `none`, `command`, or `stream`. The default is
+`none`, including non-interactive mode:
 
-```mermaid
-flowchart TD
-    A["`purista init my-app`"] --> B[Choose runtime & bridge]
-    B --> C[Project scaffolded]
-    C --> D["`npm run add:service`"]
-    D --> E["`npm run add:command`"]
-    E --> F["`npm run add:subscription`"]
-    F --> G[Run tests]
-    G --> H["`npm run add:queue`"]
-    H --> I[Deploy]
-```
+- `command` creates a protected aggregate endpoint that returns
+  `{ sessionId, outcome }`;
+- `stream` creates a protected AI SDK UI Message Stream v1 endpoint with
+  request parsing, resume support, SSE output, and cancellation;
+- `none` creates no HTTP wrapper.
 
-## Generated file structure
+A generated host tool uses `ServiceBuilder.defineTool(...)`. A portable tool
+uses `defineTool(...)`. A generated tool, Skill, or MCP server is a leaf: the
+CLI tells you which definition to edit, but it does not register the leaf
+automatically. Skills attach to agents. Tools can also be used by workflows.
+MCP connection URLs, tokens, commands, and environment variables belong in
+runtime configuration, not the definition.
 
-The CLI creates a consistent, predictable structure:
+## First-agent bootstrap
+
+When you add the first agent to a project with the standard `src/index.ts`
+entrypoint, the CLI adds the OpenAI Harness provider, an `OPENAI_API_KEY`
+environment schema entry, and the primary `ai.model` runtime binding. This is
+the only generation step that needs provider bootstrap. Tests remain
+credential-free by using a fake model.
+
+If the project uses a different entrypoint, the CLI keeps the generated agent
+usable and prints the exact manual bootstrap steps instead of changing an
+unknown composition root.
+
+A protected generated HTTP wrapper requires Hono protect middleware. Configure
+authentication with `setProtectMiddleware(...)`; use command, stream, or
+target guards for business authorization.
+
+## Generated layout
+
+A service and its Harness definitions share one versioned directory:
 
 ```text
-AGENTS.md
-CLAUDE.md
-.agents/
-├── IMPLEMENTATION.md
-└── skills/
-    └── purista -> node_modules/@purista/core/skills/purista
-.claude/
-└── skills/
-    └── purista -> node_modules/@purista/core/skills/purista
 src/
 ├── service/
-│   ├── serviceEvent.enum.ts
-│   └── user/
-│       ├── generalUserServiceInfo.ts
+│   └── support/
+│       ├── generalSupportServiceInfo.ts
 │       └── v1/
-│           ├── userServiceConfig.ts
-│           ├── userV1ServiceBuilder.ts
-│           ├── userV1Service.ts
-│           ├── userV1Service.test.ts
+│           ├── supportV1ServiceBuilder.ts
+│           ├── supportV1Service.ts
 │           ├── command/
-│           │   └── signUp/
-│           │       ├── schema.ts
-│           │       ├── types.ts
-│           │       ├── signUpCommandBuilder.ts
-│           │       └── signUpCommandBuilder.test.ts
-│           └── subscription/
-│               └── welcomeEmail/
-│                   ├── schema.ts
-│                   ├── welcomeEmailSubscriptionBuilder.ts
-│                   └── welcomeEmailSubscriptionBuilder.test.ts
+│           ├── stream/
+│           ├── queue/
+│           ├── queue-worker/
+│           └── harness/
+│               ├── supportHarness.ts
+│               ├── agent/
+│               │   └── triageTicket/
+│               ├── workflow/
+│               │   └── resolveTicket/
+│               ├── tool/
+│               ├── skill/
+│               └── mcp/
 ├── eventbridge.ts
 ├── http.ts
 └── index.ts
 ```
 
-Key files:
-
-| File | Purpose |
-|---|---|
-| `*ServiceBuilder.ts` | Service metadata, config, resources |
-| `*Service.ts` | Wires commands, subscriptions, streams into the service |
-| `schema.ts` | Zod schemas for input, output, and parameters |
-| `types.ts` | Derived TypeScript types from schemas |
-| `*CommandBuilder.ts` | Command definition with business logic |
-| `*SubscriptionBuilder.ts` | Subscription definition with event filter |
-| `eventbridge.ts` | Bootstrap file for the event bridge instance |
-
-::: warning Keep CLI-managed definition lists
-When the CLI generates or updates service files, keep `commandDefinitions` and `subscriptionDefinitions` as typed constants:
-
-```typescript
-const commandDefinitions: Parameters<typeof builder['addCommandDefinition']>[0][] = [
-  myCommandBuilder.getDefinition(),
-]
-```
-
-Renaming or untyping these lists can break follow-up CLI updates and weaken inferred types.
-:::
-
-## Programmatic usage
-
-Tools and agents can invoke the CLI engine directly:
-
-```typescript
-import { createPuristaCliEngine, resolvePuristaCommand, runPuristaCommand } from '@purista/cli'
-
-const engine = createPuristaCliEngine({ /* options */ })
-const command = resolvePuristaCommand(engine, 'add', 'command')
-const result = await runPuristaCommand(command, { service: 'user', serviceVersion: 1 })
-```
+The Harness root imports direct definitions and adds agents and workflows with
+`.addAgent(...)` and `.addWorkflow(...)`. The service mounts that root once
+with `ServiceBuilder.mountHarness(...)`.
 
 ## Project configuration
 
-Since version 1.12.0, PURISTA expects a `purista.json` file in the project root. It controls file naming conventions, event naming, and project structure.
+`purista.json` controls naming and project paths:
 
 ```json [purista.json]
 {
   "$schema": "https://purista.dev/schemas/1.12.0/schema.json",
   "runtime": "node",
   "eventBridge": "nats",
-  "fileConvention": "kebab",
+  "fileConvention": "camel",
   "eventConvention": "camel",
   "linter": "biome",
   "formatter": "biome",
-  "servicePath": "src/services"
+  "servicePath": "src/service"
 }
 ```
 
-### Configuration options
-
-| Option | Type | Default | Allowed values |
-|---|---|---|---|
-| `$schema` | `string` | `https://purista.dev/schemas/1.12.0/schema.json` | Any valid JSON schema URI |
-| `runtime` | `string` | `node` | `node`, `bun` |
-| `eventBridge` | `string` | `default` | `default`, `amqp`, `mqtt`, `nats`, `dapr` |
-| `fileConvention` | `string` | `camel` | `camel`, `snake`, `kebab`, `pascal`, `pascalSnake` |
-| `eventConvention` | `string` | `camel` | `camel`, `snake`, `kebab`, `pascal`, `pascalSnake`, `constantCase`, `dotCase`, `pathCase`, `trainCase` |
-| `linter` | `string` | `none` | `biome`, `eslint`, `none` |
-| `formatter` | `string` | `none` | `biome`, `prettier`, `none` |
-| `servicePath` | `string` | `src/service` | Any valid relative path |
+Use a relative `servicePath`. Identifier casing follows the configured file and
+event conventions while generated Harness ids use their required canonical
+form.
 
 ## Next steps
 
-- [Quickstart](./1_quickstart/index.md) — build your first service step by step
-- [Service Builder](./2_building_business-logic/service/the-service-builder.md) — understand the generated service structure
-- [Command Builder](./2_building_business-logic/command/the-command-builder.md) — add business logic to your service
+- [Build services](/handbook/framework/build-services/)
+- [Build AI-powered services](/handbook/framework/build-ai-powered-services/)
+- [Expose and consume services](/handbook/framework/expose-and-consume-services/)

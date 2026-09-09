@@ -40,7 +40,7 @@ credentials. They do not override a shorter remaining Harness run budget.
 | `delegation.maxParallelChildAgentCalls` | `8` | Active child-agent calls in one workflow run. |
 | `delegation.maxDepth` | `1` | Local workflow-to-agent delegation depth. |
 
-Use [`.defaults(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#defaults)
+Use the model and runtime defaults described in [configuration and model settings](/handbook/harness/configure-the-runtime/configuration-and-model-settings/)
 once at composition time. A non-positive iteration or concurrency limit and a
 negative timeout fail validation; `0` has the documented special meaning only
 where the corresponding type permits it.

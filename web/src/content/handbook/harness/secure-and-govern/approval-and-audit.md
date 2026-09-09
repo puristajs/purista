@@ -18,7 +18,6 @@ flowchart LR
   decision --> resume[Resume same run]
   resume --> tools[Execute approved tools once]
 ```
-
 ## Require approval
 
 A native governance rule can demand approval for a business condition:
@@ -32,7 +31,6 @@ rule({
   reasonCode: 'large_transfer',
 })
 ```
-
 Built-in tool permissions can also use `mode: 'require_approval'`. Harness
 combines all demands for one tool batch into a deterministic interrupt.
 
@@ -51,7 +49,6 @@ if (first.status === 'interrupted' && first.interrupt.type === 'tool-approval') 
   })
 }
 ```
-
 Each `ToolApprovalRequest` contains the tool id, call id, model-proposed input,
 and content-free policy evidence. It does not contain trusted caller identity.
 The application owns reviewer authentication, tenant and role authorization,
@@ -78,7 +75,6 @@ const outcome = await session.agents.banker.run(input, {
   },
 })
 ```
-
 Harness verifies the resume binding and continues from its checkpoint without
 asking the model to repeat the approved tool request. Replaying the same
 decision is idempotent. Rejection uses `approved: false`; the agent receives

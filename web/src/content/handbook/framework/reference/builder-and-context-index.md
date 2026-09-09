@@ -19,6 +19,7 @@ then enforces the same contract at execution time.
 | Durable job contract | [`QueueDefinitionBuilder`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/) | Queue payload, parameter, result, scheduling, and lifecycle metadata |
 | Queue execution | [`QueueWorkerBuilder`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/) | `QueueWorkerFunctionContext` and `context.job` controls |
 | External schedule contract | [`ScheduleDefinitionBuilder`](/handbook/api/classes/_purista_core.ScheduleDefinitionBuilder/) | No in-process schedule handler; the chosen target owns execution |
+| Service-owned AI tool | [`ServiceBuilder.defineTool(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#definetool) | `HarnessHostToolBuilder` plus only the PURISTA capabilities declared before `setHandler(...)` |
 
 ## Map declarations to context
 

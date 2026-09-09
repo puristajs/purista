@@ -61,20 +61,25 @@ content, or an exception message as a code.
 ## Bind and preflight
 
 ```ts title="src/harness.ts"
-const harness = defineHarness({ name: 'support' })
-	.models({ assistant: { provider, model: 'selected-in-composition', capabilities: ['object'] } })
-	.agent('answer', {
-		model: 'assistant',
-		input: z.string(),
-		output: z.string(),
-		instructions: 'Answer concisely.',
-		guardrails: rails,
-	})
-	.build()
+import { defineAgent, defineHarness } from '@purista/harness'
+
+const answer = defineAgent('answer', {
+	model: 'assistant',
+	input: z.string(),
+	output: z.string(),
+	instructions: 'Answer concisely.',
+	guardrails: rails,
+})
+const definition = defineHarness({ name: 'support' }).addAgent(answer)
+const harness = await definition.getInstance({
+	models: {
+		assistant: { provider, model: 'selected-in-composition' },
+	},
+})
 ```
 
 The `guardrails` field applies input, final-output, tool-input, and tool-output
-rails only to a default-loop agent; a custom handler rejects the field.
+rails to the standard agent loop.
 Retrieval remains
 application-owned and uses `filterRetrievedChunks(...)` before selected chunks
 enter model context. The [Guardrails overview](/harness/guardrails/) is the
@@ -89,7 +94,8 @@ timing, final-output lifecycle, transform targets, and composition guarantees.
 Actions run in order and transformations feed the next action. Invalid actions,
 timeouts, cancellation, detector/codec faults, and malformed results fail
 closed. No rail can grant authority, inspect opaque model reasoning, roll back
-an admitted external effect, or intercept direct model calls/custom handlers.
+an admitted external effect, or automatically intercept a workflow's direct
+model calls.
 
 ## Sensitive data, approval, and evidence
 

@@ -23,7 +23,6 @@ flowchart LR
   outputSchema --> outputRail[Tool-output flow]
   outputRail --> model[Return result to model]
 ```
-
 ## 1. Match the exact tool value
 
 ```ts title="src/guardrails/toolActions.ts"
@@ -49,7 +48,6 @@ export const redactPublishedNote = defineGuardrailAction<'tool_input', typeof pu
 	}),
 })
 ```
-
 `tools` is required and non-empty for tool phases. It limits when the action
 runs; it does not grant the agent that tool. The agent still needs
 `tools: ['publish_note']`, and the handler still authorizes the business action.
@@ -82,7 +80,6 @@ export const exposePublicStatus = defineGuardrailAction<'tool_output', typeof in
 	}),
 })
 ```
-
 The tool handler has already run at this phase. A block prevents the result
 from reaching the model, but cannot roll back the handler's side effect. If
 content must decide whether the effect is admitted, inspect it at `tool_input`
@@ -104,7 +101,6 @@ export const supportRails = defineGuardrails({
 	},
 })
 ```
-
 The maintained
 [composed Guardrails example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
 contains both phases, registered tools, a scripted model loop, governance,

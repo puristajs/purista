@@ -38,21 +38,31 @@ the durable checkpoint.
 
 Production deployments supply one shared `HarnessStorage`. It owns
 conversation history, run records, durable checkpoints, leases, and opaque
-external waits in the same transactional backing system. Passing it to
-`.storage(store)` derives the runtime/checkpoint/wait facets automatically.
+external waits in the same transactional backing system. Pass it as the
+`storage` runtime binding in `getInstance(...)`.
 
 `SqliteHarnessStorage` and `localDurableExecution()` remain zero-dependency,
 single-host Node.js/Bun choices for development, demos, and restart tests—not
 for replicated PURISTA services.
 
 ```ts title="src/bootstrap.ts: durable storage composition"
+import { defineHarness, defineWorkflow, type HarnessStorage } from '@purista/harness'
+
 const storage: HarnessStorage = createProductionHarnessStorage()
 
-const harness = defineHarness({ name: 'payment-review' })
-	.storage(storage)
-	.requires(['storage.persistent', 'storage.external_wait'])
-	// models, agents, and workflow definitions
-	.build()
+const reviewPayment = defineWorkflow('reviewPayment', {
+	input: paymentInputSchema,
+	output: paymentResultSchema,
+	durable: true,
+	async handler(context) {
+		// Durable steps and the external wait are defined here.
+		return runPaymentReview(context)
+	},
+})
+
+const definition = defineHarness({ name: 'paymentReview' })
+	.addWorkflow(reviewPayment)
+const harness = await definition.getInstance({ storage })
 ```
 
 Inside the workflow, create the **application review task first** using a

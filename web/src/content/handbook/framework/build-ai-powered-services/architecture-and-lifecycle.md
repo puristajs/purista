@@ -5,12 +5,13 @@ order: 391
 ---
 
 A Harness definition is immutable application metadata. It can run through the
-standalone Harness runtime or be mounted by a PURISTA service. Mounting assigns
-selected agents and workflows normal PURISTA addresses:
+standalone Harness runtime or be mounted by a PURISTA service. Mounting gives
+each root agent and workflow a normal PURISTA address. Agents and workflows
+used only as dependencies stay private to the Harness graph.
 
 ```text title="Mounted target address"
 service name + service version + target name
-Support      + 1               + triage_ticket
+Support      + 1               + triageTicket
 ```
 
 Every call crosses EventBridge. A caller does not keep a reference to the
@@ -19,24 +20,27 @@ therefore works when caller and target later run in different processes.
 
 ## Lifecycle
 
-1. Compose one portable service definition with `defineHarness()` and native Harness modules.
-2. Mount it with `ServiceBuilder.mountHarness(definition, policy)`.
-3. Supply concrete runtime adapters under `getInstance(eventBridge, { ai: ... })`.
-4. Start EventBridge and the service through the normal PURISTA lifecycle.
-5. Call a published target with an address-first client.
-6. Let service destruction close its Harness runtime and owned adapters.
+1. Define agents and workflows with `defineAgent(...)` and `defineWorkflow(...)`.
+2. Compose one service-owned graph with `defineHarness().addAgent(...)` and
+   `.addWorkflow(...)`.
+3. Mount it with `ServiceBuilder.mountHarness(definition, policy)`.
+4. Supply concrete runtime adapters under `getInstance(eventBridge, { ai: ... })`.
+5. Start EventBridge and the service through the normal PURISTA lifecycle.
+6. Call the mounted target with an address-first client.
+7. Let service destruction close its Harness runtime and owned adapters.
 
 The service accepts one `mountHarness(...)` call and creates one Harness
-instance for that definition. Add further agents, workflows, tools, and Skills
-through native Harness modules before mounting. Do not
+instance for that definition. Add further agents and workflows to the graph
+before mounting. Add tools, Skills, and MCP tools to the definitions that use
+them. Do not
 construct another Harness inside a command handler. That would bypass mount
 policy, trusted identity, host-tool bindings, lifecycle, and EventBridge.
 
-Each agent or workflow has one input schema and one final output schema. The
-definition may additionally declare portable updates: `none`, `text-delta`,
-or `object-snapshot`. A consumer chooses `.run(...)` for
-`RunOutcome<Output>` or `.stream(...)` for
-`AsyncIterable<ExecutionEvent<Output>>`.
+Each agent or workflow has one input schema and one final output schema. An
+address-first `.run(...)` call returns `{ sessionId, outcome }`. The `outcome`
+is either completed output or a typed interruption. An address-first
+`.stream(...)` call returns a cancellable execution stream with the resolved
+`sessionId` and portable execution events.
 
 An approval or external wait is an interrupted outcome. It is not an exception
 and must not become an HTTP 500 response.

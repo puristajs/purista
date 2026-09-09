@@ -131,7 +131,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 392,
     "title": "Build and mount the first agent",
-    "description": "Scaffold a native Harness module, compose and mount it once in the owning service, then call it through EventBridge.",
+    "description": "Define one agent beside its owning service, mount it once, and call it through EventBridge.",
     "pageRole": "task"
   },
   {
@@ -140,7 +140,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 393,
     "title": "Mount Harness and bind the runtime",
-    "description": "Publish selected targets, bind host tools and business policy, then supply concrete AI runtime adapters at service creation.",
+    "description": "Mount one Harness definition, apply target policy, and supply the runtime adapters that its graph needs.",
     "pageRole": "task"
   },
   {
@@ -149,7 +149,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 394,
     "title": "Choose run, stream, or queued execution",
-    "description": "Let consumers select aggregate or progressive delivery, and add a PURISTA queue only for admission, retry, or disconnected completion.",
+    "description": "Choose aggregate, progressive, or durable delivery for each mounted Harness target.",
     "pageRole": "task"
   },
   {
@@ -158,7 +158,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 395,
     "title": "Use tools, skills, and service resources",
-    "description": "Keep portable AI capabilities in Harness and bridge business operations through typed PURISTA host tools with trusted identity.",
+    "description": "Keep portable tools in Harness and define service-owned host tools for trusted business operations.",
     "pageRole": "task"
   },
   {
@@ -167,7 +167,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 396,
     "title": "Manage sessions and durable work",
-    "description": "Keep conversation identity separate from transport identity, bind Harness persistence explicitly, and model waits as resumable outcomes.",
+    "description": "Keep conversation identity separate from transport identity, bind persistence explicitly, and model waits as resumable outcomes.",
     "pageRole": "task"
   },
   {
@@ -176,7 +176,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 397,
     "title": "Publish results and react through subscriptions",
-    "description": "Publish a completed mounted target as a fact, and emit explicit events only for meaningful facts that happen during execution.",
+    "description": "Publish a completed target as a fact and emit explicit events for meaningful facts during execution.",
     "pageRole": "task"
   },
   {
@@ -185,7 +185,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 398,
     "title": "Coordinate workflows and human review",
-    "description": "Define orchestration in Harness, publish workflows through PURISTA, and expose approval waits as durable application state instead of failures.",
+    "description": "Define workflows directly, mount them through PURISTA, and expose approval waits as durable application state.",
     "pageRole": "task"
   },
   {
@@ -194,7 +194,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 399,
     "title": "Invoke and expose a mounted agent",
-    "description": "Call mounted targets through typed EventBridge clients and add explicit command or stream adapters for external consumers.",
+    "description": "Call mounted targets through typed EventBridge clients and add protected command or AI SDK stream projections for HTTP.",
     "pageRole": "task"
   },
   {
@@ -203,7 +203,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 3991,
     "title": "Secure the service boundary",
-    "description": "Authenticate at the HTTP edge, propagate trusted identity, and enforce business authorization with mount guards and domain commands.",
+    "description": "Authenticate at the HTTP edge, propagate trusted identity, and authorize business actions with target guards and domain commands.",
     "pageRole": "operations"
   },
   {
@@ -212,7 +212,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 3992,
     "title": "Test AI-powered services deterministically",
-    "description": "Test portable Harness behavior with a fake model, PURISTA consumers with context stubs, and protocol adapters at their own boundary.",
+    "description": "Test portable graphs, mounted service integration, and HTTP protocol adapters without provider credentials.",
     "pageRole": "task"
   },
   {
@@ -230,7 +230,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services/secure-the-service-boundary",
     "order": 3992,
     "title": "Configure guardrails and governance",
-    "description": "Put content controls in the portable Harness definition and keep business authorization at the PURISTA service boundary.",
+    "description": "Put content controls in the agent definition and business authorization at the PURISTA service boundary.",
     "pageRole": "task"
   },
   {
@@ -1346,7 +1346,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/reference",
     "order": 1210,
     "title": "CLI and project structure",
-    "description": "Use the project-local CLI to create consistent services, commands, subscriptions, streams, workers, and agents.",
+    "description": "Use the project-local CLI to create Framework definitions and service-owned Harness graphs.",
     "pageRole": "task"
   },
   {
@@ -1939,8 +1939,8 @@ const canonicalContentManifest = [
     "topicId": "harness/add-capabilities/mcp",
     "parentTopicId": "harness/add-capabilities",
     "order": 430,
-    "title": "Connect MCP tools",
-    "description": "Use an explicit MCP boundary for separately operated tool servers.",
+    "title": "Connect an MCP server",
+    "description": "Declare remote MCP tools separately from the transport and sandbox that run them.",
     "pageRole": "task"
   },
   {
@@ -1949,7 +1949,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/add-capabilities",
     "order": 420,
     "title": "Add skills",
-    "description": "Mount reviewed procedures and references without turning them into implicit authority.",
+    "description": "Mount reviewed instruction files without confusing a skill with authorization or tools.",
     "pageRole": "task"
   },
   {
@@ -1958,7 +1958,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/add-capabilities",
     "order": 410,
     "title": "Create typed tools",
-    "description": "Expose narrow, application-authorized operations to an agent.",
+    "description": "Define native application tools with schemas, authorization, and deterministic tests.",
     "pageRole": "task"
   },
   {
@@ -1976,7 +1976,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/build-agents",
     "order": 315,
     "title": "Create a portable Harness definition",
-    "description": "Declare model requirements and host tools once, then bind providers and application operations at the runtime boundary.",
+    "description": "Declare reusable agents and workflows once, then bind models and runtime adapters at the application boundary.",
     "pageRole": "task"
   },
   {
@@ -2001,9 +2001,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/build-agents/inputs-and-structured-outputs",
     "parentTopicId": "harness/build-agents",
-    "order": 330,
-    "title": "Inputs and structured outputs",
-    "description": "Make the application contract explicit with schemas before a model call and after its result.",
+    "order": 320,
+    "title": "Validate inputs and structured outputs",
+    "description": "Keep application input and model-facing output schemas explicit at the agent boundary.",
     "pageRole": "task"
   },
   {
@@ -2011,8 +2011,8 @@ const canonicalContentManifest = [
     "topicId": "harness/build-agents/instructions-and-runtime-context",
     "parentTopicId": "harness/build-agents",
     "order": 320,
-    "title": "Write instructions and use agent context",
-    "description": "Define the model-facing job, derive bounded per-run instructions, and use each custom-handler context field for its intended responsibility.",
+    "title": "Write agent instructions and prompts",
+    "description": "Define one stable model job and map validated input to provider-neutral user messages.",
     "pageRole": "task"
   },
   {
@@ -2020,8 +2020,8 @@ const canonicalContentManifest = [
     "topicId": "harness/build-agents/control-the-model-loop",
     "parentTopicId": "harness/build-agents",
     "order": 325,
-    "title": "Control the model loop",
-    "description": "Bound model turns, change one step safely, and stop before unneeded tool execution.",
+    "title": "Bound the agent loop",
+    "description": "Limit model steps, tool calls, subagent calls, parallel delegation, and depth at the agent definition.",
     "pageRole": "task"
   },
   {
@@ -2057,7 +2057,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
     "order": 260,
     "title": "Configure Amazon Bedrock",
-    "description": "Use the Bedrock adapter with an AWS credential chain, explicit region, and application-owned model access policy.",
+    "description": "Bind Bedrock with an AWS credential chain, explicit region, and model access policy.",
     "pageRole": "task"
   },
   {
@@ -2066,16 +2066,16 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
     "order": 250,
     "title": "Configure Anthropic",
-    "description": "Enable the Anthropic provider adapter and keep API credentials and model selection in the application composition root.",
+    "description": "Bind Anthropic Messages to a stable Harness model alias.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/configure-the-runtime/azure-ai-foundry",
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
-    "order": 270,
+    "order": 265,
     "title": "Configure Azure AI Foundry",
-    "description": "Enable the Azure AI Foundry adapter with an endpoint and either an API key or Azure credential.",
+    "description": "Bind an Azure AI Foundry deployment to a stable Harness model alias.",
     "pageRole": "task"
   },
   {
@@ -2084,7 +2084,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime",
     "order": 215,
     "title": "Call model operations",
-    "description": "Use provider-neutral text, structured output, embedding, reranking, and media handles with the correct aggregate and streaming contracts.",
+    "description": "Use provider-neutral text, structured output, embeddings, and media operations with explicit aggregate and streaming contracts.",
     "pageRole": "task"
   },
   {
@@ -2093,7 +2093,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime",
     "order": 210,
     "title": "Configuration and model settings",
-    "description": "Declare model capabilities truthfully, bound output, and configure generation settings without assuming every provider or model accepts them.",
+    "description": "Bind truthful model capabilities and safe generation defaults at the Harness runtime boundary.",
     "pageRole": "task"
   },
   {
@@ -2118,9 +2118,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/configure-the-runtime/grounded-retrieval",
     "parentTopicId": "harness/configure-the-runtime",
-    "order": 280,
+    "order": 270,
     "title": "Build grounded retrieval",
-    "description": "Keep authorization, retrieval, reranking, and evidence assembly in typed application workflow code.",
+    "description": "Keep retrieval authorization in application code while Harness supplies model and embedding operations.",
     "pageRole": "task"
   },
   {
@@ -2129,7 +2129,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
     "order": 240,
     "title": "Configure OpenAI",
-    "description": "Enable the OpenAI provider adapter, choose the API surface, and verify one bounded model call.",
+    "description": "Bind the OpenAI provider adapter to a stable Harness model alias.",
     "pageRole": "task"
   },
   {
@@ -2138,7 +2138,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
     "order": 245,
     "title": "Configure Google Gemini",
-    "description": "Enable the Google Gemini provider adapter with application-owned Google API or Vertex configuration, then declare only the model capabilities you use.",
+    "description": "Bind Google Gemini through the official SDK with explicit API or Vertex configuration.",
     "pageRole": "task"
   },
   {
@@ -2146,8 +2146,8 @@ const canonicalContentManifest = [
     "topicId": "harness/configure-the-runtime/provider-selection",
     "parentTopicId": "harness/configure-the-runtime",
     "order": 230,
-    "title": "Choose a model provider",
-    "description": "Compare first-party providers by deployment, identity, model access, and operational ownership, then configure the selected adapter.",
+    "title": "Select a model provider",
+    "description": "Choose a provider by operation support, deployment boundary, and recovery behavior.",
     "pageRole": "hub"
   },
   {
@@ -2156,7 +2156,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/provider-selection",
     "order": 280,
     "title": "Build a custom model provider",
-    "description": "Map an application-owned SDK or HTTP client to the provider-neutral Harness model contract and verify it offline.",
+    "description": "Implement only the provider-neutral operations your application can verify.",
     "pageRole": "adapter"
   },
   {
@@ -2174,7 +2174,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/observability",
     "order": 292,
     "title": "Configure structured logging",
-    "description": "Emit correlated JSON logs from Harness workflows and tools without copying prompts or secrets into the log pipeline.",
+    "description": "Emit correlated JSON logs without copying prompts, secrets, or raw tool payloads into the log pipeline.",
     "pageRole": "task"
   },
   {
@@ -2183,7 +2183,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/configure-the-runtime/observability",
     "order": 294,
     "title": "Export OpenTelemetry traces and metrics",
-    "description": "Start an application-owned OpenTelemetry SDK, configure safe Harness telemetry, propagate trace context, and flush on shutdown.",
+    "description": "Start the application-owned OpenTelemetry SDK before creating the Harness and keep capture content-free by default.",
     "pageRole": "task"
   },
   {
@@ -2191,26 +2191,26 @@ const canonicalContentManifest = [
     "topicId": "harness/manage-context-and-state/conversation-history",
     "parentTopicId": "harness/manage-context-and-state",
     "order": 610,
-    "title": "Bound conversation history",
-    "description": "Retain complete turns deliberately and make direct delivery retries safe.",
+    "title": "Manage conversation history",
+    "description": "Keep session history, memory, and business records separate and apply an explicit retention policy.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/manage-context-and-state/durable-workspaces",
     "parentTopicId": "harness/manage-context-and-state",
-    "order": 640,
+    "order": 630,
     "title": "Use durable workspaces",
-    "description": "Persist run artifacts separately from session history and sandbox execution.",
+    "description": "Pair Harness control storage, checkpointed workspace files, and an appropriate sandbox for restartable work.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/manage-context-and-state/postgresql-harness-storage",
     "parentTopicId": "harness/manage-context-and-state",
-    "order": 641,
+    "order": 645,
     "title": "Persist Harness state in PostgreSQL",
-    "description": "Share durable sessions, workflow checkpoints, leases, and external waits safely between replicated application instances.",
+    "description": "Use the PostgreSQL storage adapter for replicated session, run, step, and wait state.",
     "pageRole": "adapter"
   },
   {
@@ -2226,18 +2226,18 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/manage-context-and-state/memory/in-memory",
     "parentTopicId": "harness/manage-context-and-state/memory",
-    "order": 631,
+    "order": 621,
     "title": "Use in-memory memory",
-    "description": "Use the default ephemeral memory engine for tests and single-process runs.",
+    "description": "Use process-local memory for tests and disposable development sessions.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/manage-context-and-state/memory",
     "parentTopicId": "harness/manage-context-and-state",
-    "order": 630,
-    "title": "Select a memory backend",
-    "description": "Enable only the scoped memory capabilities and operational service your application needs.",
+    "order": 620,
+    "title": "Choose a memory engine",
+    "description": "Select scoped application memory separately from Harness history, durable workflows, and business storage.",
     "pageRole": "hub"
   },
   {
@@ -2271,18 +2271,18 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/manage-context-and-state/memory/sqlite",
     "parentTopicId": "harness/manage-context-and-state/memory",
-    "order": 632,
+    "order": 622,
     "title": "Use SQLite memory",
-    "description": "Persist one application's scoped memory on a single host, with FTS5 text search and an explicit vector-search opt-in.",
+    "description": "Use the SQLite memory adapter for single-host persistent application memory.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/manage-context-and-state/memory/custom-memory-engine",
     "parentTopicId": "harness/manage-context-and-state/memory",
-    "order": 636,
+    "order": 626,
     "title": "Build a custom memory engine",
-    "description": "Map an application-owned database client to scoped Harness memory and verify isolation, TTL, pagination, and cancellation.",
+    "description": "Implement the MemoryEngine port only when the application needs a backend not supplied by a first-party adapter.",
     "pageRole": "adapter"
   },
   {
@@ -2308,8 +2308,8 @@ const canonicalContentManifest = [
     "topicId": "harness/orchestrate-work/child-tasks-and-data-flow",
     "parentTopicId": "harness/orchestrate-work",
     "order": 520,
-    "title": "Use child tasks and data flow",
-    "description": "Start isolated agent work with bounded concurrency and explicit result retrieval.",
+    "title": "Child tasks and data flow",
+    "description": "Delegate bounded asynchronous agent work with typed inputs, stable IDs, cancellation, and explicit ownership.",
     "pageRole": "task"
   },
   {
@@ -2317,8 +2317,8 @@ const canonicalContentManifest = [
     "topicId": "harness/orchestrate-work/durable-workflows",
     "parentTopicId": "harness/orchestrate-work",
     "order": 530,
-    "title": "Run durable workflows",
-    "description": "Resume stable workflow runs from committed checkpoints after interruption.",
+    "title": "Build durable workflows",
+    "description": "Persist replay-safe steps and external waits so a workflow can resume after a process restart.",
     "pageRole": "task"
   },
   {
@@ -2354,7 +2354,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/orchestrate-work",
     "order": 510,
     "title": "Build a workflow",
-    "description": "Coordinate a small number of typed steps with explicit data flow and policy.",
+    "description": "Coordinate typed agents and durable steps with explicit data flow and policy.",
     "pageRole": "task"
   },
   {
@@ -2424,9 +2424,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/guardrails/build-the-first-guarded-agent",
     "parentTopicId": "harness/secure-and-govern/guardrails",
-    "order": 751,
+    "order": 752,
     "title": "Build the first guarded agent",
-    "description": "Run one complete local agent and prove that an input Guardrail blocks before the model provider is called.",
+    "description": "Add one fail-closed Guardrails action to a default-loop agent and test the denied path.",
     "pageRole": "tutorial"
   },
   {
@@ -2451,9 +2451,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/model-backed-guardrails",
     "parentTopicId": "harness/secure-and-govern/guardrails",
-    "order": 754,
-    "title": "Use a model-backed guardrail",
-    "description": "Register a separate model alias for a semantic content check and compose it with deterministic rails.",
+    "order": 762,
+    "title": "Use model-backed Guardrails",
+    "description": "Add a model-backed content rail only after deterministic checks and an approved model alias are configured.",
     "pageRole": "task"
   },
   {
@@ -2478,9 +2478,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/tool-permissions",
     "parentTopicId": "harness/add-capabilities/tools",
-    "order": 411,
+    "order": 720,
     "title": "Set tool permissions",
-    "description": "Allow, deny, or require approval for built-in tools before an agent can mutate files or execute commands.",
+    "description": "Separate agent tool selection, built-in permissions, application authorization, and sandbox enforcement.",
     "pageRole": "task"
   },
   {
@@ -2497,8 +2497,8 @@ const canonicalContentManifest = [
     "topicId": "harness/secure-and-govern/governance-policies/build-the-first-policy",
     "parentTopicId": "harness/secure-and-govern",
     "order": 702,
-    "title": "Build the first native policy",
-    "description": "Add one typed deny rule to a transfer tool, run it locally, and prove that rejected input never reaches the handler.",
+    "title": "Build the first governance policy",
+    "description": "Deny one unauthorized tool operation before its handler runs, then test the fail-closed result.",
     "pageRole": "tutorial"
   },
   {
@@ -2523,9 +2523,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/governance-policies/connect-external-policy-engine",
     "parentTopicId": "harness/secure-and-govern",
-    "order": 707,
-    "title": "Connect Open Policy Agent",
-    "description": "Evaluate typed Harness tool occurrences through OPA's Data API with bounded transport, explicit schemas, deterministic tests, and production ownership boundaries.",
+    "order": 708,
+    "title": "Connect an external policy engine",
+    "description": "Map a least-data governance request to an authenticated policy service and fail closed on uncertainty.",
     "pageRole": "adapter"
   },
   {
@@ -2559,27 +2559,27 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/privacy-detectors",
     "parentTopicId": "harness/secure-and-govern/guardrails",
-    "order": 755,
-    "title": "Select a privacy detector",
-    "description": "Install, configure, and bind the detector whose entity coverage and deployment boundary match the data you inspect.",
+    "order": 760,
+    "title": "Add privacy detectors",
+    "description": "Inspect exact model and tool boundaries with optional Guardrails detector packages and fail closed on policy errors.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/secure-and-govern/sandbox-and-mcp",
     "parentTopicId": "handbook-harness",
-    "order": 775,
-    "title": "Isolate agent execution",
-    "description": "Give tools the smallest filesystem or execution boundary they need, then verify the adapter guarantees separately.",
+    "order": 730,
+    "title": "Choose sandbox and MCP boundaries",
+    "description": "Keep sandbox capability selection, MCP transport, credentials, and isolation as separate decisions.",
     "pageRole": "chapter"
   },
   {
     "product": "harness",
     "topicId": "harness/secure-and-govern/local-docker-sandbox",
     "parentTopicId": "harness/secure-and-govern/sandbox-and-mcp",
-    "order": 776,
+    "order": 742,
     "title": "Run a local Docker sandbox",
-    "description": "Prepare a local Docker or OrbStack image, retain workspace files across attachments, and clean up owned resources.",
+    "description": "Configure Docker isolation only when the daemon, image, network, and resource policy are explicit.",
     "pageRole": "adapter"
   },
   {
@@ -2588,16 +2588,16 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/start",
     "order": 50,
     "title": "Add the first tool",
-    "description": "Give an agent one explicit, typed application capability without treating model instructions as authorization.",
+    "description": "Give an agent one typed application operation with explicit authorization.",
     "pageRole": "task"
   },
   {
     "product": "harness",
     "topicId": "harness/secure-and-govern/custom-sandbox-adapter",
     "parentTopicId": "harness/secure-and-govern/sandbox-and-mcp",
-    "order": 778,
+    "order": 746,
     "title": "Build a custom sandbox adapter",
-    "description": "Implement the public owner, attachment, filesystem, capability, and termination lifecycle for an application-owned sandbox backend.",
+    "description": "Implement only the sandbox capabilities and lifecycle guarantees the application can test.",
     "pageRole": "adapter"
   },
   {
@@ -2613,9 +2613,9 @@ const canonicalContentManifest = [
     "product": "harness",
     "topicId": "harness/secure-and-govern/kubernetes-sandbox",
     "parentTopicId": "harness/secure-and-govern/sandbox-and-mcp",
-    "order": 777,
+    "order": 744,
     "title": "Run a Kubernetes sandbox",
-    "description": "Execute tools in restricted pods and optionally recover run files through PVC generations and VolumeSnapshots.",
+    "description": "Bind a Kubernetes sandbox only after cluster isolation, workload identity, quotas, and workspace recovery are configured.",
     "pageRole": "adapter"
   },
   {
@@ -2633,7 +2633,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/start",
     "order": 40,
     "title": "Build the first agent",
-    "description": "Define one schema-validated agent, invoke it through a session, and observe a typed result.",
+    "description": "Define one schema-validated agent, bind a model, invoke it through a session, and observe a typed result.",
     "pageRole": "task"
   },
   {
@@ -2642,7 +2642,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/start",
     "order": 30,
     "title": "Configure the first model",
-    "description": "Register one provider behind a stable model alias before defining an agent.",
+    "description": "Bind one provider model to the stable alias used by a Harness definition.",
     "pageRole": "task"
   },
   {
@@ -2723,7 +2723,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/test-and-evaluate",
     "order": 813,
     "title": "Test workflows",
-    "description": "Exercise real workflow coordination with deterministic agent handlers, bounded fan-out, events, cancellation, and replayable state.",
+    "description": "Exercise workflow coordination with a fake model provider, bounded fan-out, cancellation, and replayable state.",
     "pageRole": "task"
   },
   {
@@ -2957,7 +2957,7 @@ const canonicalContentManifest = [
     "parentTopicId": "harness/reference",
     "order": 1410,
     "title": "Packages and feature availability",
-    "description": "Check what Harness 3 includes, what needs an additional package or service, and which setup step actually enables each feature.",
+    "description": "Check what Harness v4 includes, what needs an additional package or service, and which setup step actually enables each feature.",
     "pageRole": "reference"
   },
   {

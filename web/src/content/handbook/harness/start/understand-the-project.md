@@ -9,7 +9,6 @@ A small application benefits from three explicit boundaries:
 ```text title="Minimal Harness project layout"
 composition root → Harness definition → application route, worker, or CLI
 ```
-
 | Area | Owns | Avoid putting here |
 | --- | --- | --- |
 | Composition root | Provider adapters, secrets, storage/sandbox wiring, defaults | HTTP request parsing or business approvals |

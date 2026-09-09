@@ -41,11 +41,11 @@ send data anywhere by itself.
 
 | Package | Use it when | Execution boundary | Minimal next step |
 | --- | --- | --- | --- |
-| [`@purista/harness`](#core-runtime) | You need typed models, agents, workflows, tools, skills, sessions, state, sandboxes, streaming, evaluations, and telemetry. | In-process runtime; application owns transport, auth, persistence backends, and deployment. | Install it, define models before agents, then build with `defineHarness()`. |
-| [`@purista/harness-openai`](#model-providers) | Your configured model endpoint uses the OpenAI SDK or OpenAI-compatible Chat Completions / Responses API. | Provider SDK request from your application process. | Call `openai({ apiKey, api? })`, then register it under a Harness model alias. |
-| [`@purista/harness-anthropic`](#model-providers) | You use Anthropic models. | Provider SDK request from your application process. | Call `anthropic({ apiKey })`, then register it under a Harness model alias. |
-| [`@purista/harness-bedrock`](#model-providers) | You use Amazon Bedrock with the AWS credential chain. | AWS SDK request from your application process. | Call `bedrock({ region })`, then register it under a Harness model alias. |
-| [`@purista/harness-azure-foundry`](#model-providers) | You use Azure AI Foundry inference endpoints. | Azure SDK request from your application process. | Call `azureFoundry({ endpoint, apiKey or credential })`, then register it under a Harness model alias. |
+| [`@purista/harness`](#core-runtime) | You need typed models, agents, workflows, tools, skills, sessions, state, sandboxes, streaming, evaluations, and telemetry. | In-process runtime; application owns transport, auth, persistence backends, and deployment. | Install it, create direct definitions, add roots with `defineHarness()`, and bind runtime adapters with `getInstance(...)`. |
+| [`@purista/harness-openai`](#model-providers) | Your configured model endpoint uses the OpenAI SDK or OpenAI-compatible Chat Completions / Responses API. | Provider SDK request from your application process. | Call `openai({ apiKey, api? })`, then bind it to the required model alias in `getInstance(...)`. |
+| [`@purista/harness-anthropic`](#model-providers) | You use Anthropic models. | Provider SDK request from your application process. | Call `anthropic({ apiKey })`, then bind it to the required model alias in `getInstance(...)`. |
+| [`@purista/harness-bedrock`](#model-providers) | You use Amazon Bedrock with the AWS credential chain. | AWS SDK request from your application process. | Call `bedrock({ region })`, then bind it to the required model alias in `getInstance(...)`. |
+| [`@purista/harness-azure-foundry`](#model-providers) | You use Azure AI Foundry inference endpoints. | Azure SDK request from your application process. | Call `azureFoundry({ endpoint, apiKey or credential })`, then bind it to the required model alias in `getInstance(...)`. |
 | [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Define opaque action tokens and one typed inline configuration, then set `guardrails: rails`. |
 | [`@purista/harness-guardrails-presidio`](#privacy-detectors) | You already operate Microsoft Presidio Analyzer and need its recognizers or languages. | Calls an application-owned, authenticated internal Presidio `POST /analyze` endpoint. | Inject `createPresidioDetector({ endpoint, ... })`; masking remains in the core Guardrails addon. |
 | [`@purista/harness-guardrails-native-privacy`](#privacy-detectors) | You need deterministic local detection for common identifiers without a detector network hop. | Rust Node-API prebuild, in process; no model, WASM, or network fallback. | Construct `createNativePrivacyDetector({ id })`. |
@@ -66,24 +66,22 @@ available. These are entry points, not additional packages to install.
 npm install @purista/harness
 ```
 
-`@purista/harness` is the required package. It is provider-neutral: registering
-a model alias is what connects it to one configured provider adapter. Use the
+`@purista/harness` is the required package. It is provider-neutral: binding a
+model alias in `getInstance(...)` connects it to one configured provider. Use the
 [Quickstart](/handbook/harness/quickstart/) for the smallest runnable
 agent and [Models & configuration](/handbook/harness/models-and-configuration/)
 for capabilities, retries, model aliases, and credentials.
 
 ```ts
-import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { defineAgent, defineHarness } from '@purista/harness'
 
-const harness = defineHarness({ name: 'support' })
-	.sandbox(inMemorySandbox())
-	.models({
-		// Register one configured provider under a stable application alias.
-	})
-	.agents({
-		// Agents refer to aliases, not provider SDKs.
-	})
-	.build()
+const assistant = defineAgent('assistant', {
+	instructions: 'Answer the user clearly.',
+})
+const definition = defineHarness({ name: 'support' }).addAgent(assistant)
+const harness = await definition.getInstance({
+	model: { provider, model: 'provider-model' },
+})
 ```
 
 ### Optional core peers
@@ -113,20 +111,26 @@ provider-neutral.
 | Azure AI Foundry | `npm install @purista/harness-azure-foundry` | `azureFoundry({ endpoint, apiKey })` or an Azure credential | Application environment or Azure identity |
 
 ```ts
-import { defineHarness } from '@purista/harness'
+import { defineAgent, defineHarness } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 
-const harness = defineHarness().models({
-	assistant: {
-		provider: openai({ apiKey: process.env.OPENAI_API_KEY!, api: 'responses' }),
-		model: 'gpt-5-mini',
-		capabilities: ['object', 'tool_use'],
+const assistant = defineAgent('assistant', {
+	model: 'assistant',
+	instructions: 'Answer the user clearly.',
+})
+const definition = defineHarness({ name: 'support' }).addAgent(assistant)
+const harness = await definition.getInstance({
+	models: {
+		assistant: {
+			provider: openai({ apiKey: process.env.OPENAI_API_KEY!, api: 'responses' }),
+			model: 'gpt-5-mini',
+		},
 	},
 })
 ```
 
 Declare only capabilities that the selected model and adapter actually support.
-The builder validates agent requirements against these declarations before a
+The runtime validates agent requirements against these bindings before a
 run starts. See [Models & configuration](/handbook/harness/models-and-configuration/)
 for a capability matrix and provider-specific options.
 
@@ -142,6 +146,7 @@ application-owned action tokens; TypeScript provides the action behavior. It
 never creates a provider, reads credentials, or opens a vector store.
 
 ```ts title="src/guardrails.ts: content-only action"
+import { defineAgent, defineHarness } from '@purista/harness'
 import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
 import { z } from 'zod'
 
@@ -158,14 +163,15 @@ const rails = defineGuardrails({
 	},
 })
 
-const harness = defineHarness()
-	.models({ assistant: runtimeModel })
-	.agent('answer', {
-		model: 'assistant',
-		instructions: 'Answer only from approved information.',
-		guardrails: rails,
-	})
-	.build()
+const answer = defineAgent('answer', {
+	model: 'assistant',
+	instructions: 'Answer only from approved information.',
+	guardrails: rails,
+})
+const definition = defineHarness({ name: 'guardedSupport' }).addAgent(answer)
+const harness = await definition.getInstance({
+	models: { assistant: runtimeModel },
+})
 ```
 
 Read [Guardrails & governance](/handbook/harness/guardrails-governance/)

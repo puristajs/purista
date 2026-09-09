@@ -11,7 +11,7 @@ supports it.
 
 ## First-party model operations
 
-The table describes methods implemented by the current Harness 3 adapters.
+The table describes methods implemented by the current Harness v4 adapters.
 Tool use is carried by text and object operations; the selected provider model
 must also support it.
 

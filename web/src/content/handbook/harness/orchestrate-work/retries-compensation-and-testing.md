@@ -10,7 +10,9 @@ the focused `workflow.handler` fragment for an enrichment step, not a complete
 source file:
 
 ```ts title="Workflow handler: retry transient enrichment"
-const enriched = await ctx.step('enrich-v1', () => ctx.agents.enricher(ctx.input), {
+const enriched = await ctx.step('enrich-v1', () => ctx.agents.enricher.run(ctx.input, {
+	callId: 'enrich-v1',
+}), {
 	retry: {
 		maxAttempts: 3,
 		minDelayMs: 250,
@@ -19,7 +21,6 @@ const enriched = await ctx.step('enrich-v1', () => ctx.agents.enricher(ctx.input
 	},
 })
 ```
-
 ## Understand the step boundary
 
 `ctx.step(stepId, fn, options?)` behaves differently depending on the

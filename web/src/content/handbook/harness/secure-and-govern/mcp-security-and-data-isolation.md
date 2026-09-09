@@ -18,7 +18,6 @@ flowchart LR
   Http --> Remote["Server reauthorizes\nevery operation"]
   Stdio --> Guest["Sandbox enforces\nprocess, files, and egress"]
 ```
-
 Configure the transport and tool fields in
 [Connect MCP tools](/handbook/harness/add-capabilities/mcp/). This page owns the
 security decisions that surround that configuration.

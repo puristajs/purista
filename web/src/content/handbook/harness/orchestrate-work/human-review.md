@@ -10,8 +10,9 @@ releases its lease, and becomes `waiting`. The application later signals one
 terminal outcome and invokes the same durable run id to resume.
 
 Start with [Run durable workflows](/handbook/harness/orchestrate-work/durable-workflows/).
-The following is the `workflow.handler` fragment that registers the wait after
-the application has created its own versioned review task. The complete,
+The following is the `workflow.handler` fragment of a definition with
+`durable: true`; it registers the wait after the application has created its
+own versioned review task. The complete,
 executable [durable human-review example](https://github.com/puristajs/harness/tree/main/examples/durable-human-review)
 also verifies compare-and-swap decisions, immutable execution claims, and
 receipt recovery. These are application APIs, not Harness review CRUD.
@@ -25,7 +26,6 @@ const outcome = await ctx.externalWait.wait({
 	deadline: task.descriptor.expiresAt,
 })
 ```
-
 ## Define only the durable wait descriptor
 
 | Field | Required value | Purpose |
@@ -41,11 +41,11 @@ request is strict: extra fields and invalid timestamps are rejected. Store
 review title, proposal, reviewer, comments, and permissions in the
 application's review system, not in the Harness wait record.
 
-`externalWait.wait(...)` is available on every workflow context but succeeds
-only during a durable workflow invocation. On first registration it persists
-the descriptor and throws `ExternalWaitPendingError` so the worker can release
-the run. On resume, it returns a terminal snapshot with `status` equal to
-`approved`, `rejected`, `expired`, or `cancelled`.
+`externalWait.wait(...)` is available only to a workflow declared with
+`durable: true`. On first registration it persists the descriptor and throws
+`ExternalWaitPendingError` so the worker can release the run. On resume, it
+returns a terminal snapshot with `status` equal to `approved`, `rejected`,
+`expired`, or `cancelled`.
 
 The application owns review CRUD, authentication, authorization, comments,
 notifications, revision compare-and-swap, action-digest binding, expiry, and
@@ -74,7 +74,6 @@ if (delivery.kind === 'applied' || delivery.kind === 'duplicate') {
 	await enqueueWorkflowResume(review.runId)
 }
 ```
-
 `review.decision` must be `approved`, `rejected`, `expired`, or `cancelled`.
 The same `eventId` is idempotent. The delivery result is explicit:
 

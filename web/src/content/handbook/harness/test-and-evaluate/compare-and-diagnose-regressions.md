@@ -66,7 +66,6 @@ export function compareRoutingCandidates(result: EvaluationRunResult) {
 	}
 }
 ```
-
 This report keeps only stable synthetic case IDs, not candidate outputs. Treat
 `incompleteRows > 0` as an operational finding before interpreting the rate.
 Then open the authorized observation or trace reference for each failed case in

@@ -21,29 +21,56 @@ The generated [Harness API reference](/handbook/api/modules/_purista_harness/)
 is the exact symbol lookup. The task guides explain ordering, ownership, and
 failure behavior that a type signature alone cannot express.
 
+The runtime surface is split into an instance, session, and target invoker:
+[`HarnessInstance.getSession`](/handbook/api/interfaces/_purista_harness.HarnessInstance/#getsession)
+opens a session;
+[`HarnessInstance.close`](/handbook/api/interfaces/_purista_harness.HarnessInstance/#close)
+closes the instance;
+[`HarnessSession.getRunSummary`](/handbook/api/interfaces/_purista_harness.HarnessSession/#getrunsummary),
+[`HarnessSession.release`](/handbook/api/interfaces/_purista_harness.HarnessSession/#release),
+and [`HarnessSession.destroy`](/handbook/api/interfaces/_purista_harness.HarnessSession/#destroy)
+manage it; and
+[`HarnessTargetInvoker.run`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#run)
+or [`HarnessTargetInvoker.stream`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#stream)
+executes a composed target. Cancel a live stream with
+[`HarnessTargetStream.cancel`](/handbook/api/interfaces/_purista_harness.HarnessTargetStream/#cancel).
+
+The supporting runtime contracts are also public:
+[`ArtifactStore.close`](/handbook/api/interfaces/_purista_harness.ArtifactStore/#close),
+[`ArtifactStore.publish`](/handbook/api/interfaces/_purista_harness.ArtifactStore/#publish),
+[`ChildTaskHandle.cancel`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#cancel),
+[`ChildTaskHandle.result`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#result),
+[`ChildTaskHandle.status`](/handbook/api/interfaces/_purista_harness.ChildTaskHandle/#status),
+[`ContinuableChildTaskHandle.close`](/handbook/api/interfaces/_purista_harness.ContinuableChildTaskHandle/#close),
+[`ContinuableChildTaskHandle.send`](/handbook/api/interfaces/_purista_harness.ContinuableChildTaskHandle/#send),
+[`ConversationHistory.list`](/handbook/api/interfaces/_purista_harness.ConversationHistory/#list),
+[`DurableWorkflowContext.step`](/handbook/api/interfaces/_purista_harness.DurableWorkflowContext/#step),
+[`HarnessSession.clearHistory`](/handbook/api/interfaces/_purista_harness.HarnessSession/#clearhistory),
+[`SessionChildTasks.get`](/handbook/api/interfaces/_purista_harness.SessionChildTasks/#get),
+[`SessionChildTasks.list`](/handbook/api/interfaces/_purista_harness.SessionChildTasks/#list),
+[`SessionMemory.delete`](/handbook/api/interfaces/_purista_harness.SessionMemory/#delete),
+[`SessionMemory.list`](/handbook/api/interfaces/_purista_harness.SessionMemory/#list),
+[`SessionMemory.read`](/handbook/api/interfaces/_purista_harness.SessionMemory/#read),
+[`SessionMemory.search`](/handbook/api/interfaces/_purista_harness.SessionMemory/#search),
+[`SessionMemory.write`](/handbook/api/interfaces/_purista_harness.SessionMemory/#write),
+and [`WorkflowChildTasks.start`](/handbook/api/interfaces/_purista_harness.WorkflowChildTasks/#start).
+
 ## Definition and runtime contracts
 
 [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/)
-creates an immutable fluent definition. Singular and plural registrations
-append and reject duplicate IDs. `.build()` validates a concrete runtime;
-`.define()` creates a portable contract whose `.getInstance(...)`
-requires the host to bind declared models, host tools, and optional runtime
-adapters.
-
-[`harness.inspect()`](/handbook/api/interfaces/_purista_harness.Harness/#inspect)
-returns an immutable, content-free
-[`HarnessInspection`](/handbook/api/interfaces/_purista_harness.HarnessInspection/)
-containing the Harness name, available and required adapter capabilities,
-adapter descriptors, and static-module provenance. Use it for startup
-diagnostics and inventory. It is not a session/run status API and never
-authorizes access to an adapter or module.
+creates a Harness composition root. Add immutable `defineAgent`,
+`defineWorkflow`, `defineTool`, `defineSkill`, and `defineMcpServer` values with
+`.addAgent(...)` and `.addWorkflow(...)`; the resulting value is already the
+portable composition.
+`getInstance(...)` binds declared models and optional runtime adapters. The
+definition's `requirements` value is the content-free startup inventory for
+models, storage, memory, sandbox, skills, MCP, workspace, and artifacts.
 
 An agent or workflow invocation returns
 [`RunOutcome`](/handbook/api/types/_purista_harness.RunOutcome/). Portable
-stream consumers receive [`ExecutionEvent`](/handbook/api/types/_purista_harness.ExecutionEvent/);
-operators receive the richer [`RunEvent`](/handbook/api/types/_purista_harness.RunEvent/)
-through `.observe(...)`. Treating those two event streams as interchangeable
-is a contract violation.
+stream consumers receive [`ExecutionEvent`](/handbook/api/types/_purista_harness.ExecutionEvent/).
+Keep internal diagnostic and persistence records in application-owned
+observability and storage boundaries; do not expose them as the portable stream.
 
 ## Adapter conformance evidence
 
@@ -70,7 +97,7 @@ Keep all first-party Harness packages on the same major. For a clean release:
 
 - run application typechecking, linting, unit tests, and production build;
 - exercise one completed and one interrupted `RunOutcome`;
-- exercise aggregate, portable stream, and diagnostic observation separately;
+- exercise aggregate and portable stream behavior separately;
 - verify cancellation reaches providers, tools, and external resources;
 - verify session release, process shutdown, and durable restart behavior;
 - verify public HTTP/SSE responses do not expose serialized internal errors or

@@ -119,7 +119,6 @@ export function recordHarnessFailure(error: unknown): void {
 	}
 }
 ```
-
 Do not return `envelope` from an HTTP endpoint. Unknown errors preserve their
 original message during serialization, and class-specific metadata can still
 contain operational identifiers that callers do not need. Use the

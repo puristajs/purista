@@ -40,7 +40,6 @@ export const incidentRoutingDataset = {
 	],
 } as const satisfies EvaluationDataset<Incident, RoutingAssessment>
 ```
-
 Build the first cases from normal work, authorized and redacted failure review,
 and deliberately difficult negative, ambiguous, boundary, and policy-sensitive
 examples. Use segments for important slices such as language, document type,
@@ -78,7 +77,6 @@ export function assertIncidentRoutingPolicy(result: EvaluationRunResult): void {
 	}
 }
 ```
-
 This threshold is an example for one reviewed routing decision, not a universal
 recommendation. Derive each gate from the cost of the failure, dataset quality,
 scorer agreement, and required coverage. A critical segment may require its own
@@ -101,7 +99,6 @@ describe('incident routing evaluation', () => {
 	}, 120_000)
 })
 ```
-
 Add a distinct package script so normal deterministic tests do not silently
 start paid or remote evaluations:
 
@@ -113,7 +110,6 @@ start paid or remote evaluations:
   }
 }
 ```
-
 ```yaml title=".github/workflows/incident-routing-evaluation.yml"
 name: Incident routing evaluation
 
@@ -140,7 +136,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 ```
-
 Use a protected CI environment for live-provider credentials, budgets, and
 manual approval. Pin dependency and dataset versions, bound concurrency and
 timeouts, and never retry a low score until it happens to pass. Technical retry

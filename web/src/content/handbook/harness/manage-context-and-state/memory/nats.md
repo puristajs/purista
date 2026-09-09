@@ -15,7 +15,6 @@ Provision NATS with JetStream enabled, then install the adapter:
 ```sh title="Install the NATS memory adapter"
 npm install @purista/harness-memory-nats
 ```
-
 ```ts title="src/harness/claimsMemory.ts"
 import { natsMemoryEngine } from '@purista/harness-memory-nats'
 
@@ -24,7 +23,6 @@ export const claimsMemory = natsMemoryEngine({
 	replicas: 3,
 })
 ```
-
 | Call or field | What it configures | Choice and failure boundary |
 | --- | --- | --- |
 | [`natsMemoryEngine(options)`](/handbook/api/functions/_purista_harness-memory-nats.natsMemoryEngine/) | Creates one JetStream-KV memory engine with persistent multi-instance key/value/list/delete/TTL capabilities. | It intentionally does not expose text, vector, or hybrid search. Use it when JetStream coordination is the fit; use a search-capable engine for relevance queries. |
@@ -32,7 +30,7 @@ export const claimsMemory = natsMemoryEngine({
 | [`connection`](/handbook/api/interfaces/_purista_harness-memory-nats.NatsMemoryEngineConnectionOptions/#connection) | Reuses one application-owned NATS connection. | Choose it when the application owns connection lifecycle; the engine never drains or closes it. Do not combine it with `servers` or `connectionOptions`. |
 | `bucket`, `createBucket`, `replicas`, `maxEnumeratedKeys` | Select the JetStream bucket (default `purista-harness-memory-v1`), creation behavior (default `true`), new-bucket replication (default `1`), and a hard enumeration limit (default `10_000`). | Existing buckets must already have the compatible v1 layout; do not point production memory at an arbitrary bucket. Increase enumeration only after bounding and monitoring the operational cost. |
 
-Pass `claimsMemory` to `.memory(claimsMemory)` in the complete Harness
+Pass `memory: claimsMemory` to `definition.getInstance(...)` in the complete Harness
 definition shown in [SQLite memory](/handbook/harness/manage-context-and-state/memory/sqlite/).
 The default bucket is `purista-harness-memory-v1` with file storage and history
 `1`. It supports persistent scoped key/value, list, delete, and lazy TTL

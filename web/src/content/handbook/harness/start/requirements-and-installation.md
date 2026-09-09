@@ -14,7 +14,6 @@ the selected provider and native dependencies in your deployment.
 ```sh title="Install the first runnable Harness"
 npm install @purista/harness @purista/harness-openai
 ```
-
 `@purista/harness` is the core runtime. It does not include a live model
 provider. `@purista/harness-openai` is a separately installed provider adapter.
 
@@ -23,7 +22,6 @@ The first agent uses Zod, so add it for the default guide path:
 ```sh title="Install the default Zod schema library"
 npm install zod
 ```
-
 ## Choose the schema library your application owns
 
 Zod is an application dependency, not a Harness public re-export. Harness
@@ -31,7 +29,7 @@ accepts any [Standard Schema](https://standardschema.dev/schema) validator at
 every application validation boundary. The one additional requirement appears
 only when a model must produce the value: the schema must also implement
 [Standard JSON Schema](https://standardschema.dev/json-schema), so Harness can
-give the provider a Draft 2020-12 description during `.build()`.
+give the provider a Draft 2020-12 description during definition binding.
 
 | Library | Install in the application | Validation-only boundaries | Model-facing boundaries |
 | --- | --- | --- | --- |
@@ -58,7 +56,6 @@ Create an application-owned environment file or configure your secret store:
 OPENAI_API_KEY=replace-with-a-secret
 OPENAI_MODEL=gpt-5-mini
 ```
-
 Keep the key out of source code, client bundles, fixtures, logs, and telemetry.
 The provider adapter makes its network request from your application process.
 
@@ -84,7 +81,6 @@ dependency:
 npx skills add puristajs/harness --skill ai-harness
 npx skills list
 ```
-
 Add the agent selector required by your coding tool when applicable. Do not put
 provider credentials in a skill, its references, or its verification output.
 

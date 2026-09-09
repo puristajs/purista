@@ -125,7 +125,9 @@ installs the producer.
 Use `aggregate` when an HTTP caller needs only the final result. Use `stream`
 for SSE and cancel the EventBridge stream when the browser disconnects. For AI
 SDK UI Message Stream v1, declare that protocol and its response header on the
-stream builder; do not invent a PURISTA browser protocol.
+stream builder. See
+[Invoke and expose a mounted agent](/handbook/framework/build-ai-powered-services/invoke-and-expose-a-harness-target/)
+for request parsing, resume forwarding, SSE translation, and cancellation.
 
 Mounted Harness targets remain address-first EventBridge capabilities. A
 wrapper command or stream is the public application contract, not a same-process

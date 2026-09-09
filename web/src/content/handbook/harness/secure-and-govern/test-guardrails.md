@@ -44,12 +44,11 @@ describe('claims Guardrails', () => {
 			safety.assertExhausted()
 		} finally {
 			await session.release()
-			await harness.shutdown()
+			await harness.close()
 		}
 	})
 })
 ```
-
 `strict: true` rejects an unexpected provider request. The safety fake receives
 one scripted structured response; the application fake receives none.
 `assertExhausted()` proves that no expected request was skipped and no extra

@@ -79,7 +79,6 @@ export function createTranslationScorer(
 	}
 }
 ```
-
 The evaluation task places only the source text needed by this rubric in
 `scorerContext`; it does not expose the assessment to the candidate. The judge
 returns a bounded score and an application-controlled evidence reference rather

@@ -1,6 +1,6 @@
 ---
 title: Packages and feature availability
-description: Check what Harness 3 includes, what needs an additional package or service, and which setup step actually enables each feature.
+description: Check what Harness v4 includes, what needs an additional package or service, and which setup step actually enables each feature.
 order: 1410
 ---
 
@@ -8,22 +8,22 @@ Installing a package does not necessarily enable its feature. Use this page to
 separate what is present, what the Harness selects by default, and what the
 application must still configure or provision.
 
-All first-party Harness 3 packages use the same major. Keep them aligned with
-`@purista/harness`; do not combine a Harness 3 core package with a 1.x addon.
+All first-party Harness v4 packages use the same major. Keep them aligned with
+`@purista/harness`; do not combine a Harness v4 core package with a 1.x addon.
 
 ## Core runtime defaults
 
 | Capability | After installing `@purista/harness` | Enable or replace it |
 | --- | --- | --- |
-| Models | No provider or alias is selected. Handler-only agents, deterministic workflows, and memory-only compositions need no model registry. | Install one provider package or implement `ModelProvider`, then register an alias when a default-loop agent, embedding, reranker, media operation, or model-backed memory/control uses it. |
-| Harness storage | An in-memory store is created when `.storage(...)` is omitted. | Register a durable `HarnessStorage` for restart-safe sessions, runs, steps, and waits. |
-| Memory | A dependency-free in-memory engine is used when `.memory(...)` is omitted. | Register a persistent engine package and any embedding or summary model references. |
+| Models | No provider or alias is selected. Deterministic workflows and memory-only compositions need no model binding. | Install one provider package or implement `ModelProvider`, then bind an alias when an agent, embedding, reranker, media operation, or model-backed memory/control uses it. |
+| Harness storage | An in-memory store is selected when no `storage` binding is passed to `getInstance(...)`. | Pass a durable `HarnessStorage` binding for restart-safe sessions, runs, steps, and waits. |
+| Memory | A dependency-free in-memory engine is selected when no `memory` binding is passed to `getInstance(...)`. | Pass a persistent engine and any embedding or summary model references to `getInstance(...)`. |
 | Sandbox | Auto-detection uses `bashSandbox()` when the optional `just-bash` peer is importable; otherwise it uses the files-and-bounded-search in-memory sandbox. | Register an explicit sandbox when capability or isolation guarantees matter. |
-| Built-in tools | Disabled for every agent. | Add the smallest `builtinTools` allowlist on the agent. |
-| TypeScript tools, skills, agents, and workflows | Included but not registered automatically. | Register definitions on the fluent builder. |
-| Governance | Included but disabled until configured. | Add `.governance(...)` after tools and agents. |
+| Built-in tools | Disabled for every agent. | Add only the required definitions from `builtInTools` to the agent's `tools` list. |
+| TypeScript tools, skills, agents, and workflows | Included but not registered automatically. | Register definitions with `defineHarness(...).add*` composition. |
+| Governance | Included but disabled until configured. | Put policies on the definition and pass governance bindings to `getInstance(...)`. |
 | Guardrails | Not included in core. | Install and configure `@purista/harness-guardrails`. |
-| Logging | `JsonLogger` at `info` to standard output. | Supply `.logger(...)` or set `PURISTA_HARNESS_LOG_LEVEL`. |
+| Logging | `JsonLogger` at `info` to standard output. | Pass `logger` to `getInstance(...)` or set `PURISTA_HARNESS_LOG_LEVEL`. |
 | OpenTelemetry emission | Harness instrumentation is included. | Start an application-owned OpenTelemetry SDK/exporter to send data to a backend. |
 
 Do not rely on sandbox auto-detection in production. It is a convenience
@@ -45,7 +45,7 @@ isolation.
 
 | Package | Includes | External prerequisite | Enablement guide |
 | --- | --- | --- | --- |
-| `@purista/harness-ai-sdk-ui` | Versioned `/v1` conversion from portable `ExecutionEvent` values to AI SDK UI Message Stream v1, including text, tools, status, structured output, files, media progress, and tool approvals | Matching `@purista/harness@3` and `ai@7`; an HTTP transport that forwards the prescribed headers and SSE chunks | [Stream progress and use the standard browser protocol](/handbook/harness/build-agents/streaming-cancellation-and-timeouts/#4-use-ai-sdk-ui-message-stream-v1-for-a-browser) |
+| `@purista/harness-ai-sdk-ui` | Versioned `/v1` conversion from portable `ExecutionEvent` values to AI SDK UI Message Stream v1, including text, tools, status, structured output, files, media progress, and tool approvals | Matching `@purista/harness@4` and `ai@7`; an HTTP transport that forwards the prescribed headers and SSE chunks | [Stream progress and use the standard browser protocol](/handbook/harness/build-agents/streaming-cancellation-and-timeouts/#4-use-ai-sdk-ui-message-stream-v1-for-a-browser) |
 
 The adapter is transport-neutral: native Harness can return its `Response`,
 while PURISTA can pass its data-only SSE events through an HTTP stream. Import
@@ -88,8 +88,8 @@ required by the first-party Kubernetes path.
 
 ## Governance and external policy engines
 
-Governance is included in core and remains disabled until `.governance(...)`
-is configured. OPA uses a focused optional first-party package. Cedar, AWS
+Governance is included in core and remains disabled until a policy is configured
+on a definition and bound at `getInstance(...)`. OPA uses a focused optional first-party package. Cedar, AWS
 Verified Permissions, and arbitrary policy services remain separate
 application-owned integrations.
 
@@ -110,7 +110,7 @@ Installing or operating a policy engine alone does not wire it into Harness.
 
 | Feature | Package or peer | What enables it | Missing or incompatible behavior |
 | --- | --- | --- | --- |
-| Files-and-search in-memory sandbox | Included in core | Explicit `.sandbox(inMemorySandbox())` or fallback from auto-detection | Declares `sandbox.fs` and `sandbox.text_search`; execution methods are unavailable. |
+| Files-and-search in-memory sandbox | Included in core | Pass `sandbox: inMemorySandbox()` to `getInstance(...)` or use the auto-detected fallback | Declares `sandbox.fs` and `sandbox.text_search`; execution methods are unavailable. |
 | Emulated Bash sandbox | Optional `just-bash@^3.4.1` peer | Install the peer and register `bashSandbox()` or allow auto-detection | Explicit `bashSandbox()` fails with an actionable configuration error when the peer is absent. |
 | Docker sandbox | `@purista/harness-sandbox-docker` | Provision Docker/OrbStack, register the adapter, and prepare a compatible image | Package installation alone does not grant daemon access or isolation. See [local Docker sandbox](/handbook/harness/secure-and-govern/local-docker-sandbox/). |
 | Kubernetes sandbox/workspace | `@purista/harness-sandbox-kubernetes` | Provision namespaced RBAC, restricted image, quota/limits/network policy, PVC CSI support, and optional snapshots; register the returned adapters | Package installation does not grant cluster authority or make a CSI driver available. See [Kubernetes sandbox](/handbook/harness/secure-and-govern/kubernetes-sandbox/). |

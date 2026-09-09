@@ -1,133 +1,131 @@
 ---
 title: Invoke and expose a mounted agent
-description: Call mounted targets through typed EventBridge clients and add explicit command or stream adapters for external consumers.
+description: Call mounted targets through typed EventBridge clients and add protected command or AI SDK stream projections for HTTP.
 order: 399
 ---
 
-Mounted targets are internal service addresses. They do not automatically
-become HTTP endpoints. Every internal caller declares the exact address and
-portable contract:
+Mounted agents and workflows are service addresses. They do not become HTTP
+routes automatically. A caller imports the direct definition and declares the
+address:
 
 ```ts title="Declare an agent invocation"
 const triageCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('triageTicket', 'Classifies a support ticket')
-  .canInvokeAgent(
-  'Support',
-  '1',
-  'triage_ticket',
-  supportHarness.contracts.agents.triage_ticket,
-  )
-```
-
-[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-declares the address and adds a typed aggregate and streaming client to this
-command's handler context.
-[`canUseHarnessModel(alias, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#canuseharnessmodel)
-is the separate choice for deterministic command code that needs one mounted
-model handle without an agent invocation; it does not publish a target address.
-[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
-creates that caller-owned command contract.
-
-The handler receives both delivery choices:
-
-```ts title="Choose aggregate or streaming invocation"
-const result = await context.agent.Support['1'].triage_ticket.run(input)
-const events = await context.agent.Support['1'].triage_ticket.stream(input)
-```
-
-## Session identity and stored history
-
-Pass an application-owned logical `sessionId` when later calls should share a
-Harness conversation or run context:
-
-```ts title="Use one logical conversation id"
-const logicalSessionId = `support:${conversationId}`
-const result = await context.agent.Support['1'].triage_ticket.run(input, {
-  sessionId: logicalSessionId,
-})
-```
-
-The mounted runtime combines that value with trusted tenant and principal
-identity and stores the session under an opaque id. Two callers therefore do
-not share a session merely because they supply the same logical id.
-
-An authorized application command that reads or clears the same data directly
-through `HarnessStorage` must derive the identical storage id:
-
-```ts title="Resolve the mounted Harness storage id"
-import { createHarnessSessionStorageId } from '@purista/core'
-
-const storageSessionId = createHarnessSessionStorageId(
-  context.message,
-  `support:${conversationId}`,
-)
-const messages = await harnessStorage.listMessages(storageSessionId)
-```
-
-Use trusted message identity and apply a business guard before storage access.
-The logical or opaque session id is correlation data, not proof of authority.
-
-## Aggregate HTTP
-
-Wrap `.run(...)` in a normal command, add the command schemas, and call
-`.exposeAsHttpEndpoint(...)`. Decide how interrupted outcomes appear in the
-public contract; do not assume every command may silently wait for approval.
-
-## Browser streaming
-
-Wrap `.stream(...)` in a PURISTA stream and project provider-neutral execution
-events with the dedicated adapter. The
-[`addPayloadSchema(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addpayloadschema)
-call validates the public stream request:
-
-```ts title="Expose AI SDK UI Message Stream v1"
-import { createHarnessUIMessageSseEvents } from '@purista/harness-ai-sdk-ui/v1'
-import { z } from 'zod'
-
-const uiMessageSseEventSchema = z.object({
-  event: z.literal('data'),
-  data: z.unknown(),
-})
-
-export const chatStreamBuilder = supportV1ServiceBuilder
-  .getStreamBuilder('chat', 'Streams assistant UI messages')
-  .addPayloadSchema(chatInputSchema)
-  .addChunkSchema(uiMessageSseEventSchema)
-  .canInvokeAgent('Support', '1', 'assistant', supportHarness.contracts.agents.assistant)
-  .exposeAsHttpStreamEndpoint('POST', 'chat')
-  .setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-  .setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
-  .setStreamFunction(async function (context, input, _parameter, stream) {
-    const execution = await context.agent.Support['1'].assistant.stream(input)
-    stream.onCancel(reason => void execution.cancel(reason))
-    for await (const event of createHarnessUIMessageSseEvents(execution)) {
-      if (stream.cancelled) return
-      await stream.write(event)
-    }
-    await stream.close()
+  .canInvokeAgent('Support', '1', triageTicketAgent.contract)
+  .setCommandFunction(async function (context, input) {
+    return context.agent.Support['1'][triageTicketAgent.contract.id].run(input)
   })
 ```
 
-Here,
-[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
-adds the same typed EventBridge client to the stream handler. It does not
-bypass the mounted target's schemas or business guards.
-The returned execution's
-[`cancel(reason?)`](/handbook/api/interfaces/_purista_core.HarnessExecutionStream/#cancel)
-requests cancellation through the EventBridge stream session; it is not a
-rollback guarantee for provider or tool side effects that already started.
+[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+adds typed `.run(...)` and `.stream(...)` clients to the handler context. An
+aggregate call returns `{ sessionId, outcome }`. Keep that envelope in the
+public command contract so a client can distinguish completion from an
+approval or another interruption.
 
-The adapter owns only AI SDK UI Message Stream v1 encoding. PURISTA stream and Harness execution
-contracts stay provider-neutral, so another protocol can be added later as a
-separate adapter. Browser code can use AI SDK `useChat` and AI Elements
-without a PURISTA client library.
+Pass a product-owned `sessionId` when later requests should share context:
 
-The public stream chain uses
-[`getStreamBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getstreambuilder),
-[`addChunkSchema(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addchunkschema),
-[`exposeAsHttpStreamEndpoint(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#exposeashttpstreamendpoint),
-[`setHttpStreamProtocol(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#sethttpstreamprotocol),
-and
-[`setStreamFunction(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setstreamfunction).
-These calls define the application-owned HTTP projection and its validated SSE
-chunks; the UI adapter only translates the portable Harness event stream.
+```ts title="Continue one conversation"
+const result = await context.agent.Support['1'][triageTicketAgent.contract.id].run(
+  input,
+  { sessionId: `support:${conversationId}` },
+)
+```
+
+The runtime scopes storage with trusted tenant and principal identity. A
+session id is correlation data, not proof of authorization.
+
+## Aggregate HTTP
+
+Wrap `.run(...)` in a command and expose that command with
+`.exposeAsHttpEndpoint(...)`. Protect the route with
+`.enableHttpSecurity(true)`. The output schema should describe both completed
+and interrupted outcomes and preserve the target's output type.
+
+The CLI can generate this projection:
+
+```bash title="Generate an aggregate HTTP projection"
+npm run add:agent -- triage-ticket \
+  --service support \
+  --service-version 1 \
+  --http command
+```
+
+## AI SDK UI Message Stream v1
+
+Use a PURISTA stream as the HTTP projection. Parse the standard request, pass a
+fresh or resumed session to the mounted agent, and translate portable execution
+events with the v1 adapter:
+
+```ts title="Expose AI SDK UI Message Stream v1"
+import {
+  createHarnessUIMessageSseEvents,
+  parseHarnessUIMessageRequest,
+} from '@purista/harness-ai-sdk-ui/v1'
+import { z } from 'zod'
+
+const chunkSchema = z.object({ event: z.literal('data'), data: z.unknown() })
+
+export const streamAssistantStreamBuilder = supportV1ServiceBuilder
+  .getStreamBuilder('streamAssistant', 'Stream assistant UI messages')
+  .addPayloadSchema(z.unknown())
+  .addParameterSchema(z.object({}))
+  .addChunkSchema(chunkSchema)
+  .addFinalSchema(z.void())
+  .canInvokeAgent('Support', '1', assistantAgent.contract)
+  .exposeAsHttpStreamEndpoint('POST', 'ai/assistant')
+  .enableHttpSecurity(true)
+  .enableChunkAggregation(false)
+  .setHttpStreamingMode('stream')
+  .setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+  .setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+  .setStreamFunction(async function (context, payload, _parameter, writer) {
+    const request = await parseHarnessUIMessageRequest(payload)
+    const input = request.lastUserMessage.parts
+      .flatMap(part => part.type === 'text' ? [part.text] : [])
+      .join('\n')
+
+    const events = await context.agent.Support['1'][assistantAgent.contract.id].stream(
+      input,
+      request.resume === undefined
+        ? { sessionId: request.sessionId }
+        : { sessionId: request.sessionId, resume: request.resume },
+    )
+
+    let cancellation = Promise.resolve()
+    writer.onCancel(reason => {
+      cancellation = events.cancel(reason)
+    })
+
+    try {
+      for await (const record of createHarnessUIMessageSseEvents(events, {
+        sessionId: request.sessionId,
+        ...(request.assistantMessageId === undefined
+          ? {}
+          : { messageId: request.assistantMessageId }),
+      })) {
+        await writer.write(record)
+      }
+      if (!writer.cancelled) await writer.close()
+    } finally {
+      await cancellation
+    }
+  })
+```
+
+[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
+adds the mounted agent client to this stream handler. The call still crosses
+EventBridge and applies the target policy.
+
+The adapter emits data-only SSE records and owns the protocol completion marker.
+PURISTA owns the HTTP stream and closes it after the adapter finishes.
+Cancellation requests upstream cancellation and then waits for it; it cannot
+undo provider or tool effects that already started.
+
+The CLI generates this projection with `--http stream`. A resume request sends
+`{ sessionId, resume }` to the target and remains a normal HTTP response, so
+approval flows do not become server errors. Browser clients can use AI SDK
+`useChat` or AI Elements without a PURISTA-specific client library.
+
+HTTP authentication comes from the Hono protect middleware. Target guards still
+authorize the business action at the mounted address.

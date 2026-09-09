@@ -27,7 +27,6 @@ export function createGovernanceAudit(store: GovernanceDecisionStore): Governanc
 	}
 }
 ```
-
 Forward `execution.signal` and honor `execution.deadline` in the concrete store
 client. Do not start unbounded background writes from this callback.
 
@@ -53,8 +52,7 @@ in a generic sink.
 ## 3. Wire the sink at composition
 
 ```ts title="src/createAuditedTransferHarness.ts"
-return createTransferAgentBuilder(provider)
-  .governance(({ native, rule }) => ({
+const governance = ({ native, rule }) => ({
     defaultEffect: 'allow',
     audit: createGovernanceAudit(governanceDecisionStore),
     policies: [
@@ -72,10 +70,16 @@ return createTransferAgentBuilder(provider)
         ],
       }),
     ],
-  }))
-  .build()
+})
+const transferAgent = defineAgent('payments', {
+  model: 'primary',
+  tools: [transfer],
+  instructions: 'Use transfer only for authorized payment requests.',
+  governance,
+})
+const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
+return definition.getInstance({ model: primaryModel })
 ```
-
 An `audit` effect admits the tool and records the decision. An `allow`, `deny`,
 or `require_approval` decision also reaches the configured audit sink. In
 `shadow` mode, records use `enforced: false` so operators can compare proposed

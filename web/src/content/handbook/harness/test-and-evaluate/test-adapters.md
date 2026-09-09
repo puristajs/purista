@@ -36,7 +36,6 @@ sandboxContract(() => createIsolatedSandbox(), { executor: 'available' })
 sandboxTextSearchContract(() => createIsolatedSandbox())
 sandboxMultiClientContract(() => createIsolatedSandboxPair())
 ```
-
 `createIsolatedSandboxPair()` must return two independently constructed clients
 over the same deterministic test backend. That proves a second worker can
 attach to the same logical scope and that termination invalidates stale
@@ -70,8 +69,8 @@ an idempotent cleanup path so a failed CI job can be reconciled safely.
 After the adapter contract passes, build one small Harness with that adapter
 and verify the application-required capability using a fake provider. This
 catches composition mistakes such as registering a sandbox after tools,
-omitting `.requires(...)`, selecting an adapter without `sandbox.spawn`, or
-forgetting shutdown.
+omitting a definition's required sandbox capability, selecting an adapter
+without `sandbox.spawn`, or forgetting `HarnessInstance.close()`.
 
 Keep a live model out of this test. Adapter conformance, application wiring,
 and model quality are independent questions with different failure evidence.

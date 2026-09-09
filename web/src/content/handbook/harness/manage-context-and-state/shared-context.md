@@ -22,7 +22,6 @@ flowchart LR
   A -->|rejected| X[Safe rejection record]
   D --> F[Next worker or final workflow]
 ```
-
 The application owns the shared-context store and its policy. The Harness owns
 the typed worker invocation, cancellation, and workflow checkpoint around it.
 The maintained [checkout shared-context example](https://github.com/puristajs/harness/tree/main/examples/delm-shared-context)

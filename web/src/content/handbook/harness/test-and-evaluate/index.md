@@ -20,7 +20,6 @@ flowchart LR
   Scorers --> Report["Coverage and per-case results"]
   Report --> Change["Inspect, improve, and rerun"]
 ```
-
 The Harness runs and scores in process. Your application owns the dataset,
 candidate configuration, observation retention, access control, release policy,
 and any external platform. A result deliberately does not contain raw task

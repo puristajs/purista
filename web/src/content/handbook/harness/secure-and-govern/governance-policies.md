@@ -12,9 +12,10 @@ Start here when a rule must apply consistently across agents or tools. For
 example, a payment application can allow an ordinary transfer, require approval
 for a larger amount, and reject any amount above a hard limit.
 
-Governance is included in `@purista/harness`. It is disabled until
-`.governance(...)` is configured. Native TypeScript policies require no extra
-package or external service.
+Governance is included in `@purista/harness`. It is disabled until a policy is
+configured on an agent definition. `getInstance(...)` validates the declared
+graph before it starts. Native TypeScript policies require no extra package or
+external service.
 
 ## Learn the six terms used in this chapter
 
@@ -23,7 +24,7 @@ The following names describe one decision; they are not separate services:
 | Term | Plain-language meaning | Transfer example |
 | --- | --- | --- |
 | Tool occurrence | One prepared call proposed by the model | Call `transfer_funds` once with an amount and two accounts |
-| Governance configuration | The controls attached to one Harness | All transfer controls registered through `.governance(...)` |
+| Governance configuration | The controls attached to one Harness | All transfer controls registered in the definition's `governance` field |
 | Policy | A named, versionable owner for related decisions | `bank-transfer-policy` |
 | Rule | One condition inside a native TypeScript policy | Amounts above `10_000` are denied |
 | Evaluator | Application code that asks an external policy system for a decision | Map the transfer to an organization-owned policy API |
@@ -68,7 +69,6 @@ flowchart LR
   review -->|rejected resume| blocked[Return denied tool result]
   decision -->|deny| blocked
 ```
-
 Governance receives the parsed, potentially Guardrail-transformed tool input.
 A denied permission or policy, an approval interruption, or a configured audit
 failure prevents the handler from starting. Governance cannot roll back another
@@ -76,13 +76,11 @@ side effect that already ran.
 
 ## Register governance after the tools and agents
 
-The builder needs to know the tool registry before it can type-check a rule's
-selector and input. Define models, tools, and agents first; add governance just
-before `.build()`:
+Define the tool, agent, and governance policy as one composition graph.
+`getInstance(...)` validates that declared graph:
 
 ```ts title="src/createPaymentsHarness.ts"
-const harness = builder
-	.governance(({ native, rule }) => ({
+const governance = ({ native, rule }) => ({
 		defaultEffect: 'allow',
 		policies: [
 			native({
@@ -98,10 +96,16 @@ const harness = builder
 				],
 			}),
 		],
-	}))
-	.build()
+})
+const guardedAgent = defineAgent('payments', {
+  model: 'primary',
+  tools: [transfer],
+  instructions: 'Use the transfer tool only for an authorized payment request.',
+  governance,
+})
+const definition = defineHarness({ name: 'payments' }).addAgent(guardedAgent)
+const harness = await definition.getInstance({ model: primaryModel })
 ```
-
 This example is an exception list: unmatched calls are allowed, and the one
 matching condition is denied. The next guide builds the model, tool, agent,
 policy, invocation, and deterministic verification around this rule.
@@ -110,7 +114,7 @@ policy, invocation, and deterministic verification around this rule.
 
 | Requirement | Use |
 | --- | --- |
-| The agent must never see a tool | Omit it from `tools` or `builtinTools` |
+| The agent must never see a tool | Omit its definition from `tools` |
 | `bash`, `write`, or `edit` needs a local command/path rule | [Built-in tool permissions](/handbook/harness/secure-and-govern/tool-permissions/) |
 | Parsed business input needs an in-process rule | Native governance policy |
 | A prepared call needs a human decision | `require_approval`, persist its interrupt, and resume the same run |
@@ -153,7 +157,7 @@ Use only the fields required by the control you are adding:
 | `exposure` | none | Filter the model-facing tool list before each model step. |
 | `audit` | none | Persist content-free evidence for evaluated execution-policy decisions. A configured write failure fails closed. |
 
-`.governance(...)` may be called once. At least one execution policy or exposure
+The definition may contain one governance configuration. At least one execution policy or exposure
 rule must be present. A `require_approval` rule needs no callback provider: the
 run returns a `ToolApprovalInterrupt` when that rule matches.
 
@@ -180,16 +184,16 @@ run returns a `ToolApprovalInterrupt` when that rule matches.
 
 | Capability | Availability | Enablement |
 | --- | --- | --- |
-| Native TypeScript rules | Included, disabled by default | Add `.governance(...)` |
+| Native TypeScript rules | Included, disabled by default | Add a `governance` field to an agent definition; `getInstance(...)` validates it. |
 | Exposure rules, shadow mode, approval interruptions, and audit contracts | Included, opt-in | Configure the corresponding governance rule or field |
 | OPA adapter | Separate `@purista/harness-policy-opa` package | Create the fixed Data API client, explicitly map typed input, validate the result, and operate OPA |
 | Cedar adapter | Not shipped | Implement the Harness evaluator contract and Cedar client in the application |
 | Generic HTTP policy client | Not shipped | Own the HTTP client, authentication, mapping, and operations in the application |
 
-The `.governance(({ adapter }) => ...)` helper alone is only a typed
-registration helper for a `GovernancePolicyEvaluator`. It preserves the tool
-IDs and schema-derived input types available at that point in the builder.
-`opaPolicy(helpers, ...)` uses that inference anchor and supplies the OPA Data
+The governance definition is only a typed
+registration value for a `GovernancePolicyEvaluator`. It preserves the tool
+IDs and schema-derived input types available to the composed definition.
+`opaPolicy(...)` supplies the OPA Data
 API transport; it still does not load bundles or own identity and business
 mapping. No helper translates Cedar decisions.
 
@@ -206,12 +210,11 @@ npm test
 npm run build
 npm start
 ```
-
 The tests prove ordinary, approval, hard-limit, and insufficient-funds paths,
 including unchanged balances when the handler is blocked. Read the complete
 [bank governance example](https://github.com/puristajs/harness/tree/main/examples/bank-governance)
 while following the first-policy guide.
 
-API reference: [`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance),
+API reference: [`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/),
 [`GovernanceConfig`](/handbook/api/interfaces/_purista_harness.GovernanceConfig/), and
 [`GovernanceContext`](/handbook/api/types/_purista_harness.GovernanceContext/).

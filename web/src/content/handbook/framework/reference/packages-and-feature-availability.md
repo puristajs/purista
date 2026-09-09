@@ -17,15 +17,15 @@ order: 1230
 | Secret store | Default secret store | `@purista/aws-secret-store`, `@purista/azure-secret-store`, `@purista/gcloud-secret-store`, `@purista/vault-secret-store`, `@purista/infisical-secret-store`, `@purista/dapr-sdk` |
 | State store | Default state store | `@purista/redis-state-store`, `@purista/nats-state-store`, `@purista/dapr-sdk` |
 | Kubernetes integration | Application-owned deployment | `@purista/k8s-sdk` |
-| AI-powered services | Core includes the provider-neutral Harness runtime dependency | A model/provider adapter, such as `@purista/harness-openai`, plus provider credentials and runtime wiring |
+| AI-powered services | Service integration is provided by `@purista/core` | `@purista/harness` for application definitions, a provider adapter such as `@purista/harness-openai`, provider credentials, and runtime wiring |
 
 Install an optional adapter in the application that composes it, then follow its dedicated page for external prerequisites and runtime wiring. Do not add every optional dependency to every service: it increases deployment and security scope without enabling a feature by itself.
 
-`@purista/harness` is a dependency of `@purista/core`; application code uses it
-directly to define portable Harness agents and workflows. It **also** needs the
-selected provider/adapter package and its credentials before an agent can make
-a real model call. See [Build AI-powered services](/handbook/framework/build-ai-powered-services/)
-for the complete enablement and deterministic-testing path.
+Declare `@purista/harness` in the application that imports it. Do not rely on
+`@purista/core` to expose a transitive dependency. A real model call also needs
+the selected provider adapter and credentials. See
+[Build AI-powered services](/handbook/framework/build-ai-powered-services/) for
+the full setup and credential-free testing path.
 
 ## Export declared contracts for review
 

@@ -71,7 +71,6 @@ const result = await runEvaluation<Incident, ReviewedLabel, Candidate, { label: 
 
 console.log(result.dimensionAggregates)
 ```
-
 ### What the evaluation definition declares
 
 | Call or field | Purpose and options | Runtime effect and when to use it |

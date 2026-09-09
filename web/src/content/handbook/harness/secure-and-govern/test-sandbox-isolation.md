@@ -16,7 +16,6 @@ import { TrackedFilesystemSandbox } from './trackedFilesystemSandbox.js'
 
 sandboxContract(() => new TrackedFilesystemSandbox(), { executor: 'unavailable' })
 ```
-
 [`sandboxContract(...)`](/handbook/api/functions/_purista_harness_testing.sandboxContract/)
 checks owner registration, bounded administration, create/attach/restore
 behavior, concurrent create idempotency, filesystem operations, attachment
@@ -75,7 +74,6 @@ cd examples/custom-sandbox-adapter
 npm install
 npm test
 ```
-
 Use the [Docker sandbox guide](../local-docker-sandbox/) for the first-party
 local container adapter. Treat it as trusted local tooling unless its selected
 deployment and additional platform tests prove the stronger boundary your

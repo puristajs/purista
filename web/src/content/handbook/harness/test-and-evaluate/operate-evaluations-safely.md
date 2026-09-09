@@ -75,7 +75,6 @@ export async function runProtectedIncidentEvaluation() {
 	})
 }
 ```
-
 Use retry only for a callback failure classified as retriable. It keeps the
 same trial identity and must not repeat an irreversible effect. A low score,
 `not_applicable`, or `inconclusive` result is measurement evidence, not a retry

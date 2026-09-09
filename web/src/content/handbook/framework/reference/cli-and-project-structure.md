@@ -1,6 +1,6 @@
 ---
 title: CLI and project structure
-description: Use the project-local CLI to create consistent services, commands, subscriptions, streams, workers, and agents.
+description: Use the project-local CLI to create Framework definitions and service-owned Harness graphs.
 order: 1210
 ---
 
@@ -9,6 +9,7 @@ Generated projects include `@purista/cli` as a development dependency and provid
 ```bash title="Generate service"
 npm run add:service -- incident --description "Manage incidents"
 npm run add:command -- create-incident --service incident --service-version 1
+npm run add:agent -- triage-incident --service incident --service-version 1 --http none
 ```
 
 The project root `purista.json` controls generation conventions and structure. Commit generated source and tests with the business change; do not edit generated contracts without first understanding how the local command will reproduce them.
@@ -23,7 +24,13 @@ project to inspect the exact options pinned by its installed CLI version.
 | Service | A versioned business boundary |
 | Command or subscription | Typed definition, implementation, and test seam |
 | Stream or worker | An incremental response or background-work boundary |
-| Agent | Harness-enabled artifact; provider wiring remains optional and explicit |
+| Agent or workflow | A direct definition below `src/service/<service>/v<version>/harness/`, added to the service-owned Harness root |
+| Tool, Skill, or MCP server | An unregistered leaf definition plus exact guidance for the definition that should reference it; Skills attach to agents |
+
+`add:agent --http` accepts `none`, `command`, or `stream`. It defaults to
+`none`. Command and stream choices also create a protected Framework
+projection. The first agent bootstraps a provider only for the standard
+`src/index.ts` composition root.
 
 See [the generated project](/handbook/framework/start/understand-the-generated-project/)
 and [build services](/handbook/framework/build-services/) for the files and

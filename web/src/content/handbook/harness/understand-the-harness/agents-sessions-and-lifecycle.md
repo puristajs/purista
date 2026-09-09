@@ -22,12 +22,18 @@ sequenceDiagram
   Agent-->>Session: validated output or resumable interrupt
   Session-->>App: RunOutcome or typed error
 ```
-
 Use distinct session IDs for concurrent user threads. A second active run on one
 session is rejected; a session is not a queue. Use an application queue/worker
 when work must wait or survive process restart.
 
-`session.release()` closes live sandbox/MCP resources while retaining persisted
-history and runs. `session.destroy()` destructively closes the session and removes
-persisted session data. Choose deliberately; neither substitutes for a business
-retention policy.
+[`HarnessSession.release()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#release)
+closes live sandbox/MCP resources while retaining persisted history and runs.
+[`HarnessSession.destroy()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#destroy)
+destructively closes the session and removes persisted session data. Use
+[`HarnessSession.clearHistory()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#clearhistory)
+to remove conversation history while retaining the session, and
+[`HarnessSession.replaceHistory()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#replacehistory)
+when an authorized application needs to replace it. Use
+[`HarnessSession.getRunSummary()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#getrunsummary)
+for a safe operational summary. Choose deliberately; none substitutes for a
+business retention policy.

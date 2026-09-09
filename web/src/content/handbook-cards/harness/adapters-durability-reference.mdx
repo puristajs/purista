@@ -77,15 +77,14 @@ retesting the port protocol itself.
 
 1. Provide provider, Harness storage, sandbox, memory, and workspace adapters explicitly;
    do not rely on development defaults.
-2. Validate all required adapter capabilities during startup with
-   `.requires(...)`; fail readiness before accepting traffic when a mandatory
-   runtime feature is absent.
+2. Declare requirements through the definitions that use them; fail readiness
+   before accepting traffic when a mandatory runtime feature is absent.
 3. Keep secrets in a secret manager or deployment environment. Do not emit
    them to logs, spans, run events, skills, or fixtures.
 4. Bound model, tool, skill, run, queue, and storage behavior with independent
    timeouts, retry policies, quotas, retention, and idempotency keys.
 5. Run a deterministic fake-provider smoke test, then an explicitly opt-in live
-   provider smoke test. Verify `harness.shutdown()` on graceful shutdown.
+   provider smoke test. Verify `harness.close()` on graceful shutdown.
 6. Verify traces connect application request, session, workflow, agent, model,
    tool, and guardrail spans. Model/provider/token attributes are available on
    nested model spans only when the provider reports them.
@@ -97,7 +96,7 @@ organized by responsibility:
 
 | Package | Use it for |
 | --- | --- |
-| `@purista/harness` | Builder, sessions, adapters/ports, errors, telemetry, evaluation helpers. |
+| `@purista/harness` | Definitions, runtime, sessions, adapters/ports, errors, telemetry, and evaluation helpers. |
 | `@purista/harness/testing` | Deterministic model, state, sandbox, memory, telemetry, and contract test fakes. |
 | `@purista/harness-<provider>` | One independently installed model-provider adapter. |
 | `@purista/harness-guardrails` | Optional portable rail config, rail actions, and detector interfaces. |

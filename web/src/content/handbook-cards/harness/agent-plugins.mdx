@@ -28,7 +28,7 @@ flowchart LR
   report --> review[Application review and lockfile]
   review --> load[Load exact reviewed digest]
   load --> select[Select named skills and MCP tools]
-  select --> harness[Normal Harness builder]
+  select --> harness[Direct Harness definitions]
   harness --> allowlist[Agent allowlist + sandbox + governance]
 
   classDef boundary fill:#dbeafe,stroke:#2563eb,color:#172554
@@ -78,8 +78,9 @@ each selected component to a local Harness ID, then grants those local IDs to
 the intended agent in the normal way.
 
 ```ts
-import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { defineAgent, defineHarness } from '@purista/harness'
 import { loadAgentPlugins } from '@purista/harness-agent-plugins'
+import { z } from 'zod'
 
 const [plugin] = await loadAgentPlugins({
 	plugins: [
@@ -96,12 +97,18 @@ if (!plugin) {
 }
 
 const bindings = plugin.bindings({
-	skills: { claims_playbook: 'claims-playbook' },
-	tools: {
-		search_claims_knowledge: {
+	skills: { claimsPlaybook: { runtimes: [] } },
+	mcpServers: {
+		claimsKnowledge: {
 			server: 'knowledge',
-			tool: 'search',
-			description: 'Search the reviewed claims knowledge service.',
+			tools: {
+				searchClaimsKnowledge: {
+					remoteName: 'search',
+					description: 'Search the reviewed claims knowledge service.',
+					input: z.object({ query: z.string() }),
+					output: z.object({ matches: z.array(z.string()) }),
+				},
+			},
 			headers: { 'x-application': 'claims' },
 		},
 	},
@@ -111,18 +118,18 @@ if (bindings.diagnostics.some(item => item.level === 'error')) {
 	throw new Error('The selected Agent Plugin components cannot be bound safely.')
 }
 
-const harness = defineHarness({ name: 'claims' })
-	.sandbox(inMemorySandbox())
-	.skills(bindings.skills)
-	.tools(bindings.tools)
-	.agent('reviewer', {
-		model: 'assistant',
-		skills: ['claims_playbook'],
-		tools: ['search_claims_knowledge'],
-		builtinTools: ['read'],
-		instructions: 'Use the claims playbook and the selected search tool when needed.',
-	})
-	.build()
+const reviewer = defineAgent('reviewer', {
+	model: 'assistant',
+	skills: [bindings.skills.claimsPlaybook],
+	tools: [bindings.mcpServers.claimsKnowledge.tools.searchClaimsKnowledge],
+	instructions: 'Use the claims playbook and the selected search tool when needed.',
+})
+
+const definition = defineHarness({ name: 'claims' }).addAgent(reviewer)
+const harness = await definition.getInstance({
+	models: { assistant: { provider, model: 'provider-model' } },
+	mcp: bindings.mcp,
+})
 ```
 
 The package-declared HTTP headers are never forwarded automatically. The
@@ -168,8 +175,7 @@ binding any stdio component.
   sandbox policy are declared by your Harness composition root, never a plugin.
 - The agent sees only selected local aliases. A valid plugin does not grant an
   agent access to every discovered skill or tool.
-- Legacy stateful MCP and HTTP+SSE are rejected. Modern stateless Streamable
-  HTTP and reviewed stdio servers are the supported transports.
+- Use stateless Streamable HTTP or a reviewed stdio server for MCP transport.
 
 ## Test the review path
 

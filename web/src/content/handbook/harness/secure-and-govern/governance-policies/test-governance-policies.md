@@ -37,7 +37,6 @@ describe('bank transfer governance', () => {
 	})
 })
 ```
-
 This proves the complete path—scripted model proposal, parsed tool input,
 governance, handler, and result—without making a network request.
 
@@ -69,7 +68,6 @@ it('does not run the handler above the hard limit', async () => {
 	)
 })
 ```
-
 Assert stable rule IDs, effects, reason codes, and state changes. Do not snapshot
 tool input, prompts, credentials, or complete provider errors.
 
@@ -103,7 +101,6 @@ it('stops a transfer when approval is rejected', async () => {
 	expect(transfers).toHaveLength(0)
 })
 ```
-
 Add the corresponding approved case and assert that the handler runs exactly
 once. Also test stale revisions, changed decision sets, duplicate resume,
 cancellation, expiry in the application review layer, and unauthorized review.
@@ -153,8 +150,7 @@ cd examples/bank-governance
 npm install
 npm test
 ```
-
-Each test or scenario must release its session and call `harness.shutdown()` in
+Each test or scenario must release its session and call `harness.close()` in
 a `finally` block. This keeps sandbox, storage, and adapter cleanup reliable
 when an assertion fails.
 

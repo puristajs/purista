@@ -13,7 +13,6 @@ deterministic or production-ready.
 ```sh title="Run the live support-agent check"
 OPENAI_API_KEY=replace-with-a-secret node dist/index.js
 ```
-
 Expected evidence is a schema-valid result, not a fixed sentence. Capture only
 safe operational metadata such as success/failure, duration, and token usage;
 do not copy prompts, completions, tool values, or credentials into logs.
@@ -28,14 +27,13 @@ downloaded example directory:
 npm install
 npm test
 ```
-
 This verifies agent/session/workflow wiring without a network call or API key.
 Use the same pattern for application tests. Keep one explicit, access-controlled
 live smoke test outside normal CI when provider connectivity matters.
 
 ## Clean up
 
-Call `harness.shutdown()` when the application process stops. Do not create a
+Call `harness.close()` when the application process stops. Do not create a
 new Harness for every request; build the composition once and open/release
 sessions at the appropriate application boundary.
 

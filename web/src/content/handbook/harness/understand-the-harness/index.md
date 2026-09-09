@@ -18,7 +18,6 @@ flowchart LR
   Agent --> Capability[Tool, skill, or MCP]
   Session --> State[Storage, workspace, telemetry]
 ```
-
 1. [Mental model and runtime architecture](/handbook/harness/understand-the-harness/mental-model-and-runtime-architecture/)
 2. [Agents, sessions, and lifecycle](/handbook/harness/understand-the-harness/agents-sessions-and-lifecycle/)
 3. [Workflows and tasks](/handbook/harness/understand-the-harness/workflows-and-tasks/)

@@ -36,7 +36,6 @@ flowchart LR
   F -. state or workspace .-> X
   X --> H[Application failure boundary]
 ```
-
 The failure stage changes the safe response. Invalid agent input belongs to the
 caller and can become a bad-request response. Invalid agent output is an
 internal contract failure; the caller must not receive the rejected value or
@@ -150,7 +149,6 @@ export function toPublicAgentFailure(error: unknown): PublicAgentFailure {
 	return internalFailure()
 }
 ```
-
 This is an example policy, not a universal HTTP mapping. A public API may choose
 different status codes, but it should keep the allowlist and disclosure
 boundary. Add public cases only after deciding that callers may distinguish
@@ -202,7 +200,6 @@ export async function handleClassifyCase(request: Request): Promise<Response> {
 	}
 }
 ```
-
 The aggregate endpoint returns only the agent's completed output. It maps an
 interrupt to an application-owned state instead of turning an approval request
 into a `500` response or leaking the complete interrupt payload. A browser chat
@@ -320,7 +317,6 @@ describe('toPublicAgentFailure', () => {
 	})
 })
 ```
-
 Also test that a failed input or policy boundary prevents the model or protected
 tool from running. Use a fake provider and deterministic adapters for those
 tests. This verifies your implementation and control flow; model correctness

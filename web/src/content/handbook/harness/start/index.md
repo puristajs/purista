@@ -16,7 +16,6 @@ specific deployment shape.
 ```text title="First successful run"
 Install core + one provider → define a typed agent → open a session → invoke it
 ```
-
 ## Choose the first path
 
 | Need | Start here |

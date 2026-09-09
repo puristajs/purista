@@ -35,7 +35,6 @@ flowchart TB
   Agent --> Boundary
   Session --> Store
 ```
-
 | Use an agent when | Use a workflow when |
 | --- | --- |
 | One model-driven conversation can complete the task, possibly with tools | The application must sequence agents, branch, fan out, persist a step, request review, or perform a domain side effect |

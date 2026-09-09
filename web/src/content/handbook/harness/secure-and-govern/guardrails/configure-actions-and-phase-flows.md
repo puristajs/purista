@@ -38,7 +38,6 @@ export const removeInternalMarker = defineGuardrailAction({
 	}),
 })
 ```
-
 The transform target is fixed by phase. `input` uses `user_message`, `output`
 uses `bot_message`, `tool_input` uses `tool_input`, `tool_output` uses
 `tool_output`, and retrieval uses `relevant_chunks`. A mismatched target or a
@@ -69,7 +68,6 @@ export const supportRails = defineGuardrails({
 	actionTimeoutMs: 2_000,
 })
 ```
-
 The first input action's transformed value becomes the next input action's
 `value`. Output actions work the same way. Flow IDs are case-sensitive,
 application-owned names. They must be distinct, exist in `actions`, and refer

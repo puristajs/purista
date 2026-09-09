@@ -5,9 +5,9 @@ order: 390
 ---
 
 PURISTA uses `@purista/harness` as the AI definition language. Define agents,
-workflows, tools, skills, guardrails, models, and schemas once in a portable
-Harness definition. A PURISTA service mounts that definition and publishes only
-the targets that belong to its business boundary.
+workflows, tools, skills, guardrails, models, and schemas as direct definitions.
+A service-owned Harness graph adds the agents and workflows that belong to its
+business boundary. Mounting gives every added root a PURISTA address.
 
 ```mermaid title="Harness-first service integration"
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
 | Layer | Owns |
 | --- | --- |
 | Harness definition | Models, schemas, agents, workflows, native tools, skills, guardrails, and portable execution |
-| PURISTA service | Published addresses, business guards, resources, identity propagation, events, queues, and lifecycle |
+| PURISTA service | Target addresses, business guards, resources, identity propagation, events, queues, and lifecycle |
 | Composition root | Concrete model, storage, sandbox, workspace, admission, and telemetry adapters |
 | Consumer | Whether it needs one outcome with `.run(...)` or progressive events with `.stream(...)` |
 | HTTP adapter | Authentication, endpoint exposure, and conversion to a documented client protocol |

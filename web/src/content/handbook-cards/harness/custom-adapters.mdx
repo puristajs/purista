@@ -19,9 +19,10 @@ example, select the smallest port that owns the integration:
 | External capability | TypeScript tool or `mcp_http` / `mcp_stdio` | The capability has its own tool/server protocol | Tool tests plus authorization and outage tests |
 
 Keep a portable model alias, tool schema, agent, and workflow while swapping an
-adapter. The claims workflow should still call `ctx.agents.assessor(...)` and
-`ctx.memory.tenant().read(...)`; it should never acquire a database client or a
-provider SDK itself.
+adapter. The claims workflow should still call `ctx.agents.assessor.run(...)`.
+A tool that declares a memory requirement uses `context.memory.session.read(...)`
+or `context.memory.application.read(...)`; neither workflow nor agent code should
+acquire a database client or provider SDK itself.
 
 ## Package and composition pattern
 
@@ -32,7 +33,7 @@ The application owns credentials and chooses the engine at the
 composition root.
 
 ```ts
-import { defineHarness } from '@purista/harness'
+import { defineAgent, defineHarness } from '@purista/harness'
 import { postgresClaimsMemoryEngine } from '@acme/harness-memory-postgres'
 
 const memory = postgresClaimsMemoryEngine({
@@ -40,16 +41,22 @@ const memory = postgresClaimsMemoryEngine({
 	table: 'claim_memory',
 })
 
-const harness = defineHarness({ name: 'claims-review' })
-	.memory(memory)
-	.requires(['memory.kv', 'memory.persistent', 'memory.multi_instance'])
-	// models, tools, agents, and workflows
-	.build()
+const memoryUser = defineAgent('memoryUser', {
+	instructions: 'Use the configured claims memory.',
+	memory: { capabilities: ['memory.kv', 'memory.persistent', 'memory.multi_instance'] },
+})
+
+const definition = defineHarness({ name: 'claimsReview' }).addAgent(memoryUser)
+const harness = await definition.getInstance({
+	model: { provider, model: 'provider-model' },
+	memory,
+})
 ```
 
-Use `.requires(...)` for capabilities the application cannot operate without.
-It prevents a misleading startup where an adapter silently falls back to
-process-local behavior. Do not include provider credentials, connection strings,
+The agent definition declares the required memory capabilities.
+`getInstance(...)` checks them against the selected engine and fails before
+work starts instead of falling back to process-local behavior. Do not include
+provider credentials, connection strings,
 raw prompts, evidence, or tool data in adapter diagnostics, logs, spans, or
 metrics.
 
@@ -169,12 +176,12 @@ harnessStorageContract(createStorage)
 The optional `configureHarnessContext` hook receives the logger, telemetry,
 and harness name. Use them only for content-free backend spans or
 safe normalized diagnostics. `close()` must drain pools predictably so
-`harness.shutdown()` can report a controlled shutdown failure.
+`harness.close()` can report a controlled shutdown failure.
 
 A custom logger implements the complete `Logger` surface (`trace` through
 `fatal`) and `child(bindings)`. Make binding merges deterministic and redact at
-the sink as a final defense. Test it with the public contract before attaching
-it through `.logger(...)`:
+the sink as a final defense. Test it with the public contract before passing it
+as the `logger` binding to `getInstance(...)`:
 
 ```ts
 import { loggerContract } from '@purista/harness/testing'
@@ -237,11 +244,12 @@ orphan cleanup, retention expiry, and no raw workspace content in telemetry.
    into an adapter.
 2. Validate adapter configuration at construction and keep secrets out of error
    details.
-3. Declare only truthful capabilities and use `.requires(...)` in the
-   application for mandatory ones.
+3. Declare only truthful capabilities and let direct definitions project their
+   mandatory runtime requirements.
 4. Honor `AbortSignal` and close adapter-owned pools/processes in `close()`.
-5. Reuse `BaseModelProvider` where it fits and implement `HarnessStorage` once
-   than reimplementing common logging, telemetry, timeout, and error behavior.
+5. Reuse `BaseModelProvider` where it fits and implement `HarnessStorage`
+   instead of reimplementing common logging, telemetry, timeout, and error
+   behavior.
 6. Run the matching public contract suite with deterministic fakes.
 7. Add adapter-specific integration tests for the backend's failure and
    lifecycle semantics.

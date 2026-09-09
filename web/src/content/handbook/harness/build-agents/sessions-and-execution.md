@@ -27,7 +27,6 @@ flowchart LR
   I -. later request .-> B
   I -. retention expires .-> J[close session]
 ```
-
 ## 1. Choose the session ID and verified identity
 
 The application creates the session ID. Use a stable, opaque value that does
@@ -57,8 +56,7 @@ export async function runSupportClassifier(conversationId: string, caller: Verif
 	}
 }
 ```
-
-[`harness.getSession(id, options)`](/handbook/api/interfaces/_purista_harness.Harness/#getsession)
+[`harness.getSession(id, options)`](/handbook/api/interfaces/_purista_harness.HarnessInstance/#getsession)
 creates the persisted session record when the ID is new or reopens the existing
 record. It does not call an agent. Sandbox compute is attached lazily when a
 run or session capability needs it.
@@ -68,7 +66,7 @@ run or session capability needs it.
 | `id` | Application-owned logical session key. | Keep it stable for one conversation and unique across unrelated conversations. Store the mapping in the application, not in a prompt. |
 | `identity.tenantId` | Optional verified tenant dimension. | Supply it from the application authentication boundary. Business authorization must already allow this caller to use the requested session. The value becomes part of the immutable session binding. |
 | `identity.principalId` | Optional verified principal dimension. | Supply it when memory, sandbox, or policy needs a principal scope. Omit the field rather than setting it to `undefined`. |
-| `sandboxOwner` | Advanced attachment to an existing immutable sandbox owner. | Use only with an application-owned `authorizeOwner` callback configured on `.sandbox(...)`. It is not a shortcut for sharing by session ID. |
+| `sandboxOwner` | Advanced attachment to an existing immutable sandbox owner. | Use only with an application-owned `authorizeOwner` callback configured on the `sandbox` binding passed to `getInstance(...)`. It is not a shortcut for sharing by session ID. |
 
 Identity is immutable for the lifetime of a persisted session record. Every
 later `getSession(...)` call must provide the same identity, including the same
@@ -106,8 +104,7 @@ if (outcome.status === 'completed') {
 	console.log(`Run ${outcome.runId} paused for ${outcome.interrupt.type}`)
 }
 ```
-
-[`run(input, options)`](/handbook/api/interfaces/_purista_harness.AgentInvoker/#run)
+[`run(input, options)`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#run)
 waits until the run completes, reaches a durable resumable interrupt, or
 throws. A completed outcome contains the schema-valid value under `output`; an
 interrupted outcome contains the typed reason under `interrupt`. The same
@@ -168,8 +165,7 @@ if (summary) {
 	})
 }
 ```
-
-[`session.getRunSummary(runId)`](/handbook/api/interfaces/_purista_harness.Session/#getrunsummary)
+[`session.getRunSummary(runId)`](/handbook/api/interfaces/_purista_harness.HarnessSession/#getrunsummary)
 returns `undefined` when the storage has no run. A summary contains status and
 timestamps, aggregate provider-reported tokens, model/tool/agent call counts,
 and an internal serialized error when the run failed. It does not replace the
@@ -184,10 +180,10 @@ session facade.
 
 | Session method | What it removes | What remains | Use it when |
 | --- | --- | --- | --- |
-| [`release()`](/handbook/api/interfaces/_purista_harness.Session/#release) | Live, process-local sandbox/MCP attachment and child tasks owned by this facade. | Persisted session record, history, runs, memory, and durable state. | A request or worker is done but the logical session may reopen later. This is the normal per-request cleanup. |
-| [`disposeSandbox()`](/handbook/api/interfaces/_purista_harness.Session/#disposesandbox) | Owned sandbox and matching workspace resources; borrowed owners are detached, not deleted. | Session record, history, run receipts, and separately managed memory. | The application's sandbox retention policy expires. A later live invocation of the disposed owned session fails closed. |
-| [`destroy()`](/handbook/api/interfaces/_purista_harness.Session/#destroy) | Live resources and persisted session data owned by `HarnessStorage`; owned sandbox resources are disposed. | Data in external systems that have their own deletion contract may remain. | The logical session is intentionally destroyed. Treat broader privacy deletion as an application workflow. |
-| [`harness.shutdown()`](/handbook/api/interfaces/_purista_harness.Harness/#shutdown) | All process-local sessions and Harness-owned adapter resources. | Persisted backend data. | The process is shutting down after it has stopped accepting work. Inspect returned cleanup errors. |
+| [`release()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#release) | Live, process-local sandbox/MCP attachment and child tasks owned by this facade. | Persisted session record, history, runs, memory, and durable state. | A request or worker is done but the logical session may reopen later. This is the normal per-request cleanup. |
+| [`disposeSandbox()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#disposesandbox) | Owned sandbox and matching workspace resources; borrowed owners are detached, not deleted. | Session record, history, run receipts, and separately managed memory. | The application's sandbox retention policy expires. A later live invocation of the disposed owned session fails closed. |
+| [`destroy()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#destroy) | Live resources and persisted session data owned by `HarnessStorage`; owned sandbox resources are disposed. | Data in external systems that have their own deletion contract may remain. | The logical session is intentionally destroyed. Treat broader privacy deletion as an application workflow. |
+| [`harness.close()`](/handbook/api/interfaces/_purista_harness.HarnessInstance/#close) | All process-local sessions and Harness-owned adapter resources. | Persisted backend data. | The process is shutting down after it has stopped accepting work. Inspect returned cleanup errors. |
 
 Do not call `release()`, `disposeSandbox()`, or `destroy()` while the session is
 running. Stop accepting new work, cancel or await the active run, and then

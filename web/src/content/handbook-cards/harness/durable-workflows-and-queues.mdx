@@ -31,7 +31,7 @@ one SQLite `HarnessStorage`, a local durable workspace, and a local sandbox. Com
 execution stays disabled by default.
 
 ```ts
-import { defineHarness, localDurableExecution } from '@purista/harness'
+import { defineHarness, defineWorkflow, localDurableExecution } from '@purista/harness'
 import { z } from 'zod'
 
 const durable = localDurableExecution({
@@ -39,24 +39,28 @@ const durable = localDurableExecution({
 	exec: false,
 })
 
-const harness = defineHarness({ name: 'claims-review-worker' })
-	.storage(durable.storage)
-	.sandbox(durable.sandbox)
-	.workspace(durable.workspace)
-	.requires([
-		'storage.persistent',
-		'storage.workspace_checkpoint',
-		'workspace.persistent',
-		'workspace.checkpoint',
-		'workspace.resume',
-	])
-	// models, agents, and workflows are declared next
-	.build()
+const recoverClaims = defineWorkflow('recoverClaims', {
+	input: z.object({ claimId: z.string() }),
+	output: z.object({ claimId: z.string() }),
+	durable: true,
+	workspace: true,
+	async handler(context) {
+		return context.step('confirm-claim-v1', async () => context.input)
+	},
+})
+
+const definition = defineHarness({ name: 'claimsReviewWorker' })
+	.addWorkflow(recoverClaims)
+const harness = await definition.getInstance({
+	storage: durable.storage,
+	sandbox: durable.sandbox,
+	workspace: durable.workspace,
+})
 ```
 
-`.requires(...)` is a startup contract, not documentation. It fails before a
-run starts if an adapter cannot provide a capability required by the worker. The
-in-memory storage and workspace are useful for tests but do not
+`durable: true` and `workspace: true` add exact runtime requirements to the
+definition. `getInstance(...)` fails before a run starts if an adapter cannot
+provide them. The in-memory storage and workspace are useful for tests but do not
 survive process exit. For a distributed deployment, implement or install
 durable adapters with leases, persistence, retention, quota, and encryption
 policies appropriate to the environment.
@@ -69,6 +73,7 @@ same run ID; its callback does not run again. Make a call outside a step only
 when rerunning it is explicitly safe.
 
 ```ts
+import { defineAgent, defineHarness, defineWorkflow } from '@purista/harness'
 import { z } from 'zod'
 
 const ClaimReview = z.object({
@@ -76,24 +81,29 @@ const ClaimReview = z.object({
 	reasons: z.array(z.string()),
 })
 
-const claimsHarness = defineHarness({ name: 'claims-review-worker' })
-	.agent('assessor', {
+const assessor = defineAgent('assessor', {
 		model: 'reviewer',
 		input: z.object({ claimId: z.string(), evidence: z.array(z.string()) }),
 		output: ClaimReview,
 		instructions: 'Recommend approve only when the supplied evidence is sufficient; otherwise refer.',
-	})
-	.workflow('review_claim', {
+})
+
+const reviewClaim = defineWorkflow('reviewClaim', {
 		input: z.object({ claimId: z.string(), workflowVersion: z.literal('v1') }),
 		output: ClaimReview,
-		delegation: { agents: ['assessor'], maxChildAgentCalls: 1 },
+		agents: [assessor],
+		agentCalls: { maxCalls: 1 },
+		durable: true,
 		handler: async ctx => {
 			const evidence = await ctx.step('load-evidence-v1', () =>
 				claimsRepository.listReviewableEvidence(ctx.input.claimId),
 			)
 
 			const review = await ctx.step('assess-evidence-v1', () =>
-				ctx.agents.assessor({ claimId: ctx.input.claimId, evidence }),
+				ctx.agents.assessor.run(
+					{ claimId: ctx.input.claimId, evidence },
+					{ callId: 'assessEvidence' },
+				),
 			)
 
 			await ctx.step('record-recommendation-v1', () =>
@@ -107,7 +117,16 @@ const claimsHarness = defineHarness({ name: 'claims-review-worker' })
 			return review
 		},
 	})
-	.build()
+
+const claimsDefinition = defineHarness({ name: 'claimsReviewWorker' })
+	.addAgent(assessor)
+	.addWorkflow(reviewClaim)
+
+const claimsHarness = await claimsDefinition.getInstance({
+	models: { reviewer: { provider, model: 'provider-model' } },
+	storage,
+	workspace,
+})
 ```
 
 The repository's `recordRecommendation` operation needs its own idempotency
@@ -132,12 +151,17 @@ async function handleClaimReview(message: { id: string; claimId: string; workflo
 	const session = await claimsHarness.getSession(`claim:${message.claimId}`)
 
 	try {
-		const review = await session.workflows.review_claim.run(
+		const outcome = await session.workflows.reviewClaim.run(
 			{ claimId: message.claimId, workflowVersion: message.workflowVersion },
 			{ durable: { runId: `claim-review:${message.claimId}:${message.workflowVersion}` } },
 		)
 
-		if (review.recommendation === 'refer') {
+		if (outcome.status === 'interrupted') {
+			await queue.ack(message.id)
+			return
+		}
+
+		if (outcome.output.recommendation === 'refer') {
 			await claimsRepository.requestHumanReview({
 				claimId: message.claimId,
 				idempotencyKey: `review-request:${message.id}`,

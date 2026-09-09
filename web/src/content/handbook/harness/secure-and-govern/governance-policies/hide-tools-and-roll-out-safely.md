@@ -19,7 +19,6 @@ flowchart LR
   proposal --> execution[Execution policy]
   execution --> handler[Authorize and run handler]
 ```
-
 Hiding a tool improves least privilege and model behavior, but it is not a
 security boundary by itself. Keep execution policy and handler authorization
 for any sensitive side effect.
@@ -30,7 +29,7 @@ This rule hides `transfer_funds` unless the agent runs inside the
 `approved-transfer` workflow:
 
 ```ts title="src/policy/transferExposure.ts"
-createTransferAgentBuilder(provider).governance(({ exposureRule }) => ({
+const transferExposurePolicy = ({ exposureRule }) => ({
 	exposure: {
 		id: 'transfer-exposure',
 		version: '1',
@@ -44,11 +43,13 @@ createTransferAgentBuilder(provider).governance(({ exposureRule }) => ({
 			}),
 		],
 	},
-}))
+})
+const governance = { exposure: transferExposurePolicy }
+const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
+const harness = await definition.getInstance({ model: primaryModel })
 ```
-
-The [`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance)
-callback runs after the builder knows the selected tool IDs.
+The agent's governance policy is part of the definition and runs after the
+composition knows the selected tool IDs.
 
 | Field | Default | Runtime effect |
 | --- | --- | --- |
@@ -68,7 +69,7 @@ cancellation, or non-boolean result fails closed before the model call.
 Set `mode: 'shadow'` while validating a policy against real execution paths:
 
 ```ts title="src/policy/transferGovernance.ts"
-createTransferAgentBuilder(provider).governance(({ native, rule }) => ({
+const candidatePolicy = ({ native, rule }) => ({
 	mode: 'shadow',
 	defaultEffect: 'allow',
 	policies: [
@@ -86,12 +87,13 @@ createTransferAgentBuilder(provider).governance(({ native, rule }) => ({
 			],
 		}),
 	],
-}))
+})
+const governance = { mode: 'shadow', policies: [candidatePolicy] }
+const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
+const harness = await definition.getInstance({ model: primaryModel })
 ```
-
 This is the same
-[`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance)
-configuration with `mode: 'shadow'` selected.
+the agent governance policy with `mode: 'shadow'` selected.
 
 In shadow mode:
 

@@ -24,7 +24,7 @@ conditions add a restriction. Do not switch to `allow` merely to hide a
 missing or broken policy rule.
 
 ```ts title="src/policy/transferGovernance.ts"
-createTransferAgentBuilder(provider).governance(({ native, rule }) => ({
+const bankTransferPolicy = ({ native, rule }) => ({
 	defaultEffect: 'allow',
 	policies: [
 		native({
@@ -40,12 +40,14 @@ createTransferAgentBuilder(provider).governance(({ native, rule }) => ({
 			],
 		}),
 	],
-}))
+})
+const governance = { policies: [bankTransferPolicy] }
+const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
+const harness = await definition.getInstance({ model: primaryModel })
 ```
-
-This calls [`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance)
-after `createTransferAgentBuilder(provider)` has registered the typed tool and
-agent.
+This binds the governance policy through the definition and
+`definition.getInstance({ model: primaryModel })` after the typed tool and agent
+are composed.
 
 This is an exception list: ordinary transfers are admitted, while the matching
 hard-limit rule denies the occurrence.
@@ -74,7 +76,6 @@ Harness evaluates matching rules and applies the strongest effect:
 ```text title="Governance effect precedence"
 deny > require_approval > audit > allow
 ```
-
 Add a review threshold beside the hard limit:
 
 ```ts title="src/policy/transferGovernance.ts"
@@ -86,7 +87,6 @@ rule({
 	reasonCode: 'large_transfer',
 })
 ```
-
 A transfer of `1_500` requests approval. A transfer of `12_000` matches both
 rules, but `deny` wins and approval cannot override it.
 
@@ -104,7 +104,6 @@ rule({
 	reasonCode: 'invalid_amount',
 })
 ```
-
 Tool schemas should already reject an invalid amount; the example only shows
 the selected callback type. Put shape and format validation in the tool schema.
 Use governance for execution policy that remains meaningful after validation.

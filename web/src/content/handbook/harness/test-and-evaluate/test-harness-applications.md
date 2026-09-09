@@ -25,7 +25,6 @@ flowchart LR
   Adapter["Custom adapter implementation"] --> Contract["Shared contract suite"]
   Contract --> Platform["Provider integration and isolation tests"]
 ```
-
 | What you need to prove | Test boundary | Continue with |
 | --- | --- | --- |
 | One input, model request, and validated output | Strict `FakeModelProvider` through a real session | [Test a basic agent](/handbook/harness/build-agents/test-a-basic-agent/) |

@@ -17,7 +17,6 @@ the `vector` option. Then install the adapter:
 ```sh title="Install Redis Search memory support"
 npm install @purista/harness-memory-redis
 ```
-
 ```ts title="src/harness/claimsMemory.ts"
 import { redisMemoryEngine } from '@purista/harness-memory-redis'
 
@@ -32,7 +31,6 @@ export const claimsMemory = redisMemoryEngine({
 	vector: { dimensions: 1536 },
 })
 ```
-
 | Call or field | What it configures | Choice and failure boundary |
 | --- | --- | --- |
 | [`redisMemoryEngine(options)`](/handbook/api/functions/_purista_harness-memory-redis.redisMemoryEngine/) | Creates a Redis Search-backed memory engine. The full [`RedisMemoryEngineOptions`](/handbook/api/interfaces/_purista_harness-memory-redis.RedisMemoryEngineOptions/) describe connection, namespace, and search options. | The engine initializes its versioned index on first use; Redis Search or ACL failure remains an explicit memory operation failure. It never substitutes a local engine. |
@@ -40,7 +38,7 @@ export const claimsMemory = redisMemoryEngine({
 | [`namespace`](/handbook/api/interfaces/_purista_harness-memory-redis.RedisMemoryEngineOptions/#namespace) | Prefixes the engine's versioned records and search index. | Treat it as an immutable schema boundary. A new descriptor or embedding representation needs a new namespace plus reindex, not an in-place index mutation. |
 | [`vector`](/handbook/api/interfaces/_purista_harness-memory-redis.RedisMemoryEngineOptions/#vector) | Enables the vector/hybrid index and fixes its dimensions. | Omit it for text-only recall. Enable it only after Redis Search vector support and an embedding contract are ready; dimensions cannot change in place. |
 
-Pass `claimsMemory` to `.memory(claimsMemory)` in the complete Harness
+Pass `memory: claimsMemory` to `definition.getInstance(...)` in the complete Harness
 definition shown in [SQLite memory](/handbook/harness/manage-context-and-state/memory/sqlite/).
 [`redisMemoryEngine`](/handbook/api/functions/_purista_harness-memory-redis.redisMemoryEngine/)
 accepts the factory options documented by

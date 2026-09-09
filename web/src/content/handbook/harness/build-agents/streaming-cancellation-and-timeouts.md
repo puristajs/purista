@@ -7,86 +7,64 @@ order: 350
 Use `run(...)` when the caller needs one typed outcome. Use `stream(...)` when
 the caller needs text updates, structured snapshots, file/media progress, tool
 status, or an approval interruption before the final outcome. Harness keeps the
-portable consumer contract separate from detailed operator diagnostics.
+portable consumer contract separate from application logs and telemetry.
 
-```mermaid title="Aggregate, portable stream, and diagnostic paths"
+```mermaid title="Streaming Cancellation And Timeouts example 1"
 flowchart LR
   R[Agent or workflow] --> A[run: RunOutcome]
   R --> S[stream: ExecutionEvent]
-  R --> O[observe: RunEvent diagnostics]
   S --> U[AI SDK UI Message Stream v1]
   U --> B[useChat or AI Elements]
   B -. disconnect .-> C[AbortSignal]
   C --> R
 ```
-
 ## 1. Choose the consumer contract
 
 | Invocation | Result | Intended consumer |
 | --- | --- | --- |
-| [`run(input, options?)`](/handbook/api/interfaces/_purista_harness.AgentInvoker/#run) | `Promise<RunOutcome<Output>>` | A command, worker, workflow, test, or server handler that needs completion or a durable interrupt. |
-| [`stream(input, options?)`](/handbook/api/interfaces/_purista_harness.AgentInvoker/#stream) | `AsyncIterable<ExecutionEvent<Output>>` | A service/browser transport that needs a provider-neutral, versioned execution stream. |
-| [`observe(input, options?)`](/handbook/api/interfaces/_purista_harness.AgentInvoker/#observe) | `AsyncIterable<RunEvent>` | Trusted logs, local debugging, telemetry, or an operator console. Never forward it wholesale to a browser. |
+| [`HarnessTargetInvoker.run(input, options?)`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#run) | `Promise<RunOutcome<Output>>` | A command, worker, workflow, test, or server handler that needs completion or a durable interrupt. |
+| [`HarnessTargetInvoker.stream(input, options?)`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#stream) | `HarnessTargetStream<Output>` | A service/browser transport that needs a provider-neutral, versioned execution stream. Call [`HarnessTargetStream.cancel(reason?)`](/handbook/api/interfaces/_purista_harness.HarnessTargetStream/#cancel) when the client disconnects. |
 
-Workflow invokers expose the corresponding
-[`run(...)`](/handbook/api/interfaces/_purista_harness.WorkflowInvoker/#run),
-[`stream(...)`](/handbook/api/interfaces/_purista_harness.WorkflowInvoker/#stream),
-and [`observe(...)`](/handbook/api/interfaces/_purista_harness.WorkflowInvoker/#observe)
-methods with the workflow's inferred input and output types. A completed
+Agent and workflow invokers expose the same `run(...)` and `stream(...)`
+methods with their inferred input and output types. A completed
 `run(...)` returns `{ status: 'completed', runId, output }`. Approval and
 external waits return `{ status: 'interrupted', runId, interrupt }`; they are
 resumable outcomes, not server errors.
 
-## 2. Declare which output updates are portable
+## 2. Choose text or structured updates
 
-Set `updates` on the agent or workflow definition. The default is `none`.
+The agent output schema determines its portable update family. A string output
+produces text deltas. A structured output produces replaceable object snapshots.
+Workflows expose lifecycle and terminal events without partial output updates.
 
-```ts title="src/harness/supportHarness.ts"
-const supportHarness = defineHarness({ name: 'support' })
-  .models({ primary: modelAlias })
-  .agent('answer_support', {
-    input: supportInputSchema,
-    output: supportOutputSchema,
-    updates: 'text-delta',
-    handler: async context => {
-      const stream = context.models.primary.textStream(
-        { messages: [{ role: 'user', content: context.input.question }] },
-        context.signal,
-        { emitRunEvents: true },
-      )
+```ts title="Streaming Cancellation And Timeouts example 2"
+import { defineAgent, defineHarness } from '@purista/harness'
+import { z } from 'zod'
 
-      let answer = ''
-      for await (const part of stream) {
-        if (part.kind === 'delta') answer += part.text
-      }
-      return { answer }
-    },
-  })
-  .build()
+const answerSupport = defineAgent('answerSupport', {
+  input: z.object({ question: z.string().min(1) }),
+  output: z.string(),
+  prompt: input => ({ role: 'user', content: input.question }),
+  instructions: 'Answer the support question briefly and factually.',
+})
+export const definition = defineHarness({ name: 'support' }).addAgent(answerSupport)
+const supportHarness = await definition.getInstance({ model: modelAlias })
 ```
+The composition uses [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
+[`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/),
+and [`HarnessDefinition.getInstance(...)`](/handbook/api/interfaces/_purista_harness.HarnessDefinition/#getinstance)
+to bind the model alias before a session opens.
 
-The usual composition calls remain explicit:
-[`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/)
-starts the typed builder,
-[`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models)
-registers the alias used by the handler, and
-[`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent)
-declares the portable update mode on the schema-validated agent, while
-[`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
-validates the complete runtime before a session opens.
-
-[`OutputUpdateMode`](/handbook/api/types/_purista_harness.OutputUpdateMode/) is:
+[`HarnessOutputUpdateKind`](/handbook/api/types/_purista_harness.HarnessOutputUpdateKind/) is:
 
 | Value | Portable content event | Use it when |
 | --- | --- | --- |
-| `none` | No partial output; lifecycle, tools, approvals, files/progress, and the final outcome still stream. | Only the final schema-valid output should be public. |
-| `text-delta` | `output.text.delta` | The declared public result has live text. |
-| `object-snapshot` | `output.object.snapshot` | A UI can render replaceable partial structured state. A snapshot is not a JSON Patch. |
+| `none` | No partial output; lifecycle, tools, approvals, files/progress, and the final outcome still stream. | Workflow targets. |
+| `text-delta` | `output.text.delta` | The agent's declared output is text. |
+| `object-snapshot` | `output.object.snapshot` | The agent's declared output is structured. A snapshot is not a JSON Patch. |
 
-`updates` is an allowlist, not a producer. A custom handler must call a model
-stream with `{ emitRunEvents: true }`. The final return value still passes the
-agent/workflow output schema. Partial values do not prove the final schema and
-must not trigger irreversible business actions.
+The final value still passes the declared output schema. Partial values do not
+prove the final schema and must not trigger irreversible business actions.
 
 ## 3. Understand portable execution events
 
@@ -105,7 +83,7 @@ only the public execution families supported by the adapter boundary:
 | `run.finished` | Exactly one completed or interrupted `RunOutcome`. |
 
 Provider payloads, internal model messages, child-task topology, token details,
-and internal diagnostics remain on `observe(...)`. Application authentication,
+and internal diagnostics remain in application-owned logs and telemetry. Application authentication,
 business authorization, Guardrails, and artifact access control still apply to
 portable content.
 
@@ -114,57 +92,55 @@ portable content.
 Do not invent a Harness-specific browser protocol or client library. Install
 the first-party server adapter and the AI SDK protocol implementation:
 
-```bash title="Install the standard browser stream adapter"
+```bash title="Streaming Cancellation And Timeouts example 3"
 npm install @purista/harness-ai-sdk-ui ai
 ```
-
 The example below is a framework-neutral Fetch handler. Derive `sessionId` and
 the allowed agent input from authenticated application state; do not trust a
 browser-supplied tenant or principal ID.
 
-```ts title="src/http/postSupportChat.ts"
+```ts title="Streaming Cancellation And Timeouts example 4"
 import {
   createHarnessUIMessageStreamResponse,
-  parseHarnessToolApprovalResume,
+  parseHarnessUIMessageRequest,
 } from '@purista/harness-ai-sdk-ui/v1'
-import type { UIMessage } from 'ai'
-import { supportHarness } from '../harness/supportHarness.js'
-
-type ChatBody = {
-  input: { question: string }
-  messages: UIMessage[]
-}
+import { answerSupport } from '../harness/answerSupport.js'
+import { supportHarness } from '../runtime/supportHarness.js'
 
 export async function postSupportChat(request: Request, sessionId: string): Promise<Response> {
-  const body = await request.json() as ChatBody
+  const parsed = await parseHarnessUIMessageRequest(await request.json())
+  if (parsed.sessionId !== sessionId) throw new Error('Session is not allowed')
+
+  const question = parsed.lastUserMessage.parts
+    .filter(part => part.type === 'text')
+    .map(part => part.text)
+    .join('\n')
   const session = await supportHarness.getSession(sessionId)
   const runController = new AbortController()
   const abortRun = () => runController.abort('client disconnected')
   request.signal.addEventListener('abort', abortRun, { once: true })
 
-  const resume = parseHarnessToolApprovalResume(body.messages)
-  const lastAssistant = body.messages.findLast(message => message.role === 'assistant')
-  const execution = session.agents.answer_support.stream(body.input, {
+  const execution = session.agents[answerSupport.contract.id].stream({ question }, {
     signal: runController.signal,
-    ...(resume ? { resume } : {}),
+    ...(parsed.resume ? { resume: parsed.resume } : {}),
   })
 
-  async function* withLifecycle() {
-    try {
-      yield* execution
-    } finally {
+  const events = {
+    result: execution.result.finally(async () => {
       runController.abort('stream closed')
       request.signal.removeEventListener('abort', abortRun)
       await session.release()
-    }
+    }),
+    cancel: (reason?: string) => execution.cancel(reason),
+    [Symbol.asyncIterator]: () => execution[Symbol.asyncIterator](),
   }
 
-  return createHarnessUIMessageStreamResponse(withLifecycle(), {
-    ...(lastAssistant ? { messageId: lastAssistant.id } : {}),
+  return createHarnessUIMessageStreamResponse(events, {
+    sessionId,
+    ...(parsed.assistantMessageId ? { messageId: parsed.assistantMessageId } : {}),
   })
 }
 ```
-
 [`createHarnessUIMessageStreamResponse(...)`](/handbook/api/functions/_purista_harness-ai-sdk-ui_v1.createHarnessUIMessageStreamResponse/)
 returns the standard `text/event-stream` response with
 `x-vercel-ai-ui-message-stream: v1`. Text, files, tools, and approvals use AI
@@ -226,16 +202,13 @@ Keep each nested operation shorter than the remaining run budget, and keep the
 external transport deadline long enough to return the final protocol event. A
 timeout raises `OperationTimeoutError`; it is not a resumable approval outcome.
 
-## 8. Use diagnostics without exposing them
+## 8. Keep diagnostics out of the public stream
 
-Call `observe(...)` when an operator or test needs detailed `RunEvent` values
-such as model calls, token usage, workflow fan-out, child tasks, internal tool
-values, or overflow. The diagnostic relay has a bounded unread-event buffer;
-slow consumers can receive `stream.overflow`, and internal serialized errors
-can be present.
+Use application-owned logs, metrics, and traces for model calls, token usage,
+workflow fan-out, child tasks, and internal failures. Keep attributes bounded
+and content-free unless an explicit, reviewed policy permits capture.
 
-Do not forward `RunEvent` as public SSE. Convert only reviewed, low-cardinality
-operator evidence into logs/metrics, and use the portable `stream(...)` plus
+Do not forward diagnostic records as public SSE. Use the portable `stream(...)` plus
 the AI SDK adapter for browser behavior.
 
 Next: [handle agent failures safely](/handbook/harness/build-agents/errors-and-failure-behavior/), then

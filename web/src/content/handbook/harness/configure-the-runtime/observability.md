@@ -27,7 +27,6 @@ flowchart LR
   SDK --> Collector[OTLP collector]
   Collector --> Backend[Trace and metric backend]
 ```
-
 ## Know what is available
 
 | Capability | Available from `@purista/harness` | Additional setup |

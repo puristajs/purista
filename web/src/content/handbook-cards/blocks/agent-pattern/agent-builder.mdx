@@ -1,10 +1,11 @@
 ---
-title: Define agents with Harness modules
-description: Use the native Harness definition language and the PURISTA service mount boundary.
+title: Define agents with direct Harness definitions
+description: Define agents directly, add them to one Harness graph, and mount that graph at the PURISTA service boundary.
 ---
 
-PURISTA does not provide a second agent builder. Define AI behavior with
-`defineHarnessModule(...)`, compose modules with `.use(...)`, and mount the
-completed definition once in the owning service.
+Define AI behavior with `defineAgent(...)`. Add each root with
+`defineHarness(...).addAgent(...)`, then mount the completed definition once
+in the owning PURISTA service. Providers, storage, sandboxes, and credentials
+remain runtime values supplied through `getInstance(...)`.
 
 Continue with [Build and mount the first agent](/handbook/framework/build-ai-powered-services/build-and-mount-the-first-agent/).

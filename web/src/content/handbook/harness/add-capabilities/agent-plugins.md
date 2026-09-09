@@ -9,7 +9,6 @@ Install the first-party loader when plugin packages are part of your delivery:
 ```sh title="Install Agent Plugin support"
 npm install @purista/harness-agent-plugins
 ```
-
 `@purista/harness-agent-plugins` has a peer dependency on `@purista/harness`.
 Selecting an MCP component also needs the optional
 `@modelcontextprotocol/client` peer used by Harness MCP tools. Inspection and
@@ -33,7 +32,6 @@ flowchart LR
   load --> select[Select skill and MCP aliases]
   select --> harness[Register normal Harness skills and tools]
 ```
-
 ## 1. Inspect an untrusted package
 
 `inspectAgentPlugin(...)` reads package data and returns inventory plus
@@ -92,7 +90,6 @@ export async function loadReviewedResearchPlugin(root: string, expectedDigest: s
 	return bindings
 }
 ```
-
 `loadAgentPlugins(...)` processes each source independently and returns only
 trusted, valid entries whose current digest equals `expectedDigest`. An
 invalid, untrusted, changed, or malformed source is omitted; inspect first when
@@ -135,41 +132,33 @@ API reference: [`LoadedAgentPlugin`](/handbook/api/interfaces/_purista_harness-a
 
 ## 4. Register the projected definitions
 
-Pass the projected registries through the normal Harness builders, then grant
-the agent only the aliases it needs:
+Pass the projected definition objects to the agent, then grant it only the
+aliases it needs:
 
 ```ts title="src/createResearchHarness.ts"
-const harness = defineHarness({ name: 'research' })
-	.sandbox(sandbox)
-	.models(models)
-	.skills(bindings.skills)
-	.tools(bindings.tools)
-	.agent('researcher', {
-		model: 'assistant',
-		input: z.string(),
-		output: z.string(),
-		instructions: 'Research the question using approved sources.',
-		skills: ['research_playbook'],
-		builtinTools: ['read'],
-		tools: ['search_knowledge'],
-	})
-	.build()
-```
+import { builtInTools, defineAgent, defineHarness } from '@purista/harness'
 
+const researcher = defineAgent('researcher', {
+	model: 'assistant',
+	input: z.string(),
+	output: z.string(),
+	instructions: 'Research the question using approved sources.',
+	skills: [bindings.skills.research_playbook],
+	tools: [builtInTools.read, bindings.tools.search_knowledge],
+})
+const definition = defineHarness({ name: 'research' }).addAgent(researcher)
+const harness = await definition.getInstance({ models, sandbox })
+```
 The `read` built-in lets the default agent loop load the selected skill's
 mounted `SKILL.md`; it does not grant shell execution. If the plugin has no
-selected MCP tool, omit `.tools(bindings.tools)` and the agent's `tools` field.
+selected MCP tool, omit the agent's `tools` field.
 Use the normal [skill](/handbook/harness/add-capabilities/skills/) and
 [MCP](/handbook/harness/add-capabilities/mcp/) guides for runtime requirements,
 permissions, and tests.
 
 API reference: [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
-[`HarnessBuilder.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
-[`HarnessBuilder.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
-[`HarnessBuilder.skills(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#skills),
-[`HarnessBuilder.tools(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools),
-[`HarnessBuilder.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent), and
-[`HarnessBuilder.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build).
+[`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/), and
+[`HarnessDefinition.getInstance(...)`](/handbook/api/interfaces/_purista_harness.HarnessDefinition/#getinstance).
 
 When you select an MCP tool, a plugin package never supplies an authorization
 credential: replace the illustrative static header with application-owned,
@@ -216,7 +205,6 @@ npm run typecheck
 npm run build
 npm run start -- ./fixtures/knowledge-plugin
 ```
-
 The output contains only diagnostics and content-free provenance. Read the
 [complete example](https://github.com/puristajs/harness/tree/main/examples/agent-plugins)
 before adapting it to an installed package.

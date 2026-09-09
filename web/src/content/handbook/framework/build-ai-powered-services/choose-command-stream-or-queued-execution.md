@@ -1,49 +1,50 @@
 ---
 title: Choose run, stream, or queued execution
-description: Let consumers select aggregate or progressive delivery, and add a PURISTA queue only for admission, retry, or disconnected completion.
+description: Choose aggregate, progressive, or durable delivery for each mounted Harness target.
 order: 394
 ---
 
-Mounting publishes a target. It does not choose how every consumer receives the
-result.
+Mounting gives an agent or workflow a service address. The caller chooses how
+to receive the work.
 
-| Consumer need | Framework shape | Harness call |
+| Consumer need | Framework shape | Harness client |
 | --- | --- | --- |
-| One result in the current request | Command | `.run(input)` |
-| Live status and generated content | Stream | `.stream(input)` |
-| Controlled concurrency, retry, or disconnected completion | Queue and worker | Worker calls `.run(input)` or consumes `.stream(input)` |
+| One result in the current request | Command | `.run(input, options?)` |
+| Live status and generated content | Stream | `.stream(input, options?)` |
+| Admission, retry, or disconnected completion | Queue and worker | `.enqueue(input, options?, metadata?)` |
 
-Both direct forms are address-first:
+Aggregate and streaming calls use the same declared target:
 
 ```ts title="Choose aggregate or streaming delivery"
-const outcome = await context.agent.Support['1'].triage_ticket.run(input, {
+const triage = context.agent.Support['1'][triageTicketAgent.contract.id]
+const result = await triage.run(input, {
   sessionId: `ticket:${input.ticketId}`,
 })
 
-const execution = await context.agent.Support['1'].triage_ticket.stream(input)
+if (result.outcome.status === 'completed') {
+  console.log(result.outcome.output)
+}
+
+const execution = await triage.stream(input, {
+  sessionId: `ticket:${input.ticketId}`,
+})
 for await (const event of execution) {
   // Map only events promised by this consumer contract.
 }
 ```
 
-The stream is provider-neutral and can be consumed once. Stopping iteration
-early cancels remote execution. The terminal `run.finished` event contains the
-same outcome shape returned by `.run(...)`.
+`.run(...)` returns `{ sessionId, outcome }`. The outcome is either a completed
+value or an interruption that the application can resume. `.stream(...)`
+returns a cancellable stream with its `sessionId`. Its terminal `run.finished`
+event carries the same outcome shape. Cancelling or stopping early must cancel
+the upstream execution.
 
-Provider limits commonly need two controls: Harness admission limits active
-runs in one service instance, while a PURISTA queue controls durable arrival,
-retry, and fleet-wide worker concurrency. A worker declares the target with
-`canInvokeAgent(...)` or `canInvokeWorkflow(...)`. Use
-`toHarnessQueueRetry(error)` for retryable provider failures instead of
-sleeping in the handler.
-
-Use `defineHarnessQueueBinding(...)` when the queue is the published target's
-delivery mode. It composes native queue and worker builders and keeps the
-Harness contract as the only input/output schema owner:
+Use `defineHarnessQueueBinding(...)` when one mounted target needs durable
+delivery:
 
 ```ts title="Bind optional durable delivery"
 const queuedTriage = defineHarnessQueueBinding(
-  supportHarness.contracts.agents.triage_ticket,
+  triageTicketAgent.contract,
   supportV1ServiceBuilder
     .getQueueBuilder('support.triage', 'Queue ticket triage')
     .setLifecycleConfig({ maxAttempts: 5 }),
@@ -53,29 +54,21 @@ const queuedTriage = defineHarnessQueueBinding(
 )
 
 export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  publish: { agents: ['triage_ticket'] },
-  targets: { agents: { triage_ticket: { queue: queuedTriage } } },
+  targets: { agents: { [triageTicketAgent.contract.id]: { queue: queuedTriage } } },
 })
 ```
 
-[`getQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueuebuilder)
-declares the queue contract, and
-[`setLifecycleConfig(config)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#setlifecycleconfig)
-sets delivery rules such as `maxAttempts`.
-[`getQueueWorkerBuilder(queueName, workerName)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerbuilder)
-creates the worker definition, while
-[`setMaxParallelHandlers(count)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#setmaxparallelhandlers)
-bounds concurrent executions in this worker instance. These declarations do
-not replace the QueueBridge or a provider-level rate limit.
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+attaches the queue binding to this target.
 
-Declare `queuedTriage.contract` at a caller to receive typed queue delivery:
+The caller declares the queued reference instead of the plain agent contract:
 
 ```ts title="Declare queued agent delivery"
 const classifyCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('classifyTicket', 'Queue ticket classification')
-  .canInvokeAgent('Support', '1', 'triage_ticket', queuedTriage.contract)
+  .canInvokeAgent('Support', '1', queuedTriage.reference)
   .setCommandFunction(async function ({ agent }, input) {
-    return agent.Support['1'].triage_ticket.enqueue(
+    return agent.Support['1'][queuedTriage.reference.contract.id].enqueue(
       input,
       { sessionId: `ticket:${input.ticketId}` },
       { idempotencyKey: `triage:${input.ticketId}` },
@@ -83,19 +76,14 @@ const classifyCommandBuilder = supportV1ServiceBuilder
   })
 ```
 
-[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
-publishes the selected target and owns its queue worker.
-[`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
-creates the addressable command contract, and
-[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-declares the EventBridge address and exposes `.enqueue(...)` only for the
-wrapped queued contract.
-[`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction)
-installs the command handler after its invocation capabilities are declared.
+[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+uses the queued reference to expose `.enqueue(...)` on the declared target.
 
-The queue worker still calls the published service address through EventBridge.
-Tenant and principal identity come from trusted queue metadata. A caller that
-declares the plain Harness contract has only `.run(...)` and `.stream(...)`.
+Enqueue returns an acceptance envelope with identifiers such as `jobId`,
+`queueName`, and `sessionId`. It does not return the agent's final output.
 
-Do not add a queue to every agent. A short classification command can call the
-target directly when its latency and failure contract permit it.
+[`getQueueBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueuebuilder)
+defines delivery rules, and
+[`getQueueWorkerBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerbuilder)
+defines worker concurrency. The QueueBridge provides durable transport. Model
+admission separately limits active provider calls inside a service instance.
