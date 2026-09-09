@@ -12,9 +12,9 @@ QueueBridge, and shared operational state. Install only those adapters.
 
 ```bash title="Install the NATS adapters" replay="project"
 npm install --save-exact \
-  @purista/natsbridge@3.2.4 \
-  @purista/nats-queue-bridge@3.2.4 \
-  @purista/nats-state-store@3.2.4
+  @purista/natsbridge@4.0.0 \
+  @purista/nats-queue-bridge@4.0.0 \
+  @purista/nats-state-store@4.0.0
 ```
 
 Tell PURISTA tooling which EventBridge family this project uses in its
@@ -29,8 +29,7 @@ distributed profile.
   "eventConvention": "camel",
   "linter": "biome",
   "formatter": "biome",
-  "servicePath": "src/service",
-  "agentPath": "src/agents"
+  "servicePath": "src/service"
 }
 ```
 
@@ -39,9 +38,7 @@ selected family; the running adapter supplies the verified capability matrix
 after it has connected to JetStream.
 
 ```bash title="Export the declared runtime profile" replay="project"
-npx purista export runtime-capabilities \
-	--mode definition-only \
-	--out runtime-declaration.json
+npm run export:runtime
 ```
 
 ## Keep the default and durable Monitoring definitions separate

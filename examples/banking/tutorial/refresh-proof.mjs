@@ -59,6 +59,7 @@ function changedOnlyAllowedInstall(oldActions, newActions, scripts) {
 }
 
 const pending = []
+const generatedScaffoldTargets = new Set(['AGENTS.md', '.agents/IMPLEMENTATION.md', 'purista.json'])
 for (const chapter of sequence(values.chapter)) {
 	const root = retainedRoot(chapter.id)
 	const { proof, source: freshProofSource } = await readTrackedFreshReplayProof(chapter.id)
@@ -102,7 +103,7 @@ for (const chapter of sequence(values.chapter)) {
 	const currentFiles = await sourceHashes(root, enforcesV4Source(chapter))
 	for (const path of new Set([...Object.keys(oldFiles), ...Object.keys(currentFiles)])) {
 		if (oldFiles[path] === currentFiles[path]) continue
-		assert(writeTargets.has(path), `${chapter.id}: source hash changed outside a current write target: ${path}`)
+		assert(writeTargets.has(path) || generatedScaffoldTargets.has(path), `${chapter.id}: source hash changed outside a current write target or generated scaffold file: ${path}`)
 	}
 
 	for (const page of pages) {

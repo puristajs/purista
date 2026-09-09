@@ -108,6 +108,34 @@ export function assertV4Source(source, page, enforce = true) {
 	assert(!/\bsrc\/harness\//.test(source), `${page}: tutorial references forbidden top-level src/harness`)
 	assert(!/HarnessMount\.[cm]?[jt]sx?/.test(source), `${page}: tutorial references a removed HarnessMount file`)
 	assert(!/\bBankingService\b/.test(source), `${page}: tutorial uses the forbidden umbrella BankingService`)
+	assert(!/\bagentPath\b|\bsrc\/agents\b|\battached agents\b/i.test(source), `${page}: source references the removed top-level agent layout`)
+	if (page.endsWith('AGENTS.md')) {
+		assert(source.includes('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}'), `${page}: generated guidance misses the service-owned Harness layout`)
+		assert(source.includes('singular `ai.model`'), `${page}: generated guidance misses the primary model binding`)
+	}
+	if (page.endsWith('.agents/IMPLEMENTATION.md')) {
+		assert(source.includes('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}'), `${page}: implementation guidance misses the service-owned Harness layout`)
+		assert(source.includes('ServiceBuilder.defineTool(...)'), `${page}: implementation guidance misses PURISTA host tools`)
+	}
+}
+
+export const requiredGeneratedScripts = {
+	'add:service': 'purista add service',
+	'add:command': 'purista add command',
+	'add:subscription': 'purista add subscription',
+	'add:stream': 'purista add stream',
+	'add:queue': 'purista add queue',
+	'add:queue-worker': 'purista add queue-worker',
+	'add:agent': 'purista add agent',
+	'add:workflow': 'purista add workflow',
+	'add:tool': 'purista add tool',
+	'add:skill': 'purista add skill',
+	'add:mcp': 'purista add mcp',
+}
+
+export function assertGeneratedPackageScripts(projectId, packageJson) {
+	for (const [name, command] of Object.entries(requiredGeneratedScripts))
+		assert.equal(packageJson.scripts?.[name], command, `${projectId}: generated npm script ${name} drifted`)
 }
 
 function parseBlocks(source, page) {
@@ -195,7 +223,7 @@ export async function sourceHashes(root, enforceV4Source, prefix = '') {
 		} else if (entry.isDirectory()) Object.assign(result, await sourceHashes(root, enforceV4Source, path))
 		else {
 			const content = await readFile(join(root, path))
-			if (enforceV4Source && /\.[cm]?[jt]sx?$/.test(path)) assert(!/\bBankingService\b/.test(content.toString('utf8')), `Forbidden umbrella BankingService in ${path}`)
+			if (enforceV4Source && /(?:\.[cm]?[jt]sx?|\.json|\.md)$/.test(path)) assertV4Source(content.toString('utf8'), path)
 			result[path] = digest(content)
 		}
 	}

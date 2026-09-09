@@ -4,7 +4,7 @@
   "freshReplay": false,
   "chapter": "command-result-events",
   "baseFreshProofDigest": "79ab5c1f460089ed53cf904e60621dd254a82125b75f26a09bb5d215f7811c5d",
-  "packageManifestDigest": "3b85e32977a904358c6234bc29387857d04c2f1aef588b9b23d571e727894488",
+  "packageManifestDigest": "1c39f7b2fdaeafdb7deb8a7413e7308c246c43dc4abb573562fea4d6211ec7c6",
   "pages": {
     "create-project/build/initialize": "bdee28111f0615f32c2e1c821b0a397ff03ad1fec87044eea718957d44504735",
     "create-project/build/generate-service": "a573210ec4c93759c43292ff49dcb19fc79bd0e6fe4c7099b3b01a438bd8e56a",
@@ -51,16 +51,16 @@
     "command-result-events/testing/test-events": "3c7ed17e83a0c9e1e179aea0c7bce6eae377bdd1941c434903fc7d68c7799fb6"
   },
   "files": {
-    ".agents/IMPLEMENTATION.md": "e74c259e1aba782768754d77a35b9f9cc1be5872332795e26588d1491ef7b13c",
+    ".agents/IMPLEMENTATION.md": "1af56723c4c9e93f0a5a46831c0c750a245de5777bf65003d31bd63c9d87111d",
     ".agents/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
     ".claude/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
     ".gitignore": "83baf940dc3fb72fc4a641dc7cb25d50c2cd933fad788c0817277d5593634790",
-    "AGENTS.md": "906ec5e2db4483fe773be79b86a14dec68d61b3566621914740b1836f101dade",
+    "AGENTS.md": "2f76bd45c363fa99c74de668fe7b8d5cd2d3c6804cdfc38a23eb3cee7d378751",
     "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
     "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
     "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
     "compose.yaml": "94c7cb39a4568facbfd0fdf32be0d78d18b68e1156856a86aff43e86132a5f4b",
-    "purista.json": "dc2cc6b95a7541fffb3b89739040f392789cce1548b44dad82fefd1511b4a9f4",
+    "purista.json": "889d83f2f9c9aeb2016eb977642f0072aba40de1ce67631c47cc074a77a72d0b",
     "scripts/verifyLegacyProvider.mjs": "33545a25025f285005ed038f9306df2f497e947ac20fac792b2433b0136306f8",
     "src/application.test.ts": "7bc06db98d259f9912ac824df0073b415ea1cae4fe582573ce0945c58454930c",
     "src/application.ts": "a9221799a73da32ad4606acfb8a94264a83c34944d26dfa3f7fe21ee5e929a39",

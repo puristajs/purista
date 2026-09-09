@@ -812,6 +812,10 @@ to use typed fakes and does not require Docker.
     "add:queue": "purista add queue",
     "add:queue-worker": "purista add queue-worker",
     "add:agent": "purista add agent",
+    "add:workflow": "purista add workflow",
+    "add:tool": "purista add tool",
+    "add:skill": "purista add skill",
+    "add:mcp": "purista add mcp",
     "start": "tsx src/index.ts",
     "build": "npm run build:server && npm run build:ui",
     "dev": "tsx watch src/index.ts",
@@ -827,7 +831,6 @@ to use typed fakes and does not require Docker.
   }
 }
 ```
-
 Run the ordinary tests first, then the explicitly named provider integration.
 
 ```bash title="Install the updated lockfile and run ordinary tests" replay="project"

@@ -6,6 +6,5 @@
   "eventConvention": "camel",
   "linter": "biome",
   "formatter": "biome",
-  "servicePath": "src/service",
-  "agentPath": "src/agents"
+  "servicePath": "src/service"
 }

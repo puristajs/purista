@@ -5,6 +5,7 @@ import { readFile, readdir, stat } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
+import { assertGeneratedPackageScripts } from './tutorial-contract.mjs'
 
 const directory = dirname(fileURLToPath(import.meta.url))
 const bankRoot = resolve(directory, '..')
@@ -151,6 +152,7 @@ async function assertAllPackageManifests() {
 	for (const manifest of manifests) {
 		const packageJson = JSON.parse(await readFile(manifest.path, 'utf8'))
 		assert(packageJson.dependencies?.['@purista/core'], `${manifest.id}: tutorial backend must use PURISTA Framework`)
+		assertGeneratedPackageScripts(manifest.id, packageJson)
 		for (const [name, version] of Object.entries({ ...packageJson.dependencies, ...packageJson.devDependencies }))
 			assertPublishedDependencySpec(manifest.id, name, version)
 		if (aiChapterIds.has(manifest.id))
@@ -305,6 +307,7 @@ async function inspectChapter(chapter) {
 	assert(await exists(packageJsonPath), `${chapter.id}: missing package.json`)
 	const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'))
 	assert(packageJson.dependencies?.['@purista/core'], `${chapter.id}: tutorial backend must use PURISTA Framework`)
+	assertGeneratedPackageScripts(chapter.id, packageJson)
 	for (const [name, version] of Object.entries({ ...packageJson.dependencies, ...packageJson.devDependencies }))
 		assertPublishedDependencySpec(chapter.id, name, version)
 	for (const script of ['build', 'test', 'lint', 'start'])

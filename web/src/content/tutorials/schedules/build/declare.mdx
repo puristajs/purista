@@ -136,7 +136,9 @@ export only the schedule contract.
     "vite": "8.2.1",
     "vitest": "^4.1.10"
   },
-  "trustedDependencies": ["@biomejs/biome"],
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ],
   "scripts": {
     "add:service": "purista add service",
     "add:command": "purista add command",
@@ -145,6 +147,10 @@ export only the schedule contract.
     "add:queue": "purista add queue",
     "add:queue-worker": "purista add queue-worker",
     "add:agent": "purista add agent",
+    "add:workflow": "purista add workflow",
+    "add:tool": "purista add tool",
+    "add:skill": "purista add skill",
+    "add:mcp": "purista add mcp",
     "start": "tsx src/index.ts",
     "build": "npm run build:server && npm run build:ui",
     "dev": "tsx watch src/index.ts",
@@ -161,7 +167,6 @@ export only the schedule contract.
   }
 }
 ```
-
 Export and test the contract. The test reads the CLI result, so it verifies the
 artifact an external scheduler would consume.
 

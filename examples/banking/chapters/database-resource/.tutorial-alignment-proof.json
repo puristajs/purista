@@ -4,7 +4,7 @@
   "freshReplay": false,
   "chapter": "database-resource",
   "baseFreshProofDigest": "281c397f15b1385636d2f90c17dedacdbac624ae666119a6b8a721213f8e15c9",
-  "packageManifestDigest": "7e9f57449305441b6b86acc337b74ad149d883efec970d9d07ce388b466f7ce7",
+  "packageManifestDigest": "8b54d6cf6d7ec324d62f3dde8e97a9280cd5d1e2737756a6ec29118202649eaf",
   "pages": {
     "create-project/build/initialize": "bdee28111f0615f32c2e1c821b0a397ff03ad1fec87044eea718957d44504735",
     "create-project/build/generate-service": "a573210ec4c93759c43292ff49dcb19fc79bd0e6fe4c7099b3b01a438bd8e56a",
@@ -27,15 +27,15 @@
     "database-resource/testing/test-resource": "d4be11f894392029cde30207fdd9dcb7c7c6675b5e0b8db35b8050dbd32d4dc2"
   },
   "files": {
-    ".agents/IMPLEMENTATION.md": "e74c259e1aba782768754d77a35b9f9cc1be5872332795e26588d1491ef7b13c",
+    ".agents/IMPLEMENTATION.md": "1af56723c4c9e93f0a5a46831c0c750a245de5777bf65003d31bd63c9d87111d",
     ".agents/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
     ".claude/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
     ".gitignore": "83baf940dc3fb72fc4a641dc7cb25d50c2cd933fad788c0817277d5593634790",
-    "AGENTS.md": "906ec5e2db4483fe773be79b86a14dec68d61b3566621914740b1836f101dade",
+    "AGENTS.md": "2f76bd45c363fa99c74de668fe7b8d5cd2d3c6804cdfc38a23eb3cee7d378751",
     "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
     "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
     "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
-    "purista.json": "dc2cc6b95a7541fffb3b89739040f392789cce1548b44dad82fefd1511b4a9f4",
+    "purista.json": "889d83f2f9c9aeb2016eb977642f0072aba40de1ce67631c47cc074a77a72d0b",
     "src/application.test.ts": "d69f55513a6ed3557072e65c9f686ee82878a8fb11bbe983d43941befa446216",
     "src/application.ts": "d91f27c9b7e7bc73f2d7cf6ec20414dddc4d718483bed6c10212c235f24ea91a",
     "src/eventbridge.ts": "26ff7cfd68da9c058b8c225f00e2a3744ef212bf31f1ec6330c8950f0534f9af",

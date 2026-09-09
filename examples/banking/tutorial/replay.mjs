@@ -8,7 +8,7 @@ import { createServer } from 'node:net'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
-import { assertFreshReplayProof, assertPublicInstallCommands, readTrackedFreshReplayProof } from './tutorial-contract.mjs'
+import { assertFreshReplayProof, assertGeneratedPackageScripts, assertPublicInstallCommands, assertV4Source, readTrackedFreshReplayProof } from './tutorial-contract.mjs'
 
 const directory = dirname(fileURLToPath(import.meta.url))
 const bankRoot = resolve(directory, '..')
@@ -134,6 +134,7 @@ async function assertAllPackageManifests() {
 	for (const manifest of manifests) {
 		const packageJson = JSON.parse(await readFile(manifest.path, 'utf8'))
 		assert(packageJson.dependencies?.['@purista/core'], `${manifest.id}: tutorial backend must use PURISTA Framework`)
+		assertGeneratedPackageScripts(manifest.id, packageJson)
 		for (const [name, version] of Object.entries({ ...packageJson.dependencies, ...packageJson.devDependencies }))
 			assertPublishedDependencySpec(manifest.id, name, version)
 	}
@@ -253,8 +254,7 @@ async function sourceHashes(root, enforceV4Source, prefix = '') {
 		} else if (entry.isDirectory()) Object.assign(result, await sourceHashes(root, enforceV4Source, path))
 		else {
 			const content = await readFile(join(root, path))
-			if (enforceV4Source && /\.[cm]?[jt]sx?$/.test(path))
-				assert(!/\bBankingService\b/.test(content.toString('utf8')), `Forbidden umbrella BankingService in ${path}`)
+			if (enforceV4Source && /(?:\.[cm]?[jt]sx?|\.json|\.md)$/.test(path)) assertV4Source(content.toString('utf8'), path)
 			result[path] = digest(content)
 		}
 	}
