@@ -3,7 +3,7 @@ import type { z } from 'zod'
 import type {
 	answerProcedureQuestionInputSchema,
 	answerProcedureQuestionOutputSchema,
-} from './harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+} from './service/support/v1/schema.js'
 
 type ProcedureQuestion = z.infer<typeof answerProcedureQuestionInputSchema>
 type ProcedureAnswer = z.infer<typeof answerProcedureQuestionOutputSchema>
@@ -24,7 +24,7 @@ export function invokeProcedureAnswer(
 			serviceTarget: 'askProcedureQuestion',
 			instanceId: getNewInstanceId(),
 		},
-		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerProcedureQuestion' },
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
 		payload: { payload, parameter: {} },
 	})
 }

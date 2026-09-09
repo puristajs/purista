@@ -1,19 +1,18 @@
 ---
 title: Compose the Skill-enabled runtime
-description: Bind the model, sandbox, policy, and address-first caller without changing the portable agent.
+description: Bind one model, the read-capable sandbox, the policy, and an address-first caller.
 order: 245
 kind: lesson
 status: draft
 ---
 
-The Harness definition owns the Skill, built-in tool allowlist, and agent
-contract. The composition root supplies the model provider, business policy,
-and sandbox used by this process.
+Definitions do not choose infrastructure. Create one factory so tests, the
+credential-free demo, and the optional live process share the same service
+composition.
 
-## Create the service factory
-
-Use a provider-neutral factory so local tests and a live process share the same
-service definition.
+The singular `ai.model` binding supplies the agent's default model. The
+in-memory sandbox supplies the filesystem capability required by
+`builtInTools.read`.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -24,31 +23,24 @@ import { supportV1Service } from './service/support/v1/supportV1Service.js'
 export function createSupportService(
 	eventBridge: EventBridge,
 	logger: Logger,
-	options: Readonly<{
-		policy: SupportProcedurePolicy
-		model: { provider: ModelProvider; model: string }
-	}>,
+	options: Readonly<{ policy: SupportProcedurePolicy; model: { provider: ModelProvider; model: string } }>,
 ) {
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportProcedurePolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			sandbox: inMemorySandbox(),
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
+		ai: { model: options.model, sandbox: inMemorySandbox() },
 	})
 }
 ```
 
-The in-memory sandbox mounts the reviewed Skill and supplies the allowed
-`read` implementation. It is appropriate for this credential-free example;
-the sandbox-analysis chapter covers process isolation for executable tools.
 
-## Add an address-first caller
+`inMemorySandbox()` is useful for a read-only, credential-free example. It is
+not process isolation for untrusted code. This agent receives only the read
+tool, so the shell file inside the Skill remains data and cannot execute.
 
-Create a terminal adapter that invokes the normal Support command through
-EventBridge.
+Add a small caller that addresses the wrapper command through EventBridge. Its
+tenant and principal values represent identity already verified by an
+application boundary.
 
 ```ts title="src/invokeProcedureAnswer.ts" write
 import { type EventBridge, getNewInstanceId } from '@purista/core'
@@ -56,7 +48,7 @@ import type { z } from 'zod'
 import type {
 	answerProcedureQuestionInputSchema,
 	answerProcedureQuestionOutputSchema,
-} from './harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+} from './service/support/v1/schema.js'
 
 type ProcedureQuestion = z.infer<typeof answerProcedureQuestionInputSchema>
 type ProcedureAnswer = z.infer<typeof answerProcedureQuestionOutputSchema>
@@ -77,18 +69,18 @@ export function invokeProcedureAnswer(
 			serviceTarget: 'askProcedureQuestion',
 			instanceId: getNewInstanceId(),
 		},
-		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'answerProcedureQuestion' },
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
 		payload: { payload, parameter: {} },
 	})
 }
 ```
 
-The identity arguments represent trusted server-side values. Browser input may
-choose the question and case id, but authentication must establish tenant and
-principal before constructing this message.
 
-```bash title="Verify the Skill runtime composition" replay="project"
+Browser or model input may choose the case and question. It must not choose the
+trusted tenant or principal fields.
+
+```bash title="Check the runtime composition" replay="project"
 npm run build
 ```
 
-Continue with [Run the Skill-enabled application](../run-application/).
+Continue with [Run the credential-free and live examples](../run-application/).

@@ -1,7 +1,7 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportV1Service } from './supportV1Service.js'
+import { createSupportService } from '../../../createSupportService.js'
 
 const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
 
@@ -22,24 +22,18 @@ describe('Skill-enabled support service', () => {
 		const policy = { canAnswer: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportProcedurePolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		const service = await createSupportService(eventBridge, initLogger('fatal'), {
+			policy,
+			model: { provider, model: 'fake-support' },
 		})
 		await service.start()
-
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-alex',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'answerProcedureQuestion',
-						},
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
 						payload: {
 							payload: { caseId: 'case-104', question: 'How long can a transfer stay pending?' },
 							parameter: {},
@@ -55,32 +49,23 @@ describe('Skill-enabled support service', () => {
 		}
 	})
 
-	it('denies a directly addressed agent before model work', async () => {
+	it('denies the addressed wrapper before model work', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportProcedurePolicy: { canAnswer: vi.fn(async () => false) } },
-			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		const service = await createSupportService(eventBridge, initLogger('fatal'), {
+			policy: { canAnswer: vi.fn(async () => false) },
+			model: { provider, model: 'fake-support' },
 		})
 		await service.start()
-
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'answer_procedure_question',
-						},
-						payload: {
-							payload: { caseId: 'case-104', question: 'Read the procedure.' },
-							parameter: {},
-						},
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
+						payload: { payload: { caseId: 'case-104', question: 'Read the procedure.' }, parameter: {} },
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })

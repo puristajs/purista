@@ -1,16 +1,14 @@
 ---
 title: Run the Skill-enabled application
-description: Prove lazy Skill loading with a fake model, then optionally bind OpenAI.
+description: Prove lazy Skill reading with a strict fake model, then optionally bind OpenAI.
 order: 246
 kind: lesson
 status: draft
 ---
 
-The runtime composition is ready. Start with a strict fake model that asks for
-the `read` tool and then returns a structured answer. This proves the model
-loads the Skill on demand without requiring provider credentials.
-
-## Run the deterministic demo
+Start with the deterministic path. The strict fake model first chooses the
+`read` tool for `SKILL.md`, then returns a structured answer. It needs no API
+key or network connection.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
@@ -44,7 +42,6 @@ async function main() {
 		model: { provider, model: 'fake-support' },
 	})
 	await support.start()
-
 	try {
 		const result = await invokeProcedureAnswer(
 			eventBridge,
@@ -64,12 +61,31 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Document the optional provider settings and create the live entry point.
+
+
+```bash title="Run the credential-free Skill demo" replay="project"
+npm run demo
+```
+
+```json title="Expected demo result" expect="json"
+{
+  "answer": "A pending transfer can remain under review for up to two business days.",
+  "method": "pending_transfer"
+}
+```
+
+The demo destroys the Support service and EventBridge in `finally`, including
+failure paths after startup.
+
+The optional live process uses the same service, guard, Skill, and sandbox with
+a published OpenAI adapter.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
+
+
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
@@ -83,10 +99,7 @@ async function main() {
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canAnswer: async () => true },
-		model: {
-			provider: openai({ apiKey }),
-			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
-		},
+		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])
@@ -98,13 +111,15 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-```bash title="Run the deterministic Skill application" replay="project"
-npm run build
-npm run demo
+
+
+`gracefulShutdown` registers cleanup for the Support service and EventBridge.
+Copy `.env.example` to `.env` and add a key only when you want to use the live
+provider.
+
+```bash title="Run the optional live model"
+cp .env.example .env
+npm start
 ```
 
-To use the live provider, copy `.env.example` to `.env`, set
-`OPENAI_API_KEY`, and run `npm start`. Service, agent, Skill, guards, and
-address contracts remain unchanged.
-
-Continue with [Test lazy loading and authorization](../../testing/test-skills/).
+Continue with [Test the Skill definitions](../../testing/test-skills/).

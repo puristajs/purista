@@ -1,89 +1,42 @@
 ---
-title: Test lazy Skill loading
-description: Prove catalog disclosure, explicit read access, and fail-closed startup without PURISTA infrastructure.
+title: Test the Skill definitions
+description: Verify the agent uses direct Skill and read-tool definitions without granting execution.
 order: 247
 kind: lesson
 status: draft
 ---
 
-Start with the portable Harness behavior. `FakeModelProvider` scripts the
-model's request to read the Skill and its final structured output.
+The Skill definition test from the binding page checks the colocated manifest
+and confirms that this Skill declares no logical executable runtime.
 
-This test proves that the first model request contains only the compact
-catalog, offers only the `read` tool, and does not disclose the complete
-procedure before the model selects it. It also proves that a missing Skill
-directory fails startup.
+Add a focused agent test. It proves the agent owns direct definition references
+for the Skill and the read tool. No write, shell, or network capability appears
+in the graph.
 
-```ts title="src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts" write
-import { defineHarness, inMemorySandbox } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+```ts title="src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts" write
+import { builtInTools } from '@purista/harness'
 import { describe, expect, it } from 'vitest'
-import { supportHarness } from '../../supportHarness.js'
-
-const usage = { inputTokens: 6, outputTokens: 5, totalTokens: 11 }
+import { supportMethodsSkill } from '../../skill/support-methods/supportMethodsSkill.js'
+import { answerProcedureQuestionAgent } from './answerProcedureQuestionAgent.js'
 
 describe('answerProcedureQuestionAgent', () => {
-	it('mounts the reviewed Skill and exposes only the read built-in', async () => {
-		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: {
-				answer: 'A pending transfer can remain under review for up to two business days.',
-				method: 'pending_transfer',
-			},
-			usage,
-			finishReason: 'stop',
-		})
-		const runtime = await supportHarness.getInstance({
-			models: { primary: { provider, model: 'fake-support' } },
-			sandbox: inMemorySandbox(),
-		})
-
-		try {
-			const session = await runtime.getSession('support-skill:case-104')
-			const outcome = await session.agents.answer_procedure_question.run({
-				caseId: 'case-104',
-				question: 'How long can a transfer stay pending?',
-			})
-			expect(outcome).toMatchObject({
-				status: 'completed',
-				output: { method: 'pending_transfer' },
-			})
-			const firstRequest = provider.requests[0]
-			if (!('messages' in firstRequest) || !('tools' in firstRequest))
-				throw new Error('Expected an object model request.')
-			expect(firstRequest.messages[0]?.content).toContain('Location: /skills/support-methods/SKILL.md')
-			expect(firstRequest.messages[0]?.content).not.toContain('normal review window')
-			expect(firstRequest.tools?.map((tool) => tool.name) ?? []).toEqual(['read'])
-			provider.assertExhausted()
-		} finally {
-			await runtime.shutdown()
-		}
-	})
-
-	it('fails closed when a configured Skill directory is missing', async () => {
-		const invalid = defineHarness({ name: 'missing-skill' })
-			.skills({ 'support-methods': { directory: '/path/that/does/not/exist' } })
-			.define()
-
-		await expect(invalid.getInstance({ models: {}, sandbox: inMemorySandbox() })).rejects.toMatchObject({
-			code: 'SKILL_MANIFEST_ERROR',
-		})
+	it('uses direct Skill and read-tool definitions', () => {
+		expect(answerProcedureQuestionAgent.id).toBe('answerProcedureQuestion')
+		expect(answerProcedureQuestionAgent.skills).toEqual([supportMethodsSkill])
+		expect(answerProcedureQuestionAgent.tools).toEqual([builtInTools.read])
+		expect(Object.isFrozen(answerProcedureQuestionAgent)).toBe(true)
 	})
 })
 ```
 
-The first provider request is the evidence for progressive disclosure. Testing
-only the final answer would not prove that the full Skill stayed out of the
-initial prompt or that the tool allowlist remained narrow.
 
-```bash title="Run the native Skill tests" replay="project"
-npm test -- src/harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts
+Run both definition tests. They need no model credentials or EventBridge.
+
+```bash title="Run the Skill definition tests" replay="project"
+npm test -- src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.test.ts src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts
 ```
 
-Continue with [Test PURISTA Skill routing](../test-routing/).
+These tests cover the static capability boundary. The next page starts the
+mounted service and proves that the model reads the Skill lazily.
+
+Continue with [Test authorization and EventBridge routing](../test-routing/).

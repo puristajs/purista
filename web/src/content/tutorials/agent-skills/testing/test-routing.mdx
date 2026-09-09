@@ -1,34 +1,31 @@
 ---
-title: Test PURISTA Skill routing
-description: Verify the command helper, both business guards, and direct-target denial through EventBridge.
+title: Test authorization and EventBridge routing
+description: Verify the wrapper contract and the complete mounted Skill path with a strict fake model.
 order: 248
 kind: lesson
 status: draft
 ---
 
-The native tests prove Skill discovery and sandbox access. Now test the
-application boundary. First use PURISTA command helpers to isolate the command,
-then start EventBridge to prove the mounted route.
+First test the wrapper command with PURISTA context helpers. It verifies the
+three-part agent address, completed result mapping, policy call, and
+collision-safe session identity.
 
-## Test the command helper
-
-Trusted tenant and principal values must come from the command message. The
-agent address is replaced by the stub generated from `canInvokeAgent(...)`.
-
-```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts" write
+```ts title="src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
-import { answerProcedureQuestionCommandBuilder } from './answerProcedureQuestionCommandBuilder.js'
+import { answerProcedureQuestionAgent } from '../../harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+import { supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
+import { runAnswerProcedureQuestionCommandBuilder } from './runAnswerProcedureQuestionCommandBuilder.js'
 
 const sandbox = createSandbox()
 afterEach(() => sandbox.restore())
 
-describe('answerProcedureQuestionCommandBuilder', () => {
-	it('invokes the Skill-enabled agent through its declared address', async () => {
+describe('runAnswerProcedureQuestionCommandBuilder', () => {
+	it('addresses the mounted agent with a collision-safe session id', async () => {
 		const payload = { caseId: 'case-104', question: 'How long can a transfer stay pending?' }
 		const policy = { canAnswer: sandbox.stub().resolves(true) }
-		const { context, stubs } = createCommandContextMock(answerProcedureQuestionCommandBuilder, {
+		const { context, stubs } = createCommandContextMock(runAnswerProcedureQuestionCommandBuilder, {
 			payload,
 			parameter: {},
 			resources: { supportProcedurePolicy: policy },
@@ -39,42 +36,49 @@ describe('answerProcedureQuestionCommandBuilder', () => {
 			principalId: 'principal-alex',
 			payload: { payload, parameter: {} },
 		})
-		;(stubs.agent as any).Support['1'].answer_procedure_question.run.resolves({
-			status: 'completed',
-			runId: 'run-1',
-			output: { answer: 'Up to two business days.', method: 'pending_transfer' },
+		const sessionId = supportProcedureSessionId(context.message, payload.caseId)
+		stubs.agent.Support['1'][answerProcedureQuestionAgent.contract.id].run.resolves({
+			sessionId,
+			outcome: {
+				status: 'completed',
+				runId: 'run-1',
+				output: { answer: 'Up to two business days.', method: 'pending_transfer' },
+			},
 		})
 
 		await expect(
-			answerProcedureQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
-		).resolves.toEqual({ answer: 'Up to two business days.', method: 'pending_transfer' })
+			runAnswerProcedureQuestionCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({
+			answer: 'Up to two business days.',
+			method: 'pending_transfer',
+		})
 		expect(
-			(stubs.agent as any).Support['1'].answer_procedure_question.run.calledOnceWith(payload, {
-				sessionId: 'support-procedure:tenant-example:principal-alex:case-104',
+			stubs.agent.Support['1'][answerProcedureQuestionAgent.contract.id].run.calledOnceWith(payload, {
+				sessionId,
 			}),
 		).toBe(true)
-		expect(
-			policy.canAnswer.calledOnceWith({
-				tenantId: 'tenant-example',
-				principalId: 'principal-alex',
-				caseId: 'case-104',
-			}),
-		).toBe(true)
+		expect(policy.canAnswer.calledOnce).toBe(true)
+	})
+
+	it('keeps delimiter-bearing trusted identity components distinct', () => {
+		expect(supportProcedureSessionId({ tenantId: 'tenant:a', principalId: 'principal' }, 'case')).not.toBe(
+			supportProcedureSessionId({ tenantId: 'tenant', principalId: 'a:principal' }, 'case'),
+		)
 	})
 })
 ```
 
-## Test the mounted route
 
-The permitted command call causes two policy checks: one at the command and
-one at the published agent. The denied case invokes the agent directly and
-must stop before model work.
+Then start the real Support service on a local EventBridge. The successful case
+passes both command and mounted-agent guards, lets the model choose `read`, and
+returns the structured answer. The denied case stops at the wrapper guard before
+any model request.
 
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { supportV1Service } from './supportV1Service.js'
+import { createSupportService } from '../../../createSupportService.js'
 
 const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
 
@@ -95,24 +99,18 @@ describe('Skill-enabled support service', () => {
 		const policy = { canAnswer: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportProcedurePolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		const service = await createSupportService(eventBridge, initLogger('fatal'), {
+			policy,
+			model: { provider, model: 'fake-support' },
 		})
 		await service.start()
-
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-alex',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'answerProcedureQuestion',
-						},
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
 						payload: {
 							payload: { caseId: 'case-104', question: 'How long can a transfer stay pending?' },
 							parameter: {},
@@ -128,32 +126,23 @@ describe('Skill-enabled support service', () => {
 		}
 	})
 
-	it('denies a directly addressed agent before model work', async () => {
+	it('denies the addressed wrapper before model work', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
-			logger: initLogger('fatal'),
-			resources: { supportProcedurePolicy: { canAnswer: vi.fn(async () => false) } },
-			ai: { models: { primary: { provider, model: 'fake-support' } } },
+		const service = await createSupportService(eventBridge, initLogger('fatal'), {
+			policy: { canAnswer: vi.fn(async () => false) },
+			model: { provider, model: 'fake-support' },
 		})
 		await service.start()
-
 		try {
 			await expect(
 				eventBridge.invoke(
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'answer_procedure_question',
-						},
-						payload: {
-							payload: { caseId: 'case-104', question: 'Read the procedure.' },
-							parameter: {},
-						},
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnswerProcedureQuestion' },
+						payload: { payload: { caseId: 'case-104', question: 'Read the procedure.' }, parameter: {} },
 					}),
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
@@ -166,12 +155,16 @@ describe('Skill-enabled support service', () => {
 })
 ```
 
-The empty strict provider in the denied case proves authorization happens
-before the model can ask to read the Skill.
 
-```bash title="Verify the Skill chapter" replay="project"
+Both integration cases destroy the service and EventBridge in `finally`. The
+strict fake provider fails if the application makes an unexpected model call.
+
+```bash title="Verify the complete Skill chapter" replay="project"
 npm run build
 npm test
 npm run lint
-npm run demo
 ```
+
+You now have a service-owned Agent Skill that loads reviewed guidance only when
+the model needs it, while PURISTA keeps identity, authorization, and routing
+outside the prompt.

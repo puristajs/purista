@@ -674,39 +674,46 @@
       "status": "draft",
       "projectDirectory": "support-skills",
       "replayRequires": [],
-      "constructionSourceAligned": false,
+      "constructionSourceAligned": true,
       "requiredWrittenFiles": [
         ".env.example",
+        ".gitignore",
         "package.json",
-        "skills/support-methods/SKILL.md",
-        "src/createSupportService.ts",
-        "src/demo.ts",
+        "purista.json",
+        "src/service/support/v1/harness/skill/support-methods/SKILL.md",
+        "src/service/support/v1/harness/skill/support-methods/references/customer-note.txt",
+        "src/service/support/v1/harness/skill/support-methods/scripts/not-executable.sh",
+        "src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.test.ts",
+        "src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.ts",
+        "src/service/support/v1/schema.ts",
+        "src/service/support/v1/SupportProcedurePolicy.ts",
+        "src/service/support/v1/supportV1ServiceBuilder.ts",
         "src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts",
         "src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.ts",
         "src/service/support/v1/harness/supportHarness.ts",
-        "src/index.ts",
-        "src/invokeProcedureAnswer.ts",
-        "src/service/support/v1/SupportProcedurePolicy.ts",
-        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.test.ts",
-        "src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts",
+        "src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.test.ts",
+        "src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.ts",
         "src/service/support/v1/requireSupportProcedureAccess.ts",
         "src/service/support/v1/supportV1Service.test.ts",
         "src/service/support/v1/supportV1Service.ts",
-        "src/service/support/v1/supportV1ServiceBuilder.ts"
+        "src/createSupportService.ts",
+        "src/invokeProcedureAnswer.ts",
+        "src/demo.ts",
+        "src/index.ts"
       ],
       "requires": [
-        "agent-tools"
+        "create-project"
       ],
       "pages": [
-			"agent-skills/build/create-skill",
-			"agent-skills/build/bind-skill",
-			"agent-skills/build/secure-content",
-			"agent-skills/build/invoke-agent",
-			"agent-skills/build/compose-runtime",
-			"agent-skills/build/run-application",
-			"agent-skills/testing/test-skills",
-			"agent-skills/testing/test-routing"
-		]
+        "agent-skills/build/create-skill",
+        "agent-skills/build/bind-skill",
+        "agent-skills/build/secure-content",
+        "agent-skills/build/invoke-agent",
+        "agent-skills/build/compose-runtime",
+        "agent-skills/build/run-application",
+        "agent-skills/testing/test-skills",
+        "agent-skills/testing/test-routing"
+      ]
     },
     {
       "id": "human-review-workflow",

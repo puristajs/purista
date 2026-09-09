@@ -1,57 +1,52 @@
 ---
 title: Invoke the Skill-enabled agent
-description: Generate a normal PURISTA command, declare the agent address, and return only a completed answer.
+description: Add a PURISTA command that authorizes callers and uses the typed mounted-agent client.
 order: 244
 kind: lesson
 status: draft
 ---
 
-The published agent now protects direct calls. Add a normal Support command as
-the application entry point for one aggregate answer.
+Application callers address a normal Support command through EventBridge.
+Inside that command, PURISTA's typed mounted-agent client invokes the agent
+target. Give the two targets different ids: `runAnswerProcedureQuestion` wraps
+the agent target `answerProcedureQuestion`.
 
-## Generate the command
+Use the local CLI to create the command files.
 
-Use the project-local CLI before replacing its placeholder behavior.
-
-```bash title="Generate the command" replay="project"
-npm run add:command -- answer-procedure-question --service support --service-version 1 --description "Answer a support procedure question with a reviewed Skill" --non-interactive
+```bash title="Generate the wrapper command" replay="project"
+npm run add:command -- run-answer-procedure-question --service support --service-version 1 --description "Answer a support procedure question using reviewed guidance" --non-interactive
 ```
 
-## Declare and call the agent address
+The agent already owns the input and output schemas. Remove the unused command
+schema and type placeholders before replacing the builder.
 
-Replace the generated command builder. It reuses the native agent schemas and
-declares the only mounted target available to its handler.
+```bash title="Remove duplicate command placeholders" replay="project"
+rm src/service/support/v1/command/runAnswerProcedureQuestion/schema.ts
+rm src/service/support/v1/command/runAnswerProcedureQuestion/types.ts
+```
 
-```ts title="src/service/support/v1/command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.ts" write
-import {
-	answerProcedureQuestionInputSchema,
-	answerProcedureQuestionOutputSchema,
-} from '../../../../../harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
-import { supportHarness } from '../../harness/supportHarnessMount.js'
+The three-argument `canInvokeAgent` call declares the service, version, and
+direct agent contract. It creates the typed
+`context.agent.Support['1'].answerProcedureQuestion` client.
+
+```ts title="src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.ts" write
+import { answerProcedureQuestionAgent } from '../../harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
 import { requireSupportProcedureAccess, supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
+import { answerProcedureQuestionInputSchema, answerProcedureQuestionOutputSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
-export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
-	.getCommandBuilder('answerProcedureQuestion', 'Answer a support procedure question with a reviewed Skill')
+export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runAnswerProcedureQuestion', 'Answer a support procedure question using reviewed guidance')
 	.addPayloadSchema(answerProcedureQuestionInputSchema)
 	.addOutputSchema(answerProcedureQuestionOutputSchema)
-	.canInvokeAgent(
-		'Support',
-		'1',
-		'answer_procedure_question',
-		supportHarness.contracts.agents.answer_procedure_question,
-	)
+	.canInvokeAgent('Support', '1', answerProcedureQuestionAgent.contract)
 	.setBeforeGuardHooks({
 		procedureAccess: async function (context, payload) {
-			await requireSupportProcedureAccess(
-				context.resources.supportProcedurePolicy,
-				{ tenantId: context.message.tenantId, principalId: context.message.principalId },
-				payload.caseId,
-			)
+			await requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.message, payload.caseId)
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const outcome = await context.agent.Support['1'].answer_procedure_question.run(payload, {
+		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerProcedureQuestion.run(payload, {
 			sessionId: supportProcedureSessionId(context.message, payload.caseId),
 		})
 		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
@@ -59,34 +54,34 @@ export const answerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 	})
 ```
 
-`canInvokeAgent(...)` creates the typed
-`context.agent.Support['1'].answer_procedure_question` client. `.run(...)`
-crosses EventBridge and waits for an aggregate outcome. This agent has no
-approval or external wait, so an interruption is not returned as an answer.
 
-The command repeats business authorization because it is another reachable
-address. The mount guard still protects callers that skip this wrapper.
+The before-guard performs business authorization before model work. The
+session id is a SHA-256 digest of a structured tuple containing the trusted
+tenant, principal, and case id. It correlates history without exposing raw
+identity or allowing delimiter collisions.
 
-## Register the command and mount once
+The aggregate agent call returns `{ sessionId, outcome }`. This command returns
+only a completed structured answer. An unexpected interruption is not treated
+as a successful business result.
 
-Replace the generated service file.
+Register the wrapper command and mount the Harness once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
-import { answerProcedureQuestionCommandBuilder } from './command/answerProcedureQuestion/answerProcedureQuestionCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { runAnswerProcedureQuestionCommandBuilder } from './command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 export const supportV1Service = supportV1ServiceBuilder
-	.addCommandDefinition(answerProcedureQuestionCommandBuilder.getDefinition())
+	.addCommandDefinition(runAnswerProcedureQuestionCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
 
-This chapter keeps the command transport-independent. If you later expose it
-through Hono, authentication verifies the credential and places trusted tenant
-and principal ids on the message. These guards then perform business
+
+An HTTP adapter would authenticate a credential and place trusted identity on
+the PURISTA message. The command and mounted-agent guards own business
 authorization.
 
-```bash title="Verify the Skill command and mount" replay="project"
+```bash title="Check the wrapper command and mount" replay="project"
 npm run build
 ```
 

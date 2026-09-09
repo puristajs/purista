@@ -1,15 +1,15 @@
 ---
 title: Authorize the Skill-enabled agent
-description: Protect the published agent with a business policy that evaluates the requested support case.
+description: Protect the mounted agent with a business policy that uses trusted identity and the requested case.
 order: 243
 kind: lesson
 status: draft
 ---
 
 Skill text gives the model reviewed guidance. It does not decide whether the
-authenticated principal may use that guidance for a support case. Add a typed
-business policy to the Support service and apply it to the published agent
-address before model or sandbox work begins.
+authenticated principal may use that guidance for a support case. Keep
+authentication and business authorization in PURISTA code before model or
+sandbox work begins.
 
 ## Declare the case policy
 
@@ -22,11 +22,12 @@ export interface SupportProcedurePolicy {
 }
 ```
 
-Use one helper for every reachable boundary. The separate session helper
-combines trusted identity with the case id; its result correlates history but
-never grants access.
+Use one helper at every reachable boundary. The session id correlates Harness
+history; it does not grant access and does not expose raw identity in a storage
+key.
 
 ```ts title="src/service/support/v1/requireSupportProcedureAccess.ts" write
+import { createHash } from 'node:crypto'
 import { HandledError, StatusCode } from '@purista/core'
 import type { SupportProcedurePolicy } from './SupportProcedurePolicy.js'
 
@@ -35,16 +36,9 @@ export async function requireSupportProcedureAccess(
 	identity: Readonly<{ tenantId?: string; principalId?: string }>,
 	caseId: string,
 ) {
-	if (!identity.tenantId || !identity.principalId) {
+	if (!identity.tenantId || !identity.principalId)
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	if (
-		!(await policy.canAnswer({
-			tenantId: identity.tenantId,
-			principalId: identity.principalId,
-			caseId,
-		}))
-	) {
+	if (!(await policy.canAnswer({ tenantId: identity.tenantId, principalId: identity.principalId, caseId }))) {
 		throw new HandledError(StatusCode.Forbidden, 'This support procedure is not available')
 	}
 }
@@ -53,15 +47,17 @@ export function supportProcedureSessionId(
 	identity: Readonly<{ tenantId?: string; principalId?: string }>,
 	caseId: string,
 ) {
-	if (!identity.tenantId || !identity.principalId) {
+	if (!identity.tenantId || !identity.principalId)
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	return `support-procedure:${identity.tenantId}:${identity.principalId}:${caseId}`
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-procedure-v1', identity.tenantId, identity.principalId, caseId]))
+		.digest('hex')
+	return `support-procedure:${digest}`
 }
 ```
 
-Declare the policy on the generated service builder. The concrete implementation
-will be injected at startup.
+Declare the resource on the owning service builder. The concrete policy is
+provided by the application composition root.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -70,41 +66,38 @@ import type { SupportProcedurePolicy } from './SupportProcedurePolicy.js'
 export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceName: 'Support',
 	serviceVersion: '1',
-	serviceDescription: 'Owns support conversations and support automation',
+	serviceDescription: 'Owns support procedure answers',
 }).defineResource<'supportProcedurePolicy', SupportProcedurePolicy>()
 ```
 
-## Guard the directly addressable target
+## Guard the mounted target
 
-Replace the generated mount policy. The agent input supplies only `caseId`;
-trusted tenant and principal ids come from the PURISTA message.
+Replace the generated Harness composition with one service-owned definition and
+one policy object. The mounted agent can be addressed directly, so it has its
+own guard. The agent input contains only `caseId`; identity comes from the
+trusted PURISTA invocation message.
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
-import type { answerProcedureQuestionInputSchema } from '../../../../harness/support/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportProcedureAccess } from '../requireSupportProcedureAccess.js'
 import type { SupportProcedurePolicy } from '../SupportProcedurePolicy.js'
+import { answerProcedureQuestionAgent } from './agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
 
-export { supportHarness }
+export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
+	answerProcedureQuestionAgent,
+)
 
 export const supportHarnessPolicy = {
-	publish: { agents: ['answer_procedure_question'], workflows: [] },
 	targets: {
 		agents: {
-			answer_procedure_question: {
+			answerProcedureQuestion: {
 				beforeGuards: {
 					procedureAccess: async (
 						context: HarnessBusinessGuardContext<{ supportProcedurePolicy: SupportProcedurePolicy }>,
-						input: z.output<typeof answerProcedureQuestionInputSchema>,
-					) => {
-						await requireSupportProcedureAccess(
-							context.resources.supportProcedurePolicy,
-							context.identity,
-							input.caseId,
-						)
-					},
+						input: z.output<typeof answerProcedureQuestionAgent.contract.input>,
+					) => requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.identity, input.caseId),
 				},
 			},
 		},
@@ -113,11 +106,12 @@ export const supportHarnessPolicy = {
 } as const
 ```
 
-A Skill may recommend a business operation, but it cannot bypass this guard or
-add the operation as a tool. A script inside the Skill directory also remains
-data because this agent has `read` and no execution tool.
+The guard is the authorization boundary. The Skill can recommend a safe
+procedure, but it cannot bypass this check, add a command, or execute a script.
+The agent exposes only the read capability, so files under the Skill directory
+remain data.
 
-```bash title="Verify the protected Skill mount" replay="project"
+```bash title="Verify the protected Skill composition" replay="project"
 npm run build
 ```
 

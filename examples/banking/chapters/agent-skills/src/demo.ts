@@ -29,7 +29,6 @@ async function main() {
 		model: { provider, model: 'fake-support' },
 	})
 	await support.start()
-
 	try {
 		const result = await invokeProcedureAnswer(
 			eventBridge,
