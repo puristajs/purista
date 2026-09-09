@@ -5,6 +5,7 @@ import type { Options } from 'code-block-writer'
 import { type Expression, Node, Project, type SourceFile, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 import { z } from 'zod'
 import type { PuristaCommandResult } from '../core/types.js'
+import { generatedDependencyVersion } from '../create/generatedDependencyVersions.js'
 import { camelCase } from './change-case.js'
 import { getServiceHarnessFileContent } from './content/harness/getServiceHarnessFileContent.js'
 import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
@@ -12,7 +13,7 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
 /** Published dependency used by every service-owned Harness generator. */
-export const harnessPackageVersion = '^4.0.0'
+export const harnessPackageVersion = generatedDependencyVersion('@purista/harness')
 
 /** Shared project and service selection for the Harness generators. */
 export type HarnessScaffoldingInput = {

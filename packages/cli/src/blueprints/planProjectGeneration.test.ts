@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { generatedDependencyVersions } from '../create/generatedDependencyVersions.js'
 import { planProjectGeneration } from './planProjectGeneration.js'
 import { resolveProjectBlueprints } from './resolveProjectBlueprints.js'
 
@@ -52,6 +53,39 @@ describe('resolveProjectBlueprints', () => {
 })
 
 describe('planProjectGeneration', () => {
+	it('owns every generated dependency range without latest output', () => {
+		expect(generatedDependencyVersions).toEqual({
+			'@biomejs/biome': '^2.5.8',
+			'@eslint/js': '^9.20.0',
+			'@hono/node-server': '^2.1.0',
+			'@purista/amqpbridge': '^4.0.0',
+			'@purista/cli': '^4.0.0',
+			'@purista/core': '^4.0.0',
+			'@purista/dapr-sdk': '^4.0.0',
+			'@purista/harness': '^4.0.0',
+			'@purista/harness-ai-sdk-ui': '^4.0.0',
+			'@purista/harness-openai': '^4.0.0',
+			'@purista/hono-http-server': '^4.0.0',
+			'@purista/mqttbridge': '^4.0.0',
+			'@purista/natsbridge': '^4.0.0',
+			'@scalar/hono-api-reference': '^0.11.13',
+			'@types/bun': '^1.4.0',
+			'@types/node': '^26.2.0',
+			'@types/sinon': '^22.0.0',
+			ai: '^7.0.0',
+			eslint: '^9.20.1',
+			globals: '^15.15.0',
+			hono: '^4.13.1',
+			sinon: '^22.1.0',
+			tsx: '^4.23.12',
+			typescript: 'npm:@typescript/typescript6@^6.0.2',
+			'typescript-eslint': '^8.24.0',
+			vitest: '^4.1.10',
+			zod: '^4.4.3',
+		})
+		expect(Object.values(generatedDependencyVersions)).not.toContain('latest')
+	})
+
 	it('builds a stable generation plan and predicts scaffolded files', () => {
 		const plan = planProjectGeneration(
 			{
@@ -73,6 +107,10 @@ describe('planProjectGeneration', () => {
 		expect(plan.targetDirectoryPath).toBe('/tmp/workspace/example-app')
 		expect(plan.selectedBlueprints).toEqual(['base', 'runtime-bun', 'bridge-mqtt', 'http-bun', 'linter-biome'])
 		expect(plan.installCommand).toBe('bun install')
+		expect([
+			...Object.values(plan.packageJson.dependencies ?? {}),
+			...Object.values(plan.packageJson.devDependencies ?? {}),
+		]).not.toContain('latest')
 		expect(plan.predictedFiles).toContain('src/index.ts')
 		expect(plan.predictedFiles).toContain('src/http.ts')
 		expect(plan.predictedFiles).toContain('AGENTS.md')

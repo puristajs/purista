@@ -2,7 +2,7 @@ import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 
-const toAgentIdentifier = (name: string) => {
+export const getHarnessAgentIdentifier = (name: string) => {
 	const normalized = camelCase(name)
 	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
 }
@@ -15,7 +15,7 @@ export const getHarnessAgentFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const agentIdentifier = toAgentIdentifier(input.agentName)
+	const agentIdentifier = getHarnessAgentIdentifier(input.agentName)
 	writer.writeLine("import { defineAgent } from '@purista/harness'").blankLine()
 	writer.writeLine(`export const ${agentIdentifier} = defineAgent('${camelCase(input.agentName)}', {`)
 	writer.indent(() => {

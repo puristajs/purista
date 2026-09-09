@@ -18,6 +18,7 @@ const schema = baseAddInputSchema.extend({
 	description: z.string().trim().min(1),
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
+	http: z.enum(['none', 'command', 'stream']).default('none'),
 	responseEventName: z.never().optional(),
 })
 
@@ -65,8 +66,14 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			agentName: resolvedInput.name,
 			agentDescription: resolvedInput.description,
 			codeWriterOptions: context.codeWriterOptions,
+			http: resolvedInput.http,
 		})
 
-		return createResult('add-agent', context.mode, mutationSnapshot)
+		return createResult('add-agent', context.mode, mutationSnapshot, [
+			...mutationSnapshot.warnings,
+			...(resolvedInput.http === 'none'
+				? []
+				: ['Configure the Hono server with setProtectMiddleware(...) before starting the generated HTTP endpoint.']),
+		])
 	},
 }

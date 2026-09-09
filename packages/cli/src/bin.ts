@@ -88,6 +88,7 @@ const main = async () => {
 			)
 			.addArgument(new Argument('[name]', 'Name of component'))
 			.option('--description <description>', 'description of the component')
+			.addOption(new Option('--http <projection>', 'agent HTTP projection').choices(['none', 'command', 'stream']))
 			.addOption(new Option('--kind <kind>', 'tool ownership kind').choices(['portable', 'purista']))
 			.option(
 				'--runtime <runtime>',
@@ -122,6 +123,7 @@ const main = async () => {
 				const result = await engine.runPuristaCommand(commandId, {
 					name,
 					description: options.description,
+					http: options.http,
 					kind: options.kind,
 					runtimes: options.runtime,
 					toolName: options.tool,

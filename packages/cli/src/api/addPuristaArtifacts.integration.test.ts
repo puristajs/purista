@@ -108,6 +108,76 @@ afterEach(() => {
 })
 
 describe('CLI artifact generation (e2e)', () => {
+	it('preflights authentic projection collisions without treating unrelated source text as a target', async () => {
+		createBaseProject()
+		const puristaConfig = puristaConfigSchema.parse({
+			servicePath: 'src/service',
+			fileConvention: 'camel',
+			eventConvention: 'dotCase',
+			formatter: 'none',
+			linter: 'none',
+		})
+		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaService({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceDescription: 'User service',
+		})
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaAgent({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			agentName: 'run collision',
+			agentDescription: 'Existing mounted target',
+		})
+		const common = {
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			agentDescription: 'Projected agent',
+			http: 'command' as const,
+		}
+		const beforeMountedCollision = snapshotFiles(TEST_DIR)
+		await expect(addPuristaAgent({ ...common, agentName: 'collision' })).rejects.toThrow(/Mounted Harness target id/)
+		expect(snapshotFiles(TEST_DIR)).toEqual(beforeMountedCollision)
+
+		const serviceDirectory = join(TEST_DIR, 'src', 'service', 'user', 'v1')
+		writeFileSync(
+			join(serviceDirectory, 'existingProjection.ts'),
+			`import { userV1ServiceBuilder as builder } from './userV1ServiceBuilder.js'
+const canonical = builder
+export const existingProjection = canonical
+\t.getCommandBuilder('existingProjection', 'existing projection')
+\t.exposeAsHttpEndpoint('POST', 'ai/route-collision')
+`,
+		)
+		const beforeRouteCollision = snapshotFiles(TEST_DIR)
+		await expect(addPuristaAgent({ ...common, agentName: 'route collision' })).rejects.toThrow(/HTTP route/)
+		expect(snapshotFiles(TEST_DIR)).toEqual(beforeRouteCollision)
+
+		writeFileSync(
+			join(serviceDirectory, 'unrelated.ts'),
+			`// builder.getCommandBuilder('runIgnoredCollision').exposeAsHttpEndpoint('POST', 'ai/ignored-collision')
+const text = "builder.getCommandBuilder('runIgnoredCollision')"
+const helper = { getCommandBuilder: () => ({ exposeAsHttpEndpoint: () => undefined }) }
+helper.getCommandBuilder('runIgnoredCollision').exposeAsHttpEndpoint('POST', 'ai/ignored-collision')
+void text
+`,
+		)
+		await expect(addPuristaAgent({ ...common, agentName: 'ignored collision' })).resolves.toMatchObject({
+			createdFiles: expect.arrayContaining([
+				join(serviceDirectory, 'command', 'runIgnoredCollision', 'runIgnoredCollisionCommandBuilder.ts'),
+			]),
+		})
+	})
+
 	it('creates service, command, subscription, and stream with valid wiring', async () => {
 		createBaseProject()
 
@@ -215,6 +285,11 @@ describe('CLI artifact generation (e2e)', () => {
 			workflowName: 'resolve ticket',
 			workflowDescription: 'Resolve a support ticket in durable steps',
 		})
+		writeFileSync(
+			join(TEST_DIR, 'src', 'index.ts'),
+			"import { userV1Service } from './service/user/v1/userV1Service.js'\nexport const start = async (eventBridge: Parameters<typeof userV1Service.getInstance>[0]) => userV1Service.getInstance(eventBridge)\n",
+		)
+		writeFileSync(join(TEST_DIR, '.env.example'), 'EXISTING_KEY=\n')
 		await addPuristaAgent({
 			projectRootPath: TEST_DIR,
 			puristaConfig,
@@ -232,6 +307,17 @@ describe('CLI artifact generation (e2e)', () => {
 			serviceVersion: '1',
 			agentName: 'summarize',
 			agentDescription: 'Summarize a ticket',
+			http: 'command',
+		})
+		await addPuristaAgent({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			agentName: 'chat assistant',
+			agentDescription: 'Stream assistant responses',
+			http: 'stream',
 		})
 		const immutableRootFiles = [
 			join(TEST_DIR, 'package.json'),
@@ -362,6 +448,51 @@ describe('CLI artifact generation (e2e)', () => {
 		const summarizeDefinition = readFileSync(join(harnessDirPath, 'agent', 'summarize', 'summarizeAgent.ts'), 'utf-8')
 		expect(summarizeDefinition).toContain("defineAgent('summarize'")
 		expect(summarizeDefinition).toContain('instructions: "Summarize a ticket"')
+		expect(existsSync(join(serviceDir, 'command', 'runTriage'))).toBe(false)
+		const commandProjection = readFileSync(
+			join(serviceDir, 'command', 'runSummarize', 'runSummarizeCommandBuilder.ts'),
+			'utf8',
+		)
+		expect(commandProjection).toContain(".canInvokeAgent('User', '1', summarizeAgent.contract)")
+		expect(commandProjection).toContain("context.agent.User['1'][summarizeAgent.contract.id].run")
+		expect(commandProjection).toContain(".exposeAsHttpEndpoint('POST', 'ai/summarize')")
+		expect(commandProjection).toContain('.enableHttpSecurity(true)')
+		expect(commandProjection).toContain('input: z.string(), sessionId: z.string().min(1).optional()')
+		expect(commandProjection).not.toContain('.makeEndpointPublic()')
+		const streamProjection = readFileSync(
+			join(serviceDir, 'stream', 'streamChatAssistant', 'streamChatAssistantStreamBuilder.ts'),
+			'utf8',
+		)
+		expect(streamProjection).toContain('await parseHarnessUIMessageRequest(payload)')
+		expect(streamProjection).toContain(".canInvokeAgent('User', '1', chatAssistantAgent.contract)")
+		expect(streamProjection).toContain("context.agent.User['1'][chatAssistantAgent.contract.id].stream")
+		expect(streamProjection).toContain(".exposeAsHttpStreamEndpoint('POST', 'ai/chat-assistant')")
+		expect(streamProjection).toContain('.enableHttpSecurity(true)')
+		expect(streamProjection).toContain('.enableChunkAggregation(false)')
+		expect(streamProjection).toContain(".setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')")
+		expect(streamProjection).toContain("'x-vercel-ai-ui-message-stream': 'v1'")
+		expect(streamProjection).toContain('createHarnessUIMessageSseEvents')
+		expect(streamProjection).toContain('await writer.write(record)')
+		expect(streamProjection).toContain('writer.onCancel(reason => { cancellation = events.cancel(reason) })')
+		expect(streamProjection).toContain('? { sessionId: request.sessionId }')
+		expect(streamProjection).toContain('resume: request.resume')
+		expect(streamProjection).not.toContain('idempotencyKey')
+		expect(streamProjection).not.toContain('.makeEndpointPublic()')
+		const generatedPackage = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf8')) as {
+			dependencies: Record<string, string>
+		}
+		expect(generatedPackage.dependencies).toMatchObject({
+			'@purista/harness': '^4.0.0',
+			'@purista/harness-openai': '^4.0.0',
+			'@purista/harness-ai-sdk-ui': '^4.0.0',
+			ai: '^7.0.0',
+		})
+		expect(readFileSync(join(TEST_DIR, '.env.example'), 'utf8')).toBe('EXISTING_KEY=\nOPENAI_API_KEY=\n')
+		const bootstrap = readFileSync(join(TEST_DIR, 'src', 'index.ts'), 'utf8')
+		expect(bootstrap).toContain("import { openai } from '@purista/harness-openai'")
+		expect(bootstrap).toContain('OPENAI_API_KEY')
+		expect(bootstrap).toContain('ai: {')
+		expect(bootstrap).toContain("model: 'gpt-5-mini'")
 		expect(existsSync(join(serviceDir, 'harness', 'userHarnessMount.ts'))).toBe(false)
 		expect(existsSync(join(TEST_DIR, 'src', 'harness'))).toBe(false)
 		const workflowDefinition = readFileSync(
@@ -476,7 +607,7 @@ describe('CLI artifact generation (e2e)', () => {
 
 		writeFileSync(
 			join(TEST_DIR, 'vitest.config.ts'),
-			`export default { test: { include: ['src/service/**/harness/**/*.test.ts', 'src/service/**/command/signUp/*.test.ts', 'src/service/**/subscription/**/*.test.ts'], exclude: [] } }`,
+			`export default { test: { include: ['src/service/**/harness/**/*.test.ts', 'src/service/**/command/signUp/*.test.ts', 'src/service/**/command/run*/*.test.ts', 'src/service/**/stream/stream*/*.test.ts', 'src/service/**/subscription/**/*.test.ts'], exclude: [] } }`,
 		)
 		execFileSync(
 			join(REPO_ROOT, 'node_modules', '.bin', 'vitest'),

@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import type { PackageJson } from 'type-fest'
+import { generatedDependencyVersion } from './generatedDependencyVersions.js'
 import type { CreateProjectInput } from './types.js'
 
 /** Package.json shape used by the CLI project blueprint merger. */
@@ -18,7 +19,7 @@ const bunPackage: PKG = {
 	},
 	dependencies: {},
 	devDependencies: {
-		'@types/bun': 'latest',
+		'@types/bun': generatedDependencyVersion('@types/bun'),
 	},
 	trustedDependencies: [],
 }
@@ -32,8 +33,8 @@ const nodePackage: PKG = {
 	},
 	dependencies: {},
 	devDependencies: {
-		tsx: 'latest',
-		vitest: 'latest',
+		tsx: generatedDependencyVersion('tsx'),
+		vitest: generatedDependencyVersion('vitest'),
 	},
 	trustedDependencies: [],
 }
