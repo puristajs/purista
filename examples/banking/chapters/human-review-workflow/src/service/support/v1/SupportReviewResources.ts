@@ -1,4 +1,3 @@
-import type { ExternalWaitOutcome, ExternalWaitSignalResult } from '@purista/harness'
 import type { ReviewWorkflowInput } from './schema.js'
 
 export interface SupportReviewRecord {
@@ -8,8 +7,11 @@ export interface SupportReviewRecord {
 	tenantId: string
 	principalId: string
 	revision: number
-	status: 'pending' | ExternalWaitOutcome
-	waitId: string
+	status: 'pending' | 'approved' | 'rejected'
+	approvalInterruptId?: string
+	approvalRevision?: string
+	approvalIds?: readonly string[]
+	approvalAgentRunId?: string
 	runId: string
 	sessionId: string
 	actionDigest: string
@@ -21,7 +23,18 @@ export interface SupportReviewRecord {
 export interface SupportReviewStore {
 	create(input: Omit<SupportReviewRecord, 'revision' | 'status'>): Promise<SupportReviewRecord>
 	get(tenantId: string, requestId: string): Promise<SupportReviewRecord | undefined>
-	getByWaitId(tenantId: string, waitId: string): Promise<SupportReviewRecord | undefined>
+	getByAgentRunId(tenantId: string, agentRunId: string): Promise<SupportReviewRecord | undefined>
+	recordApproval(
+		input: Readonly<{
+			tenantId: string
+			requestId: string
+			runId: string
+			interruptId: string
+			revision: string
+			approvalIds: readonly string[]
+			agentRunId: string
+		}>,
+	): Promise<SupportReviewRecord>
 	decide(
 		input: Readonly<{
 			tenantId: string
@@ -37,14 +50,4 @@ export interface SupportReviewStore {
 export interface SupportReviewPolicy {
 	canRequest(input: Readonly<{ tenantId: string; principalId: string; cardId: string }>): Promise<boolean>
 	canReview(input: Readonly<{ tenantId: string; principalId: string; requestId: string }>): Promise<boolean>
-}
-
-export interface ReviewWaitSignal {
-	signal(
-		input: Readonly<{
-			waitId: string
-			eventId: string
-			outcome: 'approved' | 'rejected'
-		}>,
-	): Promise<ExternalWaitSignalResult>
 }

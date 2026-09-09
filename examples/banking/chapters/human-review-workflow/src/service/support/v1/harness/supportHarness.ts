@@ -1,26 +1,26 @@
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
 import { requireReviewWorkflowAccess } from '../requireReviewWorkflowAccess.js'
 import type { SupportReviewPolicy, SupportReviewStore } from '../SupportReviewResources.js'
+import { reviewSupportActionWorkflow } from './workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
 
-export { supportHarness }
+export const supportHarness = defineHarness({ name: 'supportHumanReview', revision: 'v1' }).addWorkflow(
+	reviewSupportActionWorkflow,
+)
 
 export const supportHarnessPolicy = {
-	publish: { agents: [], workflows: ['review_support_action'] },
 	targets: {
-		agents: {},
 		workflows: {
-			review_support_action: {
+			reviewSupportAction: {
 				beforeGuards: {
 					reviewAccess: async (
 						context: HarnessBusinessGuardContext<{
 							supportReviewPolicy: SupportReviewPolicy
 							supportReviewStore: SupportReviewStore
 						}>,
-						input: Parameters<typeof requireReviewWorkflowAccess>[2],
-					) => {
-						await requireReviewWorkflowAccess(context.resources, context.identity, input)
-					},
+						input: z.output<typeof reviewSupportActionWorkflow.contract.input>,
+					) => requireReviewWorkflowAccess(context.resources, context.identity, input),
 				},
 				durableResume: { identity: 'run-owner' },
 			},

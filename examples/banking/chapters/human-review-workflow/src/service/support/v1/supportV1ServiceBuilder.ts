@@ -1,5 +1,5 @@
 import { ServiceBuilder } from '@purista/core'
-import type { ReviewWaitSignal, SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
 
 export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceName: 'Support',
@@ -8,4 +8,3 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 })
 	.defineResource<'supportReviewStore', SupportReviewStore>()
 	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
-	.defineResource<'reviewWaitSignal', ReviewWaitSignal>()

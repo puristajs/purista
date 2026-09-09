@@ -10,7 +10,7 @@ export async function requireReviewWorkflowAccess(
 	const { tenantId, principalId } = identity
 	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 
-	const record = await resources.supportReviewStore.getByWaitId(tenantId, input.waitId)
+	const record = await resources.supportReviewStore.get(tenantId, input.requestId)
 	if (!record || record.actionDigest !== input.actionDigest) {
 		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
 	}

@@ -1,10 +1,10 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { InMemoryHarnessStorage } from '@purista/harness'
+import { sqliteHarnessStorage } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
-import { HarnessReviewWaitSignal } from './resources/HarnessReviewWaitSignal.js'
 import { InMemorySupportReviewStore } from './resources/InMemorySupportReviewStore.js'
 import { reviewIdentity } from './service/support/v1/reviewIdentity.js'
-import type { ReviewWaitSignal, SupportReviewPolicy } from './service/support/v1/SupportReviewResources.js'
+import type { SupportReviewPolicy } from './service/support/v1/SupportReviewResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
 
@@ -22,14 +22,31 @@ class IdempotentCardFreezeExecutor {
 	}
 }
 
+function reviewModel() {
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueText({
+		content: '',
+		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+		usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueText({
+		content: 'reviewed',
+		usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+		finishReason: 'stop',
+	})
+	return provider
+}
+
+const testHarnessStorage = () => sqliteHarnessStorage({ file: ':memory:' })
+
 async function startReviewTestApplication(
 	options: Readonly<{
-		storage?: InMemoryHarnessStorage
+		storage?: ReturnType<typeof testHarnessStorage>
 		policy?: SupportReviewPolicy
-		reviewWaitSignal?: ReviewWaitSignal
 	}> = {},
 ) {
-	const storage = options.storage ?? new InMemoryHarnessStorage()
+	const storage = options.storage ?? testHarnessStorage()
 	const reviews = new InMemorySupportReviewStore()
 	const policy =
 		options.policy ??
@@ -46,9 +63,8 @@ async function startReviewTestApplication(
 		resources: {
 			supportReviewStore: reviews,
 			supportReviewPolicy: policy,
-			reviewWaitSignal: options.reviewWaitSignal ?? new HarnessReviewWaitSignal(storage),
 		},
-		ai: { models: {}, storage },
+		ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
 	})
 	await transaction.start()
 	await support.start()
@@ -61,29 +77,36 @@ async function startReviewTestApplication(
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		},
 	}
 }
 
 describe('durable human review over PURISTA', () => {
 	it('returns waiting, resumes approval, and makes a duplicate delivery safe', async () => {
-		const storage = new InMemoryHarnessStorage()
+		const storage = testHarnessStorage()
 		const reviews = new InMemorySupportReviewStore()
 		const policy = { canRequest: vi.fn(async () => true), canReview: vi.fn(async () => true) }
+		const canFreeze = vi.fn(
+			async ({ tenantId, principalId, cardId, approvalId }) =>
+				tenantId === 'tenant-example' &&
+				principalId === 'principal-alex' &&
+				cardId === 'card-1' &&
+				approvalId.startsWith('support-review-run:'),
+		)
 		const executor = new IdempotentCardFreezeExecutor()
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const transaction = await transactionV1Service.getInstance(eventBridge, {
-			resources: { cardFreezeExecutor: executor, cardFreezePolicy: { canFreeze: vi.fn(async () => true) } },
+			resources: { cardFreezeExecutor: executor, cardFreezePolicy: { canFreeze } },
 		})
 		const support = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: {
 				supportReviewStore: reviews,
 				supportReviewPolicy: policy,
-				reviewWaitSignal: new HarnessReviewWaitSignal(storage),
 			},
-			ai: { models: {}, storage },
+			ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
 		})
 		await transaction.start()
 		await support.start()
@@ -101,6 +124,9 @@ describe('durable human review over PURISTA', () => {
 				}),
 			)
 			expect(waiting).toMatchObject({ status: 'waiting', requestId: 'review-1' })
+			if (!waiting || typeof waiting !== 'object' || !('runId' in waiting) || typeof waiting.runId !== 'string') {
+				throw new Error('Expected a typed waiting result')
+			}
 
 			const decisionMessage = getCommandMessageMock({
 				tenantId: 'tenant-example',
@@ -119,15 +145,22 @@ describe('durable human review over PURISTA', () => {
 			await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
 			await expect(eventBridge.invoke(decisionMessage)).resolves.toEqual({ status: 'approved', requestId: 'review-1' })
 			expect(executor.effects).toHaveBeenCalledTimes(1)
+			expect(canFreeze).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				cardId: 'card-1',
+				approvalId: waiting.runId,
+			})
 		} finally {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
 	it('does not execute the business effect after rejection', async () => {
-		const storage = new InMemoryHarnessStorage()
+		const storage = testHarnessStorage()
 		const reviews = new InMemorySupportReviewStore()
 		const executor = new IdempotentCardFreezeExecutor()
 		const eventBridge = new DefaultEventBridge()
@@ -139,9 +172,8 @@ describe('durable human review over PURISTA', () => {
 			resources: {
 				supportReviewStore: reviews,
 				supportReviewPolicy: { canRequest: vi.fn(async () => true), canReview: vi.fn(async () => true) },
-				reviewWaitSignal: new HarnessReviewWaitSignal(storage),
 			},
-			ai: { models: {}, storage },
+			ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
 		})
 		await transaction.start()
 		await support.start()
@@ -181,6 +213,7 @@ describe('durable human review over PURISTA', () => {
 			await support.destroy()
 			await transaction.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
@@ -265,100 +298,14 @@ describe('durable human review over PURISTA', () => {
 		}
 	})
 
-	it('returns a conflict when the durable wait is unavailable', async () => {
-		const application = await startReviewTestApplication({
-			reviewWaitSignal: { signal: vi.fn(async () => ({ kind: 'not_found' as const })) },
-		})
-
-		try {
-			await application.eventBridge.invoke(
-				getCommandMessageMock({
-					tenantId: 'tenant-example',
-					principalId: 'principal-alex',
-					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'requestCardFreeze' },
-					payload: {
-						payload: { requestId: 'review-missing-wait', cardId: 'card-missing-wait', reason: 'Review requested' },
-						parameter: {},
-					},
-				}),
-			)
-			await expect(
-				application.eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-reviewer',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'decideCardFreeze' },
-						payload: {
-							payload: {
-								requestId: 'review-missing-wait',
-								expectedRevision: 1,
-								eventId: 'decision-missing-wait',
-								outcome: 'approved',
-							},
-							parameter: {},
-						},
-					}),
-				),
-			).rejects.toMatchObject({ errorCode: 409 })
-			expect(application.executor.effects).not.toHaveBeenCalled()
-		} finally {
-			await application.stop()
-		}
-	})
-
-	it('expires a timed-out review without executing the approved effect', async () => {
-		let now = Date.now()
-		const storage = new InMemoryHarnessStorage({ now: () => new Date(now) })
-		const application = await startReviewTestApplication({ storage })
-
-		try {
-			await application.eventBridge.invoke(
-				getCommandMessageMock({
-					tenantId: 'tenant-example',
-					principalId: 'principal-alex',
-					receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'requestCardFreeze' },
-					payload: {
-						payload: { requestId: 'review-expired', cardId: 'card-expired', reason: 'Review requested' },
-						parameter: {},
-					},
-				}),
-			)
-			now += 16 * 60_000
-			await expect(
-				application.eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-reviewer',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'decideCardFreeze' },
-						payload: {
-							payload: {
-								requestId: 'review-expired',
-								expectedRevision: 1,
-								eventId: 'decision-expired',
-								outcome: 'approved',
-							},
-							parameter: {},
-						},
-					}),
-				),
-			).resolves.toEqual({ status: 'expired', requestId: 'review-expired' })
-			expect(application.executor.effects).not.toHaveBeenCalled()
-		} finally {
-			await application.stop()
-		}
-	})
-
 	it('rejects stale revisions and conflicting terminal decisions in the review resource', async () => {
 		const reviews = new InMemorySupportReviewStore()
-		const identity = reviewIdentity(
-			{
-				tenantId: 'tenant-example',
-				requestId: 'review-concurrency',
-				cardId: 'card-concurrency',
-				reason: 'Review requested',
-			},
-			new Date(Date.now() + 15 * 60_000).toISOString(),
-		)
+		const identity = reviewIdentity({
+			tenantId: 'tenant-example',
+			requestId: 'review-concurrency',
+			cardId: 'card-concurrency',
+			reason: 'Review requested',
+		})
 		await reviews.create({
 			tenantId: 'tenant-example',
 			principalId: 'principal-alex',
@@ -366,7 +313,6 @@ describe('durable human review over PURISTA', () => {
 			cardId: 'card-concurrency',
 			reason: 'Review requested',
 			...identity,
-			waitId: identity.workflowInput.waitId,
 		})
 
 		await expect(

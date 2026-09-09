@@ -1,8 +1,7 @@
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { EventBridge, Logger } from '@purista/core'
-import { sqliteHarnessStorage } from '@purista/harness'
-import { HarnessReviewWaitSignal } from './resources/HarnessReviewWaitSignal.js'
+import { type ModelProvider, sqliteHarnessStorage } from '@purista/harness'
 import { SqliteSupportReviewStore } from './resources/SqliteSupportReviewStore.js'
 import type { SupportReviewPolicy } from './service/support/v1/SupportReviewResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
@@ -15,6 +14,7 @@ export async function createReviewApplication(
 	supportReviewPolicy: SupportReviewPolicy,
 	cardFreezePolicy: CardFreezePolicy,
 	cardFreezeExecutor: CardFreezeExecutor,
+	model: Readonly<{ provider: ModelProvider; model: string }>,
 	dataDirectory = '.data/human-review',
 ) {
 	await mkdir(dataDirectory, { recursive: true })
@@ -29,9 +29,8 @@ export async function createReviewApplication(
 		resources: {
 			supportReviewStore: reviewStore,
 			supportReviewPolicy,
-			reviewWaitSignal: new HarnessReviewWaitSignal(storage),
 		},
-		ai: { models: {}, storage },
+		ai: { model, storage },
 	})
 	let destroyed = false
 	const destroy = async () => {

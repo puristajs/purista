@@ -1,94 +1,18 @@
 ---
-title: Test commands and resources
-description: Replace injected resources and workflow clients to verify business guards, typed waiting output, and idempotent effects.
+title: Test commands and guards
+description: Verify waiting-result mapping, business authorization, and idempotent effects without a live model.
 order: 262
 kind: lesson
 status: draft
 ---
 
-Use an in-memory review resource in fast tests. It implements the same tenant,
-revision, and idempotent-decision contract as SQLite without hiding business
-rules inside command mocks.
-
-```ts title="src/resources/InMemorySupportReviewStore.ts" write
-import { HandledError, StatusCode } from '@purista/core'
-import type { SupportReviewRecord, SupportReviewStore } from '../service/support/v1/SupportReviewResources.js'
-
-export class InMemorySupportReviewStore implements SupportReviewStore {
-	private readonly records = new Map<string, SupportReviewRecord>()
-	private key(tenantId: string, requestId: string) {
-		return `${tenantId}\u0000${requestId}`
-	}
-
-	public async create(input: Omit<SupportReviewRecord, 'revision' | 'status'>) {
-		const key = this.key(input.tenantId, input.requestId)
-		const existing = this.records.get(key)
-		if (existing) {
-			if (existing.actionDigest !== input.actionDigest || existing.principalId !== input.principalId) {
-				throw new HandledError(StatusCode.Conflict, 'Review request conflicts with its existing action')
-			}
-			return structuredClone(existing)
-		}
-		const record: SupportReviewRecord = { ...structuredClone(input), revision: 1, status: 'pending' }
-		this.records.set(key, record)
-		return structuredClone(record)
-	}
-
-	public async get(tenantId: string, requestId: string) {
-		const record = this.records.get(this.key(tenantId, requestId))
-		return record ? structuredClone(record) : undefined
-	}
-
-	public async getByWaitId(tenantId: string, waitId: string) {
-		for (const record of this.records.values()) {
-			if (record.tenantId === tenantId && record.waitId === waitId) return structuredClone(record)
-		}
-		return undefined
-	}
-
-	public async decide(input: {
-		tenantId: string
-		requestId: string
-		expectedRevision: number
-		eventId: string
-		outcome: 'approved' | 'rejected'
-		principalId: string
-	}) {
-		const key = this.key(input.tenantId, input.requestId)
-		const record = this.records.get(key)
-		if (!record) throw new HandledError(StatusCode.NotFound, 'Review request not found')
-		if (record.status !== 'pending') {
-			if (
-				record.decisionEventId === input.eventId &&
-				record.status === input.outcome &&
-				record.decidedBy === input.principalId
-			) {
-				return structuredClone(record)
-			}
-			throw new HandledError(StatusCode.Conflict, 'Review request already has a terminal decision')
-		}
-		if (record.revision !== input.expectedRevision) {
-			throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
-		}
-		const decided: SupportReviewRecord = {
-			...record,
-			revision: record.revision + 1,
-			status: input.outcome,
-			decisionEventId: input.eventId,
-			decidedBy: input.principalId,
-		}
-		this.records.set(key, decided)
-		return structuredClone(decided)
-	}
-}
-```
-
-Test the request command with PURISTA's command-context mock. Replace the policy,
-review store, and generated workflow client. Verify that the guard sees trusted
-identity and the handler maps the interrupt to `waiting`.
+Command tests isolate PURISTA boundaries with resource and target-client stubs.
+The request test proves that an authenticated, authorized caller gets a typed
+`waiting` result and that the approval correlation is saved.
 
 ```ts title="src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import type { ToolApprovalInterrupt } from '@purista/harness'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
 import { requestCardFreezeCommandBuilder } from './requestCardFreezeCommandBuilder.js'
@@ -102,8 +26,9 @@ describe('requestCardFreezeCommandBuilder', () => {
 		const reviews = {
 			create: sandbox.stub().callsFake(async (input) => ({ ...input, revision: 1, status: 'pending' })),
 			get: sandbox.stub(),
-			getByWaitId: sandbox.stub(),
 			decide: sandbox.stub(),
+			getByAgentRunId: sandbox.stub(),
+			recordApproval: sandbox.stub(),
 		}
 		const policy = { canRequest: sandbox.stub().resolves(true), canReview: sandbox.stub() }
 		const { context, stubs } = createCommandContextMock(requestCardFreezeCommandBuilder, {
@@ -117,17 +42,35 @@ describe('requestCardFreezeCommandBuilder', () => {
 			principalId: 'principal-alex',
 			payload: { payload, parameter: {} },
 		})
-		;(stubs.workflow as any).Support['1'].review_support_action.run.callsFake(
-			async (_input: unknown, options: { durable: { runId: string } }) => ({
-				status: 'interrupted',
-				runId: options.durable.runId,
-				interrupt: {
-					type: 'external-wait',
-					id: 'wait-1',
-					deadline: '2026-09-03T12:00:00.000Z',
+		stubs.workflow.Support['1'].reviewSupportAction.run.callsFake(async (_input, options) => {
+			const runId = options?.durable?.runId ?? 'review-run'
+			return {
+				sessionId: options?.sessionId ?? 'review-session',
+				outcome: {
+					status: 'interrupted' as const,
+					runId,
+					interrupt: {
+						type: 'tool-approval',
+						id: 'approval-1',
+						revision: 'review-r1',
+						requests: [
+							{
+								approvalId: 'approval-id-1',
+								runId,
+								agentRunId: 'agent-run',
+								agentId: 'reviewSupportApprovalAgent',
+								invocationId: 'invocation-1',
+								step: 1,
+								toolId: 'freezeReviewedCard',
+								callId: 'freeze-call',
+								input: {},
+								demands: [],
+							},
+						],
+					} satisfies ToolApprovalInterrupt,
 				},
-			}),
-		)
+			}
+		})
 
 		await expect(
 			requestCardFreezeCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
@@ -144,9 +87,8 @@ describe('requestCardFreezeCommandBuilder', () => {
 })
 ```
 
-Test the final Transaction command separately. Its business guard must bind the
-approval to the tenant, principal, card, and approval ID before calling the
-injected executor.
+The Transaction test proves that the approved identity reaches the executor.
+It also proves that a denied or forged direct call stops before the effect.
 
 ```ts title="src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts" write
 import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
@@ -218,8 +160,11 @@ describe('freezeCardCommandBuilder', () => {
 })
 ```
 
-```bash title="Run the command tests"
+These tests do not claim to prove Harness approval resume. They cover the
+command contracts and business guards without starting services or a model.
+
+```bash title="Run the command unit tests" replay="project"
 npx vitest run src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts
 ```
 
-Continue with [Test the routed review flow](../test-review/).
+Continue with [Test approval through PURISTA](../test-review/).

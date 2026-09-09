@@ -21,12 +21,13 @@
 		"build": "tsc --noEmit",
 		"demo": "node --import tsx src/demo.ts",
 		"lint": "biome check .",
-		"start": "node --import tsx src/index.ts",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
 		"test": "vitest run"
 	},
 	"dependencies": {
 		"@purista/core": "^4.0.0",
 		"@purista/harness": "^4.0.0",
+		"@purista/harness-openai": "^4.0.0",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {

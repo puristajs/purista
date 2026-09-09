@@ -1,18 +1,25 @@
 ---
 title: Protect the approved effect
-description: Put the final business action behind its own guarded Transaction command and idempotent executor.
-order: 257
+description: Put the card change behind a PURISTA host tool and the Transaction service's business guard.
+order: 255
 kind: lesson
 status: draft
 ---
 
-Generate the command on the service that owns the final business effect.
+Human approval allows one prepared tool call to continue. It does not replace
+business authorization. The card change still belongs to the Transaction
+service, where a guard checks the trusted PURISTA identity and approval id.
 
-```bash title="Generate the card action command" replay="project"
-npm run add:command -- freeze-card --service transaction --service-version 1 --description "Freeze a card after an approved review" --non-interactive
+The project CLI already generated the Transaction command and the PURISTA host
+tool owned by Support. Remove the command's local placeholder schemas before
+replacing both definitions with the shared contracts below.
+
+```bash title="Remove the generated command placeholders" replay="project"
+rm src/service/transaction/v1/command/freezeCard/schema.ts
+rm src/service/transaction/v1/command/freezeCard/types.ts
 ```
 
-Define the address contract and the Transaction-owned resource interfaces.
+Define the small schemas shared by the command and host tool.
 
 ```ts title="src/service/transaction/v1/schema.ts" write
 import { z } from 'zod'
@@ -21,6 +28,10 @@ export const freezeCardInputSchema = z.strictObject({ cardId: z.string() })
 export const freezeCardParameterSchema = z.strictObject({ approvalId: z.string().min(1).max(200) })
 export const freezeCardOutputSchema = z.strictObject({ status: z.literal('frozen'), cardId: z.string() })
 ```
+
+The service builder declares the application resources. The policy decides
+whether the trusted caller may perform this card action. The executor owns the
+idempotent side effect.
 
 ```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -56,9 +67,8 @@ export const transactionV1ServiceBuilder = new ServiceBuilder({
 	.defineResource<'cardFreezePolicy', CardFreezePolicy>()
 ```
 
-The command's business guard binds the approval to the current tenant,
-principal, card, and trusted approval ID. The executor receives the same ID as
-its idempotency key, so a retried workflow cannot repeat the external effect.
+The command rejects missing identity and denied actions before it calls the
+executor. Its approval id is also the executor's idempotency key.
 
 ```ts title="src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -98,7 +108,7 @@ export const freezeCardCommandBuilder = transactionV1ServiceBuilder
 	})
 ```
 
-Register the command on its owning service.
+Register the command with the Transaction service.
 
 ```ts title="src/service/transaction/v1/transactionV1Service.ts" write
 import { freezeCardCommandBuilder } from './command/freezeCard/freezeCardCommandBuilder.js'
@@ -109,12 +119,52 @@ export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefini
 )
 ```
 
-In production, `cardFreezePolicy` should validate a durable grant or signed
-capability with the tenant, action, resource, and expiry. The visible local
-policy added later is only a runnable fixture.
+Now replace the generated host tool. `ServiceBuilder.defineTool(...)` makes this
+a PURISTA host tool. Its `.canInvoke(...)` declaration creates the typed
+`context.service.Transaction['1'].freezeCard(...)` EventBridge client.
 
-```bash title="Type-check the protected effect"
+The model supplies no identity or approval id. The host tool receives the
+authenticated current reviewer and uses that trusted tenant to load the review
+linked to the prepared agent run. The nested Transaction command carries the
+stored run owner as its trusted PURISTA identity. It runs only after the review
+record says `approved`.
+
+```ts title="src/service/support/v1/harness/tool/freezeReviewedCard/freezeReviewedCardTool.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import {
+	freezeCardInputSchema,
+	freezeCardOutputSchema,
+	freezeCardParameterSchema,
+} from '../../../../../transaction/v1/schema.js'
+import type { SupportReviewStore } from '../../../SupportReviewResources.js'
+import { freezeReviewedCardInputSchema } from '../../../schema.js'
+import { supportV1ServiceBuilder } from '../../../supportV1ServiceBuilder.js'
+
+export const freezeReviewedCardTool = supportV1ServiceBuilder
+	.defineTool('freezeReviewedCard', {
+		description: 'Freeze the card for the already approved review attached to this run.',
+		input: freezeReviewedCardInputSchema,
+		output: freezeCardOutputSchema,
+	})
+	.canInvoke('Transaction', '1', 'freezeCard', freezeCardOutputSchema, freezeCardInputSchema, freezeCardParameterSchema)
+	.setHandler(async (context) => {
+		const tenantId = context.identity?.tenantId
+		if (!tenantId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const record = await context.resources.supportReviewStore.getByAgentRunId(tenantId, context.tool.runId)
+		if (record?.status !== 'approved') {
+			throw new HandledError(StatusCode.Forbidden, 'This card freeze is not approved')
+		}
+		return context.service.Transaction['1'].freezeCard({ cardId: record.cardId }, { approvalId: record.runId })
+	})
+
+export type FreezeReviewedCardResources = Readonly<{ supportReviewStore: SupportReviewStore }>
+```
+
+The host tool stays a direct dependency of the agent. It is not mounted as a
+separate public endpoint.
+
+```bash title="Type-check the protected effect" replay="project"
 npm run build
 ```
 
-Continue with [Record and resume a decision](../approve-resume/).
+Continue with [Compose the agent and durable workflow](../define-workflow/).

@@ -13,13 +13,16 @@ interface ReviewRow {
 	principal_id: string
 	revision: number
 	status: SupportReviewRecord['status']
-	wait_id: string
 	run_id: string
 	session_id: string
 	action_digest: string
 	workflow_input: string
 	decision_event_id: string | null
 	decided_by: string | null
+	approval_interrupt_id: string | null
+	approval_revision: string | null
+	approval_ids: string | null
+	approval_agent_run_id: string | null
 }
 
 export class SqliteSupportReviewStore implements SupportReviewStore {
@@ -38,15 +41,18 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 				principal_id TEXT NOT NULL,
 				revision INTEGER NOT NULL,
 				status TEXT NOT NULL,
-				wait_id TEXT NOT NULL,
 				run_id TEXT NOT NULL,
 				session_id TEXT NOT NULL,
 				action_digest TEXT NOT NULL,
 				workflow_input TEXT NOT NULL,
 				decision_event_id TEXT,
 				decided_by TEXT,
+				approval_interrupt_id TEXT,
+				approval_revision TEXT,
+				approval_ids TEXT,
+				approval_agent_run_id TEXT,
 				PRIMARY KEY (tenant_id, request_id),
-				UNIQUE (tenant_id, wait_id)
+				UNIQUE (tenant_id, request_id)
 			)
 		`)
 	}
@@ -56,8 +62,8 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 			.prepare(`
 				INSERT OR IGNORE INTO support_reviews (
 					tenant_id, request_id, card_id, reason, principal_id, revision, status,
-					wait_id, run_id, session_id, action_digest, workflow_input
-				) VALUES (?, ?, ?, ?, ?, 1, 'pending', ?, ?, ?, ?, ?)
+					run_id, session_id, action_digest, workflow_input
+				) VALUES (?, ?, ?, ?, ?, 1, 'pending', ?, ?, ?, ?)
 			`)
 			.run(
 				input.tenantId,
@@ -65,7 +71,6 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 				input.cardId,
 				input.reason,
 				input.principalId,
-				input.waitId,
 				input.runId,
 				input.sessionId,
 				input.actionDigest,
@@ -86,11 +91,39 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 		return row ? this.toRecord(row) : undefined
 	}
 
-	public async getByWaitId(tenantId: string, waitId: string) {
+	public async getByAgentRunId(tenantId: string, agentRunId: string) {
 		const row = this.database
-			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND wait_id = ?')
-			.get(tenantId, waitId) as unknown as ReviewRow | undefined
+			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND approval_agent_run_id = ?')
+			.get(tenantId, agentRunId) as unknown as ReviewRow | undefined
 		return row ? this.toRecord(row) : undefined
+	}
+
+	public async recordApproval(input: {
+		tenantId: string
+		requestId: string
+		runId: string
+		interruptId: string
+		revision: string
+		approvalIds: readonly string[]
+		agentRunId: string
+	}) {
+		const result = this.database
+			.prepare(
+				'UPDATE support_reviews SET approval_interrupt_id = ?, approval_revision = ?, approval_ids = ?, approval_agent_run_id = ? WHERE tenant_id = ? AND request_id = ? AND run_id = ?',
+			)
+			.run(
+				input.interruptId,
+				input.revision,
+				JSON.stringify(input.approvalIds),
+				input.agentRunId,
+				input.tenantId,
+				input.requestId,
+				input.runId,
+			)
+		if (result.changes !== 1) throw new HandledError(StatusCode.Conflict, 'Review approval is stale')
+		const record = await this.get(input.tenantId, input.requestId)
+		if (!record) throw new HandledError(StatusCode.NotFound, 'Review request not found')
+		return record
 	}
 
 	public async decide(input: {
@@ -150,13 +183,16 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 			principalId: row.principal_id,
 			revision: row.revision,
 			status: row.status,
-			waitId: row.wait_id,
 			runId: row.run_id,
 			sessionId: row.session_id,
 			actionDigest: row.action_digest,
 			workflowInput: JSON.parse(row.workflow_input) as ReviewWorkflowInput,
 			decisionEventId: row.decision_event_id ?? undefined,
 			decidedBy: row.decided_by ?? undefined,
+			approvalInterruptId: row.approval_interrupt_id ?? undefined,
+			approvalRevision: row.approval_revision ?? undefined,
+			approvalIds: row.approval_ids ? (JSON.parse(row.approval_ids) as string[]) : undefined,
+			approvalAgentRunId: row.approval_agent_run_id ?? undefined,
 		}
 	}
 }

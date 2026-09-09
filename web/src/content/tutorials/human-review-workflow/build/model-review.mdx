@@ -1,21 +1,30 @@
 ---
-title: Model the review state
-description: Define client results, durable business records, resource contracts, and stable workflow identity.
-order: 253
+title: Define the review contracts
+description: Keep request data, durable workflow input, and the waiting or terminal command result explicit.
+order: 252
 kind: lesson
 status: draft
 ---
 
-Define strict schemas for the request and its client-visible results. A pending
-review is ordinary data: `waiting` carries the opaque wait and run identifiers
-plus the deadline. Terminal states use the same output union.
+The request command returns either a completed review result or a `waiting`
+result. `waiting` contains opaque identifiers from the Harness interruption.
+The caller sends those identifiers back only through the guarded decision
+command; it does not construct a new approval.
 
 ```ts title="src/service/support/v1/schema.ts" write
 import { z } from 'zod'
-import {
-	reviewOutcomeSchema,
-	type reviewSupportActionInputSchema,
-} from '../../../harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
+
+export const reviewOutcomeSchema = z.literal('reviewed')
+
+export const reviewSupportActionInputSchema = z.strictObject({
+	requestId: z.string().min(1).max(120),
+	actionDigest: z.string().regex(/^[a-f0-9]{64}$/),
+	definitionVersion: z.literal('support-card-freeze-v1'),
+})
+
+export const reviewSupportActionOutputSchema = z.strictObject({ status: reviewOutcomeSchema })
+
+export const freezeReviewedCardInputSchema = z.strictObject({})
 
 export const requestCardFreezeInputSchema = z.strictObject({
 	requestId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),
@@ -26,13 +35,14 @@ export const requestCardFreezeInputSchema = z.strictObject({
 export const reviewWaitingSchema = z.strictObject({
 	status: z.literal('waiting'),
 	requestId: z.string(),
-	waitId: z.string(),
+	approvalId: z.string(),
+	interruptId: z.string(),
+	revision: z.string(),
 	runId: z.string(),
-	deadline: z.string(),
 })
 
 export const reviewTerminalSchema = z.strictObject({
-	status: reviewOutcomeSchema,
+	status: z.enum(['approved', 'rejected']),
 	requestId: z.string(),
 })
 
@@ -48,118 +58,12 @@ export const decideReviewInputSchema = z.strictObject({
 export type ReviewWorkflowInput = z.output<typeof reviewSupportActionInputSchema>
 ```
 
-Define the business resources used by the Support service. The review store
-owns durable review records. The policy answers action-specific authorization
-questions. The wait signal is deliberately narrow, so command tests can replace
-Harness storage without mocking the whole runtime.
+`actionDigest` binds a stored request to its card and reason without placing
+those business fields in a second workflow schema. The review decision uses an
+optimistic `expectedRevision` so a stale reviewer cannot overwrite a decision.
 
-```ts title="src/service/support/v1/SupportReviewResources.ts" write
-import type { ExternalWaitOutcome, ExternalWaitSignalResult } from '@purista/harness'
-import type { ReviewWorkflowInput } from './schema.js'
-
-export interface SupportReviewRecord {
-	requestId: string
-	cardId: string
-	reason: string
-	tenantId: string
-	principalId: string
-	revision: number
-	status: 'pending' | ExternalWaitOutcome
-	waitId: string
-	runId: string
-	sessionId: string
-	actionDigest: string
-	workflowInput: ReviewWorkflowInput
-	decisionEventId?: string
-	decidedBy?: string
-}
-
-export interface SupportReviewStore {
-	create(input: Omit<SupportReviewRecord, 'revision' | 'status'>): Promise<SupportReviewRecord>
-	get(tenantId: string, requestId: string): Promise<SupportReviewRecord | undefined>
-	getByWaitId(tenantId: string, waitId: string): Promise<SupportReviewRecord | undefined>
-	decide(
-		input: Readonly<{
-			tenantId: string
-			requestId: string
-			expectedRevision: number
-			eventId: string
-			outcome: 'approved' | 'rejected'
-			principalId: string
-		}>,
-	): Promise<SupportReviewRecord>
-}
-
-export interface SupportReviewPolicy {
-	canRequest(input: Readonly<{ tenantId: string; principalId: string; cardId: string }>): Promise<boolean>
-	canReview(input: Readonly<{ tenantId: string; principalId: string; requestId: string }>): Promise<boolean>
-}
-
-export interface ReviewWaitSignal {
-	signal(
-		input: Readonly<{
-			waitId: string
-			eventId: string
-			outcome: 'approved' | 'rejected'
-		}>,
-	): Promise<ExternalWaitSignalResult>
-}
-```
-
-Declare those resources on the generated service builder.
-
-```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
-import { ServiceBuilder } from '@purista/core'
-import type { ReviewWaitSignal, SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
-
-export const supportV1ServiceBuilder = new ServiceBuilder({
-	serviceName: 'Support',
-	serviceVersion: '1',
-	serviceDescription: 'Owns support review requests and support automation',
-})
-	.defineResource<'supportReviewStore', SupportReviewStore>()
-	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
-	.defineResource<'reviewWaitSignal', ReviewWaitSignal>()
-```
-
-A retried request must select the same wait, session, and durable run. Derive
-those identities from the tenant, request ID, and definition version. The
-action digest prevents reuse of a request ID for different card or reason data.
-
-```ts title="src/service/support/v1/reviewIdentity.ts" write
-import { createHash } from 'node:crypto'
-import type { ReviewWorkflowInput } from './schema.js'
-
-export function reviewIdentity(
-	input: Readonly<{ tenantId: string; requestId: string; cardId: string; reason: string }>,
-	deadline: string,
-) {
-	const actionDigest = createHash('sha256')
-		.update(JSON.stringify([input.tenantId, input.requestId, input.cardId, input.reason, 'support-card-freeze-v1']))
-		.digest('hex')
-	const identityDigest = createHash('sha256')
-		.update(`${input.tenantId}:${input.requestId}:support-card-freeze-v1`)
-		.digest('hex')
-	const workflowInput: ReviewWorkflowInput = {
-		waitId: `support-review-wait:${identityDigest}`,
-		deadline,
-		actionDigest,
-		definitionVersion: 'support-card-freeze-v1',
-	}
-	return {
-		actionDigest,
-		sessionId: `support-review:${identityDigest}`,
-		runId: `support-review-run:${identityDigest}`,
-		workflowInput,
-	}
-}
-```
-
-PURISTA StateStore is intentionally absent. Harness storage owns checkpoints;
-the Support database owns business records.
-
-```bash title="Type-check the review contracts"
+```bash title="Type-check the review contracts" replay="project"
 npm run build
 ```
 
-Continue with [Request human review](../request-review/).
+Continue with [Store review state and identity](../persist-decision/).

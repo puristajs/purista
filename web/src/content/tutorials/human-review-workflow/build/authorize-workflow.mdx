@@ -1,17 +1,31 @@
 ---
-title: Authorize the workflow address
-description: Publish the workflow with a tenant-scoped business guard and an explicit cross-principal resume policy.
-order: 255
+title: Define Support resources and authorization
+description: Use trusted identity and the Support review record to authorize both a fresh workflow call and its resume.
+order: 254
 kind: lesson
 status: draft
 ---
 
-A mounted workflow is a directly addressable capability. Its own guard must
-authorize every initial run and resume; relying only on the wrapper command
-would leave another route unprotected.
+The request command protects its business action, but the mounted workflow also
+needs a business guard. The guard reads the Support-owned review record using
+the trusted tenant and principal carried by EventBridge. It never accepts a
+tenant or principal from the model input.
 
-Load the tenant-scoped review by wait ID, verify its immutable action digest,
-and apply the correct action policy for the requester or reviewer.
+The service builder declares the two Support resources once. Commands, the
+mounted workflow policy, and tests receive the same typed resource names.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support review requests and support automation',
+})
+	.defineResource<'supportReviewStore', SupportReviewStore>()
+	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
+```
 
 ```ts title="src/service/support/v1/requireReviewWorkflowAccess.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -26,7 +40,7 @@ export async function requireReviewWorkflowAccess(
 	const { tenantId, principalId } = identity
 	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 
-	const record = await resources.supportReviewStore.getByWaitId(tenantId, input.waitId)
+	const record = await resources.supportReviewStore.get(tenantId, input.requestId)
 	if (!record || record.actionDigest !== input.actionDigest) {
 		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
 	}
@@ -39,47 +53,16 @@ export async function requireReviewWorkflowAccess(
 }
 ```
 
-Apply that guard while publishing only the intended workflow.
+Authentication resolves the identity. This guard authorizes a requester or a
+reviewer for one stored review. Keep those jobs separate: a valid token does
+not automatically allow a card freeze.
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
-import { requireReviewWorkflowAccess } from '../requireReviewWorkflowAccess.js'
-import type { SupportReviewPolicy, SupportReviewStore } from '../SupportReviewResources.js'
+The `durableResume` policy lets a same-tenant reviewer resume the durable run
+while Harness keeps the stored owner in its private execution scopes. The
+before guard receives the current reviewer and still runs on every resume.
 
-export { supportHarness }
-
-export const supportHarnessPolicy = {
-	publish: { agents: [], workflows: ['review_support_action'] },
-	targets: {
-		agents: {},
-		workflows: {
-			review_support_action: {
-				beforeGuards: {
-					reviewAccess: async (
-						context: HarnessBusinessGuardContext<{
-							supportReviewPolicy: SupportReviewPolicy
-							supportReviewStore: SupportReviewStore
-						}>,
-						input: Parameters<typeof requireReviewWorkflowAccess>[2],
-					) => {
-						await requireReviewWorkflowAccess(context.resources, context.identity, input)
-					},
-				},
-				durableResume: { identity: 'run-owner' },
-			},
-		},
-	},
-} as const
-```
-
-`durableResume.identity: 'run-owner'` explicitly allows an authorized reviewer
-to resume a run created by the requester. PURISTA still evaluates the business
-guard with the current caller and rejects another tenant. A resume must also
-carry the original input, session ID, and durable run ID.
-
-```bash title="Type-check the published workflow"
+```bash title="Check the workflow guard" replay="project"
 npm run build
 ```
 
-Continue with [Persist review decisions](../persist-decision/).
+Continue with [Protect the Transaction effect](../protect-effect/).

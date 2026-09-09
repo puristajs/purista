@@ -1,14 +1,210 @@
 ---
-title: Persist review decisions
-description: Store tenant-scoped decisions atomically with optimistic revisions and idempotent event delivery.
-order: 256
+title: Store review state and identity
+description: Store the business request and the opaque approval identifiers that the guarded decision command needs.
+order: 253
 kind: lesson
 status: draft
 ---
 
-Implement the Support review resource with SQLite. This is the durable business
-record. It is separate from Harness checkpoint storage and from PURISTA
-StateStore.
+Harness storage owns the durable run and approval interruption. Support still
+needs a small business record: who requested the card freeze, which reviewer
+decided, and which opaque Harness identifiers belong to that request. This
+record lets a guarded decision command find the correct run without creating a
+second approval protocol.
+
+```ts title="src/service/support/v1/SupportReviewResources.ts" write
+import type { ReviewWorkflowInput } from './schema.js'
+
+export interface SupportReviewRecord {
+	requestId: string
+	cardId: string
+	reason: string
+	tenantId: string
+	principalId: string
+	revision: number
+	status: 'pending' | 'approved' | 'rejected'
+	approvalInterruptId?: string
+	approvalRevision?: string
+	approvalIds?: readonly string[]
+	approvalAgentRunId?: string
+	runId: string
+	sessionId: string
+	actionDigest: string
+	workflowInput: ReviewWorkflowInput
+	decisionEventId?: string
+	decidedBy?: string
+}
+
+export interface SupportReviewStore {
+	create(input: Omit<SupportReviewRecord, 'revision' | 'status'>): Promise<SupportReviewRecord>
+	get(tenantId: string, requestId: string): Promise<SupportReviewRecord | undefined>
+	getByAgentRunId(tenantId: string, agentRunId: string): Promise<SupportReviewRecord | undefined>
+	recordApproval(
+		input: Readonly<{
+			tenantId: string
+			requestId: string
+			runId: string
+			interruptId: string
+			revision: string
+			approvalIds: readonly string[]
+			agentRunId: string
+		}>,
+	): Promise<SupportReviewRecord>
+	decide(
+		input: Readonly<{
+			tenantId: string
+			requestId: string
+			expectedRevision: number
+			eventId: string
+			outcome: 'approved' | 'rejected'
+			principalId: string
+		}>,
+	): Promise<SupportReviewRecord>
+}
+
+export interface SupportReviewPolicy {
+	canRequest(input: Readonly<{ tenantId: string; principalId: string; cardId: string }>): Promise<boolean>
+	canReview(input: Readonly<{ tenantId: string; principalId: string; requestId: string }>): Promise<boolean>
+}
+```
+
+`expectedRevision` and `eventId` make duplicate or stale reviewer submissions
+safe to handle. Later pages use this record to protect the Transaction effect
+and resume the exact Harness run.
+
+Create stable, opaque run and session identifiers from the business request.
+They keep the same request together without treating a caller-provided string
+as a trusted identity.
+
+```ts title="src/service/support/v1/reviewIdentity.ts" write
+import { createHash } from 'node:crypto'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export function reviewIdentity(
+	input: Readonly<{ tenantId: string; requestId: string; cardId: string; reason: string }>,
+) {
+	const actionDigest = createHash('sha256')
+		.update(JSON.stringify([input.tenantId, input.requestId, input.cardId, input.reason, 'support-card-freeze-v1']))
+		.digest('hex')
+	const identityDigest = createHash('sha256')
+		.update(`${input.tenantId}:${input.requestId}:support-card-freeze-v1`)
+		.digest('hex')
+	const workflowInput: ReviewWorkflowInput = {
+		requestId: input.requestId,
+		actionDigest,
+		definitionVersion: 'support-card-freeze-v1',
+	}
+	return {
+		actionDigest,
+		sessionId: `support-review:${identityDigest}`,
+		runId: `support-review-run:${identityDigest}`,
+		workflowInput,
+	}
+}
+```
+
+Use the in-memory store in deterministic tests. Its map belongs to the test
+process, so it is fast and has no local setup.
+
+```ts title="src/resources/InMemorySupportReviewStore.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportReviewRecord, SupportReviewStore } from '../service/support/v1/SupportReviewResources.js'
+
+export class InMemorySupportReviewStore implements SupportReviewStore {
+	private readonly records = new Map<string, SupportReviewRecord>()
+	private key(tenantId: string, requestId: string) {
+		return `${tenantId}\u0000${requestId}`
+	}
+
+	public async create(input: Omit<SupportReviewRecord, 'revision' | 'status'>) {
+		const key = this.key(input.tenantId, input.requestId)
+		const existing = this.records.get(key)
+		if (existing) {
+			if (existing.actionDigest !== input.actionDigest || existing.principalId !== input.principalId) {
+				throw new HandledError(StatusCode.Conflict, 'Review request conflicts with its existing action')
+			}
+			return structuredClone(existing)
+		}
+		const record: SupportReviewRecord = { ...structuredClone(input), revision: 1, status: 'pending' }
+		this.records.set(key, record)
+		return structuredClone(record)
+	}
+
+	public async get(tenantId: string, requestId: string) {
+		const record = this.records.get(this.key(tenantId, requestId))
+		return record ? structuredClone(record) : undefined
+	}
+
+	public async getByAgentRunId(tenantId: string, agentRunId: string) {
+		for (const record of this.records.values()) {
+			if (record.tenantId === tenantId && record.approvalAgentRunId === agentRunId) return structuredClone(record)
+		}
+		return undefined
+	}
+
+	public async recordApproval(input: {
+		tenantId: string
+		requestId: string
+		runId: string
+		interruptId: string
+		revision: string
+		approvalIds: readonly string[]
+		agentRunId: string
+	}) {
+		const key = this.key(input.tenantId, input.requestId)
+		const record = this.records.get(key)
+		if (!record || record.runId !== input.runId) throw new HandledError(StatusCode.Conflict, 'Review approval is stale')
+		const updated = {
+			...record,
+			approvalInterruptId: input.interruptId,
+			approvalRevision: input.revision,
+			approvalIds: [...input.approvalIds],
+			approvalAgentRunId: input.agentRunId,
+		}
+		this.records.set(key, updated)
+		return structuredClone(updated)
+	}
+
+	public async decide(input: {
+		tenantId: string
+		requestId: string
+		expectedRevision: number
+		eventId: string
+		outcome: 'approved' | 'rejected'
+		principalId: string
+	}) {
+		const key = this.key(input.tenantId, input.requestId)
+		const record = this.records.get(key)
+		if (!record) throw new HandledError(StatusCode.NotFound, 'Review request not found')
+		if (record.status !== 'pending') {
+			if (
+				record.decisionEventId === input.eventId &&
+				record.status === input.outcome &&
+				record.decidedBy === input.principalId
+			) {
+				return structuredClone(record)
+			}
+			throw new HandledError(StatusCode.Conflict, 'Review request already has a terminal decision')
+		}
+		if (record.revision !== input.expectedRevision) {
+			throw new HandledError(StatusCode.Conflict, 'Review request revision changed')
+		}
+		const decided: SupportReviewRecord = {
+			...record,
+			revision: record.revision + 1,
+			status: input.outcome,
+			decisionEventId: input.eventId,
+			decidedBy: input.principalId,
+		}
+		this.records.set(key, decided)
+		return structuredClone(decided)
+	}
+}
+```
+
+The application uses SQLite so a restart can still find the review record that
+belongs to the durable Harness run. The store commits a decision only when the
+record revision still matches.
 
 ```ts title="src/resources/SqliteSupportReviewStore.ts" write
 import { mkdirSync } from 'node:fs'
@@ -26,13 +222,16 @@ interface ReviewRow {
 	principal_id: string
 	revision: number
 	status: SupportReviewRecord['status']
-	wait_id: string
 	run_id: string
 	session_id: string
 	action_digest: string
 	workflow_input: string
 	decision_event_id: string | null
 	decided_by: string | null
+	approval_interrupt_id: string | null
+	approval_revision: string | null
+	approval_ids: string | null
+	approval_agent_run_id: string | null
 }
 
 export class SqliteSupportReviewStore implements SupportReviewStore {
@@ -51,15 +250,18 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 				principal_id TEXT NOT NULL,
 				revision INTEGER NOT NULL,
 				status TEXT NOT NULL,
-				wait_id TEXT NOT NULL,
 				run_id TEXT NOT NULL,
 				session_id TEXT NOT NULL,
 				action_digest TEXT NOT NULL,
 				workflow_input TEXT NOT NULL,
 				decision_event_id TEXT,
 				decided_by TEXT,
+				approval_interrupt_id TEXT,
+				approval_revision TEXT,
+				approval_ids TEXT,
+				approval_agent_run_id TEXT,
 				PRIMARY KEY (tenant_id, request_id),
-				UNIQUE (tenant_id, wait_id)
+				UNIQUE (tenant_id, request_id)
 			)
 		`)
 	}
@@ -69,8 +271,8 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 			.prepare(`
 				INSERT OR IGNORE INTO support_reviews (
 					tenant_id, request_id, card_id, reason, principal_id, revision, status,
-					wait_id, run_id, session_id, action_digest, workflow_input
-				) VALUES (?, ?, ?, ?, ?, 1, 'pending', ?, ?, ?, ?, ?)
+					run_id, session_id, action_digest, workflow_input
+				) VALUES (?, ?, ?, ?, ?, 1, 'pending', ?, ?, ?, ?)
 			`)
 			.run(
 				input.tenantId,
@@ -78,7 +280,6 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 				input.cardId,
 				input.reason,
 				input.principalId,
-				input.waitId,
 				input.runId,
 				input.sessionId,
 				input.actionDigest,
@@ -99,11 +300,39 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 		return row ? this.toRecord(row) : undefined
 	}
 
-	public async getByWaitId(tenantId: string, waitId: string) {
+	public async getByAgentRunId(tenantId: string, agentRunId: string) {
 		const row = this.database
-			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND wait_id = ?')
-			.get(tenantId, waitId) as unknown as ReviewRow | undefined
+			.prepare('SELECT * FROM support_reviews WHERE tenant_id = ? AND approval_agent_run_id = ?')
+			.get(tenantId, agentRunId) as unknown as ReviewRow | undefined
 		return row ? this.toRecord(row) : undefined
+	}
+
+	public async recordApproval(input: {
+		tenantId: string
+		requestId: string
+		runId: string
+		interruptId: string
+		revision: string
+		approvalIds: readonly string[]
+		agentRunId: string
+	}) {
+		const result = this.database
+			.prepare(
+				'UPDATE support_reviews SET approval_interrupt_id = ?, approval_revision = ?, approval_ids = ?, approval_agent_run_id = ? WHERE tenant_id = ? AND request_id = ? AND run_id = ?',
+			)
+			.run(
+				input.interruptId,
+				input.revision,
+				JSON.stringify(input.approvalIds),
+				input.agentRunId,
+				input.tenantId,
+				input.requestId,
+				input.runId,
+			)
+		if (result.changes !== 1) throw new HandledError(StatusCode.Conflict, 'Review approval is stale')
+		const record = await this.get(input.tenantId, input.requestId)
+		if (!record) throw new HandledError(StatusCode.NotFound, 'Review request not found')
+		return record
 	}
 
 	public async decide(input: {
@@ -163,30 +392,23 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 			principalId: row.principal_id,
 			revision: row.revision,
 			status: row.status,
-			waitId: row.wait_id,
 			runId: row.run_id,
 			sessionId: row.session_id,
 			actionDigest: row.action_digest,
 			workflowInput: JSON.parse(row.workflow_input) as ReviewWorkflowInput,
 			decisionEventId: row.decision_event_id ?? undefined,
 			decidedBy: row.decided_by ?? undefined,
+			approvalInterruptId: row.approval_interrupt_id ?? undefined,
+			approvalRevision: row.approval_revision ?? undefined,
+			approvalIds: row.approval_ids ? (JSON.parse(row.approval_ids) as string[]) : undefined,
+			approvalAgentRunId: row.approval_agent_run_id ?? undefined,
 		}
 	}
 }
 ```
 
-The `decide` method is one database transaction. It loads the tenant-scoped
-pending review, compares the expected revision, and writes the decision,
-reviewer, event ID, and next revision atomically. An exact redelivery of the
-same event returns the existing result. A stale revision or different terminal
-decision becomes `409 Conflict`.
-
-This example uses Node's built-in SQLite driver to keep local setup small. A
-production adapter can implement the same `SupportReviewStore` contract with
-the database and transaction mechanism used by the application.
-
-```bash title="Type-check the SQLite resource"
+```bash title="Type-check review storage" replay="project"
 npm run build
 ```
 
-Continue with [Protect the approved effect](../protect-effect/).
+Continue with [Define Support resources and authorization](../authorize-workflow/).

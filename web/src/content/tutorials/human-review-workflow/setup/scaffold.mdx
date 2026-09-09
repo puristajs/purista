@@ -1,22 +1,21 @@
 ---
 title: Scaffold the human-review project
-description: Create a PURISTA application and generate the service, workflow, and command boundaries used by a durable review.
+description: Create a PURISTA project, then generate the service, workflow, agent, tool, and command boundaries for one card-freeze review.
 order: 251
 kind: lesson
 status: draft
 ---
 
-Create a fresh PURISTA project. This workflow coordinates application work and
-human input without calling a model, so it needs Harness storage but no model
-provider or API key.
+Create a fresh project with published packages. This chapter uses a model to
+request approval, so the runtime later needs a model provider and durable
+Harness storage.
 
-```bash title="Create and enter the human-review project" replay="parent"
-npm create purista@2.2.0 human-review-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 human-review-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd human-review-workflow
 ```
 
-Use the published package versions and expose the CLI commands that the next
-pages call.
+Replace the package manifest with the project contract used by the examples.
 
 ```json title="package.json" write
 {
@@ -42,12 +41,13 @@ pages call.
 		"build": "tsc --noEmit",
 		"demo": "node --import tsx src/demo.ts",
 		"lint": "biome check .",
-		"start": "node --import tsx src/index.ts",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
 		"test": "vitest run"
 	},
 	"dependencies": {
 		"@purista/core": "^4.0.0",
 		"@purista/harness": "^4.0.0",
+		"@purista/harness-openai": "^4.0.0",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
@@ -62,26 +62,34 @@ pages call.
 	}
 }
 ```
-```bash title="Install the human-review dependencies" replay="project"
+
+```bash title="Install and generate the project boundaries" replay="project"
 npm install
-```
-
-Generate the two service owners and the native Harness workflow. Support owns
-the review process. Transaction owns the card action that may happen after an
-approval.
-
-```bash title="Generate the capability owners" replay="project"
 npm run add:service -- support --description "Owns support reviews and automation" --non-interactive
 npm run add:service -- transaction --description "Owns transaction and card actions" --non-interactive
-npm run add:workflow -- review-support-action --service support --service-version 1 --description "Wait for an authorized support review decision" --non-interactive
+npm run add:workflow -- review-support-action --service support --service-version 1 --description "Request a human approval for a card freeze" --non-interactive
+npm run add:agent -- review-support-approval-agent --service support --service-version 1 --http none --description "Request an approval before a card freeze" --non-interactive
+npm run add:tool -- freeze-reviewed-card --service support --service-version 1 --kind purista --description "Freeze an approved card" --non-interactive
+npm run add:command -- request-card-freeze --service support --service-version 1 --description "Request a card-freeze review" --non-interactive
+npm run add:command -- decide-card-freeze --service support --service-version 1 --description "Record a review decision" --non-interactive
+npm run add:command -- freeze-card --service transaction --service-version 1 --description "Freeze a card after an approved review" --non-interactive
+rm src/service/support/v1/harness/workflow/reviewSupportAction/reviewSupportActionWorkflow.test.ts
+rm src/service/support/v1/harness/agent/reviewSupportApprovalAgent/reviewSupportApprovalAgent.test.ts
+rm src/service/support/v1/harness/tool/freezeReviewedCard/freezeReviewedCardTool.test.ts
+rm src/service/support/v1/command/requestCardFreeze/requestCardFreezeCommandBuilder.test.ts
+rm src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.test.ts
+rm src/service/transaction/v1/command/freezeCard/freezeCardCommandBuilder.test.ts
 ```
 
-Inspect the generated folders before changing them. The CLI has created a
-Harness workflow module, the Support harness composition, a mount policy, and
-both PURISTA service versions.
+The final `rm` commands remove the generated starter tests. The testing pages
+add focused command and integration tests after the behavior is complete.
 
-```bash title="Check the generated project"
+All Harness definitions belong beneath `src/service/support/v1/harness/`.
+The Support service mounts one workflow root. The Transaction service keeps the
+actual card-change command.
+
+```bash title="Check the generated project" replay="project"
 npm run build
 ```
 
-Continue with [Define an external wait](../../build/define-workflow/).
+Continue with [Define the review contracts](../../build/model-review/).

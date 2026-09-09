@@ -1,8 +1,16 @@
 import { z } from 'zod'
-import {
-	reviewOutcomeSchema,
-	type reviewSupportActionInputSchema,
-} from '../../../harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
+
+export const reviewOutcomeSchema = z.literal('reviewed')
+
+export const reviewSupportActionInputSchema = z.strictObject({
+	requestId: z.string().min(1).max(120),
+	actionDigest: z.string().regex(/^[a-f0-9]{64}$/),
+	definitionVersion: z.literal('support-card-freeze-v1'),
+})
+
+export const reviewSupportActionOutputSchema = z.strictObject({ status: reviewOutcomeSchema })
+
+export const freezeReviewedCardInputSchema = z.strictObject({})
 
 export const requestCardFreezeInputSchema = z.strictObject({
 	requestId: z.string().regex(/^[A-Za-z0-9_.:@/-]{1,120}$/),
@@ -13,13 +21,14 @@ export const requestCardFreezeInputSchema = z.strictObject({
 export const reviewWaitingSchema = z.strictObject({
 	status: z.literal('waiting'),
 	requestId: z.string(),
-	waitId: z.string(),
+	approvalId: z.string(),
+	interruptId: z.string(),
+	revision: z.string(),
 	runId: z.string(),
-	deadline: z.string(),
 })
 
 export const reviewTerminalSchema = z.strictObject({
-	status: reviewOutcomeSchema,
+	status: z.enum(['approved', 'rejected']),
 	requestId: z.string(),
 })
 

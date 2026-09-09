@@ -1,74 +1,105 @@
 ---
-title: Define an external wait
-description: Define a native Harness workflow that pauses durably and returns one typed review outcome.
-order: 252
+title: Compose the agent and durable workflow
+description: Compose one approval-required agent into a durable workflow and one service-owned Harness root.
+order: 256
 kind: lesson
 status: draft
 ---
 
-Replace the generated workflow body with one versioned external wait. Its input
-contains only opaque identity, integrity data, and a deadline. Mutable review
-comments and user profiles belong in the Support database, not in a workflow
-checkpoint.
+A workflow owns the application sequence. The agent only asks to use the
+reviewed-card tool. Harness pauses before that tool runs because the agent
+policy requires approval.
 
-```ts title="src/harness/support/workflow/reviewSupportAction/reviewSupportActionWorkflow.ts" write
-import { defineHarnessModule } from '@purista/harness'
-import { z } from 'zod'
+Keep the agent beside the workflow that composes it. It asks for one native
+tool call; the governance policy turns that call into an ordinary typed
+approval interruption.
 
-export const reviewOutcomeSchema = z.enum(['approved', 'rejected', 'expired', 'cancelled'])
+The scaffold used the agent's public id so it could coexist with the workflow
+address. Remove that small placeholder before writing the final definition in
+the workflow's feature folder.
 
-export const reviewSupportActionInputSchema = z.strictObject({
-	waitId: z.string().min(1).max(200),
-	deadline: z.iso.datetime({ offset: false, precision: 3 }),
-	actionDigest: z.string().regex(/^[a-f0-9]{64}$/),
-	definitionVersion: z.literal('support-card-freeze-v1'),
+```bash title="Remove the generated agent placeholder" replay="project"
+rm -r src/service/support/v1/harness/agent/reviewSupportApprovalAgent
+```
+
+```ts title="src/service/support/v1/harness/agent/reviewSupportAction/reviewSupportActionAgent.ts" write
+import { defineAgent } from '@purista/harness'
+import { reviewSupportActionInputSchema } from '../../../schema.js'
+import { freezeReviewedCardTool } from '../../tool/freezeReviewedCard/freezeReviewedCardTool.js'
+
+export const reviewSupportActionAgent = defineAgent('reviewSupportApprovalAgent', {
+	input: reviewSupportActionInputSchema,
+	instructions: 'Use freezeReviewedCard exactly once so the requested action can enter human review.',
+	tools: [freezeReviewedCardTool],
+	governance: ({ native, rule }) => ({
+		policies: [
+			native({
+				id: 'humanReview',
+				rules: [rule({ id: 'freezeApproval', tools: ['freezeReviewedCard'], effect: 'require_approval' })],
+			}),
+		],
+	}),
+	prompt: (input) => ({ role: 'user', content: `Review ${input.requestId}: freeze the approved card.` }),
 })
+```
 
-export const reviewSupportActionOutputSchema = z.strictObject({
-	status: reviewOutcomeSchema,
-})
+```ts title="src/service/support/v1/harness/workflow/reviewSupportAction/reviewSupportActionWorkflow.ts" write
+import { defineWorkflow } from '@purista/harness'
+import { reviewSupportActionInputSchema, reviewSupportActionOutputSchema } from '../../../schema.js'
+import { reviewSupportActionAgent } from '../../agent/reviewSupportAction/reviewSupportActionAgent.js'
 
-export const reviewSupportActionWorkflow = defineHarnessModule()('support.workflow.review-support-action', {
-	version: '1.0.0',
-	register(builder) {
-		return builder.workflow('review_support_action', {
-			input: reviewSupportActionInputSchema,
-			output: reviewSupportActionOutputSchema,
-			handler: async (context) => {
-				const outcome = await context.externalWait.wait({
-					waitId: context.input.waitId,
-					kind: 'human_review',
-					schemaVersion: 'support-review-signal-v1',
-					definitionVersion: context.input.definitionVersion,
-					deadline: context.input.deadline,
-				})
-				return { status: outcome.status }
-			},
-		})
+export const reviewSupportActionWorkflow = defineWorkflow('reviewSupportAction', {
+	input: reviewSupportActionInputSchema,
+	output: reviewSupportActionOutputSchema,
+	durable: true,
+	agents: [reviewSupportActionAgent],
+	handler: async (context) => {
+		await context.agents.reviewSupportApprovalAgent.run(context.input, { callId: 'freeze-reviewed-card' })
+		return { status: 'reviewed' as const }
 	},
 })
 ```
 
-`context.externalWait.wait(...)` is a normal Harness workflow operation. On the
-first run it creates a durable wait and interrupts the run. After an external
-caller signals that wait, rerunning the same durable run returns the recorded
-outcome.
+The stable `callId` names this one workflow step. The durable workflow preserves
+its state when the agent returns a tool-approval interruption.
 
-Compose the workflow module once in the Support harness.
-
-```ts title="src/harness/support/supportHarness.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import { requireReviewWorkflowAccess } from '../requireReviewWorkflowAccess.js'
+import type { SupportReviewPolicy, SupportReviewStore } from '../SupportReviewResources.js'
 import { reviewSupportActionWorkflow } from './workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
 
-export const supportHarness = defineHarness({ name: 'support-human-review' }).use(reviewSupportActionWorkflow).define()
+export const supportHarness = defineHarness({ name: 'supportHumanReview', revision: 'v1' }).addWorkflow(
+	reviewSupportActionWorkflow,
+)
+
+export const supportHarnessPolicy = {
+	targets: {
+		workflows: {
+			reviewSupportAction: {
+				beforeGuards: {
+					reviewAccess: async (
+						context: HarnessBusinessGuardContext<{
+							supportReviewPolicy: SupportReviewPolicy
+							supportReviewStore: SupportReviewStore
+						}>,
+						input: z.output<typeof reviewSupportActionWorkflow.contract.input>,
+					) => requireReviewWorkflowAccess(context.resources, context.identity, input),
+				},
+				durableResume: { identity: 'run-owner' },
+			},
+		},
+	},
+} as const
 ```
 
-At this point the workflow is defined, but it is not yet safely published as a
-PURISTA address. The mount policy comes after the review resource and business
-policy contracts exist.
+There is one Harness mount later on the Support service. The mount guard runs
+for both the initial workflow call and its resume.
 
-```bash title="Type-check the workflow"
+```bash title="Type-check the Harness definitions" replay="project"
 npm run build
 ```
 
-Continue with [Model the review state](../model-review/).
+Continue with [Request human review](../request-review/).

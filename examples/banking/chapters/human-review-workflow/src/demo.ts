@@ -2,7 +2,10 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { createReviewApplication } from './createReviewApplication.js'
+
+const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
 
 async function main() {
 	const dataDirectory = await mkdtemp(join(tmpdir(), 'purista-human-review-'))
@@ -10,6 +13,14 @@ async function main() {
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const effects: string[] = []
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueText({
+		content: '',
+		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueText({ content: 'reviewed', usage, finishReason: 'stop' })
 	const application = await createReviewApplication(
 		eventBridge,
 		logger,
@@ -22,7 +33,7 @@ async function main() {
 		{
 			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
 				tenantId === 'tenant-example' &&
-				principalId === 'principal-reviewer' &&
+				principalId === 'principal-alex' &&
 				cardId === 'card-1' &&
 				approvalId.startsWith('support-review-run:'),
 		},
@@ -32,6 +43,7 @@ async function main() {
 				return { status: 'frozen', cardId }
 			},
 		},
+		{ provider, model: 'fake-review' },
 		dataDirectory,
 	)
 
@@ -64,6 +76,7 @@ async function main() {
 			}),
 		)
 		process.stdout.write(`${JSON.stringify({ waiting, decided, effectCount: effects.length }, null, 2)}\n`)
+		provider.assertExhausted()
 	} finally {
 		await application.destroy()
 		await eventBridge.destroy()

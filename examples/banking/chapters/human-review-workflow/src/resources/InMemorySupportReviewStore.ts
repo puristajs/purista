@@ -26,11 +26,34 @@ export class InMemorySupportReviewStore implements SupportReviewStore {
 		return record ? structuredClone(record) : undefined
 	}
 
-	public async getByWaitId(tenantId: string, waitId: string) {
+	public async getByAgentRunId(tenantId: string, agentRunId: string) {
 		for (const record of this.records.values()) {
-			if (record.tenantId === tenantId && record.waitId === waitId) return structuredClone(record)
+			if (record.tenantId === tenantId && record.approvalAgentRunId === agentRunId) return structuredClone(record)
 		}
 		return undefined
+	}
+
+	public async recordApproval(input: {
+		tenantId: string
+		requestId: string
+		runId: string
+		interruptId: string
+		revision: string
+		approvalIds: readonly string[]
+		agentRunId: string
+	}) {
+		const key = this.key(input.tenantId, input.requestId)
+		const record = this.records.get(key)
+		if (!record || record.runId !== input.runId) throw new HandledError(StatusCode.Conflict, 'Review approval is stale')
+		const updated = {
+			...record,
+			approvalInterruptId: input.interruptId,
+			approvalRevision: input.revision,
+			approvalIds: [...input.approvalIds],
+			approvalAgentRunId: input.agentRunId,
+		}
+		this.records.set(key, updated)
+		return structuredClone(updated)
 	}
 
 	public async decide(input: {

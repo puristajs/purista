@@ -1,23 +1,27 @@
 ---
-title: Compose the review runtime
-description: Bind separate workflow and business-record stores and start the Support and Transaction services safely.
+title: Compose the durable runtime
+description: Bind the services, fake model, Harness storage, and business review store.
 order: 259
 kind: lesson
 status: draft
 ---
 
-Bind adapters at the application composition root. Harness gets its SQLite
-storage for workflow runs and external waits. Support gets a different SQLite
-resource for review business records. The two stores have different ownership,
-retention, and query needs even though this local example places both files in
-one data directory.
+Tool approval pauses a durable Harness run, so the runtime needs persistent
+Harness storage. The application also needs a business review database. These
+stores have different owners:
+
+- Harness storage owns runs, checkpoints, prepared tool calls, and resume data.
+- The Support review store owns reviewer policy data, revisions, and the saved
+  correlation needed to build a trusted resume request.
+
+Do not put business review records into Harness storage, and do not recreate
+Harness checkpoints in the business database.
 
 ```ts title="src/createReviewApplication.ts" write
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { EventBridge, Logger } from '@purista/core'
-import { sqliteHarnessStorage } from '@purista/harness'
-import { HarnessReviewWaitSignal } from './resources/HarnessReviewWaitSignal.js'
+import { type ModelProvider, sqliteHarnessStorage } from '@purista/harness'
 import { SqliteSupportReviewStore } from './resources/SqliteSupportReviewStore.js'
 import type { SupportReviewPolicy } from './service/support/v1/SupportReviewResources.js'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
@@ -30,6 +34,7 @@ export async function createReviewApplication(
 	supportReviewPolicy: SupportReviewPolicy,
 	cardFreezePolicy: CardFreezePolicy,
 	cardFreezeExecutor: CardFreezeExecutor,
+	model: Readonly<{ provider: ModelProvider; model: string }>,
 	dataDirectory = '.data/human-review',
 ) {
 	await mkdir(dataDirectory, { recursive: true })
@@ -44,9 +49,8 @@ export async function createReviewApplication(
 		resources: {
 			supportReviewStore: reviewStore,
 			supportReviewPolicy,
-			reviewWaitSignal: new HarnessReviewWaitSignal(storage),
 		},
-		ai: { models: {}, storage },
+		ai: { model, storage },
 	})
 	let destroyed = false
 	const destroy = async () => {
@@ -88,13 +92,20 @@ export async function createReviewApplication(
 }
 ```
 
-The application starts Transaction before Support because the decision command
-may invoke the Transaction address. Shutdown reverses that order and closes
-both storage adapters. Startup cleanup preserves both the startup and shutdown
-errors when necessary.
+The example binds SQLite for both responsibilities, but uses separate files.
+`ai.model` is singular because this graph has one model requirement. The caller
+passes that model binding into the composition function, so tests and the demo
+can use a fake while the long-running process can use a real provider. The
+Support service receives the review policy and store; the Transaction service
+receives its effect policy and executor.
 
-```bash title="Type-check application composition"
+The application starts Transaction before Support because the Support host tool
+calls the Transaction command through EventBridge. `destroy()` closes both
+services, Harness storage, and the business database even when more than one
+close operation fails.
+
+```bash title="Type-check runtime composition" replay="project"
 npm run build
 ```
 
-Continue with [Run the human-review flow](../run-application/).
+Continue with [Run the review flow](../run-application/).

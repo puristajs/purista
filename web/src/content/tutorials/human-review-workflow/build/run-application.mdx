@@ -1,21 +1,25 @@
 ---
 title: Run the human-review flow
-description: Exercise waiting, approval, durable resume, and one protected effect through EventBridge.
+description: See a deterministic approval pause, resume, and one protected card effect.
 order: 260
 kind: lesson
 status: draft
 ---
 
-Create a deterministic demo that invokes the two Support commands through the
-EventBridge. The requester first receives `waiting`; a different authorized
-principal records approval and resumes the same run.
+The demo uses PURISTA EventBridge addresses exactly as another service would.
+The requester starts the review. A different trusted principal in the same
+tenant records the approval. The fake model first asks for
+`freezeReviewedCard`, then returns its final answer after the approved resume.
 
 ```ts title="src/demo.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
 import { createReviewApplication } from './createReviewApplication.js'
+
+const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
 
 async function main() {
 	const dataDirectory = await mkdtemp(join(tmpdir(), 'purista-human-review-'))
@@ -23,6 +27,14 @@ async function main() {
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const effects: string[] = []
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueText({
+		content: '',
+		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+		usage,
+		finishReason: 'tool_calls',
+	})
+	provider.enqueueText({ content: 'reviewed', usage, finishReason: 'stop' })
 	const application = await createReviewApplication(
 		eventBridge,
 		logger,
@@ -35,7 +47,7 @@ async function main() {
 		{
 			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
 				tenantId === 'tenant-example' &&
-				principalId === 'principal-reviewer' &&
+				principalId === 'principal-alex' &&
 				cardId === 'card-1' &&
 				approvalId.startsWith('support-review-run:'),
 		},
@@ -45,6 +57,7 @@ async function main() {
 				return { status: 'frozen', cardId }
 			},
 		},
+		{ provider, model: 'fake-review' },
 		dataDirectory,
 	)
 
@@ -77,6 +90,7 @@ async function main() {
 			}),
 		)
 		process.stdout.write(`${JSON.stringify({ waiting, decided, effectCount: effects.length }, null, 2)}\n`)
+		provider.assertExhausted()
 	} finally {
 		await application.destroy()
 		await eventBridge.destroy()
@@ -90,16 +104,35 @@ main().catch((error: unknown) => {
 })
 ```
 
-Add the long-running entry point with explicit example policies. These policies
-make the authorization inputs visible. A real application should resolve them
-from trusted grants and business records.
+Run it without an API key:
+
+```bash title="Run the deterministic approval demo" replay="project"
+npm run demo
+```
+
+The output contains a `waiting` result, an `approved` result, and
+`effectCount: 1`. The temporary SQLite files are removed in `finally` after the
+services, EventBridge, Harness storage, and review store close.
+
+The long-running entry point uses the same composition boundary. Replace the
+example policies and executor with your real authorization and card systems.
+
+The agent generator added a minimal provider bootstrap. Remove that placeholder
+before writing the application entry point used by this chapter.
+
+```bash title="Remove the generated provider placeholder" replay="project"
+rm src/config/env.ts
+```
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
 import { createReviewApplication } from './createReviewApplication.js'
 
 async function main() {
 	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const application = await createReviewApplication(
@@ -114,12 +147,16 @@ async function main() {
 		{
 			canFreeze: async ({ tenantId, principalId, cardId, approvalId }) =>
 				tenantId === 'tenant-example' &&
-				principalId === 'principal-reviewer' &&
+				principalId === 'principal-alex' &&
 				cardId === 'card-1' &&
 				/^support-review-run:[a-f0-9]{64}$/.test(approvalId),
 		},
 		{
 			freeze: async ({ cardId }) => ({ status: 'frozen', cardId }),
+		},
+		{
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
 		},
 	)
 	gracefulShutdown(logger, [application, eventBridge])
@@ -132,16 +169,22 @@ main().catch((error: unknown) => {
 })
 ```
 
-Run the complete path.
+Copy the environment example only if you want to start the optional live
+process. The deterministic demo above does not read these values.
 
-```bash title="Run the deterministic human-review application" replay="project"
-npm run build
-npm run demo
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
 ```
 
-The output contains the typed waiting result, the approved terminal result,
-and an effect count of one. The application has exercised two PURISTA command
-addresses, a mounted Harness workflow, an external wait, and separate durable
-stores.
+```bash title="Start the optional OpenAI-backed process"
+cp .env.example .env
+# Set OPENAI_API_KEY in .env, then run:
+npm start
+```
 
-Continue with [Test the native workflow](../../testing/test-workflow/).
+`gracefulShutdown` closes the application and EventBridge when the process
+stops. This tutorial intentionally has no custom approval HTTP or UI protocol.
+A later UI tutorial maps the standard Harness approval records to AI SDK UI v1.
+
+Continue with [Test the workflow boundary](../../testing/test-workflow/).
