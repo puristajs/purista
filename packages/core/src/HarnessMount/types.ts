@@ -5,6 +5,8 @@ import type {
 	HarnessExecutionCaller,
 	HarnessIdentity,
 	HarnessInstanceConfig,
+	HarnessInterruptKind,
+	HarnessOutputUpdateKind,
 	HarnessTargetContract,
 	HarnessTargetInput,
 	HarnessTargetOutput,
@@ -245,12 +247,12 @@ export type SerializedHarnessTargetExportV1 = Readonly<{
 	invocation: Readonly<{
 		aggregate: true
 		stream: true
-		resumableInterrupts: readonly ('tool-approval' | 'external-wait')[]
+		resumableInterrupts: readonly HarnessInterruptKind[]
 	}>
 	stream: Readonly<{
 		protocol: 'harness-execution-events-v1'
 		eventTypes: typeof harnessExecutionEventTypesV1
-		outputUpdates: readonly ('text-delta' | 'object-snapshot')[]
+		outputUpdates: readonly Exclude<HarnessOutputUpdateKind, 'none'>[]
 	}>
 	queue?: Readonly<{ name: string }>
 	exportDigest: `sha256:${string}`
