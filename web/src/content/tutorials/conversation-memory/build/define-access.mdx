@@ -1,20 +1,13 @@
 ---
 title: Define conversation access and identity
-description: Add shared schemas, action-based authorization, resource ports, and identity-scoped session helpers.
+description: Add schemas, action-based authorization, typed resources, and one stable opaque session id.
 order: 222
 kind: lesson
 status: draft
 ---
 
-Before invoking the agent, define what the Support service needs to know about a
-conversation. This page adds contracts only: request and response schemas, the
-business policy, the transcript resource, and the session-id rules.
-
-## Define the application schemas
-
-Create the shared request, transcript, and clear-result schemas. The caller may
-supply a short `conversationId`; tenant and principal identity never come from
-this payload.
+A caller supplies a short conversation id. Trusted tenant and principal values
+come from the PURISTA message after authentication.
 
 ```ts title="src/service/support/v1/schema.ts" write
 import { z } from 'zod'
@@ -36,20 +29,14 @@ export const conversationHistorySchema = z.strictObject({
 export const clearedConversationHistorySchema = z.strictObject({ cleared: z.literal(true) })
 ```
 
-The service has no custom configuration in this focused example, but an
-explicit schema keeps the generated service contract intact.
-
 ```ts title="src/service/support/v1/supportServiceConfig.ts" write
 import { z } from 'zod'
 
 export const supportServiceV1ConfigSchema = z.object({})
 ```
 
-## Separate authorization by business action
-
-Create the policy resource. `continue`, `read`, and `clear` are separate
-permissions: a caller allowed to continue a support case does not automatically
-gain permission to delete its transcript.
+The business policy authorizes each action separately. Permission to continue a
+conversation does not imply permission to read or clear its transcript.
 
 ```ts title="src/service/support/v1/SupportConversationPolicy.ts" write
 export type SupportConversationAction = 'continue' | 'read' | 'clear'
@@ -64,24 +51,20 @@ export interface SupportConversationPolicy {
 }
 ```
 
-Create the narrow transcript resource used by the later read and clear
-commands. Harness still owns the storage implementation and session lifecycle.
+The application uses a narrow resource port for transcript access. Its entry
+type comes from the Zod schema, so there is no second handwritten shape.
 
 ```ts title="src/service/support/v1/SupportConversationHistory.ts" write
-export interface SupportConversationHistoryEntry {
-	role: 'system' | 'user' | 'assistant' | 'tool'
-	content: string
-	timestamp: string
-}
+import type { z } from 'zod'
+import type { conversationHistoryEntrySchema } from './schema.js'
+
+export type SupportConversationHistoryEntry = z.output<typeof conversationHistoryEntrySchema>
 
 export interface SupportConversationHistory {
 	list(sessionId: string): Promise<SupportConversationHistoryEntry[]>
 	clear(sessionId: string): Promise<void>
 }
 ```
-
-Keep the fail-closed decision in one helper so commands and the directly
-published agent use the same business rule.
 
 ```ts title="src/service/support/v1/requireSupportConversationAccess.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -109,13 +92,7 @@ export async function requireSupportConversationAccess(
 }
 ```
 
-Authentication must establish trusted identity before a capability is called.
-This policy performs authorization for one object and one action.
-
-## Declare the resources on the Support service
-
-Replace the generated builder so every Support command and Harness mount guard
-receives typed access to the two resources.
+Declare both resources once on the service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
@@ -135,14 +112,13 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
 ```
 
-## Derive logical and physical session ids
-
-The application uses a readable logical id. The mounted runtime combines it
-with trusted identity before storing data. Application commands that inspect
-Harness storage must derive the same opaque id with the Framework helper.
+Derive one stable opaque id from trusted tenant, principal, and conversation
+values. The version label makes a future key change explicit. Never accept this
+session id directly from an untrusted payload.
 
 ```ts title="src/service/support/v1/conversationSessionId.ts" write
-import { createHarnessSessionStorageId, HandledError, StatusCode } from '@purista/core'
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 
 export function conversationSessionId(
 	identity: Readonly<{ tenantId?: string; principalId?: string }>,
@@ -151,22 +127,25 @@ export function conversationSessionId(
 	if (!identity.tenantId || !identity.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	return `support:${conversationId}`
-}
-
-export function conversationStorageSessionId(
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	conversationId: string,
-) {
-	return createHarnessSessionStorageId(identity, conversationSessionId(identity, conversationId))
+	const digest = createHash('sha256')
+		.update(
+			JSON.stringify({
+				tenantId: identity.tenantId,
+				principalId: identity.principalId,
+				conversationId,
+				version: 'support-conversation-v1',
+			}),
+		)
+		.digest('hex')
+	return `support-conversation:${digest}`
 }
 ```
 
-`conversationId` is correlation input, not authority. Two authenticated callers
-may send the same value and still receive different physical storage ids.
+The same value will be passed to the agent run and to authorized Harness storage
+operations. There is no second Core storage-id conversion.
 
-```bash title="Verify the conversation access contracts" replay="project"
+```bash title="Check the access contracts" replay="project"
 npm run build
 ```
 
-Continue with [Invoke an authorized conversation session](../use-session/).
+Continue with [Mount and invoke the conversation agent](../use-session/).

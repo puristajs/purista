@@ -1,16 +1,3 @@
----
-title: Test native conversation history
-description: Prove history reuse, session isolation, clearing, retention, and explicit session cleanup without PURISTA infrastructure.
-order: 227
-kind: lesson
-status: draft
----
-
-Start at the native Harness boundary. `FakeModelProvider` records each model
-request, so the second request can prove that the first answer entered model
-context. Another session must remain isolated.
-
-```ts title="src/service/support/v1/harness/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts" write
 import { inMemoryHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
@@ -156,14 +143,3 @@ describe('answerSupportQuestionAgent', () => {
 		}
 	})
 })
-```
-
-Each session is borrowed from the runtime. Its nested `finally` calls
-`session.release()` before the outer `finally` calls `runtime.close()`. Releasing
-a session frees live resources without deleting its persisted transcript.
-
-```bash title="Run native conversation tests" replay="project"
-npm test -- src/service/support/v1/harness/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts
-```
-
-Continue with [Test the PURISTA commands](../test-commands/).

@@ -1,31 +1,75 @@
 ---
-title: Test conversation routing through EventBridge
-description: Start the mounted service and prove allowed history plus direct-target denial with trusted identity.
+title: Test the mounted EventBridge path
+description: Prove the wrapper, mounted target policy, shared transcript storage, and denial path together.
 order: 229
 kind: lesson
 status: draft
 ---
 
-The focused tests replaced PURISTA routing with local stubs. Finish with the
-real `DefaultEventBridge`, mounted Support service, in-memory Harness storage,
-and deterministic model.
+Finish with a mounted-service test. The allowed case invokes the wrapper,
+exports the transcript through the authorized resource, clears it, and confirms
+it is empty. This proves the agent and history commands use one session id and
+one storage adapter.
 
-The allowed case enters through the wrapper command and must pass both its
-command guard and the mounted-agent guard. The denied case addresses the agent
-directly and must stop before any model request.
+The denied case uses a test-only command with a declared, address-first agent
+call. The mounted target guard rejects it before the strict fake model receives
+a request.
 
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
-import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
 import { inMemoryHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { HarnessConversationHistory } from '../../../resources/HarnessConversationHistory.js'
+import { conversationSessionId } from './conversationSessionId.js'
+import { answerSupportQuestionAgent } from './harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import type { SupportConversationHistory } from './SupportConversationHistory.js'
+import type { SupportConversationPolicy } from './SupportConversationPolicy.js'
 import { supportV1Service } from './supportV1Service.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
+const directCallerBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Calls the conversation agent in integration tests',
+})
+	.defineResource<'supportConversationHistory', SupportConversationHistory>()
+	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
+const callSupportAgentCommandBuilder = directCallerBuilder
+	.getCommandBuilder('callSupportAgent', 'Call the conversation agent directly')
+	.addPayloadSchema(answerSupportQuestionAgent.contract.input)
+	.addOutputSchema(answerSupportQuestionAgent.contract.output)
+	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
+	.setCommandFunction(async function (context, payload) {
+		const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(payload, {
+			sessionId: conversationSessionId(context.message, payload.conversationId),
+		})
+		if (result.outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
+		return result.outcome.output
+	})
+const directCallerService = directCallerBuilder
+	.addCommandDefinition(callSupportAgentCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+
+const invoke = (
+	eventBridge: DefaultEventBridge,
+	serviceTarget: string,
+	payload: unknown,
+	principalId = 'principal-alex',
+) =>
+	eventBridge.invoke(
+		getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId,
+			receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget },
+			payload: { payload, parameter: {} },
+		}),
+	)
+
 describe('support conversation service', () => {
-	it('authorizes the command and mounted agent before continuing a conversation', async () => {
+	it('uses one mounted session for the agent and authorized history commands', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
 			object: { answer: 'A transfer can remain pending for two business days.' },
@@ -42,29 +86,23 @@ describe('support conversation service', () => {
 				supportConversationHistory: new HarnessConversationHistory(storage),
 				supportConversationPolicy: policy,
 			},
-			ai: { models: { primary: { provider, model: 'fake-support' } }, storage },
+			ai: { model: { provider, model: 'fake-support' }, storage },
 		})
 		await service.start()
 
 		try {
-			await expect(
-				eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-alex',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'continueSupportConversation',
-						},
-						payload: {
-							payload: { conversationId: 'case-1', question: 'How long can it stay pending?' },
-							parameter: {},
-						},
-					}),
-				),
-			).resolves.toEqual({ answer: 'A transfer can remain pending for two business days.' })
-			expect(policy.canAccess).toHaveBeenCalledTimes(2)
+			const payload = { conversationId: 'case-1', question: 'How long can it stay pending?' }
+			await expect(invoke(eventBridge, 'continueSupportConversation', payload)).resolves.toEqual({
+				answer: 'A transfer can remain pending for two business days.',
+			})
+			const history = await invoke(eventBridge, 'getConversationHistory', { conversationId: 'case-1' })
+			expect(history).toMatchObject({ messages: [{ role: 'user' }, { role: 'assistant' }] })
+			await expect(invoke(eventBridge, 'clearConversationHistory', { conversationId: 'case-1' })).resolves.toEqual({
+				cleared: true,
+			})
+			await expect(invoke(eventBridge, 'getConversationHistory', { conversationId: 'case-1' })).resolves.toEqual({
+				messages: [],
+			})
 			expect(policy.canAccess).toHaveBeenCalledWith({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
@@ -75,66 +113,58 @@ describe('support conversation service', () => {
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
-	it('denies the directly addressed agent before model work', async () => {
+	it('denies an addressed mounted agent before model work', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const storage = inMemoryHarnessStorage()
+		const policy = { canAccess: vi.fn(async () => false) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
+		const service = await directCallerService.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: {
 				supportConversationHistory: new HarnessConversationHistory(storage),
-				supportConversationPolicy: { canAccess: vi.fn(async () => false) },
+				supportConversationPolicy: policy,
 			},
-			ai: { models: { primary: { provider, model: 'fake-support' } }, storage },
+			ai: { model: { provider, model: 'fake-support' }, storage },
 		})
 		await service.start()
 
 		try {
 			await expect(
-				eventBridge.invoke(
-					getCommandMessageMock({
-						tenantId: 'tenant-example',
-						principalId: 'principal-other',
-						receiver: {
-							serviceName: 'Support',
-							serviceVersion: '1',
-							serviceTarget: 'answer_support_question',
-						},
-						payload: {
-							payload: { conversationId: 'case-1', question: 'What did we discuss?' },
-							parameter: {},
-						},
-					}),
+				invoke(
+					eventBridge,
+					'callSupportAgent',
+					{ conversationId: 'case-1', question: 'What did we discuss?' },
+					'principal-other',
 				),
 			).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canAccess).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-other',
+				conversationId: 'case-1',
+				action: 'continue',
+			})
 			provider.assertExhausted()
 		} finally {
 			await service.destroy()
 			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 })
 ```
 
-The empty strict provider in the denied case is part of the assertion: any
-model request would fail the test. The allowed case confirms the same policy
-receives trusted identity and the `continue` action at both reachable
-boundaries.
-
-Run the complete local gate.
-
-```bash title="Verify the conversation-history chapter" replay="project"
+```bash title="Run the complete local verification" replay="project"
 npm run build
 npm test
 npm run lint
 npm run demo
 ```
 
-These tests cover the application contract without an API key. Before reducing
-`maxBytes` in production, also test that trimming keeps complete tool calls and
-their results together. Run the Harness storage contract suite against the
-chosen shared storage adapter before deploying multiple instances.
+All automated checks are credential-free. Before sharing a different storage
+adapter between application instances, run the Harness storage contract suite
+for that adapter too.

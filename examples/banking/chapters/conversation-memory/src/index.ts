@@ -23,7 +23,7 @@ async function main() {
 		storage,
 	})
 	await support.start()
-	gracefulShutdown(logger, [support, eventBridge])
+	gracefulShutdown(logger, [support, eventBridge, { name: 'Harness SQLite storage', destroy: () => storage.close() }])
 	logger.info('Support conversation service started')
 }
 

@@ -210,11 +210,13 @@ structural documentation check cannot replace this replay.
   separate; do not make an API key the learner's first proof that the chapter
   is wired correctly.
 - When a tutorial reads or clears mounted Harness session data through
-  `HarnessStorage`, keep the application-facing `sessionId` logical and derive
-  the actual opaque storage id with `createHarnessSessionStorageId(...)` from
-  trusted message identity. Run the complete EventBridge path and assert the
-  stored transcript is actually found; a unit test against a hand-built raw id
-  does not prove the mounted path.
+  `HarnessStorage`, derive one stable opaque `sessionId` from trusted tenant,
+  principal, and conversation identifiers. Use that same id for the mounted
+  agent invocation and authorized `HarnessStorage` transcript access; do not
+  introduce a second framework-owned storage-id mapping. Run the complete
+  EventBridge path and assert the stored transcript is actually found; a unit
+  test against a hand-built raw id does not prove the mounted path. Keep
+  transcripts in Harness storage, not in a PURISTA StateStore.
 - Match durability language to the runnable composition. A live entry point
   described as durable must bind a compatible persistent storage, workspace,
   and sandbox lifecycle, then close them during shutdown; storage alone does

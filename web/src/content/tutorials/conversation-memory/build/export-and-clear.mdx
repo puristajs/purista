@@ -1,25 +1,21 @@
 ---
 title: Export and clear conversation history
-description: Add business-authorized PURISTA commands for identity-scoped transcript access and deletion.
+description: Add authorized PURISTA commands that use the same Harness storage and opaque session id.
 order: 224
 kind: lesson
 status: draft
 ---
 
-History access is an application capability, so expose it through normal
-PURISTA commands with business authorization. Do not give the model a
-transcript deletion tool.
+History management is an application capability. Expose it through normal
+PURISTA commands instead of giving transcript deletion to the model.
 
-Generate both commands.
-
-```bash title="Generate history management commands" replay="project"
+```bash title="Generate history commands" replay="project"
 npm run add:command -- get-conversation-history --service support --service-version 1 --description "Export the caller support conversation history" --non-interactive
 npm run add:command -- clear-conversation-history --service support --service-version 1 --description "Clear the caller support conversation transcript" --non-interactive
 ```
 
-Implement the narrow resource from the previous step with the same Harness
-storage port that the mounted
-runtime will use.
+This adapter gives the service narrow access to the same Harness storage used by
+the mounted agent.
 
 ```ts title="src/resources/HarnessConversationHistory.ts" write
 import type { HarnessStorage } from '@purista/harness'
@@ -41,11 +37,12 @@ export class HarnessConversationHistory implements SupportConversationHistory {
 	}
 }
 ```
-The read command authorizes the `read` action before deriving the same
-identity-scoped id as the agent invocation.
+
+Both commands authorize the requested action and derive the same opaque session
+id used by the agent invocation.
 
 ```ts title="src/service/support/v1/command/getConversationHistory/getConversationHistoryCommandBuilder.ts" write
-import { conversationStorageSessionId } from '../../conversationSessionId.js'
+import { conversationSessionId } from '../../conversationSessionId.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
 import { conversationHistoryRequestSchema, conversationHistorySchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
@@ -65,15 +62,13 @@ export const getConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const sessionId = conversationStorageSessionId(context.message, payload.conversationId)
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
 		return { messages: await context.resources.supportConversationHistory.list(sessionId) }
 	})
 ```
-The clear command authorizes a different business action. A policy can permit
-someone to continue and read a support case while denying deletion.
 
 ```ts title="src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts" write
-import { conversationStorageSessionId } from '../../conversationSessionId.js'
+import { conversationSessionId } from '../../conversationSessionId.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
 import { clearedConversationHistorySchema, conversationHistoryRequestSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
@@ -93,18 +88,19 @@ export const clearConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const sessionId = conversationStorageSessionId(context.message, payload.conversationId)
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
 		await context.resources.supportConversationHistory.clear(sessionId)
 		return { cleared: true as const }
 	})
 ```
-Register all commands and mount the native Harness once.
+
+Mount the Harness once on the final service definition.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
 import { clearConversationHistoryCommandBuilder } from './command/clearConversationHistory/clearConversationHistoryCommandBuilder.js'
 import { continueSupportConversationCommandBuilder } from './command/continueSupportConversation/continueSupportConversationCommandBuilder.js'
 import { getConversationHistoryCommandBuilder } from './command/getConversationHistory/getConversationHistoryCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 export const supportV1Service = supportV1ServiceBuilder
@@ -113,10 +109,8 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(clearConversationHistoryCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-Clearing messages keeps the session record and run receipts. `Session.destroy()`
-is the destructive Harness operation for deleting the complete session,
-including persisted runs and events. Use that only for a deliberate full-delete
-policy. `Session.release()` keeps all persisted state and only frees live
-sandbox, MCP, and child-task resources.
 
-Continue with [Compose the conversation runtime](../compose-runtime/).
+Clearing messages keeps the session naming rule reusable. The next run with the
+same id starts with an empty transcript.
+
+Continue with [Compose the runtime](../compose-runtime/).

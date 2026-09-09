@@ -1,24 +1,15 @@
 ---
 title: Compose the conversation runtime
-description: Bind one Harness storage instance to the mounted runtime and the authorized history resource.
+description: Bind one model and one shared Harness storage adapter to the mounted Support service.
 order: 225
 kind: lesson
 status: draft
 ---
 
-The commands and mounted agent are complete. The composition root must now bind
-one storage instance to two typed ports:
-
-- Harness uses it for sessions, messages, run receipts, and checkpoints.
-- The `supportConversationHistory` resource uses it for authorized export and
-  clear commands.
-
-Using one instance prevents the application commands from reading a different
-transcript store than the agent writes.
-
-## Create the provider-neutral service factory
-
-Create the complete factory below.
+Create one composition function for tests, demos, and the live process. The
+singular `ai.model` binding satisfies the agent's default model requirement.
+The same storage instance is bound to the mounted Harness and wrapped by the
+authorized history resource.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -43,25 +34,14 @@ export function createSupportService(
 			supportConversationPolicy: options.policy,
 		},
 		ai: {
-			models: { primary: options.model },
+			model: options.model,
 			storage: options.storage,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }
 ```
 
-The factory does not select SQLite, PostgreSQL, or in-memory storage. The
-process entry point chooses the adapter. The same rule applies to the model and
-authorization policy.
+Do not place provider secrets in an agent definition. The caller chooses the
+model provider and storage adapter at the application edge.
 
-`contentCaptureMode: 'NO_CONTENT'` keeps prompts and model output out of
-telemetry by default. It does not disable storage; the configured Harness
-storage still retains the bounded conversation history requested by this
-chapter.
-
-```bash title="Verify the shared storage composition" replay="project"
-npm run build
-```
-
-Continue with [Run the conversation service](../run-application/).
+Continue with [Run the application](../run-application/).

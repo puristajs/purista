@@ -20,9 +20,8 @@ export function createSupportService(
 			supportConversationPolicy: options.policy,
 		},
 		ai: {
-			models: { primary: options.model },
+			model: options.model,
 			storage: options.storage,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }

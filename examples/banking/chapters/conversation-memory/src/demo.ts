@@ -18,10 +18,11 @@ provider.enqueueObject({
 
 const eventBridge = new DefaultEventBridge({ logger: initLogger('error') })
 await eventBridge.start()
+const storage = inMemoryHarnessStorage()
 const support = await createSupportService(eventBridge, initLogger('error'), {
 	policy: { canAccess: async () => true },
 	model: { provider, model: 'fake-support' },
-	storage: inMemoryHarnessStorage(),
+	storage,
 })
 await support.start()
 
@@ -51,4 +52,5 @@ try {
 } finally {
 	await support.destroy()
 	await eventBridge.destroy()
+	await storage.close()
 }

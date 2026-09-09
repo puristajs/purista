@@ -578,7 +578,7 @@
       "status": "draft",
       "projectDirectory": "support-conversations",
       "replayRequires": [],
-      "constructionSourceAligned": false,
+      "constructionSourceAligned": true,
       "requiredWrittenFiles": [
         ".env.example",
         "package.json",
@@ -603,9 +603,7 @@
         "src/service/support/v1/supportV1Service.ts",
         "src/service/support/v1/supportV1ServiceBuilder.ts"
       ],
-      "requires": [
-        "classification-agent"
-      ],
+      "requires": ["create-project"],
 		"pages": [
 			"conversation-memory/build/configure-storage",
 			"conversation-memory/build/define-access",

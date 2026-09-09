@@ -8,6 +8,10 @@ agent is mounted on a PURISTA service. It deliberately separates three stores:
 - PURISTA StateStore remains for operational application state such as login
   sessions; it is not the transcript database.
 
+The application hashes trusted tenant, principal, and conversation values into
+one stable opaque session id. The mounted agent and authorized history commands
+use that same id; no second storage-id mapping is involved.
+
 Run the deterministic checks without credentials:
 
 ```bash
@@ -19,3 +23,4 @@ npm run lint
 
 To run the Support service with SQLite-backed conversation history, copy
 `.env.example` to `.env`, set `OPENAI_API_KEY`, and run `npm start`.
+The live shutdown sequence closes the service, EventBridge, and SQLite storage.

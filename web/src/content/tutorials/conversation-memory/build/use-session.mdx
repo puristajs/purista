@@ -1,51 +1,40 @@
 ---
-title: Invoke an authorized conversation session
-description: Protect the published agent and invoke its identity-scoped session through a declared PURISTA command address.
+title: Mount and invoke the conversation agent
+description: Add bounded retention, a target policy, and an address-first PURISTA command wrapper.
 order: 223
 kind: lesson
 status: draft
 ---
 
-The access contracts are ready. Now create the callable PURISTA boundary. The
-mounted agent guard protects direct calls, and the wrapper command guard
-protects the application entry point.
+Compose the direct agent into one service-owned Harness definition. Retention
+keeps the newest eight complete turns and also limits stored bytes. The target
+policy protects direct agent calls with the same business authorization used by
+the wrapper command.
 
-## Generate the conversation command
-
-Use the project-local CLI before editing the command.
-
-```bash title="Generate the conversation command" replay="project"
-npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
-```
-
-The command remains the application boundary. The agent remains a portable
-native Harness definition composed into the Support service.
-
-## Protect the published agent
-
-Replace the generated mount policy. A wrapper command guard cannot protect a
-caller that invokes `Support / 1 / answer_support_question` directly, so the
-published target owns its own `continue` authorization check.
-
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
-import type { answerSupportQuestionInputSchema } from '../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
 import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
 import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'
+import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 
-export { supportHarness }
+export const supportHarness = defineHarness({
+	name: 'supportConversations',
+	revision: 'support-v1',
+	defaults: { historyRetention: { maxTurns: 8, maxBytes: 32_000 } },
+}).addAgent(answerSupportQuestionAgent)
 
 export const supportHarnessPolicy = {
-	publish: { agents: ['answer_support_question'], workflows: [] },
 	targets: {
 		agents: {
-			answer_support_question: {
+			answerSupportQuestion: {
 				beforeGuards: {
 					conversationAccess: async (
-						context: HarnessBusinessGuardContext<{ supportConversationPolicy: SupportConversationPolicy }>,
-						input: z.output<typeof answerSupportQuestionInputSchema>,
+						context: HarnessBusinessGuardContext<{
+							supportConversationPolicy: SupportConversationPolicy
+						}>,
+						input: z.output<typeof answerSupportQuestionAgent.contract.input>,
 					) => {
 						await requireSupportConversationAccess(
 							context.resources.supportConversationPolicy,
@@ -62,22 +51,24 @@ export const supportHarnessPolicy = {
 } as const
 ```
 
-The guard runs before Harness loads a session or contacts the model. It uses
-trusted identity from the PURISTA message and the requested conversation as the
-business object.
+Generate the wrapper command with the local CLI.
 
-## Invoke the agent from the command
+```bash title="Generate the conversation command" replay="project"
+npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
+```
 
-Replace the generated command builder. It reuses the agent schemas, declares
-one versioned agent address, and calls that address through EventBridge.
+The builder declares the exact agent contract it may call. Runtime access is
+address-first: service name, service version, then the direct definition id.
+Core returns a result envelope containing the session id and run outcome, so the
+command only returns output from a completed run.
 
 ```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts" write
+import { conversationSessionId } from '../../conversationSessionId.js'
 import {
+	answerSupportQuestionAgent,
 	answerSupportQuestionInputSchema,
 	answerSupportQuestionOutputSchema,
-} from '../../../../../harness/support/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
-import { conversationSessionId } from '../../conversationSessionId.js'
-import { supportHarness } from '../../harness/supportHarnessMount.js'
+} from '../../harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
@@ -85,7 +76,7 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('continueSupportConversation', 'Continue a bounded support conversation')
 	.addPayloadSchema(answerSupportQuestionInputSchema)
 	.addOutputSchema(answerSupportQuestionOutputSchema)
-	.canInvokeAgent('Support', '1', 'answer_support_question', supportHarness.contracts.agents.answer_support_question)
+	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
 	.setBeforeGuardHooks({
 		conversationAccess: async function (context, payload) {
 			await requireSupportConversationAccess(
@@ -98,24 +89,16 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	})
 	.setCommandFunction(async function (context, payload) {
 		const sessionId = conversationSessionId(context.message, payload.conversationId)
-		const outcome = await context.agent.Support['1'].answer_support_question.run(payload, { sessionId })
-		if (outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
-		return outcome.output
+		const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(payload, { sessionId })
+		if (result.outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
+		return result.outcome.output
 	})
 ```
 
-Reusing the logical session id loads earlier complete turns. The mounted
-runtime scopes that id with trusted tenant and principal identity, so another
-caller cannot join the transcript by sending the same `conversationId`.
+The command and target guards perform authorization. Authentication belongs at
+the application boundary that establishes trusted message identity.
 
-`.run(...)` requests one aggregate answer. This agent has no approval or
-external wait, so an interrupted outcome is not a successful command result.
-
-`release()` closes live session resources but keeps persisted history. The
-mounted Framework runtime releases sessions after requests while the configured
-storage retains their transcript.
-
-```bash title="Verify the conversation invocation" replay="project"
+```bash title="Check the mounted invocation" replay="project"
 npm run build
 ```
 

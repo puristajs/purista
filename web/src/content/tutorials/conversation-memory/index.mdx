@@ -7,34 +7,32 @@ group: ai
 status: draft
 ---
 
-This chapter teaches persistent conversation sessions in a standalone PURISTA
-project. The small `Support` service keeps the example concrete, but the
-capability applies to any agent that must understand earlier turns.
+This chapter builds a small Support service whose agent can use earlier messages
+from the same conversation. You can follow it on its own after the create-project
+chapter.
 
-You will keep three storage responsibilities separate:
+You will keep three responsibilities separate:
 
-- **Harness storage** owns agent sessions, transcript messages, run receipts,
-  durable checkpoints, and external waits.
-- **Harness memory** stores facts that an agent or tool writes explicitly. It
-  does not automatically contain the transcript.
-- **PURISTA StateStore** remains application state for values such as login
-  sessions. It is not a database for AI conversation history.
+- **Harness storage** owns sessions, transcripts, run receipts, durable
+  checkpoints, and waits.
+- **Harness memory** stores facts that an agent or tool writes on purpose. It is
+  separate from the transcript.
+- **PURISTA StateStore** holds application state such as login sessions. It does
+  not hold agent transcripts.
 
-By the end, one identity-scoped conversation survives process restarts, retains
-only complete bounded turns, and can be exported or cleared through
-business-authorized PURISTA commands.
+The application derives one opaque session id from trusted tenant, principal,
+and conversation values. The mounted agent and the authorized read and clear
+commands use that same id.
 
-1. [Create the project and retention policy](./build/configure-storage/)
-2. [Define conversation access and identity](./build/define-access/)
-3. [Invoke an authorized conversation session](./build/use-session/)
+1. [Create the project and agent](./build/configure-storage/)
+2. [Define access and session identity](./build/define-access/)
+3. [Mount and invoke the conversation agent](./build/use-session/)
 4. [Export and clear conversation history](./build/export-and-clear/)
-5. [Compose the conversation runtime](./build/compose-runtime/)
-6. [Run the conversation service](./build/run-application/)
-7. [Test native conversation history](./testing/test-history/)
-8. [Test the PURISTA commands](./testing/test-commands/)
-9. [Test the complete EventBridge route](./testing/test-eventbridge/)
+5. [Compose the runtime](./build/compose-runtime/)
+6. [Run the application](./build/run-application/)
+7. [Test native history](./testing/test-history/)
+8. [Test command behavior](./testing/test-commands/)
+9. [Test the mounted EventBridge path](./testing/test-eventbridge/)
 
-The complete source is retained in
-`examples/banking/chapters/conversation-memory` and uses published npm package
-names. Its model tests use `FakeModelProvider`, so the verification suite needs
-no API key.
+The complete source is in `examples/banking/chapters/conversation-memory`.
+Every automated test uses `FakeModelProvider`, so it needs no API key.
