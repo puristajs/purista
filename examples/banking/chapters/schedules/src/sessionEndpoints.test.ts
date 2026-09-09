@@ -94,6 +94,18 @@ describe('Identity session endpoints', () => {
 		} finally { await destroyApplication(app) }
 	})
 
+	test('preserves downstream validation errors after authentication', async () => {
+		const app = await createApplication(initLogger('fatal'))
+		try {
+			const { sessionToken } = await login(app)
+			const response = await app.http.app.request('/api/v1/transactions', {
+				method: 'POST', headers: { authorization: `Bearer ${sessionToken}`, 'content-type': 'application/json' },
+				body: JSON.stringify({ amountCents: -1, direction: 'debit', counterparty: 'x' }),
+			})
+			expect(response.status).toBe(400)
+		} finally { await destroyApplication(app) }
+	})
+
 	test('removes expired session state and blocks downstream effects', async () => {
 		const stateStore = initDefaultStateStore({ logger: initLogger('fatal') })
 		const token = crypto.randomUUID()
