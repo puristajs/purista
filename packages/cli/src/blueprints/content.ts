@@ -32,7 +32,7 @@ Generated with \`@purista/cli\`.
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
-Agents and workflows are native \`@purista/harness\` modules under \`src/harness/<service>\`. Compose one Harness definition per service and publish selected targets with one \`ServiceBuilder.mountHarness(...)\` call. Keep model providers, Skills, storage, sandbox, admission, queues, and artifact stores in application bootstrap configuration.
+Agents, workflows, tools, Skills, and MCP definitions are service-owned \`@purista/harness\` modules under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`. Compose one Harness definition per service version and publish selected targets with one \`ServiceBuilder.mountHarness(...)\` call. Bind the model as \`ai.model\` and keep storage, sandbox, admission, queues, and artifact stores in application bootstrap configuration.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
@@ -67,10 +67,10 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 ## Required workflow
 - Read \`purista.json\` before changing services, commands, subscriptions, streams, queues, workers, or agents.
 - Use the local \`@purista/cli\` package scripts whenever the CLI can create the target artifact. Refine generated code instead of hand-writing framework skeletons.
-- Keep service code under the configured \`servicePath\` and native Harness definitions under \`src/harness\`.
+- Keep service code under the configured \`servicePath\`. Put service-owned Harness definitions under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- Mount one composed Harness definition per service with \`ServiceBuilder.mountHarness(...)\`. Keep \`ai.models\` and optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config.
+- Mount one composed Harness definition per service version with \`ServiceBuilder.mountHarness(...)\`. Bind the model as singular \`ai.model\` and keep optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config.
 
 ${createLocalCliUsageGuide(input)}
 
@@ -103,7 +103,7 @@ ${createLocalCliUsageGuide(input)}
 ## Project Shape
 - \`purista.json\` defines file casing, event casing, and \`servicePath\`.
 - Service definitions live under \`src/service\` unless \`purista.json\` says otherwise.
-- Native Harness modules live under \`src/harness/<service>\`; each service owns one composed Harness definition.
+- Service-owned Harness definitions live under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`; each service version owns one composed Harness definition.
 
 ## Artifact Creation
 - New service: \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`

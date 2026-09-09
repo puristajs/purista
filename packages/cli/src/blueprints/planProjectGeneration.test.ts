@@ -147,5 +147,16 @@ describe('planProjectGeneration', () => {
 			expect(agentsFile?.content).toContain('bun run add:service -- <name> --description "<description>"')
 			expect(agentsFile?.content).toContain('bun run dev')
 		}
+
+		const guidance = ['README.md', 'AGENTS.md', '.agents/IMPLEMENTATION.md']
+			.flatMap(path => {
+				const file = plan.files.find(candidate => candidate.path === path)
+				return file && file.type !== 'symlink' ? [file.content] : []
+			})
+			.join('\n')
+		expect(guidance).toContain('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}')
+		expect(guidance).toContain('`ai.model`')
+		expect(guidance).not.toContain('src/harness')
+		expect(guidance).not.toContain('ai.models')
 	})
 })
