@@ -1,16 +1,12 @@
 ---
-title: Protect and publish the workflow
-description: Add case-level business authorization and expose only the composed workflow through PURISTA.
-order: 264
+title: Add resources and business authorization
+description: Give the Support service one policy resource and one reusable authorization check.
+order: 263
 kind: lesson
 status: draft
 ---
 
-The native workflow can run both specialists and merge their evidence. Before
-publishing it through EventBridge, add a business policy for the support case.
-The specialist agents remain private implementation details.
-
-## Declare the case policy
+Model output does not decide who may analyze a support case. A PURISTA resource owns that business decision.
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportCasePolicy {
@@ -18,8 +14,7 @@ export interface SupportCasePolicy {
 }
 ```
 
-Declare it on the Support service builder so mount guards and commands receive
-the policy as a typed resource.
+Declare the resource on the Support service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder } from '@purista/core'
@@ -32,10 +27,10 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 }).defineResource<'supportCasePolicy', SupportCasePolicy>()
 ```
 
-Keep the fail-closed decision in one helper. The session helper derives a
-caller-scoped id for workflow history; the id itself does not authorize access.
+Use one guard helper at both public boundaries. It requires trusted tenant and principal identity before it calls the policy. The session ID hashes a JSON tuple, so values containing separators cannot collide.
 
 ```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts" write
+import { createHash } from 'node:crypto'
 import { HandledError, StatusCode } from '@purista/core'
 import type { SupportCasePolicy } from './SupportResources.js'
 
@@ -61,51 +56,17 @@ export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; pri
 	if (!identity.tenantId || !identity.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	return `support-case:${identity.tenantId}:${identity.principalId}:${caseId}`
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-case-v1', identity.tenantId, identity.principalId, caseId]))
+		.digest('hex')
+	return `support-case:${digest}`
 }
 ```
 
-## Publish only the workflow
+This separates business authorization from the agents. The agents only analyze valid input; the service decides whether the caller may start that work.
 
-Replace the generated mount policy. The directly addressable workflow owns its
-guard because a wrapper command cannot protect callers that skip it.
-
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
-import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
-import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
-import type { SupportCasePolicy } from '../SupportResources.js'
-
-export { supportHarness }
-
-export const supportHarnessPolicy = {
-	publish: { agents: [], workflows: ['analyze_support_case'] },
-	targets: {
-		agents: {},
-		workflows: {
-			analyze_support_case: {
-				beforeGuards: {
-					caseAccess: async (
-						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
-						input: { caseId: string },
-					) => {
-						await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
-							...context.identity,
-							caseId: input.caseId,
-						})
-					},
-				},
-			},
-		},
-	},
-} as const
-```
-
-`publish.agents` is empty, so neither specialist gets its own EventBridge
-address. Callers receive only the workflow's merged contract.
-
-```bash title="Verify the protected parallel workflow mount" replay="project"
+```bash title="Check the service resource and guard" replay="project"
 npm run build
 ```
 
-Continue with [Invoke the workflow from a command](../invoke-workflow/).
+Continue with [Run bounded work in parallel](../fan-out/).

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { HandledError, StatusCode } from '@purista/core'
 import type { SupportCasePolicy } from './SupportResources.js'
 
@@ -23,5 +24,8 @@ export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; pri
 	if (!identity.tenantId || !identity.principalId) {
 		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
 	}
-	return `support-case:${identity.tenantId}:${identity.principalId}:${caseId}`
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-case-v1', identity.tenantId, identity.principalId, caseId]))
+		.digest('hex')
+	return `support-case:${digest}`
 }

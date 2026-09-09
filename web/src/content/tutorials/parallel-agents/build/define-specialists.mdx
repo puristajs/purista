@@ -1,18 +1,14 @@
 ---
 title: Define the specialist agents
-description: Give each generated agent one responsibility, one model alias, and one schema-validated result.
+description: Give each agent one task, one named model, and one structured output.
 order: 262
 kind: lesson
 status: draft
 ---
 
-The CLI generated two agent modules. Keep them separate because they solve
-different tasks and may use different models in production. Put only their
-shared input and result schemas in one nearby file.
+Both agents receive the same support case. They return different structured results, so ordinary TypeScript can combine them later.
 
-## Define the shared contracts
-
-```ts title="src/harness/support/supportCaseSchemas.ts" write
+```ts title="src/service/support/v1/harness/supportCaseSchemas.ts" write
 import { z } from 'zod'
 
 export const supportCaseInputSchema = z.strictObject({
@@ -37,74 +33,52 @@ export const supportCaseAnalysisOutputSchema = z.strictObject({
 })
 ```
 
-Both agents receive the same case. Their outputs stay different so the
-workflow can merge typed evidence without another model call.
+The risk agent uses the lower-camel model name `riskModel`.
 
-## Implement the risk specialist
-
-Replace the first generated agent. Its only job is to assess risk and return
-short evidence through the `risk_model` alias.
-
-```ts title="src/harness/support/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
-import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+```ts title="src/service/support/v1/harness/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
+import { defineAgent } from '@purista/harness'
 import { riskAssessmentSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
 
-type RiskModelState = BuilderState & { models: { risk_model: ModelAlias } }
-
-export const assessSupportRiskAgent = defineHarnessModule<RiskModelState>()('support.agent.assess_support_risk', {
-	version: '1.0.0',
-	register(builder) {
-		return builder.agent('assess_support_risk', {
-			model: 'risk_model',
-			input: supportCaseInputSchema,
-			output: riskAssessmentSchema,
-			instructions: [
-				'Assess security and financial risk in one Example Bank support message.',
-				'Use only facts present in the message and list short evidence statements.',
-			].join(' '),
-		})
-	},
+export const assessSupportRiskAgent = defineAgent('assessSupportRisk', {
+	model: 'riskModel',
+	input: supportCaseInputSchema,
+	output: riskAssessmentSchema,
+	instructions: [
+		'Assess risk in one support message.',
+		'Use only facts in the message and return short evidence statements.',
+	].join(' '),
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}`,
+	}),
 })
 ```
 
-The alias is a portable requirement. The application composition decides
-which provider and model satisfy it.
+The response agent uses `responseModel`. It proposes an action but does not perform it.
 
-## Implement the response specialist
-
-Replace the second generated module. It proposes a response and next action;
-it cannot perform that action.
-
-```ts title="src/harness/support/agent/planSupportResponse/planSupportResponseAgent.ts" write
-import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+```ts title="src/service/support/v1/harness/agent/planSupportResponse/planSupportResponseAgent.ts" write
+import { defineAgent } from '@purista/harness'
 import { responsePlanSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
 
-type ResponseModelState = BuilderState & { models: { response_model: ModelAlias } }
-
-export const planSupportResponseAgent = defineHarnessModule<ResponseModelState>()(
-	'support.agent.plan_support_response',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.agent('plan_support_response', {
-				model: 'response_model',
-				input: supportCaseInputSchema,
-				output: responsePlanSchema,
-				instructions: [
-					'Plan a concise Example Bank support response.',
-					'Do not claim an action happened. Select the next action that a service should perform.',
-				].join(' '),
-			})
-		},
-	},
-)
+export const planSupportResponseAgent = defineAgent('planSupportResponse', {
+	model: 'responseModel',
+	input: supportCaseInputSchema,
+	output: responsePlanSchema,
+	instructions: [
+		'Plan a short support response.',
+		'Do not claim an action happened. Select the next action for a service to perform.',
+	].join(' '),
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}`,
+	}),
+})
 ```
 
-Run a typecheck before composing the workflow. This verifies both generated
-modules against their aliases and schemas.
+The agents are direct Harness definitions owned by Support v1. The application will bind both model names to providers later.
 
-```bash title="Verify the specialist agent modules" replay="project"
+```bash title="Check the specialist definitions" replay="project"
 npm run build
 ```
 
-Continue with [Build the bounded parallel workflow](../fan-out/).
+Continue with [Add resources and business authorization](../merge-evidence/).

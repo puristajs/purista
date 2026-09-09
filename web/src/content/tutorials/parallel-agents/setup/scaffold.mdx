@@ -1,21 +1,19 @@
 ---
-title: Create the parallel workflow project
-description: Generate the Support service, two native agents, their workflow, and the invoking command with the PURISTA CLI.
+title: Create the parallel-agent project
+description: Use the PURISTA CLI to generate the Support service, two agents, one workflow, and one wrapper command.
 order: 261
 kind: lesson
 status: draft
 ---
 
-Start in an empty parent directory. This chapter owns a complete project and
-does not depend on another tutorial application.
+Start in an empty parent directory. This chapter creates its own project.
 
-```bash title="Create and enter the parallel-agent project" replay="parent"
-npm create purista@2.2.0 parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 parallel-agent-workflow -- --runtime node --event-bridge default --non-interactive --defaults
 cd parallel-agent-workflow
 ```
 
-Replace the generated package manifest. Every `add:*` script calls the
-project-local PURISTA CLI. The default demo uses fake model providers.
+Use the published PURISTA and Harness packages. The scripts call the project-local CLI.
 
 ```json title="package.json" write
 {
@@ -62,31 +60,30 @@ project-local PURISTA CLI. The default demo uses fake model providers.
 	}
 }
 ```
-Install exactly those dependencies.
 
-```bash title="Install the parallel-agent dependencies" replay="project"
+```bash title="Install the project dependencies" replay="project"
 npm install
 ```
 
-Generate the capability owner, both specialists, their owning workflow, and
-the application command that will invoke it.
+Generate each application boundary once. `--http none` keeps the agents internal. The command has the distinct target `runAnalyzeSupportCase`, so it does not collide with the workflow target `analyzeSupportCase`.
 
-```bash title="Generate specialists, workflow, and command" replay="project"
+```bash title="Generate the Support boundaries" replay="project"
 npm run add:service -- support --description "Own support cases and support automation" --non-interactive
-npm run add:agent -- assess-support-risk --service support --service-version 1 --description "Assess risk in one support case" --non-interactive
-npm run add:agent -- plan-support-response --service support --service-version 1 --description "Plan a response for one support case" --non-interactive
+npm run add:agent -- assess-support-risk --service support --service-version 1 --http none --description "Assess risk in one support case" --non-interactive
+npm run add:agent -- plan-support-response --service support --service-version 1 --http none --description "Plan a response for one support case" --non-interactive
 npm run add:workflow -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis" --non-interactive
-npm run add:command -- analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
+npm run add:command -- run-analyze-support-case --service support --service-version 1 --description "Run bounded specialist analysis for one support case" --non-interactive
 ```
 
-The CLI creates one module and colocated test per agent, one workflow module
-and test, one service-level `supportHarness.ts`, one mount policy, and the
-command files. Keep those generated boundaries; they let one specialist change
-without turning the complete Harness into a single large file.
+This chapter supplies focused tests later. Remove the generated placeholder tests now so each final test file is created once.
 
-```bash title="Verify the generated parallel workflow checkpoint" replay="project"
-npm run build
-npm test
+```bash title="Remove generated placeholder tests" replay="project"
+rm src/service/support/v1/harness/agent/assessSupportRisk/assessSupportRiskAgent.test.ts
+rm src/service/support/v1/harness/agent/planSupportResponse/planSupportResponseAgent.test.ts
+rm src/service/support/v1/harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts
+rm src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.test.ts
 ```
+
+The next lesson fills the generated definitions with the chapter contracts.
 
 Continue with [Define the specialist agents](../../build/define-specialists/).

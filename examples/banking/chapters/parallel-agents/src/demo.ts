@@ -32,7 +32,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyzeSupportCase' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnalyzeSupportCase' },
 				payload: {
 					payload: { caseId: 'case-1', message: 'My card is missing.' },
 					parameter: {},

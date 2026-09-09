@@ -1,16 +1,12 @@
 ---
-title: Compose the parallel workflow runtime
-description: Bind each model alias and the case policy through one provider-neutral Support service factory.
+title: Bind the named models
+description: Create the Support service with separate riskModel and responseModel bindings.
 order: 266
 kind: lesson
 status: draft
 ---
 
-The service definition requires two model aliases. The composition root may
-bind them to different providers or models without changing either specialist
-or the workflow.
-
-Create the provider-neutral factory.
+Definitions name the models they need. Runtime composition supplies each provider and model. This keeps the agents portable and lets production use different models for different jobs.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -32,21 +28,18 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			models: {
-				risk_model: options.riskModel,
-				response_model: options.responseModel,
+				riskModel: options.riskModel,
+				responseModel: options.responseModel,
 			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }
 ```
 
-The factory makes the two capacity and quality decisions explicit. A cheaper
-model can plan responses while a stricter model assesses risk, or both aliases
-can share one provider. The workflow contract remains unchanged.
+The singular `ai` configuration contains a named `models` map. Its keys exactly match `riskModel` and `responseModel` from the agent definitions.
 
-```bash title="Verify the parallel runtime composition" replay="project"
+```bash title="Check runtime composition" replay="project"
 npm run build
 ```
 
-Continue with [Run the parallel workflow](../run-application/).
+Continue with [Run the demo and live service](../run-application/).

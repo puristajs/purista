@@ -1,20 +1,17 @@
 ---
-title: Fan out with an explicit concurrency budget
-description: Replace the generated workflow module, allowlist both specialists, and compose the service Harness without collapsing generated modules.
-order: 263
+title: Run bounded work in parallel
+description: Use a workflow fan-out with stable call IDs, explicit limits, and a deterministic merge.
+order: 264
 kind: lesson
 status: draft
 ---
 
-The workflow owns orchestration. It may call only the two agents named in its
-delegation policy. The total-call limit prevents retries or future code from
-silently adding more model work, while the parallel limit allows these two
-independent calls to overlap.
+The workflow is the only Harness root in this service. Its `agents` list allows the two child agents, and `agentCalls` limits the whole run to two calls with at most two active at once.
 
-Replace the generated workflow module at its CLI-owned path.
-
-```ts title="src/harness/support/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.ts" write
-import { type AgentDefinition, type BuilderState, defineHarnessModule } from '@purista/harness'
+```ts title="src/service/support/v1/harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.ts" write
+import { defineWorkflow } from '@purista/harness'
+import { assessSupportRiskAgent } from '../../agent/assessSupportRisk/assessSupportRiskAgent.js'
+import { planSupportResponseAgent } from '../../agent/planSupportResponse/planSupportResponseAgent.js'
 import {
 	responsePlanSchema,
 	riskAssessmentSchema,
@@ -22,82 +19,70 @@ import {
 	supportCaseInputSchema,
 } from '../../supportCaseSchemas.js'
 
-type ParallelWorkflowState = BuilderState & {
-	agents: {
-		assess_support_risk: AgentDefinition<any, typeof supportCaseInputSchema, typeof riskAssessmentSchema>
-		plan_support_response: AgentDefinition<any, typeof supportCaseInputSchema, typeof responsePlanSchema>
-	}
-}
+export const analyzeSupportCaseWorkflow = defineWorkflow('analyzeSupportCase', {
+	input: supportCaseInputSchema,
+	output: supportCaseAnalysisOutputSchema,
+	agents: [assessSupportRiskAgent, planSupportResponseAgent],
+	agentCalls: { maxCalls: 2, maxParallel: 2 },
+	handler: async (context) => {
+		const results = await context.fanOut(
+			['risk', 'response'],
+			async (focus) =>
+				focus === 'risk'
+					? context.agents.assessSupportRisk.run(context.input, { callId: 'assess-risk' })
+					: context.agents.planSupportResponse.run(context.input, { callId: 'plan-response' }),
+			{ concurrency: 2 },
+		)
 
-export const analyzeSupportCaseWorkflow = defineHarnessModule<ParallelWorkflowState>()(
-	'support.workflow.analyze_support_case',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.workflow('analyze_support_case', {
-				input: supportCaseInputSchema,
-				output: supportCaseAnalysisOutputSchema,
-				delegation: {
-					agents: ['assess_support_risk', 'plan_support_response'],
-					maxChildAgentCalls: 2,
-					maxParallelChildAgentCalls: 2,
-				},
-				handler: async (context) => {
-					const results = await context.fanOut(
-						['risk', 'response'] as const,
-						async (focus) =>
-							focus === 'risk'
-								? { kind: 'risk' as const, value: await context.agents.assess_support_risk(context.input) }
-								: { kind: 'response' as const, value: await context.agents.plan_support_response(context.input) },
-						{ concurrency: 2 },
-					)
-					const risk = results.find((result) => result.kind === 'risk')
-					const response = results.find((result) => result.kind === 'response')
-					if (!risk || !response) throw new Error('Support analysis did not return both specialist results')
-					return {
-						caseId: context.input.caseId,
-						risk: riskAssessmentSchema.parse(risk.value),
-						response: responsePlanSchema.parse(response.value),
-					}
-				},
-			})
-		},
+		return {
+			caseId: context.input.caseId,
+			risk: riskAssessmentSchema.parse(results[0]),
+			response: responsePlanSchema.parse(results[1]),
+		}
 	},
-)
+})
 ```
-`context.fanOut(...)` preserves the input order and cancels remaining work if
-one branch fails. Its `concurrency: 2` option controls this workflow run. The
-delegation policy also caps total and parallel child-agent calls for the run.
-Provider admission or a PURISTA queue controls aggregate concurrency across
-many requests and service instances.
 
-The workflow tags each result before merging it. Ordinary TypeScript then
-finds and validates both results, so no third model call can rewrite or omit
-the evidence.
+`context.fanOut` preserves the input order in its result array. The stable call IDs make each child call identifiable. The response agent may finish first, but `results[0]` is still the risk result and `results[1]` is still the response result. Parsing both values again makes the merge boundary explicit.
 
-Replace the generated service-level Harness composition. It binds logical
-model requirements and applies each generated module once.
+Add only the workflow to the service Harness. The mounted target gets the same case authorization check as the wrapper command.
 
-```ts title="src/harness/support/supportHarness.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
 import { defineHarness } from '@purista/harness'
-import { assessSupportRiskAgent } from './agent/assessSupportRisk/assessSupportRiskAgent.js'
-import { planSupportResponseAgent } from './agent/planSupportResponse/planSupportResponseAgent.js'
+import type { z } from 'zod'
+import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
 import { analyzeSupportCaseWorkflow } from './workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
 
-export const supportHarness = defineHarness({ name: 'support-case-analysis' })
-	.requireModel('risk_model', { capabilities: ['object'] })
-	.requireModel('response_model', { capabilities: ['object'] })
-	.use(assessSupportRiskAgent)
-	.use(planSupportResponseAgent)
-	.use(analyzeSupportCaseWorkflow)
-	.define()
-```
-This is the only service-level Harness definition. The agent and workflow
-files remain portable native Harness modules; the PURISTA mount comes on the
-next page.
+export const supportHarness = defineHarness({ name: 'supportParallelAnalysis', revision: 'v1' }).addWorkflow(
+	analyzeSupportCaseWorkflow,
+)
 
-```bash title="Verify the composed parallel workflow" replay="project"
+export const supportHarnessPolicy = {
+	targets: {
+		workflows: {
+			analyzeSupportCase: {
+				beforeGuards: {
+					caseAccess: async (
+						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+						input: z.output<typeof analyzeSupportCaseWorkflow.contract.input>,
+					) =>
+						requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+							...context.identity,
+							caseId: input.caseId,
+						}),
+				},
+			},
+		},
+	},
+} as const
+```
+
+The child agents have no mounted target entries, so they are not published as PURISTA targets. They remain available only inside the workflow.
+
+```bash title="Check the bounded workflow and mount policy" replay="project"
 npm run build
 ```
 
-Continue with [Mount and invoke the parallel workflow](../merge-evidence/).
+Continue with [Invoke the workflow from a PURISTA command](../invoke-workflow/).

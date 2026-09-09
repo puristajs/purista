@@ -17,10 +17,9 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			models: {
-				risk_model: options.riskModel,
-				response_model: options.responseModel,
+				riskModel: options.riskModel,
+				responseModel: options.responseModel,
 			},
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
 		},
 	})
 }

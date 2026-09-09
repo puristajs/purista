@@ -1,14 +1,12 @@
 ---
-title: Run the parallel workflow
-description: Invoke both specialists through EventBridge with deterministic providers, then optionally bind OpenAI.
+title: Run the demo and live service
+description: Try the workflow with strict fake models, then start the optional OpenAI-backed service.
 order: 267
 kind: lesson
 status: draft
 ---
 
-Start with one strict fake provider per alias. Separate providers avoid a
-timing-dependent shared response queue while the workflow runs both branches
-concurrently.
+The local demo is deterministic and needs no credentials. It invokes the distinct wrapper address through `DefaultEventBridge`, then closes the service and EventBridge.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -45,7 +43,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'analyzeSupportCase' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnalyzeSupportCase' },
 				payload: {
 					payload: { caseId: 'case-1', message: 'My card is missing.' },
 					parameter: {},
@@ -66,12 +64,26 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Document optional live-provider settings and create the live entry point.
+
+Run it now.
+
+```bash title="Run the credential-free demo" replay="project"
+npm run demo
+```
+
+For an optional live run, keep the provider credential outside source control.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
+
+The CLI may have created a first-agent environment helper. This project reads the two variables directly in its application entry point, so remove that generated helper before writing the final file.
+
+```bash title="Remove the unused generated environment helper" replay="project"
+rm -f src/config/env.ts
+```
+
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
@@ -103,12 +115,14 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-```bash title="Run the deterministic parallel-agent application" replay="project"
-npm run build
-npm run demo
+
+Copy `.env.example` to `.env`, add a valid key, and start the live service only when you want to call OpenAI.
+
+```bash title="Start the optional live service"
+cp .env.example .env
+npm start
 ```
 
-The result contains both typed specialist outputs. To make live calls, copy
-`.env.example` to `.env`, set the key, and run `npm start`.
+The live entry point registers graceful shutdown for the service and EventBridge. Continue with credential-free tests next.
 
-Continue with [Test specialists and authorization](../../testing/test-parallel/).
+Continue with [Test the agents and parallel workflow](../../testing/test-parallel/).

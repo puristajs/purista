@@ -775,7 +775,7 @@
       "status": "draft",
       "projectDirectory": "parallel-agent-workflow",
       "replayRequires": [],
-      "constructionSourceAligned": false,
+      "constructionSourceAligned": true,
       "requiredWrittenFiles": [
         ".env.example",
         "package.json",
@@ -792,20 +792,20 @@
         "src/index.ts",
         "src/parallelAgents.integration.test.ts",
         "src/service/support/v1/SupportResources.ts",
-        "src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.test.ts",
-        "src/service/support/v1/command/analyzeSupportCase/analyzeSupportCaseCommandBuilder.ts",
+        "src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.test.ts",
+        "src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.ts",
         "src/service/support/v1/requireSupportCaseAnalysis.ts",
         "src/service/support/v1/supportV1Service.ts",
         "src/service/support/v1/supportV1ServiceBuilder.ts"
       ],
       "requires": [
-        "classification-agent"
+        "create-project"
       ],
 		"pages": [
 			"parallel-agents/setup/scaffold",
 			"parallel-agents/build/define-specialists",
-			"parallel-agents/build/fan-out",
 			"parallel-agents/build/merge-evidence",
+			"parallel-agents/build/fan-out",
 			"parallel-agents/build/invoke-workflow",
 			"parallel-agents/build/compose-runtime",
 			"parallel-agents/build/run-application",
