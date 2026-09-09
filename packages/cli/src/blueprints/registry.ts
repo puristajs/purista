@@ -64,6 +64,9 @@ const basePackage: PKG = {
 		'add:queue-worker': 'purista add queue-worker',
 		'add:agent': 'purista add agent',
 		'add:workflow': 'purista add workflow',
+		'add:tool': 'purista add tool',
+		'add:skill': 'purista add skill',
+		'add:mcp': 'purista add mcp',
 	},
 	dependencies: {
 		'@purista/core': generatedDependencyVersion('@purista/core'),

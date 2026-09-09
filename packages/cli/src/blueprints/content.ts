@@ -40,6 +40,9 @@ This project installs \`@purista/cli\` as a dev dependency. Use the local add sc
 - \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
 - \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
 - \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:tool', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:skill', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:mcp', '<name> --service <serviceName> --service-version <version>')}\`
 `
 
 const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
@@ -56,6 +59,11 @@ const createLocalCliUsageGuide = (input: CreateProjectInput) => `## Local CLI
 - Package manager: \`${input.packageManager}\`
 - Create services with \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`.
 - Create commands with \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create agents with \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create workflows with \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create tools with \`${runScriptCommand(input, 'add:tool', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create Skills with \`${runScriptCommand(input, 'add:skill', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create MCP servers with \`${runScriptCommand(input, 'add:mcp', '<name> --service <serviceName> --service-version <version>')}\`.
 - Run the app with \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`.
 - Run tests with \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`.`
 
@@ -114,6 +122,9 @@ ${createLocalCliUsageGuide(input)}
 - New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
 - New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
 - New workflow: \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
+- New tool: \`${runScriptCommand(input, 'add:tool', '<name> --service <serviceName> --service-version <version>')}\`
+- New Skill: \`${runScriptCommand(input, 'add:skill', '<name> --service <serviceName> --service-version <version>')}\`
+- New MCP server: \`${runScriptCommand(input, 'add:mcp', '<name> --service <serviceName> --service-version <version>')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 

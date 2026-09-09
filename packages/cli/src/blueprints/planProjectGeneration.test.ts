@@ -128,7 +128,9 @@ describe('planProjectGeneration', () => {
 			expect(packageJsonFile?.content).toContain('"@purista/hono-http-server"')
 			expect(packageJsonFile?.content).toContain('"@purista/cli"')
 			expect(packageJsonFile?.content).toContain('"add:service": "purista add service"')
-			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
+			for (const artifact of ['agent', 'workflow', 'tool', 'skill', 'mcp']) {
+				expect(packageJsonFile?.content).toContain(`"add:${artifact}": "purista add ${artifact}"`)
+			}
 			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
 		}
 
@@ -158,5 +160,10 @@ describe('planProjectGeneration', () => {
 		expect(guidance).toContain('`ai.model`')
 		expect(guidance).not.toContain('src/harness')
 		expect(guidance).not.toContain('ai.models')
+		for (const artifact of ['agent', 'workflow', 'tool', 'skill', 'mcp']) {
+			expect(guidance).toContain(
+				`bun run add:${artifact} -- <name> --service <serviceName> --service-version <version>`,
+			)
+		}
 	})
 })
