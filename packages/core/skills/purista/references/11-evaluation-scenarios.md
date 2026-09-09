@@ -241,14 +241,15 @@ Harness composition type-safe and show the request lifecycle.
 ```
 
 Expected behavior:
-- registers the inline native definition with `.tool('transfer_funds', {...})`
-  so schema-derived handler input remains exact
-- uses `.tools(record)` only when a reusable native/MCP record is already typed
+- defines the native tool with `defineTool('transferFunds', {...})` so
+  schema-derived handler input remains exact
+- packages shared tools with `defineCatalog('payments', { tools: [transferFunds] })`
+  and composes the catalog with `defineHarness(...).use(...)`
 - invokes agents and workflows with `.run(...)` or `.stream(...)`, never
   `.prompt(...)`
 - calls `session.release()` for normal idle cleanup and reserves
   `session.destroy()` for deliberate data deletion
-- uses `ctx.logger` and `ctx.telemetry` in Harness agent/workflow handlers
+- uses `ctx.logger` and `ctx.telemetry` in Harness tool and workflow handlers
 
 Validation:
 - no tool callback helper, registration brand, legacy invoker, Harness

@@ -160,33 +160,24 @@ definition, and updates the service's single mount policy. Add a normal PURISTA
 command or stream only when the application needs that consumer contract.
 
 ```ts
-const triageAgent = defineHarnessModule<PrimaryModelState>()('support.agent.triage', {
-	register(builder) {
-		return builder.agent('triage_ticket', triageAgentDefinition)
-	},
-})
-
-const harness = defineHarness({ name: 'support' })
-	.requireModel('primary', { capabilities: ['object'] })
-	.use(triageAgent)
-	.define()
-
+const harness = defineHarness({ name: 'support' }).addAgent(triageTicketAgent)
 const support = supportService.mountHarness(harness, {
-	publish: { agents: ['triage_ticket'] },
+	targets: { agents: { [triageTicketAgent.contract.id]: {} } },
 })
 ```
 
-Call `mountHarness(...)` once per service. Compose later agents, workflows,
-tools, and Skills into the same definition with native modules.
+Call `mountHarness(...)` once per service. Compose later root agents and
+workflows into the same definition; tools, Skills, and MCP tools attach to the
+definition that uses them.
 
 The first `add:agent` or `add:workflow` creates that service Harness and mount.
 Later calls extend the same files. Workflow modules use native Harness workflow
 steps and remain runnable without a PURISTA service.
 
 Use mount before/after guards for business authorization and `successEvent` for
-the completed target fact. Bind commands as host tools with
-`commandAsHarnessTool(...)`, or use `getHarnessHostToolBuilder(...)` when a tool
-handler needs several declared PURISTA capabilities.
+the completed target fact. Define a service-owned tool with
+`ServiceBuilder.defineTool(...)` when its handler needs declared PURISTA
+capabilities.
 
 ## Contract Rule
 Every component boundary owns its schema. Consumers should define a narrow local schema for the fields they read instead of importing an oversized producer schema.

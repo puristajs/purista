@@ -428,13 +428,10 @@ runtime test for the complete order.
   generated path truly needs a dependent type, expose a deliberately named
   alias from the owning public package instead of reaching into an
   implementation package.
-- For standalone Harness definitions, use repeatable
-  `.agent(id, definition)` and `.workflow(id, definition)` as the normal inline
-  path. Use `.agents(record)` and `.workflows(record)` only for cohesive
-  pre-typed batches, and explain that singular/plural calls accumulate while
-  duplicate ids fail. Never reintroduce callback identity wrappers or
-  standalone definition helpers. Register models before agents and agents
-  before workflows so schema-derived callback and `ctx.agents` types cascade.
+- For standalone Harness definitions, compose roots with
+  `defineHarness(...).addAgent(...)` and `.addWorkflow(...)`. Tools, Skills,
+  and MCP definitions remain dependencies of the agent or workflow that uses
+  them; duplicate root ids fail.
 - Bind optional Harness Guardrails through the default-loop agent definition's
   direct `guardrails` field. Do not document decorator or attach helpers.
   State that custom-handler agents reject Guardrails, interceptors, and other

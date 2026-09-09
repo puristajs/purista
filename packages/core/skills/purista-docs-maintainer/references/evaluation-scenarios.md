@@ -901,8 +901,8 @@ Near miss to reject:
 Prompt:
 
 ```text
-Built-in Harness tools should be opt-in, but every example sets
-builtinTools: false. Check whether skills collide with that default and explain
+Built-in Harness tools should be opt-in. Check whether Skills collide with that
+default and explain
 the security limits of skill scripts and instructions.
 ```
 
@@ -930,8 +930,8 @@ Near miss to reject:
 - claiming `allowed-tools` enforces permissions because the frontmatter field
   exists;
 - saying skill scripts are safe merely because mounting does not execute them;
-- retaining `builtinTools: false` in every recommended snippet after omission
-  becomes the verified secure default; or
+- using a legacy built-in tool option instead of explicit `builtInTools`
+  definitions in an agent `tools` array; or
 - discovering the missing `read` only after a provider request starts.
 
 ## Scenario 31: Beginner governance and external policy engines
@@ -1053,16 +1053,13 @@ Expected behavior:
 - traces the exported builder types, runtime merge path, duplicate validation,
   Guardrails binding, PURISTA forwarding, type tests, and generated API before
   changing examples;
-- teaches `.agent(id, definition)` and `.workflow(id, definition)` as the normal
-  repeatable inline path with model-before-agent and agent-before-workflow order;
-- explains `.agents(record)` and `.workflows(record)` as cohesive pre-typed
-  batch registration, and states that all four methods accumulate while
-  duplicate ids fail;
+- teaches `defineHarness(...).addAgent(...)` and `.addWorkflow(...)` as the
+  normal root-composition path, while tools, Skills, and MCP tools attach to
+  the definition that uses them;
 - shows schema-derived instruction/handler context and workflow `ctx.agents`
   inference without broad casts or extracted definition constants;
-- binds configured Guardrails with `guardrails: rails` on a default-loop agent,
-  removes redundant `builtinTools: false`, and states the custom-handler
-  incompatibility; and
+- binds configured Guardrails with `guardrails: rails` on a default-loop agent
+  and states the custom-handler incompatibility; and
 - proves the same provider-neutral definition is mounted without mutation while
   Core remains independent of the optional addon.
 

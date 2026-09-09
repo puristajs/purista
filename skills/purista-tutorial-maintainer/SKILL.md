@@ -189,8 +189,8 @@ structural documentation check cannot replace this replay.
   timeouts, secrets, remote validation, and failure mapping.
 - For AI chapters, distinguish an application-controlled command call from a
   model-selected tool. A default-loop RAG agent receives retrieval through a
-  native Harness host-tool contract bound with `commandAsHarnessTool(...)` or
-  `getHarnessHostToolBuilder(...)`; do not pre-call retrieval in a custom
+  service-owned `ServiceBuilder.defineTool(...)`, or through `defineTool(...)`
+  when the dependency is fully portable; do not pre-call retrieval in a custom
   agent handler. Keep retrieval authorization in the PURISTA command guard and
   add a mount business guard when the same scope is known before model work.
   Every published mounted target that can be called directly through

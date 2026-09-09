@@ -1,140 +1,198 @@
 ---
-title: Migrate from v3 to v4
-description: Replace the generated attached-agent API with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.
+title: Migrate from PURISTA v3 to v4
+description: Replace legacy attached-agent projections with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.
 order: 1120
 ---
 
-PURISTA v4 makes a clean break in AI integration. Remove v3 agent builders and
-their generated command, stream, queue, and worker projections. Define AI
-behavior with native `@purista/harness`, mount selected targets in a service,
-and add normal Framework primitives only where the application needs them.
+PURISTA v4 is a clean break for AI integration. Move agent and workflow
+definitions to native @purista/harness modules, mount one composed definition
+in the service, and create Framework primitives only for application behavior
+that needs their delivery or exposure guarantees.
 
-There is no runtime compatibility layer. Migrate the whole service boundary in
-one release and verify every caller before deployment.
+There is no runtime compatibility layer. Update the service boundary, callers,
+stored Harness data, and deployment together.
 
-## 1. Align packages and generated code
+## Align packages and layout
 
-Upgrade `@purista/core`, CLI, transport packages, and `@purista/harness` as
-one version set. Regenerate or manually update CLI-owned AI scaffolds. Install
-the provider packages used by the composition root and the optional
-`@purista/harness-ai-sdk-ui` adapter only when a browser endpoint needs it.
-Remove `agentPath` from `purista.json`; native modules now use the fixed
-service-owned `src/harness/<service>` layout.
+Keep the published @purista/* packages on one v4 release line. Add
+@purista/harness to the application that owns definitions, plus provider,
+storage, sandbox, memory, MCP, or UI adapter packages only when the composition
+root uses them. Remove the old agentPath setting. Put native modules below the
+owning service version, for example `src/service/support/v1/harness/`, and
+keep the final service as that graph's only Framework composition root.
 
-## 2. Replace AgentQueueBuilder with a Harness definition
+## Define and mount the Harness graph
 
-Move model requirements, schemas, agents, workflows, tools, skills, MCP
-servers, guardrails, and portable runtime policy into one native definition
-per service. Use native Harness modules to keep individual capabilities in
-focused files:
+Replace generated agent builders with leaf definitions and additive composition:
 
-```ts title="Define a native Harness agent"
-export const supportHarness = defineHarness({ name: 'support' })
-  .requireModel('primary', { capabilities: ['object'] })
-  .use(triageTicketAgent)
-  .define()
-```
+~~~ts title="src/service/support/v1/harness/supportHarness.ts"
+import { defineAgent, defineHarness, defineWorkflow } from '@purista/harness'
 
-Delete v3 `getAgentQueueBuilder`, `addAgentDefinition`,
-`setHarnessAgent`, `setHarnessWorkflow`, `setRunFunction`, response-mode,
-and generated-projection configuration.
-
-## 3. Mount selected targets
-
-Mount the composed definition once. Remove every extra per-agent mount; several
-independent Harness runtimes inside one service are unsupported.
-
-```ts title="Mount selected targets"
-export const supportV1Service = supportV1ServiceBuilder
-  .addCommandDefinition(triageTicketCommandBuilder.getDefinition())
-  .mountHarness(supportHarness, {
-    publish: { agents: ['triage_ticket'] },
+export const triage = defineAgent('triage', {
+  model: 'assistant',
+  instructions: 'Classify the ticket and return the next action.',
 })
-```
 
-[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
-is the single service lifecycle boundary. The preceding
-[`addCommandDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addcommanddefinition)
-registers an ordinary application command and does not wrap or own the agent.
+export const supportWorkflow = defineWorkflow('support', {
+  input: triage.contract.input,
+  output: triage.contract.output,
+  agents: [triage],
+  handler: async context => context.agents.triage.run(context.input, {
+    callId: 'support-triage',
+  }),
+})
 
-Bind host tools with `commandAsHarnessTool(...)` or
-`getHarnessHostToolBuilder(...)`. Put target-specific business authorization
-in mount before/after guards. Use `successEvent` only for the fact that a
-target completed successfully.
+export const supportHarness = defineHarness({ name: 'support' })
+  .addAgent(triage)
+  .addWorkflow(supportWorkflow)
+~~~
 
-## 4. Replace generated callers
+Mount the definition once on the final service builder. Bind model providers,
+storage, memory, sandbox, admission, telemetry, and other runtime facilities
+when the service starts; the definition remains portable.
 
-Declare the service name, version, target, and exported Harness contract:
+~~~ts title="src/service/support/v1/supportV1Service.ts"
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness)
+~~~
 
-```ts title="Declare the target address"
-const triageCommandBuilder = supportV1ServiceBuilder
-  .getCommandBuilder('triageTicket', 'Classifies a support ticket')
-  .canInvokeAgent(
-  'Support',
-  '1',
-  'triage_ticket',
-  supportHarness.contracts.agents.triage_ticket,
-  )
-```
+mountHarness(definition) is the service lifecycle boundary. It does not turn
+every Harness target into a command, stream, or queue.
 
-[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-derives the typed aggregate and streaming client from the neutral contract and
-routes both through EventBridge.
-[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
-creates the caller-owned application boundary.
+## Move callers to target contracts
 
-Then call `context.agent.Support['1'].triage_ticket.run(input)` or
-`.stream(input)`. All calls cross EventBridge. Remove same-process shortcuts
-and definition-object invocation.
+Create a Framework command, stream, subscription, or queue only when that
+application boundary is required. For a caller in the same service, declare the
+target contract with the current address-first helper:
 
-The aggregate result is a `RunOutcome`. Handle `completed`, `interrupted`,
-and other terminal states explicitly. Approval and external waits are
-interrupted outcomes, not thrown errors.
+~~~ts title="src/service/support/v1/command/triage/triageCommandBuilder.ts"
+export const triageCommandBuilder = supportV1ServiceBuilder
+  .getCommandBuilder('triage', 'Classify one ticket')
+  .canInvokeAgent('Support', '1', triage.contract)
+  .setCommandFunction(async function (context, payload) {
+    const { sessionId, outcome } = await context.agent.Support['1'].triage.run(payload)
+    return { sessionId, outcome }
+  })
+~~~
 
-## 5. Recreate only needed application contracts
+Use the typed target client supplied by the handler context and pass the target
+input. Addressed `run` returns `{ sessionId, outcome }`; addressed `stream`
+returns an execution stream. Handle completed, interrupted, failed, and
+cancelled outcomes explicitly. Approval and external waits are outcomes that
+can be resumed, not generic application errors.
 
-Create a normal command for bounded request/response, a normal stream for live
-updates, or a queue and worker for durable admission/retry. Mounting no longer
-creates all four.
+For durable admission, replace a generated agent queue projection with a native
+queue binding for the exact root contract:
 
-When a published target needs durable delivery, replace the old generated
-agent queue with `defineHarnessQueueBinding(targetContract, queueBuilder,
-workerBuilder)`. Put the binding on the target mount policy and use
-`binding.contract` in callers that need `.enqueue(...)`. Callers using the
-plain Harness contract remain limited to `.run(...)` and `.stream(...)`.
-The integration worker invokes the same published EventBridge address and
-converts provider admission backpressure into native queue retry behavior.
+~~~ts title="src/service/support/v1/supportV1Service.ts"
+// Before: generated attached-agent queue projection
+// After: one nominal binding, then one matching mount policy
+import { defineHarnessQueueBinding } from '@purista/core'
 
-Use `purista add agent` and `purista add workflow` for new native modules. Both
-commands extend the single service Harness and mount; neither creates a second
-runtime or a generated transport wrapper.
+const triageQueue = defineHarnessQueueBinding(
+  triage.contract,
+  triageQueueBuilder,
+  triageQueueWorkerBuilder,
+)
 
-For browser chat, map the portable execution stream with
-`@purista/harness-ai-sdk-ui/v1`, declare
-`ai-sdk-ui-message-stream-v1`, and send the
-`x-vercel-ai-ui-message-stream: v1` header. The client can use AI SDK
-`useChat` and AI Elements without a PURISTA client package.
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
+  targets: { agents: { triage: { queue: triageQueue } } },
+})
 
-## 6. Move runtime bindings
+const enqueueTriage = commandBuilder
+  .canInvokeAgent('Support', '1', triageQueue.reference)
+  .setCommandFunction(async function (context, payload) {
+    return context.agent.Support['1'].triage.enqueue(payload)
+  })
+~~~
 
-Supply concrete adapters under `getInstance(eventBridge, { ai: ... })`:
-models, admission, artifacts, telemetry, Harness storage, sandbox,
-sandboxBinding, memory, and workspace. PURISTA StateStore does not replace
-Harness persistence, and domain records belong behind database resources.
+The binding's nominal `reference` is the only value that grants `enqueue` to a
+caller. Do not recreate the removed generated agent transport projections.
 
-## 7. Replace tests
+## Expose HTTP deliberately
 
-- Test the portable definition with `FakeModelProvider`.
-- Test commands, streams, and workers with PURISTA context mocks and
-  address-first target stubs.
-- Test the UI Message Stream v1 adapter with deterministic execution events.
-- Test authentication, public/protected metadata, business guards, host-tool
-  identity propagation, interruptions, and cancellation.
+Choose a command or stream projection for an HTTP route and map authentication,
+tenant identity, request schemas, response status, and cancellation explicitly.
+For browser chat, replace a generated public agent route with a protected
+Framework stream projection and the published `@purista/harness-ai-sdk-ui/v1`
+adapter:
 
-## Release verification
+~~~ts title="src/service/support/v1/stream/streamTriage/streamTriageStreamBuilder.ts"
+// Before: generated attached-agent HTTP route
+// After: a protected wrapper around the addressed target
+import { createHarnessUIMessageSseEvents, parseHarnessUIMessageRequest } from '@purista/harness-ai-sdk-ui/v1'
+import { z } from 'zod'
 
-Before deployment, search application and documentation sources for the removed
-v3 API names. Build and test all packages, export contracts, start the real
-composition root with production-like adapters, and exercise aggregate,
-streaming, queued, approval, and shutdown paths. Roll back the whole release if
-any consumer still expects a generated agent projection.
+const inputSchema = z.unknown()
+const parameterSchema = z.object({})
+const chunkSchema = z.object({ event: z.literal('data'), data: z.unknown() })
+const finalSchema = z.void()
+
+export const streamTriage = supportV1ServiceBuilder
+  .getStreamBuilder('streamTriage', 'Stream ticket triage')
+  .addPayloadSchema(inputSchema)
+  .addParameterSchema(parameterSchema)
+  .addChunkSchema(chunkSchema)
+  .addFinalSchema(finalSchema)
+  .canInvokeAgent('Support', '1', triage.contract)
+  .exposeAsHttpStreamEndpoint('POST', 'ai/triage')
+  .enableHttpSecurity(true)
+  .enableChunkAggregation(false)
+  .setHttpStreamingMode('stream')
+  .setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+  .setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+  .setStreamFunction(async function (context, payload, _parameter, writer) {
+    const request = await parseHarnessUIMessageRequest(payload)
+    const input = request.lastUserMessage.parts
+      .flatMap(part => part.type === 'text' ? [part.text] : [])
+      .join('\n')
+    const events = await context.agent.Support['1'][triage.contract.id].stream(
+      input,
+      request.resume === undefined
+        ? { sessionId: request.sessionId }
+        : { sessionId: request.sessionId, resume: request.resume },
+    )
+    let cancellation = Promise.resolve()
+    writer.onCancel(reason => { cancellation = events.cancel(reason) })
+    try {
+      for await (const event of createHarnessUIMessageSseEvents(events, {
+        sessionId: request.sessionId,
+        ...(request.assistantMessageId === undefined
+          ? {}
+          : { messageId: request.assistantMessageId }),
+      })) {
+        await writer.write(event)
+      }
+      if (!writer.cancelled) await writer.close()
+    } finally {
+      await cancellation
+    }
+  })
+~~~
+
+Configure `honoService.setProtectMiddleware(...)` before startup. That
+middleware authenticates the request and sets trusted `principalId` and
+`tenantId`; business authorization remains a guard on the mounted target.
+For example, decode the transport credential there, set those two variables,
+and return `next()`; do not put business authorization in the HTTP wrapper.
+Keep stream protocol headers and session identifiers at the HTTP boundary; the
+Harness definition stays transport-neutral.
+
+## Move runtime bindings
+
+Construct one runtime instance for the mounted definition with the concrete
+model and optional bindings required by its graph. PURISTA StateStore remains
+for Framework application state; Harness storage and memory own Harness
+sessions, run history, durable steps, and retrieval state. Domain records stay
+behind application resources.
+
+## Test the new boundary
+
+Use FakeModelProvider for deterministic definition tests. Test service mounts
+and address-first calls with Framework testing helpers, then test the selected
+storage, sandbox, queue, HTTP, and UI adapters at their own boundary. Cover
+authorization, host-tool identity, interruption/resume, cancellation, instance
+closure, and redaction. Live model quality belongs in evaluations.
+
+Before deployment, search source for removed builder and generated projection
+names, typecheck and build the application, export service definitions, and
+exercise aggregate, streaming, queued, approval, and instance-close paths.

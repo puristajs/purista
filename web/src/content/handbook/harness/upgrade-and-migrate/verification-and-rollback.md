@@ -1,82 +1,57 @@
 ---
-title: Verify rollout and rollback
-description: Drain Harness 2.1.1 safely, verify Harness 3 in staging and canary deployments, and preserve a version-matched rollback path.
+title: Verify Harness v4 rollout and rollback
+description: Prove the v4 source rewrite, adapters, outcomes, and data boundaries before production traffic moves.
 order: 1330
 ---
 
-Roll out Harness 3 only after source migration, data migration, and adapter
-verification are independently green.
+Define measurable stop conditions before deployment: startup validation failure,
+provider capability mismatch, permission denial, durable restart failure,
+approval resume failure, adapter timeout, duplicate side effect, or a
+redaction violation.
 
-## 1. Define stop and rollback conditions
-
-Choose measurable conditions before deployment: startup validation failures,
-provider capability errors, permission denials, failed durable resumes,
-adapter timeouts, model error rate, or latency regression. Assign an operator
-who can stop the rollout and restore the previous deployment and data snapshot.
-
-## 2. Drain Harness 2.1.1
-
-Stop new work, wait for active runs to settle, preserve pending approval
-interruptions, and
-resolve or cancel application-owned human-review tasks using the 2.1.1
-application. Record any run that cannot finish; do not hand it to Harness 3.
-
-Back up application data and every retained 2.1.1 database or namespace before
-creating Harness 3 resources. Test the restore command against a non-production
-copy.
-
-## 3. Verify staging
+## Verify the source and runtime
 
 Run, in order:
 
 1. application typecheck and build;
 2. deterministic agent, tool, workflow, governance, and Guardrail tests;
-3. shared contracts for custom storage, memory, workspace, sandbox, and model
-   providers;
-4. integration tests against each selected real adapter;
-5. a restart after every durable workflow step and external wait;
-6. one live-provider smoke test with bounded credentials and cost;
-7. evaluations for the quality behaviors that deterministic adapters cannot
-   prove.
+3. storage, memory, workspace, sandbox, MCP, and model-provider contracts;
+4. restart tests after durable steps and external waits;
+5. one bounded live-provider smoke test;
+6. evaluations for behaviors deterministic fakes cannot prove.
 
-Confirm logs, spans, and metrics contain operational identifiers but no prompts,
-tool payloads, secrets, or reviewed content. Follow
-[Observe the runtime](/handbook/harness/configure-the-runtime/observability/).
+Confirm traces and metrics contain operational identifiers without prompts,
+tool payloads, secrets, reviewed content, or tenant identifiers.
 
-## 4. Deploy a canary
+## Deploy a canary
 
-Send only new sessions and new durable runs to Harness 3. Keep its storage,
-memory namespaces, workspaces, and sandbox resources separate from 2.1.1. Compare
-the predefined health signals before increasing traffic.
+Send only new sessions and new durable runs to v4. Keep storage, memory
+namespaces, workspaces, artifact stores, and sandbox resources separate from
+the old runtime. Compare the predefined health and business signals before
+increasing traffic.
 
-Do not run both majors against one session or durable-run namespace. A model
-alias may point to the same provider, but that does not make runtime records
-compatible.
+Do not run both versions against one session or durable-run namespace. A shared
+provider model does not make runtime records compatible.
 
-## 5. Shut down in ownership order
+## Shut down in ownership order
 
-During deployment or rollback:
+Stop new application work, let active calls finish or cancel them deliberately,
+release retained sessions, destroy sessions only when deletion is intended, then
+close the Harness instance:
 
-1. stop accepting new application work;
-2. wait for active Harness calls to finish or cancel them deliberately;
-3. release idle sessions when their durable history must remain;
-4. call `harness.shutdown()`;
-5. close application-owned adapter pools and local durable bundles;
-6. flush the OpenTelemetry SDK last.
+~~~ts title="Close the Harness runtime"
+await instance.close()
+~~~
 
-Use `session.destroy()` only when the application intends to delete the
-conversation and its Harness-owned records. It is not a graceful worker-drain
-operation.
+Close application-owned adapters next and flush telemetry last.
 
-## 6. Roll back without cross-reading
+## Roll back without cross-reading
 
-If a stop condition is reached, remove Harness 3 from traffic and restore the
-Harness 2.1.1 deployment with its matching pre-migration data snapshot. Do not
-point 2.1.1 at Harness 3 databases or replay Harness 3 run events through 2.1.1.
+If a stop condition is reached, remove v4 from traffic and restore the previous
+deployment with its matching data snapshot. Do not point the old runtime at v4
+storage or replay v4 run events through it. Reconcile external business effects
+with an idempotent application procedure; restoring Harness storage cannot undo
+an email, payment, or ticket update.
 
-Application business effects that occurred during the canary need their own
-idempotent reconciliation or compensation. Restoring Harness storage does not
-undo an email, payment, ticket update, or other external side effect.
-
-After the rollback window closes, remove old data only through an approved,
-bounded cleanup operation with a verified target and backup policy.
+After the rollback window closes, remove old data only through a bounded,
+verified cleanup operation with a backup and retention record.

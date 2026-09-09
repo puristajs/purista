@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import { join, relative, resolve, sep } from 'node:path'
 
 const root = process.cwd()
 const skillsRoot = resolve(root, 'skills')
 const issues = []
+const canonicalSkillNames = [
+	'purista',
+	'purista-migration',
+	'purista-skill-maintainer',
+	'purista-docs-maintainer',
+	'purista-tutorial-maintainer',
+]
+const canonicalSkillNameSet = new Set(canonicalSkillNames)
 const internalMaintainerSkills = new Set([
 	'purista-skill-maintainer',
 	'purista-docs-maintainer',
@@ -13,6 +21,7 @@ const internalMaintainerSkills = new Set([
 ])
 
 const readText = path => readFileSync(path, 'utf8')
+const readBytes = path => readFileSync(path)
 
 const walkFiles = directory =>
 	readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
@@ -40,9 +49,54 @@ const parseFrontmatter = text => {
 	return data
 }
 
-const addIssue = (file, message) => {
-	issues.push(`${relative(root, file)}: ${message}`)
+const displayPath = file => {
+	const relativePath = relative(root, file)
+	return relativePath === '..' || relativePath.startsWith(`..${sep}`) ? file : relativePath
 }
+
+const addIssue = (file, message) => {
+	issues.push(`${displayPath(file)}: ${message}`)
+}
+
+const compareTrees = (canonicalRoot, mirrorRoot, mirrorLabel) => {
+	if (!existsSync(canonicalRoot)) {
+		addIssue(canonicalRoot, 'canonical skill tree is missing')
+		return
+	}
+
+	const canonicalFiles = new Map(walkFiles(canonicalRoot).map(file => [relative(canonicalRoot, file), file]))
+	const mirrorFiles = new Map(
+		existsSync(mirrorRoot) ? walkFiles(mirrorRoot).map(file => [relative(mirrorRoot, file), file]) : [],
+	)
+
+	for (const [relativeFile, canonicalFile] of canonicalFiles) {
+		const mirrorFile = join(mirrorRoot, relativeFile)
+		if (!mirrorFiles.has(relativeFile)) {
+			addIssue(mirrorFile, `${mirrorLabel} file is missing`)
+			continue
+		}
+		if (!readBytes(canonicalFile).equals(readBytes(mirrorFile))) {
+			addIssue(mirrorFile, `${mirrorLabel} file differs from canonical skills`)
+		}
+	}
+
+	for (const [relativeFile, mirrorFile] of mirrorFiles) {
+		if (!canonicalFiles.has(relativeFile)) {
+			addIssue(mirrorFile, `${mirrorLabel} contains an extra file`)
+		}
+	}
+}
+
+const parseInstalledRoot = args => {
+	if (args.length === 0) return undefined
+	if (args.length !== 2 || args[0] !== '--check-installed' || args[1].trim() === '') {
+		process.stderr.write('Usage: node scripts/skills-audit.mjs [--check-installed <root>]\n')
+		process.exit(2)
+	}
+	return resolve(args[1])
+}
+
+const installedSkillsRoot = parseInstalledRoot(process.argv.slice(2))
 
 if (!existsSync(skillsRoot)) {
 	process.stderr.write(`Skills root not found at ${skillsRoot}\n`)
@@ -53,6 +107,17 @@ const skillDirs = readdirSync(skillsRoot, { withFileTypes: true })
 	.filter(entry => entry.isDirectory())
 	.map(entry => join(skillsRoot, entry.name))
 	.sort()
+
+for (const skillName of canonicalSkillNames) {
+	const skillDir = join(skillsRoot, skillName)
+	if (!existsSync(skillDir)) addIssue(skillDir, 'required canonical skill tree is missing')
+}
+for (const skillDir of skillDirs) {
+	const skillName = relative(skillsRoot, skillDir)
+	if (!canonicalSkillNameSet.has(skillName)) {
+		addIssue(skillDir, 'canonical skill tree is not covered by the five-skill mirror audit')
+	}
+}
 
 for (const skillDir of skillDirs) {
 	const skillName = relative(skillsRoot, skillDir)
@@ -156,11 +221,16 @@ const packagedSkillsRoot = resolve(root, 'packages/core/skills')
 if (!existsSync(packagedSkillsRoot)) {
 	addIssue(packagedSkillsRoot, 'packaged skill mirror is missing')
 } else {
-	for (const canonicalFile of walkFiles(skillsRoot)) {
-		const relativeFile = relative(skillsRoot, canonicalFile)
-		const packagedFile = join(packagedSkillsRoot, relativeFile)
-		if (!existsSync(packagedFile)) addIssue(packagedFile, 'packaged skill mirror file is missing')
-		else if (readText(canonicalFile) !== readText(packagedFile)) addIssue(packagedFile, 'differs from canonical skills')
+	compareTrees(skillsRoot, packagedSkillsRoot, 'packaged skill mirror')
+}
+
+if (installedSkillsRoot) {
+	if (!existsSync(installedSkillsRoot)) {
+		addIssue(installedSkillsRoot, 'installed skill mirror root is missing')
+	} else {
+		for (const skillName of canonicalSkillNames) {
+			compareTrees(join(skillsRoot, skillName), join(installedSkillsRoot, skillName), `installed ${skillName} mirror`)
+		}
 	}
 }
 

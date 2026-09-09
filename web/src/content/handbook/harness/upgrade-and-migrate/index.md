@@ -1,56 +1,26 @@
 ---
-title: Upgrade and migrate
-description: Move from the latest published Harness release to Harness 3 with explicit code, adapter, data, verification, and rollback boundaries.
+title: Migrate to Harness v4
+description: Move a Harness v3 application to the v4 definition, runtime binding, outcome, and lifecycle contracts.
 order: 1300
 ---
 
-The migration baseline is `@purista/harness@2.1.1`, verified as npm's latest
-published release on 31 August 2026 and matched to the
-[GitHub v2.1.1 source tag](https://github.com/puristajs/harness/tree/v2.1.1).
-The target described here is the current Harness 3
-contract. Until the 3.0 packages are published, use this guide to prepare and
-test a branch—not as evidence that a production release is available.
+Harness v4 is a clean break. Definitions are immutable, composition is
+additive, and runtime adapters are supplied when an application creates an
+instance. Generated builder modules and implicit runtime projections are
+removed.
 
-## Choose the path you need
-
-| Need | Guide |
+| Existing v3 usage | v4 destination |
 | --- | --- |
-| Update application source to the current clean-break Harness 3 API | [Adopt the Harness 3 clean-break API](./migrate-to-v3/) |
-| Decide what can be copied, converted, reindexed, or must start clean | [Migrate adapters and data](./adapter-and-data-compatibility/) |
-| Stage the rollout, prove recovery, and retain a real rollback path | [Verify rollout and rollback](./verification-and-rollback/) |
+| Fluent builder or module factory | defineAgent, defineWorkflow, defineTool, defineSkill, or defineMcpServer |
+| One builder containing every capability | defineCatalog(...), then defineHarness(...).use(catalog) |
+| Builder finalization | await definition.getInstance({ ...runtime bindings }) |
+| Session prompt helpers | session.agents.id.run(...) or .stream(...) with explicit call IDs |
+| Implicit approval booleans | Typed interrupted outcomes and resume |
+| Split runtime/checkpoint stores | The v4 storage, memory, workspace, and artifact contracts selected by the runtime |
+| Generated transport projections | PURISTA mountHarness(...) plus explicit Framework command, stream, queue, or HTTP projection |
 
-## Treat the upgrade as a clean boundary
+Start with [the v3 to v4 rewrite](./migrate-to-v3/), then migrate adapters and
+data, and finish with [verification and rollback](./verification-and-rollback/).
 
-Harness 3 replaces the 2.1.1 durability, memory, sandbox, and decision contracts
-without compatibility shims. MCP v2 transport requirements, additive registry
-registration, and `session.release()` already exist in 2.1.1. A mixed
-installation is not supported:
-keep all `@purista/harness*` packages on the same major and rebuild application
-code against the new types.
-
-```mermaid title="Harness major-version rollout boundary"
-flowchart LR
-  V2[Drain Harness 2.1.1 work] --> Snapshot[Back up application-owned data]
-  Snapshot --> Migrate[Build and migrate in staging]
-  Migrate --> Verify[Run deterministic and adapter checks]
-  Verify --> Switch[Deploy Harness 3 together]
-  Switch --> Observe[Watch errors, traces, and recovery]
-```
-
-Do not let Harness 2.1.1 workers process Harness 3 durable records, or Harness 3
-workers open a 2.1.1 SQLite runtime database. Rollback means restoring the old
-binary with its matching data snapshot—not asking one version to interpret the
-other version's records.
-
-Before editing, create an inventory of:
-
-- every installed `@purista/harness*` package and optional peer;
-- every `.state`, `.runtime`, `.workspaceStore`, `.checkpoints`, `.memory`,
-  `.sandbox`, `.tools`, `.governance`, and MCP registration, plus any
-  application-owned content controls;
-- active durable runs, waits, workspace checkpoints, memory indexes, and plugin
-  digests;
-- deployment entry points, worker drain controls, backups, and rollback owner.
-
-Start with the [source migration](./migrate-to-v3/), then make each storage and
-adapter decision before running the rollout checklist.
+Keep all Harness packages on the same published v4 range. A successful install
+does not prove provider capabilities, storage compatibility, or safe recovery.

@@ -27,8 +27,9 @@ context, business guards, runtime binding, and address-first invocation.
 Harness never imports Core.
 
 Each PURISTA service mounts at most one composed Harness definition and starts
-one native runtime. Add capabilities with `defineHarnessModule(...).use(...)`;
-never create a Harness or call `mountHarness(...)` once per agent.
+one native runtime. Compose roots with `defineHarness(...).addAgent(...)` and
+`.addWorkflow(...)`; never create a Harness or call `mountHarness(...)` once
+per agent.
 
 Every agent/workflow invocation crosses EventBridge, including same-service and
 same-process calls. Each target has one final output schema; callers choose
@@ -51,8 +52,8 @@ browser clients and keep the internal stream provider-neutral.
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents and workflows are native `@purista/harness` definitions mounted by `@purista/core`; provider packages remain app-level dependencies.
-- Standalone Harness composition uses additive singular/plural registries; prefer `.tool(id, definition)` for inline native tools, invoke with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
-- Declare provider-neutral model requirements in `defineHarness()` and bind concrete providers/model identifiers under `ai.models[alias]` when the service is instantiated.
+- Standalone Harness definitions use `.addAgent(...)` and `.addWorkflow(...)`; invoke through a session with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
+- Bind the default primary provider under `ai.model`; use `ai.models` only for declared non-primary aliases.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.

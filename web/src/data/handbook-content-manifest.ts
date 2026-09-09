@@ -1894,8 +1894,8 @@ const canonicalContentManifest = [
     "topicId": "framework/upgrade-and-migrate/migrate-v3-to-v4",
     "parentTopicId": "framework/upgrade-and-migrate",
     "order": 1120,
-    "title": "Migrate from v3 to v4",
-    "description": "Replace the generated attached-agent API with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.",
+    "title": "Migrate from PURISTA v3 to v4",
+    "description": "Replace legacy attached-agent projections with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.",
     "pageRole": "migration"
   },
   {
@@ -2938,8 +2938,8 @@ const canonicalContentManifest = [
     "topicId": "harness/upgrade-and-migrate",
     "parentTopicId": "handbook-harness",
     "order": 1300,
-    "title": "Upgrade and migrate",
-    "description": "Move from the latest published Harness release to Harness 3 with explicit code, adapter, data, verification, and rollback boundaries.",
+    "title": "Migrate to Harness v4",
+    "description": "Move a Harness v3 application to the v4 definition, runtime binding, outcome, and lifecycle contracts.",
     "pageRole": "chapter"
   },
   {
@@ -2947,8 +2947,8 @@ const canonicalContentManifest = [
     "topicId": "harness/upgrade-and-migrate/migrate-to-v3",
     "parentTopicId": "harness/upgrade-and-migrate",
     "order": 1310,
-    "title": "Adopt the Harness 3 clean-break API",
-    "description": "Migrate Harness 2.1.1 registration, invocation, session cleanup, schemas, adapters, and governance to Harness 3 without compatibility shims.",
+    "title": "Rewrite a Harness v3 application for v4",
+    "description": "Replace fluent Harness builders with definition factories, additive composition, explicit runtime bindings, typed outcomes, and safe lifecycle handling.",
     "pageRole": "migration"
   },
   {
@@ -2965,8 +2965,8 @@ const canonicalContentManifest = [
     "topicId": "harness/upgrade-and-migrate/adapter-and-data-compatibility",
     "parentTopicId": "harness/upgrade-and-migrate",
     "order": 1320,
-    "title": "Migrate adapters and data",
-    "description": "Decide which Harness 2.1.1 data can be converted, which Harness 3 adapters need new contracts, and where a clean namespace is required.",
+    "title": "Migrate Harness adapters and data",
+    "description": "Recreate v3 adapter bindings and approved data in Harness v4 with explicit namespaces, contracts, and restart checks.",
     "pageRole": "migration"
   },
   {
@@ -2974,8 +2974,8 @@ const canonicalContentManifest = [
     "topicId": "harness/upgrade-and-migrate/verification-and-rollback",
     "parentTopicId": "harness/upgrade-and-migrate",
     "order": 1330,
-    "title": "Verify rollout and rollback",
-    "description": "Drain Harness 2.1.1 safely, verify Harness 3 in staging and canary deployments, and preserve a version-matched rollback path.",
+    "title": "Verify Harness v4 rollout and rollback",
+    "description": "Prove the v4 source rewrite, adapters, outcomes, and data boundaries before production traffic moves.",
     "pageRole": "migration"
   }
 ] as const
