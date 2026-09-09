@@ -1,7 +1,7 @@
 import { defineGuardrailAction } from '@purista/harness-guardrails'
 import { classifySupportMessageInputSchema } from './schema.js'
 
-export const blockInstructionOverride = defineGuardrailAction({
+export const blockInstructionOverride = defineGuardrailAction<'input', typeof classifySupportMessageInputSchema>({
 	phase: 'input',
 	valueSchema: classifySupportMessageInputSchema,
 	mayTransform: false,

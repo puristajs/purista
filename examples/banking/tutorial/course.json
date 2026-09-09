@@ -442,7 +442,7 @@
       "status": "draft",
 	  "projectDirectory": "guarded-classification",
 	  "replayRequires": [],
-	  "constructionSourceAligned": false,
+	  "constructionSourceAligned": true,
 	  "requiredWrittenFiles": [
 		".env.example",
 		"package.json",
@@ -454,18 +454,19 @@
 		"src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts",
 		"src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.ts",
 		"src/service/support/v1/harness/agent/classifySupportMessage/schema.ts",
+		"src/service/support/v1/harness/supportHarness.ts",
 		"src/index.ts",
 		"src/invokeClassification.ts",
 		"src/service/support/v1/SupportResources.ts",
-		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.test.ts",
-		"src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts",
+		"src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.test.ts",
+		"src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.ts",
 		"src/service/support/v1/requireSupportClassification.ts",
 		"src/service/support/v1/supportV1Service.test.ts",
 		"src/service/support/v1/supportV1Service.ts",
 		"src/service/support/v1/supportV1ServiceBuilder.ts"
 	  ],
       "requires": [
-        "classification-agent"
+        "create-project"
       ],
       "pages": [
         "ai-guardrails/build/install",

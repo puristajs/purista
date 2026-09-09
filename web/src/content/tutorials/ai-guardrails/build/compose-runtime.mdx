@@ -1,19 +1,12 @@
 ---
 title: Compose the guarded runtime
-description: Inject the business policy and model through one reusable PURISTA service factory.
+description: Supply the business policy and singular model binding at startup.
 order: 196
 kind: lesson
 status: draft
 ---
 
-The portable content policy and the PURISTA service definitions are complete.
-Now create the composition root that selects the concrete model and business
-policy for this process.
-
-## Create the service factory
-
-Create a factory that accepts infrastructure as arguments. Tests, the local
-demo, and the live entry point can then share one service definition.
+Create one composition root for the service's runtime dependencies.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -33,21 +26,16 @@ export function createSupportService(
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
 		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+			model: options.model,
 		},
 	})
 }
 ```
 
-The `primary` binding satisfies the Harness model alias. The business policy is
-a normal typed service resource. `NO_CONTENT` keeps prompts and results out of
-telemetry by default.
+The singular `ai.model` value supplies the provider and model to the mounted
+Harness. Credentials remain outside the portable agent and guardrail files.
 
-## Add an address-first caller
-
-Create the terminal adapter below. It sends a normal command message to
-`Support / 1 / classifySupportMessage`.
+Create an address-first terminal caller for the wrapper command.
 
 ```ts title="src/invokeClassification.ts" write
 import { type EventBridge, getNewInstanceId } from '@purista/core'
@@ -55,7 +43,7 @@ import type { z } from 'zod'
 import type {
 	classifySupportMessageInputSchema,
 	classifySupportMessageOutputSchema,
-} from './harness/support/agent/classifySupportMessage/schema.js'
+} from './service/support/v1/harness/agent/classifySupportMessage/schema.js'
 
 type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
 type Classification = z.infer<typeof classifySupportMessageOutputSchema>
@@ -76,19 +64,16 @@ export function invokeClassification(
 			serviceTarget: 'classify',
 			instanceId: getNewInstanceId(),
 		},
-		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
 		payload: { payload, parameter: {} },
 	})
 }
 ```
 
-In a server application, authentication middleware verifies a credential and
-adds the trusted identity. A client-supplied tenant or principal must never be
-copied into these fields without verification.
+Trusted identity stays in PURISTA message metadata. The input rail inspects only
+the classified content and cannot use payload fields as proof of authority.
 
-Compile the composition before starting the process.
-
-```bash title="Verify the guarded runtime composition" replay="project"
+```bash title="Verify runtime composition" replay="project"
 npm run build
 ```
 

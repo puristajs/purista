@@ -1,7 +1,31 @@
-import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
+import { classifySupportMessageAgent } from './harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import type { SupportClassificationPolicy } from './SupportResources.js'
 import { supportV1Service } from './supportV1Service.js'
+
+const directCallerBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Calls the guarded classifier in integration tests',
+}).defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
+const callClassifierCommandBuilder = directCallerBuilder
+	.getCommandBuilder('callClassifier', 'Call the guarded classifier directly')
+	.addPayloadSchema(classifySupportMessageAgent.contract.input)
+	.addOutputSchema(classifySupportMessageAgent.contract.output)
+	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.setCommandFunction(async function ({ agent }, payload) {
+		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
+			sessionId: `direct:${payload.messageId}`,
+		})
+		if (result.outcome.status !== 'completed') throw new Error('The classifier was interrupted unexpectedly.')
+		return result.outcome.output
+	})
+const directCallerService = directCallerBuilder
+	.addCommandDefinition(callClassifierCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
 
 describe('guarded support service', () => {
 	it('applies Harness guardrails when a PURISTA command invokes the mounted agent', async () => {
@@ -11,7 +35,7 @@ describe('guarded support service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: { canClassify: async () => true } },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -21,7 +45,11 @@ describe('guarded support service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-alex',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						receiver: {
+							serviceName: 'Support',
+							serviceVersion: '1',
+							serviceTarget: 'runClassifySupportMessage',
+						},
 						payload: {
 							payload: {
 								messageId: 'MSG-303',
@@ -47,10 +75,10 @@ describe('guarded support service', () => {
 		const policy = { canClassify: vi.fn(async () => false) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await supportV1Service.getInstance(eventBridge, {
+		const service = await directCallerService.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -60,7 +88,7 @@ describe('guarded support service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-other',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classify_support_message' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'callClassifier' },
 						payload: {
 							payload: { messageId: 'MSG-304', text: 'Please classify this message.' },
 							parameter: {},

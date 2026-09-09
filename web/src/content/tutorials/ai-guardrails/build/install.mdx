@@ -1,28 +1,28 @@
 ---
-title: Create the guarded agent project
-description: Install the optional Guardrails package and let the PURISTA CLI generate Support, the native agent, and its caller command.
+title: Create the guarded classification project
+description: Install the published v4 packages and generate a service-owned agent.
 order: 191
 kind: lesson
 status: draft
 ---
 
-Start in an empty parent directory. This chapter creates its own project named
-`guarded-classification`.
+Start in an empty parent directory. This chapter creates an independent
+`guarded-classification` project.
 
-```bash title="Create and enter the Guardrails project" replay="parent"
-npm create purista@2.2.0 guarded-classification -- --runtime node --event-bridge default --non-interactive --defaults
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 guarded-classification -- --runtime node --event-bridge default --non-interactive --defaults
 cd guarded-classification
 ```
 
-Install the exact versions used by the lesson. `@purista/harness-guardrails` is
-optional in applications that do not declare content rails.
+Install the published Framework, Harness, guardrail, and optional provider
+packages.
 
-```bash title="Install Framework, Harness, Guardrails, and test dependencies" replay="project"
-npm install --save-exact @purista/core@4.0.0 @purista/harness@3.0.0 @purista/harness-guardrails@3.0.0 @purista/harness-openai@3.0.0 zod@4.4.3
-npm install --save-dev --save-exact @purista/cli@4.0.0 @biomejs/biome@2.5.8 @types/node@26.2.0 @types/sinon@22.0.0 sinon@22.1.0 tsx@4.23.12 typescript@7.0.2 vitest@4.1.10
+```bash title="Install guardrail dependencies" replay="project"
+npm install @purista/core@^4.0.0 @purista/harness@^4.0.0 @purista/harness-guardrails@^4.0.0 @purista/harness-openai@^4.0.0 zod@^4.4.3
+npm install --save-dev @purista/cli@^4.0.0 @biomejs/biome@^2.5.8 @types/node@^26.2.0 @types/sinon@^22.0.0 sinon@^22.1.0 tsx@^4.23.12 typescript@npm:@typescript/typescript6@^6.0.2 vitest@^4.1.10
 ```
 
-Replace `package.json` with this complete file.
+Replace the package manifest.
 
 ```json title="package.json" write
 {
@@ -70,21 +70,15 @@ Replace `package.json` with this complete file.
 	}
 }
 ```
-Generate the capability owner, native agent, and application command.
 
-```bash title="Generate Support, the agent, and its command caller" replay="project"
-npm run add:service -- support --description "Own support conversations and support automation" --non-interactive
+Generate the Support service and its agent with explicit non-interactive values.
+
+```bash title="Generate the guarded agent" replay="project"
+npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
 npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with content guardrails" --non-interactive
-npm run add:command -- classify-support-message --service support --service-version 1 --description "Classify one support message with the guarded agent" --non-interactive
 ```
 
-The CLI creates the portable agent module and test, one service-level Harness
-definition, one mount policy, the command files, and both service
-registrations. Run that generated checkpoint before editing it.
+The generated Harness definition lives under
+`src/service/support/v1/harness`, beside the service that owns its mount.
 
-```bash title="Verify the generated Guardrails checkpoint" replay="project"
-npm run build
-npm test
-```
-
-Continue with [Define the input content rail](../input/).
+Continue with [Define the input rail](../input/).

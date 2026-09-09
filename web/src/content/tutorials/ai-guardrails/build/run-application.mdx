@@ -1,20 +1,13 @@
 ---
 title: Run the guarded application
-description: Observe an output transform through EventBridge, then optionally replace the fake model with OpenAI.
+description: Observe output transformation with a fake model, then optionally bind OpenAI.
 order: 197
 kind: lesson
 status: draft
 ---
 
-The composition is ready. Start with a strict fake model so the output
-transformation is repeatable and requires no provider credentials. The live
-entry point later changes only the model binding.
-
-## Run the transformed result without an API key
-
-Create the deterministic demo. The fake model returns a reason containing a
-synthetic test number. The output rail replaces it before the command receives
-the result.
+Use a strict fake provider first. Its response contains a card-like number so
+the output rail has visible work to do.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
@@ -61,11 +54,12 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-```bash title="Run the credential-free Guardrails demo" replay="project"
+
+```bash title="Run the credential-free guardrail demo" replay="project"
 npm run demo
 ```
 
-```json title="Expected transformed classification" expect="json"
+```json title="Expected redacted result" expect="json"
 {
 	"category": "card",
 	"urgency": "normal",
@@ -73,9 +67,7 @@ npm run demo
 }
 ```
 
-## Optional: use a live provider
-
-Create the live process entry point.
+The optional live process binds OpenAI only at startup.
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
@@ -104,12 +96,13 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
+
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
 
-Copy the template to `.env`, set the key, and run `npm start` only when you
-intend to contact the provider. The process remains active until shutdown.
+The default demo and all tests need no credentials or network. Add a key only
+when you intentionally run the live process.
 
-Continue with [Test the native and command boundaries](../../testing/test-guardrails/).
+Continue with [Test the guardrail boundaries](../../testing/test-guardrails/).

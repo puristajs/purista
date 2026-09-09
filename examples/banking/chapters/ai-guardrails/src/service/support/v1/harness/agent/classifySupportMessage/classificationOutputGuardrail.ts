@@ -3,7 +3,7 @@ import { classifySupportMessageOutputSchema } from './schema.js'
 
 const cardLikeDigits = /\b\d{13,19}\b/g
 
-export const redactCardLikeDigits = defineGuardrailAction({
+export const redactCardLikeDigits = defineGuardrailAction<'output', typeof classifySupportMessageOutputSchema>({
 	phase: 'output',
 	valueSchema: classifySupportMessageOutputSchema,
 	evaluate: ({ value }) => {
@@ -13,7 +13,7 @@ export const redactCardLikeDigits = defineGuardrailAction({
 			: {
 					decision: 'transform',
 					target: 'bot_message',
-					value: { ...value, reason },
+					value: { category: value.category, urgency: value.urgency, reason },
 					reasonCode: 'card_digits_redacted',
 				}
 	},

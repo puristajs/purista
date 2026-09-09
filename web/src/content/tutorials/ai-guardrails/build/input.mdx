@@ -1,21 +1,15 @@
 ---
-title: Define the input content rail
-description: Create a typed, fail-closed action that blocks one instruction-override pattern before provider access.
+title: Block unsafe agent input
+description: Define a typed input rail that stops a request before provider work.
 order: 192
 kind: lesson
 status: draft
 ---
 
-A guardrail action receives a value at a specific model lifecycle phase. This
-first action inspects validated agent input before Harness contacts the model
-provider.
+First define the shared agent input and output schemas. Each guardrail action
+uses the same contract as the boundary it checks.
 
-## Create the shared schemas
-
-Create a separate schema file beside the generated agent. The agent and both
-guardrail actions will use the same contracts without importing one another.
-
-```ts title="src/harness/support/agent/classifySupportMessage/schema.ts" write
+```ts title="src/service/support/v1/harness/agent/classifySupportMessage/schema.ts" write
 import { z } from 'zod'
 
 export const classifySupportMessageInputSchema = z.strictObject({
@@ -29,16 +23,14 @@ export const classifySupportMessageOutputSchema = z.strictObject({
 	reason: z.string().trim().min(1).max(240),
 })
 ```
-## Define the blocking action
 
-Create the complete action file. The evaluator inspects only `text` and returns
-a stable reason code without copying message content into the result.
+Now define the input action.
 
-```ts title="src/harness/support/agent/classifySupportMessage/classificationInputGuardrail.ts" write
+```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classificationInputGuardrail.ts" write
 import { defineGuardrailAction } from '@purista/harness-guardrails'
 import { classifySupportMessageInputSchema } from './schema.js'
 
-export const blockInstructionOverride = defineGuardrailAction({
+export const blockInstructionOverride = defineGuardrailAction<'input', typeof classifySupportMessageInputSchema>({
 	phase: 'input',
 	valueSchema: classifySupportMessageInputSchema,
 	mayTransform: false,
@@ -48,20 +40,12 @@ export const blockInstructionOverride = defineGuardrailAction({
 			: { decision: 'allow' },
 })
 ```
-`phase: 'input'` fixes where the action may run. `valueSchema` gives the
-evaluator a validated value. `mayTransform: false` restricts the result to
-allow or block. An evaluator exception, timeout, cancellation, invalid input,
-or invalid result fails closed when the flow runs.
 
-This deterministic expression teaches the lifecycle. It is not a general
-prompt-injection detector.
+`phase: 'input'` runs before the model request. The action returns `allow`
+for ordinary messages and `block` for the tutorial's deterministic pattern.
+`mayTransform: false` makes this rail decision-only.
 
-```bash title="Typecheck the input action" replay="project"
-npm run build
-```
+The rule inspects content. It does not know the tenant or decide whether the
+caller may use Support; that remains a PURISTA business policy.
 
-The action exists but is not attached to the agent yet. The next page adds the
-output action, composes both flows, and attaches them together so every runnable
-checkpoint uses the complete final policy.
-
-Continue with [Define the output rail and attach the flow](../output/).
+Continue with [Transform unsafe model output](../output/).

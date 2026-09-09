@@ -1,50 +1,43 @@
 ---
 title: Apply AI guardrails
-description: Add explicit, fail-closed input and output content controls to a native Harness agent.
+description: Block unsafe agent input and transform unsafe model output without mixing content checks with business authorization.
 order: 190
 kind: chapter
 group: ai
 status: draft
 ---
 
-This chapter builds a small classifier with content controls. An input rail
-blocks one instruction-override pattern before the provider runs. An output
-rail removes long card-like digit sequences from the final structured reason
-before it reaches the caller.
+This chapter adds content guardrails to one structured Harness agent. An input
+rail blocks a small instruction-override pattern before the provider runs. An
+output rail removes card-like digit sequences before the result leaves Harness.
 
-Guardrails answer a content question: may this exact value enter or leave the
-agent? They do not authenticate the caller and do not decide whether a
-principal may perform a business action. PURISTA business guards keep that
-separate responsibility.
-
-```text title="Guardrail placement"
-validated agent input
-  -> input content rail
+```text title="Guarded classification path"
+authenticated PURISTA caller
+  -> PURISTA business authorization guard
+  -> mounted Harness agent target
+  -> Harness input rail
   -> model provider
-  -> schema-valid final candidate
-  -> output content rail
-  -> PURISTA caller
+  -> Harness output rail
+  -> validated command result
 ```
 
-You will generate the complete PURISTA and Harness structure, install the
-optional package, define typed actions and ordered flows, attach them to the
-native agent, protect its published address, and prove that blocked content or
-denied business access never reaches the model.
+These checks have different jobs. PURISTA guards decide whether a trusted
+caller may use a business capability. Harness guardrails inspect or transform
+content around model and tool work. A content rule must not grant business
+access, and an authorization check must not be presented as model safety.
 
-You need Node.js 24 or newer and basic TypeScript knowledge. The required demo
-uses a strict fake model and needs no API key or earlier tutorial.
+The example uses a short support-message fixture. Its reusable lesson is how to
+attach provider-neutral rails to a direct agent definition, mount that agent on
+a service, and test every boundary without credentials.
 
-The focused source is retained in
-`examples/banking/chapters/ai-guardrails`.
+You will:
 
-1. [Create the project and generate the agent](./build/install/)
-2. [Define an input content rail](./build/input/)
-3. [Define an output rail and attach the flow](./build/output/)
-4. [Authorize and mount the guarded agent](./build/integrate/)
-5. [Invoke the guarded agent from a command](./build/invoke/)
-6. [Compose the guarded runtime](./build/compose-runtime/)
-7. [Run the complete application](./build/run-application/)
-8. [Test the native and command boundaries](./testing/test-guardrails/)
-9. [Test authorization and content rails through EventBridge](./testing/test-eventbridge/)
-
-Start with [Generate the guarded agent project](./build/install/).
+1. [create the project and install guardrails](./build/install/);
+2. [define an input rail](./build/input/);
+3. [define an output rail and attach both rails](./build/output/);
+4. [protect and mount the agent](./build/integrate/);
+5. [invoke it through a PURISTA command](./build/invoke/);
+6. [compose and run the service](./build/compose-runtime/);
+7. [run a deterministic demo](./build/run-application/);
+8. [test the native and command boundaries](./testing/test-guardrails/); and
+9. [test the complete EventBridge path](./testing/test-eventbridge/).
