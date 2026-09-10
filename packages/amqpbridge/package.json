@@ -1,6 +1,6 @@
 {
 	"name": "@purista/amqpbridge",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "AMQP eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -45,7 +45,7 @@
 		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
 		"@opentelemetry/instrumentation-amqplib": "^0.68.0",
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"amqplib": "^2.0.1"
 	},
 	"peerDependenciesMeta": {},

@@ -1,6 +1,6 @@
 {
 	"name": "@purista/banking-tutorials",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"private": true,
 	"type": "module",
 	"description": "PURISTA examples built by replaying the website tutorial instructions",

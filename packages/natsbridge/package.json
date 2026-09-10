@@ -1,6 +1,6 @@
 {
 	"name": "@purista/natsbridge",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "NATS eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -45,7 +45,7 @@
 		"@opentelemetry/resources": "^2.10.0",
 		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"nats": "^2.29.3"
 	},
 	"peerDependenciesMeta": {},

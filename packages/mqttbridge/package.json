@@ -1,6 +1,6 @@
 {
 	"name": "@purista/mqttbridge",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "MQTT eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -44,7 +44,7 @@
 		"@opentelemetry/resources": "^2.10.0",
 		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"mqtt": "^5.15.2"
 	},
 	"peerDependenciesMeta": {},

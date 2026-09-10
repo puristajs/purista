@@ -1,5 +1,5 @@
 {
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -13,9 +13,9 @@
 		"test:unit": "tsc --noEmit -p ./tsconfig.unit.json && vitest -c ./vitest.config.unit.ts",
 		"test:coverage:streaming": "tsc --noEmit && vitest -c ./vitest.config.streaming.ts --run",
 		"update:doc": "npm run gitclean && git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && npm run build:api-docs && npm run build -w @purista/web && git add --all && git commit -S -am \"doc: update api documentation\" && git commit -am \"doc: update CHANGELOG\"",
-		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
-		"release:minor": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
-		"release:patch": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && npm publish --workspaces",
+		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && node scripts/publishWorkspaces.mjs",
+		"release:minor": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && node scripts/publishWorkspaces.mjs",
+		"release:patch": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && node scripts/publishWorkspaces.mjs",
 		"gitclean": "./scripts/isGitClean.sh",
 		"release:prepare": "npm run test:unit && npm run build && npm run test:package-imports && npm run audit:examples",
 		"release:prepare:patch": "./scripts/releasePrepare.sh patch",
