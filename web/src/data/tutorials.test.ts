@@ -1,9 +1,13 @@
+import { readdirSync, readFileSync } from 'node:fs'
+import { join, relative, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 import {
 	getPublishedTutorialEntries,
 	getTutorialBreadcrumbs,
 	getTutorialPageNavigation,
 	getTutorialSidebar,
+	tutorialIndexId,
 	getVisibleTutorialEntries,
 	tutorialRoute,
 	type TutorialEntry,
@@ -26,6 +30,39 @@ const pages = [
 	entry('state/extensions/history/define', 10),
 	entry('state/extensions/history/test', 20),
 ]
+
+const coursePath = fileURLToPath(new URL('../../../examples/banking/tutorial/course.json', import.meta.url))
+const contentRoot = fileURLToPath(new URL('../content/tutorials/', import.meta.url))
+const course = JSON.parse(readFileSync(coursePath, 'utf8')) as {
+	chapters: { id: string; title: string; status: 'draft' | 'published'; pages: string[] }[]
+	baselines: { id: string; pages: string[] }[]
+}
+
+const capabilityRoots = [
+	'create-project', 'hono-webserver', 'static-website', 'rest-endpoints',
+	'database-resource', 'protected-endpoints', 'sessions', 'business-guards',
+	'command-transforms', 'external-resources', 'command-result-events', 'subscriptions',
+	'streams', 'queue-processing', 'schedules', 'observability', 'distributed-runtime',
+	'classification-agent', 'ai-guardrails', 'retrieval-ingestion', 'conversation-memory',
+	'agent-tools', 'agent-skills', 'human-review-workflow', 'parallel-agents',
+	'multi-step-workflow', 'sandbox-analysis', 'agent-evaluation',
+] as const
+
+const aiCapabilityRoots = capabilityRoots.slice(17)
+
+function tutorialContentIds(directory = contentRoot): string[] {
+	return readdirSync(directory, { withFileTypes: true }).flatMap(item => {
+		const path = join(directory, item.name)
+		if (item.isDirectory()) return tutorialContentIds(path)
+		if (!/\.mdx?$/.test(item.name)) return []
+		const id = relative(contentRoot, path).split(sep).join('/').replace(/\.mdx?$/, '').replace(/\/index$/, '')
+		return [id || tutorialIndexId]
+	})
+}
+
+function frontmatter(source: string, field: string): string | undefined {
+	return source.match(new RegExp(`^${field}:\\s*(.+)$`, 'm'))?.[1]?.trim()
+}
 
 describe('tutorial reading structure', () => {
 	test('keeps Build before Testing despite locally repeated order numbers', () => {
@@ -102,5 +139,63 @@ describe('tutorial reading structure', () => {
 		expect(tutorialRoute('state/index')).toBe('/tutorials/state/')
 		expect(tutorialRoute('index')).toBe('/tutorials/')
 		expect(() => getPublishedTutorialEntries([...pages, entry('state/index', 10)])).toThrow('Duplicate normalized tutorial content ID')
+	})
+})
+
+describe('tutorial course navigation contract', () => {
+	test('keeps all 28 capability roots in the required capability-first order', () => {
+		expect(course.chapters.map(chapter => chapter.id)).toEqual(capabilityRoots)
+		expect(course.chapters).toHaveLength(28)
+	})
+
+	test('groups every AI capability under Add AI capabilities in draft preview and after publication', () => {
+		const chapterEntries = course.chapters.map((chapter, index) => {
+			const source = readFileSync(`${contentRoot}/${chapter.id}/index.mdx`, 'utf8')
+			return entry(chapter.id, index + 1, 'chapter', {
+				title: chapter.title,
+				status: frontmatter(source, 'status') as 'draft' | 'published',
+				group: frontmatter(source, 'group') as TutorialEntry['data']['group'],
+			})
+		})
+
+		const previewSidebar = getTutorialSidebar(chapterEntries, { includeDrafts: true })
+		const aiHeader = previewSidebar.findIndex(item => item.id === 'group-ai')
+		expect(aiHeader).toBeGreaterThanOrEqual(0)
+		expect(previewSidebar[aiHeader]).toMatchObject({ title: 'Add AI capabilities', kind: 'sectionHeader' })
+		expect(previewSidebar.slice(aiHeader + 1, aiHeader + 1 + aiCapabilityRoots.length).map(item => item.id)).toEqual(aiCapabilityRoots)
+
+		const publishedSidebar = getTutorialSidebar(chapterEntries)
+		expect(publishedSidebar.some(item => item.id === 'group-ai')).toBe(false)
+		expect(chapterEntries.filter(item => item.data.status === 'draft')).toHaveLength(aiCapabilityRoots.length)
+
+		const futurePublishedEntries = chapterEntries.map(item => ({
+			...item,
+			data: { ...item.data, status: 'published' as const },
+		}))
+		const futurePublishedSidebar = getTutorialSidebar(futurePublishedEntries)
+		const futureAiHeader = futurePublishedSidebar.findIndex(item => item.id === 'group-ai')
+		expect(futurePublishedSidebar.slice(futureAiHeader + 1, futureAiHeader + 1 + aiCapabilityRoots.length).map(item => item.id)).toEqual(aiCapabilityRoots)
+	})
+
+	test('lists every content page in the course manifest and keeps root status aligned', () => {
+		const expected = new Set<string>([tutorialIndexId, ...course.chapters.map(chapter => chapter.id)])
+		for (const recipe of [...course.chapters, ...course.baselines]) {
+			for (const page of recipe.pages) expected.add(page)
+		}
+		expect(tutorialContentIds().sort()).toEqual([...expected].sort())
+
+		for (const chapter of course.chapters) {
+			const source = readFileSync(`${contentRoot}/${chapter.id}/index.mdx`, 'utf8')
+			expect(frontmatter(source, 'kind')).toBe('chapter')
+			expect(frontmatter(source, 'status')).toBe(chapter.status)
+		}
+	})
+
+	test('keeps the course landing list aligned with the manifest order', () => {
+		const source = readFileSync(`${contentRoot}/index.mdx`, 'utf8')
+		const courseChapterSection = source.match(/## Course chapters\n([\s\S]*?)\n## Start here/)
+		expect(courseChapterSection).toBeTruthy()
+		const listedRoots = [...courseChapterSection![1].matchAll(/\]\(\/tutorials\/([^/]+)\/\)/g)].map(([, id]) => id)
+		expect(listedRoots).toEqual(capabilityRoots)
 	})
 })
