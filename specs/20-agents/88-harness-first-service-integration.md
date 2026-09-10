@@ -1366,11 +1366,11 @@ UI uses AI Elements components for conversation, message, tool, prompt, and
 confirmation presentation instead of custom chat primitives.
 
 The tutorial client manifest pins the verified protocol set:
-`ai@7.0.90`, `@ai-sdk/react@4.0.15`, `react@19.2.8`, and
+`ai@7.0.90`, `@ai-sdk/react@4.0.93`, `react@19.2.8`, and
 `react-dom@19.2.8`. It initializes the default shadcn theme with
-`npx shadcn@4.20.1 init --defaults`, then vendors `conversation`, `message`,
-`prompt-input`, `tool`, `confirmation`, and `sources` with
-`npx ai-elements@1.9.0 add ...`. The checked-in generated source and lockfile
+`npx shadcn@4.20.1 init --defaults`, then vendors the AI Elements 1.9.0
+`conversation`, `message`, `prompt-input`, `tool`, `confirmation`, and
+`sources` registry components with the pinned shadcn CLI. The checked-in generated source and lockfile
 are the reproducible artifact; tutorials show these published commands. Backend
 `--http stream` adds `@purista/harness-ai-sdk-ui@^4.0.0` and its tested
 `ai@^7.0.0` peer for the standard Message Stream protocol. The React packages
