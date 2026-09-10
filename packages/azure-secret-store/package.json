@@ -40,7 +40,7 @@
 		"dotenv": "^17.4.2",
 		"sinon": "^22.1.0",
 		"testcontainers": "^12.1.0",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"@azure/identity": "^4.13.1",
