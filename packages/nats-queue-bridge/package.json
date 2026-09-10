@@ -35,7 +35,7 @@
 	"devDependencies": {
 		"@testcontainers/nats": "^12.1.0",
 		"@types/node": "^26.2.0",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"@purista/core": "*",
