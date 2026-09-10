@@ -7,7 +7,9 @@ status: draft
 ---
 
 Compose the three visible stages. The local credential exists only to make the
-full authentication path runnable and easy to inspect.
+full authentication path runnable and easy to inspect. The browser keeps the
+opaque session token; the server derives trusted tenant and principal identity
+from it.
 
 ```tsx title="ui/src/App.tsx" write
 import { type FormEvent, useState } from 'react'
@@ -83,9 +85,10 @@ export function App() {
 	)
 }
 ```
-
-After login, the browser keeps only the opaque token. A successful ingestion
+After login, the browser holds only the opaque token. A successful ingestion
 enables chat, making the indexing and answer paths visible as separate steps.
+The layout uses a responsive grid that collapses for narrow screens, and the
+error message is exposed with role=alert.
 
 ```bash title="Build the complete UI"
 npm run build:ui

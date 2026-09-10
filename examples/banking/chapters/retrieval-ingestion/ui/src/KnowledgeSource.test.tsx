@@ -26,4 +26,16 @@ describe('KnowledgeSource', () => {
 		)
 		expect(screen.getByText('The source is ready for retrieval.')).toBeInTheDocument()
 	})
+
+	it('recovers from a network failure and announces the error', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+		const onIngested = vi.fn()
+		render(<KnowledgeSource sessionToken="session-123" onIngested={onIngested} />)
+
+		fireEvent.submit(screen.getByRole('button', { name: 'Ingest source' }).closest('form') as HTMLFormElement)
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('The source could not be ingested.')
+		expect(screen.getByRole('button', { name: 'Ingest source' })).toBeEnabled()
+		expect(onIngested).not.toHaveBeenCalled()
+	})
 })

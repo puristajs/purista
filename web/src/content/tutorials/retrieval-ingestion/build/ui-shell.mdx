@@ -1,15 +1,47 @@
 ---
 title: Create the React application shell
-description: Configure Vite, Tailwind, shadcn, aliases, and browser tests for the RAG interface.
+description: Configure the pinned React, Vite, Tailwind, shadcn, and browser test foundation for the RAG interface.
 order: 214
 kind: lesson
 status: draft
 ---
 
-Create the UI source directories.
+Create the UI source directories from the project root. The example keeps its
+server package manifest at the project root, so these commands never assume
+that ui/ has a separate package.json.
 
-```bash title="Create the React application directories" replay="project"
+```bash title="Create the React application directories"
 mkdir -p ui/src/test
+```
+
+Install the exact browser dependencies used by this tutorial. ai provides
+the standard UI Message Stream v1 transport, @ai-sdk/react provides
+useChat, and React 19.2.8 is the version tested by the example.
+
+```bash title="Install the pinned browser dependencies"
+npm install ai@7.0.90 @ai-sdk/react@4.0.93 react@19.2.8 react-dom@19.2.8
+```
+
+Initialize the default shadcn theme in the ui directory. The --cwd ui
+argument tells the pinned CLI where the Vite app lives while the command still
+runs from the project root.
+
+```bash title="Initialize the default shadcn theme"
+npx shadcn@4.20.1 init --defaults --cwd ui
+```
+
+The chat uses AI Elements 1.9.0. Each command below fetches one pinned registry
+entry and vendors its source into the application. The generated files are
+application code owned by this project; do not replace these commands with
+@latest or handwritten copies.
+
+```bash title="Vendor the pinned AI Elements components"
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/conversation.json
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/message.json
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/prompt-input.json
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/tool.json
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/confirmation.json
+npx shadcn@4.20.1 add --cwd ui https://elements.ai-sdk.dev/r/1.9.0/sources.json
 ```
 
 Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
@@ -28,7 +60,6 @@ Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
 	</body>
 </html>
 ```
-
 ```json title="ui/tsconfig.json" write
 {
 	"compilerOptions": {
@@ -48,7 +79,6 @@ Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
 	"include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts"]
 }
 ```
-
 ```json title="ui/components.json" write
 {
 	"$schema": "https://ui.shadcn.com/schema.json",
@@ -69,7 +99,6 @@ Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
 	}
 }
 ```
-
 ```ts title="ui/vite.config.ts" write
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
@@ -88,7 +117,6 @@ export default defineConfig({
 	},
 })
 ```
-
 ```ts title="ui/vitest.config.ts" write
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
@@ -106,11 +134,9 @@ export default defineConfig({
 	},
 })
 ```
-
 ```ts title="ui/src/test/setup.ts" write
 import '@testing-library/jest-dom/vitest'
 ```
-
 Create the React entry point and default theme styles.
 
 ```tsx title="ui/src/main.tsx" write
@@ -128,7 +154,6 @@ createRoot(root).render(
 	</StrictMode>,
 )
 ```
-
 ```css title="ui/src/index.css" write
 @import "tailwindcss";
 
@@ -177,6 +202,7 @@ createRoot(root).render(
 	}
 }
 ```
+Build the empty shell before adding application behavior.
 
 ```bash title="Build the empty UI shell"
 npm run build:ui

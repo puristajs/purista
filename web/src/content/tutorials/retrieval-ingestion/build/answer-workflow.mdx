@@ -1,89 +1,53 @@
 ---
-title: Build the answer workflow
-description: Run retrieval first, then stream a cited answer while forwarding native agent and model events.
+title: Expose the aggregate answer command
+description: Invoke the answerKnowledgeQuestion agent through a guarded runAnswerKnowledgeQuestion command.
 order: 209
 kind: lesson
 status: draft
 ---
 
-Fill the generated workflow. It invokes the retrieval agent, handles its typed
-outcome, and streams a grounded answer from the primary model.
+Create the command that starts or resumes the durable answer workflow. It carries the request identity and collection scope into the Harness.
 
-```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.ts" write
-import { type AgentDefinition, type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
-import {
-	answerKnowledgeQuestionInputSchema,
-	type retrievedEvidenceSchema,
-} from '../../../../service/knowledge/v1/schema.js'
+```ts title="src/service/knowledge/v1/command/runAnswerKnowledgeQuestion/runAnswerKnowledgeQuestionCommandBuilder.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import { answerKnowledgeQuestionAgent } from '../../harness/agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
+import { runAnswerKnowledgeQuestionInputSchema, runAnswerKnowledgeQuestionOutputSchema } from '../../schema.js'
 
-type AnswerKnowledgeQuestionState = BuilderState & {
-	models: { primary: ModelAlias }
-	agents: {
-		retrieve_evidence: AgentDefinition<any, typeof answerKnowledgeQuestionInputSchema, typeof retrievedEvidenceSchema>
-	}
-}
-
-export const answerKnowledgeQuestionWorkflow = defineHarnessModule<AnswerKnowledgeQuestionState>()(
-	'knowledge.workflow.answer-knowledge-question',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.workflow('answer_knowledge_question', {
-				input: answerKnowledgeQuestionInputSchema,
-				output: answerKnowledgeQuestionInputSchema.shape.question,
-				updates: 'text-delta',
-				delegation: { agents: ['retrieve_evidence'] },
-				handler: async (context) => {
-					const research = await context.agents.retrieve_evidence(context.input)
-					let answer = ''
-					for await (const chunk of context.models.primary.textStream(
-						{
-							messages: [
-								{
-									role: 'system',
-									content:
-										'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
-								},
-								{ role: 'user', content: JSON.stringify(research) },
-							],
-						},
-						context.signal,
-						{ emitRunEvents: true },
-					)) {
-						if (chunk.kind === 'delta') answer += chunk.text
-					}
-					return answer
-				},
+export const runAnswerKnowledgeQuestionCommandBuilder = knowledgeV1ServiceBuilder
+	.getCommandBuilder('runAnswerKnowledgeQuestion', 'Answer a knowledge question with the protected retrieval agent')
+	.addPayloadSchema(runAnswerKnowledgeQuestionInputSchema)
+	.addOutputSchema(runAnswerKnowledgeQuestionOutputSchema)
+	.canInvokeAgent('Knowledge', '1', answerKnowledgeQuestionAgent.contract)
+	.exposeAsHttpEndpoint('POST', 'knowledge/answer')
+	.setBeforeGuardHooks({
+		collectionAccess: async function (context, payload) {
+			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				collectionId: payload.collectionId,
+				action: 'search',
 			})
 		},
-	},
-)
+	})
+	.setCommandFunction(async function (context, payload) {
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const sessionId = createHash('sha256')
+			.update(JSON.stringify([tenantId, principalId, payload.conversationId]))
+			.digest('hex')
+		return context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run(
+			{ collectionId: payload.collectionId, question: payload.question },
+			{
+				sessionId: `knowledge-answer:${sessionId}`,
+				...(payload.resume === undefined ? {} : { resume: payload.resume }),
+			},
+		)
+	})
 ```
+Check your work: Run `npm run test:rag-retrieval`. The answer command test verifies the workflow request.
 
-Compose tool, agent, and workflow modules into one Knowledge harness and declare
-the primary and embedding model capabilities it requires.
-
-```ts title="src/harness/knowledge/knowledgeHarness.ts" write
-import { defineHarness } from '@purista/harness'
-import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
-import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
-import { answerKnowledgeQuestionWorkflow } from './workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.js'
-
-export const knowledgeHarness = defineHarness({ name: 'knowledge' })
-	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
-	.requireModel('embedding', { capabilities: ['embeddings'] })
-	.use(searchKnowledgeTool)
-	.use(retrieveEvidenceAgent)
-	.use(answerKnowledgeQuestionWorkflow)
-	.define()
-```
-
-The workflow forwards native retrieval events before answer text. The HTTP
-stream adapter can therefore expose tool status and real text deltas without
-inventing a second event model.
-
-```bash title="Type-check the answer workflow"
-npm run build
-```
-
-Continue with [Bind the search tool and publish targets](../mount-harness/).
+Continue with [Assemble one Knowledge Harness](../mount-harness/).

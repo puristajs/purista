@@ -1,14 +1,12 @@
 ---
-title: Authorize knowledge collections
-description: Inject repository and policy resources and centralize action-specific collection authorization.
+title: Declare resources and business authorization
+description: Inject the pgvector repository, embedding profile, and collection policy into the Knowledge service.
 order: 203
 kind: lesson
 status: draft
 ---
 
-Define the repository, collection policy, and embedding service contracts owned
-by Knowledge. The repository stores durable business data; it is not a
-StateStore.
+Create resource contracts that carry a tenant and collection scope through the retrieval flow. The guard rejects callers who do not supply that scope.
 
 ```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
 import type { KnowledgeMatch } from './schema.js'
@@ -18,6 +16,11 @@ export type KnowledgeChunkInput = {
 	content: string
 	embedding: number[]
 }
+
+export type KnowledgeEmbeddingProfile = Readonly<{
+	model: string
+	dimensions: number
+}>
 
 export interface KnowledgeRepository {
 	replaceRevision(
@@ -62,36 +65,6 @@ export class StaleKnowledgeRevisionError extends Error {
 	}
 }
 ```
-
-Attach the resources and embedding configuration to the generated service
-builder.
-
-```ts title="src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts" write
-import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
-import { z } from 'zod'
-import { generalKnowledgeServiceInfo } from '../generalKnowledgeServiceInfo.js'
-import type { KnowledgeCollectionPolicy, KnowledgeRepository } from './KnowledgeResources.js'
-
-export const knowledgeServiceInfo = {
-	serviceVersion: '1',
-	...generalKnowledgeServiceInfo,
-} as const satisfies ServiceInfoType
-
-export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo)
-	.setConfigSchema(
-		z.object({
-			embeddingModel: z.string().min(1),
-			embeddingDimensions: z.number().int().positive(),
-		}),
-	)
-	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
-	.defineResource<'knowledgeRepository', KnowledgeRepository>()
-```
-
-Centralize the business rule used by ingestion, search, the stream, and mounted
-Harness targets. Authentication supplies trusted tenant and principal IDs; this
-policy decides whether that caller may read or edit the named collection.
-
 ```ts title="src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts" write
 import { HandledError, StatusCode } from '@purista/core'
 import type { KnowledgeCollectionPolicy } from './KnowledgeResources.js'
@@ -120,9 +93,6 @@ export async function requireKnowledgeCollectionAccess(
 	}
 }
 ```
+Check your work: Run `npm run build:server`. The resource guard and service imports resolve.
 
-```bash title="Type-check collection authorization"
-npm run build
-```
-
-Continue with [Ingest and embed a source](../ingest/).
+Continue with [Build the ingestion workflow and command](../ingest/).

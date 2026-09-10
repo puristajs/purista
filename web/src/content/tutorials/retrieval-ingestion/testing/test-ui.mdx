@@ -1,14 +1,17 @@
 ---
 title: Test the browser client
-description: Verify bearer authentication, standard AI stream transport, tool rendering, text deltas, and the ingestion-to-chat transition.
+description: Verify bearer authentication, standard AI stream transport, status, citations, tools, approval decisions, cancellation, and ingestion.
 order: 227
 kind: lesson
 status: draft
 ---
 
-Test the chat at the React boundary. Mock AI SDK hooks and AI Elements rendering,
-then verify transport configuration, signed-in submission, retrieval status,
-and streamed text parts.
+Test the browser at the React boundary. Mock the AI SDK hook, transport, and
+vendored AI Elements components so these tests focus on the client contract:
+the bearer token and collection reach DefaultChatTransport, signed-in users
+can submit, status and tool parts are visible, source parts become citations,
+manual approval sends an accept or reject response, automatic approval does not
+show manual controls, and stop cancels an active request.
 
 ```tsx title="ui/src/KnowledgeChat.test.tsx" write
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
@@ -16,8 +19,10 @@ import type { PropsWithChildren } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { KnowledgeChat } from './KnowledgeChat'
 
-const { sendMessage, transports, useChat } = vi.hoisted(() => ({
+const { addToolApprovalResponse, sendMessage, stop, transports, useChat } = vi.hoisted(() => ({
+	addToolApprovalResponse: vi.fn(),
 	sendMessage: vi.fn(),
+	stop: vi.fn(),
 	transports: [] as Array<Record<string, unknown>>,
 	useChat: vi.fn(),
 }))
@@ -29,6 +34,20 @@ vi.mock('ai', () => ({
 			transports.push(options)
 		}
 	},
+	lastAssistantMessageIsCompleteWithApprovalResponses: vi.fn(),
+}))
+vi.mock('@/components/ai-elements/confirmation', () => ({
+	Confirmation: ({ children }: PropsWithChildren) => <section>{children}</section>,
+	ConfirmationAction: (properties: React.ComponentProps<'button'>) => <button {...properties} />,
+	ConfirmationActions: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	ConfirmationRequest: ({ children }: PropsWithChildren) => <p>{children}</p>,
+}))
+vi.mock('@/components/ai-elements/sources', () => ({
+	Source: ({ href, title }: { href?: string; title: string }) =>
+		href ? <a href={href}>{title}</a> : <span>{title}</span>,
+	Sources: ({ children }: PropsWithChildren) => <section aria-label="Retrieved sources">{children}</section>,
+	SourcesContent: ({ children }: PropsWithChildren) => <div>{children}</div>,
+	SourcesTrigger: ({ count }: { count: number }) => <button type="button">{count} sources</button>,
 }))
 vi.mock('@/components/ai-elements/conversation', () => ({
 	Conversation: ({ children }: PropsWithChildren) => <div>{children}</div>,
@@ -59,8 +78,17 @@ vi.mock('@/components/ai-elements/prompt-input', () => ({
 		</form>
 	),
 	PromptInputTextarea: (properties: React.ComponentProps<'textarea'>) => <textarea name="message" {...properties} />,
-	PromptInputSubmit: ({ status: _status, ...properties }: React.ComponentProps<'button'> & { status: string }) => (
-		<button type="submit" {...properties} />
+	PromptInputSubmit: ({
+		onStop,
+		status,
+		...properties
+	}: React.ComponentProps<'button'> & { onStop?: () => void; status: string }) => (
+		<button
+			aria-label={status === 'streaming' || status === 'submitted' ? 'Stop' : 'Submit'}
+			onClick={status === 'streaming' || status === 'submitted' ? onStop : undefined}
+			type={status === 'streaming' || status === 'submitted' ? 'button' : 'submit'}
+			{...properties}
+		/>
 	),
 }))
 vi.mock('@/components/ai-elements/tool', () => ({
@@ -79,10 +107,12 @@ afterEach(cleanup)
 
 describe('KnowledgeChat', () => {
 	beforeEach(() => {
+		addToolApprovalResponse.mockReset()
 		sendMessage.mockReset()
+		stop.mockReset()
 		useChat.mockReset()
 		transports.length = 0
-		useChat.mockReturnValue({ messages: [], sendMessage, status: 'ready' })
+		useChat.mockReturnValue({ addToolApprovalResponse, messages: [], sendMessage, status: 'ready', stop })
 	})
 
 	it('uses the standard endpoint and sends the session identity in the transport', () => {
@@ -108,12 +138,15 @@ describe('KnowledgeChat', () => {
 		fireEvent.submit(screen.getByRole('button').closest('form') as HTMLFormElement)
 
 		expect(sendMessage).toHaveBeenCalledWith({ text: 'How long can a transfer stay pending?' })
+		expect(screen.getByRole('textbox', { name: 'Knowledge question' })).toBeInTheDocument()
 	})
 
 	it('renders standard retrieval tool status and streamed text parts', () => {
 		useChat.mockReturnValue({
+			addToolApprovalResponse,
 			sendMessage,
 			status: 'streaming',
+			stop,
 			messages: [
 				{
 					id: 'assistant-1',
@@ -139,11 +172,132 @@ describe('KnowledgeChat', () => {
 		expect(screen.getByText('Up to two business days.')).toBeInTheDocument()
 		expect(screen.getByText('The answer is streaming.')).toBeInTheDocument()
 	})
+
+	it('renders retrieval citations, stream status, and standard source parts', () => {
+		useChat.mockReturnValue({
+			addToolApprovalResponse,
+			sendMessage,
+			status: 'streaming',
+			stop,
+			messages: [
+				{
+					id: 'assistant-1',
+					role: 'assistant',
+					parts: [
+						{ type: 'data-status', id: 'status-1', data: { phase: 'tool-running' } },
+						{
+							type: 'source-document',
+							sourceId: 'transfer-guide',
+							mediaType: 'text/plain',
+							title: 'International transfer timing',
+						},
+						{
+							type: 'dynamic-tool',
+							toolCallId: 'search-1',
+							toolName: 'searchKnowledge',
+							state: 'output-available',
+							input: {},
+							output: { matches: [{ documentId: 'transfer-guide', chunkIndex: 0 }] },
+						},
+					],
+				},
+			],
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(screen.getByText('Searching the authorized knowledge collection.')).toBeInTheDocument()
+		expect(screen.getByText('International transfer timing')).toBeInTheDocument()
+		expect(screen.getByText('[transfer-guide#0]')).toBeInTheDocument()
+		expect(screen.queryByRole('link', { name: 'International transfer timing' })).not.toBeInTheDocument()
+		expect(screen.queryByRole('link', { name: '[transfer-guide#0]' })).not.toBeInTheDocument()
+		fireEvent.click(screen.getByRole('button', { name: 'Stop' }))
+		expect(stop).toHaveBeenCalledOnce()
+	})
+
+	it('accepts and rejects only manual tool approval requests', () => {
+		useChat.mockReturnValue({
+			addToolApprovalResponse,
+			sendMessage,
+			status: 'ready',
+			stop,
+			messages: [
+				{
+					id: 'assistant-1',
+					role: 'assistant',
+					parts: [
+						{
+							type: 'dynamic-tool',
+							toolCallId: 'search-1',
+							toolName: 'searchKnowledge',
+							state: 'approval-requested',
+							input: {},
+							approval: { id: 'approval-1', requestReason: 'Search the customer-help collection?', isAutomatic: false },
+						},
+					],
+				},
+			],
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		fireEvent.click(screen.getByRole('button', { name: 'Approve' }))
+		expect(addToolApprovalResponse).toHaveBeenCalledWith({ id: 'approval-1', approved: true })
+		fireEvent.click(screen.getByRole('button', { name: 'Reject' }))
+		expect(addToolApprovalResponse).toHaveBeenCalledWith({ id: 'approval-1', approved: false })
+	})
+
+	it('shows automatic approval state without sending an approval response', () => {
+		useChat.mockReturnValue({
+			addToolApprovalResponse,
+			sendMessage,
+			status: 'ready',
+			stop,
+			messages: [
+				{
+					id: 'assistant-1',
+					role: 'assistant',
+					parts: [
+						{
+							type: 'dynamic-tool',
+							toolCallId: 'search-1',
+							toolName: 'searchKnowledge',
+							state: 'approval-requested',
+							input: {},
+							approval: { id: 'approval-1', isAutomatic: true },
+						},
+					],
+				},
+			],
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(screen.getByText('searchKnowledge: approval-requested')).toBeInTheDocument()
+		expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
+		expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument()
+	})
+
+	it('announces transport failures', () => {
+		useChat.mockReturnValue({
+			addToolApprovalResponse,
+			error: new Error('The stream connection was lost.'),
+			messages: [],
+			sendMessage,
+			status: 'error',
+			stop,
+		})
+
+		render(<KnowledgeChat sessionToken="session-123" />)
+
+		expect(screen.getByRole('alert')).toHaveTextContent('The stream connection was lost.')
+	})
 })
 ```
-
-Test the ingestion form separately and verify it calls the protected command
-before enabling retrieval.
+Test the ingestion form separately. This proves the protected command is called
+before the parent enables retrieval and checks that the success state is
+announced. The fetch stub uses a local response, so the test needs no provider
+credential or network.
 
 ```tsx title="ui/src/KnowledgeSource.test.tsx" write
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -174,10 +328,51 @@ describe('KnowledgeSource', () => {
 		)
 		expect(screen.getByText('The source is ready for retrieval.')).toBeInTheDocument()
 	})
+
+	it('recovers from a network failure and announces the error', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+		const onIngested = vi.fn()
+		render(<KnowledgeSource sessionToken="session-123" onIngested={onIngested} />)
+
+		fireEvent.submit(screen.getByRole('button', { name: 'Ingest source' }).closest('form') as HTMLFormElement)
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('The source could not be ingested.')
+		expect(screen.getByRole('button', { name: 'Ingest source' })).toBeEnabled()
+		expect(onIngested).not.toHaveBeenCalled()
+	})
 })
 ```
+The application shell test checks the visible sign-in control and the layout
+contract. The grid stays in one column by default and changes to two columns at
+the large breakpoint, so the same UI remains usable on a phone or desktop.
 
-Run the complete fast gate.
+```tsx title="ui/src/App.test.tsx" write
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { App } from './App'
+
+vi.mock('./KnowledgeChat.js', () => ({
+	KnowledgeChat: () => <section aria-label="Knowledge chat" />,
+}))
+
+vi.mock('./KnowledgeSource.js', () => ({
+	KnowledgeSource: () => <section aria-label="Knowledge source" />,
+}))
+
+afterEach(cleanup)
+
+describe('App', () => {
+	it('provides labeled controls and a responsive one-to-two-column layout', () => {
+		const { container } = render(<App />)
+
+		expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
+		expect(screen.getByRole('main')).toHaveClass('max-w-6xl')
+		expect(container.querySelector('.grid')).toHaveClass('grid', 'lg:grid-cols-[0.85fr_1.15fr]')
+	})
+})
+```
+Run the complete fast gate from the project root. It compiles the server and
+React UI, runs the deterministic tests, and checks formatting.
 
 ```bash title="Build, test, and lint the complete RAG example" replay="project"
 npm run build
@@ -186,7 +381,6 @@ npm run test:ui
 npm run lint
 ```
 
-A production RAG system should add representative evaluations for chunking,
-recall, citation correctness, refusal behavior, latency, and cost. These tests
-first prove that the Framework, Harness, storage, stream protocol, and browser
-boundaries are connected correctly.
+These tests establish the browser boundary. A production RAG system should
+also add representative evaluations for chunking, recall, citation
+correctness, refusal behavior, latency, and cost.

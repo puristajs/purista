@@ -1,13 +1,12 @@
 ---
-title: Start PostgreSQL and pgvector
-description: Create the vector schema and a reproducible local dependency without mixing database setup into service logic.
+title: Start PostgreSQL with pgvector
+description: Create the tenant scoped vector tables and a reproducible local database dependency.
 order: 205
 kind: lesson
 status: draft
 ---
 
-Create the PostgreSQL schema. Source documents and chunks are tenant- and
-collection-scoped, and vectors record the embedding model used to create them.
+Create the local pgvector database before connecting the application. The SQL creates the chunks table and its vector index; Compose runs PostgreSQL with that initialization file.
 
 ```sql title="database/knowledge.sql" write
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -42,10 +41,6 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
 CREATE INDEX IF NOT EXISTS knowledge_chunks_scope_idx
   ON knowledge_chunks (tenant_id, collection_id, embedding_model);
 ```
-
-Provide the local database with Compose. The initialization script enables
-pgvector and creates the tables on the first volume start.
-
 ```yaml title="compose.yaml" write
 services:
   postgres:
@@ -68,12 +63,6 @@ services:
 volumes:
   knowledge-postgres:
 ```
-
-```bash title="Start the local vector database" replay="project"
-docker compose up -d --wait
-```
-
-The database is an injected business resource. PURISTA StateStore remains
-reserved for short-lived application state such as the sessions added later.
+Check your work: Run `docker compose up -d --wait`. `docker compose ps` shows the database as running.
 
 Continue with [Implement the vector repository](../repository/).

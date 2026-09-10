@@ -15,24 +15,25 @@ export function KnowledgeSource({ sessionToken, onIngested }: { sessionToken: st
 		event.preventDefault()
 		if (!sessionToken) return
 		setStatus('submitting')
-		const data = new FormData(event.currentTarget)
-		const response = await fetch('/api/v1/knowledge/documents', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json', authorization: `Bearer ${sessionToken}` },
-			body: JSON.stringify({
-				collectionId: 'customer-help',
-				documentId: data.get('documentId'),
-				revision: Number(data.get('revision')),
-				title: data.get('title'),
-				content: data.get('content'),
-			}),
-		})
-		if (!response.ok) {
+		try {
+			const data = new FormData(event.currentTarget)
+			const response = await fetch('/api/v1/knowledge/documents', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json', authorization: `Bearer ${sessionToken}` },
+				body: JSON.stringify({
+					collectionId: 'customer-help',
+					documentId: data.get('documentId'),
+					revision: Number(data.get('revision')),
+					title: data.get('title'),
+					content: data.get('content'),
+				}),
+			})
+			if (!response.ok) throw new Error('Ingestion failed')
+			setStatus('ready')
+			onIngested()
+		} catch {
 			setStatus('error')
-			return
 		}
-		setStatus('ready')
-		onIngested()
 	}
 
 	return (

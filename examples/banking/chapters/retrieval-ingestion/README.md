@@ -1,60 +1,39 @@
-# Complete RAG tutorial source
+# Build a RAG feature with PURISTA
 
-This focused source project belongs to the PURISTA tutorial chapter **Build a
-complete RAG pipeline**. It contains the indexing and answer paths in one
-runnable application.
+This example is the runnable source for the PURISTA retrieval and ingestion tutorial. It uses a small Example Bank help document so the framework boundaries stay visible.
 
-The example keeps these boundaries visible:
+The `Knowledge` service owns the contracts, resources, guards, commands, streams, and one `knowledgeHarness` definition. PostgreSQL with pgvector stores document chunks and embeddings. The PURISTA StateStore belongs to `Identity` and stores only short lived login sessions.
 
-1. `runIngestKnowledge` is an authorized PURISTA command that invokes the
-   mounted `ingestKnowledge` workflow through the EventBridge.
-2. `ingestKnowledge` chunks source text, obtains vectors from the named Harness
-   embedding model, and stores them through the `storeKnowledgeChunks` host
-   tool and injected `KnowledgeRepository`.
-3. `retrieveKnowledge` owns query embedding and calls the private
-   `queryKnowledgeRepository` host tool, which scopes every database query with
-   the authenticated tenant.
-4. `answerKnowledgeQuestion` is a configurable Harness agent. The model can
-   choose its `searchKnowledge` host tool, which authorizes the requested
-   collection and invokes `retrieveKnowledge` through the EventBridge.
-5. `runAnswerKnowledgeQuestion` provides the protected aggregate endpoint, and
-   `streamAnswerKnowledgeQuestion` provides the protected AI SDK UI Message
-   Stream v1 endpoint over the same agent contract. Tool approvals are returned
-   as resumable outcomes instead of server errors.
-6. `Identity` owns the local login and opaque sessions in PURISTA StateStore.
-7. Hono projects the public login command, protected ingestion command, and
-   protected stream, authenticates
-   the stream through the internal session command, and serves the static UI.
-8. `ui` lets the learner ingest the sample source before chatting. It uses
-   maintained AI Elements and shadcn source components and consumes the
-   standard stream without a PURISTA browser SDK.
+The application has two paths:
 
-Install the published packages, then run the normal checks:
+1. `runIngestKnowledge` checks collection access, invokes the service owned `ingestKnowledge` workflow, embeds the chunks, and stores them through the `storeKnowledgeChunks` host tool.
+2. `searchKnowledge` is a model selected host tool. It checks collection access and invokes `retrieveKnowledge`, which embeds the query and calls the private `queryKnowledgeRepository` tool. `answerKnowledgeQuestion` is the model loop that uses this tool.
 
-```bash
+`runAnswerKnowledgeQuestion` exposes the aggregate answer result. `streamAnswerKnowledgeQuestion` exposes the same agent contract through AI SDK UI Message Stream v1. The stream supports tool approval resume and cancellation. Hono exposes the public login command and protects the knowledge endpoints with `ProtectMiddleware`.
+
+Install the published dependencies and run the framework checks:
+
+```bash title="Install published dependencies"
 npm install
-npm run build
-npm test
-npm run lint
 ```
 
-The server tests use fake providers and resources, and the UI test runs in
-JSDOM. They do not need an API key, a running database, or a browser.
-
-To run the complete application with deterministic model responses, copy
-`.env.example` to `.env`, then use:
-
-```bash
-docker compose up -d --wait
+```bash title="Build the server and UI"
 npm run build
+```
+
+```bash title="Run the deterministic tests"
+npm test
+```
+
+The server tests use fake model providers and in memory resource doubles. They do not need an API key or a running database. The PostgreSQL test is separate because it proves pgvector behavior.
+
+To run the complete local application, copy `.env.example` to `.env`, start PostgreSQL, and use the deterministic entry point:
+
+```bash title="Run the local RAG demo"
+docker compose up -d --wait
 npm run demo
 ```
 
-Open `http://127.0.0.1:3000` and sign in with the credentials shown by the UI.
-Stop the server with `Ctrl+C`; use `docker compose down` to stop PostgreSQL.
-The scripted entry point resets only its `transfer-guide` fixture when it
-starts, so the same walkthrough can be repeated without deleting the volume.
+The demo uses the real EventBridge, Knowledge service, mounted Harness definition, Hono endpoints, repository, and stream adapter. It uses a scripted model, so no provider credential is needed. Stop the process with `Ctrl+C`, then stop PostgreSQL with `docker compose down`.
 
-To use a live OpenAI model, set `OPENAI_API_KEY` in `.env` and run `npm start`
-instead. Both modes use the same PURISTA services, Harness definitions,
-PostgreSQL repository, Hono endpoints, and React UI.
+For a live model, set `OPENAI_API_KEY` in `.env` and run `npm start`. The live path uses the same service assembly and endpoint contracts.

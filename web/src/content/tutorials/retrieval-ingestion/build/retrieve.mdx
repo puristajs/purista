@@ -1,17 +1,105 @@
 ---
-title: Build semantic retrieval
-description: Authorize a query, create its embedding with the same Harness model, and search the tenant-scoped repository.
+title: Build retrieval workflows and commands
+description: Embed a query, query the tenant scoped repository, and expose searchKnowledge as a guarded command.
 order: 207
 kind: lesson
 status: draft
 ---
 
-Replace the generated search command. It applies the read action policy, creates
-a query embedding through the same Harness alias used during ingestion, and
-calls the injected repository.
+Create the retrieval path. It asks the repository for ranked matches, exposes the work as a workflow and tool, then provides a service command for callers.
 
+```ts title="src/service/knowledge/v1/harness/tool/queryKnowledgeRepository/queryKnowledgeRepositoryTool.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { knowledgeV1ServiceBuilder } from '../../../knowledgeV1ServiceBuilder.js'
+import { queryKnowledgeRepositoryInputSchema, retrieveKnowledgeOutputSchema } from '../../../schema.js'
+
+export const queryKnowledgeRepositoryTool = knowledgeV1ServiceBuilder
+	.defineTool('queryKnowledgeRepository', {
+		description: 'Query tenant-scoped knowledge vectors using a prepared embedding.',
+		input: queryKnowledgeRepositoryInputSchema,
+		output: retrieveKnowledgeOutputSchema,
+	})
+	.setHandler(async (context, input) => {
+		const tenantId = context.identity.tenantId
+		if (!tenantId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const profile = context.resources.knowledgeEmbeddingProfile
+		if (input.embedding.length !== profile.dimensions || input.embedding.some((value) => !Number.isFinite(value))) {
+			throw new HandledError(StatusCode.BadRequest, 'The query embedding is invalid')
+		}
+		return {
+			matches: await context.resources.knowledgeRepository.search({
+				tenantId,
+				collectionId: input.collectionId,
+				embeddingModel: profile.model,
+				queryEmbedding: [...input.embedding],
+				limit: input.limit,
+				signal: context.signal,
+			}),
+		}
+	})
+```
+```ts title="src/service/knowledge/v1/harness/workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.ts" write
+import { defineWorkflow } from '@purista/harness'
+import { retrieveKnowledgeInputSchema, retrieveKnowledgeOutputSchema } from '../../../schema.js'
+import { queryKnowledgeRepositoryTool } from '../../tool/queryKnowledgeRepository/queryKnowledgeRepositoryTool.js'
+
+export const retrieveKnowledgeWorkflow = defineWorkflow('retrieveKnowledge', {
+	input: retrieveKnowledgeInputSchema,
+	output: retrieveKnowledgeOutputSchema,
+	models: { embedding: { capabilities: ['embeddings'] } },
+	tools: [queryKnowledgeRepositoryTool],
+	handler: async (context) => {
+		const embedding = (
+			await context.models.embedding.embed({ input: context.input.query }, { callId: 'embed-knowledge-query' })
+		).embeddings[0]?.vector
+		if (!embedding || embedding.some((value) => !Number.isFinite(value)))
+			throw new Error('The embedding model returned no query vector')
+		return context.tools.queryKnowledgeRepository.run(
+			{
+				collectionId: context.input.collectionId,
+				query: context.input.query,
+				limit: context.input.limit,
+				embedding: [...embedding],
+			},
+			{ callId: 'query-knowledge-repository' },
+		)
+	},
+})
+```
+```ts title="src/service/knowledge/v1/harness/tool/searchKnowledge/searchKnowledgeTool.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import type { KnowledgeCollectionPolicy } from '../../../KnowledgeResources.js'
+import { knowledgeV1ServiceBuilder } from '../../../knowledgeV1ServiceBuilder.js'
+import { requireKnowledgeCollectionAccess } from '../../../requireKnowledgeCollectionAccess.js'
+import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../../schema.js'
+import { retrieveKnowledgeWorkflow } from '../../workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.js'
+
+export const searchKnowledgeTool = knowledgeV1ServiceBuilder
+	.defineTool('searchKnowledge', {
+		description: 'Search the authorized knowledge collection for source evidence.',
+		input: searchKnowledgeInputSchema,
+		output: searchKnowledgeOutputSchema,
+	})
+	.canInvokeWorkflow('Knowledge', '1', retrieveKnowledgeWorkflow.contract)
+	.setHandler(async (context, input) => {
+		await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+			...context.identity,
+			collectionId: input.collectionId,
+			action: 'search',
+		})
+		return context.workflow.Knowledge['1'][retrieveKnowledgeWorkflow.contract.id].run(input, {
+			callId: 'retrieve-knowledge',
+		})
+	})
+
+export type SearchKnowledgePolicyContext = HarnessBusinessGuardContext<{
+	knowledgeCollectionPolicy: KnowledgeCollectionPolicy
+}>
+```
 ```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts" write
-import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import { retrieveKnowledgeWorkflow } from '../../harness/workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.js'
 import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
 import { requireKnowledgeCollectionAccess } from '../../requireKnowledgeCollectionAccess.js'
 import { searchKnowledgeInputSchema, searchKnowledgeOutputSchema } from '../../schema.js'
@@ -20,7 +108,7 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
 	.addPayloadSchema(searchKnowledgeInputSchema)
 	.addOutputSchema(searchKnowledgeOutputSchema)
-	.canUseHarnessModel(knowledgeHarness, 'embedding')
+	.canInvokeWorkflow('Knowledge', '1', retrieveKnowledgeWorkflow.contract)
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
 			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
@@ -32,31 +120,19 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
-		const signal = new AbortController().signal
-		const response = await context.model.embedding.embed(
-			{ input: payload.query, dimensions: this.config.embeddingDimensions },
-			signal,
-		)
-		const queryEmbedding = response.embeddings[0]?.vector
-		if (!queryEmbedding) throw new Error('The embedding model returned no query vector')
-		const matches = await context.resources.knowledgeRepository.search({
-			tenantId: context.message.tenantId ?? '',
-			collectionId: payload.collectionId,
-			embeddingModel: this.config.embeddingModel,
-			queryEmbedding: [...queryEmbedding],
-			limit: payload.limit,
-			signal,
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const sessionId = createHash('sha256')
+			.update(JSON.stringify([tenantId, principalId, payload.collectionId, payload.query]))
+			.digest('hex')
+		const result = await context.workflow.Knowledge['1'][retrieveKnowledgeWorkflow.contract.id].run(payload, {
+			sessionId,
 		})
-		return { matches }
+		if (result.outcome.status !== 'completed') throw new Error('Knowledge retrieval did not complete')
+		return result.outcome.output
 	})
 ```
+Check your work: Run `npm run test:rag-retrieval`. The retrieval workflow and search command tests run.
 
-Using one configured embedding model and dimension for indexing and querying is
-a runtime invariant. Changing that model requires a deliberate re-index, not a
-silent configuration update.
-
-```bash title="Type-check ingestion and search" replay="project"
-npm run build
-```
-
-Continue with [Let the agent choose retrieval](../agent/).
+Continue with [Give the model a searchKnowledge tool](../agent/).

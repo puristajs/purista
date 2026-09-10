@@ -428,11 +428,7 @@ export const CodeBlockLanguageSelector = (props: CodeBlockLanguageSelectorProps)
 export type CodeBlockLanguageSelectorTriggerProps = ComponentProps<typeof SelectTrigger>
 
 export const CodeBlockLanguageSelectorTrigger = ({ className, ...props }: CodeBlockLanguageSelectorTriggerProps) => (
-	<SelectTrigger
-		className={cn('h-7 border-none bg-transparent px-2 text-xs shadow-none', className)}
-		size="sm"
-		{...props}
-	/>
+	<SelectTrigger className={cn('h-7 border-none bg-transparent px-2 text-xs shadow-none', className)} {...props} />
 )
 
 export type CodeBlockLanguageSelectorValueProps = ComponentProps<typeof SelectValue>

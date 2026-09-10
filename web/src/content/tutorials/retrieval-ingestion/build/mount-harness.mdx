@@ -1,60 +1,98 @@
 ---
-title: Bind the search tool and publish targets
-description: Connect the host tool to a PURISTA command and guard every directly addressable agent and workflow.
+title: Assemble one Knowledge Harness
+description: Compose ingestion, retrieval, and the answer agent once in the owning Knowledge service.
 order: 210
 kind: lesson
 status: draft
 ---
 
-Configure the service mount. The host tool invokes the declared
-`searchKnowledge` command client, so the call travels through EventBridge with
-tenant and principal identity. The LLM sees only the typed tool contract.
+Create one Harness instance and mount it on the knowledge service. This makes the tools, workflows, and agent available to the service commands.
 
-```ts title="src/service/knowledge/v1/harness/knowledgeHarnessMount.ts" write
-import { commandAsHarnessTool, type HarnessBusinessGuardContext } from '@purista/core'
+```ts title="src/service/knowledge/v1/harness/knowledgeHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
-import { knowledgeHarness } from '../../../../harness/knowledge/knowledgeHarness.js'
 import type { KnowledgeCollectionPolicy } from '../KnowledgeResources.js'
 import { requireKnowledgeCollectionAccess } from '../requireKnowledgeCollectionAccess.js'
-import type { answerKnowledgeQuestionInputSchema } from '../schema.js'
+import type {
+	answerKnowledgeQuestionInputSchema,
+	ingestKnowledgeInputSchema,
+	retrieveKnowledgeInputSchema,
+} from '../schema.js'
+import { answerKnowledgeQuestionAgent } from './agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.js'
+import { ingestKnowledgeWorkflow } from './workflow/ingestKnowledge/ingestKnowledgeWorkflow.js'
+import { retrieveKnowledgeWorkflow } from './workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.js'
 
-export { knowledgeHarness }
+export const knowledgeHarness = defineHarness({ name: 'knowledge', revision: 'v1' })
+	.addWorkflow(ingestKnowledgeWorkflow)
+	.addWorkflow(retrieveKnowledgeWorkflow)
+	.addAgent(answerKnowledgeQuestionAgent)
 
 export const knowledgeHarnessPolicy = {
-	publish: { workflows: ['answer_knowledge_question'] },
-	hostTools: {
-		search_knowledge: commandAsHarnessTool('Knowledge', '1', 'searchKnowledge'),
-	},
 	targets: {
 		workflows: {
-			answer_knowledge_question: {
+			ingestKnowledge: {
+				beforeGuards: {
+					collectionAccess: async (
+						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+						input: z.output<typeof ingestKnowledgeInputSchema>,
+					) =>
+						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+							...context.identity,
+							collectionId: input.collectionId,
+							action: 'edit',
+						}),
+				},
+			},
+			retrieveKnowledge: {
+				beforeGuards: {
+					collectionAccess: async (
+						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+						input: z.output<typeof retrieveKnowledgeInputSchema>,
+					) =>
+						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+							...context.identity,
+							collectionId: input.collectionId,
+							action: 'search',
+						}),
+				},
+			},
+		},
+		agents: {
+			answerKnowledgeQuestion: {
 				beforeGuards: {
 					collectionAccess: async (
 						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
 						input: z.output<typeof answerKnowledgeQuestionInputSchema>,
-					) => {
-						await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+					) =>
+						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
 							...context.identity,
 							collectionId: input.collectionId,
 							action: 'search',
-						})
-					},
+						}),
 				},
 			},
 		},
 	},
 } as const
 ```
+```ts title="src/service/knowledge/v1/knowledgeV1Service.ts" write
+import { runAnswerKnowledgeQuestionCommandBuilder } from './command/runAnswerKnowledgeQuestion/runAnswerKnowledgeQuestionCommandBuilder.js'
+import { runIngestKnowledgeCommandBuilder } from './command/runIngestKnowledge/runIngestKnowledgeCommandBuilder.js'
+import { searchKnowledgeCommandBuilder } from './command/searchKnowledge/searchKnowledgeCommandBuilder.js'
+import { knowledgeHarness, knowledgeHarnessPolicy } from './harness/knowledgeHarness.js'
+import { knowledgeV1ServiceBuilder } from './knowledgeV1ServiceBuilder.js'
+import { answerKnowledgeQuestionStreamBuilder } from './stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.js'
 
-The retrieval agent and answer workflow are directly addressable. Their mount
-policies repeat the collection business guard; protection on an HTTP stream or
-wrapper command alone would not secure those addresses.
-
-This boundary also avoids cyclic imports: the Harness definition declares a
-host tool, while the service mount supplies its PURISTA implementation.
-
-```bash title="Type-check the mounted Harness"
-npm run build
+export const knowledgeV1Service = knowledgeV1ServiceBuilder
+	.addCommandDefinition(
+		runIngestKnowledgeCommandBuilder.getDefinition(),
+		searchKnowledgeCommandBuilder.getDefinition(),
+		runAnswerKnowledgeQuestionCommandBuilder.getDefinition(),
+	)
+	.addStreamDefinition(answerKnowledgeQuestionStreamBuilder.getDefinition())
+	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
 ```
+Check your work: Run `npm run build:server`. The service can now resolve its Harness dependencies.
 
-Continue with [Expose an AI SDK UI stream](../stream-ui/).
+Continue with [Expose the AI SDK UI Message Stream](../stream-ui/).

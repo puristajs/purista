@@ -1,116 +1,122 @@
 ---
-title: Test the streaming answer workflow
-description: Verify retrieved evidence becomes cited text deltas and native events are forwarded in order.
+title: Test the aggregate answer command
+description: Verify address first agent invocation, durable approval interruption, acceptance, rejection, and cancellation boundaries.
 order: 224
 kind: lesson
 status: draft
 ---
 
-Test the native workflow with a fake retrieval result and scripted streaming
-model. Collect its events and assert tool status, text deltas, citations, and
-terminal output.
+Create the answer command test. It checks that a request is handed to the durable answer workflow with the correct access context.
 
-```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.test.ts" write
-import { FakeModelProvider } from '@purista/harness/testing'
+```ts title="src/service/knowledge/v1/command/runAnswerKnowledgeQuestion/runAnswerKnowledgeQuestionCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
-import { knowledgeHarness } from '../../knowledgeHarness.js'
+import { answerKnowledgeQuestionAgent } from '../../harness/agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.js'
+import { runAnswerKnowledgeQuestionCommandBuilder } from './runAnswerKnowledgeQuestionCommandBuilder.js'
 
-const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+const payload = { collectionId: 'customer-help', question: 'How long are transfers pending?', conversationId: 'chat-1' }
+const approval = {
+	type: 'tool-approval' as const,
+	runId: 'run-approval',
+	interruptId: 'interrupt-1',
+	revision: 'revision-1',
+	eventId: 'event-1',
+	decisions: [{ approvalId: 'approval-1', approved: true }],
+}
 
-describe('answerKnowledgeQuestionWorkflow', () => {
-	it('lets the retrieval agent choose the search tool and streams the grounded answer', async () => {
-		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [
-				{
-					id: 'search-1',
-					name: 'search_knowledge',
-					arguments: { collectionId: 'customer-help', query: 'How long are transfers pending?', limit: 4 },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: {
-				question: 'How long are transfers pending?',
-				evidence: [
-					{
-						documentId: 'transfer-guide',
-						chunkIndex: 2,
-						content: 'International transfers can remain pending for two business days.',
-						score: 0.94,
-					},
-				],
-			},
-			usage,
-			finishReason: 'stop',
-		})
-		provider.enqueueTextStream([
-			{ kind: 'delta', text: 'They can remain pending for ' },
-			{ kind: 'delta', text: 'two business days [transfer-guide#2].' },
-			{ kind: 'finish', usage, finishReason: 'stop' },
-		])
-		const search = vi.fn(async () => ({
-			matches: [
-				{
-					documentId: 'transfer-guide',
-					chunkIndex: 2,
-					content: 'International transfers can remain pending for two business days.',
-					score: 0.94,
-				},
-			],
-		}))
-		const harness = await knowledgeHarness.getInstance({
-			models: {
-				primary: { provider, model: 'fake-knowledge-model' },
-				embedding: { provider, model: 'fake-embedding-model' },
-			},
-			hostTools: { search_knowledge: search },
-		})
+function context(input = payload, allowed = true) {
+	const policy = { canAccess: vi.fn().mockResolvedValue(allowed) }
+	const test = createCommandContextMock(runAnswerKnowledgeQuestionCommandBuilder, {
+		payload: input,
+		parameter: {},
+		resources: { knowledgeCollectionPolicy: policy },
+	})
+	test.context.message = getCommandMessageMock({
+		tenantId: 'tenant-example',
+		principalId: 'principal-alex',
+		payload: { payload: input, parameter: {} },
+	})
+	return { ...test, policy }
+}
 
-		try {
-			const session = await harness.getSession('knowledge-chat-1')
-			const events = []
-			for await (const event of session.workflows.answer_knowledge_question.stream(
-				{
-					collectionId: 'customer-help',
-					question: 'How long are transfers pending?',
-				},
-				{ hostContext: { identity: { tenantId: 'tenant-example', principalId: 'principal-alex' } } },
-			))
-				events.push(event)
-
-			expect(search).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'retrieve_evidence' }), {
-				collectionId: 'customer-help',
-				query: 'How long are transfers pending?',
-				limit: 4,
-			})
-			expect(events).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({ type: 'tool.input.available', toolId: 'search_knowledge' }),
-					expect.objectContaining({ type: 'tool.finished', toolId: 'search_knowledge' }),
-					expect.objectContaining({ type: 'output.text.delta', delta: 'They can remain pending for ' }),
-					expect.objectContaining({
-						type: 'run.finished',
-						outcome: expect.objectContaining({
-							status: 'completed',
-							output: 'They can remain pending for two business days [transfer-guide#2].',
-						}),
-					}),
-				]),
-			)
-			provider.assertExhausted()
-		} finally {
-			await harness.shutdown()
+describe('runAnswerKnowledgeQuestionCommandBuilder', () => {
+	it('returns the mounted agent result with a stable tenant-scoped session', async () => {
+		const first = context()
+		const target = first.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run
+		const result = {
+			sessionId: 'knowledge-answer:runtime',
+			outcome: { status: 'completed' as const, runId: 'run-1', output: 'Two days [transfer-guide#0].' },
 		}
+		target.resolves(result)
+		await expect(
+			runAnswerKnowledgeQuestionCommandBuilder.getCommandFunction().call({} as never, first.context, payload, {}),
+		).resolves.toEqual(result)
+		expect(first.policy.canAccess).toHaveBeenCalledWith({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			collectionId: 'customer-help',
+			action: 'search',
+		})
+		expect(target.firstCall.args[0]).toEqual({ collectionId: payload.collectionId, question: payload.question })
+		const sessionId = target.firstCall.args[1]?.sessionId
+		expect(sessionId).toMatch(/^knowledge-answer:[a-f0-9]{64}$/)
+
+		const second = context()
+		const secondTarget = second.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run
+		secondTarget.resolves(result)
+		await runAnswerKnowledgeQuestionCommandBuilder.getCommandFunction().call({} as never, second.context, payload, {})
+		expect(secondTarget.firstCall.args[1]?.sessionId).toBe(sessionId)
+	})
+
+	it('forwards a typed approval resume without changing the session', async () => {
+		const resumedPayload = { ...payload, resume: approval }
+		const test = context(resumedPayload)
+		const target = test.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run
+		target.resolves({
+			sessionId: 'knowledge-answer:runtime',
+			outcome: {
+				status: 'interrupted',
+				runId: 'run-approval',
+				interrupt: {
+					type: 'tool-approval',
+					id: 'interrupt-2',
+					revision: 'revision-2',
+					requests: [
+						{
+							approvalId: 'approval-2',
+							runId: 'run-approval',
+							agentRunId: 'agent-run-1',
+							agentId: 'answerKnowledgeQuestion',
+							invocationId: 'invocation-1',
+							step: 1,
+							toolId: 'searchKnowledge',
+							callId: 'search-2',
+							input: { collectionId: 'customer-help' },
+							demands: [],
+						},
+					],
+				},
+			},
+		})
+		await runAnswerKnowledgeQuestionCommandBuilder
+			.getCommandFunction()
+			.call({} as never, test.context, resumedPayload, {})
+		expect(target.firstCall.args[1]).toMatchObject({
+			sessionId: expect.stringMatching(/^knowledge-answer:[a-f0-9]{64}$/),
+			resume: approval,
+		})
+	})
+
+	it('denies before it invokes the mounted agent', async () => {
+		const test = context(payload, false)
+		const target = test.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run
+		await expect(
+			runAnswerKnowledgeQuestionCommandBuilder.getCommandFunction().call({} as never, test.context, payload, {}),
+		).rejects.toMatchObject({ errorCode: 403 })
+		expect(target.called).toBe(false)
 	})
 })
 ```
+Check your work: Run `npm run test:rag-retrieval`. The answer command test passes with the retrieval suite.
 
-```bash title="Run the answer-workflow test"
-npx vitest run src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.test.ts
-```
-
-Continue with [Test streaming and authentication](../test-stream-http/).
+Continue with [Test the stream and authentication](../test-stream-http/).

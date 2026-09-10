@@ -1,18 +1,16 @@
 ---
-title: Compose the RAG application
-description: Bind StateStore, repository, model aliases, business policy, Identity, Knowledge, and Hono at one composition root.
+title: Compose the application
+description: Bind Identity, Knowledge, models, pgvector, Harness storage, Hono, static assets, and ordered shutdown at one root.
 order: 218
 kind: lesson
 status: draft
 ---
 
-Create the application factory. The default live dependencies bind OpenAI,
-PostgreSQL, and StateStore. Tests and the deterministic demo can inject the same
-ports with controlled adapters.
+Create the application composition root and HTTP listener. These files assemble both services, resources, middleware, and routes into one server.
 
 ```ts title="src/createKnowledgeApplication.ts" write
 import { DefaultEventBridge, initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
+import { type HarnessStorage, type ModelProvider, sqliteHarnessStorage } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { honoV1Service } from '@purista/hono-http-server'
 import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
@@ -35,6 +33,7 @@ export type KnowledgeApplicationDependencies = {
 		embedding: { provider: ModelProvider; model: string }
 	}
 	embeddingDimensions: number
+	storage?: HarnessStorage
 }
 
 function defaultDependencies(
@@ -56,6 +55,7 @@ function defaultDependencies(
 			embedding: { provider, model: embeddingModel },
 		},
 		embeddingDimensions,
+		storage: sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' }),
 	}
 }
 
@@ -65,6 +65,8 @@ export async function createKnowledgeApplication(
 	environment: Readonly<Record<string, string | undefined>> = process.env,
 ) {
 	const resolved = dependencies ?? defaultDependencies(logger, environment)
+	const storage =
+		resolved.storage ?? sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const identity = await identityV1Service.getInstance(eventBridge, {
@@ -83,11 +85,28 @@ export async function createKnowledgeApplication(
 				canAccess: async ({ tenantId, principalId, collectionId }) =>
 					tenantId === 'tenant-example' && principalId === 'principal-alex' && collectionId === 'customer-help',
 			},
+			knowledgeEmbeddingProfile: {
+				model: resolved.models.embedding.model,
+				dimensions: resolved.embeddingDimensions,
+			},
 			knowledgeRepository: resolved.repository,
 		},
 		ai: {
-			models: resolved.models,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+			storage,
+			model: resolved.models.primary,
+			models: {
+				embedding: {
+					...resolved.models.embedding,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 100,
+						maxDelayMs: 1_000,
+						maxActiveDelayMs: 5_000,
+						maxActiveElapsedMs: 15_000,
+						retryOn: { serverError: true },
+					},
+				},
+			},
 		},
 	})
 	const http = await honoV1Service.getInstance(eventBridge, {
@@ -117,22 +136,56 @@ export async function createKnowledgeApplication(
 		identity,
 		knowledge,
 		http,
+		harnessStorage: storage,
 	}
 }
 ```
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
 
-Three boundaries remain distinct:
+async function main() {
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const application = await createKnowledgeApplication(logger)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		{ name: 'Harness storage', destroy: async () => application.harnessStorage.close?.() },
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank knowledge application started')
+}
 
-- Hono protection middleware authenticates protected requests and establishes
-  trusted identity;
-- `registerService` exposes only commands and streams with HTTP metadata; and
-- Knowledge guards authorize the requested collection after authentication.
-
-The login command is explicitly public. Ingestion and chat are protected by
-default. Content capture remains disabled for model telemetry.
-
-```bash title="Type-check application composition"
-npm run build
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Knowledge application could not start.'}\n`)
+	process.exit(1)
+})
 ```
+```ts title="src/nodeHttpListener.ts" write
+type ClosableNodeServer = { close(callback: (error?: Error) => void): unknown }
 
-Continue with [Serve the React application](../serve-ui/).
+export function createNodeHttpListener(server: ClosableNodeServer) {
+	return {
+		name: 'nodeHttpListener',
+		destroy: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+	}
+}
+```
+Check your work: Run `npm run build:server`. The application composition compiles.
+
+Continue with [Serve static assets](../serve-ui/).

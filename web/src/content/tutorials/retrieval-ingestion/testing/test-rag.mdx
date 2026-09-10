@@ -1,227 +1,573 @@
 ---
-title: Test ingestion and retrieval commands
-description: Use deterministic Harness models and mocked business resources while executing real command guards and handlers.
+title: Test ingestion and retrieval
+description: Use fake models and mocked resources to test command guards, workflows, and address first calls.
 order: 222
 kind: lesson
 status: draft
 ---
 
-Test ingestion with PURISTA's command context, an in-memory repository, and a
-fake embedding provider. Verify authorization, chunk storage, model identity,
-and vector validation.
+Create focused ingestion tests. They verify chunking, the store tool, the workflow, the command builder, and the end-to-end ingestion path without requiring PostgreSQL.
 
-```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts" write
-import { createCommandTestHarness } from '@purista/core'
+```ts title="src/service/knowledge/v1/chunkKnowledgeText.test.ts" write
+import { describe, expect, it } from 'vitest'
+import { chunkKnowledgeText } from './chunkKnowledgeText.js'
+
+describe('chunkKnowledgeText', () => {
+	it('normalizes whitespace and keeps deterministic chunk order', () => {
+		expect(chunkKnowledgeText('  one   two three four  ', 2)).toEqual(['one two', 'three four'])
+	})
+
+	it('rejects an invalid chunk size', () => {
+		expect(() => chunkKnowledgeText('text', 0)).toThrow('wordsPerChunk must be a positive integer')
+	})
+})
+```
+```ts title="src/service/knowledge/v1/harness/tool/storeKnowledgeChunks/storeKnowledgeChunksTool.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import { storeKnowledgeChunksTool } from './storeKnowledgeChunksTool.js'
+
+const input = {
+	collectionId: 'customer-help',
+	documentId: 'doc-1',
+	revision: 1,
+	title: 'Transfer help',
+	chunks: [
+		{ index: 0, content: 'First chunk', embedding: [0.1, 0.2] },
+		{ index: 1, content: 'Second chunk', embedding: [0.3, 0.4] },
+	],
+}
+
+function context() {
+	const repository = { replaceRevision: vi.fn().mockResolvedValue(undefined), search: vi.fn() }
+	return {
+		repository,
+		value: {
+			identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			resources: {
+				knowledgeEmbeddingProfile: { model: 'text-embedding-example', dimensions: 2 },
+				knowledgeRepository: repository,
+			},
+			signal: new AbortController().signal,
+		},
+	}
+}
+
+describe('storeKnowledgeChunksTool', () => {
+	it('persists trusted tenant identity and the concrete embedding profile', async () => {
+		const { repository, value } = context()
+
+		await expect(storeKnowledgeChunksTool.handler(value as never, input)).resolves.toEqual({
+			documentId: 'doc-1',
+			revision: 1,
+			chunkCount: 2,
+			embeddingModel: 'text-embedding-example',
+		})
+		expect(repository.replaceRevision).toHaveBeenCalledWith(
+			{
+				tenantId: 'tenant-example',
+				collectionId: 'customer-help',
+				documentId: 'doc-1',
+				revision: 1,
+				title: 'Transfer help',
+				embeddingModel: 'text-embedding-example',
+				chunks: input.chunks,
+			},
+			value.signal,
+		)
+	})
+
+	it.each([
+		['out-of-order indexes', [{ ...input.chunks[0], index: 1 }, input.chunks[1]]],
+		['wrong dimensions', [{ ...input.chunks[0], embedding: [0.1] }, input.chunks[1]]],
+		['non-finite values', [{ ...input.chunks[0], embedding: [Number.NaN, 0.2] }, input.chunks[1]]],
+	])('rejects %s before persistence', async (_label, chunks) => {
+		const { repository, value } = context()
+
+		await expect(
+			storeKnowledgeChunksTool.handler(value as never, { ...input, chunks: [...chunks] }),
+		).rejects.toMatchObject({
+			errorCode: 400,
+		})
+		expect(repository.replaceRevision).not.toHaveBeenCalled()
+	})
+})
+```
+```ts title="src/service/knowledge/v1/harness/workflow/ingestKnowledge/ingestKnowledgeWorkflow.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import { ingestKnowledgeWorkflow } from './ingestKnowledgeWorkflow.js'
+
+const words = Array.from({ length: 81 }, (_, index) => `word-${index}`)
+const input = {
+	collectionId: 'customer-help',
+	documentId: 'doc-1',
+	revision: 1,
+	title: 'Transfer help',
+	content: words.join(' '),
+}
+
+describe('ingestKnowledgeWorkflow', () => {
+	it('chunks in order and uses stable managed call ids for embedding and persistence', async () => {
+		const embed = vi.fn().mockResolvedValue({
+			embeddings: [
+				{ index: 1, vector: [0.3, 0.4] },
+				{ index: 0, vector: [0.1, 0.2] },
+			],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+		})
+		const run = vi.fn().mockResolvedValue({
+			documentId: 'doc-1',
+			revision: 1,
+			chunkCount: 2,
+			embeddingModel: 'text-embedding-example',
+		})
+
+		await expect(
+			ingestKnowledgeWorkflow.handler({
+				input,
+				models: { embedding: { embed } },
+				tools: { storeKnowledgeChunks: { run } },
+			} as never),
+		).resolves.toMatchObject({ documentId: 'doc-1', chunkCount: 2 })
+		expect(embed).toHaveBeenCalledWith(
+			{ input: [words.slice(0, 80).join(' '), words[80]] },
+			{ callId: 'embed-knowledge-chunks' },
+		)
+		expect(run).toHaveBeenCalledWith(
+			{
+				collectionId: 'customer-help',
+				documentId: 'doc-1',
+				revision: 1,
+				title: 'Transfer help',
+				chunks: [
+					{ index: 0, content: words.slice(0, 80).join(' '), embedding: [0.1, 0.2] },
+					{ index: 1, content: words[80], embedding: [0.3, 0.4] },
+				],
+			},
+			{ callId: 'store-knowledge-chunks' },
+		)
+	})
+
+	it('rejects an invalid embedding response before persistence', async () => {
+		const run = vi.fn()
+		const embed = vi.fn().mockResolvedValue({
+			embeddings: [{ index: 0, vector: [Number.NaN, 0.2] }],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+		})
+
+		await expect(
+			ingestKnowledgeWorkflow.handler({
+				input,
+				models: { embedding: { embed } },
+				tools: { storeKnowledgeChunks: { run } },
+			} as never),
+		).rejects.toThrow('The embedding model returned invalid document vectors')
+		expect(run).not.toHaveBeenCalled()
+	})
+})
+```
+```ts title="src/service/knowledge/v1/command/runIngestKnowledge/runIngestKnowledgeCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { describe, expect, it, vi } from 'vitest'
+import { ingestKnowledgeWorkflow } from '../../harness/workflow/ingestKnowledge/ingestKnowledgeWorkflow.js'
+import { runIngestKnowledgeCommandBuilder } from './runIngestKnowledgeCommandBuilder.js'
+
+const payload = {
+	collectionId: 'customer-help',
+	documentId: 'doc-1',
+	revision: 1,
+	title: 'Policy',
+	content: 'one two three',
+}
+
+describe('runIngestKnowledgeCommandBuilder', () => {
+	it('authorizes and invokes the mounted workflow', async () => {
+		const policy = { canAccess: vi.fn().mockResolvedValue(true) }
+		const { context, stubs } = createCommandContextMock(runIngestKnowledgeCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { knowledgeCollectionPolicy: policy },
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = { documentId: 'doc-1', revision: 1, chunkCount: 1, embeddingModel: 'fake-embedding' }
+		stubs.workflow.Knowledge['1'][ingestKnowledgeWorkflow.contract.id].run.resolves({
+			sessionId: 'knowledge-session',
+			outcome: { status: 'completed', runId: 'run-1', output },
+		})
+
+		await expect(
+			runIngestKnowledgeCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(policy.canAccess).toHaveBeenCalledWith({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			collectionId: 'customer-help',
+			action: 'edit',
+		})
+		expect(stubs.workflow.Knowledge['1'][ingestKnowledgeWorkflow.contract.id].run.calledOnce).toBe(true)
+		expect(stubs.workflow.Knowledge['1'][ingestKnowledgeWorkflow.contract.id].run.firstCall.args[1]).toEqual({
+			sessionId: expect.stringMatching(/^knowledge:[a-f0-9]{64}$/),
+		})
+	})
+
+	it('denies before invoking the workflow', async () => {
+		const policy = { canAccess: vi.fn().mockResolvedValue(false) }
+		const { context, stubs } = createCommandContextMock(runIngestKnowledgeCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { knowledgeCollectionPolicy: policy },
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			runIngestKnowledgeCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toMatchObject({ errorCode: 403 })
+		expect(stubs.workflow.Knowledge['1'][ingestKnowledgeWorkflow.contract.id].run.called).toBe(false)
+	})
+})
+```
+```ts title="src/ingestion.integration.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { BaseModelProvider, ModelError, sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { knowledgeV1Service } from '../../knowledgeV1Service.js'
-import { ingestKnowledgeCommandBuilder } from './ingestKnowledgeCommandBuilder.js'
+import { describe, expect, it, vi } from 'vitest'
+import { runIngestKnowledgeCommandBuilder } from './service/knowledge/v1/command/runIngestKnowledge/runIngestKnowledgeCommandBuilder.js'
+import { knowledgeHarness, knowledgeHarnessPolicy } from './service/knowledge/v1/harness/knowledgeHarness.js'
+import { knowledgeV1ServiceBuilder } from './service/knowledge/v1/knowledgeV1ServiceBuilder.js'
 
-const repository = { replaceRevision: vi.fn().mockResolvedValue(undefined), search: vi.fn() }
+const ingestionService = knowledgeV1ServiceBuilder
+	.addCommandDefinition(runIngestKnowledgeCommandBuilder.getDefinition())
+	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
 
-afterEach(() => vi.clearAllMocks())
+class RetryEmbeddingProvider extends BaseModelProvider {
+	public declare readonly embed: NonNullable<BaseModelProvider['embed']>
+	private readonly fake = new FakeModelProvider({ strict: true })
+	public attempts = 0
 
-describe('ingestKnowledgeCommandBuilder', () => {
-	it('uses the Harness embedding model and stores the vectors through the repository resource', async () => {
+	public constructor() {
+		super({ id: 'retry-embedding', genAiSystem: 'fake' })
+	}
+
+	public enqueueEmbedding(response: import('@purista/harness').EmbeddingResponse) {
+		this.fake.enqueueEmbedding(response)
+	}
+
+	protected override async doEmbed(
+		request: import('@purista/harness').EmbeddingRequest,
+	): Promise<import('@purista/harness').EmbeddingResponse> {
+		this.attempts += 1
+		if (this.attempts === 1) {
+			throw new ModelError('Temporary embedding outage.', {
+				provider: 'fake',
+				model: 'fake-embedding',
+				method: 'embed',
+				status: 503,
+			})
+		}
+		return this.fake.embed(request)
+	}
+}
+
+describe('knowledge ingestion workflow', () => {
+	it('runs the mounted workflow through EventBridge and persists trusted tenant data', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueEmbedding({
-			embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }],
-			usage: { inputTokens: 8, outputTokens: 0, totalTokens: 8 },
+			embeddings: [
+				{ index: 0, vector: [0.1, 0.2] },
+				{ index: 1, vector: [0.3, 0.4] },
+			],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 		})
-		const policy = { canAccess: vi.fn(async () => true) }
-		const harness = await createCommandTestHarness(knowledgeV1Service, ingestKnowledgeCommandBuilder, {
-			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
-			resources: { knowledgeCollectionPolicy: policy, knowledgeRepository: repository },
+		const repository = { replaceRevision: vi.fn().mockResolvedValue(undefined), search: vi.fn() }
+		const policy = { canAccess: vi.fn().mockResolvedValue(true) }
+		const eventBridge = new DefaultEventBridge()
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		await eventBridge.start()
+		const service = await ingestionService.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 2 },
+			resources: {
+				knowledgeCollectionPolicy: policy,
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
+				knowledgeRepository: repository,
+			},
 			ai: {
-				models: {
-					primary: { provider, model: 'fake-chat' },
-					embedding: { provider, model: 'fake-embedding' },
-				},
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
 			},
 		})
-
+		await service.start()
 		try {
-			await harness.service.start()
-			const { result } = await harness.run({
-				payload: {
-					collectionId: 'customer-help',
-					documentId: 'transfer-guide',
-					revision: 1,
-					title: 'International transfer timing',
-					content: 'International transfers can remain pending for two business days.',
-				},
-				parameter: {},
-			})
-
-			expect(result).toEqual({
-				documentId: 'transfer-guide',
-				revision: 1,
-				chunkCount: 1,
-				embeddingModel: 'fake-embedding',
-			})
-			expect(policy.canAccess).toHaveBeenCalledWith({
-				tenantId: 'mocked-tenant-id',
-				principalId: 'mocked-principal-id',
-				collectionId: 'customer-help',
-				action: 'edit',
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'runIngestKnowledge' },
+						payload: {
+							payload: {
+								collectionId: 'customer-help',
+								documentId: 'doc-1',
+								revision: 1,
+								title: 'Policy',
+								content: Array.from({ length: 81 }, (_, index) => `word-${index}`).join(' '),
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toMatchObject({ documentId: 'doc-1', chunkCount: 2, embeddingModel: 'fake-embedding' })
+			expect(provider.requests[0]).toMatchObject({
+				input: [Array.from({ length: 80 }, (_, index) => `word-${index}`).join(' '), 'word-80'],
 			})
 			expect(repository.replaceRevision).toHaveBeenCalledWith(
 				expect.objectContaining({
-					tenantId: 'mocked-tenant-id',
+					tenantId: 'tenant-example',
 					embeddingModel: 'fake-embedding',
-					chunks: [expect.objectContaining({ embedding: [0.1, 0.2, 0.3, 0.4] })],
+					chunks: [
+						expect.objectContaining({ index: 0, content: expect.stringContaining('word-0'), embedding: [0.1, 0.2] }),
+						expect.objectContaining({ index: 1, content: 'word-80', embedding: [0.3, 0.4] }),
+					],
 				}),
 				expect.any(AbortSignal),
 			)
 			provider.assertExhausted()
 		} finally {
-			await harness.destroy()
+			await service.destroy()
+			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
-	it('denies collection edits before model or repository work', async () => {
+	it('denies before model or persistence effects', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		const harness = await createCommandTestHarness(knowledgeV1Service, ingestKnowledgeCommandBuilder, {
-			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
+		const repository = { replaceRevision: vi.fn(), search: vi.fn() }
+		const policy = { canAccess: vi.fn().mockResolvedValue(false) }
+		const eventBridge = new DefaultEventBridge()
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		await eventBridge.start()
+		const service = await ingestionService.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 2 },
 			resources: {
-				knowledgeCollectionPolicy: { canAccess: async () => false },
+				knowledgeCollectionPolicy: policy,
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
 				knowledgeRepository: repository,
 			},
 			ai: {
-				models: {
-					primary: { provider, model: 'fake-chat' },
-					embedding: { provider, model: 'fake-embedding' },
-				},
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
 			},
 		})
-
+		await service.start()
 		try {
-			await harness.service.start()
-			const { result, message } = await harness.run({
-				payload: {
-					collectionId: 'internal-risk',
-					documentId: 'secret-policy',
-					revision: 1,
-					title: 'Internal policy',
-					content: 'This source must not be indexed by this caller.',
-				},
-				parameter: {},
-			})
-
-			expect(result).toBeUndefined()
-			expect(message).toMatchObject({ payload: { status: 403, message: 'This knowledge collection is not available' } })
-			provider.assertExhausted()
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'runIngestKnowledge' },
+						payload: {
+							payload: {
+								collectionId: 'customer-help',
+								documentId: 'doc-1',
+								revision: 1,
+								title: 'Policy',
+								content: 'one',
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(provider.requests).toHaveLength(0)
 			expect(repository.replaceRevision).not.toHaveBeenCalled()
 		} finally {
-			await harness.destroy()
+			await service.destroy()
+			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
-})
-```
 
-Test search independently with a deterministic query embedding and mocked
-repository.
-
-```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.test.ts" write
-import { createCommandTestHarness } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { KnowledgeCollectionPolicy } from '../../KnowledgeResources.js'
-import { knowledgeV1Service } from '../../knowledgeV1Service.js'
-import { searchKnowledgeCommandBuilder } from './searchKnowledgeCommandBuilder.js'
-
-const repository = {
-	replaceRevision: vi.fn(),
-	search: vi.fn(async () => [
-		{
-			documentId: 'fees',
-			chunkIndex: 0,
-			content: 'Instant transfers have no Example Bank fee.',
-			score: 0.91,
-		},
-	]),
-}
-
-function options(policy: KnowledgeCollectionPolicy, provider: FakeModelProvider) {
-	return {
-		serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
-		resources: { knowledgeCollectionPolicy: policy, knowledgeRepository: repository },
-		ai: {
-			models: {
-				primary: { provider, model: 'fake-chat' },
-				embedding: { provider, model: 'fake-embedding' },
-			},
-		},
-	}
-}
-
-afterEach(() => vi.clearAllMocks())
-
-describe('searchKnowledgeCommandBuilder', () => {
-	it('scopes repository search with the trusted tenant identity', async () => {
+	it('fails closed when the mounted guard or vectors are invalid', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueEmbedding({
-			embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }],
-			usage: { inputTokens: 3, outputTokens: 0, totalTokens: 3 },
+			embeddings: [{ index: 0, vector: [0.1] }],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 		})
-		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => true)
-		const policy = { canAccess }
-		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
-			...options(policy, provider),
+		const repository = { replaceRevision: vi.fn(), search: vi.fn() }
+		const policy = { canAccess: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false) }
+		const eventBridge = new DefaultEventBridge()
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		await eventBridge.start()
+		const service = await ingestionService.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 2 },
+			resources: {
+				knowledgeCollectionPolicy: policy,
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
+				knowledgeRepository: repository,
+			},
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
 		})
+		await service.start()
 		try {
-			await harness.service.start()
-			const { result } = await harness.run({
-				payload: { collectionId: 'customer-help', query: 'Are instant transfers free?', limit: 3 },
-				parameter: {},
+			const message = getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'runIngestKnowledge' },
+				payload: {
+					payload: { collectionId: 'customer-help', documentId: 'doc-1', revision: 1, title: 'Policy', content: 'one' },
+					parameter: {},
+				},
 			})
-			expect(result?.matches).toHaveLength(1)
-			expect(canAccess).toHaveBeenCalledWith({
-				tenantId: 'mocked-tenant-id',
-				principalId: 'mocked-principal-id',
-				collectionId: 'customer-help',
-				action: 'search',
-			})
-			expect(repository.search).toHaveBeenCalledWith(
-				expect.objectContaining({
-					tenantId: 'mocked-tenant-id',
-					collectionId: 'customer-help',
-					embeddingModel: 'fake-embedding',
-					queryEmbedding: [0.1, 0.2, 0.3, 0.4],
-					limit: 3,
-				}),
-			)
-			provider.assertExhausted()
+			await expect(eventBridge.invoke(message)).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canAccess).toHaveBeenCalledTimes(2)
+			expect(provider.requests).toHaveLength(0)
+			expect(repository.replaceRevision).not.toHaveBeenCalled()
 		} finally {
-			await harness.destroy()
+			await service.destroy()
+			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 
-	it('denies collection access before embedding or repository work', async () => {
+	it('does not persist an invalid embedding response', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => false)
-		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
-			...options({ canAccess }, provider),
+		provider.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1] }],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 		})
+		const repository = { replaceRevision: vi.fn(), search: vi.fn() }
+		const policy = { canAccess: vi.fn().mockResolvedValue(true) }
+		const eventBridge = new DefaultEventBridge()
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		await eventBridge.start()
+		const service = await ingestionService.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 2 },
+			resources: {
+				knowledgeCollectionPolicy: policy,
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
+				knowledgeRepository: repository,
+			},
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
+		})
+		await service.start()
 		try {
-			await harness.service.start()
-			const { result, message } = await harness.run({
-				payload: { collectionId: 'internal-risk', query: 'Show risk rules', limit: 4 },
-				parameter: {},
-			})
-			expect(result).toBeUndefined()
-			expect(message).toMatchObject({ payload: { status: 403, message: 'This knowledge collection is not available' } })
-			provider.assertExhausted()
-			expect(repository.search).not.toHaveBeenCalled()
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'runIngestKnowledge' },
+						payload: {
+							payload: {
+								collectionId: 'customer-help',
+								documentId: 'doc-1',
+								revision: 1,
+								title: 'Policy',
+								content: 'one',
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 500 })
+			expect(repository.replaceRevision).not.toHaveBeenCalled()
 		} finally {
-			await harness.destroy()
+			await service.destroy()
+			await eventBridge.destroy()
+			await storage.close()
+		}
+	})
+
+	it('retries a transient embedding failure through the model binding', async () => {
+		const provider = new RetryEmbeddingProvider()
+		provider.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1, 0.2] }],
+			usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+		})
+		const repository = { replaceRevision: vi.fn().mockResolvedValue(undefined), search: vi.fn() }
+		const policy = { canAccess: vi.fn().mockResolvedValue(true) }
+		const eventBridge = new DefaultEventBridge()
+		const storage = sqliteHarnessStorage({ file: ':memory:' })
+		await eventBridge.start()
+		const service = await ingestionService.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 2 },
+			resources: {
+				knowledgeCollectionPolicy: policy,
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
+				knowledgeRepository: repository,
+			},
+			ai: {
+				storage,
+				model: { provider: new FakeModelProvider({ strict: true }), model: 'fake-chat' },
+				models: {
+					embedding: {
+						provider,
+						model: 'fake-embedding',
+						retry: {
+							maxAttempts: 2,
+							minDelayMs: 1,
+							maxDelayMs: 2,
+							maxActiveDelayMs: 20,
+							maxActiveElapsedMs: 100,
+							retryOn: { serverError: true },
+						},
+					},
+				},
+			},
+		})
+		await service.start()
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'runIngestKnowledge' },
+						payload: {
+							payload: {
+								collectionId: 'customer-help',
+								documentId: 'doc-retry',
+								revision: 1,
+								title: 'Policy',
+								content: 'one',
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toMatchObject({ documentId: 'doc-retry' })
+			expect(provider.attempts).toBe(2)
+			expect(repository.replaceRevision).toHaveBeenCalledTimes(1)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+			await storage.close()
 		}
 	})
 })
 ```
+Check your work: Run `npm run test:rag-ingestion`. Vitest reports the ingestion suite passing.
 
-```bash title="Run the RAG command tests" replay="project"
-npx vitest run src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.test.ts src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.test.ts
-```
-
-Continue with [Test model-selected retrieval](../test-agent/).
+Continue with [Test model selected retrieval](../test-agent/).

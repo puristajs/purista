@@ -1,14 +1,12 @@
 ---
-title: Authenticate protected HTTP endpoints
-description: Resolve bearer sessions in Hono protection middleware and place trusted principal and tenant identity on PURISTA messages.
+title: Protect Hono endpoints with session identity
+description: Resolve bearer sessions in ProtectMiddleware and place trusted tenant and principal identity on PURISTA messages.
 order: 213
 kind: lesson
 status: draft
 ---
 
-Implement Hono's protection middleware. The webserver calls it only for command
-and stream definitions that are protected; protected is the default, while the
-login command explicitly declares itself public.
+Create Hono middleware that reads the session cookie, resolves its user, and makes the identity available to protected routes.
 
 ```ts title="src/sessionProtectMiddleware.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -40,17 +38,6 @@ export const createSessionProtectMiddleware = (http: HonoServiceClass): Endpoint
 		}
 	}
 ```
+Check your work: Run `npm run test:rag-retrieval`. The protected application test can resolve session middleware.
 
-The middleware extracts the bearer token and invokes the Identity resolver
-through EventBridge. On success it returns principal and tenant IDs for the
-outgoing PURISTA message. Missing or invalid credentials throw handled errors,
-which the Hono service maps to the correct HTTP response.
-
-This is authentication. Knowledge guards still perform action-specific
-authorization for every collection operation.
-
-```bash title="Type-check HTTP authentication"
-npm run build
-```
-
-Continue with [Create the React shell](../ui-shell/).
+Continue with [Create the React application shell](../ui-shell/).
