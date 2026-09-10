@@ -1,7 +1,7 @@
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
 import { z } from 'zod'
 import { generalKnowledgeServiceInfo } from '../generalKnowledgeServiceInfo.js'
-import type { KnowledgeCollectionPolicy, KnowledgeRepository } from './KnowledgeResources.js'
+import type { KnowledgeCollectionPolicy, KnowledgeEmbeddingProfile, KnowledgeRepository } from './KnowledgeResources.js'
 
 export const knowledgeServiceInfo = {
 	serviceVersion: '1',
@@ -16,4 +16,5 @@ export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo
 		}),
 	)
 	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
+	.defineResource<'knowledgeEmbeddingProfile', KnowledgeEmbeddingProfile>()
 	.defineResource<'knowledgeRepository', KnowledgeRepository>()

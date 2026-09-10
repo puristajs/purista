@@ -15,6 +15,24 @@ export const ingestKnowledgeOutputSchema = z.object({
 	embeddingModel: z.string().min(1),
 })
 
+export const storedKnowledgeChunksInputSchema = z.object({
+	collectionId: z.string().min(1).max(64),
+	documentId: z.string().min(1).max(80),
+	revision: z.number().int().positive(),
+	title: z.string().min(1).max(120),
+	chunks: z
+		.array(
+			z.object({
+				index: z.number().int().nonnegative(),
+				content: z.string().min(1),
+				embedding: z.array(z.number().finite()).min(1),
+			}),
+		)
+		.min(1),
+})
+
+export const storedKnowledgeChunksOutputSchema = ingestKnowledgeOutputSchema
+
 export const knowledgeMatchSchema = z.object({
 	documentId: z.string().min(1),
 	chunkIndex: z.number().int().nonnegative(),

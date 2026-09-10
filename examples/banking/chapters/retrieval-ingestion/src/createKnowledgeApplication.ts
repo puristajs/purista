@@ -70,11 +70,27 @@ export async function createKnowledgeApplication(
 				canAccess: async ({ tenantId, principalId, collectionId }) =>
 					tenantId === 'tenant-example' && principalId === 'principal-alex' && collectionId === 'customer-help',
 			},
+			knowledgeEmbeddingProfile: {
+				model: resolved.models.embedding.model,
+				dimensions: resolved.embeddingDimensions,
+			},
 			knowledgeRepository: resolved.repository,
 		},
 		ai: {
-			models: resolved.models,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
+			models: {
+				...resolved.models,
+				embedding: {
+					...resolved.models.embedding,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 100,
+						maxDelayMs: 1_000,
+						maxActiveDelayMs: 5_000,
+						maxActiveElapsedMs: 15_000,
+						retryOn: { serverError: true },
+					},
+				},
+			},
 		},
 	})
 	const http = await honoV1Service.getInstance(eventBridge, {

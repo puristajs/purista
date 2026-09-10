@@ -1,4 +1,4 @@
-import { Pool, type PoolClient } from 'pg'
+import { Pool } from 'pg'
 import { type KnowledgeRepository, StaleKnowledgeRevisionError } from '../service/knowledge/v1/KnowledgeResources.js'
 
 function vectorLiteral(vector: number[], dimensions: number) {
@@ -6,20 +6,6 @@ function vectorLiteral(vector: number[], dimensions: number) {
 		throw new Error(`Expected ${dimensions} finite embedding values`)
 	}
 	return `[${vector.join(',')}]`
-}
-
-async function currentRevision(
-	client: PoolClient,
-	input: { tenantId: string; collectionId: string; documentId: string },
-) {
-	const result = await client.query(
-		`SELECT revision
-		 FROM knowledge_documents
-		 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3
-		 FOR UPDATE`,
-		[input.tenantId, input.collectionId, input.documentId],
-	)
-	return (result.rows[0] as { revision: number } | undefined)?.revision
 }
 
 export class PgKnowledgeRepository implements KnowledgeRepository {
@@ -37,49 +23,56 @@ export class PgKnowledgeRepository implements KnowledgeRepository {
 		signal?.throwIfAborted()
 		const client = await this.pool.connect()
 		try {
+			signal?.throwIfAborted()
 			await client.query('BEGIN')
-			const revision = await currentRevision(client, input)
-			if (revision !== undefined && input.revision <= revision) throw new StaleKnowledgeRevisionError()
-			await client.query(
-				`INSERT INTO knowledge_documents (
-				   tenant_id, collection_id, document_id, revision, title, status, embedding_model
-				 ) VALUES ($1, $2, $3, $4, $5, 'active', $6)
-				 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
-				   revision = EXCLUDED.revision,
-				   title = EXCLUDED.title,
-				   status = 'active',
-				   embedding_model = EXCLUDED.embedding_model,
-				   updated_at = now()`,
-				[input.tenantId, input.collectionId, input.documentId, input.revision, input.title, input.embeddingModel],
-			)
-			await client.query(
-				`DELETE FROM knowledge_chunks
-				 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
-				[input.tenantId, input.collectionId, input.documentId],
-			)
-			for (const chunk of input.chunks) {
+			try {
+				signal?.throwIfAborted()
+				const revision = await client.query<{ revision: number }>(
+					`INSERT INTO knowledge_documents (
+					   tenant_id, collection_id, document_id, revision, title, status, embedding_model
+					 ) VALUES ($1, $2, $3, $4, $5, 'active', $6)
+					 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
+					   revision = EXCLUDED.revision,
+					   title = EXCLUDED.title,
+					   status = 'active',
+					   embedding_model = EXCLUDED.embedding_model,
+					   updated_at = now()
+					 WHERE knowledge_documents.revision < EXCLUDED.revision
+					 RETURNING revision`,
+					[input.tenantId, input.collectionId, input.documentId, input.revision, input.title, input.embeddingModel],
+				)
+				if (revision.rowCount !== 1) throw new StaleKnowledgeRevisionError()
 				signal?.throwIfAborted()
 				await client.query(
-					`INSERT INTO knowledge_chunks (
-					   tenant_id, collection_id, document_id, revision,
-					   chunk_index, content, embedding_model, embedding
-					 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector)`,
-					[
-						input.tenantId,
-						input.collectionId,
-						input.documentId,
-						input.revision,
-						chunk.index,
-						chunk.content,
-						input.embeddingModel,
-						vectorLiteral(chunk.embedding, this.embeddingDimensions),
-					],
+					`DELETE FROM knowledge_chunks
+					 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+					[input.tenantId, input.collectionId, input.documentId],
 				)
+				for (const chunk of input.chunks) {
+					signal?.throwIfAborted()
+					await client.query(
+						`INSERT INTO knowledge_chunks (
+						   tenant_id, collection_id, document_id, revision,
+						   chunk_index, content, embedding_model, embedding
+						 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector)`,
+						[
+							input.tenantId,
+							input.collectionId,
+							input.documentId,
+							input.revision,
+							chunk.index,
+							chunk.content,
+							input.embeddingModel,
+							vectorLiteral(chunk.embedding, this.embeddingDimensions),
+						],
+					)
+				}
+				signal?.throwIfAborted()
+				await client.query('COMMIT')
+			} catch (error) {
+				await client.query('ROLLBACK')
+				throw error
 			}
-			await client.query('COMMIT')
-		} catch (error) {
-			await client.query('ROLLBACK')
-			throw error
 		} finally {
 			client.release()
 		}

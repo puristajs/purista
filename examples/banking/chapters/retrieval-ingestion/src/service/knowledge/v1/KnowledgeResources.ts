@@ -6,6 +6,11 @@ export type KnowledgeChunkInput = {
 	embedding: number[]
 }
 
+export type KnowledgeEmbeddingProfile = Readonly<{
+	model: string
+	dimensions: number
+}>
+
 export interface KnowledgeRepository {
 	replaceRevision(
 		input: Readonly<{
