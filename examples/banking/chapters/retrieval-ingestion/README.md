@@ -6,17 +6,21 @@ runnable application.
 
 The example keeps these boundaries visible:
 
-1. `ingestKnowledge` is an authorized PURISTA command that chunks source text,
-   obtains vectors from the mounted Harness embedding model, and stores them
-   through the injected `KnowledgeRepository`.
-2. `searchKnowledge` uses the same Harness embedding model and performs
-   tenant-scoped retrieval through the repository resource.
-3. `retrieve_evidence` is a native Harness agent that lets the model choose the
-   `search_knowledge` host tool.
-4. `answer_knowledge_question` is a native Harness workflow that produces both
-   an aggregate answer and real text deltas.
-5. `answerKnowledgeQuestion` is a protected PURISTA stream that exposes AI SDK
-   UI Message Stream v1 for standard `useChat` clients.
+1. `runIngestKnowledge` is an authorized PURISTA command that invokes the
+   mounted `ingestKnowledge` workflow through the EventBridge.
+2. `ingestKnowledge` chunks source text, obtains vectors from the named Harness
+   embedding model, and stores them through the `storeKnowledgeChunks` host
+   tool and injected `KnowledgeRepository`.
+3. `retrieveKnowledge` owns query embedding and calls the private
+   `queryKnowledgeRepository` host tool, which scopes every database query with
+   the authenticated tenant.
+4. `answerKnowledgeQuestion` is a configurable Harness agent. The model can
+   choose its `searchKnowledge` host tool, which authorizes the requested
+   collection and invokes `retrieveKnowledge` through the EventBridge.
+5. `runAnswerKnowledgeQuestion` provides the protected aggregate endpoint, and
+   `streamAnswerKnowledgeQuestion` provides the protected AI SDK UI Message
+   Stream v1 endpoint over the same agent contract. Tool approvals are returned
+   as resumable outcomes instead of server errors.
 6. `Identity` owns the local login and opaque sessions in PURISTA StateStore.
 7. Hono projects the public login command, protected ingestion command, and
    protected stream, authenticates

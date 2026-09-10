@@ -22,6 +22,7 @@ async function main() {
 		application.identity,
 		application.repository,
 		application.stateStore,
+		{ name: 'Harness storage', destroy: async () => application.harnessStorage.close?.() },
 		application.eventBridge,
 	])
 	logger.info({ port }, 'Example Bank knowledge application started')

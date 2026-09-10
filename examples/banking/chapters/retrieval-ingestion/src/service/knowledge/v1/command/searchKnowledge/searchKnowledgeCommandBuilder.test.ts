@@ -1,4 +1,5 @@
-import { createCommandTestHarness } from '@purista/core'
+import { createCommandTestHarness, DefaultEventBridge } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { KnowledgeCollectionPolicy } from '../../KnowledgeResources.js'
@@ -18,15 +19,22 @@ const repository = {
 }
 
 function options(policy: KnowledgeCollectionPolicy, provider: FakeModelProvider) {
+	const storage = sqliteHarnessStorage({ file: ':memory:' })
 	return {
 		serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
-		resources: { knowledgeCollectionPolicy: policy, knowledgeRepository: repository },
+		resources: {
+			knowledgeCollectionPolicy: policy,
+			knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 4 },
+			knowledgeRepository: repository,
+		},
 		ai: {
+			storage,
+			model: { provider, model: 'fake-chat' },
 			models: {
-				primary: { provider, model: 'fake-chat' },
 				embedding: { provider, model: 'fake-embedding' },
 			},
 		},
+		storage,
 	}
 }
 
@@ -41,8 +49,12 @@ describe('searchKnowledgeCommandBuilder', () => {
 		})
 		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => true)
 		const policy = { canAccess }
+		const runtime = options(policy, provider)
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
 		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
-			...options(policy, provider),
+			...runtime,
+			eventBridge,
 		})
 		try {
 			await harness.service.start()
@@ -68,15 +80,22 @@ describe('searchKnowledgeCommandBuilder', () => {
 			)
 			provider.assertExhausted()
 		} finally {
+			await new Promise<void>((resolve) => setImmediate(resolve))
 			await harness.destroy()
+			await eventBridge.destroy()
+			await runtime.storage.close()
 		}
 	})
 
 	it('denies collection access before embedding or repository work', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => false)
+		const runtime = options({ canAccess }, provider)
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
 		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
-			...options({ canAccess }, provider),
+			...runtime,
+			eventBridge,
 		})
 		try {
 			await harness.service.start()
@@ -89,7 +108,10 @@ describe('searchKnowledgeCommandBuilder', () => {
 			provider.assertExhausted()
 			expect(repository.search).not.toHaveBeenCalled()
 		} finally {
+			await new Promise<void>((resolve) => setImmediate(resolve))
 			await harness.destroy()
+			await eventBridge.destroy()
+			await runtime.storage.close()
 		}
 	})
 })

@@ -31,38 +31,22 @@ async function main() {
 	await resetScriptedFixture(databaseUrl)
 	const provider = new FakeModelProvider({ strict: true })
 	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
-	provider.enqueueObject({
-		object: {},
-		toolCalls: [
-			{
+	provider.enqueueTextStream([
+		{
+			kind: 'tool_call',
+			call: {
 				id: 'search-1',
-				name: 'search_knowledge',
+				name: 'searchKnowledge',
 				arguments: {
 					collectionId: 'customer-help',
 					query: 'How long can an international transfer remain pending?',
 					limit: 4,
 				},
 			},
-		],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
-	provider.enqueueObject({
-		object: {
-			question: 'How long can an international transfer remain pending?',
-			evidence: [
-				{
-					documentId: 'transfer-guide',
-					chunkIndex: 0,
-					content: 'International transfers can remain pending for up to two business days.',
-					score: 1,
-				},
-			],
 		},
-		usage,
-		finishReason: 'stop',
-	})
+		{ kind: 'finish', usage, finishReason: 'tool_calls' },
+	])
+	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
 	provider.enqueueTextStream([
 		{ kind: 'delta', text: 'Up to two business days ' },
 		{ kind: 'delta', text: '[transfer-guide#0].' },
@@ -94,6 +78,7 @@ async function main() {
 		application.identity,
 		application.repository,
 		application.stateStore,
+		{ name: 'Harness storage', destroy: async () => application.harnessStorage.close?.() },
 		application.eventBridge,
 	])
 	logger.info({ port }, 'Scripted RAG demo started; ingest once, then ask the suggested question')

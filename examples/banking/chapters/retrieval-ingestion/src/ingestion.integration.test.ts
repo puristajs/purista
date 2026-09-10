@@ -62,7 +62,11 @@ describe('knowledge ingestion workflow', () => {
 				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
 				knowledgeRepository: repository,
 			},
-			ai: { storage, models: { embedding: { provider, model: 'fake-embedding' } } },
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
 		})
 		await service.start()
 		try {
@@ -122,7 +126,11 @@ describe('knowledge ingestion workflow', () => {
 				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
 				knowledgeRepository: repository,
 			},
-			ai: { storage, models: { embedding: { provider, model: 'fake-embedding' } } },
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
 		})
 		await service.start()
 		try {
@@ -173,7 +181,11 @@ describe('knowledge ingestion workflow', () => {
 				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
 				knowledgeRepository: repository,
 			},
-			ai: { storage, models: { embedding: { provider, model: 'fake-embedding' } } },
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
 		})
 		await service.start()
 		try {
@@ -216,7 +228,11 @@ describe('knowledge ingestion workflow', () => {
 				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 2 },
 				knowledgeRepository: repository,
 			},
-			ai: { storage, models: { embedding: { provider, model: 'fake-embedding' } } },
+			ai: {
+				storage,
+				model: { provider, model: 'fake-chat' },
+				models: { embedding: { provider, model: 'fake-embedding' } },
+			},
 		})
 		await service.start()
 		try {
@@ -268,6 +284,7 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
+				model: { provider: new FakeModelProvider({ strict: true }), model: 'fake-chat' },
 				models: {
 					embedding: {
 						provider,

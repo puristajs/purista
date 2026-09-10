@@ -1,5 +1,5 @@
 import { DefaultEventBridge, initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
+import { type HarnessStorage, type ModelProvider, sqliteHarnessStorage } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { honoV1Service } from '@purista/hono-http-server'
 import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
@@ -22,6 +22,7 @@ export type KnowledgeApplicationDependencies = {
 		embedding: { provider: ModelProvider; model: string }
 	}
 	embeddingDimensions: number
+	storage?: HarnessStorage
 }
 
 function defaultDependencies(
@@ -43,6 +44,7 @@ function defaultDependencies(
 			embedding: { provider, model: embeddingModel },
 		},
 		embeddingDimensions,
+		storage: sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' }),
 	}
 }
 
@@ -52,6 +54,8 @@ export async function createKnowledgeApplication(
 	environment: Readonly<Record<string, string | undefined>> = process.env,
 ) {
 	const resolved = dependencies ?? defaultDependencies(logger, environment)
+	const storage =
+		resolved.storage ?? sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const identity = await identityV1Service.getInstance(eventBridge, {
@@ -77,8 +81,9 @@ export async function createKnowledgeApplication(
 			knowledgeRepository: resolved.repository,
 		},
 		ai: {
+			storage,
+			model: resolved.models.primary,
 			models: {
-				...resolved.models,
 				embedding: {
 					...resolved.models.embedding,
 					retry: {
@@ -120,5 +125,6 @@ export async function createKnowledgeApplication(
 		identity,
 		knowledge,
 		http,
+		harnessStorage: storage,
 	}
 }

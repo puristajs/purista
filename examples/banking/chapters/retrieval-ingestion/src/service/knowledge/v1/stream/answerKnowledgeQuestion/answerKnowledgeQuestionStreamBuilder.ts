@@ -1,44 +1,60 @@
-import { AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS, createHarnessUIMessageSseEvents } from '@purista/harness-ai-sdk-ui/v1'
-import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
-import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
 import {
-	aiSdkUiMessageSseEventSchema,
-	answerKnowledgeQuestionFinalSchema,
-	answerKnowledgeQuestionHttpInputSchema,
-} from '../../schema.js'
-import { latestUserText } from './latestUserText.js'
+	AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS,
+	createHarnessUIMessageSseEvents,
+	parseHarnessUIMessageRequest,
+} from '@purista/harness-ai-sdk-ui/v1'
+import { z } from 'zod'
+import { answerKnowledgeQuestionAgent } from '../../harness/agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.js'
+import { knowledgeV1ServiceBuilder } from '../../knowledgeV1ServiceBuilder.js'
+
+const inputSchema = z.object({ collectionId: z.string().min(1) }).passthrough()
+const parameterSchema = z.object({})
+const chunkSchema = z.object({ event: z.literal('data'), data: z.unknown() })
+const finalSchema = z.void()
+const protocolHeaders = {
+	'x-vercel-ai-ui-message-stream': AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS['x-vercel-ai-ui-message-stream'],
+	'x-accel-buffering': AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS['x-accel-buffering'],
+}
 
 export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
-	.getStreamBuilder('answerKnowledgeQuestion', 'Stream a grounded answer through AI SDK UI Message Stream v1')
-	.addPayloadSchema(answerKnowledgeQuestionHttpInputSchema)
-	.addChunkSchema(aiSdkUiMessageSseEventSchema)
-	.addFinalSchema(answerKnowledgeQuestionFinalSchema)
-	.canInvokeWorkflow(
-		'Knowledge',
-		'1',
-		'answer_knowledge_question',
-		knowledgeHarness.contracts.workflows.answer_knowledge_question,
-	)
+	.getStreamBuilder('streamAnswerKnowledgeQuestion', 'Stream a grounded answer through AI SDK UI Message Stream v1')
+	.addPayloadSchema(inputSchema)
+	.addParameterSchema(parameterSchema)
+	.addChunkSchema(chunkSchema)
+	.addFinalSchema(finalSchema)
+	.canInvokeAgent('Knowledge', '1', answerKnowledgeQuestionAgent.contract)
 	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
+	.enableHttpSecurity(true)
+	.enableChunkAggregation(false)
+	.setHttpStreamingMode('stream')
 	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-	.setHttpResponseHeaders(AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS)
+	.setHttpResponseHeaders(protocolHeaders)
 	.setOpenApiSummary('Chat with authorized knowledge')
 	.addOpenApiTags('knowledge', 'ai')
 	.setStreamFunction(async function (context, payload, _parameter, writer) {
-		const execution = await context.workflow.Knowledge['1'].answer_knowledge_question.stream(
-			{
-				collectionId: payload.collectionId,
-				question: latestUserText(payload.messages),
-			},
-			{ sessionId: `knowledge-chat:${payload.id}` },
+		const request = await parseHarnessUIMessageRequest(payload)
+		const question = request.lastUserMessage.parts
+			.flatMap((part) => (part.type === 'text' ? [part.text] : []))
+			.join('\n')
+		const events = await context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].stream(
+			{ collectionId: payload.collectionId, question },
+			request.resume === undefined
+				? { sessionId: request.sessionId }
+				: { sessionId: request.sessionId, resume: request.resume },
 		)
-		writer.onCancel(() => {
-			void execution.cancel('browser disconnected')
+		let cancellation = Promise.resolve()
+		writer.onCancel((reason) => {
+			cancellation = events.cancel(reason)
 		})
-
-		for await (const event of createHarnessUIMessageSseEvents(execution)) {
-			if (writer.cancelled) return
-			await writer.write(event)
+		try {
+			for await (const record of createHarnessUIMessageSseEvents(events, {
+				sessionId: request.sessionId,
+				...(request.assistantMessageId === undefined ? {} : { messageId: request.assistantMessageId }),
+			})) {
+				await writer.write(record)
+			}
+			if (!writer.cancelled) await writer.close()
+		} finally {
+			await cancellation
 		}
-		if (!writer.cancelled) await writer.close({ status: 'completed' })
 	})

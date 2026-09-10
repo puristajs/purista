@@ -27,6 +27,7 @@
 		"test": "npm run test:server && npm run test:ui",
 		"test:server": "vitest run src/application.test.ts src/service src/harness",
 		"test:rag-ingestion": "vitest run src/service/knowledge/v1/chunkKnowledgeText.test.ts src/service/knowledge/v1/harness src/service/knowledge/v1/command/runIngestKnowledge src/ingestion.integration.test.ts",
+		"test:rag-retrieval": "vitest run src/service/knowledge/v1/harness src/service/knowledge/v1/command/runIngestKnowledge src/service/knowledge/v1/command/searchKnowledge src/service/knowledge/v1/command/runAnswerKnowledgeQuestion src/service/knowledge/v1/stream src/service/knowledge/v1/chunkKnowledgeText.test.ts src/ingestion.integration.test.ts src/application.test.ts",
 		"test:postgres": "vitest run src/resources/PgKnowledgeRepository.postgres.test.ts",
 		"test:ui": "vitest run --config ui/vitest.config.ts"
 	},
