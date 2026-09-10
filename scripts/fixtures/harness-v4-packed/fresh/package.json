@@ -1,0 +1,21 @@
+{
+	"name": "tracked-fresh-packed-consumer",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run consumer.test.mjs",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"@purista/core": "^4.0.0",
+		"@purista/harness": "^4.0.0",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@types/node": "^26.2.0",
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
+		"vitest": "^4.1.10"
+	}
+}
