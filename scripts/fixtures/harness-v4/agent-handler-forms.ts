@@ -1,0 +1,6 @@
+const handler = async () => ({})
+defineAgent('method', { async handler() { return {} } })
+defineAgent('getter', { get handler() { return handler } })
+defineAgent('setter', { set handler(value) { void value } })
+defineAgent('shorthand', { handler })
+defineAgent('nested', { tools: [{ handler }] })

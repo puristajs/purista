@@ -88,7 +88,7 @@ const worker = service
 	.canConsumeStream('InvoiceService', '1', 'renderInvoice', invoiceChunkSchema, invoicePayloadSchema)
 	.canEnqueue('notificationQueue', notificationPayloadSchema, notificationParameterSchema)
 	.canEmit('invoice.completed', invoiceCompletedEventSchema)
-	.canInvokeAgent('Reconciliation', '1', 'reconcile_invoice', reconciliationHarness.contracts.agents.reconcile_invoice)
+	.canInvokeAgent('Reconciliation', '1', reconciliationHarness.contracts.agents.reconcile_invoice)
 	.setHandler(async function (context) {
 		const payload = context.message.payload as { invoiceId: string }
 		await context.service.InvoiceService['1'].sendInvoice({ invoiceId: payload.invoiceId })
