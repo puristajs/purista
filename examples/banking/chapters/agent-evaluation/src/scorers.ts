@@ -1,6 +1,6 @@
 import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
 import type { ClassificationAssessment } from './dataset.js'
-import type { ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+import type { ClassificationOutput } from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 export const categoryScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
 	id: 'classification-category',
@@ -22,9 +22,17 @@ export const urgencyScorer = createDeterministicEvaluationScorer<ClassificationA
 	},
 })
 
-export function passRate(result: EvaluationRunResult, dimensionId: string) {
+export function passRate(
+	result: EvaluationRunResult,
+	dimensionId: string,
+	candidate: Readonly<{ id: string; version: string }>,
+) {
 	const aggregate = result.dimensionAggregates.find(
-		(item) => item.dimensionId === dimensionId && item.scope.kind === 'all',
+		(item) =>
+			item.dimensionId === dimensionId &&
+			item.candidateId === candidate.id &&
+			item.candidateVersion === candidate.version &&
+			item.scope.kind === 'all',
 	)
 	if (!aggregate) throw new Error(`Missing evaluation aggregate ${dimensionId}`)
 	return aggregate.passCounts?.rate ?? 0

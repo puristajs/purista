@@ -1,14 +1,12 @@
 ---
 title: Run the mounted classifier
-description: Invoke the evaluated agent through its guarded PURISTA command and EventBridge route.
+description: Invoke the evaluated target through its guarded PURISTA command and EventBridge route.
 order: 300
 kind: lesson
 status: draft
 ---
 
-Create a credential-free application demo with a strict fake provider. Start
-the EventBridge and Support service, invoke the command address with trusted
-identity, and print the validated result.
+Use the deterministic demo to exercise the same mounted agent without credentials.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
@@ -36,7 +34,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
 				payload: {
 					payload: { messageId: 'message-demo', text: 'How do I replace my expiring card?' },
 					parameter: {},
@@ -58,13 +56,9 @@ main().catch((error: unknown) => {
 ```
 
 ```bash title="Run the mounted classifier" replay="project"
-npm run build
 npm run demo
 ```
 
-The output is one structured classification. This run proves the production
-Framework path: command routing, business guards, the mounted agent address,
-identity propagation, and model binding. The previous page's `evaluate` script
-is the offline quality path.
+The result has category `card` and urgency `normal`, proving the command, guard, mount, address, and model fixture work together.
 
 Continue with [Run a live candidate](../run-live/).

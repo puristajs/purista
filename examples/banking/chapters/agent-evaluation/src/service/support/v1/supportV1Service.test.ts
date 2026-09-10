@@ -17,7 +17,7 @@ describe('evaluated support service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: policy },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -27,7 +27,7 @@ describe('evaluated support service', () => {
 					getCommandMessageMock({
 						tenantId: 'tenant-example',
 						principalId: 'principal-alex',
-						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
 						payload: {
 							payload: { messageId: 'message-runtime', text: 'How do I replace my expiring card?' },
 							parameter: {},
@@ -47,14 +47,14 @@ describe('evaluated support service', () => {
 		}
 	})
 
-	it('denies the directly addressed agent before model work', async () => {
+	it('denies the addressed command before model work', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
-			ai: { models: { primary: { provider, model: 'fake-classifier' } } },
+			ai: { model: { provider, model: 'fake-classifier' } },
 		})
 		await service.start()
 
@@ -67,7 +67,7 @@ describe('evaluated support service', () => {
 						receiver: {
 							serviceName: 'Support',
 							serviceVersion: '1',
-							serviceTarget: 'classify_support_message',
+							serviceTarget: 'runClassifySupportMessage',
 						},
 						payload: {
 							payload: { messageId: 'message-denied', text: 'Please classify this.' },

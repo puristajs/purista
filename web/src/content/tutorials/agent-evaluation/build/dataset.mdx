@@ -1,18 +1,19 @@
 ---
 title: Create a versioned dataset
-description: Store stable inputs, expected structured behavior, and semantic segments as ordinary application data.
+description: Keep stable messages and expected structured behavior as ordinary application data.
 order: 292
 kind: lesson
 status: draft
 ---
 
-Create a small, reviewable evaluation dataset. Each case has a stable ID, the
-real agent input, the expected structured fields, and segments used to inspect
-important slices independently.
+Add three small cases. The assessment fields are objective enough for deterministic scoring, while `reason` stays available for review.
 
 ```ts title="src/dataset.ts" write
 import type { EvaluationDataset } from '@purista/harness'
-import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+import type {
+	ClassificationInput,
+	ClassificationOutput,
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 export type ClassificationAssessment = Pick<ClassificationOutput, 'category' | 'urgency'>
 
@@ -42,15 +43,7 @@ export const supportClassificationDataset = {
 } as const satisfies EvaluationDataset<ClassificationInput, ClassificationAssessment>
 ```
 
-Version the dataset independently from prompts, models, and scorers. A dataset
-change means the measurement target changed; a candidate change means the
-system under test changed. Keeping those identities separate makes evaluation
-results comparable.
-
-The banking messages are deliberately short fixtures. The capability being
-taught is dataset structure and traceability, not banking-domain coverage.
-
-```bash title="Type-check the dataset"
+```bash title="Type-check the dataset" replay="project"
 npm run build
 ```
 

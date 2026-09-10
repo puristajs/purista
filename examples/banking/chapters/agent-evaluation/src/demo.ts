@@ -23,7 +23,7 @@ async function main() {
 			getCommandMessageMock({
 				tenantId: 'tenant-example',
 				principalId: 'principal-alex',
-				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'classifySupportMessage' },
+				receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
 				payload: {
 					payload: { messageId: 'message-demo', text: 'How do I replace my expiring card?' },
 					parameter: {},

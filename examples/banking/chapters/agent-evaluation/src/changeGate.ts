@@ -6,13 +6,34 @@ export interface ClassificationGateThresholds {
 	urgencyRate: number
 }
 
+const evaluatedCandidate = { id: 'classify-support-message', version: '1.0.0' } as const
+
 export function assertClassificationGate(
 	result: EvaluationRunResult,
 	thresholds: ClassificationGateThresholds = { categoryRate: 1, urgencyRate: 1 },
 ) {
 	if (result.status !== 'completed') throw new Error(`Evaluation did not complete cleanly: ${result.status}`)
-	const categoryRate = passRate(result, 'category_exact')
-	const urgencyRate = passRate(result, 'urgency_exact')
+	if (result.cases.length !== result.dataset.caseCount)
+		throw new Error('Evaluation did not execute every dataset case.')
+	for (const evaluationCase of result.cases) {
+		if (
+			evaluationCase.candidateId !== evaluatedCandidate.id ||
+			evaluationCase.candidateVersion !== evaluatedCandidate.version
+		) {
+			throw new Error('Evaluation result belongs to a different candidate.')
+		}
+		if (evaluationCase.status !== 'completed' || evaluationCase.task.status !== 'completed') {
+			throw new Error(`Evaluation case ${evaluationCase.caseId} did not complete cleanly.`)
+		}
+		for (const scorer of evaluationCase.scorers) {
+			if (scorer.status !== 'completed') throw new Error(`Scorer ${scorer.scorerId} did not complete cleanly.`)
+			if (scorer.dimensions.some((dimension) => dimension.outcome !== 'scored')) {
+				throw new Error(`Scorer ${scorer.scorerId} returned an inconclusive dimension.`)
+			}
+		}
+	}
+	const categoryRate = passRate(result, 'category_exact', evaluatedCandidate)
+	const urgencyRate = passRate(result, 'urgency_exact', evaluatedCandidate)
 	if (categoryRate < thresholds.categoryRate || urgencyRate < thresholds.urgencyRate) {
 		throw new Error(
 			`Classification gate failed: category=${categoryRate.toFixed(3)}, urgency=${urgencyRate.toFixed(3)}`,

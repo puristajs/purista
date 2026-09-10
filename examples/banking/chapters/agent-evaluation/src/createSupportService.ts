@@ -14,9 +14,6 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
+		ai: { model: options.model },
 	})
 }

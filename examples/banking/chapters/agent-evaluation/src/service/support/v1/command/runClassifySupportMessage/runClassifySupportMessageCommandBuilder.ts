@@ -1,14 +1,3 @@
----
-title: Invoke the agent from a command
-description: Declare a direct agent contract and call its Framework address through EventBridge.
-order: 295
-kind: lesson
-status: draft
----
-
-The command declares the agent contract with `canInvokeAgent`. That declaration gives the handler a typed address-first client; it does not import or execute the agent implementation directly.
-
-```ts title="src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.ts" write
 import {
 	classifySupportMessageAgent,
 	classifySupportMessageInputSchema,
@@ -39,22 +28,3 @@ export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		if (result.outcome.status !== 'completed') throw new Error('Message classification was interrupted unexpectedly.')
 		return result.outcome.output
 	})
-```
-
-Mount the one Harness graph once in the composition root.
-
-```ts title="src/service/support/v1/supportV1Service.ts" write
-import { runClassifySupportMessageCommandBuilder } from './command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.js'
-import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
-import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
-
-export const supportV1Service = supportV1ServiceBuilder
-	.addCommandDefinition(runClassifySupportMessageCommandBuilder.getDefinition())
-	.mountHarness(supportHarness, supportHarnessPolicy)
-```
-
-```bash title="Type-check the complete service" replay="project"
-npm run build
-```
-
-Continue with [Add deterministic scorers](../deterministic-checks/).

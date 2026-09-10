@@ -32,5 +32,22 @@ describe('classification agent evaluation', () => {
 		}
 		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
 		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)
+		provider.assertExhausted()
+	})
+
+	it('rejects incomplete or mismatched candidate evidence', async () => {
+		const provider = passingEvaluationProvider()
+		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-incomplete' })
+		const [firstCase, ...remainingCases] = result.cases
+		if (!firstCase) throw new Error('Expected the deterministic evaluation to produce a case.')
+		const skipped = { ...firstCase, status: 'skipped' as const }
+		expect(() => assertClassificationGate({ ...result, cases: [skipped, ...remainingCases] })).toThrow(
+			/did not complete/i,
+		)
+		const mismatched = { ...firstCase, candidateId: 'other-candidate' }
+		expect(() => assertClassificationGate({ ...result, cases: [mismatched, ...remainingCases] })).toThrow(
+			/different candidate/i,
+		)
+		provider.assertExhausted()
 	})
 })

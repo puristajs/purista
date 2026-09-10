@@ -1,5 +1,8 @@
 import type { EvaluationDataset } from '@purista/harness'
-import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
+import type {
+	ClassificationInput,
+	ClassificationOutput,
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 export type ClassificationAssessment = Pick<ClassificationOutput, 'category' | 'urgency'>
 

@@ -1,13 +1,12 @@
 ---
 title: Compose the evaluated service
-description: Bind a model candidate and business policy when creating the mounted PURISTA service instance.
+description: Bind the chosen model and business policy when creating the Support service.
 order: 299
 kind: lesson
 status: draft
 ---
 
-Create a provider-neutral service factory. It accepts the candidate's provider
-and model ID plus the Support authorization policy.
+The factory supplies application-owned policy and the singular primary model binding. The server entry point selects OpenAI only for the optional live service.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -26,16 +25,10 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			models: { primary: options.model },
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
+		ai: { model: options.model },
 	})
 }
 ```
-
-Add the long-running entry point used by an application. It selects OpenAI only
-at composition time and keeps content capture disabled by default.
 
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
@@ -66,10 +59,7 @@ main().catch((error: unknown) => {
 })
 ```
 
-This runtime composition is separate from offline evaluation, but both paths
-use the same `supportHarness` and classifier module.
-
-```bash title="Type-check service composition"
+```bash title="Type-check service composition" replay="project"
 npm run build
 ```
 

@@ -1,14 +1,3 @@
----
-title: Define the evaluated agent
-description: Put one strict, portable classifier under the Support service version.
-order: 293
-kind: lesson
-status: draft
----
-
-Replace the generated agent with the complete definition below. The input and output schemas are the contract shared by the evaluation and the mounted service.
-
-```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.ts" write
 import { defineAgent } from '@purista/harness'
 import { z } from 'zod'
 
@@ -37,12 +26,3 @@ export const classifySupportMessageAgent = defineAgent('classifySupportMessage',
 	].join(' '),
 	prompt: (input) => ({ role: 'user', content: `Message ${input.messageId}: ${input.text}` }),
 })
-```
-
-An agent is the bounded model loop. It owns the prompt and schemas; routing and authorization stay in PURISTA service files.
-
-```bash title="Type-check the native agent" replay="project"
-npm run build
-```
-
-Continue with [Authorize the mounted agent](../authorize-agent/).

@@ -1,12 +1,21 @@
 ---
 title: Authorize the mounted agent
-description: Protect the directly addressable classifier with the Support service's action-specific business policy.
+description: Keep business authorization in the Support service for every addressed target.
 order: 294
 kind: lesson
 status: draft
 ---
 
-Declare the Support-owned policy resource and explicit service configuration.
+The Support service owns the policy resource and the service identity. Replace these generated files before composing the Harness graph.
+
+```ts title="src/service/support/generalSupportServiceInfo.ts" write
+import type { ServiceInfoType } from '@purista/core'
+
+export const generalSupportServiceInfo: Omit<ServiceInfoType, 'serviceVersion'> = {
+	serviceName: 'Support',
+	serviceDescription: 'Classify and route customer support requests',
+}
+```
 
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportClassificationPolicy {
@@ -21,8 +30,6 @@ export const supportServiceV1ConfigSchema = z.object({})
 
 export type SupportServiceV1Config = z.input<typeof supportServiceV1ConfigSchema>
 ```
-
-Attach the resource to the generated service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
@@ -40,8 +47,7 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
 
-Centralize the business authorization rule and the tenant- and
-principal-scoped session identity used for Harness calls.
+The policy checks trusted identity from the message. Its stable hash keeps later turns for the same message in the same Harness session.
 
 ```ts title="src/service/support/v1/requireSupportClassification.ts" write
 import { createHash } from 'node:crypto'
@@ -80,29 +86,29 @@ export function supportClassificationSessionId(
 }
 ```
 
-Publish the agent with its own guard. Offline evaluation may invoke the native
-Harness definition directly, but every Framework address must remain secure
-when the service runs.
+Compose one service-owned Harness definition and attach the target guard. The guard protects direct addressed execution as well as the command added on the next page.
 
-```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
-import { supportHarness } from '../../../../harness/support/supportHarness.js'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
+import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
 
-export { supportHarness }
+/** One service-owned Harness graph. The evaluation runner uses this same definition directly. */
+export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
+	classifySupportMessageAgent,
+)
 
 export const supportHarnessPolicy = {
-	publish: { agents: ['classify_support_message'], workflows: [] },
 	targets: {
 		agents: {
-			classify_support_message: {
+			classifySupportMessage: {
 				beforeGuards: {
-					messageAccess: async (
-						context: HarnessBusinessGuardContext<{
-							supportClassificationPolicy: SupportClassificationPolicy
-						}>,
-						input: { messageId: string },
+					mayClassifySupport: async (
+						context: HarnessBusinessGuardContext<{ supportClassificationPolicy: SupportClassificationPolicy }>,
+						input: z.output<typeof classifySupportMessageAgent.contract.input>,
 					) => {
 						await requireSupportClassification(context.resources.supportClassificationPolicy, {
 							...context.identity,
@@ -117,7 +123,7 @@ export const supportHarnessPolicy = {
 } as const
 ```
 
-```bash title="Type-check the mounted capability"
+```bash title="Type-check the mounted capability" replay="project"
 npm run build
 ```
 

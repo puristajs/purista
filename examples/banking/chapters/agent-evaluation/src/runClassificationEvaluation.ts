@@ -1,16 +1,17 @@
 import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
 import { type ClassificationAssessment, supportClassificationDataset } from './dataset.js'
-import type { ClassificationInput, ClassificationOutput } from './harness/support/supportClassificationSchemas.js'
-import { supportHarness } from './harness/support/supportHarness.js'
 import { categoryScorer, urgencyScorer } from './scorers.js'
+import type {
+	ClassificationInput,
+	ClassificationOutput,
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportHarness } from './service/support/v1/harness/supportHarness.js'
 
 export async function runClassificationEvaluation(
 	provider: ModelProvider,
 	options: Readonly<{ runId?: string; model?: string }> = {},
 ): Promise<EvaluationRunResult> {
-	const harness = await supportHarness.getInstance({
-		models: { primary: { provider, model: options.model ?? 'evaluation-model' } },
-	})
+	const harness = await supportHarness.getInstance({ model: { provider, model: options.model ?? 'evaluation-model' } })
 	try {
 		return await runEvaluation<
 			ClassificationInput,
@@ -26,9 +27,13 @@ export async function runClassificationEvaluation(
 				version: '1.0.0',
 				async run(target) {
 					const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
-					const outcome = await session.agents.classify_support_message.run(target.input)
-					if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
-					return { output: outcome.output, correlation: { runId: outcome.runId } }
+					try {
+						const outcome = await session.agents.classifySupportMessage.run(target.input)
+						if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
+						return { output: outcome.output, correlation: { runId: outcome.runId } }
+					} finally {
+						await session.release()
+					}
 				},
 			},
 			scorers: [categoryScorer, urgencyScorer],
@@ -38,6 +43,6 @@ export async function runClassificationEvaluation(
 			timeouts: { runMs: 30_000, taskMs: 10_000, scorerMs: 1_000 },
 		})
 	} finally {
-		await harness.shutdown()
+		await harness.close()
 	}
 }

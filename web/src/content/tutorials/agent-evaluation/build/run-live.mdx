@@ -1,13 +1,17 @@
 ---
 title: Run a live candidate
-description: Evaluate the same agent and dataset against one explicitly named provider model.
+description: Evaluate the same agent and dataset against one deliberately named provider model.
 order: 301
 kind: lesson
 status: draft
 ---
 
-Create a separate live runner so credentials and provider variability never
-enter the default verification path.
+The live runner is optional. It requires your own provider key and records the model name alongside the gate result.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
 
 ```ts title="src/runLiveEvaluation.ts" write
 import { openai } from '@purista/harness-openai'
@@ -32,22 +36,12 @@ main().catch((error: unknown) => {
 })
 ```
 
-Document the required environment values.
+Copy `.env.example` to `.env`, choose a model deliberately, and run:
 
-```dotenv title=".env.example" write
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-5-mini
+```bash title="Run the optional live candidate" replay="project"
+npm run evaluate:live
 ```
 
-Copy `.env.example` to `.env`, choose the model candidate deliberately, and run
-the live evaluation.
-
-```bash title="Run the optional live candidate"
-node --env-file=.env --import tsx src/runLiveEvaluation.ts
-```
-
-Record the exact provider, model, prompt/module version, dataset version, and
-scorer versions beside every result. A live score without candidate identity
-cannot support a release decision.
+Keep provider, model, dataset, agent, and scorer versions with each real result. A live score without candidate identity cannot support a release decision.
 
 Continue with [Test the agent and runner](../../testing/test-evaluation/).
