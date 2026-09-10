@@ -129,6 +129,10 @@ routes.
   for a first useful path, decisions or configuration, and a next step. Merge
   or redirect pointer-only, duplicate, or empty chapters instead of retaining
   them for taxonomy symmetry.
+- A completed tutorial becomes visible after its strong local content, source,
+  build, test, and lint gates pass. Track fresh registry consumer
+  replay as separate construction evidence; registry timing does not hide or
+  demote locally verified completed tutorials.
 - Each material adapter/provider has one focused guide, and every public
   package/adapter has a coverage owner.
 - Old public routes remain redirects until intentionally retired through an

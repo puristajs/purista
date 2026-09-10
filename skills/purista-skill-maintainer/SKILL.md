@@ -37,6 +37,9 @@ Specs are the source of truth for framework development. If implementation and s
 - Keep user-facing skills and public docs on the released final state. Remove
   development chronology, correction narratives, rejected alternatives, and
   internal review language; migration guidance compares released contracts.
+- Keep tutorial publication evidence-based: strong local tutorial gates make
+  completed chapters visible, while fresh registry replay remains separate
+  construction-verification evidence and never controls navigation status.
 - Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed copies under `$CODEX_HOME/skills` are mirrors that may need syncing after repo changes.

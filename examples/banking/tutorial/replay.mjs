@@ -56,8 +56,7 @@ const allowedServiceNames = new Set(
 const scaffoldServiceNames = new Set(
 	(course.scaffoldServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()),
 )
-const enforcesV4Source = chapter =>
-	chapter.status !== 'draft' || chapter.constructionSourceAligned === true || chapter.constructionVerified === true
+const enforcesV4Source = () => true
 
 function readFrontmatter(source, path) {
 	const match = source.match(/^---\n([\s\S]*?)\n---\n/)
@@ -141,7 +140,7 @@ async function assertAllPackageManifests() {
 }
 
 assert.equal(course.chapters.length, 28, 'the course must declare exactly 28 capability chapters')
-assert.equal(course.chapters.filter(chapter => chapter.status === 'draft').length, 11, 'all 11 AI chapters must stay draft')
+assert.equal(course.chapters.filter(chapter => chapter.status === 'published').length, 28, 'all 28 completed chapters must be published')
 for (const chapter of course.chapters) {
 	for (const path of chapter.requiredWrittenFiles ?? []) {
 		assert(!path.startsWith('src/harness/'), `${chapter.id}: top-level Harness path is forbidden: ${path}`)
@@ -293,7 +292,7 @@ if (values.check) {
 	let verified = 0
 	let verifiedBaselines = 0
 	for (const chapter of checkedRecipes) {
-		if (chapter.status === 'draft') continue
+		if (chapter.constructionSourceAligned === true && chapter.constructionVerified !== true) continue
 		const root = retainedRoot(chapter.id)
 		const enforceV4Source = enforcesV4Source(chapter)
 		await assertServiceBoundaries(root, enforceV4Source)

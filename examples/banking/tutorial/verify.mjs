@@ -11,7 +11,9 @@ import { fileURLToPath } from 'node:url'
 const directory = dirname(fileURLToPath(import.meta.url))
 const bankRoot = join(directory, '..')
 const course = JSON.parse(await readFile(join(directory, 'course.json'), 'utf8'))
-const retainedChapters = course.chapters.filter(chapter => chapter.status !== 'draft')
+const freshReplayChapters = course.chapters.filter(
+	chapter => chapter.constructionSourceAligned !== true || chapter.constructionVerified === true,
+)
 
 function run(command, args, cwd) {
 	return new Promise((resolve, reject) => {
@@ -110,7 +112,7 @@ async function smokeCompiledApplication(project, chapter) {
 await run(process.execPath, [join(directory, 'replay.mjs'), '--check'], bankRoot)
 const scratch = await mkdtemp(join(tmpdir(), 'purista-bank-verify-'))
 try {
-	for (const chapter of retainedChapters) {
+	for (const chapter of freshReplayChapters) {
 		const project = join(scratch, chapter.id)
 		await cp(join(bankRoot, 'chapters', chapter.id), project, {
 			recursive: true,
@@ -129,7 +131,7 @@ try {
 		await smokeCompiledApplication(project, chapter)
 	}
 	process.stdout.write(
-		`Verified ${retainedChapters.length} retained applications; ${course.plannedChapters} chapters planned.\n`,
+		`Verified ${freshReplayChapters.length} fresh-replay applications; ${course.plannedChapters} chapters published.\n`,
 	)
 } finally {
 	await rm(scratch, { recursive: true, force: true })

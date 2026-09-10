@@ -3,7 +3,7 @@ title: Authorize an analysis request
 description: Keep authentication identity and business authorization separate.
 order: 283
 kind: lesson
-status: draft
+status: published
 ---
 
 The message supplies trusted tenant and principal identity. Payload data never chooses either value. The policy decides whether that caller may analyze this request: missing identity is 401, denied permission is 403.

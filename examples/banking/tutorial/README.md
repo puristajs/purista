@@ -7,7 +7,7 @@ software.
 
 Read [ROADMAP.md](./ROADMAP.md) for the exact 28 chapter sequence and the
 service that owns each capability. Read [VERIFICATION.md](./VERIFICATION.md)
-for the retained source baseline, draft rules, and release checks.
+for the retained source baseline, local checks, and release checks.
 
 ## How to work on a chapter
 
@@ -40,8 +40,9 @@ business guards authorize effects; Harness guardrails govern model content.
 The first 17 chapters establish the Framework base: project creation, HTTP,
 resources, identity, authorization, transforms, events, streams, queues,
 schedules, observability, and distributed runtime. Chapters 18 through 28 are
-AI capability packets. They stay `draft` in `course.json` until their focused
-source, deterministic tests, and clean consumer replay have passed.
+AI capability packets. Their published pages are checked against complete
+retained source locally. Fresh consumer replay remains separate release
+evidence and does not control website visibility.
 
 ## Replay and source checks
 
@@ -66,18 +67,28 @@ instruction.
 Run the retained-course checks with:
 
 ```sh
-npm run check:drafts --prefix examples/banking
-npm run check:source --prefix examples/banking
+npm run check:tutorials --prefix examples/banking
 npm run build -w @purista/web
-npm test --prefix examples/banking
+npm run test:tutorials --prefix examples/banking
 ```
 
-`check:drafts` checks the draft packet structure without publishing it.
-`check:source` verifies page and retained-source hashes. The website build
-checks rendered tutorial content. `npm test` verifies retained projects from
-fresh consumer copies by resolving the declared public ranges without writing
-a lockfile, then running typechecks, tests, builds, and compiled smoke checks.
-Draft chapters are not part of the published retained-course gate.
+`check:tutorials` checks the source-aligned AI chapter structure and complete
+write blocks. `test:tutorials` also runs each retained AI project's build,
+tests, and lint checks. The website build checks rendered tutorial content.
+The default `npm test` and `npm run build` commands use these local gates.
+
+After all declared package versions exist in the registry, run the separate
+release-evidence gates:
+
+```sh
+npm run check:replay --prefix examples/banking
+npm run test:consumer --prefix examples/banking
+```
+
+`check:replay` verifies existing fresh-replay evidence for chapters that
+declare it. `test:consumer` verifies those projects from consumer copies by
+resolving the declared public ranges without writing a lockfile, then running
+typechecks, tests, builds, and compiled smoke checks.
 
 The retained project package locks are a release concern owned by P4-044. They
 are regenerated from the registry after all v4 packages are available.

@@ -3,7 +3,7 @@ title: "Optional: test Docker isolation"
 description: Run a real non-root container test only when Docker is available.
 order: 292
 kind: lesson
-status: draft
+status: published
 ---
 
 The default suite does not need Docker. This test is skipped unless an immutable image reference is supplied. It uses the real adapter and its trusted cleanup API. If both the operation and cleanup fail, the test reports their combined errors instead of hiding either one.

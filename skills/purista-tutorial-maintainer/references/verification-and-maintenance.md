@@ -57,12 +57,25 @@ npm run audit:knowledge
 ```
 
 For website/tutorial content, also use the existing Handbook/link audits and
-web build where relevant, then inspect changed routes in a browser. Run
-`npm run check:drafts --prefix examples/banking` for draft structure and
-source references, and `npm run test:drafts --prefix examples/banking` for the
-draft projects' build, test, and lint gates. Published chapters additionally
-require the clean consumer replay and runtime smoke gate. Do not report one of
-these narrower checks as evidence for a boundary it does not execute.
+web build where relevant, then inspect changed routes in a browser. Run the
+final local tutorial gates from `purista`:
+
+```sh
+npm run check:tutorials --prefix examples/banking
+npm run test:tutorials --prefix examples/banking
+```
+
+Both commands use `examples/banking/tutorial/verify-local.mjs` as the single
+local verifier. The check command proves course structure, page/source
+alignment, dependency policy, and source references. The test command additionally
+executes the locally aligned tutorial projects' builds, tests, and lint gates.
+When those strong local gates and the relevant website audits pass,
+completed chapters may be published and made visible. A fresh consumer replay
+using registry-published packages is separate construction-verification
+evidence; it must not control tutorial status or navigation. Record which
+dependency source each proof used, and never present a local package proof as a
+registry replay. Do not report either narrower command as evidence for a
+boundary it does not execute.
 
 When syncing the catalog, update `purista/skills` first, then the affected
 `packages/core/skills` files and installed mirrors. Check for unrelated local

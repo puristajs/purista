@@ -17,6 +17,7 @@
 - [Command result events](#16-choose-a-command-success-event)
 - [Capability-first course](#17-keep-the-example-out-of-the-information-architecture)
 - [Narrow service names](#18-keep-the-application-name-out-of-service-boundaries)
+- [Tutorial visibility evidence](#19-publish-after-strong-local-verification)
 
 Use these bounded scenarios to review the skill's decisions. They are
 behavioral acceptance cases, not claims that an evaluation has already run.
@@ -262,3 +263,19 @@ retained source contain no generated `Banking` or `ExampleBank` service. Every
 service has a clear owner, state/resource boundary, excluded responsibilities,
 and focused Framework tests. Old diagnostic evidence may preserve the rejected
 name but cannot be a starting checkpoint.
+
+## 19. Publish after strong local verification
+
+Request: “The chapter is complete and passes every local tutorial gate, but the
+matching packages have not reached the public registry yet. Keep it hidden.”
+
+Expected: reject registry timing as a visibility gate. Run
+`npm run check:tutorials --prefix examples/banking` and
+`npm run test:tutorials --prefix examples/banking`, confirm the chapter is
+complete, then publish it and include it in navigation. Record a later fresh
+registry consumer replay as distinct construction-verification evidence.
+
+Check: the evidence names `examples/banking/tutorial/verify-local.mjs` and the
+dependency source actually used. No guidance retains draft-only verifier names;
+no local packed-package run is described as a fresh registry replay; registry
+availability cannot demote a completed chapter to draft or hide its route.

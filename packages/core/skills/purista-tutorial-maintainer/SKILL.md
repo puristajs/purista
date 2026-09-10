@@ -96,19 +96,23 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
    propagation, durability, delivery, or stream compatibility without evidence.
 7. Verify clean setup, source checkpoints, tests, UI interactions, links, and
    the newcomer journey. Update coverage and navigation only for completed
-   destinations. During isolated maintenance, use the replay tool's focused
-   `--check --chapter <id>` mode so a deliberately frozen dependent branch does
-   not force unrelated migration. The unfiltered source-provenance check remains
-   the release gate. Report exact commands, results, and unresolved gaps.
+   destinations. Run `npm run check:tutorials --prefix examples/banking` for
+   the complete local structure gate, then run
+   `npm run test:tutorials --prefix examples/banking` for the locally aligned
+   tutorial projects' build, test, and lint gates. Report exact
+   commands, results, and unresolved gaps.
 
 Treat source alignment and construction proof as different states. Exact
 learner-facing file blocks may be machine-aligned with a retained review
 project before the lesson is executable. Call that source-aligned, not
-construction-verified. Claim construction verification only after the current
-pages have created a fresh project outside the monorepo, installed the shown
-published packages, executed every marked command in order, and produced a
-file/proof hash that matches the retained solution. A final-source build or a
-structural documentation check cannot replace this replay.
+construction-verified. A chapter becomes complete and visible after the strong
+local tutorial verifier proves its content, retained source, dependency
+contracts, build, tests, and lint. A fresh project replay against
+published registry packages is separate construction-verification evidence. It
+strengthens release confidence, but package publication timing must not keep an
+otherwise completed tutorial in draft or remove it from navigation. Never claim
+fresh-registry construction verification from local packed packages, a
+final-source build, or a structural documentation check.
 
 ## Completion rules
 

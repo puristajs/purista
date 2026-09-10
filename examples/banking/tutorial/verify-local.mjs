@@ -50,13 +50,16 @@ const { values } = parseArgs({
 	},
 })
 
-const draftChapters = course.chapters.filter(chapter => chapter.status === 'draft')
+const locallyVerifiedChapters = course.chapters.filter(chapter => chapter.constructionSourceAligned === true)
 const selectedChapters = values.chapter
-	? draftChapters.filter(chapter => chapter.id === values.chapter)
-	: draftChapters
+	? locallyVerifiedChapters.filter(chapter => chapter.id === values.chapter)
+	: locallyVerifiedChapters
 const snippetMismatches = []
 
-assert(selectedChapters.length > 0, values.chapter ? `Unknown draft chapter: ${values.chapter}` : 'No draft chapters found')
+assert(
+	selectedChapters.length > 0,
+	values.chapter ? `Unknown locally verified chapter: ${values.chapter}` : 'No locally verified chapters found',
+)
 assert.equal(course.chapters.length, course.plannedChapters, 'plannedChapters must equal the number of declared chapters')
 
 function assertCourseGraph() {
@@ -100,8 +103,14 @@ function assertCourseGraph() {
 	}
 	const aiChapters = course.chapters.filter(chapter => aiChapterIds.has(chapter.id))
 	assert.equal(aiChapters.length, 11, 'the course must retain all 11 AI chapters')
-	for (const chapter of aiChapters)
-		assert.equal(chapter.status, 'draft', `${chapter.id}: AI chapters stay draft until implementation and replay proof`)
+	for (const chapter of aiChapters) {
+		assert.equal(chapter.status, 'published', `${chapter.id}: locally verified AI chapter must be publicly visible`)
+		assert.equal(
+			chapter.constructionSourceAligned,
+			true,
+			`${chapter.id}: locally verified AI chapter must declare constructionSourceAligned`,
+		)
+	}
 }
 
 assertCourseGraph()
@@ -261,7 +270,7 @@ async function inspectTutorialPage(chapter, page) {
 	for (const field of ['title', 'description', 'order', 'kind', 'status'])
 		assert(new RegExp(`^${field}:\\s+\\S`, 'm').test(frontmatter), `${page}: missing ${field} frontmatter`)
 	assert(/^kind:\s+lesson$/m.test(frontmatter), `${page}: tutorial steps must use kind: lesson`)
-	assert(/^status:\s+draft$/m.test(frontmatter), `${page}: draft chapter page must use status: draft`)
+	assert(/^status:\s+published$/m.test(frontmatter), `${page}: locally verified chapter page must be published`)
 	assert(!/\b(?:file|link|workspace):\.?(?:\.\/|\/)/.test(source), `${page}: contains a local package dependency`)
 	assert(!/manual(?:ly)? cop(?:y|ied)|copy packages? from (?:the )?monorepo/i.test(source), `${page}: describes a development-only package copy`)
 	for (const inline of source.matchAll(/`((?:src|ui|public|skills|scripts)\/[A-Za-z0-9_@./-]+\.[A-Za-z0-9]+)`/g)) {
@@ -301,7 +310,7 @@ async function inspectTutorialPage(chapter, page) {
 async function inspectChapter(chapter) {
 	const projectRoot = join(bankRoot, 'chapters', chapter.id)
 	const constructionSourceAligned = chapter.constructionSourceAligned || chapter.constructionVerified
-	const enforceV4Source = chapter.status !== 'draft' || constructionSourceAligned
+	const enforceV4Source = true
 	assert(await exists(projectRoot), `${chapter.id}: missing retained example project`)
 	const packageJsonPath = join(projectRoot, 'package.json')
 	assert(await exists(packageJsonPath), `${chapter.id}: missing package.json`)
@@ -359,7 +368,7 @@ async function inspectChapter(chapter) {
 		assert(await exists(join(projectRoot, '.tutorial-proof.json')), `${chapter.id}: constructionVerified requires replay proof`)
 
 	await assertServiceBoundaries(chapter.id, projectRoot, enforceV4Source)
-	process.stdout.write(`Checked draft tutorial structure: ${chapter.id}\n`)
+	process.stdout.write(`Checked locally verified tutorial structure: ${chapter.id}\n`)
 	return { chapter, projectRoot }
 }
 
@@ -373,11 +382,11 @@ if (snippetMismatches.length > 0) {
 
 if (!values['structure-only']) {
 	for (const { chapter, projectRoot } of inspected) {
-		process.stdout.write(`\nVerify draft consumer project: ${chapter.id}\n`)
+		process.stdout.write(`\nVerify local tutorial project: ${chapter.id}\n`)
 		for (const script of ['build', 'test', 'lint']) await run('npm', ['run', script], projectRoot)
 	}
 }
 
 process.stdout.write(
-	`Verified ${inspected.length} draft tutorial project(s)${values['structure-only'] ? ' structurally' : ' with build, tests, and lint'}.\n`,
+	`Verified ${inspected.length} local tutorial project(s)${values['structure-only'] ? ' structurally' : ' with build, tests, and lint'}.\n`,
 )

@@ -26,7 +26,7 @@ export function tutorialRoute(id: string): string {
 	return slug ? `/tutorials/${slug}/` : '/tutorials/'
 }
 
-/** Resolve entries for either the public course or a local draft preview. */
+/** Resolve published course entries, with an explicit opt-in for work in progress. */
 export function getVisibleTutorialEntries(
 	entries: TutorialEntry[],
 	visibility: TutorialVisibility = {},

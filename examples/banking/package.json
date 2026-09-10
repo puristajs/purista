@@ -8,12 +8,13 @@
 		"node": ">=24.15.0"
 	},
 	"scripts": {
-		"test": "node tutorial/verify.mjs",
-		"test:drafts": "node tutorial/verify-drafts.mjs",
-		"check:drafts": "node tutorial/verify-drafts.mjs --structure-only",
-		"check:source": "node tutorial/replay.mjs --check",
+		"test": "npm run test:tutorials",
+		"build": "npm run check:tutorials",
+		"test:tutorials": "node tutorial/verify-local.mjs",
+		"check:tutorials": "node tutorial/verify-local.mjs --structure-only",
+		"test:consumer": "node tutorial/verify.mjs",
+		"check:replay": "node tutorial/replay.mjs --check",
 		"refresh-proof": "node tutorial/refresh-proof.mjs",
-		"build": "node tutorial/replay.mjs --check",
 		"replay": "node tutorial/replay.mjs"
 	}
 }

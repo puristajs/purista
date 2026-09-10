@@ -148,7 +148,7 @@ describe('tutorial course navigation contract', () => {
 		expect(course.chapters).toHaveLength(28)
 	})
 
-	test('groups every AI capability under Add AI capabilities in draft preview and after publication', () => {
+	test('publishes every AI capability under Add AI capabilities', () => {
 		const chapterEntries = course.chapters.map((chapter, index) => {
 			const source = readFileSync(`${contentRoot}/${chapter.id}/index.mdx`, 'utf8')
 			return entry(chapter.id, index + 1, 'chapter', {
@@ -158,23 +158,12 @@ describe('tutorial course navigation contract', () => {
 			})
 		})
 
-		const previewSidebar = getTutorialSidebar(chapterEntries, { includeDrafts: true })
-		const aiHeader = previewSidebar.findIndex(item => item.id === 'group-ai')
-		expect(aiHeader).toBeGreaterThanOrEqual(0)
-		expect(previewSidebar[aiHeader]).toMatchObject({ title: 'Add AI capabilities', kind: 'sectionHeader' })
-		expect(previewSidebar.slice(aiHeader + 1, aiHeader + 1 + aiCapabilityRoots.length).map(item => item.id)).toEqual(aiCapabilityRoots)
-
 		const publishedSidebar = getTutorialSidebar(chapterEntries)
-		expect(publishedSidebar.some(item => item.id === 'group-ai')).toBe(false)
-		expect(chapterEntries.filter(item => item.data.status === 'draft')).toHaveLength(aiCapabilityRoots.length)
-
-		const futurePublishedEntries = chapterEntries.map(item => ({
-			...item,
-			data: { ...item.data, status: 'published' as const },
-		}))
-		const futurePublishedSidebar = getTutorialSidebar(futurePublishedEntries)
-		const futureAiHeader = futurePublishedSidebar.findIndex(item => item.id === 'group-ai')
-		expect(futurePublishedSidebar.slice(futureAiHeader + 1, futureAiHeader + 1 + aiCapabilityRoots.length).map(item => item.id)).toEqual(aiCapabilityRoots)
+		const aiHeader = publishedSidebar.findIndex(item => item.id === 'group-ai')
+		expect(aiHeader).toBeGreaterThanOrEqual(0)
+		expect(publishedSidebar[aiHeader]).toMatchObject({ title: 'Add AI capabilities', kind: 'sectionHeader' })
+		expect(publishedSidebar.slice(aiHeader + 1, aiHeader + 1 + aiCapabilityRoots.length).map(item => item.id)).toEqual(aiCapabilityRoots)
+		expect(chapterEntries.filter(item => item.data.status === 'published')).toHaveLength(capabilityRoots.length)
 	})
 
 	test('lists every content page in the course manifest and keeps root status aligned', () => {

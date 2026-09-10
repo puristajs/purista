@@ -50,14 +50,16 @@ database or service. Shared utilities must not hide the lesson's business logic.
 
 ## Assign one observable change
 
-For the banking series, extend `examples/banking/tutorial/steps.json` and its
-`steps/<checkpoint>/` file snapshots. The replay runs published-package CLI
-generation, applies the documented complete files, and tests each checkpoint.
-Use `node examples/banking/tutorial/replay.mjs --check-docs` for file/prose drift;
-then replay into a new directory with `--verify-http` for runtime evidence.
-Do not substitute `examples/banking/src` demo tests for that replay. The two
-layouts differ, and passing the finished demo does not prove a learner can
-construct the application.
+For the banking series, keep the course manifest, retained chapter projects,
+and learner-facing pages aligned. Use
+`npm run check:tutorials --prefix examples/banking` for the complete local
+structure gate, then `npm run test:tutorials --prefix examples/banking` for
+build, test, and lint evidence. Both commands route through
+`examples/banking/tutorial/verify-local.mjs`. A fresh registry-backed consumer
+replay is separate construction-verification evidence and does not control
+whether a locally verified completed chapter is published or visible. Do not
+substitute finished-demo tests for the local verifier or describe local packed
+dependency evidence as a registry replay.
 
 Before drafting a page, identify the prior file contents, the exact CLI output,
 the complete replacement or located edit, and every registration/resource
@@ -84,8 +86,10 @@ provider capabilities or repeatedly guess signatures to make a build pass.
 ## Evidence and handoff
 
 Report changed files, source regions, exact executed checks, observed results,
-runtime/UI evidence and unresolved limits. Mark planned, ready, verified and
-published separately; do not label prose-only work as an implemented tutorial.
+runtime/UI evidence and unresolved limits. Mark planned, ready, locally
+verified, published, and registry-construction-verified separately; do not label
+prose-only work as an implemented tutorial. Publication and visibility follow
+strong local verification and do not wait for the separate registry replay.
 Consumer setup, negative business cases and advertised intermediate checkpoints
 must work, not only the final happy-path screenshot.
 

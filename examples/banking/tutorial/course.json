@@ -400,7 +400,7 @@
     {
       "id": "classification-agent",
       "title": "Add a classification agent",
-      "status": "draft",
+      "status": "published",
 	  "projectDirectory": "support-classification",
 	  "replayRequires": [],
 	  "constructionSourceAligned": true,
@@ -439,7 +439,7 @@
     {
       "id": "ai-guardrails",
       "title": "Apply AI guardrails",
-      "status": "draft",
+      "status": "published",
 	  "projectDirectory": "guarded-classification",
 	  "replayRequires": [],
 	  "constructionSourceAligned": true,
@@ -483,7 +483,7 @@
     {
       "id": "retrieval-ingestion",
       "title": "Build a complete RAG pipeline",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "example-rag",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -588,7 +588,7 @@
     {
       "id": "conversation-memory",
       "title": "Persist and manage conversation history",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "support-conversations",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -632,7 +632,7 @@
     {
       "id": "agent-tools",
       "title": "Use PURISTA commands as agent tools",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "support-agent-tools",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -684,7 +684,7 @@
     {
       "id": "agent-skills",
       "title": "Load Agent Skills on demand",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "support-skills",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -731,7 +731,7 @@
     {
       "id": "human-review-workflow",
       "title": "Pause a workflow for human review",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "human-review-workflow",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -785,7 +785,7 @@
     {
       "id": "parallel-agents",
       "title": "Run specialist agents in parallel",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "parallel-agent-workflow",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -829,7 +829,7 @@
     {
       "id": "multi-step-workflow",
       "title": "Build a multi-step agent workflow",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "multi-step-support-workflow",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -875,7 +875,7 @@
     {
       "id": "sandbox-analysis",
       "title": "Run analysis in a sandbox",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "sandbox-analysis",
       "replayRequires": [],
       "constructionSourceAligned": true,
@@ -926,7 +926,7 @@
     {
       "id": "agent-evaluation",
       "title": "Evaluate agent behavior",
-      "status": "draft",
+      "status": "published",
       "projectDirectory": "agent-evaluation",
       "replayRequires": [],
       "constructionSourceAligned": true,

@@ -210,10 +210,29 @@ for (const retiredFragment of [
 	'core-native agents',
 	'fluent agent builder',
 	'3.2.4 `createCommandTestHarness`',
+	'verify-drafts.mjs',
+	'check:drafts',
+	'test:drafts',
 	'voyage',
 ]) {
 	if (canonicalSkillText.toLowerCase().includes(retiredFragment.toLowerCase())) {
 		addIssue(skillsRoot, `contains retired guidance fragment: ${retiredFragment}`)
+	}
+}
+
+const tutorialMaintainerText = walkFiles(join(skillsRoot, 'purista-tutorial-maintainer'))
+	.filter(file => file.endsWith('.md'))
+	.map(file => readText(file))
+	.join('\n')
+for (const requiredFragment of [
+	'examples/banking/tutorial/verify-local.mjs',
+	'check:tutorials',
+	'test:tutorials',
+	'fresh registry',
+	'visible',
+]) {
+	if (!tutorialMaintainerText.includes(requiredFragment)) {
+		addIssue(skillsRoot, `tutorial maintainer is missing final status-policy guidance: ${requiredFragment}`)
 	}
 }
 

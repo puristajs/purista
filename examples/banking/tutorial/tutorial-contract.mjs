@@ -33,8 +33,7 @@ const forbiddenServiceNames = new Set((course.forbiddenServiceNames ?? []).map(n
 const allowedServiceNames = new Set((course.allowedServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()))
 const scaffoldServiceNames = new Set((course.scaffoldServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()))
 
-export const enforcesV4Source = chapter =>
-	chapter.status !== 'draft' || chapter.constructionSourceAligned === true || chapter.constructionVerified === true
+export const enforcesV4Source = () => true
 
 export const exists = path => stat(path).then(() => true, () => false)
 

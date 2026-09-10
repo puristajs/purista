@@ -1,28 +1,39 @@
 # Tutorial verification
 
-The tutorial has 28 capability chapters: 17 published Framework chapters and
-11 AI chapters that remain draft until their proof is complete. `course.json`
-is the source of chapter ids, page recipes, statuses, prerequisites, and
-retained source hashes.
+The tutorial has 28 published capability chapters: 17 Framework chapters and
+11 AI chapters. `course.json` is the source of chapter ids, page recipes,
+visibility, prerequisites, and construction evidence.
 
 ## Published course gate
 
 From the repository root, run:
 
 ```sh
-npm run check:drafts --prefix examples/banking
-npm run check:source --prefix examples/banking
+npm run check:tutorials --prefix examples/banking
 npm run build -w @purista/web
-npm test --prefix examples/banking
+npm run test:tutorials --prefix examples/banking
 ```
 
-`check:drafts` checks the 11 draft packets without counting them as published.
-`check:source` verifies the page hashes, retained source hashes, and source
-provenance for published chapters. The website build checks rendered tutorial
-content. `npm test` copies every retained project to a fresh directory outside
-the repository, resolves its declared public ranges without writing a lockfile,
-runs its typecheck and tests, builds it, and starts the compiled application for
-its loopback smoke check. Temporary copies are removed after the run.
+`check:tutorials` checks all 11 source-aligned AI chapters, including their
+structure, complete write blocks, and retained source references.
+`test:tutorials` additionally runs each local AI project's build, tests, and
+lint checks. The website build checks rendered tutorial content. The banking
+workspace's default `npm test` and `npm run build` commands call these local
+gates and do not require registry publication.
+
+After the declared package versions are available in the registry, run:
+
+```sh
+npm run check:replay --prefix examples/banking
+npm run test:consumer --prefix examples/banking
+```
+
+`check:replay` verifies page and source provenance for chapters with
+fresh-replay evidence. `test:consumer` copies every such project to a directory
+outside the repository, resolves its declared public ranges without writing a
+lockfile, runs its typecheck and tests, builds it, and starts the compiled
+application for its loopback smoke check. Temporary copies are removed after
+the run.
 
 For one chapter during isolated work, use the bounded check:
 
@@ -40,11 +51,11 @@ node examples/banking/tutorial/replay.mjs \
 The replay follows the declared construction recipe and prerequisites, uses
 published package names, and executes the documented commands and requests. It
 does not invent missing files or repair instructions silently. The unfiltered
-`check:source` check remains the release gate.
+`check:replay` check remains a release-evidence gate.
 
-## Draft AI gate
+## Locally verified AI gate
 
-The 11 draft chapters are:
+The 11 source-aligned AI chapters are:
 
 1. `classification-agent`
 2. `ai-guardrails`
@@ -58,10 +69,12 @@ The 11 draft chapters are:
 10. `sandbox-analysis`
 11. `agent-evaluation`
 
-Each draft packet needs a focused typecheck, lint, deterministic tests, and a
-fresh consumer replay before its status changes. AI tests use a fake or scripted
-provider by default. A live provider run is separate, optional evidence and
-must never require credentials for the default gate.
+Each chapter needs a focused typecheck, lint, and deterministic tests before it
+is visible. `constructionSourceAligned` records that the instructions and
+retained source agree. `constructionVerified` records separate fresh consumer
+replay evidence. AI tests use a fake or scripted provider by default. A live
+provider run is optional evidence and must never require credentials for the
+default gate.
 
 An AI packet is complete only when its proof covers the native Harness
 definition, service-owned composition, one mount, address-first caller,

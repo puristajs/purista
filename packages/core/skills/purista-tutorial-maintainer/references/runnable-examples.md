@@ -24,14 +24,20 @@ If chapters create different project directory names, declare that name in the
 replay recipe instead of hard-coding one course-wide directory. Keep conceptual
 learning prerequisites separate from construction prerequisites: a standalone
 chapter can recommend earlier reading while replaying from an empty directory.
-Do not mark a chapter construction-verified until that independent replay has
-actually succeeded and its proof matches the retained source.
+Strong local verification may mark a completed chapter published and visible.
+Reserve `construction-verified against the registry` for an independent fresh
+consumer replay that actually installed the published packages and whose proof
+matches the retained source. Registry availability does not control tutorial
+status or navigation.
 
 Provide a clean consumer install using declared, compatible dependencies and
 a lockfile in the distributed example. Keep maintainer workspace builds and
 sibling checkouts out of public setup instructions. Verify packed artifacts
-or published versions separately from workspace source. Clearly label a
-pre-release dependency and do not publish unusable install instructions.
+or published versions separately from workspace source, and record the
+dependency source in the evidence. A completed locally verified tutorial can
+be visible before the matching registry replay is available as long as its
+public install instructions name the intended released dependency contract and
+do not claim that the registry replay already passed.
 
 Expose consistent scripts for install guidance, dependency up/down, dev/start,
 typecheck, test, build, seed/reset, and relevant integration tests. The series

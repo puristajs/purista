@@ -11,10 +11,7 @@ const sourceRoot = join(repoRoot, 'examples/banking/chapters', chapter)
 const course = JSON.parse(await readFile(join(repoRoot, 'examples/banking/tutorial/course.json'), 'utf8'))
 const chapterDefinition = course.chapters.find(candidate => candidate.id === chapter)
 assert(chapterDefinition, `Unknown chapter: ${chapter}`)
-const enforceV4Source =
-	chapterDefinition.status !== 'draft' ||
-	chapterDefinition.constructionSourceAligned === true ||
-	chapterDefinition.constructionVerified === true
+const enforceV4Source = true
 
 async function visit(directory) {
 	for (const entry of await readdir(directory, { withFileTypes: true })) {
