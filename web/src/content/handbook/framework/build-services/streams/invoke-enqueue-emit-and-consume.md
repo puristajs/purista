@@ -17,7 +17,6 @@ dependencies the handler actually owns.
 | Durable work that can complete later | [`canEnqueue(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canenqueue) | Queue acceptance is not completion of the work. |
 | An independent fact | [`canEmit(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canemit) | Publication is separate from a database transaction. |
 | A mounted agent or workflow | [`canInvokeAgent(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent) or [`canInvokeWorkflow(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeworkflow) | The call remains address-first through EventBridge and may itself stream. |
-| One mounted model handle | [`canUseHarnessModel(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#canuseharnessmodel) | Deterministic stream logic needs a declared model operation without an agent wrapper. |
 
 ## Declare then use the capability
 

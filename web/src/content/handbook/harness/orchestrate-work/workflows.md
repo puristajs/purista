@@ -40,4 +40,4 @@ and an abort signal. Return the final value instead of mutating an output slot.
 Unknown agents, invalid schemas, and disallowed delegation fail before the
 handler or before a child call.
 
-Next: [child tasks and data flow](./child-tasks-and-data-flow/) and [durable workflows](./durable-workflows/).
+Next: [child tasks and data flow](/handbook/harness/orchestrate-work/child-tasks-and-data-flow/) and [durable workflows](/handbook/harness/orchestrate-work/durable-workflows/).

@@ -14,7 +14,6 @@ import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const answer = defineAgent('answer', {
-  model: 'primary',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string() }),
   prompt: input => ({ role: 'user', content: input.question }),
@@ -24,6 +23,7 @@ const answer = defineAgent('answer', {
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
 
 export const harness = await definition.getInstance({
+	// The singular field binds the reserved "primary" alias.
 	model: {
 		provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
 		model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
@@ -31,6 +31,10 @@ export const harness = await definition.getInstance({
 	},
 })
 ```
+An agent that omits `model` selects the reserved `primary` alias. The singular
+`getInstance({ model: ... })` field binds that alias; named aliases use
+`getInstance({ models: { alias: ... } })`.
+
 The definition graph derives its required capabilities from response modes,
 tools, and other selected features. Missing provider methods, unknown aliases,
 and invalid defaults fail during composition or instance creation.
@@ -45,8 +49,15 @@ field.
 | `defaults` | Safe per-call generation defaults | It is not a determinism guarantee |
 | `retry` | Provider-neutral retry policy | Retries do not make side effects idempotent |
 
+## Choose a retry policy for the caller
+
+Configure short provider retries on the model binding only for transient model
+failures. Keep the attempt count and total delay within the caller's timeout.
+The application must still decide whether an entire agent or workflow run is
+safe to repeat after a timeout or an uncertain tool side effect.
+
 Use a deterministic fake model in unit tests and a separately gated live smoke
 test for each deployed provider/model combination. Never place credentials,
 raw prompts, completions, or tenant identifiers in logs or telemetry.
 
-Next: [call model operations](../call-model-operations/) or [configure a provider](./provider-selection/).
+Next: [call model operations](/handbook/harness/configure-the-runtime/call-model-operations/) or [configure a provider](/handbook/harness/configure-the-runtime/provider-selection/).

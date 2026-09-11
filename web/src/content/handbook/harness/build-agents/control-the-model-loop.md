@@ -67,5 +67,5 @@ subagent call does not start after the corresponding budget is exhausted. Also
 test cancellation and the normalized error returned at the application
 boundary.
 
-Next: [define structured inputs and outputs](./inputs-and-structured-outputs/) or
+Next: [define structured inputs and outputs](/handbook/harness/build-agents/inputs-and-structured-outputs/) or
 [build a workflow](/handbook/harness/orchestrate-work/workflows/).

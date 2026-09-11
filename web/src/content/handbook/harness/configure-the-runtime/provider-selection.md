@@ -21,4 +21,4 @@ provider incompatibility must fail explicitly; never silently select another
 provider. Keep provider credentials, timeout policy, retry policy, storage,
 and telemetry at the composition root.
 
-Next: [configure model settings](./configuration-and-model-settings/) or choose a focused provider guide.
+Next: [configure model settings](/handbook/harness/configure-the-runtime/configuration-and-model-settings/) or choose a focused provider guide.

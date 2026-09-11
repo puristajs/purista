@@ -49,4 +49,4 @@ reacquire a retained session, search an imported record, and delete a session
 when requested. For sandbox and MCP, test denied capabilities, owner mismatch,
 remote startup failure, cancellation, and cleanup.
 
-Next: [verify rollout and rollback](./verification-and-rollback/).
+Next: [verify rollout and rollback](/handbook/harness/upgrade-and-migrate/verification-and-rollback/).

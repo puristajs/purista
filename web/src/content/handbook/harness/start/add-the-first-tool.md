@@ -34,4 +34,4 @@ portable Harness tool receives only declared Harness facilities and a signal;
 PURISTA service resources belong in `ServiceBuilder.defineTool` in the hosted
 integration layer.
 
-Next: [define an agent](../build-agents/agent-definition/).
+Next: [define an agent](/handbook/harness/build-agents/agent-definition/).

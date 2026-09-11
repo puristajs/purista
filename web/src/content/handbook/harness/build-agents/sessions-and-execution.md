@@ -181,11 +181,10 @@ session facade.
 | Session method | What it removes | What remains | Use it when |
 | --- | --- | --- | --- |
 | [`release()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#release) | Live, process-local sandbox/MCP attachment and child tasks owned by this facade. | Persisted session record, history, runs, memory, and durable state. | A request or worker is done but the logical session may reopen later. This is the normal per-request cleanup. |
-| [`disposeSandbox()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#disposesandbox) | Owned sandbox and matching workspace resources; borrowed owners are detached, not deleted. | Session record, history, run receipts, and separately managed memory. | The application's sandbox retention policy expires. A later live invocation of the disposed owned session fails closed. |
 | [`destroy()`](/handbook/api/interfaces/_purista_harness.HarnessSession/#destroy) | Live resources and persisted session data owned by `HarnessStorage`; owned sandbox resources are disposed. | Data in external systems that have their own deletion contract may remain. | The logical session is intentionally destroyed. Treat broader privacy deletion as an application workflow. |
 | [`harness.close()`](/handbook/api/interfaces/_purista_harness.HarnessInstance/#close) | All process-local sessions and Harness-owned adapter resources. | Persisted backend data. | The process is shutting down after it has stopped accepting work. Inspect returned cleanup errors. |
 
-Do not call `release()`, `disposeSandbox()`, or `destroy()` while the session is
+Do not call `release()` or `destroy()` while the session is
 running. Stop accepting new work, cancel or await the active run, and then
 clean up. A released facade is no longer usable; call `getSession(...)` again
 to reopen the logical session.

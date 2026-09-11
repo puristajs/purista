@@ -32,7 +32,6 @@ then enforces the same contract at execution time.
 | `canEnqueue(...)` | `context.queue.enqueue.<queue>(...)` | The named queue must be registered and the QueueBridge started. |
 | `canEmit(...)` | `context.emit(eventName, payload)` | The payload is checked against the declared event schema. |
 | `canInvokeAgent(...)` / `canInvokeWorkflow(...)` | `context.agent` / `context.workflow` | Address-first calls use EventBridge and the mounted Harness contract. |
-| `canUseHarnessModel(...)` | `context.model` | Exposes only the named mounted-Harness model handle declared by the caller. |
 
 Common logger, tracing, stores, message metadata, `principalId`, and `tenantId`
 are described in [Handler inputs and context](/handbook/framework/build-services/handler-context/).

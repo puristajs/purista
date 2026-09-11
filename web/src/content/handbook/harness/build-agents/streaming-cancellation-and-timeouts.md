@@ -52,7 +52,7 @@ const supportHarness = await definition.getInstance({ model: modelAlias })
 ```
 The composition uses [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 [`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/),
-and [`HarnessDefinition.getInstance(...)`](/handbook/api/interfaces/_purista_harness.HarnessDefinition/#getinstance)
+and [`HarnessInstanceConfig`](/handbook/api/types/_purista_harness.HarnessInstanceConfig/)
 to bind the model alias before a session opens.
 
 [`HarnessOutputUpdateKind`](/handbook/api/types/_purista_harness.HarnessOutputUpdateKind/) is:

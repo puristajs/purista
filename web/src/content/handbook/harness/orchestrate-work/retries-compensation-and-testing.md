@@ -53,7 +53,7 @@ Workflow cancellation stops a retry before the next attempt and interrupts a
 pending backoff. The step function must still forward `ctx.signal` to its own
 HTTP, SDK, model, or agent calls so in-flight work can stop promptly.
 
-API reference: [`WorkflowContext.step(...)`](/handbook/api/interfaces/_purista_harness.WorkflowContext/#step),
+API reference: [`DurableWorkflowContext.step(...)`](/handbook/api/interfaces/_purista_harness.DurableWorkflowContext/#step),
 [`DurableStepOptions`](/handbook/api/interfaces/_purista_harness.DurableStepOptions/), and
 [`DurableStepRetryPolicy`](/handbook/api/interfaces/_purista_harness.DurableStepRetryPolicy/).
 

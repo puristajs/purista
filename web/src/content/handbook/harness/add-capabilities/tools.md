@@ -32,4 +32,4 @@ validates input and output at its boundary and does not make a side effect
 idempotent. Test malformed input and dependency failure, then use a strict fake
 model fixture to verify that the agent selected the tool.
 
-MCP tools use `defineMcpServer` and remote names; see [MCP](./mcp/).
+MCP tools use `defineMcpServer` and remote names; see [MCP](/handbook/harness/add-capabilities/mcp/).

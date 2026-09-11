@@ -1,126 +1,97 @@
 ---
 title: Build and mount the first agent
-description: Define one agent beside its owning service, mount it once, and call it through EventBridge.
+description: Create the smallest service-owned agent, add it to a Harness, mount it, and bind one model.
 order: 392
 ---
 
-Start with an existing service. The project-local CLI creates the agent under
-that service version and updates its one Harness definition:
+Start with an existing service. The project-local CLI creates an agent under
+that service version and adds it to the service-owned Harness:
 
 ```bash title="Create an internal agent"
-npm run add:agent -- triage-ticket \
+npm run add:agent -- answer-support-question \
   --service support \
   --service-version 1 \
-  --description "Classify a support ticket"
+  --description "Answer a support question"
 ```
 
 `--http` defaults to `none`, so this command creates no route. Use
 `--http command` for a protected request/response wrapper or `--http stream`
 for a protected AI SDK UI Message Stream v1 wrapper.
 
-## Define the agent
+## 1. Define the smallest agent
 
 Keep the definition with the service version that owns it. Use lower camel
 case for the stable agent id.
 
-```ts title="src/service/support/v1/harness/agent/triageTicket/triageTicketAgent.ts"
+```ts title="src/service/support/v1/harness/agent/answerSupportQuestion/answerSupportQuestionAgent.ts"
 import { defineAgent } from '@purista/harness'
-import { z } from 'zod'
 
-export const triageInput = z.object({
-  ticketId: z.string().min(1),
-  text: z.string().min(1),
-})
-
-export const triageOutput = z.object({
-  priority: z.enum(['low', 'normal', 'high']),
-  reason: z.string().min(1),
-})
-
-export const triageTicketAgent = defineAgent('triageTicket', {
-  input: triageInput,
-  output: triageOutput,
-  instructions: 'Classify the ticket and give one short reason.',
-  prompt: input => ({
-    role: 'user',
-    content: `Ticket ${input.ticketId}: ${input.text}`,
-  }),
+export const answerSupportQuestionAgent = defineAgent('answerSupportQuestion', {
+	description: 'Answer a support question',
+	instructions: 'Answer one support question clearly and briefly.',
 })
 ```
 
-The `prompt` function maps validated business input to a model message. Do not
-put credentials, providers, tenant identity, or transport values in this file.
+Without `input`, `output`, `prompt`, or `model`, this agent accepts a string,
+returns a string, uses the input as its user message, and selects the reserved
+`primary` model alias. This is enough for the first working run. Add schemas
+and capabilities later when the application needs their guarantees.
 
-Compose the root directly:
+Do not put credentials, providers, tenant identity, or HTTP values in the
+agent definition.
+
+## 2. Add the agent to the Harness
 
 ```ts title="src/service/support/v1/harness/supportHarness.ts"
 import { defineHarness } from '@purista/harness'
-import { triageTicketAgent } from './agent/triageTicket/triageTicketAgent.js'
+import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 
 export const supportHarness = defineHarness({ name: 'support' })
-  .addAgent(triageTicketAgent)
-
-export const supportHarnessPolicy = {
-  targets: {
-    agents: { triageTicket: {} },
-  },
-} as const
+	.addAgent(answerSupportQuestionAgent)
 ```
 
 Every agent added as a root receives a service address when mounted. The
-`targets` entry is where this service attaches guards, success events, queue
-delivery, or durable-resume policy. Nested dependency agents stay private.
+Harness definition is portable: it still has no provider credentials or live
+resources. Nested dependency agents stay private unless they are also added as
+roots.
 
-Mount the graph once on the final service builder:
+## 3. Mount the Harness once
 
 ```ts title="src/service/support/v1/supportV1Service.ts"
 export const supportV1Service = supportV1ServiceBuilder
-  .addCommandDefinition(runTriageTicketCommandBuilder.getDefinition())
-  .mountHarness(supportHarness, supportHarnessPolicy)
+	.mountHarness(supportHarness)
 ```
 
-[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
-records the graph and its root policy. A service accepts one Harness mount.
+[`mountHarness(definition, policy?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+records the graph and gives each added root an address. A service accepts one
+Harness mount. Add a target policy later when a root needs business guards,
+success events, queue delivery, or durable resume behavior.
 
-## Call the mounted address
-
-Import the definition and pass its authentic contract as the third argument.
-The contract supplies the target id and all input, output, update, and
-interruption types.
-
-```ts title="src/service/support/v1/command/runTriageTicket/runTriageTicketCommandBuilder.ts"
-export const runTriageTicketCommandBuilder = supportV1ServiceBuilder
-  .getCommandBuilder('runTriageTicket', 'Classify a support ticket')
-  .addPayloadSchema(triageInput)
-  .addOutputSchema(triageOutput)
-  .canInvokeAgent('Support', '1', triageTicketAgent.contract)
-  .setCommandFunction(async function ({ agent }, payload) {
-    const result = await agent.Support['1'][triageTicketAgent.contract.id].run(payload, {
-      sessionId: `ticket:${payload.ticketId}`,
-    })
-    if (result.outcome.status !== 'completed') {
-      throw new Error('This command requires a completed triage result')
-    }
-    return result.outcome.output
-  })
-```
-
-[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-adds the typed client to the handler. The call crosses EventBridge even when
-both services run in one process. The aggregate result contains the resolved
-`sessionId` and the typed `outcome`.
-
-Bind the model only when the service instance is created:
+## 4. Bind the primary model at startup
 
 ```ts title="src/index.ts"
+import { openai } from '@purista/harness-openai'
+
 const support = await supportV1Service.getInstance(eventBridge, {
-  resources,
-  ai: {
-    model: { provider: modelProvider, model: 'provider-model-id' },
-  },
+	ai: {
+		// The singular field binds the reserved "primary" alias.
+		model: {
+			provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+		},
+	},
 })
 ```
 
+The outer `ai.model` field supplies the binding for the `primary` alias inferred
+from the agent. The inner `model` value is the provider-specific model ID. The
+service's inferred instance configuration requires every model alias and
+adapter capability used by its mounted graph.
+
 The provider package and credentials belong to the application composition
-root. The generated first-agent bootstrap uses an environment schema and never
-writes a credential value into source.
+root. Validate environment variables before creating the service and never
+write a credential value into source.
+
+At this point the agent has a PURISTA address, but no HTTP route. The next page
+adds a typed command for an aggregate result and a stream for progressive UI
+events: [invoke and expose a mounted agent](/handbook/framework/build-ai-powered-services/invoke-and-expose-a-harness-target/).

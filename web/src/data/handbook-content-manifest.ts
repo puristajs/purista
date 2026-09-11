@@ -131,7 +131,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 392,
     "title": "Build and mount the first agent",
-    "description": "Define one agent beside its owning service, mount it once, and call it through EventBridge.",
+    "description": "Create the smallest service-owned agent, add it to a Harness, mount it, and bind one model.",
     "pageRole": "task"
   },
   {

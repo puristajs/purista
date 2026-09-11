@@ -37,9 +37,7 @@ Subscriptions can declare
 [`canConsumeStream`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#canconsumestream),
 [`canEmit`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#canemit),
 [`canInvokeAgent`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#caninvokeagent),
-[`canInvokeWorkflow`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#caninvokeworkflow),
-and
-[`canUseHarnessModel`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#canuseharnessmodel).
+and [`canInvokeWorkflow`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#caninvokeworkflow).
 The Harness capabilities remain address-first or mount-bound and are available
 only when the service mounts and publishes the corresponding contracts.
 They do **not** have `canEnqueue`: calling `context.queue.enqueue(...)` from a

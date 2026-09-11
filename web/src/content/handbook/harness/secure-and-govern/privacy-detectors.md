@@ -30,7 +30,29 @@ const guardedAgent = defineAgent('support', {
 const definition = defineHarness({ name: 'support' }).addAgent(guardedAgent)
 const harness = await definition.getInstance({ model: primaryModel })
 ```
-Use native, Presidio, or local NER adapters only after verifying their package,
-model assets, sidecar, credentials, and data residency. Test true positives,
-false positives, malformed detector results, timeouts, and fail-closed behavior
-without logging the protected value.
+
+## Native privacy
+
+Use `@purista/harness-guardrails-native-privacy` for local detection of common
+identifiers such as email addresses, phone numbers, payment cards, IP
+addresses, IBANs, US Social Security numbers, and URLs. It runs in process and
+does not need a detector service. Verify that the target platform has a
+supported native prebuild.
+
+## Presidio
+
+Use `@purista/harness-guardrails-presidio` when the organization already runs
+a governed Microsoft Presidio Analyzer service or needs its recognizers and
+language support. The application owns the authenticated sidecar connection,
+timeouts, health checks, and data-residency decision. Masking remains a
+Guardrails action after detection.
+
+## Local NER
+
+Use `@purista/harness-guardrails-local-ner` for locally provisioned labels such
+as person, organization, or location. Pin and provision the model assets before
+startup, supply the label map, and warm the detector. Do not download an
+unreviewed model during a request.
+
+For every detector, test true positives, false positives, malformed results,
+timeouts, and fail-closed behavior without logging the protected value.

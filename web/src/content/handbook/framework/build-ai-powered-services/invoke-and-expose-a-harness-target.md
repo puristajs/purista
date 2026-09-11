@@ -8,13 +8,51 @@ Mounted agents and workflows are service addresses. They do not become HTTP
 routes automatically. A caller imports the direct definition and declares the
 address:
 
-```ts title="Declare an agent invocation"
-const triageCommandBuilder = supportV1ServiceBuilder
-  .getCommandBuilder('triageTicket', 'Classifies a support ticket')
-  .canInvokeAgent('Support', '1', triageTicketAgent.contract)
-  .setCommandFunction(async function (context, input) {
-    return context.agent.Support['1'][triageTicketAgent.contract.id].run(input)
-  })
+```ts title="src/service/support/v1/command/runAnswerSupportQuestion/runAnswerSupportQuestionCommandBuilder.ts"
+import type { HarnessTargetRunOutcome } from '@purista/harness'
+import { z } from 'zod'
+import { answerSupportQuestionAgent } from '../../harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+type AgentOutcome = HarnessTargetRunOutcome<typeof answerSupportQuestionAgent.contract>
+type AgentResult = { sessionId: string; outcome: AgentOutcome }
+type AgentInterrupt = Extract<AgentOutcome, { status: 'interrupted' }>['interrupt']
+
+const payloadSchema = z.object({
+	input: z.string().min(1),
+	sessionId: z.string().min(1).optional(),
+})
+const interruptSchema = z.json() as unknown as z.ZodType<AgentInterrupt, AgentInterrupt>
+const outputSchema = z.object({
+	sessionId: z.string().min(1),
+	outcome: z.discriminatedUnion('status', [
+		z.object({
+			status: z.literal('completed'),
+			runId: z.string().min(1),
+			output: answerSupportQuestionAgent.contract.output,
+		}),
+		z.object({
+			status: z.literal('interrupted'),
+			runId: z.string().min(1),
+			interrupt: interruptSchema,
+		}),
+	]),
+}) as unknown as z.ZodType<AgentResult, AgentResult>
+
+export const runAnswerSupportQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runAnswerSupportQuestion', 'Answer a support question')
+	.addPayloadSchema(payloadSchema)
+	.addParameterSchema(z.object({}))
+	.addOutputSchema(outputSchema)
+	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
+	.exposeAsHttpEndpoint('POST', 'ai/answer-support-question')
+	.enableHttpSecurity(true)
+	.setCommandFunction(async function (context, payload) {
+		return context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(
+			payload.input,
+			payload.sessionId === undefined ? {} : { sessionId: payload.sessionId },
+		)
+	})
 ```
 
 [`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
@@ -23,12 +61,20 @@ aggregate call returns `{ sessionId, outcome }`. Keep that envelope in the
 public command contract so a client can distinguish completion from an
 approval or another interruption.
 
+The command is the application contract. It owns HTTP exposure, request
+validation, the public response schema, and business guards. Marking it as
+protected lets the Hono protect middleware authenticate the caller and attach
+the verified principal and tenant to the message. Command and mounted-target
+guards then authorize the business action. The agent remains
+transport-independent. The call crosses EventBridge even when caller and target
+run in the same process.
+
 Pass a product-owned `sessionId` when later requests should share context:
 
 ```ts title="Continue one conversation"
-const result = await context.agent.Support['1'][triageTicketAgent.contract.id].run(
-  input,
-  { sessionId: `support:${conversationId}` },
+const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(
+	question,
+	{ sessionId: `support:${conversationId}` },
 )
 ```
 
@@ -42,10 +88,10 @@ Wrap `.run(...)` in a command and expose that command with
 `.enableHttpSecurity(true)`. The output schema should describe both completed
 and interrupted outcomes and preserve the target's output type.
 
-The CLI can generate this projection:
+For a new agent, the CLI can generate this projection together with the agent:
 
 ```bash title="Generate an aggregate HTTP projection"
-npm run add:agent -- triage-ticket \
+npm run add:agent -- answer-another-question \
   --service support \
   --service-version 1 \
   --http command

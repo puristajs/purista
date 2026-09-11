@@ -35,3 +35,19 @@ resume.
 Keep approval decisions as typed interrupted outcomes. Authenticate the
 reviewer in the application before resuming the same run; do not treat an
 external policy response as proof of caller identity.
+
+## Test mapping and enforcement separately
+
+Test the adapter with fixed requests and responses to prove field minimization,
+authentication, response validation, cancellation, timeout, and fail-closed
+behavior. Then inject a fake evaluator into a Harness integration test and
+prove that allow, deny, audit, approval, and evaluator failure produce the
+expected tool behavior. Keep live policy-engine tests in a separate suite.
+
+## Keep Cedar and custom engines separate
+
+Harness does not ship a Cedar or AWS Verified Permissions adapter. Implement
+the typed evaluator contract in the application and keep policy schema,
+entities, snapshot lifecycle, credentials, and service request mapping at that
+boundary. Return only Harness governance effects; do not make the policy
+engine a source of authenticated caller identity.

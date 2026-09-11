@@ -25,4 +25,4 @@ provider options remain an explicit escape hatch. Verify the chosen model and
 endpoint support every declared capability. Missing keys, denied model access,
 unsupported settings, and network failures remain application errors.
 
-Next: [select a provider](./provider-selection/) or [configure model settings](./configuration-and-model-settings/).
+Next: [select a provider](/handbook/harness/configure-the-runtime/provider-selection/) or [configure model settings](/handbook/harness/configure-the-runtime/configuration-and-model-settings/).

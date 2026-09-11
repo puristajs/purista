@@ -16,6 +16,22 @@ specific deployment shape.
 ```text title="First successful run"
 Install core + one provider → define a typed agent → open a session → invoke it
 ```
+
+## Learn the terms used below
+
+| Term | Meaning in Harness |
+| --- | --- |
+| Agent | A bounded model loop with instructions and optional schemas, tools, skills, guardrails, and child agents. It decides which allowed capability to use on each model turn. |
+| Workflow | Typed application code that fixes the order, branches, retries, parallel work, and review points of a multi-step process. A workflow may call agents and other workflows. |
+| Harness definition | The portable graph created with `defineHarness(...)`. It registers the agents, workflows, tools, and shared capabilities that belong together. It does not contain provider credentials or live resources. |
+| Harness instance | A running definition with concrete model, storage, sandbox, queue, telemetry, and other adapter bindings. |
+| Session | One application-owned execution context with a stable ID, history, memory scope, and lifecycle. |
+| Capability | Something an agent may use, such as a native tool, MCP tool, skill, child agent, memory, or sandbox. Nothing becomes available merely because a package is installed. |
+
+Use an agent when the model should choose the next allowed action. Use a
+workflow when application code must choose the order and recovery behavior.
+They compose: a workflow can call an agent for one model-driven step.
+
 ## Choose the first path
 
 | Need | Start here |

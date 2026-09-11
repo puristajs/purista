@@ -136,5 +136,5 @@ runs before the model proposes a tool. Continue with the complete
 [governance test guide](/handbook/harness/secure-and-govern/governance-policies/test-governance-policies/).
 
 API reference: [`GovernanceToolExposurePolicy`](/handbook/api/interfaces/_purista_harness.GovernanceToolExposurePolicy/),
-[`GovernanceToolExposureRuleForTool`](/handbook/api/interfaces/_purista_harness.GovernanceToolExposureRuleForTool/), and
+[`GovernanceToolExposureRule`](/handbook/api/interfaces/_purista_harness.GovernanceToolExposureRule/), and
 [`GovernanceMode`](/handbook/api/types/_purista_harness.GovernanceMode/).

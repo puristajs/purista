@@ -127,7 +127,7 @@ headers from the binding are projected, and sensitive authentication headers
 are prohibited at the plugin layer.
 
 API reference: [`LoadedAgentPlugin`](/handbook/api/interfaces/_purista_harness-agent-plugins.LoadedAgentPlugin/),
-[`AgentPluginToolBinding`](/handbook/api/interfaces/_purista_harness-agent-plugins.AgentPluginToolBinding/), and
+[`AgentPluginHttpMcpBinding`](/handbook/api/types/_purista_harness-agent-plugins.AgentPluginHttpMcpBinding/), and
 [`AgentPluginBindings`](/handbook/api/interfaces/_purista_harness-agent-plugins.AgentPluginBindings/).
 
 ## 4. Register the projected definitions
@@ -158,7 +158,7 @@ permissions, and tests.
 
 API reference: [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 [`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/), and
-[`HarnessDefinition.getInstance(...)`](/handbook/api/interfaces/_purista_harness.HarnessDefinition/#getinstance).
+[`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/).
 
 When you select an MCP tool, a plugin package never supplies an authorization
 credential: replace the illustrative static header with application-owned,

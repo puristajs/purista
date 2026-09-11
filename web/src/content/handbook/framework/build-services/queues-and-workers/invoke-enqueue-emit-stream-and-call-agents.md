@@ -19,7 +19,6 @@ same declared schema before using it, rather than adding a cast.
 | [`canEmit(event, schema)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canemit) | `context.emit(event, payload)` | Another service should react independently. |
 | [`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeagent) | `context.agent.Service['1'][contract.id].run(input)` or `.stream(input)` | A mounted Harness agent owns the next model-driven step. |
 | [`canInvokeWorkflow(service, version, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeworkflow) | `context.workflow.Service['1'][contract.id].run(input)` or `.stream(input)` | A mounted Harness workflow coordinates the next typed process. |
-| [`canUseHarnessModel(alias, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canuseharnessmodel) | `context.model[alias]` | Deterministic worker code needs one mounted model operation without invoking an agent. Keep provider policy in the Harness binding. |
 
 ```ts title="src/service/report/v1/queue-worker/generateReport/generateReportQueueWorkerBuilder.ts"
 import { validate } from '@purista/core'

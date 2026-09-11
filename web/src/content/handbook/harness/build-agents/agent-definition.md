@@ -48,4 +48,4 @@ portable factories. Compose roots with `defineHarness(...).addAgent(agent)` and
 `.addWorkflow(workflow)`. IDs are stable graph keys; duplicate or unknown
 references fail before a run starts.
 
-Next: [control the model loop](./control-the-model-loop/) or [add a typed tool](../add-capabilities/tools/).
+Next: [control the model loop](/handbook/harness/build-agents/control-the-model-loop/) or [add a typed tool](/handbook/harness/add-capabilities/tools/).
