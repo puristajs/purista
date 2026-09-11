@@ -23,12 +23,12 @@ const rails = defineGuardrails({
 })
 
 const guardedAgent = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   guardrails: rails,
   instructions: 'Answer the support request while protecting sensitive data.',
 })
 const definition = defineHarness({ name: 'support' }).addAgent(guardedAgent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 
 ## Native privacy

@@ -151,7 +151,7 @@ selected targets at a service address; mounting creates no implicit command,
 stream, queue, worker, or HTTP route.
 
 ```bash
-npm run add:agent -- triage --service support --service-version 1
+npm run add:agent -- triage --service support --service-version 1 --model-alias classification
 npm run add:workflow -- resolve-ticket --service support --service-version 1
 ```
 

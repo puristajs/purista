@@ -13,7 +13,7 @@ describe('assessSupportRiskAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'riskAgentTest' })
 			.addAgent(assessSupportRiskAgent)
-			.getInstance({ models: { riskModel: { provider, model: 'risk-fake' } } })
+			.getInstance({ models: { riskAssessment: { provider, model: 'risk-fake' } } })
 		const session = await runtime.getSession('risk-case-1')
 
 		try {

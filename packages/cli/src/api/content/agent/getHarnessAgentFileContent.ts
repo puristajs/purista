@@ -12,6 +12,7 @@ export const getHarnessAgentFileContent = (input: {
 	serviceName: string
 	agentName: string
 	agentDescription: string
+	modelAlias: string
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
@@ -20,6 +21,7 @@ export const getHarnessAgentFileContent = (input: {
 	writer.writeLine(`export const ${agentIdentifier} = defineAgent('${camelCase(input.agentName)}', {`)
 	writer.indent(() => {
 		writer.writeLine(`description: ${JSON.stringify(input.agentDescription)},`)
+		writer.writeLine(`model: ${JSON.stringify(input.modelAlias)},`)
 		writer.writeLine(`instructions: ${JSON.stringify(input.agentDescription)},`)
 	})
 	writer.writeLine('})')

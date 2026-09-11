@@ -51,6 +51,12 @@ workspace, artifacts, logger, and telemetry are supplied under the service
 `ai` instance config. PURISTA StateStore is not Harness checkpoint storage,
 and transactional records remain behind database resources.
 
+Every `defineAgent(...)` call must declare a user-chosen purpose model alias.
+Harness reserves no alias and provides no singular model shortcut. Replace
+standalone `getInstance({ model: binding })` with
+`getInstance({ models: { purpose: binding } })`, and replace hosted
+`ai.model` with the exact `ai.models` map required by the mounted graph.
+
 Testing is split by boundary: native Harness with `FakeModelProvider`,
 PURISTA consumers with context mocks and address-first stubs, and transport
 adapters with protocol fixtures.

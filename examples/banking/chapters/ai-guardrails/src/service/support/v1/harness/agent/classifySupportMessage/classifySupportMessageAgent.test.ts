@@ -10,7 +10,7 @@ describe('classification guardrails', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const runtime = await defineHarness({ name: 'blockedClassificationTest' })
 			.addAgent(classifySupportMessageAgent)
-			.getInstance({ model: { provider, model: 'fake' } })
+			.getInstance({ models: { classification: { provider, model: 'fake' } } })
 
 		try {
 			const session = await runtime.getSession('blocked-message')
@@ -46,7 +46,7 @@ describe('classification guardrails', () => {
 		})
 		const runtime = await defineHarness({ name: 'redactedClassificationTest' })
 			.addAgent(classifySupportMessageAgent)
-			.getInstance({ model: { provider, model: 'fake' } })
+			.getInstance({ models: { classification: { provider, model: 'fake' } } })
 
 		try {
 			const session = await runtime.getSession('redacted-message')

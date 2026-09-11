@@ -78,8 +78,8 @@ describe('durable multi-step workflow over PURISTA', () => {
 			ai: {
 				storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: {
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: {
 						provider: resolutionProvider,
 						model: 'resolution-fake',
 						retry: {
@@ -143,8 +143,8 @@ describe('durable multi-step workflow over PURISTA', () => {
 			ai: {
 				storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})
@@ -193,8 +193,8 @@ describe('durable multi-step workflow over PURISTA', () => {
 			ai: {
 				storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})
@@ -237,8 +237,8 @@ describe('durable multi-step workflow over PURISTA', () => {
 			ai: {
 				storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			},
 		})

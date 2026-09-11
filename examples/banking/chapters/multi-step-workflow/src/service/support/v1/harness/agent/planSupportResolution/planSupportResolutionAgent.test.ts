@@ -15,7 +15,7 @@ describe('planSupportResolutionAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'resolutionAgentTest' })
 			.addAgent(planSupportResolutionAgent)
-			.getInstance({ models: { resolutionModel: { provider, model: 'resolution-fake' } } })
+			.getInstance({ models: { planning: { provider, model: 'resolution-fake' } } })
 		const session = await runtime.getSession('resolution-case-1')
 		try {
 			const outcome = await session.agents.planSupportResolution.run({

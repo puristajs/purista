@@ -31,7 +31,7 @@ src/service/<service>/v<version>/harness/
 ```
 
 Compose one Harness definition for that service version and mount it once with
-`ServiceBuilder.mountHarness(...)`. Bind the primary model as `ai.model` at
+`ServiceBuilder.mountHarness(...)`. Bind every user-chosen purpose alias under the exact `ai.models` key at
 application startup. Providers, storage, memory, sandbox, workspace,
 admission, queues, artifacts, and telemetry are runtime bindings owned by the
 application composition root. Authentication creates trusted identity;

@@ -134,6 +134,7 @@ describe('CLI artifact generation (e2e)', () => {
 			serviceVersion: '1',
 			agentName: 'run collision',
 			agentDescription: 'Existing mounted target',
+			modelAlias: 'chat',
 		})
 		const common = {
 			projectRootPath: TEST_DIR,
@@ -145,7 +146,9 @@ describe('CLI artifact generation (e2e)', () => {
 			http: 'command' as const,
 		}
 		const beforeMountedCollision = snapshotFiles(TEST_DIR)
-		await expect(addPuristaAgent({ ...common, agentName: 'collision' })).rejects.toThrow(/Mounted Harness target id/)
+		await expect(addPuristaAgent({ ...common, agentName: 'collision', modelAlias: 'chat' })).rejects.toThrow(
+			/Mounted Harness target id/,
+		)
 		expect(snapshotFiles(TEST_DIR)).toEqual(beforeMountedCollision)
 
 		const serviceDirectory = join(TEST_DIR, 'src', 'service', 'user', 'v1')
@@ -159,7 +162,9 @@ export const existingProjection = canonical
 `,
 		)
 		const beforeRouteCollision = snapshotFiles(TEST_DIR)
-		await expect(addPuristaAgent({ ...common, agentName: 'route collision' })).rejects.toThrow(/HTTP route/)
+		await expect(addPuristaAgent({ ...common, agentName: 'route collision', modelAlias: 'chat' })).rejects.toThrow(
+			/HTTP route/,
+		)
 		expect(snapshotFiles(TEST_DIR)).toEqual(beforeRouteCollision)
 
 		writeFileSync(
@@ -171,7 +176,9 @@ helper.getCommandBuilder('runIgnoredCollision').exposeAsHttpEndpoint('POST', 'ai
 void text
 `,
 		)
-		await expect(addPuristaAgent({ ...common, agentName: 'ignored collision' })).resolves.toMatchObject({
+		await expect(
+			addPuristaAgent({ ...common, agentName: 'ignored collision', modelAlias: 'chat' }),
+		).resolves.toMatchObject({
 			createdFiles: expect.arrayContaining([
 				join(serviceDirectory, 'command', 'runIgnoredCollision', 'runIgnoredCollisionCommandBuilder.ts'),
 			]),
@@ -298,6 +305,7 @@ void text
 			serviceVersion: '1',
 			agentName: 'triage',
 			agentDescription: 'Review tickets',
+			modelAlias: 'classification',
 		})
 		await addPuristaAgent({
 			projectRootPath: TEST_DIR,
@@ -308,6 +316,7 @@ void text
 			agentName: 'summarize',
 			agentDescription: 'Summarize a ticket',
 			http: 'command',
+			modelAlias: 'chat',
 		})
 		await addPuristaAgent({
 			projectRootPath: TEST_DIR,
@@ -318,6 +327,7 @@ void text
 			agentName: 'chat assistant',
 			agentDescription: 'Stream assistant responses',
 			http: 'stream',
+			modelAlias: 'chat',
 		})
 		const immutableRootFiles = [
 			join(TEST_DIR, 'package.json'),
@@ -444,9 +454,11 @@ void text
 		expect(harnessDefinition).not.toContain('.define()')
 		const triageDefinition = readFileSync(join(harnessDirPath, 'agent', 'triage', 'triageAgent.ts'), 'utf-8')
 		expect(triageDefinition).toContain("defineAgent('triage'")
+		expect(triageDefinition).toContain('model: "classification"')
 		expect(triageDefinition).toContain('instructions: "Review tickets"')
 		const summarizeDefinition = readFileSync(join(harnessDirPath, 'agent', 'summarize', 'summarizeAgent.ts'), 'utf-8')
 		expect(summarizeDefinition).toContain("defineAgent('summarize'")
+		expect(summarizeDefinition).toContain('model: "chat"')
 		expect(summarizeDefinition).toContain('instructions: "Summarize a ticket"')
 		expect(existsSync(join(serviceDir, 'command', 'runTriage'))).toBe(false)
 		const commandProjection = readFileSync(
@@ -492,6 +504,9 @@ void text
 		expect(bootstrap).toContain("import { openai } from '@purista/harness-openai'")
 		expect(bootstrap).toContain('OPENAI_API_KEY')
 		expect(bootstrap).toContain('ai: {')
+		expect(bootstrap).toContain('models: {')
+		expect(bootstrap.match(/classification:/g)).toHaveLength(1)
+		expect(bootstrap.match(/chat:/g)).toHaveLength(1)
 		expect(bootstrap).toContain("model: 'gpt-5-mini'")
 		expect(existsSync(join(serviceDir, 'harness', 'userHarnessMount.ts'))).toBe(false)
 		expect(existsSync(join(TEST_DIR, 'src', 'harness'))).toBe(false)
@@ -517,7 +532,7 @@ void text
 		expect(agentTestContent).toContain('runs as a standalone Harness definition')
 		expect(agentTestContent).toContain('const provider = new FakeModelProvider({ strict: true })')
 		expect(agentTestContent).toContain("content: 'hello'")
-		expect(agentTestContent).toContain("model: { provider, model: 'fake' }")
+		expect(agentTestContent).toContain("models: { classification: { provider, model: 'fake' } }")
 		expect(agentTestContent).toContain('session.agents.triage.run')
 		expect(agentTestContent).toContain("expect(outcome.output).toBe('hello')")
 		expect(agentTestContent).toContain('await runtime.close()')

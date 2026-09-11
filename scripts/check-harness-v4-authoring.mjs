@@ -126,6 +126,14 @@ function hasDirectProperty(node, name) {
 	)
 }
 
+function directPropertyInitializer(node, name) {
+	if (!ts.isObjectLiteralExpression(node)) return undefined
+	for (const property of node.properties) {
+		if (ts.isPropertyAssignment(property) && propertyName(property) === name) return property.initializer
+	}
+	return undefined
+}
+
 function hasPropertyWithin(node, name) {
 	if (hasDirectProperty(node, name)) return true
 	let found = false
@@ -138,6 +146,16 @@ function hasPropertyWithin(node, name) {
 function hasExpectErrorComment(source, node) {
 	const comments = ts.getLeadingCommentRanges(source, node.getFullStart()) ?? []
 	return comments.some(comment => /@ts-expect-error\b/.test(source.slice(comment.pos, comment.end)))
+}
+
+function hasExpectErrorAnnotation(source, node) {
+	let current = node
+	while (current && !ts.isSourceFile(current)) {
+		if (hasExpectErrorComment(source, current)) return true
+		if (ts.isStatement(current)) break
+		current = current.parent
+	}
+	return false
 }
 
 function isNativeHarnessSurface(file) {
@@ -209,9 +227,30 @@ function astFindings(file, source) {
 				node.arguments.some(
 					argument => ts.isObjectLiteralExpression(argument) && hasDirectProperty(argument, 'handler'),
 				) &&
-				!hasExpectErrorComment(source, node)
+				!hasExpectErrorAnnotation(source, node)
 			)
 				results.push(finding(file, source, node, 'custom-agent-handler', 'defineAgent handler property'))
+			if (
+				callee === 'defineAgent' &&
+				node.arguments[1] &&
+				ts.isObjectLiteralExpression(node.arguments[1]) &&
+				!hasDirectProperty(node.arguments[1], 'model') &&
+				!hasExpectErrorAnnotation(source, node)
+			)
+				results.push(finding(file, source, node, 'missing-agent-model', 'defineAgent requires an explicit model alias'))
+			if (callee === 'getInstance' && !hasExpectErrorAnnotation(source, node)) {
+				for (const argument of node.arguments) {
+					if (!ts.isObjectLiteralExpression(argument)) continue
+					if (
+						hasDirectProperty(argument, 'model') &&
+						(source.includes('@purista/harness') || source.includes('defineHarness'))
+					)
+						results.push(finding(file, source, argument, 'singular-harness-model', 'use the exact models alias map'))
+					const ai = directPropertyInitializer(argument, 'ai')
+					if (ai && ts.isObjectLiteralExpression(ai) && hasDirectProperty(ai, 'model'))
+						results.push(finding(file, source, ai, 'singular-harness-model', 'use ai.models with exact aliases'))
+				}
+			}
 			if (
 				callee === 'mountHarness' &&
 				node.arguments
@@ -269,6 +308,46 @@ function fencedInvocationFindings(file, body, openingLine, info) {
 	const tree = ts.createSourceFile(file, body, ts.ScriptTarget.Latest, true, scriptKind)
 	const results = []
 	function visit(node) {
+		if (ts.isCallExpression(node)) {
+			const expression = node.expression
+			const callee = ts.isIdentifier(expression) ? expression.text : propertyName(expression)
+			if (
+				callee === 'defineAgent' &&
+				node.arguments[1] &&
+				ts.isObjectLiteralExpression(node.arguments[1]) &&
+				!hasDirectProperty(node.arguments[1], 'model') &&
+				!hasExpectErrorAnnotation(body, node)
+			) {
+				results.push({
+					file: relativeName(file),
+					line: openingLine + lineAt(body, node.getStart()),
+					rule: 'missing-agent-model',
+					detail: 'defineAgent requires an explicit model alias',
+				})
+			}
+			if (callee === 'getInstance' && !hasExpectErrorAnnotation(body, node)) {
+				for (const argument of node.arguments) {
+					if (!ts.isObjectLiteralExpression(argument)) continue
+					if (hasDirectProperty(argument, 'model')) {
+						results.push({
+							file: relativeName(file),
+							line: openingLine + lineAt(body, argument.getStart()),
+							rule: 'singular-harness-model',
+							detail: 'use the exact models alias map',
+						})
+					}
+					const ai = directPropertyInitializer(argument, 'ai')
+					if (ai && ts.isObjectLiteralExpression(ai) && hasDirectProperty(ai, 'model')) {
+						results.push({
+							file: relativeName(file),
+							line: openingLine + lineAt(body, ai.getStart()),
+							rule: 'singular-harness-model',
+							detail: 'use ai.models with exact aliases',
+						})
+					}
+				}
+			}
+		}
 		if (
 			ts.isCallExpression(node) &&
 			ts.isPropertyAccessExpression(node.expression) &&

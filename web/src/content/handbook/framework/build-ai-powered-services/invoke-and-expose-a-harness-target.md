@@ -91,7 +91,7 @@ and interrupted outcomes and preserve the target's output type.
 For a new agent, the CLI can generate this projection together with the agent:
 
 ```bash title="Generate an aggregate HTTP projection"
-npm run add:agent -- answer-another-question \
+npm run add:agent -- answer-another-question --model-alias answering \
   --service support \
   --service-version 1 \
   --http command

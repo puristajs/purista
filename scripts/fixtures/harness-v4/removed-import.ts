@@ -1,4 +1,4 @@
-import { defineHarnessModule, BuilderState } from '@purista/harness'
+import { BuilderState, defineHarnessModule } from '@purista/harness'
 
 void defineHarnessModule
 void BuilderState

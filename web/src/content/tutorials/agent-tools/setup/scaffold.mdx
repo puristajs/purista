@@ -135,7 +135,7 @@ the service name and version on every generated artifact. `--kind purista`
 creates a service-owned tool whose handler receives PURISTA context.
 
 ```bash title="Generate the agent and commands" replay="project"
-npm run add:agent -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized transaction data" --non-interactive
+npm run add:agent -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized transaction data" --non-interactive --model-alias answering
 npm run add:tool -- lookup-transaction --service support --service-version 1 --kind purista --description "Look up one transaction the current caller may read" --non-interactive
 npm run add:command -- get-transaction-summary --service transaction --service-version 1 --description "Read an authorized transaction summary" --non-interactive
 npm run add:command -- run-answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized PURISTA tools" --non-interactive

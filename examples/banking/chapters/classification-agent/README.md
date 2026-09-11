@@ -17,5 +17,5 @@ npm run demo
 
 The tests and default demo use `FakeModelProvider` and need no API key. An application that starts
 this service supplies a real provider, for example `openai({ apiKey })`, through
-the service's `ai.model` runtime binding. Provider credentials never
+the service's exact `ai.models.classification` runtime binding. Provider credentials never
 belong in the portable Harness definition.

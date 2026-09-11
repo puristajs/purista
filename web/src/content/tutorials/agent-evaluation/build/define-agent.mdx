@@ -28,6 +28,7 @@ export type ClassificationOutput = z.output<typeof classifySupportMessageOutputS
 
 /** The portable definition exercised by the offline evaluation and mounted Support service. */
 export const classifySupportMessageAgent = defineAgent('classifySupportMessage', {
+	model: 'classification',
 	input: classifySupportMessageInputSchema,
 	output: classifySupportMessageOutputSchema,
 	instructions: [

@@ -55,6 +55,7 @@ describe('command testing helpers', () => {
 		const sandbox = createSandbox()
 		try {
 			const answer = defineAgent('answer', {
+				model: 'chat',
 				input: z.object({ question: z.string() }),
 				output: z.object({ answer: z.string() }),
 				instructions: 'Answer the question.',
@@ -93,7 +94,10 @@ describe('command testing helpers', () => {
 	})
 
 	it('stubs typed stream and queued target calls without starting a runtime', async () => {
-		const answer = defineAgent('answer', { instructions: 'Answer the question.' })
+		const answer = defineAgent('answer', {
+			model: 'chat',
+			instructions: 'Answer the question.',
+		})
 		const queue = defineHarnessQueueBinding(
 			answer.contract,
 			new QueueDefinitionBuilder('knowledge.answer', 'Queue questions'),

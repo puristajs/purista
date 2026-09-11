@@ -36,6 +36,7 @@ import { lookupTransactionTool } from '../../tool/lookupTransaction/lookupTransa
 
 export { answerTransactionQuestionInputSchema, answerTransactionQuestionOutputSchema }
 export const answerTransactionQuestionAgent = defineAgent('answerTransactionQuestion', {
+	model: 'answering',
 	input: answerTransactionQuestionInputSchema,
 	output: answerTransactionQuestionOutputSchema,
 	instructions: 'Use lookupTransaction for the requested transaction. Return a concise answer and the transaction id.',

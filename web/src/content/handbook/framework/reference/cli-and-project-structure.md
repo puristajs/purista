@@ -9,7 +9,7 @@ Generated projects include `@purista/cli` as a development dependency and provid
 ```bash title="Generate service"
 npm run add:service -- incident --description "Manage incidents"
 npm run add:command -- create-incident --service incident --service-version 1
-npm run add:agent -- triage-incident --service incident --service-version 1 --http none
+npm run add:agent -- triage-incident --service incident --service-version 1 --http none --model-alias classification
 ```
 
 The project root `purista.json` controls generation conventions and structure. Commit generated source and tests with the business change; do not edit generated contracts without first understanding how the local command will reproduce them.

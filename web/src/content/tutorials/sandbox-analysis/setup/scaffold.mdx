@@ -127,7 +127,7 @@ npm install
 
 ```bash title="Generate Analysis boundaries" replay="project"
 npm run add:service -- analysis --description "Own isolated transaction analysis" --non-interactive
-npm run add:agent -- analyze-transactions --service analysis --service-version 1 --http none --description "Analyze transactions in a sandbox" --non-interactive
+npm run add:agent -- analyze-transactions --service analysis --service-version 1 --http none --description "Analyze transactions in a sandbox" --non-interactive --model-alias analysis
 npm run add:command -- run-analyze-transactions --service analysis --service-version 1 --description "Run protected transaction analysis" --non-interactive
 ```
 

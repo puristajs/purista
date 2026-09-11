@@ -22,6 +22,7 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { z } from 'zod'
 
 export const triageTicketAgent = defineAgent('triageTicket', {
+	model: 'classification',
   input: z.object({ ticketId: z.string(), text: z.string() }),
   output: z.object({ priority: z.enum(['low', 'normal', 'high']) }),
   prompt: input => ({ role: 'user', content: input.text }),
@@ -72,15 +73,16 @@ reference; direct contracts never expose `.enqueue(...)`.
 
 ## Runtime binding and lifecycle
 
-Bind concrete infrastructure only at service instance creation. Use singular
-`ai.model` for the primary alias and `ai.models` only for additional declared
-aliases. Runtime bindings do not declare model capabilities.
+Bind concrete infrastructure only at service instance creation. Every agent
+declares a user-chosen purpose alias, and every binding uses the exact matching
+key under `ai.models`. Harness reserves no alias. Runtime bindings do not
+declare model capabilities.
 
 ```ts
 const support = await supportV1Service.getInstance(eventBridge, {
   resources,
   ai: {
-    model: { provider, model: 'provider-model-id' },
+    models: { classification: { provider, model: 'provider-model-id' } },
     storage: harnessStorage,
     memory,
     sandbox,

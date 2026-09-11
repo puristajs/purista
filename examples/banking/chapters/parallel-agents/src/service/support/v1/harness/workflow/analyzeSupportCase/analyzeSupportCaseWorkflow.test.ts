@@ -68,8 +68,8 @@ describe('analyzeSupportCaseWorkflow', () => {
 			.addWorkflow(analyzeSupportCaseWorkflow)
 			.getInstance({
 				models: {
-					riskModel: { provider: riskProvider, model: 'risk-fake' },
-					responseModel: { provider: responseProvider, model: 'response-fake' },
+					riskAssessment: { provider: riskProvider, model: 'risk-fake' },
+					responsePlanning: { provider: responseProvider, model: 'response-fake' },
 				},
 			})
 		const session = await runtime.getSession('parallel-case-1')

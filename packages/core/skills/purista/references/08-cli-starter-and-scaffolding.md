@@ -37,7 +37,7 @@ npm run add:subscription -- <name> --service <serviceName> --service-version <ve
 npm run add:stream -- <name> --service <serviceName> --service-version <version>
 npm run add:queue -- <name> --service <serviceName> --service-version <version>
 npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>
-npm run add:agent -- <name> --service <serviceName> --service-version <version>
+npm run add:agent -- <name> --service <serviceName> --service-version <version> --model-alias <purposeAlias>
 npm run add:workflow -- <name> --service <serviceName> --service-version <version>
 purista export schedule-manifest --out schedules.json
 purista export kubernetes-cronjob --out kubernetes-cronjobs.json --trigger-image curlimages/curl:8.8.0 --trigger-url 'https://api.example.com/purista/schedules/{{targetKind}}/{{targetName}}'
@@ -56,7 +56,7 @@ npm run add:subscription -- welcome-email --service email --service-version 1 --
 npm run add:stream -- search --service catalog --service-version 1
 npm run add:queue -- invoice-processing --service billing --service-version 1
 npm run add:queue-worker -- invoice-processor --service billing --service-version 1 --queue invoiceProcessing
-npm run add:agent -- triage --service support --service-version 1
+npm run add:agent -- triage --service support --service-version 1 --model-alias classification
 ```
 
 Use the matching package manager and runtime:

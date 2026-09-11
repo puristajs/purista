@@ -124,7 +124,7 @@ Generate the service-owned boundaries. The later pages replace the generated pla
 
 ```bash title="Generate the evaluated boundaries" replay="project"
 npm run add:service -- support --description "Own support classification" --non-interactive
-npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message" --non-interactive --model-alias classification
 npm run add:command -- run-classify-support-message --service support --service-version 1 --description "Run one support classification" --non-interactive
 ```
 

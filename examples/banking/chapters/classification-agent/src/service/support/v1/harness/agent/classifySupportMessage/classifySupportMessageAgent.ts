@@ -13,6 +13,7 @@ export const classifySupportMessageOutputSchema = z.strictObject({
 })
 
 export const classifySupportMessageAgent = defineAgent('classifySupportMessage', {
+	model: 'classification',
 	input: classifySupportMessageInputSchema,
 	output: classifySupportMessageOutputSchema,
 	instructions: [

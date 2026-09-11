@@ -96,11 +96,12 @@ const instance = await definition.getInstance({
 })
 ~~~
 
-Use singular model only for the primary alias. This graph uses the named
-assistant alias, so it binds assistantModel under models. Runtime bindings
-contain provider instances and do not repeat definition capabilities. Bind only
-the facilities the graph needs. Here, the selected MCP tool also makes the
-`support-mcp` transport binding required.
+Harness v4 reserves no model alias and has no singular model shortcut. Every
+agent declares a user-chosen alias, and every runtime binding appears under the
+exact matching `models` key. Runtime bindings contain provider instances and do
+not repeat definition capabilities. Bind only the facilities the graph needs.
+Here, the selected MCP tool also makes the `support-mcp` transport binding
+required.
 
 ## 3. Update invocation and outcomes
 

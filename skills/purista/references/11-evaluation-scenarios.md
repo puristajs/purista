@@ -81,7 +81,7 @@ Add a support triage agent that can classify tickets, call an allowed command to
 ```
 
 Expected behavior:
-- attaches the agent to the support service with a local package script such as `npm run add:agent -- ...`
+- attaches the agent to the support service with a local package script such as `npm run add:agent -- ...` --model-alias answering
 - uses a native Harness definition, `mountHarness(...)`, and address-first PURISTA consumers
 - installs provider packages only in the app wiring layer
 - allowlists tools and child agents

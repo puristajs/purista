@@ -46,7 +46,7 @@ const transferExposurePolicy = ({ exposureRule }) => ({
 })
 const governance = { exposure: transferExposurePolicy }
 const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 The agent's governance policy is part of the definition and runs after the
 composition knows the selected tool IDs.
@@ -90,7 +90,7 @@ const candidatePolicy = ({ native, rule }) => ({
 })
 const governance = { mode: 'shadow', policies: [candidatePolicy] }
 const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 This is the same
 the agent governance policy with `mode: 'shadow'` selected.

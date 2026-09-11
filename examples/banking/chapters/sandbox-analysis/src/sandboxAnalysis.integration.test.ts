@@ -23,7 +23,7 @@ describe('sandbox analysis over PURISTA', () => {
 			logger: initLogger('fatal'),
 			resources: { analysisPolicy: policy },
 			ai: {
-				models: { analysisModel: { provider, model: 'analysis-fake' } },
+				models: { analysis: { provider, model: 'analysis-fake' } },
 				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 			},
 		})
@@ -72,7 +72,7 @@ describe('sandbox analysis over PURISTA', () => {
 		const service = await analysisV1Service.getInstance(eventBridge, {
 			resources: { analysisPolicy: { canRun: vi.fn(async () => false) } },
 			ai: {
-				models: { analysisModel: { provider, model: 'analysis-fake' } },
+				models: { analysis: { provider, model: 'analysis-fake' } },
 				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 			},
 		})
@@ -112,7 +112,7 @@ describe('sandbox analysis over PURISTA', () => {
 		const service = await analysisV1Service.getInstance(eventBridge, {
 			resources: { analysisPolicy: policy },
 			ai: {
-				models: { analysisModel: { provider, model: 'analysis-fake' } },
+				models: { analysis: { provider, model: 'analysis-fake' } },
 				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 			},
 		})

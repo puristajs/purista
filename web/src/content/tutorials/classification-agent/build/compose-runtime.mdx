@@ -1,6 +1,6 @@
 ---
 title: Compose the classification runtime
-description: Supply the policy and singular model binding through one service factory.
+description: Supply the policy and exact classification model binding through one service factory.
 order: 185
 kind: lesson
 status: published
@@ -26,14 +26,12 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			model: options.model,
-		},
+		ai: { models: { classification: options.model } },
 	})
 }
 ```
 
-The singular `ai.model` binding is shared by the mounted Harness runtime.
+The `ai.models.classification` binding matches the mounted agent's explicit alias.
 Credentials stay at application startup, outside the agent definition.
 
 Create a terminal adapter that sends a normal PURISTA command message to

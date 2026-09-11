@@ -19,8 +19,8 @@ export function createSupportService(
 		ai: {
 			storage: options.storage,
 			models: {
-				classificationModel: options.classificationModel,
-				resolutionModel: {
+				classification: options.classificationModel,
+				planning: {
 					...options.resolutionModel,
 					retry: {
 						maxAttempts: 2,

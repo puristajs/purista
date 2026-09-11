@@ -14,7 +14,7 @@ describe('triageTicketAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'triageTicketTest' })
 			.addAgent(triageTicketAgent)
-			.getInstance({ model: { provider, model: 'fake' } })
+			.getInstance({ models: { chat: { provider, model: 'fake' } } })
 
 		try {
 			const session = await runtime.getSession('ticket:SUP-123')

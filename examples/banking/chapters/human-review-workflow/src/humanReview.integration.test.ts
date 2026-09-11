@@ -64,7 +64,7 @@ async function startReviewTestApplication(
 			supportReviewStore: reviews,
 			supportReviewPolicy: policy,
 		},
-		ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
+		ai: { models: { review: { provider: reviewModel(), model: 'fake-review' } }, storage },
 	})
 	await transaction.start()
 	await support.start()
@@ -106,7 +106,7 @@ describe('durable human review over PURISTA', () => {
 				supportReviewStore: reviews,
 				supportReviewPolicy: policy,
 			},
-			ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
+			ai: { models: { review: { provider: reviewModel(), model: 'fake-review' } }, storage },
 		})
 		await transaction.start()
 		await support.start()
@@ -173,7 +173,7 @@ describe('durable human review over PURISTA', () => {
 				supportReviewStore: reviews,
 				supportReviewPolicy: { canRequest: vi.fn(async () => true), canReview: vi.fn(async () => true) },
 			},
-			ai: { model: { provider: reviewModel(), model: 'fake-review' }, storage },
+			ai: { models: { review: { provider: reviewModel(), model: 'fake-review' } }, storage },
 		})
 		await transaction.start()
 		await support.start()

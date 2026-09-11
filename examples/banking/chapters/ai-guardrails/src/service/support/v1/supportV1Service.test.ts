@@ -35,7 +35,7 @@ describe('guarded support service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: { canClassify: async () => true } },
-			ai: { model: { provider, model: 'fake-classifier' } },
+			ai: { models: { classification: { provider, model: 'fake-classifier' } } },
 		})
 		await service.start()
 
@@ -78,7 +78,7 @@ describe('guarded support service', () => {
 		const service = await directCallerService.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: policy },
-			ai: { model: { provider, model: 'fake-classifier' } },
+			ai: { models: { classification: { provider, model: 'fake-classifier' } } },
 		})
 		await service.start()
 

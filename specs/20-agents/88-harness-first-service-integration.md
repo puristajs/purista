@@ -54,16 +54,17 @@ AI definitions live below the service version that owns them:
 ```ts
 // service/support/v1/harness/agent/support/supportAgent.ts
 export const supportAgent = defineAgent('support', {
+	model: 'answering',
   instructions: 'Answer the customer clearly and concisely.',
 })
 ```
 
 This is a complete text agent. Harness supplies the documented default string
-input/output schemas, uses the validated string directly as the prompt, selects
-the `primary` model alias, derives text streaming, and applies bounded safe loop
-defaults. A beginner does not need a prompt mapper, catalog, output-mode flag,
-tool list, storage, memory, sandbox, queue, or mount policy. Adding any of those
-later refines the same definition and bootstrap shape.
+input/output schemas, uses the validated string directly as the prompt, requires
+the explicitly chosen `answering` alias, derives text streaming, and applies
+bounded safe loop defaults. A beginner does not need a prompt mapper, catalog,
+output-mode flag, tool list, storage, memory, sandbox, queue, or mount policy.
+Adding any of those later refines the same definition and bootstrap shape.
 
 ```ts
 // service/support/v1/harness/supportHarness.ts
@@ -80,9 +81,11 @@ export const supportV1Service = supportV1ServiceBuilder
 ```ts
 const support = await supportV1Service.getInstance(eventBridge, {
   ai: {
-    model: {
-      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
-      model: 'gpt-5-mini',
+    models: {
+      answering: {
+        provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+        model: 'gpt-5-mini',
+      },
     },
   },
 })
@@ -101,17 +104,10 @@ Harness definition before mounting. One service instance creates one Harness
 runtime and shuts it down exactly once.
 
 The mounted definition contributes its exact runtime requirements to
-`ServiceBuilder.getInstance(...)`. Runtime model configuration is additive and
-stable as the graph grows:
-
-- `ai.model` binds the `primary` alias and is required exactly when the graph
-  requires `primary`;
-- `ai.models` is the exact readonly record of required non-primary aliases;
-- a graph that requires both accepts both fields without moving `primary` into
-  `ai.models`;
-- a graph without `primary` rejects `ai.model`; and
-- missing, duplicate, unknown, or capability-incompatible model bindings fail
-  before target registration.
+`ServiceBuilder.getInstance(...)`. Every agent declares a user-chosen model
+alias and Harness reserves no alias. `ai.models` is the exact readonly record
+of aliases required by the graph. Missing, duplicate, unknown, or
+capability-incompatible model bindings fail before target registration.
 
 For example, adding retrieval to a basic text agent extends the same bootstrap
 instead of rewriting it:
@@ -119,11 +115,11 @@ instead of rewriting it:
 ```ts
 const support = await supportV1Service.getInstance(eventBridge, {
   ai: {
-    model: {
-      provider: openaiProvider,
-      model: 'gpt-5.5',
-    },
     models: {
+      answering: {
+        provider: openaiProvider,
+        model: 'gpt-5.5',
+      },
       embeddings: {
         provider: openaiProvider,
         model: 'text-embedding-3-large',
@@ -1060,6 +1056,7 @@ const bankingCapabilities = defineCatalog('bankingCapabilities', {
 })
 
 const answerQuestion = defineAgent('answerQuestion', {
+	model: 'answering',
   instructions: 'Answer using verified account information.',
   tools: [bankingCapabilities.tools.lookupTransaction],
   skills: [bankingCapabilities.skills.customerSupportPolicy],
@@ -2077,7 +2074,8 @@ is not rewritten: the CLI makes no partial graph change and prints the exact
 manual composition required. The release package map uses
 `@purista/harness@^4.0.0`; the standard first-agent path also installs
 `@purista/harness-openai@^4.0.0`, adds `OPENAI_API_KEY` to `.env.example`, and
-adds the canonical additive `ai.model` bootstrap. Generated wrappers use
+adds the canonical `ai.models` bootstrap with the generated agent's explicit
+purpose alias. Generated wrappers use
 `canInvokeAgent(serviceName, serviceVersion, contract)` without a repeated
 target string. Generated tests use
 `@purista/harness/testing` and need no credentials.
@@ -2122,8 +2120,8 @@ data. Unknown provider or tool details are not exposed.
 
 ## 13. Testing and clean removal
 
-Core tests cover mount lifecycle; additive `ai.model` plus `ai.models`
-inference; optional production `storage` and `memory` upgrades; aggregate and
+Core tests cover mount lifecycle; exact `ai.models` inference; optional
+production `storage` and `memory` upgrades; aggregate and
 stream root registration; dependency-only non-public `streamDispatched` routes;
 authentic `visitHostedHarnessTargets` traversal with exact one-projection-per-
 target cardinality; visitor failure propagation; empty-graph rejection; proof

@@ -13,7 +13,7 @@ describe('planSupportResponseAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'responseAgentTest' })
 			.addAgent(planSupportResponseAgent)
-			.getInstance({ models: { responseModel: { provider, model: 'response-fake' } } })
+			.getInstance({ models: { responsePlanning: { provider, model: 'response-fake' } } })
 		const session = await runtime.getSession('response-case-1')
 
 		try {

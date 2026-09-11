@@ -15,9 +15,9 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
-const answer = defineAgent('answer', { model: 'primary', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
+const answer = defineAgent('answer', { model: 'answering', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
-export const harness = await definition.getInstance({ model: { provider: openai({ apiKey: process.env.OPENAI_API_KEY, api: 'responses' }), model: process.env.OPENAI_MODEL ?? 'gpt-5-mini' } })
+export const harness = await definition.getInstance({ models: { answering: { provider: openai({ apiKey: process.env.OPENAI_API_KEY, api: 'responses' }), model: process.env.OPENAI_MODEL ?? 'gpt-5-mini' } } })
 ```
 The adapter supports Chat Completions by default and Responses when `api:
 'responses'` is selected. Use `defaults` for shared token and sampling limits;

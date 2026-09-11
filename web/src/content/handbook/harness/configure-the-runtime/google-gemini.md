@@ -15,9 +15,9 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { google } from '@purista/harness-google'
 import { z } from 'zod'
 
-const answer = defineAgent('answer', { model: 'primary', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
+const answer = defineAgent('answer', { model: 'answering', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
-export const harness = await definition.getInstance({ model: { provider: google({ apiKey: process.env.GEMINI_API_KEY }), model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' } })
+export const harness = await definition.getInstance({ models: { answering: { provider: google({ apiKey: process.env.GEMINI_API_KEY }), model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' } } })
 ```
 Gemini generation settings map into the SDK `config` object. Model metadata
 controls valid ranges and support; omit settings you have not verified.

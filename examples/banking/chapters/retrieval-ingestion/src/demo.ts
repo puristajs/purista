@@ -58,7 +58,7 @@ async function main() {
 		stateStore,
 		repository,
 		models: {
-			primary: { provider, model: 'scripted-chat' },
+			answering: { provider, model: 'scripted-chat' },
 			embedding: { provider, model: 'scripted-embedding' },
 		},
 		embeddingDimensions: dimensions,

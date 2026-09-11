@@ -74,7 +74,7 @@ Generate the service and agent with explicit non-interactive values.
 
 ```bash title="Generate Support and its classification agent" replay="project"
 npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
-npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with a structured result" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with a structured result" --non-interactive --model-alias classification
 ```
 
 The service owns its Harness files:

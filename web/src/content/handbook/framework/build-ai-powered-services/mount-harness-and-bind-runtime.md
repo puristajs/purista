@@ -48,7 +48,7 @@ concrete adapters:
 const support = await supportV1Service.getInstance(eventBridge, {
   resources: { incidentRepository, rollbackReviewRepository },
   ai: {
-    model: { provider: modelProvider, model: 'provider-model-id' },
+    models: { answering: { provider: modelProvider, model: 'provider-model-id' } },
     admission: modelAdmission,
     storage: harnessStorage,
     sandbox,
@@ -58,10 +58,10 @@ const support = await supportV1Service.getInstance(eventBridge, {
 })
 ```
 
-Use `ai.model` for the primary model required by agents. Add named entries to
-`ai.models` only when the definition declares extra model aliases. Configure
-only the adapters required by the graph. Startup checks those requirements
-before the service accepts work.
+Every agent declares a user-chosen purpose alias. Bind every alias under the
+exact matching `ai.models` key; Harness reserves no alias. Configure only the
+adapters required by the graph. Startup checks those requirements before the
+service accepts work.
 
 `modelAdmission` implements Harness `ModelAdmission`: `acquire(request)` waits
 for or rejects capacity and returns a lease with `release()`. It controls active

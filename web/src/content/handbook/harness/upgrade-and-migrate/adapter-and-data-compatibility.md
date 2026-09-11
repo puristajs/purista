@@ -26,7 +26,7 @@ const definition = defineHarness({ name: 'support' })
   .addWorkflow(workflow)
 
 const instance = await definition.getInstance({
-  model: assistantModel,
+  models: { answering: assistantModel },
   storage: v4Storage,
   memory: v4Memory,
   workspace: v4Workspace,

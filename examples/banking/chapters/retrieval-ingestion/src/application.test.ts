@@ -34,7 +34,7 @@ async function fixture(provider = new FakeModelProvider({ strict: true })) {
 		stateStore: initDefaultStateStore({ logger }),
 		repository,
 		models: {
-			primary: { provider, model: 'fake-knowledge' },
+			answering: { provider, model: 'fake-knowledge' },
 			embedding: { provider, model: 'fake-embedding' },
 		},
 		embeddingDimensions: 4,

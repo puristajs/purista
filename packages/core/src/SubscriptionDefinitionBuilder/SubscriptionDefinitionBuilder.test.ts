@@ -430,7 +430,10 @@ describe('SubscriptionDefinitionBuilder', () => {
 	})
 
 	it('declares local Harness targets by their authentic source and grants enqueue only to a nominal queue reference', async () => {
-		const agent = defineAgent('answer', { instructions: 'Answer.' })
+		const agent = defineAgent('answer', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
 		const workflow = defineWorkflow('summarize', {
 			async handler({ input }) {
 				return input
@@ -525,6 +528,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 	it('finalizes local agent and workflow declarations for a real subscription service context', async () => {
 		const valueSchema = z.object({ value: z.string() })
 		const agent = defineAgent('classify', {
+			model: 'chat',
 			input: valueSchema,
 			output: valueSchema,
 			instructions: 'Return the classified value.',
@@ -572,7 +576,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 		})
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider, model: 'fake' } },
+			ai: { models: { chat: { provider, model: 'fake' } } },
 		} as never)
 		await service.start()
 		try {

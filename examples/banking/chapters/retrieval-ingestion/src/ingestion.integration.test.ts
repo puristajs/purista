@@ -64,8 +64,10 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
-				model: { provider, model: 'fake-chat' },
-				models: { embedding: { provider, model: 'fake-embedding' } },
+				models: {
+					answering: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
 			},
 		})
 		await service.start()
@@ -128,8 +130,10 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
-				model: { provider, model: 'fake-chat' },
-				models: { embedding: { provider, model: 'fake-embedding' } },
+				models: {
+					answering: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
 			},
 		})
 		await service.start()
@@ -183,8 +187,10 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
-				model: { provider, model: 'fake-chat' },
-				models: { embedding: { provider, model: 'fake-embedding' } },
+				models: {
+					answering: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
 			},
 		})
 		await service.start()
@@ -230,8 +236,10 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
-				model: { provider, model: 'fake-chat' },
-				models: { embedding: { provider, model: 'fake-embedding' } },
+				models: {
+					answering: { provider, model: 'fake-chat' },
+					embedding: { provider, model: 'fake-embedding' },
+				},
 			},
 		})
 		await service.start()
@@ -284,8 +292,8 @@ describe('knowledge ingestion workflow', () => {
 			},
 			ai: {
 				storage,
-				model: { provider: new FakeModelProvider({ strict: true }), model: 'fake-chat' },
 				models: {
+					answering: { provider: new FakeModelProvider({ strict: true }), model: 'fake-chat' },
 					embedding: {
 						provider,
 						model: 'fake-embedding',

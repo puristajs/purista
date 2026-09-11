@@ -8,7 +8,7 @@ Start with an existing service. The project-local CLI creates an agent under
 that service version and adds it to the service-owned Harness:
 
 ```bash title="Create an internal agent"
-npm run add:agent -- answer-support-question \
+npm run add:agent -- answer-support-question --model-alias answering \
   --service support \
   --service-version 1 \
   --description "Answer a support question"
@@ -27,15 +27,17 @@ case for the stable agent id.
 import { defineAgent } from '@purista/harness'
 
 export const answerSupportQuestionAgent = defineAgent('answerSupportQuestion', {
+	model: 'answering',
 	description: 'Answer a support question',
 	instructions: 'Answer one support question clearly and briefly.',
 })
 ```
 
-Without `input`, `output`, `prompt`, or `model`, this agent accepts a string,
-returns a string, uses the input as its user message, and selects the reserved
-`primary` model alias. This is enough for the first working run. Add schemas
-and capabilities later when the application needs their guarantees.
+Without `input`, `output`, or `prompt`, this agent accepts a string, returns a
+string, and uses the input as its user message. The explicit `answering` alias
+states which application model role it needs. Harness does not provide reserved
+aliases. Add schemas and capabilities later when the application needs their
+guarantees.
 
 Do not put credentials, providers, tenant identity, or HTTP values in the
 agent definition.
@@ -67,24 +69,25 @@ records the graph and gives each added root an address. A service accepts one
 Harness mount. Add a target policy later when a root needs business guards,
 success events, queue delivery, or durable resume behavior.
 
-## 4. Bind the primary model at startup
+## 4. Bind the model alias at startup
 
 ```ts title="src/index.ts"
 import { openai } from '@purista/harness-openai'
 
 const support = await supportV1Service.getInstance(eventBridge, {
 	ai: {
-		// The singular field binds the reserved "primary" alias.
-		model: {
-			provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
-			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+		models: {
+			answering: {
+				provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
+				model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			},
 		},
 	},
 })
 ```
 
-The outer `ai.model` field supplies the binding for the `primary` alias inferred
-from the agent. The inner `model` value is the provider-specific model ID. The
+The `ai.models.answering` key matches the alias declared by the agent. The inner
+`model` value is the provider-specific model ID. The
 service's inferred instance configuration requires every model alias and
 adapter capability used by its mounted graph.
 

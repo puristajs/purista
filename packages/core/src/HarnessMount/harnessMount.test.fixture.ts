@@ -61,6 +61,7 @@ export const valueSchema = generatedModelSchema<{ value: string }, { value: stri
 })
 
 export const dependencyAgent = defineAgent(dependencyTargetName, {
+	model: 'chat',
 	instructions: 'Return the supplied value.',
 	input: valueSchema,
 	output: valueSchema,
@@ -171,7 +172,7 @@ export async function startMounted(
 	const eventBridge = options.eventBridge ?? new DefaultEventBridge()
 	await eventBridge.start()
 	const service = await mountedBuilder(options.definition ?? mountedHarness, options.policy).getInstance(eventBridge, {
-		ai: options.ai ?? { model: { provider: new FakeModelProvider(), model: 'fake' } },
+		ai: options.ai ?? { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 	} as never)
 	await service.start()
 	return Object.freeze({ eventBridge, service })

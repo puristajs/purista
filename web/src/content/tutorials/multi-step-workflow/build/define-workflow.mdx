@@ -69,8 +69,8 @@ Generate each boundary once. `--http none` keeps both agents internal. The comma
 
 ```bash title="Generate the Support boundaries" replay="project"
 npm run add:service -- support --description "Own support case resolution" --non-interactive
-npm run add:agent -- classify-support-case --service support --service-version 1 --http none --description "Classify one support case" --non-interactive
-npm run add:agent -- plan-support-resolution --service support --service-version 1 --http none --description "Plan one support resolution" --non-interactive
+npm run add:agent -- classify-support-case --service support --service-version 1 --http none --description "Classify one support case" --non-interactive --model-alias classification
+npm run add:agent -- plan-support-resolution --service support --service-version 1 --http none --description "Plan one support resolution" --non-interactive --model-alias planning
 npm run add:workflow -- resolve-support-case --service support --service-version 1 --description "Run recoverable support resolution stages" --non-interactive
 npm run add:command -- run-resolve-support-case --service support --service-version 1 --description "Run a durable multi-step support resolution" --non-interactive
 ```

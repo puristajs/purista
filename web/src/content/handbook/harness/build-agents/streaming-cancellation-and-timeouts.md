@@ -42,13 +42,14 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { z } from 'zod'
 
 const answerSupport = defineAgent('answerSupport', {
+	model: 'answering',
   input: z.object({ question: z.string().min(1) }),
   output: z.string(),
   prompt: input => ({ role: 'user', content: input.question }),
   instructions: 'Answer the support question briefly and factually.',
 })
 export const definition = defineHarness({ name: 'support' }).addAgent(answerSupport)
-const supportHarness = await definition.getInstance({ model: modelAlias })
+const supportHarness = await definition.getInstance({ models: { answering: modelAlias } })
 ```
 The composition uses [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
 [`defineAgent(...)`](/handbook/api/functions/_purista_harness.defineAgent/),

@@ -15,7 +15,7 @@ import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const summarize = defineAgent('summarize', {
-  model: 'primary',
+  model: 'summarization',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string() }),
   prompt: input => ({ role: 'user', content: input.question }),
@@ -24,9 +24,11 @@ const summarize = defineAgent('summarize', {
 
 const definition = defineHarness({ name: 'support' }).addAgent(summarize)
 export const harnessPromise = definition.getInstance({
-	model: {
-		provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
-		model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+	models: {
+		summarization: {
+			provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+		},
 	},
 })
 ```

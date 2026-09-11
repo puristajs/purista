@@ -11,7 +11,7 @@ describe('classifySupportCaseAgent', () => {
 		provider.enqueueObject({ object: { category: 'card', urgency: 'urgent' }, usage, finishReason: 'stop' })
 		const runtime = await defineHarness({ name: 'classificationAgentTest' })
 			.addAgent(classifySupportCaseAgent)
-			.getInstance({ models: { classificationModel: { provider, model: 'classification-fake' } } })
+			.getInstance({ models: { classification: { provider, model: 'classification-fake' } } })
 		const session = await runtime.getSession('classification-case-1')
 		try {
 			const outcome = await session.agents.classifySupportCase.run({ caseId: 'case-1', message: 'My card is missing.' })

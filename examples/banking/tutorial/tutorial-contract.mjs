@@ -110,7 +110,8 @@ export function assertV4Source(source, page, enforce = true) {
 	assert(!/\bagentPath\b|\bsrc\/agents\b|\battached agents\b/i.test(source), `${page}: source references the removed top-level agent layout`)
 	if (page.endsWith('AGENTS.md')) {
 		assert(source.includes('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}'), `${page}: generated guidance misses the service-owned Harness layout`)
-		assert(source.includes('singular `ai.model`'), `${page}: generated guidance misses the primary model binding`)
+		assert(source.includes('user-chosen purpose model alias'), `${page}: generated guidance misses explicit model aliases`)
+		assert(source.includes('exact `ai.models` key'), `${page}: generated guidance misses the exact model map binding`)
 	}
 	if (page.endsWith('.agents/IMPLEMENTATION.md')) {
 		assert(source.includes('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}'), `${page}: implementation guidance misses the service-owned Harness layout`)

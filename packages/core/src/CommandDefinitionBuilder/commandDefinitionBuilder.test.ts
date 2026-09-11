@@ -421,7 +421,10 @@ describe('CommandDefinitionBuilder', () => {
 		// @ts-expect-error Model providers belong to mounted Harness runtime configuration.
 		void cleanBuilder.canUseHarnessModel
 		expect((cleanBuilder as any).canUseHarnessModel).toBeUndefined()
-		const localAgent = defineAgent('localAgent', { instructions: 'Answer.' })
+		const localAgent = defineAgent('localAgent', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
 		const localWorkflow = defineWorkflow('localWorkflow', {
 			async handler({ input }) {
 				return input

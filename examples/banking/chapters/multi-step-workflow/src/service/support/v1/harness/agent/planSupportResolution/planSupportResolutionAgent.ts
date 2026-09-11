@@ -2,7 +2,7 @@ import { defineAgent } from '@purista/harness'
 import { resolutionPlanInputSchema, resolutionPlanSchema } from '../../supportResolutionSchemas.js'
 
 export const planSupportResolutionAgent = defineAgent('planSupportResolution', {
-	model: 'resolutionModel',
+	model: 'planning',
 	input: resolutionPlanInputSchema,
 	output: resolutionPlanSchema,
 	instructions: 'Create a concise next-step plan grounded in the message, validated classification, and handling lane.',

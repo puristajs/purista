@@ -157,14 +157,14 @@ describe('planProjectGeneration', () => {
 			})
 			.join('\n')
 		expect(guidance).toContain('src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}')
-		expect(guidance).toContain('`ai.model`')
+		expect(guidance).toContain('`ai.models`')
 		expect(guidance).toContain('PURISTA host tools use `ServiceBuilder.defineTool(...)`')
 		expect(guidance).toContain('interactive and prompt for omitted choices')
 		expect(guidance).not.toContain('src/harness')
-		expect(guidance).not.toContain('ai.models')
 		for (const artifact of ['agent', 'workflow', 'tool', 'skill', 'mcp']) {
+			const extra = artifact === 'agent' ? ' --model-alias <alias>' : ''
 			expect(guidance).toContain(
-				`bun run add:${artifact} -- <name> --service <serviceName> --service-version <version>`,
+				`bun run add:${artifact} -- <name>${extra} --service <serviceName> --service-version <version>`,
 			)
 		}
 	})

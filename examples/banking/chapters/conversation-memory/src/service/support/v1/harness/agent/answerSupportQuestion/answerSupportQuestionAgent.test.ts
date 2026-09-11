@@ -24,7 +24,7 @@ describe('answerSupportQuestionAgent', () => {
 			finishReason: 'stop',
 		})
 		const runtime = await supportHarness.getInstance({
-			model: { provider, model: 'fake-support' },
+			models: { answering: { provider, model: 'fake-support' } },
 			storage: inMemoryHarnessStorage(),
 		})
 
@@ -83,7 +83,7 @@ describe('answerSupportQuestionAgent', () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({ object: { answer: 'I can help.' }, usage, finishReason: 'stop' })
 		const runtime = await supportHarness.getInstance({
-			model: { provider, model: 'fake-support' },
+			models: { answering: { provider, model: 'fake-support' } },
 			storage: inMemoryHarnessStorage(),
 		})
 
@@ -114,7 +114,7 @@ describe('answerSupportQuestionAgent', () => {
 			})
 		}
 		const runtime = await supportHarness.getInstance({
-			model: { provider, model: 'fake-support' },
+			models: { answering: { provider, model: 'fake-support' } },
 			storage: inMemoryHarnessStorage(),
 		})
 

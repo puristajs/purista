@@ -70,6 +70,7 @@ describe('ServiceBuilder.defineTool', () => {
 		const parameterSchema = z.object({ requestId: z.string() })
 		const eventSchema = z.object({ id: z.string() })
 		const childAgent = defineAgent('childAgent', {
+			model: 'chat',
 			input: z.object({ question: z.string() }),
 			output: z.object({ answer: z.string() }),
 			instructions: 'Answer.',
@@ -160,7 +161,10 @@ describe('ServiceBuilder.defineTool', () => {
 	})
 
 	it('rejects copied and wrong-kind nested target contracts before registration', () => {
-		const agent = defineAgent('authenticAgent', { instructions: 'Answer.' })
+		const agent = defineAgent('authenticAgent', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
 		const workflow = defineWorkflow('authenticWorkflow', {
 			async handler() {
 				return 'done'

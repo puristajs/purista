@@ -15,7 +15,10 @@ import {
 	createRemoteHarnessTargetContract,
 } from './remoteTargetContract.js'
 
-const support = defineAgent('support', { instructions: 'Answer clearly.' }).contract
+const support = defineAgent('support', {
+	model: 'chat',
+	instructions: 'Answer clearly.',
+}).contract
 const digest = `sha256:${'a'.repeat(64)}` as const
 
 describe('EventBridge Harness target dispatcher', () => {

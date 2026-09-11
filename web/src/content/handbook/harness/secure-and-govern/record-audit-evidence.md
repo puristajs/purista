@@ -72,13 +72,13 @@ const governance = ({ native, rule }) => ({
     ],
 })
 const transferAgent = defineAgent('payments', {
-  model: 'primary',
+  model: 'answering',
   tools: [transfer],
   instructions: 'Use transfer only for authorized payment requests.',
   governance,
 })
 const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
-return definition.getInstance({ model: primaryModel })
+return definition.getInstance({ models: { answering: answeringModel } })
 ```
 An `audit` effect admits the tool and records the decision. An `allow`, `deny`,
 or `require_approval` decision also reaches the configured audit sink. In

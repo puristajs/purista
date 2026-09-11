@@ -17,7 +17,7 @@ const output = z.object({ answer: z.string() })
 const summarize = defineAgent('summarize', {
   input,
   output,
-  model: 'primary',
+  model: 'summarization',
   prompt: value => ({ role: 'user', content: value.question }),
   instructions: 'Summarize the policy question in one answer.',
 })
@@ -28,7 +28,7 @@ const answer = defineWorkflow('answerWithPolicy', {
   handler: async context => context.agents.summarize.run(context.input, { callId: 'summarize-policy' }),
 })
 export const definition = defineHarness({ name: 'policy-analysis' }).addAgent(summarize).addWorkflow(answer)
-export const harness = await definition.getInstance({ model: primaryModel })
+export const harness = await definition.getInstance({ models: { summarization: summarizationModel } })
 ```
 Workflow delegation is explicit and bounded. A background task or external
 queue remains application-owned delivery; a session is not a durable broker.

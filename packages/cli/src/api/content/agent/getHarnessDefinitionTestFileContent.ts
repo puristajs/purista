@@ -11,6 +11,7 @@ const toAgentIdentifier = (name: string) => {
 export const getHarnessDefinitionTestFileContent = (input: {
 	agentName: string
 	agentImportName: string
+	modelAlias: string
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
@@ -37,7 +38,9 @@ export const getHarnessDefinitionTestFileContent = (input: {
 			writer.writeLine('})').blankLine()
 			writer.writeLine(`const ${harnessName} = defineHarness({ name: 'agentTest' }).addAgent(${agentIdentifier})`)
 			writer
-				.writeLine(`const runtime = await ${harnessName}.getInstance({ model: { provider, model: 'fake' } })`)
+				.writeLine(
+					`const runtime = await ${harnessName}.getInstance({ models: { ${input.modelAlias}: { provider, model: 'fake' } } })`,
+				)
 				.blankLine()
 			writer.writeLine('try {')
 			writer.indent(() => {

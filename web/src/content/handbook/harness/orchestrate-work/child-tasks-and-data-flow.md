@@ -15,7 +15,7 @@ import { z } from 'zod'
 const reviewer = defineAgent('reviewer', {
   input: z.object({ report: z.string() }),
   output: z.object({ accepted: z.boolean() }),
-  model: 'primary',
+  model: 'review',
   prompt: value => ({ role: 'user', content: value.report }),
   instructions: 'Decide whether the report is accepted.',
 })
@@ -29,7 +29,7 @@ const startReview = defineWorkflow('startReview', {
   },
 })
 export const definition = defineHarness({ name: 'review' }).addAgent(reviewer).addWorkflow(startReview)
-export const harness = await definition.getInstance({ model: primaryModel })
+export const harness = await definition.getInstance({ models: { review: reviewModel } })
 ```
 Use a stable unique call ID, bound child-agent allowlists, deadlines, and
 cancellation. The application owns durable delivery and authorization. A task

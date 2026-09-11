@@ -17,7 +17,7 @@ describe('evaluated support service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: policy },
-			ai: { model: { provider, model: 'fake-classifier' } },
+			ai: { models: { classification: { provider, model: 'fake-classifier' } } },
 		})
 		await service.start()
 
@@ -54,7 +54,7 @@ describe('evaluated support service', () => {
 		const service = await supportV1Service.getInstance(eventBridge, {
 			logger: initLogger('fatal'),
 			resources: { supportClassificationPolicy: { canClassify: vi.fn(async () => false) } },
-			ai: { model: { provider, model: 'fake-classifier' } },
+			ai: { models: { classification: { provider, model: 'fake-classifier' } } },
 		})
 		await service.start()
 

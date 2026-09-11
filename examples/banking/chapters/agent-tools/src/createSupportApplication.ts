@@ -27,7 +27,7 @@ export async function createSupportApplication(
 		logger,
 		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
 		ai: {
-			model,
+			models: { answering: model },
 			storage,
 		},
 	})

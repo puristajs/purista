@@ -98,13 +98,13 @@ const governance = ({ native, rule }) => ({
 		],
 })
 const guardedAgent = defineAgent('payments', {
-  model: 'primary',
+  model: 'answering',
   tools: [transfer],
   instructions: 'Use the transfer tool only for an authorized payment request.',
   governance,
 })
 const definition = defineHarness({ name: 'payments' }).addAgent(guardedAgent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 This example is an exception list: unmatched calls are allowed, and the one
 matching condition is denied. The next guide builds the model, tool, agent,

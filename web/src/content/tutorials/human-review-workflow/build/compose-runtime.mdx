@@ -50,7 +50,7 @@ export async function createReviewApplication(
 			supportReviewStore: reviewStore,
 			supportReviewPolicy,
 		},
-		ai: { model, storage },
+		ai: { models: { review: model }, storage },
 	})
 	let destroyed = false
 	const destroy = async () => {
@@ -93,7 +93,7 @@ export async function createReviewApplication(
 ```
 
 The example binds SQLite for both responsibilities, but uses separate files.
-`ai.model` is singular because this graph has one model requirement. The caller
+`ai.models.review` matches the agent's explicit model alias. The caller
 passes that model binding into the composition function, so tests and the demo
 can use a fake while the long-running process can use a real provider. The
 Support service receives the review policy and store; the Transaction service

@@ -46,14 +46,14 @@ const outputSchema = generatedSchema<{ answer: string }, { answer: string }>(
 	},
 )
 const dependency = defineAgent('lookup', {
-	model: 'primary',
+	model: 'chat',
 	input: generatedSchema<string, string>({ type: 'string' }),
 	output: generatedSchema<string, string>({ type: 'string' }),
 	instructions: 'Look up facts.',
 	prompt: input => ({ role: 'user', content: input }),
 })
 const root = defineAgent('answer', {
-	model: 'primary',
+	model: 'chat',
 	input: inputSchema,
 	output: outputSchema,
 	instructions: 'Answer the normalized question.',
@@ -220,7 +220,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			{ mode: 'summary' | 'detail'; detail?: string }
 		>(advancedOutputJsonSchema)
 		const advancedAgent = defineAgent('advanced', {
-			model: 'primary',
+			model: 'chat',
 			input: generatedSchema<string, string>({ type: 'string' }),
 			output: advancedOutput,
 			instructions: 'Return a summary or detail.',
@@ -259,7 +259,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			},
 		})
 		const approvalAgent = defineAgent('approve', {
-			model: 'primary',
+			model: 'chat',
 			input: generatedSchema<string, string>({ type: 'string' }),
 			output: generatedSchema<string, string>({ type: 'string' }),
 			instructions: 'Ask before looking up an account.',
@@ -379,7 +379,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			})[0],
 		)
 		const changedSchemaAgent = defineAgent('answer', {
-			model: 'primary',
+			model: 'chat',
 			input: inputSchema,
 			output: generatedSchema<string, string>({ type: 'string' }),
 			instructions: 'Return text.',
@@ -497,14 +497,14 @@ describe('createMountedHarnessTargetProjections', () => {
 			},
 		})
 		const invalidDependency = defineAgent('invalidLookup', {
-			model: 'primary',
+			model: 'chat',
 			input: generatedSchema<string, string>(hostileSchema),
 			output: generatedSchema<string, string>({ type: 'string' }),
 			instructions: 'Never runs.',
 			prompt: input => ({ role: 'user', content: input }),
 		})
 		const validRoot = defineAgent('validRoot', {
-			model: 'primary',
+			model: 'chat',
 			input: generatedSchema<string, string>({ type: 'string' }),
 			output: generatedSchema<string, string>({ type: 'string' }),
 			instructions: 'Never runs.',
@@ -569,7 +569,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			},
 		})
 		const reviewAgent = defineAgent('review', {
-			model: 'primary',
+			model: 'chat',
 			input: generatedSchema<string, string>({ type: 'string' }),
 			output: generatedSchema<string, string>({ type: 'string' }),
 			instructions: 'Review one record.',

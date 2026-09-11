@@ -19,9 +19,10 @@ implementation plan.
   EventBridge. Same-process execution has no local fallback.
 - Harness target contracts carry exact input, validated-input, output, update,
   and reachable-interrupt inference.
-- `ai.model` binds `primary`; `ai.models` adds the exact non-primary aliases.
-  Storage and memory accept optional production adapters and become mandatory
-  only when compiled requirements demand them.
+- Every agent declares a user-chosen model alias; Harness reserves no alias.
+  `ai.models` binds the graph's exact aliases. Storage and memory accept
+  optional production adapters and become mandatory only when compiled
+  requirements demand them.
 - Host-aware tools expose only builder-declared PURISTA resources and
   operations. Workflows receive only explicitly declared typed tool invokers.
 - Hono protection middleware authenticates and establishes trusted principal

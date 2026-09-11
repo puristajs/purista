@@ -2,7 +2,7 @@ import { defineAgent } from '@purista/harness'
 import { responsePlanSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
 
 export const planSupportResponseAgent = defineAgent('planSupportResponse', {
-	model: 'responseModel',
+	model: 'responsePlanning',
 	input: supportCaseInputSchema,
 	output: responsePlanSchema,
 	instructions: [

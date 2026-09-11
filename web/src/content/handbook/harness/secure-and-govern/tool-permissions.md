@@ -12,7 +12,7 @@ authorize business actions, and the sandbox enforces filesystem/process scope.
 import { builtInTools, defineAgent } from '@purista/harness'
 
 const agent = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   tools: [lookupAccount, builtInTools.read, builtInTools.write],
   instructions: 'Use the declared tools only for the authorized support task.',
   permissions: {
@@ -20,7 +20,10 @@ const agent = defineAgent('support', {
   },
 })
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
-const harness = await definition.getInstance({ sandbox, model: primaryModel })
+const harness = await definition.getInstance({
+  models: { answering: answeringModel },
+  sandbox,
+})
 ```
 Omitting a built-in definition disables it. `read` is non-mutating and has no
 permission entry; `write`, `edit`, and `bash` support explicit permission

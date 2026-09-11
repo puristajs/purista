@@ -23,14 +23,16 @@ const rails = defineGuardrails({
 })
 
 const agent = defineAgent('answer', {
-  model: 'primary',
+  model: 'answering',
   guardrails: rails,
   instructions: 'Answer the support request safely and clearly.',
 })
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
 const harness = await definition.getInstance({
-  model: primaryModel,
-  models: { safety: { provider: safetyProvider, model: 'safety-model-id' } },
+  models: {
+    answering: answeringModel,
+    safety: { provider: safetyProvider, model: 'safety-model-id' },
+  },
 })
 ```
 The guardrail model is not business authorization. Fail closed on unavailable

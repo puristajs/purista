@@ -236,6 +236,7 @@ describe('QueueWorkerBuilder', () => {
 	it('finalizes local agent and workflow declarations for a real queue-worker service context', async () => {
 		const valueSchema = z.object({ value: z.string() })
 		const agent = defineAgent('classify', {
+			model: 'chat',
 			input: valueSchema,
 			output: valueSchema,
 			instructions: 'Return the classified value.',
@@ -289,7 +290,7 @@ describe('QueueWorkerBuilder', () => {
 		})
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider, model: 'fake' } },
+			ai: { models: { chat: { provider, model: 'fake' } } },
 			queueBridge,
 		} as never)
 		await service.start()

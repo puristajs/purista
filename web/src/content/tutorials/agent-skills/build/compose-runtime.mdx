@@ -10,7 +10,7 @@ Definitions do not choose infrastructure. Create one factory so tests, the
 credential-free demo, and the optional live process share the same service
 composition.
 
-The singular `ai.model` binding supplies the agent's default model. The
+The `ai.models.answering` binding supplies the agent's explicit model alias. The
 in-memory sandbox supplies the filesystem capability required by
 `builtInTools.read`.
 
@@ -28,7 +28,7 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportProcedurePolicy: options.policy },
-		ai: { model: options.model, sandbox: inMemorySandbox() },
+		ai: { models: { answering: options.model }, sandbox: inMemorySandbox() },
 	})
 }
 ```

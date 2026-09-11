@@ -35,8 +35,8 @@ describe('resolveSupportCaseWorkflow', () => {
 			const firstRuntime = await supportHarness.getInstance({
 				storage: firstLocal.storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			})
 			const firstSession = await firstRuntime.getSession('tenant-example:principal-alex:case-1')
@@ -52,8 +52,8 @@ describe('resolveSupportCaseWorkflow', () => {
 			const secondRuntime = await supportHarness.getInstance({
 				storage: secondLocal.storage,
 				models: {
-					classificationModel: { provider: classificationProvider, model: 'classification-fake' },
-					resolutionModel: { provider: resolutionProvider, model: 'resolution-fake' },
+					classification: { provider: classificationProvider, model: 'classification-fake' },
+					planning: { provider: resolutionProvider, model: 'resolution-fake' },
 				},
 			})
 			const secondSession = await secondRuntime.getSession('tenant-example:principal-alex:case-1')

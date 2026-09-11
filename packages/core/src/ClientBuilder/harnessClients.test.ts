@@ -101,8 +101,14 @@ function definitions(): FullServiceDefinition {
 describe('ClientBuilder Harness convergence', () => {
 	it('generates only native local roots and preserves the authentic local queue projection', async () => {
 		const schema = createGeneratedHarnessSchema<string>({ type: 'string' })
-		const child = defineAgent('lookup', { input: schema, output: schema, instructions: 'Look up.' })
+		const child = defineAgent('lookup', {
+			model: 'chat',
+			input: schema,
+			output: schema,
+			instructions: 'Look up.',
+		})
 		const agent = defineAgent('answer', {
+			model: 'chat',
 			input: schema,
 			output: schema,
 			instructions: 'Answer.',

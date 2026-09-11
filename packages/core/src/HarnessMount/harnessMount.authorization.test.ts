@@ -103,6 +103,7 @@ function approvalDefinition(
 		},
 	})
 	const agent = defineAgent('review', {
+		model: 'chat',
 		input: input.schema,
 		output: generatedSchema<string, string>({ type: 'string' }),
 		instructions: 'Request review before the effect.',
@@ -291,7 +292,10 @@ async function startApproval(options: Parameters<typeof approvalDefinition>[0] =
 		usage,
 		finishReason: 'tool_calls',
 	})
-	const mounted = await startAuthorizationFixture({ ...fixture, ai: { model: { provider, model: 'fake' }, storage } })
+	const mounted = await startAuthorizationFixture({
+		...fixture,
+		ai: { models: { chat: { provider, model: 'fake' } }, storage },
+	})
 	const first = response(
 		await mounted.command('review')(commandFor(fixture.definition, fixture.policy, 'review', {}, owner)),
 	)

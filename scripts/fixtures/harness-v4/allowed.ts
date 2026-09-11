@@ -1,2 +1,5 @@
 defineWorkflow('example', { handler: async () => ({ ok: true }) })
-class Builder { build() {} define() {} }
+class Builder {
+	build() {}
+	define() {}
+}

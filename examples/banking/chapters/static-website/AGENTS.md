@@ -8,7 +8,7 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured `servicePath`. Put service-owned Harness definitions under `src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- Mount one composed Harness definition per service version with `ServiceBuilder.mountHarness(...)`. Bind the model as singular `ai.model` and keep optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config.
+- Mount one composed Harness definition per service version with `ServiceBuilder.mountHarness(...)`. Give every agent a user-chosen purpose model alias, bind every required alias under the exact `ai.models` key, and keep optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config. Harness reserves no alias.
 - Define portable tools with `@purista/harness`. Define PURISTA host tools with `ServiceBuilder.defineTool(...)`; keep both under the service-owned `harness/tool` directory.
 
 ## Local CLI
@@ -18,7 +18,7 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - The short add commands below are interactive and prompt for omitted choices.
 - Create services with `npm run add:service -- <name> --description "<description>"`.
 - Create commands with `npm run add:command -- <name> --service <serviceName> --service-version <version>`.
-- Create agents with `npm run add:agent -- <name> --service <serviceName> --service-version <version>`.
+- Create agents with `npm run add:agent -- <name> --service <serviceName> --service-version <version>`. --model-alias <purposeAlias>
 - Create workflows with `npm run add:workflow -- <name> --service <serviceName> --service-version <version>`.
 - Create tools with `npm run add:tool -- <name> --service <serviceName> --service-version <version>`.
 - Create Skills with `npm run add:skill -- <name> --service <serviceName> --service-version <version>`.

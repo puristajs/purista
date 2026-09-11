@@ -15,7 +15,7 @@ import { answerKnowledgeQuestionInputSchema } from '../../../schema.js'
 import { searchKnowledgeTool } from '../../tool/searchKnowledge/searchKnowledgeTool.js'
 
 export const answerKnowledgeQuestionAgent = defineAgent('answerKnowledgeQuestion', {
-	model: 'primary',
+	model: 'answering',
 	input: answerKnowledgeQuestionInputSchema,
 	output: z.string(),
 	instructions:

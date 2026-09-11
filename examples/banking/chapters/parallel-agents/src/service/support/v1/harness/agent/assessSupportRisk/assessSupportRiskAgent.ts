@@ -2,7 +2,7 @@ import { defineAgent } from '@purista/harness'
 import { riskAssessmentSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
 
 export const assessSupportRiskAgent = defineAgent('assessSupportRisk', {
-	model: 'riskModel',
+	model: 'riskAssessment',
 	input: supportCaseInputSchema,
 	output: riskAssessmentSchema,
 	instructions: [

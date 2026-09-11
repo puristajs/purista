@@ -81,7 +81,7 @@ Agents, workflows, host tools, portable tools, Skills, and MCP definitions live
 with the service that owns the Harness mount.
 
 ```bash
-npm run add:agent -- triage-ticket \
+npm run add:agent -- triage-ticket --model-alias classification \
   --service support \
   --service-version 1 \
   --description "Classify a support ticket" \
@@ -134,7 +134,7 @@ runtime configuration, not the definition.
 
 When you add the first agent to a project with the standard `src/index.ts`
 entrypoint, the CLI adds the OpenAI Harness provider, an `OPENAI_API_KEY`
-environment schema entry, and the primary `ai.model` runtime binding. This is
+environment schema entry, and an explicit purpose alias under the `ai.models` runtime binding. This is
 the only generation step that needs provider bootstrap. Tests remain
 credential-free by using a fake model.
 

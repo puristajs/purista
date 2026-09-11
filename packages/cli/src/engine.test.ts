@@ -94,6 +94,58 @@ describe('createPuristaCliEngine', () => {
 		).rejects.toBeInstanceOf(PuristaCliValidationError)
 	})
 
+	it('requires an explicit model alias when adding an agent', async () => {
+		createMinimalProject()
+		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
+		await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
+
+		await expect(
+			engine.runPuristaCommand('add-agent', {
+				name: 'answer ticket',
+				description: 'Answer a support ticket',
+				serviceName: 'support',
+				serviceVersion: '1',
+			}),
+		).rejects.toMatchObject({
+			issues: expect.arrayContaining([expect.objectContaining({ code: 'missing_input', path: ['modelAlias'] })]),
+		})
+	})
+
+	it('extends a custom model map without introducing provider-specific identifiers', async () => {
+		createMinimalProject()
+		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
+		await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
+		await engine.runPuristaCommand('add-agent', {
+			name: 'answer ticket',
+			description: 'Answer a support ticket',
+			modelAlias: 'chat',
+			serviceName: 'support',
+			serviceVersion: '1',
+		})
+		writeFileSync(
+			join(TEST_DIR, 'src', 'index.ts'),
+			`import { supportV1Service } from './service/support/v1/supportV1Service.js'
+const customModelBinding = getCustomModelBinding()
+export const start = async (eventBridge: Parameters<typeof supportV1Service.getInstance>[0]) =>
+\tsupportV1Service.getInstance(eventBridge, { ai: { models: { chat: customModelBinding } } })
+`,
+		)
+
+		await engine.runPuristaCommand('add-agent', {
+			name: 'classify ticket',
+			description: 'Classify a support ticket',
+			modelAlias: 'classification',
+			serviceName: 'support',
+			serviceVersion: '1',
+		})
+
+		const entrypoint = readFileSync(join(TEST_DIR, 'src', 'index.ts'), 'utf8')
+		expect(entrypoint).toContain('chat: customModelBinding')
+		expect(entrypoint).toContain('classification: customModelBinding')
+		expect(entrypoint).not.toContain('openai')
+		expect(entrypoint).not.toContain('env.')
+	})
+
 	it('runs init-project through the blueprint engine', async () => {
 		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-init-'))
 		const engine = createPuristaCliEngine({
@@ -137,6 +189,7 @@ describe('createPuristaCliEngine', () => {
 			const result = await engine.runPuristaCommand(kind === 'agent' ? 'add-agent' : 'add-workflow', {
 				...common,
 				name: kind === 'agent' ? 'answer ticket' : 'resolve ticket',
+				modelAlias: 'chat',
 			})
 			expect(result.ok).toBe(true)
 		}
@@ -166,7 +219,7 @@ describe('createPuristaCliEngine', () => {
 		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
 		await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
 		const common = { serviceName: 'support', serviceVersion: '1', description: 'Help' }
-		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer ticket' })
+		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer ticket', modelAlias: 'chat' })
 		const directory = join(TEST_DIR, 'src/service/support/v1')
 		const serviceFile = join(directory, 'supportV1Service.ts')
 		const harnessFile = join(directory, 'harness/supportHarness.ts')
@@ -202,6 +255,7 @@ describe('createPuristaCliEngine', () => {
 		const before = snapshotFiles(TEST_DIR)
 		const request = engine.runPuristaCommand(failure === 'duplicate-path' ? 'add-agent' : 'add-workflow', {
 			...common,
+			modelAlias: 'chat',
 			name:
 				failure.startsWith('duplicate-') && failure !== 'duplicate-symbol'
 					? 'answer ticket'
@@ -228,7 +282,13 @@ describe('createPuristaCliEngine', () => {
 			await engine.runPuristaCommand('add-service', { name: serviceName, description: 'Support' })
 			const before = snapshotFiles(TEST_DIR)
 			await expect(
-				engine.runPuristaCommand(command, { name, serviceName, serviceVersion: '1', description: 'Help' }),
+				engine.runPuristaCommand(command, {
+					name,
+					serviceName,
+					serviceVersion: '1',
+					description: 'Help',
+					modelAlias: 'chat',
+				}),
 			).rejects.toThrow('collides with the imported')
 			expect(snapshotFiles(TEST_DIR)).toEqual(before)
 		},
@@ -241,7 +301,7 @@ describe('createPuristaCliEngine', () => {
 			const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
 			await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
 			const common = { serviceName: 'support', serviceVersion: '1', description: 'Help' }
-			await engine.runPuristaCommand('add-agent', { ...common, name: 'answer ticket' })
+			await engine.runPuristaCommand('add-agent', { ...common, name: 'answer ticket', modelAlias: 'chat' })
 			const harnessFile = join(TEST_DIR, 'src/service/support/v1/harness/supportHarness.ts')
 			const binding = kind === 'default' ? 'resolveTicketWorkflow' : '* as resolveTicketWorkflow'
 			writeFileSync(harnessFile, `import ${binding} from 'node:path'\n${readFileSync(harnessFile, 'utf8')}`)
@@ -267,6 +327,7 @@ describe('createPuristaCliEngine', () => {
 			serviceName: 'support',
 			serviceVersion: '1',
 			description: 'Resolve a ticket',
+			modelAlias: 'chat',
 		}
 		await engine.runPuristaCommand(existingCommand, input)
 		const before = snapshotFiles(TEST_DIR)
@@ -327,7 +388,7 @@ describe('createPuristaCliEngine', () => {
 		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
 		await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
 		const common = { serviceName: 'support', serviceVersion: '1', description: 'Help' }
-		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer' })
+		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer', modelAlias: 'chat' })
 		const file = join(TEST_DIR, 'src/service/support/v1/harness/supportHarness.ts')
 		writeFileSync(file, `import * as path from 'node:path'\n${readFileSync(file, 'utf8')}\n${declaration}\n`)
 		const before = snapshotFiles(TEST_DIR)
@@ -344,7 +405,7 @@ describe('createPuristaCliEngine', () => {
 			const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
 			await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
 			const common = { serviceName: 'support', serviceVersion: '1', description: 'Help' }
-			await engine.runPuristaCommand('add-agent', { ...common, name: 'answer' })
+			await engine.runPuristaCommand('add-agent', { ...common, name: 'answer', modelAlias: 'chat' })
 			const file = join(TEST_DIR, 'src/service/support/v1/harness/supportHarness.ts')
 			writeFileSync(file, `${readFileSync(file, 'utf8')}\n${declaration}\n`)
 			await expect(
@@ -430,7 +491,7 @@ describe('createPuristaCliEngine', () => {
 		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
 		await engine.runPuristaCommand('add-service', { name: 'support', description: 'Support' })
 		const common = { serviceName: 'support', serviceVersion: '1', description: 'Help' }
-		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer' })
+		await engine.runPuristaCommand('add-agent', { ...common, name: 'answer', modelAlias: 'chat' })
 		const file = join(TEST_DIR, 'src/service/support/v1/supportV1Service.ts')
 		let source = readFileSync(file, 'utf8').replace('import { supportHarness }', typeImport)
 		if (!mounted) source = source.replace('.mountHarness(supportHarness)', '')
@@ -453,6 +514,7 @@ describe('createPuristaCliEngine', () => {
 				serviceVersion: '1',
 				name: 'answer',
 				description: 'Answer',
+				modelAlias: 'chat',
 			}),
 		).rejects.toThrow(
 			"Import { supportHarness } from './harness/supportHarness.js' and add .mountHarness(supportHarness)",
@@ -485,6 +547,7 @@ describe('createPuristaCliEngine', () => {
 				description: 'Answer',
 				serviceName: 'customer-support',
 				serviceVersion,
+				modelAlias: 'chat',
 			})
 			await engine.runPuristaCommand('add-workflow', {
 				name: 'resolve ticket',

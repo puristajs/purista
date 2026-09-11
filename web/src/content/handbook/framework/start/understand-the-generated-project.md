@@ -61,7 +61,7 @@ installed CLI so every contributor uses the same version.
 | `npm run add:command -- <name> ...` | Command schemas, types, builder, handler, test, and service registration | [Add a command](/handbook/framework/start/add-a-command/). |
 | `npm run add:subscription -- <name> ...` | Subscription schemas, types, builder, handler, test, and service registration | [Add a subscription](/handbook/framework/start/add-a-subscription/). |
 | `npm run add:stream -- <name> ...` | A typed stream definition and test | [Streams](/handbook/framework/build-services/streams/). |
-| `npm run add:agent -- <name> ...` | A native Harness target, test, and one service mount | [AI-powered services](/handbook/framework/build-ai-powered-services/). |
+| `npm run add:agent -- <name> ...` | A native Harness target, test, and one service mount | [AI-powered services](/handbook/framework/build-ai-powered-services/). | --model-alias <purposeAlias>
 
 The first path has already used the service, command, and subscription scripts.
 Use the focused capability chapters for streams, queues, and agents so their

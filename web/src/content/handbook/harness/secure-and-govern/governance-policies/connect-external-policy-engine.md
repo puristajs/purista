@@ -17,13 +17,13 @@ const transfer = defineTool('transferFunds', {
   handler: executeTransfer,
 })
 const agent = defineAgent('payments', {
-  model: 'primary',
+  model: 'answering',
   tools: [transfer],
   instructions: 'Use the transfer tool only for an authorized payment request.',
   governance: { policies: [opaPolicy] },
 })
 const definition = defineHarness({ name: 'payments' }).addAgent(agent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 Project only the fields needed by the policy. Never send prompts, documents,
 credentials, raw tool payloads, or unnecessary identity data. Validate the

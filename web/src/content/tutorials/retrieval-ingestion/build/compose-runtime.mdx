@@ -29,7 +29,7 @@ export type KnowledgeApplicationDependencies = {
 	stateStore: StateStore
 	repository: ManagedKnowledgeRepository
 	models: {
-		primary: { provider: ModelProvider; model: string }
+		answering: { provider: ModelProvider; model: string }
 		embedding: { provider: ModelProvider; model: string }
 	}
 	embeddingDimensions: number
@@ -51,7 +51,7 @@ function defaultDependencies(
 		stateStore: initDefaultStateStore({ logger }),
 		repository: new PgKnowledgeRepository(databaseUrl, embeddingDimensions),
 		models: {
-			primary: { provider, model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+			answering: { provider, model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 			embedding: { provider, model: embeddingModel },
 		},
 		embeddingDimensions,
@@ -93,8 +93,8 @@ export async function createKnowledgeApplication(
 		},
 		ai: {
 			storage,
-			model: resolved.models.primary,
 			models: {
+				answering: resolved.models.answering,
 				embedding: {
 					...resolved.models.embedding,
 					retry: {

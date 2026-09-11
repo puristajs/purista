@@ -19,6 +19,7 @@ const lookupOrder = defineTool('lookupOrder', {
 })
 
 const support = defineAgent('support', {
+	model: 'answering',
   tools: [lookupOrder],
   instructions: 'Use lookupOrder only when the customer supplied an order id.',
 })
@@ -33,6 +34,7 @@ const returnPolicy = defineSkill('return-policy', {
 })
 
 const returnsAgent = defineAgent('returnsAgent', {
+	model: 'answering',
   skills: [returnPolicy],
   tools: [builtInTools.read, lookupOrder],
   instructions: 'Read the return-policy Skill before answering return questions.',

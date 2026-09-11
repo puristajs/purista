@@ -17,7 +17,7 @@ const caseInput = z.object({ summary: z.string().min(1) })
 const caseOutput = z.object({ priority: z.enum(['low', 'normal', 'high']) })
 
 const classifyCase = defineAgent('classifyCase', {
-  model: 'primary',
+  model: 'classification',
   input: caseInput,
   output: caseOutput,
   prompt: input => ({ role: 'user', content: input.summary }),
@@ -27,7 +27,7 @@ const classifyCase = defineAgent('classifyCase', {
 export const definition = defineHarness({ name: 'support-classification' })
   .addAgent(classifyCase)
 ```
-Bind `primary` with the singular `model` field at `definition.getInstance(...)`.
+Bind `classification` under the exact `models.classification` key at `definition.getInstance(...)`.
 An agent cannot use tools, skills, guardrails, or subagents unless those direct
 definitions are supplied.
 

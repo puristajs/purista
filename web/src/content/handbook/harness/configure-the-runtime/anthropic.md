@@ -15,9 +15,9 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { anthropic } from '@purista/harness-anthropic'
 import { z } from 'zod'
 
-const answer = defineAgent('answer', { model: 'primary', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
+const answer = defineAgent('answer', { model: 'answering', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
-export const harness = await definition.getInstance({ model: { provider: anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }), model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet', defaults: { maxTokens: 700 } } })
+export const harness = await definition.getInstance({ models: { answering: { provider: anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }), model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet', defaults: { maxTokens: 700 } } } })
 ```
 Sampling controls vary by Claude family. Omit `temperature`, `topP`, and
 `topK` unless the selected model documents them. Retry and timeout policy does

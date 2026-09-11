@@ -7,7 +7,7 @@ status: published
 ---
 
 Create both service instances with the same EventBridge. The Support service
-binds one singular `ai.model` configuration and the caller-owned Harness
+binds the exact `ai.models.answering` configuration and the caller-owned Harness
 storage.
 
 ```ts title="src/createSupportApplication.ts" write
@@ -40,7 +40,7 @@ export async function createSupportApplication(
 		logger,
 		resources: { supportQuestionPolicy: resources.supportQuestionPolicy },
 		ai: {
-			model,
+			models: { answering: model },
 			storage,
 		},
 	})

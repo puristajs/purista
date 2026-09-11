@@ -18,7 +18,7 @@ export function createAnalysisService(
 		logger,
 		resources: { analysisPolicy: options.analysisPolicy },
 		ai: {
-			models: { analysisModel: options.analysisModel },
+			models: { analysis: options.analysisModel },
 			sandbox: options.sandbox,
 		},
 	})

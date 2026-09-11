@@ -5,8 +5,8 @@ order: 210
 ---
 
 A model binding connects a provider adapter to a concrete provider model. Agent
-and workflow definitions refer to stable aliases such as `primary`; they do not
-contain credentials or provider clients.
+and workflow definitions refer to user-chosen purpose aliases such as
+`answering`; they do not contain credentials or provider clients.
 
 ```ts title="Bind a model at the composition root"
 import { defineAgent, defineHarness } from '@purista/harness'
@@ -14,6 +14,7 @@ import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const answer = defineAgent('answer', {
+	model: 'answering',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string() }),
   prompt: input => ({ role: 'user', content: input.question }),
@@ -23,17 +24,19 @@ const answer = defineAgent('answer', {
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
 
 export const harness = await definition.getInstance({
-	// The singular field binds the reserved "primary" alias.
-	model: {
-		provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
-		model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-		defaults: { maxTokens: 600, temperature: 0.2 },
+	models: {
+		answering: {
+			provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			defaults: { maxTokens: 600, temperature: 0.2 },
+		},
 	},
 })
 ```
-An agent that omits `model` selects the reserved `primary` alias. The singular
-`getInstance({ model: ... })` field binds that alias; named aliases use
-`getInstance({ models: { alias: ... } })`.
+Every agent declares its model alias explicitly. Harness assigns no special
+meaning to names such as `primary` or `default`. Bind every required alias under
+`getInstance({ models: { alias: ... } })`; the keys must match the definition
+graph exactly.
 
 The definition graph derives its required capabilities from response modes,
 tools, and other selected features. Missing provider methods, unknown aliases,

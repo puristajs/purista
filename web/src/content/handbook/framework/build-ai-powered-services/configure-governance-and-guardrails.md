@@ -16,6 +16,7 @@ const supportRails = defineGuardrails({
 })
 
 export const assistantAgent = defineAgent('assistant', {
+	model: 'answering',
   description: 'Help a customer with a support request',
   input: supportInputSchema,
   output: supportOutputSchema,

@@ -11,14 +11,14 @@ import {
 } from './queueBinding.js'
 
 const answer = defineAgent('answer', {
-	model: 'primary',
+	model: 'chat',
 	input: z.object({ question: z.string() }),
 	output: z.object({ answer: z.string() }),
 	instructions: 'Answer the question.',
 	prompt: input => ({ role: 'user', content: input.question }),
 })
 const other = defineAgent('other', {
-	model: 'primary',
+	model: 'chat',
 	input: z.object({ question: z.string() }),
 	output: z.object({ answer: z.string() }),
 	instructions: 'Answer the question.',

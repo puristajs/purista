@@ -162,6 +162,10 @@ final-source build, or a structural documentation check.
   bindings, address-first caller, deterministic demo entry point, shutdown,
   and expected output in the required path. Showing only definitions, mounts,
   and handler fragments is incomplete even when the retained source can run.
+- Give every `defineAgent(...)` call an explicit, user-chosen purpose model
+  alias. Harness reserves no alias. Bind the graph's exact aliases under
+  `models` for standalone Harness or `ai.models` for a mounted service; never
+  teach a singular model shortcut.
 - Keep a short required path, nesting optional variations and deeper checks
   beneath their owner. Do not require unrelated chapters or grow the teaching
   domain into a production bank.

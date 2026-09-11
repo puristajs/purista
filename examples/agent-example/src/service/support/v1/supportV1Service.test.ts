@@ -95,7 +95,7 @@ describe('supportV1Service', () => {
 					rollbackReviewRepository: new InMemoryRollbackReviewRepository(),
 					harnessStorage: execution.storage,
 				},
-				ai: { storage: execution.storage, model: { provider, model: 'fake' } },
+				ai: { storage: execution.storage, models: { chat: { provider, model: 'fake' } } },
 			})
 			await service.start()
 			const request = getCommandMessageMock({

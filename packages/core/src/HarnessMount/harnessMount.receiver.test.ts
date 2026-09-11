@@ -229,7 +229,7 @@ async function startProtocolFixture() {
 		logger: getLoggerMock().mock,
 		mount: { definition, policy: mountedPolicy, projections: projectionsFor(definition, mountedPolicy) },
 		config: unsafeTransport<ConstructorParameters<typeof HarnessMountRuntime>[0]['config']>({
-			model: { provider: new FakeModelProvider(), model: 'fake' },
+			models: { chat: { provider: new FakeModelProvider(), model: 'fake' } },
 		}),
 		resources: {},
 		hostOwner: createHostOwnerToken<PuristaToolContext>(),
@@ -392,7 +392,7 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 	it('rejects nested aggregate delivery and public dependency delivery', async () => {
 		const eventBridge = new InspectableEventBridge()
 		const provider = new FakeModelProvider({ strict: true })
-		const mounted = await startMounted({ eventBridge, ai: { model: { provider, model: 'fake' } } })
+		const mounted = await startMounted({ eventBridge, ai: { models: { chat: { provider, model: 'fake' } } } })
 		try {
 			const rootReceiver = eventBridge.commandReceivers.get(rootTargetName)
 			if (!rootReceiver) throw new Error('Expected the root command receiver.')
@@ -669,6 +669,7 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 	it('fails same-id projections and service route collisions before receiver registration', async () => {
 		const sameSchema = generatedModelSchema<string, string>({ type: 'string' })
 		const sameAgent = defineAgent('sameTarget', {
+			model: 'chat',
 			input: sameSchema,
 			output: sameSchema,
 			instructions: 'Return input.',
@@ -707,7 +708,7 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 				builder.getInstance(
 					collisionBridge,
 					unsafeTransport({
-						ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+						ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 					}),
 				),
 			).rejects.toThrow(/conflicts with a command address/i)

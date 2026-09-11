@@ -16,7 +16,7 @@ const output = z.object({ level: z.enum(['low', 'medium', 'high']) })
 const facts = defineAgent('facts', {
   input,
   output,
-  model: 'primary',
+  model: 'answering',
   prompt: value => ({ role: 'user', content: value.report }),
   instructions: 'Assess the incident report as low, medium, or high risk.',
 })
@@ -27,7 +27,7 @@ const review = defineWorkflow('reviewIncident', {
   handler: async context => context.agents.facts.run(context.input, { callId: 'facts-review' }),
 })
 export const definition = defineHarness({ name: 'incident-review' }).addAgent(facts).addWorkflow(review)
-export const harness = await definition.getInstance({ model: primaryModel })
+export const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 Bind storage, workspace, models, and other adapters with `getInstance(...)`.
 Use `context.step(id, operation)` for replay-safe work and

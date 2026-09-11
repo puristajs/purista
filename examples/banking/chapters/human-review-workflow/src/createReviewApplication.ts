@@ -30,7 +30,7 @@ export async function createReviewApplication(
 			supportReviewStore: reviewStore,
 			supportReviewPolicy,
 		},
-		ai: { model, storage },
+		ai: { models: { review: model }, storage },
 	})
 	let destroyed = false
 	const destroy = async () => {

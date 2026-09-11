@@ -17,7 +17,7 @@ describe('classifySupportMessageAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'classificationTest' })
 			.addAgent(classifySupportMessageAgent)
-			.getInstance({ model: { provider, model: 'fake-classifier' } })
+			.getInstance({ models: { classification: { provider, model: 'fake-classifier' } } })
 
 		try {
 			const session = await runtime.getSession('support-message:MSG-123')

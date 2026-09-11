@@ -12,7 +12,7 @@ describe('analyzeTransactionsAgent', () => {
 		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-'))
 		const provider = scriptedAnalysisProvider()
 		const runtime = await analysisHarness.getInstance({
-			models: { analysisModel: { provider, model: 'analysis-fake' } },
+			models: { analysis: { provider, model: 'analysis-fake' } },
 			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 		})
 
@@ -71,7 +71,7 @@ describe('analyzeTransactionsAgent', () => {
 			},
 		})
 		const runtime = await analysisHarness.getInstance({
-			models: { analysisModel: { provider, model: 'analysis-fake' } },
+			models: { analysis: { provider, model: 'analysis-fake' } },
 			sandbox,
 		})
 
@@ -113,7 +113,7 @@ describe('analyzeTransactionsAgent', () => {
 			finishReason: 'stop',
 		})
 		const runtime = await analysisHarness.getInstance({
-			models: { analysisModel: { provider, model: 'analysis-fake' } },
+			models: { analysis: { provider, model: 'analysis-fake' } },
 			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 		})
 
@@ -166,7 +166,7 @@ describe('analyzeTransactionsAgent', () => {
 			finishReason: 'stop',
 		})
 		const runtime = await analysisHarness.getInstance({
-			models: { analysisModel: { provider, model: 'analysis-fake' } },
+			models: { analysis: { provider, model: 'analysis-fake' } },
 			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
 		})
 

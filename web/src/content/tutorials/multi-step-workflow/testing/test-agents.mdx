@@ -22,7 +22,7 @@ describe('classifySupportCaseAgent', () => {
 		provider.enqueueObject({ object: { category: 'card', urgency: 'urgent' }, usage, finishReason: 'stop' })
 		const runtime = await defineHarness({ name: 'classificationAgentTest' })
 			.addAgent(classifySupportCaseAgent)
-			.getInstance({ models: { classificationModel: { provider, model: 'classification-fake' } } })
+			.getInstance({ models: { classification: { provider, model: 'classification-fake' } } })
 		const session = await runtime.getSession('classification-case-1')
 		try {
 			const outcome = await session.agents.classifySupportCase.run({ caseId: 'case-1', message: 'My card is missing.' })
@@ -56,7 +56,7 @@ describe('planSupportResolutionAgent', () => {
 		})
 		const runtime = await defineHarness({ name: 'resolutionAgentTest' })
 			.addAgent(planSupportResolutionAgent)
-			.getInstance({ models: { resolutionModel: { provider, model: 'resolution-fake' } } })
+			.getInstance({ models: { planning: { provider, model: 'resolution-fake' } } })
 		const session = await runtime.getSession('resolution-case-1')
 		try {
 			const outcome = await session.agents.planSupportResolution.run({

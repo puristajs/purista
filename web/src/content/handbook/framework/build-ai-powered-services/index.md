@@ -46,7 +46,7 @@ explicit.
 
 1. Use the CLI to create one agent beside the service that owns it.
 2. Define the smallest string-in, string-out agent and add it to a Harness.
-3. Mount the Harness on the service and bind one `primary` model at startup.
+3. Mount the Harness on the service and bind the agent's explicit model alias at startup.
 4. Add a command for an aggregate result or a stream for progressive UI events.
 5. Add input and output schemas when the business contract needs structure.
 6. Add tools, skills, guardrails, child agents, or workflows only when their

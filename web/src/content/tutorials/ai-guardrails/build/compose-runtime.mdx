@@ -1,6 +1,6 @@
 ---
 title: Compose the guarded runtime
-description: Supply the business policy and singular model binding at startup.
+description: Supply the business policy and exact classification model binding at startup.
 order: 196
 kind: lesson
 status: published
@@ -25,14 +25,12 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: {
-			model: options.model,
-		},
+		ai: { models: { classification: options.model } },
 	})
 }
 ```
 
-The singular `ai.model` value supplies the provider and model to the mounted
+The `ai.models.classification` value supplies the provider and model to the mounted
 Harness. Credentials remain outside the portable agent and guardrail files.
 
 Create an address-first terminal caller for the wrapper command.

@@ -42,13 +42,14 @@ const memory = postgresClaimsMemoryEngine({
 })
 
 const memoryUser = defineAgent('memoryUser', {
+	model: 'conversation',
 	instructions: 'Use the configured claims memory.',
 	memory: { capabilities: ['memory.kv', 'memory.persistent', 'memory.multi_instance'] },
 })
 
 const definition = defineHarness({ name: 'claimsReview' }).addAgent(memoryUser)
 const harness = await definition.getInstance({
-	model: { provider, model: 'provider-model' },
+	models: { conversation: { provider, model: 'provider-model' } },
 	memory,
 })
 ```

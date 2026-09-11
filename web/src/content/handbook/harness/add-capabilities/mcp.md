@@ -23,7 +23,7 @@ const knowledge = defineMcpServer('knowledge', {
   },
 })
 const support = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   tools: [knowledge.tools.search],
   instructions: 'Use the approved knowledge search when needed.',
 })

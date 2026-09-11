@@ -35,6 +35,7 @@ const transformedObjectSchema = generatedSchema<{ value: string }, { value: stri
 )
 
 const privateLookup = defineAgent('privateLookup', {
+	model: 'chat',
 	instructions: 'Look up the supplied value.',
 	input: objectSchema,
 	output: objectSchema,
@@ -99,7 +100,7 @@ async function startMounted(policy?: MountPolicy) {
 	await eventBridge.start()
 	const builder = mountOptions(policy)
 	const service = await builder.getInstance(eventBridge, {
-		ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+		ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 	} as never)
 	await service.start()
 	return { eventBridge, service }
@@ -174,7 +175,7 @@ describe('P4-004 mounted Harness receivers', () => {
 			})
 		builder.addCommandDefinition(invokeEcho.getDefinition()).mountHarness(mountedHarness)
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 		} as never)
 		await service.start()
 		try {
@@ -201,7 +202,10 @@ describe('P4-004 mounted Harness receivers', () => {
 	})
 
 	it('rejects an unprojected local Harness declaration before EventBridge registration', async () => {
-		const missing = defineAgent('missing', { instructions: 'Never runs.' })
+		const missing = defineAgent('missing', {
+			model: 'chat',
+			instructions: 'Never runs.',
+		})
 		const builder = new ServiceBuilder({
 			serviceName: 'Harness',
 			serviceVersion: '1',
@@ -218,7 +222,7 @@ describe('P4-004 mounted Harness receivers', () => {
 		const registerCommand = vi.spyOn(eventBridge, 'registerCommand')
 		await expect(
 			builder.getInstance(eventBridge, {
-				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+				ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 			} as never),
 		).rejects.toThrow('has no matching mounted target projection')
 		expect(registerCommand).not.toHaveBeenCalled()
@@ -243,7 +247,7 @@ describe('P4-004 mounted Harness receivers', () => {
 
 		await expect(
 			builder.getInstance(eventBridge, {
-				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+				ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 			} as never),
 		).rejects.toThrow('has no matching mounted target projection')
 		expect(registerCommand).not.toHaveBeenCalled()
@@ -274,6 +278,7 @@ describe('P4-004 mounted Harness receivers', () => {
 				context.workflow.WrongService['9'].nestedEcho.run(input, { callId: 'nested-call' }),
 			)
 		const caller = defineAgent('hostToolCaller', {
+			model: 'chat',
 			input: objectSchema,
 			instructions: 'Use the nested workflow tool.',
 			tools: [hostTool],
@@ -289,7 +294,7 @@ describe('P4-004 mounted Harness receivers', () => {
 
 		await expect(
 			builder.getInstance(eventBridge, {
-				ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+				ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 			} as never),
 		).rejects.toThrow('has no matching mounted projection')
 		expect(registerCommand).not.toHaveBeenCalled()
@@ -303,6 +308,7 @@ describe('P4-004 mounted Harness receivers', () => {
 			serviceDescription: 'host-tool nested EventBridge invocation',
 		})
 		const nestedAgent = defineAgent('nestedEcho', {
+			model: 'chat',
 			input: objectSchema,
 			instructions: 'Return a short nested response.',
 			prompt: input => ({ role: 'user', content: input.value }),
@@ -320,6 +326,7 @@ describe('P4-004 mounted Harness receivers', () => {
 				return context.agent.Harness['1'].nestedEcho.run(input, { callId: 'nested-call' })
 			})
 		const caller = defineAgent('hostToolCaller', {
+			model: 'chat',
 			input: objectSchema,
 			instructions: 'Use invokeNested once, then return a short answer.',
 			tools: [hostTool],
@@ -346,7 +353,7 @@ describe('P4-004 mounted Harness receivers', () => {
 		const openStream = vi.spyOn(eventBridge, 'openStream')
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider, model: 'fake' }, storage: persistentStorage() },
+			ai: { models: { chat: { provider, model: 'fake' } }, storage: persistentStorage() },
 		} as never)
 		await service.start()
 		try {
@@ -492,7 +499,7 @@ describe('P4-004 mounted Harness receivers', () => {
 		)
 		const builder = mountOptions(policy)
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 		} as never)
 		await service.start()
 		try {

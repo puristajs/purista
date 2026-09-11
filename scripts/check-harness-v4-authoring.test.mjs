@@ -46,11 +46,54 @@ await expectFixtureRule('fences.md', 'removed-name')
 assert.deepEqual(auditSource(fixture('allowed.ts'), await readFixture('allowed.ts')), [])
 assert.deepEqual(auditSource(fixture('allowed-publish.ts'), await readFixture('allowed-publish.ts')), [])
 assert.deepEqual(auditSource(fixture('allowed-fence.md'), await readFixture('allowed-fence.md')), [])
-const nestedOnly = "defineAgent('nested', { tools: [{ handler: async () => ({}) }] })"
 assert.deepEqual(
-	auditSource(fixture('allowed.ts'), nestedOnly),
+	auditSource(
+		fixture('allowed.ts'),
+		"defineAgent('nested', { model: 'tools', tools: [{ handler: async () => ({}) }] })",
+	),
 	[],
 	'nested tool handlers must not be treated as agent handlers',
+)
+assert(
+	auditSource(fixture('allowed.ts'), "defineAgent('missing', { instructions: 'Answer.' })").some(
+		item => item.rule === 'missing-agent-model',
+	),
+	'an agent without an explicit alias must be reported',
+)
+assert.deepEqual(
+	auditSource(fixture('allowed.ts'), "defineAgent('answer', { model: 'answering', instructions: 'Answer.' })"),
+	[],
+	'an application-chosen agent model alias is valid',
+)
+assert(
+	auditSource(
+		fixture('allowed.ts'),
+		"import { defineHarness } from '@purista/harness'\ndefinition.getInstance({ model: { provider, model: 'provider-id' } })",
+	).some(item => item.rule === 'singular-harness-model'),
+	'the removed singular standalone model binding must be reported',
+)
+assert(
+	auditSource(
+		fixture('allowed.ts'),
+		"service.getInstance(eventBridge, { ai: { model: { provider, model: 'provider-id' } } })",
+	).some(item => item.rule === 'singular-harness-model'),
+	'the removed singular hosted model binding must be reported',
+)
+assert.deepEqual(
+	auditSource(
+		fixture('allowed.ts'),
+		'// @ts-expect-error singular model bindings are intentionally rejected\nservice.getInstance(eventBridge, { ai: { model: binding } })',
+	),
+	[],
+	'negative type tests may document the rejected singular model binding',
+)
+assert.deepEqual(
+	auditSource(
+		fixture('allowed.ts'),
+		"service.getInstance(eventBridge, { ai: { models: { answering: { provider, model: 'provider-id' } } } })",
+	),
+	[],
+	'an exact hosted alias map is valid',
 )
 assert.deepEqual(
 	auditSource(fixture('fences.md'), '```ts\nold\n~~~'),

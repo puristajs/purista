@@ -53,7 +53,7 @@ browser clients and keep the internal stream provider-neutral.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents and workflows are native `@purista/harness` definitions mounted by `@purista/core`; provider packages remain app-level dependencies.
 - Standalone Harness definitions use `.addAgent(...)` and `.addWorkflow(...)`; invoke through a session with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
-- Bind the default primary provider under `ai.model`; use `ai.models` only for declared non-primary aliases.
+- Give every agent a user-chosen purpose alias and bind every required alias under the exact `ai.models` key. Harness reserves no alias.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.

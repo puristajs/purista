@@ -7,12 +7,13 @@ Agents and workflows name model aliases in their definitions. Provider clients,
 credentials, concrete model ids, and retry/default settings belong to
 `getInstance(...)`.
 
-```ts title="Bind the default primary model"
+```ts title="Bind the agent's model alias"
 import { defineAgent, defineHarness } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 import { z } from 'zod'
 
 const assistant = defineAgent('assistant', {
+	model: 'answering',
   input: z.string(),
   output: z.string(),
   instructions: 'Answer clearly and concisely.',
@@ -20,18 +21,20 @@ const assistant = defineAgent('assistant', {
 const definition = defineHarness({ name: 'support' }).addAgent(assistant)
 
 const harness = await definition.getInstance({
-  model: {
-    provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
-    model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-    defaults: { maxTokens: 600 },
+  models: {
+    answering: {
+      provider: openai({ apiKey: process.env.OPENAI_API_KEY }),
+      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+      defaults: { maxTokens: 600 },
+    },
   },
 })
 ```
 
-Use singular `model` for the default `primary` alias. Use `models` only for
-explicit non-primary aliases. Do not declare runtime `capabilities`: Harness
-derives required operations from the definition graph and validates the provider
-binding before work starts.
+Every agent names a user-chosen purpose alias explicitly. Harness reserves no
+alias. Bind every required alias under the exact `models` key. Do not declare
+runtime `capabilities`: Harness derives required operations from the definition
+graph and validates the provider binding before work starts.
 
 Validate environment values at the application composition root. Keep secrets,
 tenant policy, and provider-specific configuration out of definitions, prompts,

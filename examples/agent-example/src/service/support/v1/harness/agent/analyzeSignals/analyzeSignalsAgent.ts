@@ -9,6 +9,7 @@ import { getRunbookTool } from '../../tool/getRunbook/getRunbookTool.js'
 
 /** Uses service-owned host tools to analyze trusted incident evidence. */
 export const analyzeSignalsAgent = defineAgent('analyzeSignals', {
+	model: 'chat',
 	input: supportV1SignalAnalysisInputPayloadSchema,
 	output: supportV1SignalAnalysisOutputPayloadSchema,
 	tools: [getIncidentSnapshotTool, getRunbookTool],

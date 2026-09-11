@@ -14,7 +14,7 @@ const returns = defineSkill('returns-support', {
   directory: new URL('./returns-support/', import.meta.url),
 })
 const support = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   skills: [returns],
   tools: [builtInTools.read],
   instructions: 'Use the reviewed returns skill when it applies.',

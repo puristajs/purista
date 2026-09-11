@@ -10,7 +10,10 @@ capabilities backed by real tests.
 
 ```ts title="Custom Sandbox Adapter example 1"
 const definition = defineHarness({ name: 'custom-sandbox' }).addAgent(agent)
-const harness = await definition.getInstance({ model: primaryModel, sandbox: customSandbox })
+const harness = await definition.getInstance({
+  models: { answering: answeringModel },
+  sandbox: customSandbox,
+})
 ```
 Run the shared sandbox contract plus platform tests for path traversal,
 process isolation, network policy, quotas, cancellation, restart, snapshot and

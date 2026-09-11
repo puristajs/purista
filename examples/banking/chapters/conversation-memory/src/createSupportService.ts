@@ -20,7 +20,7 @@ export function createSupportService(
 			supportConversationPolicy: options.policy,
 		},
 		ai: {
-			model: options.model,
+			models: { answering: options.model },
 			storage: options.storage,
 		},
 	})

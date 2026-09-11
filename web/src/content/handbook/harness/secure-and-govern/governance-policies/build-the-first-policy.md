@@ -15,12 +15,12 @@ const transfer = defineTool('transferFunds', {
   handler: executeTransfer,
 })
 const agent = defineAgent('support', {
-  model: 'primary', tools: [transfer],
+  model: 'answering', tools: [transfer],
   instructions: 'Use the transfer tool only for an authorized payment request.',
   governance: { policies: [denyUnverifiedTransfer] },
 })
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 Register policies before accepting work. A deny or approval interruption must
 happen before the handler side effect. Test matching and nonmatching selectors,

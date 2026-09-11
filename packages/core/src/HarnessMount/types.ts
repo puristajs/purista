@@ -313,7 +313,10 @@ export type HarnessState<D> = D extends HarnessDefinition<infer S, infer _Name, 
 /** Inferred input/output catalog carried by a portable Harness definition. */
 export type HarnessTypes<D> = D extends { readonly $infer: infer I } ? I : never
 
-/** Runtime AI configuration required by the service's mounted Harness definition. */
+/**
+ * Exact runtime AI configuration required by the service's mounted Harness definition.
+ * Every model alias declared by an agent is inferred as a required key of `models`.
+ */
 export type MountedHarnessRuntimeConfig<D> =
 	D extends HarnessDefinition<infer Catalog, infer _Name, infer _Graph>
 		? HostedHarnessInstanceConfig<Catalog['requirements']>

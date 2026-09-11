@@ -11,7 +11,9 @@ export async function runClassificationEvaluation(
 	provider: ModelProvider,
 	options: Readonly<{ runId?: string; model?: string }> = {},
 ): Promise<EvaluationRunResult> {
-	const harness = await supportHarness.getInstance({ model: { provider, model: options.model ?? 'evaluation-model' } })
+	const harness = await supportHarness.getInstance({
+		models: { classification: { provider, model: options.model ?? 'evaluation-model' } },
+	})
 	try {
 		return await runEvaluation<
 			ClassificationInput,

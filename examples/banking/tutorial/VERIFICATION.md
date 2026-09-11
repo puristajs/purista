@@ -95,7 +95,7 @@ src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}
 
 Portable tools use `defineTool(...)`. Tools that need service resources or
 trusted identity use `ServiceBuilder.defineTool(...)`. Mount one composed
-Harness definition per service version. Bind the primary model as `ai.model`;
+Harness definition per service version. Bind every user-chosen purpose alias under the exact `ai.models` key;
 keep providers, storage, memory, sandbox, workspace, admission, queues,
 artifacts, and telemetry in application bootstrap. Authentication establishes
 identity, PURISTA guards authorize business effects, and Harness guardrails

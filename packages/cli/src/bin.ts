@@ -88,6 +88,7 @@ const main = async () => {
 			)
 			.addArgument(new Argument('[name]', 'Name of component'))
 			.option('--description <description>', 'description of the component')
+			.option('--model-alias <modelAlias>', 'model alias used by an agent definition')
 			.addOption(new Option('--http <projection>', 'agent HTTP projection').choices(['none', 'command', 'stream']))
 			.addOption(new Option('--kind <kind>', 'tool ownership kind').choices(['portable', 'purista']))
 			.option(
@@ -123,6 +124,7 @@ const main = async () => {
 				const result = await engine.runPuristaCommand(commandId, {
 					name,
 					description: options.description,
+					modelAlias: options.modelAlias,
 					http: options.http,
 					kind: options.kind,
 					runtimes: options.runtime,

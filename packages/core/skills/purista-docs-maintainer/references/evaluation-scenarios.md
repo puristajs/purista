@@ -1056,6 +1056,8 @@ Expected behavior:
 - teaches `defineHarness(...).addAgent(...)` and `.addWorkflow(...)` as the
   normal root-composition path, while tools, Skills, and MCP tools attach to
   the definition that uses them;
+- gives every `defineAgent(...)` definition an explicit, purpose-based model
+  alias and binds that exact alias through `models` or `ai.models`;
 - shows schema-derived instruction/handler context and workflow `ctx.agents`
   inference without broad casts or extracted definition constants;
 - binds configured Guardrails with `guardrails: rails` on a default-loop agent
@@ -1066,7 +1068,7 @@ Expected behavior:
 Near miss to reject:
 
 - reintroducing `.agents(({ agent }) => ...)`, `.workflows(({ workflow }) => ...)`,
-  `defineAgent(...)`, or a Guardrails decorator/attach helper;
+  omitting an agent's model alias, or using a Guardrails decorator/attach helper;
 - presenting plural registration as a replacement registry instead of an
   additive batch;
 - defining a workflow before the agents it calls or using casts to hide lost

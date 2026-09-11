@@ -39,6 +39,7 @@ const typedWorkflow = defineWorkflow('typedEcho', {
 const workflowHarness = defineHarness({ name: 'typedWorkflow' }).addWorkflow(typedWorkflow)
 const agentHarness = defineHarness({ name: 'typedAgent' }).addAgent(
 	defineAgent('answer', {
+		model: 'chat',
 		instructions: 'Answer the user.',
 		input: generatedModelSchema<string, string>({ type: 'string' }),
 		output: generatedModelSchema<string, string>({ type: 'string' }),
@@ -155,17 +156,21 @@ describe('P4-004 public Harness mount inference', () => {
 		const builder = new ServiceBuilder(serviceInfo).mountHarness(agentHarness)
 		const eventBridge = new DefaultEventBridge()
 		const provider = new FakeModelProvider()
-		const config = { model: { provider, model: 'fake' } } satisfies MountedHarnessRuntimeConfig<typeof agentHarness>
+		const config = { models: { chat: { provider, model: 'fake' } } } satisfies MountedHarnessRuntimeConfig<
+			typeof agentHarness
+		>
 		const assertRejectedConfigs = () => {
 			// @ts-expect-error A mounted agent requires the runtime options argument.
 			void builder.getInstance(eventBridge)
 			// @ts-expect-error A mounted agent requires the ai object.
 			void builder.getInstance(eventBridge, {})
-			// @ts-expect-error The agent requires the primary model binding.
+			// @ts-expect-error The agent requires its declared chat model binding.
 			void builder.getInstance(eventBridge, { ai: {} })
-			// @ts-expect-error An agent using primary does not accept a made-up named alias.
-			void builder.getInstance(eventBridge, { ai: { ...config, models: { other: config.model } } })
-			// @ts-expect-error A workflow without a model requirement rejects a primary model binding.
+			// @ts-expect-error Model bindings are always keyed by their explicit aliases.
+			void builder.getInstance(eventBridge, { ai: { model: config.models.chat } })
+			// @ts-expect-error The exact binding map rejects an undeclared model alias.
+			void builder.getInstance(eventBridge, { ai: { models: { chat: config.models.chat, other: config.models.chat } } })
+			// @ts-expect-error A workflow without a model requirement rejects model bindings.
 			void new ServiceBuilder(serviceInfo).mountHarness(workflowHarness).getInstance(eventBridge, { ai: config })
 		}
 		void assertRejectedConfigs

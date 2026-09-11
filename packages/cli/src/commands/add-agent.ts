@@ -16,6 +16,10 @@ import {
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
 	description: z.string().trim().min(1),
+	modelAlias: z
+		.string()
+		.trim()
+		.regex(/^[a-z][A-Za-z0-9]{0,63}$/, 'Model alias must be lower camel case with at most 64 ASCII letters or digits.'),
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
 	http: z.enum(['none', 'command', 'stream']).default('none'),
@@ -33,6 +37,17 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			missing.push({ type: 'input', key: 'name', message: 'Name of the agent', required: true } as const)
 		if (!input.description?.trim())
 			missing.push({ type: 'input', key: 'description', message: 'Description of the agent', required: true } as const)
+		if (!input.modelAlias?.trim())
+			missing.push({
+				type: 'input',
+				key: 'modelAlias',
+				message: 'Model alias for the agent (for example chat)',
+				required: true,
+				validate: (value: string) =>
+					/^[a-z][A-Za-z0-9]{0,63}$/.test(value)
+						? true
+						: 'Use lower camel case with at most 64 ASCII letters or digits.',
+			} as const)
 		if (!input.serviceName?.trim())
 			missing.push({
 				type: 'select',
@@ -65,6 +80,7 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			serviceVersion: resolvedInput.serviceVersion,
 			agentName: resolvedInput.name,
 			agentDescription: resolvedInput.description,
+			modelAlias: resolvedInput.modelAlias,
 			codeWriterOptions: context.codeWriterOptions,
 			http: resolvedInput.http,
 		})

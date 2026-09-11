@@ -75,7 +75,7 @@ Generate the Support service and its agent with explicit non-interactive values.
 
 ```bash title="Generate the guarded agent" replay="project"
 npm run add:service -- support --description "Classify and route customer support requests" --non-interactive
-npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with content guardrails" --non-interactive
+npm run add:agent -- classify-support-message --service support --service-version 1 --description "Classify one support message with content guardrails" --non-interactive --model-alias classification
 ```
 
 The generated Harness definition lives under

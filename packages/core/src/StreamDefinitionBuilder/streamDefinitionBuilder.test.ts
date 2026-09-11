@@ -319,7 +319,10 @@ describe('StreamDefinitionBuilder', () => {
 		// @ts-expect-error Model providers belong to mounted Harness runtime configuration.
 		void cleanBuilder.canUseHarnessModel
 		expect((cleanBuilder as any).canUseHarnessModel).toBeUndefined()
-		const localAgent = defineAgent('localAgent', { instructions: 'Answer.' })
+		const localAgent = defineAgent('localAgent', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
 		const localWorkflow = defineWorkflow('localWorkflow', {
 			async handler({ input }) {
 				return input
@@ -357,6 +360,7 @@ describe('StreamDefinitionBuilder', () => {
 	it('finalizes local agent and workflow declarations for a real stream service context', async () => {
 		const valueSchema = z.object({ value: z.string() })
 		const agent = defineAgent('classify', {
+			model: 'chat',
 			input: valueSchema,
 			output: valueSchema,
 			instructions: 'Return the classified value.',
@@ -401,7 +405,7 @@ describe('StreamDefinitionBuilder', () => {
 		})
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
-			ai: { model: { provider, model: 'fake' } },
+			ai: { models: { chat: { provider, model: 'fake' } } },
 		} as never)
 		await service.start()
 		try {

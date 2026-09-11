@@ -28,9 +28,11 @@ export const main = async () => {
 			},
 			ai: {
 				storage: execution.ai.storage,
-				model: {
-					provider: createOpenAiIncidentModel(),
-					model,
+				models: {
+					chat: {
+						provider: createOpenAiIncidentModel(),
+						model,
+					},
 				},
 			},
 		})

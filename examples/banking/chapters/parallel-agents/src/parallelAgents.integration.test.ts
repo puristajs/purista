@@ -22,8 +22,8 @@ async function startService(policy: {
 		resources: { supportCasePolicy: policy },
 		ai: {
 			models: {
-				riskModel: { provider: riskProvider, model: 'risk-fake' },
-				responseModel: { provider: responseProvider, model: 'response-fake' },
+				riskAssessment: { provider: riskProvider, model: 'risk-fake' },
+				responsePlanning: { provider: responseProvider, model: 'response-fake' },
 			},
 		},
 	})

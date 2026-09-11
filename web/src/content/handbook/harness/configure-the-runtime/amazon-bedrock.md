@@ -15,9 +15,9 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { bedrock } from '@purista/harness-bedrock'
 import { z } from 'zod'
 
-const answer = defineAgent('answer', { model: 'primary', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
+const answer = defineAgent('answer', { model: 'answering', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
-export const harness = await definition.getInstance({ model: { provider: bedrock({ region: process.env.AWS_REGION ?? 'us-east-1' }), model: process.env.BEDROCK_MODEL_ID } })
+export const harness = await definition.getInstance({ models: { answering: { provider: bedrock({ region: process.env.AWS_REGION ?? 'us-east-1' }), model: process.env.BEDROCK_MODEL_ID } } })
 ```
 Bedrock Converse settings vary by foundation model. Verify each model's
 supported inference fields, access policy, throttling, and regional behavior.

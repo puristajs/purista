@@ -106,7 +106,7 @@ its first agent. The service owns the Harness definitions for this chapter.
 ```bash title="Install dependencies and generate Support" replay="project"
 npm install
 npm run add:service -- support --description "Answer support questions with reviewed procedures" --non-interactive
-npm run add:agent -- answer-procedure-question --service support --service-version 1 --http none --description "Answer one question with a reviewed Skill" --non-interactive
+npm run add:agent -- answer-procedure-question --service support --service-version 1 --http none --description "Answer one question with a reviewed Skill" --non-interactive --model-alias answering
 ```
 
 Add the Skill with the CLI. This creates the service-owned Skill directory, its

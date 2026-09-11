@@ -14,6 +14,7 @@ import { expect } from 'vitest'
 import { z } from 'zod'
 
 const answer = defineAgent('answer', {
+	model: 'answering',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string() }),
   prompt: input => ({ role: 'user', content: input.question }),
@@ -24,7 +25,7 @@ const definition = defineHarness({ name: 'support' }).addAgent(answer)
 const provider = new FakeModelProvider({ strict: true })
 provider.enqueueObject({ object: { answer: 'Reset the PIN in Settings.' }, finishReason: 'stop' })
 
-const harness = await definition.getInstance({ model: { provider, model: 'fake' } })
+const harness = await definition.getInstance({ models: { answering: { provider, model: 'fake' } } })
 const session = await harness.getSession('test:pin-reset')
 try {
   await expect(session.agents.answer.run({ question: 'How do I reset my PIN?' }))

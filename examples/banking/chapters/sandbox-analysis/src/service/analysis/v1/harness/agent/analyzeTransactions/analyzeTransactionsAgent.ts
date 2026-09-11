@@ -2,7 +2,7 @@ import { builtInTools, defineAgent } from '@purista/harness'
 import { analyzeTransactionsInputSchema, analyzeTransactionsOutputSchema } from '../../analysisSchemas.js'
 
 export const analyzeTransactionsAgent = defineAgent('analyzeTransactions', {
-	model: 'analysisModel',
+	model: 'analysis',
 	input: analyzeTransactionsInputSchema,
 	output: analyzeTransactionsOutputSchema,
 	tools: [builtInTools.write, builtInTools.bash, builtInTools.read],

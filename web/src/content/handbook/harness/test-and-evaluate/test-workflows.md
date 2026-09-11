@@ -13,7 +13,7 @@ import { z } from 'zod'
 
 const reviewAgent = defineAgent('reviewInvoice', {
   input: z.string(), output: z.enum(['approved', 'review']),
-  model: 'primary',
+  model: 'review',
   prompt: value => ({ role: 'user', content: value }),
   instructions: 'Decide whether the invoice is approved or needs review.',
 })
@@ -26,7 +26,7 @@ const batch = defineWorkflow('reviewBatch', {
     { concurrency: 2 }),
 })
 export const definition = defineHarness({ name: 'invoice-review' }).addAgent(reviewAgent).addWorkflow(batch)
-export const harness = await definition.getInstance({ model: primaryModel })
+export const harness = await definition.getInstance({ models: { review: reviewModel } })
 ```
 Assert result order, concurrency, cancellation, durable step replay, external
 wait resume, and retry behavior. Use a selected durable adapter for crash and

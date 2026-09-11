@@ -33,7 +33,7 @@ npm run add:subscription -- <name> --service <serviceName> --service-version <ve
 npm run add:stream -- <name> --service <serviceName> --service-version <version>
 npm run add:queue -- <name> --service <serviceName> --service-version <version>
 npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>
-npm run add:agent -- <name> --service <serviceName> --service-version <version>
+npm run add:agent -- <name> --service <serviceName> --service-version <version> --model-alias <purposeAlias>
 npm run add:workflow -- <name> --service <serviceName> --service-version <version>
 ```
 
@@ -45,7 +45,7 @@ After dependencies are installed, use the project-local CLI through generated pa
 npm run add:service -- user --description "User management"
 npm run add:command -- sign-up --service user --service-version 1
 pnpm run add:queue-worker -- process-jobs --service user --service-version 1 --queue processJobs
-bun run add:agent -- triage --service support --service-version 1
+bun run add:agent -- triage --service support --service-version 1 --model-alias classification
 ```
 
 Match the package manager and runtime recorded in `purista.json` and `package.json`. For Bun projects, use `bun run ...`; for Node.js projects, use the configured package manager scripts (`npm run`, `pnpm run`, or `yarn`).

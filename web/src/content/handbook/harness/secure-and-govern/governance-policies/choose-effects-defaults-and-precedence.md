@@ -43,10 +43,10 @@ const bankTransferPolicy = ({ native, rule }) => ({
 })
 const governance = { policies: [bankTransferPolicy] }
 const definition = defineHarness({ name: 'payments' }).addAgent(transferAgent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 This binds the governance policy through the definition and
-`definition.getInstance({ model: primaryModel })` after the typed tool and agent
+`definition.getInstance({ models: { answering: answeringModel } })` after the typed tool and agent
 are composed.
 
 This is an exception list: ordinary transfers are admitted, while the matching

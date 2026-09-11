@@ -206,7 +206,10 @@ const addProjectionToService = (
 	return source.getFullText().replace(/^ +(?=\t)/gm, '')
 }
 
-const bootstrapEntrypoint = (entrypoint: string, input: { serviceName: string; serviceVersion: string }) => {
+const bootstrapEntrypoint = (
+	entrypoint: string,
+	input: { serviceName: string; serviceVersion: string; modelAlias: string },
+): { content: string; createdProviderBinding: boolean } => {
 	if (!existsSync(entrypoint))
 		throw new Error(`Application entrypoint not found: ${entrypoint}. No files were changed.`)
 	const project = new Project({
@@ -218,23 +221,6 @@ const bootstrapEntrypoint = (entrypoint: string, input: { serviceName: string; s
 	const source = project.createSourceFile(entrypoint, readFileSync(entrypoint, 'utf8'))
 	if (source.getPreEmitDiagnostics().some(diagnostic => diagnostic.getCode() >= 1000 && diagnostic.getCode() < 2000))
 		throw new Error(`Cannot safely edit invalid TypeScript in ${entrypoint}. No files were changed.`)
-	for (const name of ['openai', 'env']) {
-		if (
-			source.getDescendantsOfKind(SyntaxKind.Identifier).some(
-				identifier =>
-					identifier.getText() === name &&
-					identifier
-						.getSymbol()
-						?.getDeclarations()
-						.some(
-							declaration => declaration.getSourceFile() === source && declaration.getStart() !== identifier.getStart(),
-						),
-			)
-		)
-			throw new Error(
-				`Cannot safely add runtime binding ${name} in ${entrypoint}: the identifier already exists. No files were changed.`,
-			)
-	}
 	const serviceIdentifier = camelCase(`${input.serviceName} v${input.serviceVersion} service`)
 	const calls = source.getDescendantsOfKind(SyntaxKind.CallExpression).filter(call => {
 		const expression = call.getExpression()
@@ -244,19 +230,55 @@ const bootstrapEntrypoint = (entrypoint: string, input: { serviceName: string; s
 			expression.getExpression().getText() === serviceIdentifier
 		)
 	})
-	if (calls.length !== 1 || calls[0].getArguments().length !== 1)
-		throw new Error(`Cannot safely add the canonical ai.model bootstrap to ${entrypoint}. No files were changed.`)
-	source.addImportDeclaration({ namedImports: ['openai'], moduleSpecifier: '@purista/harness-openai' })
-	source.addImportDeclaration({ namedImports: ['env'], moduleSpecifier: './config/env.js' })
-	calls[0].addArgument(`{
+	if (calls.length !== 1 || ![1, 2].includes(calls[0].getArguments().length))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	if (calls[0].getArguments().length === 1) {
+		for (const name of ['openai', 'env']) {
+			if (source.getDescendantsOfKind(SyntaxKind.Identifier).some(identifier => identifier.getText() === name))
+				throw new Error(
+					`Cannot safely add runtime binding ${name} in ${entrypoint}: the identifier already exists. No files were changed.`,
+				)
+		}
+		source.addImportDeclaration({ namedImports: ['openai'], moduleSpecifier: '@purista/harness-openai' })
+		source.addImportDeclaration({ namedImports: ['env'], moduleSpecifier: './config/env.js' })
+		calls[0].addArgument(`{
 		ai: {
-			model: {
-				provider: openai({ apiKey: env.OPENAI_API_KEY }),
-				model: 'gpt-5-mini',
+			models: {
+				${input.modelAlias}: {
+					provider: openai({ apiKey: env.OPENAI_API_KEY }),
+					model: 'gpt-5-mini',
+				},
 			},
 		},
 	}`)
-	return source.getFullText().replace(/^ +(?=\t)/gm, '')
+		return { content: source.getFullText().replace(/^ +(?=\t)/gm, ''), createdProviderBinding: true }
+	}
+
+	const runtimeConfig = unwrap(calls[0].getArguments()[1])
+	if (!Node.isObjectLiteralExpression(runtimeConfig))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const aiProperty = runtimeConfig.getProperty('ai')
+	if (!aiProperty || !Node.isPropertyAssignment(aiProperty))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const ai = unwrap(aiProperty.getInitializerOrThrow())
+	if (!Node.isObjectLiteralExpression(ai))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const modelsProperty = ai.getProperty('models')
+	if (!modelsProperty || !Node.isPropertyAssignment(modelsProperty))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const models = unwrap(modelsProperty.getInitializerOrThrow())
+	if (!Node.isObjectLiteralExpression(models))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	if (models.getProperty(input.modelAlias))
+		return { content: readFileSync(entrypoint, 'utf8'), createdProviderBinding: false }
+	const existingBinding = models.getProperties()[0]
+	if (!existingBinding || !Node.isPropertyAssignment(existingBinding))
+		throw new Error(`Cannot safely reuse an existing ai.models binding in ${entrypoint}. No files were changed.`)
+	models.addPropertyAssignment({
+		name: input.modelAlias,
+		initializer: existingBinding.getInitializerOrThrow().getText(),
+	})
+	return { content: source.getFullText().replace(/^ +(?=\t)/gm, ''), createdProviderBinding: false }
 }
 
 const envFileContent = `import { z } from 'zod'
@@ -268,14 +290,19 @@ const envSchema = z.object({
 export const env = envSchema.parse(process.env)
 `
 
-/** Generate a colocated string agent, optional protected HTTP projection, and first-agent runtime bootstrap. */
+/** Generate a colocated string agent, optional protected HTTP projection, and exact runtime model bindings. */
 export const addPuristaAgent = async (
 	input: HarnessScaffoldingInput & {
 		agentName: string
 		agentDescription: string
+		modelAlias: string
 		http?: AgentHttpProjection
 	},
 ) => {
+	if (!/^[a-z][A-Za-z0-9]{0,63}$/.test(input.modelAlias))
+		throw new Error(
+			'Model alias must be lower camel case with at most 64 ASCII letters or digits. No files were changed.',
+		)
 	const http = input.http ?? 'none'
 	const paths = getHarnessPaths(input)
 	const files = prepareHarnessScaffold(input, {
@@ -286,6 +313,7 @@ export const addPuristaAgent = async (
 			getHarnessDefinitionTestFileContent({
 				agentName: input.agentName,
 				agentImportName: importName,
+				modelAlias: input.modelAlias,
 				codeWriterOptions: input.codeWriterOptions,
 			}),
 	})
@@ -296,7 +324,6 @@ export const addPuristaAgent = async (
 		throw new Error('Internal error: incomplete Harness scaffold plan. No files were changed.')
 	const packageJson = packageSchema.parse(JSON.parse(packagePlan.content))
 	packageJson.dependencies = { ...packageJson.dependencies }
-	const firstAgent = !existsSync(join(paths.harnessDirectory, 'agent'))
 	const warnings: string[] = []
 
 	if (http !== 'none') {
@@ -349,25 +376,29 @@ export const addPuristaAgent = async (
 	}
 
 	const entrypoint = join(paths.projectPath, 'src', 'index.ts')
-	if (firstAgent && existsSync(entrypoint)) {
+	if (existsSync(entrypoint)) {
+		const currentEntrypoint = readFileSync(entrypoint, 'utf8')
+		const bootstrap = bootstrapEntrypoint(entrypoint, input)
 		const envFile = join(paths.projectPath, 'src', 'config', 'env.ts')
-		if (existsSync(envFile)) throw new Error(`Environment schema already exists: ${envFile}. No files were changed.`)
-		const envExample = join(paths.projectPath, '.env.example')
-		const currentEnvExample = existsSync(envExample) ? readFileSync(envExample, 'utf8') : ''
-		if (/^OPENAI_API_KEY=/m.test(currentEnvExample))
-			throw new Error(`OPENAI_API_KEY already exists in ${envExample}. No files were changed.`)
-		files.push(
-			{ path: envFile, content: envFileContent },
-			{
-				path: envExample,
-				content: `${currentEnvExample}${currentEnvExample && !currentEnvExample.endsWith('\n') ? '\n' : ''}OPENAI_API_KEY=\n`,
-			},
-			{ path: entrypoint, content: bootstrapEntrypoint(entrypoint, input) },
-		)
-		packageJson.dependencies['@purista/harness-openai'] = generatedDependencyVersion('@purista/harness-openai')
-	} else if (firstAgent) {
+		if (bootstrap.createdProviderBinding) {
+			if (existsSync(envFile)) throw new Error(`Environment schema already exists: ${envFile}. No files were changed.`)
+			const envExample = join(paths.projectPath, '.env.example')
+			const currentEnvExample = existsSync(envExample) ? readFileSync(envExample, 'utf8') : ''
+			if (/^OPENAI_API_KEY=/m.test(currentEnvExample))
+				throw new Error(`OPENAI_API_KEY already exists in ${envExample}. No files were changed.`)
+			files.push(
+				{ path: envFile, content: envFileContent },
+				{
+					path: envExample,
+					content: `${currentEnvExample}${currentEnvExample && !currentEnvExample.endsWith('\n') ? '\n' : ''}OPENAI_API_KEY=\n`,
+				},
+			)
+			packageJson.dependencies['@purista/harness-openai'] = generatedDependencyVersion('@purista/harness-openai')
+		}
+		if (bootstrap.content !== currentEntrypoint) files.push({ path: entrypoint, content: bootstrap.content })
+	} else {
 		warnings.push(
-			'No standard src/index.ts entrypoint was found. Configure the mounted service with ai.model and a model provider before startup.',
+			`No standard src/index.ts entrypoint was found. Configure the mounted service with ai.models.${input.modelAlias} and a model provider before startup.`,
 		)
 	}
 	packagePlan.content = `${JSON.stringify(packageJson, null, '\t')}\n`

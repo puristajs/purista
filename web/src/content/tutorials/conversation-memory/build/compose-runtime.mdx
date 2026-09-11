@@ -7,7 +7,7 @@ status: published
 ---
 
 Create one composition function for tests, demos, and the live process. The
-singular `ai.model` binding satisfies the agent's default model requirement.
+`ai.models.answering` binding satisfies the agent's explicit model requirement.
 The same storage instance is bound to the mounted Harness and wrapped by the
 authorized history resource.
 
@@ -34,7 +34,7 @@ export function createSupportService(
 			supportConversationPolicy: options.policy,
 		},
 		ai: {
-			model: options.model,
+			models: { answering: options.model },
 			storage: options.storage,
 		},
 	})

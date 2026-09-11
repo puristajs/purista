@@ -28,7 +28,7 @@ const valueSchema = generatedSchema<{ value: string }>({
 })
 
 const dependency = defineAgent('lookup', {
-	model: 'primary',
+	model: 'chat',
 	input: valueSchema,
 	output: valueSchema,
 	instructions: 'Look up a value.',
@@ -36,7 +36,7 @@ const dependency = defineAgent('lookup', {
 })
 
 const root = defineAgent('answer', {
-	model: 'primary',
+	model: 'chat',
 	input: valueSchema,
 	output: valueSchema,
 	instructions: 'Answer with a value.',

@@ -83,7 +83,7 @@ async function mountedLifecycleService(mode: LifecycleMode) {
 	await eventBridge.start()
 	const builder = mountedBuilder().setCustomClass(LifecycleService)
 	const runtimeOptions = {
-		ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+		ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 	} as unknown as Parameters<typeof builder.getInstance>[1]
 	const service = await builder.getInstance(eventBridge, runtimeOptions)
 	return { eventBridge, service }
@@ -243,7 +243,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 		await eventBridge.start()
 		const builder = mountedBuilder()
 		const runtimeOptions = {
-			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 		} as unknown as Parameters<typeof builder.getInstance>[1]
 		const service = await builder.getInstance(eventBridge, runtimeOptions)
 		try {
@@ -266,6 +266,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 
 	it('replays a direct-agent idempotent delivery with a stable run ID and one publication attempt per receiver execution', async () => {
 		const agent = defineAgent('idempotentAgent', {
+			model: 'chat',
 			instructions: 'Return the supplied value.',
 			input: generatedModelSchema<Value, Value>({
 				type: 'object',
@@ -296,7 +297,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 		const mounted = await startMounted({
 			definition,
 			policy,
-			ai: { model: { provider, model: 'fake' } },
+			ai: { models: { chat: { provider, model: 'fake' } } },
 		} as unknown as Parameters<typeof startMounted>[0])
 		try {
 			await mounted.eventBridge.registerSubscription(

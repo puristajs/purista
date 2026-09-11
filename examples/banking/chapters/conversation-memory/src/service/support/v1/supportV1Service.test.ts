@@ -68,7 +68,7 @@ describe('support conversation service', () => {
 				supportConversationHistory: new HarnessConversationHistory(storage),
 				supportConversationPolicy: policy,
 			},
-			ai: { model: { provider, model: 'fake-support' }, storage },
+			ai: { models: { answering: { provider, model: 'fake-support' } }, storage },
 		})
 		await service.start()
 
@@ -111,7 +111,7 @@ describe('support conversation service', () => {
 				supportConversationHistory: new HarnessConversationHistory(storage),
 				supportConversationPolicy: policy,
 			},
-			ai: { model: { provider, model: 'fake-support' }, storage },
+			ai: { models: { answering: { provider, model: 'fake-support' } }, storage },
 		})
 		await service.start()
 

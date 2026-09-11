@@ -76,11 +76,12 @@ for capabilities, retries, model aliases, and credentials.
 import { defineAgent, defineHarness } from '@purista/harness'
 
 const assistant = defineAgent('assistant', {
+	model: 'answering',
 	instructions: 'Answer the user clearly.',
 })
 const definition = defineHarness({ name: 'support' }).addAgent(assistant)
 const harness = await definition.getInstance({
-	model: { provider, model: 'provider-model' },
+	models: { answering: { provider, model: 'provider-model' } },
 })
 ```
 

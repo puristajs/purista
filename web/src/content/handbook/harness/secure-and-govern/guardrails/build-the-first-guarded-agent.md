@@ -10,12 +10,12 @@ still owns business actions.
 
 ```ts title="Build The First Guarded Agent example 1"
 const agent = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   guardrails: { input: [redactSecrets], output: [redactSecrets] },
   instructions: 'Answer the support request without exposing sensitive data.',
 })
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
-const harness = await definition.getInstance({ model: primaryModel })
+const harness = await definition.getInstance({ models: { answering: answeringModel } })
 ```
 Test allowed input, transformed input, denied output, malformed action results,
 timeout, cancellation, and the negative assertion that the handler or tool did

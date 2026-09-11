@@ -13,6 +13,7 @@ export const supportV1TriageTicketOutputPayloadSchema = z.object({
 
 /** Classifies a support ticket without depending on PURISTA runtime code. */
 export const triageTicketAgent = defineAgent('triageTicket', {
+	model: 'chat',
 	input: supportV1TriageTicketInputPayloadSchema,
 	output: supportV1TriageTicketOutputPayloadSchema,
 	instructions: 'Classify the support ticket as low, normal, or high priority and give one concise reason.',

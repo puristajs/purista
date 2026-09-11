@@ -29,7 +29,10 @@ import {
 	createRemoteHarnessTargetContract,
 } from './remoteTargetContract.js'
 
-const answerAgent = defineAgent('answer', { instructions: 'Answer.' })
+const answerAgent = defineAgent('answer', {
+	model: 'chat',
+	instructions: 'Answer.',
+})
 const target = answerAgent.contract
 const workflowTarget = defineWorkflow('answer', {
 	durable: true,
@@ -46,6 +49,7 @@ const approvalTool = defineTool('bash', {
 	},
 })
 const approvalTarget = defineAgent('approval', {
+	model: 'chat',
 	instructions: 'Use the action.',
 	tools: [approvalTool],
 	permissions: { bash: 'require_approval' },
@@ -475,7 +479,10 @@ describe('address-first Harness invocations', () => {
 	it('rejects a contract created by a foreign Harness package instance before transport', async () => {
 		vi.resetModules()
 		const foreignHarness = await import('@purista/harness')
-		const foreignTarget = foreignHarness.defineAgent('answer', { instructions: 'Answer.' }).contract
+		const foreignTarget = foreignHarness.defineAgent('answer', {
+			model: 'chat',
+			instructions: 'Answer.',
+		}).contract
 		const invoke = vi.fn()
 
 		expect(() => registerHarnessInvocation({}, {}, 'Knowledge', '1', foreignTarget)).toThrow('authentic')
@@ -552,6 +559,7 @@ describe('address-first Harness invocations', () => {
 		const validate = vi.fn((value: unknown) => ({ value: { parsed: String(value) } }))
 		const input = generatedSchema<string, { parsed: string }>(validate)
 		const asymmetric = defineAgent('asymmetric', {
+			model: 'chat',
 			input,
 			instructions: 'Answer.',
 			prompt: value => ({ role: 'user', content: value.parsed }),

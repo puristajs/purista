@@ -22,7 +22,7 @@ const lookupPlan = defineTool('lookupPlan', {
   handler: async (_context, input) => accounts.readPlan(input.accountId),
 })
 const support = defineAgent('support', {
-  model: 'primary',
+  model: 'answering',
   tools: [lookupPlan],
   instructions: 'Use lookupPlan when account plan data is needed.',
 })

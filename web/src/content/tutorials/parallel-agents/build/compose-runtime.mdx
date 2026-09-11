@@ -28,15 +28,15 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			models: {
-				riskModel: options.riskModel,
-				responseModel: options.responseModel,
+				riskAssessment: options.riskModel,
+				responsePlanning: options.responseModel,
 			},
 		},
 	})
 }
 ```
 
-The singular `ai` configuration contains a named `models` map. Its keys exactly match `riskModel` and `responseModel` from the agent definitions.
+The `ai.models` map binds both explicit purpose aliases: `riskAssessment` and `responsePlanning`.
 
 ```bash title="Check runtime composition" replay="project"
 npm run build

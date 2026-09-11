@@ -23,14 +23,14 @@ const claimsServer = defineMcpServer('claims', {
   },
 })
 const agent = defineAgent('claimsReview', {
-  model: 'primary',
+  model: 'review',
   tools: [claimsServer.tools.searchClaims, readClaimEvidence],
   sandbox: 'private',
   instructions: 'Review the claim using only the declared evidence tools.',
 })
 const definition = defineHarness({ name: 'claims' }).addAgent(agent)
 const harness = await definition.getInstance({
-  model: primaryModel,
+  models: { review: reviewModel },
   sandbox,
   mcp: {
     claims: { transport: 'http', url: process.env.CLAIMS_MCP_URL! },

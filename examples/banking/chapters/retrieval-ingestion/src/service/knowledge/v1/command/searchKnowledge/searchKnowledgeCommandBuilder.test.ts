@@ -29,8 +29,8 @@ function options(policy: KnowledgeCollectionPolicy, provider: FakeModelProvider)
 		},
 		ai: {
 			storage,
-			model: { provider, model: 'fake-chat' },
 			models: {
+				answering: { provider, model: 'fake-chat' },
 				embedding: { provider, model: 'fake-embedding' },
 			},
 		},

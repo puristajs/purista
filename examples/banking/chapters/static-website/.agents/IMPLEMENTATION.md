@@ -9,7 +9,7 @@ This project is CLI-first. Prefer generated PURISTA artifacts over manual framew
 - The short add commands below are interactive and prompt for omitted choices.
 - Create services with `npm run add:service -- <name> --description "<description>"`.
 - Create commands with `npm run add:command -- <name> --service <serviceName> --service-version <version>`.
-- Create agents with `npm run add:agent -- <name> --service <serviceName> --service-version <version>`.
+- Create agents with `npm run add:agent -- <name> --service <serviceName> --service-version <version>`. --model-alias <purposeAlias>
 - Create workflows with `npm run add:workflow -- <name> --service <serviceName> --service-version <version>`.
 - Create tools with `npm run add:tool -- <name> --service <serviceName> --service-version <version>`.
 - Create Skills with `npm run add:skill -- <name> --service <serviceName> --service-version <version>`.
@@ -32,7 +32,7 @@ These short commands prompt for any omitted choices.
 - New stream: `npm run add:stream -- <name> --service <serviceName> --service-version <version>`
 - New queue: `npm run add:queue -- <name> --service <serviceName> --service-version <version>`
 - New queue worker: `npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>`
-- New agent: `npm run add:agent -- <name> --service <serviceName> --service-version <version>`
+- New agent: `npm run add:agent -- <name> --service <serviceName> --service-version <version>` --model-alias <purposeAlias>
 - New workflow: `npm run add:workflow -- <name> --service <serviceName> --service-version <version>`
 - New tool: `npm run add:tool -- <name> --service <serviceName> --service-version <version>`
 - New Skill: `npm run add:skill -- <name> --service <serviceName> --service-version <version>`

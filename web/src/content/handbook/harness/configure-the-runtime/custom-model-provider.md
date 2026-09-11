@@ -24,7 +24,7 @@ Bind it like any other provider:
 ```ts title="Custom Model Provider example 3"
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
 const harness = await definition.getInstance({
-	model: { provider: gatewayProvider, model: 'support-object' },
+	models: { answering: { provider: gatewayProvider, model: 'support-object' } },
 })
 ```
 Run the shared adapter contract suite, typecheck without casts, test timeout,

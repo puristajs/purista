@@ -12,7 +12,7 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { z } from 'zod'
 
 const answer = defineAgent('answerSupportQuestion', {
-  model: 'primary',
+  model: 'answering',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string(), confidence: z.number().min(0).max(1) }),
   prompt: input => ({ role: 'user', content: input.question }),

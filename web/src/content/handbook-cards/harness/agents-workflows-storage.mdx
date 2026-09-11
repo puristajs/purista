@@ -18,6 +18,7 @@ Definitions are immutable. A workflow receives only the agents listed in its
 import { defineAgent, defineHarness } from '@purista/harness'
 
 const claimsSupport = defineAgent('claimsSupport', {
+	model: 'answering',
   input: z.object({ question: z.string().min(1) }),
   output: z.object({ answer: z.string() }),
   instructions: 'Answer claims questions from approved information.',
@@ -26,7 +27,7 @@ const claimsSupport = defineAgent('claimsSupport', {
 
 const definition = defineHarness({ name: 'claims' }).addAgent(claimsSupport)
 const harness = await definition.getInstance({
-  model: { provider, model: 'provider-model' },
+  models: { answering: { provider, model: 'provider-model' } },
 })
 ```
 

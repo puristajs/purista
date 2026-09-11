@@ -68,7 +68,7 @@ npm install
 npm run add:service -- support --description "Owns support reviews and automation" --non-interactive
 npm run add:service -- transaction --description "Owns transaction and card actions" --non-interactive
 npm run add:workflow -- review-support-action --service support --service-version 1 --description "Request a human approval for a card freeze" --non-interactive
-npm run add:agent -- review-support-approval-agent --service support --service-version 1 --http none --description "Request an approval before a card freeze" --non-interactive
+npm run add:agent -- review-support-approval-agent --service support --service-version 1 --http none --description "Request an approval before a card freeze" --non-interactive --model-alias review
 npm run add:tool -- freeze-reviewed-card --service support --service-version 1 --kind purista --description "Freeze an approved card" --non-interactive
 npm run add:command -- request-card-freeze --service support --service-version 1 --description "Request a card-freeze review" --non-interactive
 npm run add:command -- decide-card-freeze --service support --service-version 1 --description "Record a review decision" --non-interactive

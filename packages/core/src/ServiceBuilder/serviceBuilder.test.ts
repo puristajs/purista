@@ -82,7 +82,10 @@ describe('ServiceBuilder', () => {
 	})
 
 	it('creates an exact trusted context with declared helpers and injected nested targets', async () => {
-		const childAgent = defineAgent('contextChildAgent', { instructions: 'Answer.' })
+		const childAgent = defineAgent('contextChildAgent', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
 		const childWorkflow = defineWorkflow('contextChildWorkflow', {
 			input: z.string(),
 			output: z.string(),
@@ -128,7 +131,7 @@ describe('ServiceBuilder', () => {
 		const service = await mountedBuilder.getInstance(eventBridge.mock, {
 			logger: logger.mock,
 			resources: { records: { prefix: 'record:' } },
-			ai: { model: { provider: new FakeModelProvider(), model: 'fake' } },
+			ai: { models: { chat: { provider: new FakeModelProvider(), model: 'fake' } } },
 		})
 		const message = getCommandMessageMock()
 		const request = {
@@ -225,7 +228,11 @@ describe('ServiceBuilder', () => {
 				output: z.string(),
 			})
 			.setHandler(async (_context, input) => input)
-		const agent = defineAgent('foreignToolAgent', { instructions: 'Use the tool.', tools: [foreignTool] })
+		const agent = defineAgent('foreignToolAgent', {
+			model: 'chat',
+			instructions: 'Use the tool.',
+			tools: [foreignTool],
+		})
 		const definition = defineHarness({ name: 'foreignToolHarness', revision: 'v1' }).addAgent(agent)
 		const sameIdBuilder = new ServiceBuilder(serviceInfo)
 		sameIdBuilder
@@ -269,6 +276,7 @@ describe('ServiceBuilder', () => {
 		})
 		const directDefinition = defineHarness({ name: 'directToolHarness', revision: 'v1' }).addAgent(
 			defineAgent('directToolAgent', {
+				model: 'chat',
 				instructions: 'Use.',
 				tools: [directTool],
 			}),

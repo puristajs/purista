@@ -26,7 +26,7 @@ export const readAccount = defineTool('readAccount', {
 })
 
 export const answerAccountQuestion = defineAgent('answerAccountQuestion', {
-  model: 'primary',
+  model: 'answering',
   input: z.strictObject({ question: z.string().min(1), accountId: z.string().min(1) }),
   output: z.strictObject({ answer: z.string() }),
   prompt: input => ({ role: 'user', content: input.question }),
@@ -59,7 +59,7 @@ import { supportHarness } from './harness/support.js'
 
 export async function createSupportHarness(apiKey: string) {
 	return supportHarness.getInstance({
-		model: { provider: openai({ apiKey }), model: 'gpt-5-mini' },
+		models: { answering: { provider: openai({ apiKey }), model: 'gpt-5-mini' } },
 	})
 }
 ```

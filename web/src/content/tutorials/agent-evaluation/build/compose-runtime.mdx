@@ -6,7 +6,7 @@ kind: lesson
 status: published
 ---
 
-The factory supplies application-owned policy and the singular primary model binding. The server entry point selects OpenAI only for the optional live service.
+The factory supplies application-owned policy and the exact `ai.models.classification` binding. The server entry point selects OpenAI only for the optional live service.
 
 ```ts title="src/createSupportService.ts" write
 import type { EventBridge, Logger } from '@purista/core'
@@ -25,7 +25,7 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: { model: options.model },
+		ai: { models: { classification: options.model } },
 	})
 }
 ```

@@ -17,8 +17,8 @@ export function createSupportService(
 		resources: { supportCasePolicy: options.supportCasePolicy },
 		ai: {
 			models: {
-				riskModel: options.riskModel,
-				responseModel: options.responseModel,
+				riskAssessment: options.riskModel,
+				responsePlanning: options.responseModel,
 			},
 		},
 	})

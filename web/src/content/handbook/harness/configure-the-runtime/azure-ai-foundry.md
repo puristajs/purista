@@ -15,9 +15,9 @@ import { defineAgent, defineHarness } from '@purista/harness'
 import { azureFoundry } from '@purista/harness-azure-foundry'
 import { z } from 'zod'
 
-const answer = defineAgent('answer', { model: 'primary', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
+const answer = defineAgent('answer', { model: 'answering', input: z.string(), output: z.object({ answer: z.string() }), instructions: 'Answer clearly.' })
 const definition = defineHarness({ name: 'support' }).addAgent(answer)
-export const harness = await definition.getInstance({ model: { provider: azureFoundry({ endpoint: process.env.AZURE_AI_ENDPOINT, apiKey: process.env.AZURE_AI_API_KEY }), model: process.env.AZURE_AI_DEPLOYMENT } })
+export const harness = await definition.getInstance({ models: { answering: { provider: azureFoundry({ endpoint: process.env.AZURE_AI_ENDPOINT, apiKey: process.env.AZURE_AI_API_KEY }), model: process.env.AZURE_AI_DEPLOYMENT } } })
 ```
 Deployment capabilities and API settings are Azure-owned. Verify structured
 output, tools, streaming, embeddings, and retries against the exact deployment.

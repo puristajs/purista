@@ -11,6 +11,7 @@ export const answerSupportQuestionOutputSchema = z.strictObject({
 })
 
 export const answerSupportQuestionAgent = defineAgent('answerSupportQuestion', {
+	model: 'answering',
 	input: answerSupportQuestionInputSchema,
 	output: answerSupportQuestionOutputSchema,
 	instructions: [
