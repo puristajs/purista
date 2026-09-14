@@ -111,10 +111,8 @@ const aiMessageStream = serviceBuilder
 	.getStreamBuilder('aiMessageStream', 'AI SDK UI Message Stream')
 	.makeEndpointPublic()
 	.addChunkSchema(z.object({ event: z.string(), data: z.unknown() }))
-	.enableChunkAggregation(false)
 	.exposeAsHttpStreamEndpoint('POST', 'ai-chat')
 	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-	.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
 	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
 		await writer.close()
 	})
@@ -122,11 +120,9 @@ const aiMessageStream = serviceBuilder
 const protectedAiMessageStream = serviceBuilder
 	.getStreamBuilder('protectedAiMessageStream', 'Protected AI SDK UI Message Stream')
 	.addChunkSchema(z.object({ event: z.string(), data: z.unknown() }))
-	.enableChunkAggregation(false)
 	.enableHttpSecurity(true)
 	.exposeAsHttpStreamEndpoint('POST', 'protected-ai-chat')
 	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-	.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
 	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
 		await writer.close()
 	})
@@ -1014,7 +1010,11 @@ describe('HonoServiceClass', () => {
 				}),
 			)
 			expect(response.status).toBe(StatusCode.OK)
+			expect(response.headers.get('content-type')).toBe('text/event-stream')
+			expect(response.headers.get('cache-control')).toBe('no-cache')
+			expect(response.headers.get('connection')).toBe('keep-alive')
 			expect(response.headers.get('x-vercel-ai-ui-message-stream')).toBe('v1')
+			expect(response.headers.get('x-accel-buffering')).toBe('no')
 			const officialChunks = await readOfficialUiMessageChunks(response.clone())
 			const body = await response.text()
 			expect(body).toContain('data: {"type":"text-delta","id":"answer","delta":"hello"}\n\n')

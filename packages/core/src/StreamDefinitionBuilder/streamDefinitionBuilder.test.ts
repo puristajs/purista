@@ -226,11 +226,10 @@ describe('StreamDefinitionBuilder', () => {
 		expect(definition.metadata.expose.http?.stream?.mode).toBe('aggregate')
 	})
 
-	it('stores static response headers with stream protocol metadata', async () => {
+	it('configures a protocol stream for direct output without chunk aggregation', async () => {
 		const definition = await new StreamDefinitionBuilder('aiChat', 'AI SDK chat stream')
 			.exposeAsHttpStreamEndpoint('POST', '/chat')
 			.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-			.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
 			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
 				await writer.close()
 			})
@@ -238,7 +237,24 @@ describe('StreamDefinitionBuilder', () => {
 
 		expect(definition.metadata.expose.http?.stream).toMatchObject({
 			protocol: 'ai-sdk-ui-message-stream-v1',
-			responseHeaders: { 'x-vercel-ai-ui-message-stream': 'v1' },
+			mode: 'stream',
+		})
+		expect(definition.aggregateChunks).toBe(false)
+		expect(definition.metadata.expose.finalPayload).toBeUndefined()
+	})
+
+	it('stores custom response headers with stream protocol metadata', async () => {
+		const definition = await new StreamDefinitionBuilder('custom', 'custom protocol stream')
+			.exposeAsHttpStreamEndpoint('POST', '/custom')
+			.setHttpStreamProtocol('custom-v1')
+			.setHttpResponseHeaders({ 'x-custom-protocol': 'v1' })
+			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+				await writer.close()
+			})
+			.getDefinition()
+
+		expect(definition.metadata.expose.http?.stream).toMatchObject({
+			responseHeaders: { 'x-custom-protocol': 'v1' },
 		})
 	})
 

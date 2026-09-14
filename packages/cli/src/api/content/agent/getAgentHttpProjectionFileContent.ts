@@ -53,7 +53,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 	if (input.http === 'command') writer.writeLine("import type { HarnessTargetRunOutcome } from '@purista/harness'")
 	if (input.http === 'stream') {
 		writer.writeLine(
-			"import { createHarnessUIMessageSseEvents, parseHarnessUIMessageRequest } from '@purista/harness-ai-sdk-ui/v1'",
+			"import { AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL, parseHarnessUIMessageRequest, pipeHarnessUIMessageStream } from '@purista/harness-ai-sdk-ui/v1'",
 		)
 	}
 	writer.writeLine(`import { ${serviceBuilderIdentifier} } from '../../${serviceBuilderFile}.js'`)
@@ -126,10 +126,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 		)
 		writer.writeLine(`.exposeAsHttpStreamEndpoint('POST', '${names.route}')`)
 		writer.writeLine('.enableHttpSecurity(true)')
-		writer.writeLine('.enableChunkAggregation(false)')
-		writer.writeLine(".setHttpStreamingMode('stream')")
-		writer.writeLine(".setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')")
-		writer.writeLine(".setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })")
+		writer.writeLine('.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)')
 		writer.writeLine('.setStreamFunction(async function (context, payload, _parameter, writer) {')
 		writer.indent(() => {
 			writer.writeLine('const request = await parseHarnessUIMessageRequest(payload)')
@@ -146,25 +143,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 				)
 			})
 			writer.writeLine(')')
-			writer.writeLine('let cancellation = Promise.resolve()')
-			writer.writeLine('writer.onCancel(reason => { cancellation = events.cancel(reason) })')
-			writer.writeLine('try {')
-			writer.indent(() => {
-				writer.writeLine('for await (const record of createHarnessUIMessageSseEvents(events, {')
-				writer.indent(() => {
-					writer.writeLine('sessionId: request.sessionId,')
-					writer.writeLine(
-						'...(request.assistantMessageId === undefined ? {} : { messageId: request.assistantMessageId }),',
-					)
-				})
-				writer.writeLine('})) {')
-				writer.indent(() => writer.writeLine('await writer.write(record)'))
-				writer.writeLine('}')
-				writer.writeLine('if (!writer.cancelled) await writer.close()')
-			})
-			writer.writeLine('} finally {')
-			writer.indent(() => writer.writeLine('await cancellation'))
-			writer.writeLine('}')
+			writer.writeLine('await pipeHarnessUIMessageStream(events, writer, request)')
 		})
 		writer.writeLine('})')
 	})
@@ -317,7 +296,7 @@ ${
 
 \t\tharness.cancel('client closed')
 
-\t\tawait expect(execution).rejects.toThrow(/terminal event/)
+\t\tawait expect(execution).resolves.toBeUndefined()
 \t\texpect(cancellationReasons).toContain('client closed')
 \t})`
 		: ''

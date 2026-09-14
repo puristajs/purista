@@ -4,6 +4,16 @@ PURISTA 4 is a clean breaking release. Do not add compatibility shims, dual
 registration, legacy overloads, or fallback runtime paths. Upgrade framework,
 CLI, adapters, generated code, documentation, and tests as one version set.
 
+## Contents
+
+- [Core package boundaries](#core-package-boundaries)
+- [Native Harness service mounting](#native-harness-service-mounting)
+- [Schedules](#schedules)
+- [Architecture diagnostics](#architecture-diagnostics)
+- [Observability](#observability)
+- [HTTP errors and security](#http-errors-and-security)
+- [State retention](#state-retention)
+
 ## Core package boundaries
 
 Application builders and runtime APIs belong at `@purista/core`. Test helpers
@@ -44,7 +54,10 @@ Migrate in this order:
 
 `.run` returns a `RunOutcome`. Approval and external waits are
 `interrupted` outcomes, not exceptions. A browser stream uses the separate
-`@purista/harness-ai-sdk-ui/v1` adapter and AI SDK UI Message Stream v1.
+`@purista/harness-ai-sdk-ui/v1` adapter and AI SDK UI Message Stream v1. On a
+PURISTA stream, declare `AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` and use
+`pipeHarnessUIMessageStream(events, writer, request)`; Hono supplies the
+standard headers and the adapter owns projection and cancellation.
 
 Concrete models, admission, storage, memory, sandbox, sandbox binding,
 workspace, artifacts, logger, and telemetry are supplied under the service

@@ -119,7 +119,11 @@ adapter:
 ~~~ts title="src/service/support/v1/stream/streamTriage/streamTriageStreamBuilder.ts"
 // Before: generated attached-agent HTTP route
 // After: a protected wrapper around the addressed target
-import { createHarnessUIMessageSseEvents, parseHarnessUIMessageRequest } from '@purista/harness-ai-sdk-ui/v1'
+import {
+  AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
+  parseHarnessUIMessageRequest,
+  pipeHarnessUIMessageStream,
+} from '@purista/harness-ai-sdk-ui/v1'
 import { z } from 'zod'
 
 const inputSchema = z.unknown()
@@ -136,10 +140,7 @@ export const streamTriage = supportV1ServiceBuilder
   .canInvokeAgent('Support', '1', triage.contract)
   .exposeAsHttpStreamEndpoint('POST', 'ai/triage')
   .enableHttpSecurity(true)
-  .enableChunkAggregation(false)
-  .setHttpStreamingMode('stream')
-  .setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-  .setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+  .setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
   .setStreamFunction(async function (context, payload, _parameter, writer) {
     const request = await parseHarnessUIMessageRequest(payload)
     const input = request.lastUserMessage.parts
@@ -151,21 +152,7 @@ export const streamTriage = supportV1ServiceBuilder
         ? { sessionId: request.sessionId }
         : { sessionId: request.sessionId, resume: request.resume },
     )
-    let cancellation = Promise.resolve()
-    writer.onCancel(reason => { cancellation = events.cancel(reason) })
-    try {
-      for await (const event of createHarnessUIMessageSseEvents(events, {
-        sessionId: request.sessionId,
-        ...(request.assistantMessageId === undefined
-          ? {}
-          : { messageId: request.assistantMessageId }),
-      })) {
-        await writer.write(event)
-      }
-      if (!writer.cancelled) await writer.close()
-    } finally {
-      await cancellation
-    }
+    await pipeHarnessUIMessageStream(events, writer, request)
   })
 ~~~
 
@@ -174,8 +161,9 @@ middleware authenticates the request and sets trusted `principalId` and
 `tenantId`; business authorization remains a guard on the mounted target.
 For example, decode the transport credential there, set those two variables,
 and return `next()`; do not put business authorization in the HTTP wrapper.
-Keep stream protocol headers and session identifiers at the HTTP boundary; the
-Harness definition stays transport-neutral.
+The protocol declaration makes the Hono server add the standard response
+headers. The pipe helper owns projection, completion, stream closing, and
+disconnect cancellation. The Harness definition stays transport-neutral.
 
 ## Move runtime bindings
 

@@ -105,8 +105,9 @@ events with the v1 adapter:
 
 ```ts title="Expose AI SDK UI Message Stream v1"
 import {
-  createHarnessUIMessageSseEvents,
+  AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
   parseHarnessUIMessageRequest,
+  pipeHarnessUIMessageStream,
 } from '@purista/harness-ai-sdk-ui/v1'
 import { z } from 'zod'
 
@@ -121,10 +122,7 @@ export const streamAssistantStreamBuilder = supportV1ServiceBuilder
   .canInvokeAgent('Support', '1', assistantAgent.contract)
   .exposeAsHttpStreamEndpoint('POST', 'ai/assistant')
   .enableHttpSecurity(true)
-  .enableChunkAggregation(false)
-  .setHttpStreamingMode('stream')
-  .setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
-  .setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+  .setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
   .setStreamFunction(async function (context, payload, _parameter, writer) {
     const request = await parseHarnessUIMessageRequest(payload)
     const input = request.lastUserMessage.parts
@@ -138,24 +136,7 @@ export const streamAssistantStreamBuilder = supportV1ServiceBuilder
         : { sessionId: request.sessionId, resume: request.resume },
     )
 
-    let cancellation = Promise.resolve()
-    writer.onCancel(reason => {
-      cancellation = events.cancel(reason)
-    })
-
-    try {
-      for await (const record of createHarnessUIMessageSseEvents(events, {
-        sessionId: request.sessionId,
-        ...(request.assistantMessageId === undefined
-          ? {}
-          : { messageId: request.assistantMessageId }),
-      })) {
-        await writer.write(record)
-      }
-      if (!writer.cancelled) await writer.close()
-    } finally {
-      await cancellation
-    }
+    await pipeHarnessUIMessageStream(events, writer, request)
   })
 ```
 
@@ -163,10 +144,16 @@ export const streamAssistantStreamBuilder = supportV1ServiceBuilder
 adds the mounted agent client to this stream handler. The call still crosses
 EventBridge and applies the target policy.
 
-The adapter emits data-only SSE records and owns the protocol completion marker.
-PURISTA owns the HTTP stream and closes it after the adapter finishes.
-Cancellation requests upstream cancellation and then waits for it; it cannot
-undo provider or tool effects that already started.
+`setHttpStreamProtocol(...)` selects direct streaming and disables automatic
+chunk aggregation. The Hono server recognizes the protocol identifier and sets
+the standard content type, caching, connection, buffering, and
+`x-vercel-ai-ui-message-stream` headers. Do not add those headers in the stream
+definition.
+
+`pipeHarnessUIMessageStream(...)` projects and forwards the data-only protocol
+records, writes `[DONE]`, closes a successful stream, and propagates browser
+cancellation to the addressed Harness execution. Cancellation cannot undo
+provider or tool effects that already started.
 
 The CLI generates this projection with `--http stream`. A resume request sends
 `{ sessionId, resume }` to the target and remains a normal HTTP response, so

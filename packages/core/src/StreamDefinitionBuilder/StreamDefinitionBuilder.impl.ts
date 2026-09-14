@@ -701,12 +701,26 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
-	/** Set stream protocol metadata for generated OpenAPI/HTTP exposure. */
+	/**
+	 * Set protocol metadata for a direct HTTP stream.
+	 *
+	 * Protocol streams send their chunks directly to the transport, so this also
+	 * selects streaming mode and disables automatic chunk aggregation. HTTP
+	 * server adapters may derive protocol-specific response headers from the
+	 * protocol identifier.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	 * ```
+	 */
 	setHttpStreamProtocol(protocol: string, documentationUrl?: string) {
 		this.httpStreamProtocol = {
 			protocol,
 			documentationUrl,
 		}
+		this.httpStreamingMode = 'stream'
+		this.aggregateChunks = false
 		return this
 	}
 
@@ -719,7 +733,7 @@ export class StreamDefinitionBuilder<
 	 * @example
 	 * ```ts
 	 * stream.setHttpResponseHeaders({
-	 *   'x-vercel-ai-ui-message-stream': 'v1',
+	 *   'x-custom-protocol': 'v1',
 	 * })
 	 * ```
 	 */

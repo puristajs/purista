@@ -90,8 +90,8 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		expect(definition.metadata.expose.http?.stream).toMatchObject({
 			mode: 'stream',
 			protocol: 'ai-sdk-ui-message-stream-v1',
-			responseHeaders: { 'x-vercel-ai-ui-message-stream': 'v1' },
 		})
+		expect(definition.aggregateChunks).toBe(false)
 	})
 
 	it('parses the latest user message and writes data-only v1 records', async () => {
@@ -220,7 +220,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		expect(settled).toBe(false)
 
 		finishCancellation()
-		await expect(execution).rejects.toThrow(/terminal event/)
+		await expect(execution).resolves.toBeUndefined()
 		expect(settled).toBe(true)
 	})
 })

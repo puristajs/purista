@@ -105,7 +105,12 @@ its `setHandler(...)` implementation.
 
 Mounting creates no HTTP route. Expose a command for aggregate output or a
 PURISTA stream for browser delivery. Use `@purista/harness-ai-sdk-ui/v1` to map
-portable events to AI SDK UI Message Stream v1 and forward cancellation upstream.
+portable events to AI SDK UI Message Stream v1. Declare
+`AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` on the stream so Hono supplies the
+standard response headers and direct-stream settings. Use
+`pipeHarnessUIMessageStream(events, writer, request)` so projection,
+completion, closing, and upstream cancellation stay in the adapter instead of
+being reimplemented in the handler.
 
 Test portable definitions with `FakeModelProvider`. Test host tools and mounted
 targets through deterministic EventBridge/service integration. Test commands,

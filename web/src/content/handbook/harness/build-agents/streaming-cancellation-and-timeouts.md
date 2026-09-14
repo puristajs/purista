@@ -150,10 +150,13 @@ SDK message parts. Harness lifecycle and structured output use typed
 ignore.
 
 If another framework owns SSE framing, use
+[`pipeHarnessUIMessageStream(...)`](/handbook/api/functions/_purista_harness-ai-sdk-ui_v1.pipeHarnessUIMessageStream/)
+with its stream writer. The helper owns projection, completion, closing, and
+cancellation. A lower-level host can instead consume
 [`createHarnessUIMessageSseEvents(...)`](/handbook/api/functions/_purista_harness-ai-sdk-ui_v1.createHarnessUIMessageSseEvents/)
 and apply
 [`AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS`](/handbook/api/variables/_purista_harness-ai-sdk-ui_v1.AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS/).
-PURISTA Framework streams use that form so the EventBridge remains the
+PURISTA Framework streams use the pipe form so the EventBridge remains the
 address-first execution boundary.
 
 ## 5. Treat approval as a normal stream outcome

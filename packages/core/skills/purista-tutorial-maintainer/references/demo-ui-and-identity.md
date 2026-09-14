@@ -33,6 +33,13 @@ suite without changing Harness execution or EventBridge dispatch. Do not add
 generic protocol switches to Core, invent a PURISTA browser protocol, or
 install a second model loop, AI Gateway backend, or standalone Harness service.
 
+For PURISTA examples, declare
+`AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` with `setHttpStreamProtocol(...)` and
+let Hono derive the standard response headers. Forward the addressed Harness
+stream with `pipeHarnessUIMessageStream(events, writer, request)`. Do not copy
+header maps, cancellation callbacks, chunk loops, `[DONE]`, or close handling
+into tutorial handlers.
+
 Verify start/delta/end, safe status data, sources, tool input/output, approval,
 denial, completion, terminal error, cancellation, reconnect, headers, and the
 `[DONE]` marker with the official AI SDK parser and the example UI.
