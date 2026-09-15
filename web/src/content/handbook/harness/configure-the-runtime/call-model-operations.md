@@ -76,7 +76,7 @@ const writeSummary = defineWorkflow('writeSummary', {
   },
 })
 ```
-Consume or cancel the iterable. The provider, admission lease, and telemetry
+Consume or cancel the iterable. The provider, concurrency lease, and telemetry
 span remain active until iteration finishes, throws, or the signal aborts. Use
 an agent or workflow target stream for portable execution events and use
 `@purista/harness-ai-sdk-ui/v1` at a browser boundary.

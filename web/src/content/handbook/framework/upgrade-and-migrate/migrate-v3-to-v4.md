@@ -184,7 +184,7 @@ disconnect cancellation. The Harness definition stays transport-neutral.
 
 Construct one runtime instance for the mounted definition with the exact
 `ai.models` map required by its graph. Configure complete-run and provider-call
-admission under `ai.concurrency: { runs, modelCalls }`. Keep sandbox execution
+limits under `ai.concurrency: { runs, modelCalls }`. Keep sandbox execution
 and deployment consent together under `ai.sandbox: { adapter, policy }`.
 PURISTA StateStore remains
 for Framework application state; Harness storage and memory own Harness

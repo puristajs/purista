@@ -16,7 +16,7 @@ order: 1440
 | `ExecutionEvent` | Provider-neutral, client-safe progress contract used by `.stream(...)`. |
 | `RunEvent` | Internal detailed execution record used by persistence, tests, and observability integration. It is not the public target stream or a browser protocol. |
 | Model provider | Adapter implementing one or more provider-neutral operations such as text, object, embedding, image, speech, or video. |
-| Model alias | Application name that binds one provider and provider model ID with optional defaults and retry/admission identity. Required capabilities come from the definition graph. |
+| Model alias | Application name that binds one provider and provider model ID with optional generation defaults, retry policy, and credential scope. Required capabilities come from the definition graph. |
 | Tool | Typed model-callable capability. A TypeScript tool handler owns authorization and side effects; MCP tools cross an explicit MCP boundary. |
 | Built-in tool | Harness-provided `read`, `write`, `edit`, `glob`, `grep`, `list`, or `bash` definition, disabled unless it appears in an agent's `tools` list. |
 | Skill | Reviewed, versioned instructions and files mounted for an agent. A skill grants no tool authority by itself. |
@@ -30,7 +30,8 @@ order: 1440
 | Child task | Workflow-owned isolated agent task with explicit input, status, result, and cancellation. It does not inherit parent conversation history. |
 | Durable step | Versioned workflow checkpoint whose committed JSON result can replay without repeating the step function. |
 | Host tool | Portable tool declaration whose implementation is bound by the host, such as a PURISTA command invocation with trusted identity. |
-| Admission | In-process limit on active model/agent work. Use a durable queue separately when arrivals, retry, or fleet-wide concurrency must survive restart. |
+| Run concurrency | Optional limit on active root execution trees. The included helper is process-local; use a durable queue separately when arrival, retry, or fleet-wide delivery must survive restart. |
+| Model-call concurrency | Optional limit around individual provider operations, keyed by provider, model, credential scope, and operation. It remains separate from run concurrency and durable queues. |
 
 Use these terms in application code and operational documentation so transport,
 provider, persistence, and business-authorization responsibilities remain

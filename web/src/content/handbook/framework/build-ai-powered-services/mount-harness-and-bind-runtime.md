@@ -77,6 +77,6 @@ shared group or a deployment permits borrowing an owner.
 
 `concurrency.runs` limits complete root execution trees.
 `concurrency.modelCalls` limits provider operations and can apply provider or
-model-specific rate admission. Both are runtime ports. Bind a target to a
+model-specific limits. Both are runtime ports. Bind a target to a
 PURISTA queue when complete invocations need durable delivery, retry, or
-fleet-wide admission.
+fleet-wide scheduling.

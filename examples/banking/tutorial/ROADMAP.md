@@ -72,7 +72,7 @@ Use `@purista/harness` factories for portable definitions. Use
 `ServiceBuilder.defineTool(...)` for tools that need PURISTA service context.
 Compose and mount one service-owned Harness definition. Call targets by their
 versioned address from commands, streams, queues, or workers. Runtime model,
-provider, storage, memory, sandbox, workspace, admission, queue, artifact, and
+provider, storage, memory, sandbox, workspace, concurrency, queue, artifact, and
 telemetry bindings belong in application bootstrap.
 
 The classification chapter is the reference packet: CLI generation, native

@@ -64,21 +64,21 @@ const harness = await definition.getInstance({
   models,
   concurrency: {
     runs: inMemoryRunConcurrency({ maxConcurrent: 8, maxQueued: 32 }),
-    modelCalls: providerRateAdmission,
+    modelCalls: modelCallConcurrency,
   },
 })
 ```
 
-`runs` admits complete root execution trees.
+`runs` limits complete root execution trees.
 [`inMemoryRunConcurrency(...)`](/handbook/api/functions/_purista_harness.inMemoryRunConcurrency/)
 is
-process-local and does not replace a durable queue. `modelCalls` admits each
-provider operation and can coordinate by provider, model, credential scope,
-and operation. Supply an application or adapter implementation of
+process-local and does not replace a durable queue. `modelCalls` acquires a
+lease around each provider operation and can coordinate by provider, model,
+credential scope, and operation. Supply an application or adapter implementation of
 [`ModelCallConcurrency`](/handbook/api/interfaces/_purista_harness.ModelCallConcurrency/)
 when provider quotas require it. Both ports receive the
 invocation deadline and cancellation signal and return a lease that is released
-when the admitted work finishes.
+when the protected work finishes.
 
 Use a durable queue before the Harness when a complete invocation must survive
 process loss, retry later, or be controlled across a fleet. Model-call

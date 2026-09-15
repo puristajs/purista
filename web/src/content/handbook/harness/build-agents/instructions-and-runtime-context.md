@@ -59,7 +59,7 @@ metadata.
 | Stable model behavior | Agent `instructions` |
 | Model-visible input | Agent `prompt` mapper |
 | Valid request and result shape | Agent schemas |
-| Authenticated caller and session admission | Application transport and `getSession(...)` |
+| Authenticated caller and session establishment | Application transport and `getSession(...)` |
 | Business authorization | Application command or tool handler |
 | Dynamic facts | Authorized tool or workflow |
 | Direct provider-neutral model operation | Workflow `models` allowlist |

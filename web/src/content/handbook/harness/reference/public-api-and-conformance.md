@@ -32,7 +32,10 @@ and [`HarnessSession.destroy`](/handbook/api/interfaces/_purista_harness.Harness
 manage it; and
 [`HarnessTargetInvoker.run`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#run)
 or [`HarnessTargetInvoker.stream`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#stream)
-executes a composed target. Cancel a live stream with
+starts a composed target. Use
+[`HarnessTargetInvoker.resume`](/handbook/api/interfaces/_purista_harness.HarnessTargetInvoker/#resume)
+to continue a durable interruption without resupplying the original input.
+Cancel a live stream with
 [`HarnessTargetStream.cancel`](/handbook/api/interfaces/_purista_harness.HarnessTargetStream/#cancel).
 
 The supporting runtime contracts are also public:

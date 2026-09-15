@@ -29,7 +29,7 @@ purista add agent triage --service user --service-version 1 --description "Revie
 purista add workflow resolve-ticket --service user --service-version 1 --description "Resolve a ticket in durable steps"
 ```
 
-Generated agents are native, provider-neutral `@purista/harness` definitions under `src/harness`. The CLI adds a small service mount that explicitly publishes the agent through PURISTA. Live providers, storage, Skills, sandbox, admission, queues, and artifact stores remain application runtime bindings. Generated tests run the same definition standalone with `FakeModelProvider`.
+Generated agents are native, provider-neutral `@purista/harness` definitions under `src/harness`. The CLI adds a small service mount that explicitly publishes the agent through PURISTA. Live providers, storage, Skills, sandbox, concurrency controls, queues, and artifact stores remain application runtime bindings. Generated tests run the same definition standalone with `FakeModelProvider`.
 
 Non-interactive mode fails fast when a required value has no declared default:
 

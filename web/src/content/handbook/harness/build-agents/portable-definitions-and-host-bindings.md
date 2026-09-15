@@ -63,7 +63,7 @@ export async function createSupportHarness(apiKey: string) {
 	})
 }
 ```
-`getInstance(...)` supplies the concrete model, storage, admission, sandbox,
+`getInstance(...)` supplies the concrete model, storage, concurrency, sandbox,
 memory, workspace, queue, logger, and telemetry bindings required by the
 composed graph. Bind only capabilities the selected adapters implement. The
 application still owns authentication, business authorization, and external

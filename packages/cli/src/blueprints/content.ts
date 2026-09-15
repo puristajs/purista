@@ -32,7 +32,7 @@ Generated with \`@purista/cli\`.
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
-Agents, workflows, portable tools, Skills, and MCP definitions use \`@purista/harness\`. PURISTA host tools use \`ServiceBuilder.defineTool(...)\`. Keep both tool kinds service-owned under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`. Compose one Harness definition per service version and publish selected targets with one \`ServiceBuilder.mountHarness(...)\` call. Give every agent an explicit model alias and bind every used alias under \`ai.models\`. Keep storage, sandbox, admission, queues, and artifact stores in application bootstrap configuration.
+Agents, workflows, portable tools, Skills, and MCP definitions use \`@purista/harness\`. PURISTA host tools use \`ServiceBuilder.defineTool(...)\`. Keep both tool kinds service-owned under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`. Compose one Harness definition per service version and publish selected targets with one \`ServiceBuilder.mountHarness(...)\` call. Give every agent an explicit model alias and bind every used alias under \`ai.models\`. Keep storage, sandbox, concurrency, queues, and artifact stores in application bootstrap configuration.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI. These short examples are interactive and prompt for omitted choices:
 
@@ -79,7 +79,7 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured \`servicePath\`. Put service-owned Harness definitions under \`src/service/<service>/v<version>/harness/{agent,workflow,tool,skill,mcp}\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- Mount one composed Harness definition per service version with \`ServiceBuilder.mountHarness(...)\`. Give every agent an explicit model alias and bind every used alias under \`ai.models\`. Keep optional Skills, storage, sandbox, admission, queue, and artifact bindings in service bootstrap/config.
+- Mount one composed Harness definition per service version with \`ServiceBuilder.mountHarness(...)\`. Give every agent an explicit model alias and bind every used alias under \`ai.models\`. Keep optional Skills, storage, sandbox, concurrency, queue, and artifact bindings in service bootstrap/config.
 - Define portable tools with \`@purista/harness\`. Define PURISTA host tools with \`ServiceBuilder.defineTool(...)\`; keep both under the service-owned \`harness/tool\` directory.
 
 ${createLocalCliUsageGuide(input)}
