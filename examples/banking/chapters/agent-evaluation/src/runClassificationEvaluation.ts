@@ -31,7 +31,6 @@ export async function runClassificationEvaluation(
 					const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
 					try {
 						const outcome = await session.agents.classifySupportMessage.run(target.input)
-						if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
 						return { output: outcome.output, correlation: { runId: outcome.runId } }
 					} finally {
 						await session.release()

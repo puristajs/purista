@@ -6,7 +6,7 @@ kind: lesson
 status: published
 ---
 
-Create stream and application tests. They verify the standard UI message stream endpoint and the protected HTTP application wiring.
+Create stream and application tests. They verify the standard UI message stream endpoint and the protected HTTP application wiring. The fake stream implements the complete public handle: `runId`, the server-derived `sessionId`, `result`, `terminal`, `cancel`, and the async event iterator. Approval tests resume the descriptor through `target.resume(descriptor).stream(...)` while keeping the trusted session id supplied by the server.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts" write
 import { createHash } from 'node:crypto'
@@ -26,10 +26,13 @@ function trustedSessionId(transportId: string) {
 
 afterEach(() => sandbox.restore())
 
-function completedEvents(runId = 'run-1') {
+function completedEvents(runId: string, sessionId: string) {
 	const outcome = { status: 'completed' as const, runId, output: 'Grounded answer [guide-1#0].' }
 	return {
+		runId,
+		sessionId,
 		result: Promise.resolve(outcome),
+		terminal: Promise.resolve(outcome),
 		cancel: sandbox.stub().resolves(),
 		async *[Symbol.asyncIterator]() {
 			yield { type: 'run.started' as const, eventId: 'event-1', sequence: 1, runId, at: new Date(0).toISOString() }
@@ -131,7 +134,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 			],
 		}
 		const harness = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, { payload, parameter: {}, sandbox })
-		const events = completedEvents()
+		const events = completedEvents('run-1', trustedSessionId('session-1'))
 		harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.resolves(events as never)
 
 		await answerKnowledgeQuestionStreamBuilder
@@ -160,7 +163,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 	] as const)('%s an approval by resuming the same Harness root', async (_label, approved) => {
 		const payload = approvalPayload(approved)
 		const harness = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, { payload, parameter: {}, sandbox })
-		const events = completedEvents('run-approval')
+		const events = completedEvents('run-approval', trustedSessionId('session-approval'))
 		const target = harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion
 		target.resume.continuation.stream.resolves(events as never)
 
@@ -197,7 +200,10 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		})
 		const reasons: Array<string | undefined> = []
 		const events = {
+			runId: 'run-cancel',
+			sessionId: trustedSessionId('session-cancel'),
 			result: new Promise<never>(() => undefined),
+			terminal: new Promise<never>(() => undefined),
 			cancel: async (reason?: string) => {
 				reasons.push(reason)
 				stopEvents()

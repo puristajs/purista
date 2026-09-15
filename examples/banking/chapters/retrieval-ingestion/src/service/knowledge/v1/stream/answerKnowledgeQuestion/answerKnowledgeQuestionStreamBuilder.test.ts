@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { createStreamContextMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -6,12 +7,21 @@ import { answerKnowledgeQuestionStreamBuilder } from './answerKnowledgeQuestionS
 const sandbox = createSandbox()
 const usage = { inputTokens: 2, outputTokens: 2, totalTokens: 4 }
 
+function trustedSessionId(transportId: string) {
+	return createHash('sha256')
+		.update(JSON.stringify(['mocked-tenant-id', 'mocked-principal-id', 'customer-help', transportId]))
+		.digest('base64url')
+}
+
 afterEach(() => sandbox.restore())
 
-function completedEvents(runId = 'run-1') {
+function completedEvents(runId: string, sessionId: string) {
 	const outcome = { status: 'completed' as const, runId, output: 'Grounded answer [guide-1#0].' }
 	return {
+		runId,
+		sessionId,
 		result: Promise.resolve(outcome),
+		terminal: Promise.resolve(outcome),
 		cancel: sandbox.stub().resolves(),
 		async *[Symbol.asyncIterator]() {
 			yield { type: 'run.started' as const, eventId: 'event-1', sequence: 1, runId, at: new Date(0).toISOString() }
@@ -51,7 +61,7 @@ function approvalPayload(approved: boolean) {
 		version: 1,
 		rootRunId: 'run-approval',
 		agentRunId: 'run-approval',
-		sessionId: 'session-approval',
+		sessionId: trustedSessionId('session-approval'),
 		interruptId: 'interrupt-1',
 		revision: 'revision-1',
 		eventId: 'event-approval',
@@ -113,7 +123,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 			],
 		}
 		const harness = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, { payload, parameter: {}, sandbox })
-		const events = completedEvents()
+		const events = completedEvents('run-1', trustedSessionId('session-1'))
 		harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.resolves(events as never)
 
 		await answerKnowledgeQuestionStreamBuilder
@@ -123,7 +133,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		expect(
 			harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.calledWith(
 				{ collectionId: 'customer-help', question: 'How long\nare transfers pending?' },
-				{ sessionId: 'session-1' },
+				{ sessionId: trustedSessionId('session-1') },
 			),
 		).toBe(true)
 		expect(harness.chunks.at(0)).toMatchObject({ event: 'data', data: { type: 'start', messageId: 'run-1' } })
@@ -142,24 +152,23 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 	] as const)('%s an approval by resuming the same Harness root', async (_label, approved) => {
 		const payload = approvalPayload(approved)
 		const harness = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, { payload, parameter: {}, sandbox })
-		const events = completedEvents('run-approval')
-		harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.resolves(events as never)
+		const events = completedEvents('run-approval', trustedSessionId('session-approval'))
+		const target = harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion
+		target.resume.continuation.stream.resolves(events as never)
 
 		await answerKnowledgeQuestionStreamBuilder
 			.getStreamFunction()
 			.call({} as never, harness.context, payload, {}, harness.writer)
 
-		const options = harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.firstCall.args[1]
-		expect(options).toMatchObject({
-			sessionId: 'session-approval',
-			resume: {
-				type: 'tool-approval',
-				runId: 'run-approval',
-				interruptId: 'interrupt-1',
-				revision: 'revision-1',
-				decisions: [{ approvalId: 'approval-1', approved }],
-			},
+		expect(target.resume.firstCall.args[0]).toMatchObject({
+			type: 'tool-approval',
+			runId: 'run-approval',
+			interruptId: 'interrupt-1',
+			revision: 'revision-1',
+			decisions: [{ approvalId: 'approval-1', approved }],
 		})
+		const options = target.resume.continuation.stream.firstCall.args[0]
+		expect(options).toMatchObject({ sessionId: trustedSessionId('session-approval') })
 		expect(options).not.toHaveProperty('idempotencyKey')
 		expect(harness.chunks.at(0)).toMatchObject({ event: 'data', data: { type: 'start', messageId: 'assistant-1' } })
 		expect(harness.chunks.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
@@ -180,7 +189,10 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		})
 		const reasons: Array<string | undefined> = []
 		const events = {
+			runId: 'run-cancel',
+			sessionId: trustedSessionId('session-cancel'),
 			result: new Promise<never>(() => undefined),
+			terminal: new Promise<never>(() => undefined),
 			cancel: async (reason?: string) => {
 				reasons.push(reason)
 				stopEvents()

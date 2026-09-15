@@ -33,7 +33,7 @@ const deliveryEnvelopeJsonSchema = Object.freeze({
 			additionalProperties: false,
 			properties: {
 				idempotencyKey: { type: 'string', minLength: 1 },
-				timeoutMs: { type: 'integer', minimum: 0 },
+				timeoutMs: { anyOf: [{ const: false }, { type: 'integer', minimum: 1 }] },
 				metadata: { type: 'object' },
 				durable: { type: 'object' },
 				resume: { type: 'object' },
@@ -82,7 +82,11 @@ export function createHarnessQueueDeliveryEnvelope(
 	if (!nonempty(invocationId)) throw invalidDeliveryEnvelope()
 	assertPlainFields(parameter, [], ['sessionId', 'idempotencyKey', 'timeoutMs', 'metadata', 'durable', 'resume'])
 	if (parameter.resume !== undefined && parameter.idempotencyKey !== undefined) throw invalidDeliveryEnvelope()
-	if (parameter.timeoutMs !== undefined && (!Number.isSafeInteger(parameter.timeoutMs) || parameter.timeoutMs < 0)) {
+	if (
+		parameter.timeoutMs !== undefined &&
+		parameter.timeoutMs !== false &&
+		(!Number.isSafeInteger(parameter.timeoutMs) || parameter.timeoutMs <= 0)
+	) {
 		throw invalidDeliveryEnvelope()
 	}
 	const { sessionId: requestedSessionId, ...invocationParameter } = parameter
@@ -109,7 +113,8 @@ export function requireHarnessQueueDeliveryEnvelope(value: unknown): HarnessQueu
 	if (Object.hasOwn(parameter, 'resume') && Object.hasOwn(parameter, 'idempotencyKey')) throw invalidDeliveryEnvelope()
 	if (
 		parameter.timeoutMs !== undefined &&
-		(!Number.isSafeInteger(parameter.timeoutMs) || Number(parameter.timeoutMs) < 0)
+		parameter.timeoutMs !== false &&
+		(!Number.isSafeInteger(parameter.timeoutMs) || Number(parameter.timeoutMs) <= 0)
 	) {
 		throw invalidDeliveryEnvelope()
 	}

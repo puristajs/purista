@@ -15,12 +15,11 @@ const callClassifierCommandBuilder = directCallerBuilder
 	.getCommandBuilder('callClassifier', 'Call the guarded classifier directly')
 	.addPayloadSchema(classifySupportMessageAgent.contract.input)
 	.addOutputSchema(classifySupportMessageAgent.contract.output)
-	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.canInvokeAgent(directCallerBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setCommandFunction(async function ({ agent }, payload) {
 		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: `direct:${payload.messageId}`,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('The classifier was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 const directCallerService = directCallerBuilder

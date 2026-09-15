@@ -40,13 +40,13 @@ export const runAnswerKnowledgeQuestionCommandBuilder = knowledgeV1ServiceBuilde
 		const sessionId = createHash('sha256')
 			.update(JSON.stringify([tenantId, principalId, payload.conversationId]))
 			.digest('hex')
-		const target = context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
+		const agentClient = context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
 		return payload.resume === undefined
-			? target.run(
+			? agentClient.run(
 					{ collectionId: payload.collectionId, question: payload.question },
 					{ sessionId: `knowledge-answer:${sessionId}` },
 				)
-			: target.resume(payload.resume).run({ sessionId: `knowledge-answer:${sessionId}` })
+			: agentClient.resume(payload.resume).run({ sessionId: `knowledge-answer:${sessionId}` })
 	})
 ```
 `harnessTarget` binds the agent contract to the Knowledge service without

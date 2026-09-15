@@ -11,7 +11,7 @@ export const searchKnowledgeTool = knowledgeV1ServiceBuilder
 		input: searchKnowledgeInputSchema,
 		output: searchKnowledgeOutputSchema,
 	})
-	.canInvokeWorkflow('Knowledge', '1', retrieveKnowledgeWorkflow.contract)
+	.canInvokeWorkflow(knowledgeV1ServiceBuilder.harnessTarget(retrieveKnowledgeWorkflow.contract))
 	.setHandler(async (context, input) => {
 		await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
 			...context.identity,

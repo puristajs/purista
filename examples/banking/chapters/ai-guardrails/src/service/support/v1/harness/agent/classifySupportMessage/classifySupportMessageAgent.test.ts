@@ -1,5 +1,5 @@
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { classifySupportMessageAgent } from './classifySupportMessageAgent.js'
 
@@ -35,15 +35,16 @@ describe('classification guardrails', () => {
 
 	it('redacts card-like digits from a final structured result', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {
-				category: 'card',
-				urgency: 'normal',
-				reason: 'The message contains card number 4111111111111111.',
-			},
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{
+					category: 'card',
+					urgency: 'normal',
+					reason: 'The message contains card number 4111111111111111.',
+				},
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'redactedClassificationTest' })
 			.addAgent(classifySupportMessageAgent)
 			.getInstance({ models: { classification: { provider, model: 'fake' } } })
@@ -56,7 +57,6 @@ describe('classification guardrails', () => {
 					text: 'I have a question about my card.',
 				})
 				expect(outcome.status).toBe('completed')
-				if (outcome.status !== 'completed') throw new Error('Expected a completed classification run.')
 				expect(outcome.output.reason).toBe('The message contains card number [redacted].')
 				provider.assertExhausted()
 			} finally {

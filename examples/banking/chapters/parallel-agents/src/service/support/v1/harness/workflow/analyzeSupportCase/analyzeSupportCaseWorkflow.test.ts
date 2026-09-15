@@ -1,5 +1,5 @@
 import { defineHarness, type JsonValue, type ObjectRequest, type ObjectResponse } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { analyzeSupportCaseWorkflow } from './analyzeSupportCaseWorkflow.js'
 
@@ -54,16 +54,18 @@ describe('analyzeSupportCaseWorkflow', () => {
 			completionOrder.push('response')
 			releaseRisk()
 		})
-		riskProvider.enqueueObject({
-			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-			usage,
-			finishReason: 'stop',
-		})
-		responseProvider.enqueueObject({
-			object: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
+		riskProvider.enqueueObject(
+			objectReply(
+				{ level: 'high', evidence: ['The customer reports a missing card.'] },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		responseProvider.enqueueObject(
+			objectReply(
+				{ customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'parallelWorkflowTest' })
 			.addWorkflow(analyzeSupportCaseWorkflow)
 			.getInstance({
@@ -80,7 +82,6 @@ describe('analyzeSupportCaseWorkflow', () => {
 				message: 'My card is missing.',
 			})
 			expect(outcome.status).toBe('completed')
-			if (outcome.status !== 'completed') throw new Error('Expected a completed parallel workflow.')
 			expect(outcome.output).toEqual({
 				caseId: 'case-1',
 				risk: { level: 'high', evidence: ['The customer reports a missing card.'] },

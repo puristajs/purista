@@ -20,7 +20,7 @@ export const getHarnessDefinitionTestFileContent = (input: {
 	const harnessName = 'definition'
 
 	writer.writeLine("import { defineHarness } from '@purista/harness'")
-	writer.writeLine("import { FakeModelProvider } from '@purista/harness/testing'")
+	writer.writeLine("import { FakeModelProvider, textReply } from '@purista/harness/testing'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.writeLine(`import { ${agentIdentifier} } from '${input.agentImportName}'`).blankLine()
 
@@ -29,13 +29,7 @@ export const getHarnessDefinitionTestFileContent = (input: {
 		writer.writeLine("it('runs as a standalone Harness definition', async () => {")
 		writer.indent(() => {
 			writer.writeLine('const provider = new FakeModelProvider({ strict: true })')
-			writer.writeLine('provider.enqueueText({')
-			writer.indent(() => {
-				writer.writeLine("content: 'hello',")
-				writer.writeLine('usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },')
-				writer.writeLine("finishReason: 'stop',")
-			})
-			writer.writeLine('})').blankLine()
+			writer.writeLine("provider.enqueueText(textReply('hello'))").blankLine()
 			writer.writeLine(`const ${harnessName} = defineHarness({ name: 'agentTest' }).addAgent(${agentIdentifier})`)
 			writer
 				.writeLine(
@@ -47,7 +41,6 @@ export const getHarnessDefinitionTestFileContent = (input: {
 				writer.writeLine("const session = await runtime.getSession('test-session')")
 				writer.writeLine(`const outcome = await session.agents.${agentId}.run('hello')`)
 				writer.writeLine("expect(outcome.status).toBe('completed')")
-				writer.writeLine("if (outcome.status !== 'completed') throw new Error('Expected a completed agent run.')")
 				writer.writeLine("expect(outcome.output).toBe('hello')")
 				writer.writeLine('provider.assertExhausted()')
 			})

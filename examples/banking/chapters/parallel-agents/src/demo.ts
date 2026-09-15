@@ -1,5 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
@@ -7,16 +7,15 @@ const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 async function main() {
 	const riskProvider = new FakeModelProvider({ strict: true })
 	const responseProvider = new FakeModelProvider({ strict: true })
-	riskProvider.enqueueObject({
-		object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-		usage,
-		finishReason: 'stop',
-	})
-	responseProvider.enqueueObject({
-		object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-		usage,
-		finishReason: 'stop',
-	})
+	riskProvider.enqueueObject(
+		objectReply({ level: 'high', evidence: ['The customer reports a missing card.'] }, { usage, finishReason: 'stop' }),
+	)
+	responseProvider.enqueueObject(
+		objectReply(
+			{ customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+			{ usage, finishReason: 'stop' },
+		),
+	)
 	const logger = initLogger('fatal')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()

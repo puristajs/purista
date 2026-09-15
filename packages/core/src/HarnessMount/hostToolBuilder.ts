@@ -12,6 +12,11 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
 import type { Infer, InferIn } from '../schema/index.js'
+import {
+	type AddressedHarnessInvocationSource,
+	type HarnessInvocationContract,
+	resolveAddressedHarnessInvocationSource,
+} from './invocation.js'
 import type {
 	HarnessHostToolSchemaBoundary,
 	HarnessNestedTargetDeclarations,
@@ -121,7 +126,82 @@ export class HarnessHostToolBuilder<
 		Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'agent' }>,
 		ServiceName extends string,
 		ServiceVersion extends string,
-	>(serviceName: ServiceName, serviceVersion: ServiceVersion, contract: Contract) {
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		contract: Contract,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>,
+		Workflows
+	>
+	/** Declare one service-bound or generated remote Harness agent. */
+	canInvokeAgent<
+		const Source extends AddressedHarnessInvocationSource & AnyHarnessTargetContract & Readonly<{ kind: 'agent' }>,
+	>(
+		source: Source,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents &
+			Record<
+				Source['address']['serviceName'],
+				Record<Source['address']['serviceVersion'], Record<Source['id'], HarnessInvocationContract<Source>>>
+			>,
+		Workflows
+	>
+	/** Declare one service-bound queued Harness agent for direct nested invocation. */
+	canInvokeAgent<
+		const Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'agent' }>,
+		const Source extends AddressedHarnessInvocationSource &
+			Readonly<{ contract: Contract; queue: Readonly<{ name: string }> }>,
+	>(
+		source: Source,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents &
+			Record<
+				Source['address']['serviceName'],
+				Record<Source['address']['serviceVersion'], Record<Contract['id'], Contract>>
+			>,
+		Workflows
+	>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, contract: AnyHarnessTargetContract]
+	): unknown {
+		if (args.length === 1) {
+			const resolved = resolveAddressedHarnessInvocationSource(args[0])
+			return this.#registerAgent(resolved.address.serviceName, resolved.address.serviceVersion, resolved.target)
+		}
+		return this.#registerAgent(args[0], args[1], args[2])
+	}
+
+	#registerAgent(serviceName: string, serviceVersion: string, contract: AnyHarnessTargetContract) {
 		assertTargetContract(contract, 'agent')
 		this.#agents = registerTarget(this.#agents, serviceName, serviceVersion, contract.id, contract)
 		return this as unknown as HarnessHostToolBuilder<
@@ -134,7 +214,7 @@ export class HarnessHostToolBuilder<
 			StreamInvokes,
 			QueueInvokes,
 			EmitList,
-			Agents & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>,
+			Agents & Record<string, Record<string, Record<typeof contract.id, typeof contract>>>,
 			Workflows
 		>
 	}
@@ -144,7 +224,82 @@ export class HarnessHostToolBuilder<
 		Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'workflow' }>,
 		ServiceName extends string,
 		ServiceVersion extends string,
-	>(serviceName: ServiceName, serviceVersion: ServiceVersion, contract: Contract) {
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		contract: Contract,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents,
+		Workflows & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>
+	>
+	/** Declare one service-bound or generated remote Harness workflow. */
+	canInvokeWorkflow<
+		const Source extends AddressedHarnessInvocationSource & AnyHarnessTargetContract & Readonly<{ kind: 'workflow' }>,
+	>(
+		source: Source,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents,
+		Workflows &
+			Record<
+				Source['address']['serviceName'],
+				Record<Source['address']['serviceVersion'], Record<Source['id'], HarnessInvocationContract<Source>>>
+			>
+	>
+	/** Declare one service-bound queued Harness workflow for direct nested invocation. */
+	canInvokeWorkflow<
+		const Contract extends AnyHarnessTargetContract & Readonly<{ kind: 'workflow' }>,
+		const Source extends AddressedHarnessInvocationSource &
+			Readonly<{ contract: Contract; queue: Readonly<{ name: string }> }>,
+	>(
+		source: Source,
+	): HarnessHostToolBuilder<
+		Id,
+		Input,
+		Output,
+		Resources,
+		Metrics,
+		Invokes,
+		StreamInvokes,
+		QueueInvokes,
+		EmitList,
+		Agents,
+		Workflows &
+			Record<
+				Source['address']['serviceName'],
+				Record<Source['address']['serviceVersion'], Record<Contract['id'], Contract>>
+			>
+	>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, contract: AnyHarnessTargetContract]
+	): unknown {
+		if (args.length === 1) {
+			const resolved = resolveAddressedHarnessInvocationSource(args[0])
+			return this.#registerWorkflow(resolved.address.serviceName, resolved.address.serviceVersion, resolved.target)
+		}
+		return this.#registerWorkflow(args[0], args[1], args[2])
+	}
+
+	#registerWorkflow(serviceName: string, serviceVersion: string, contract: AnyHarnessTargetContract) {
 		assertTargetContract(contract, 'workflow')
 		this.#workflows = registerTarget(this.#workflows, serviceName, serviceVersion, contract.id, contract)
 		return this as unknown as HarnessHostToolBuilder<
@@ -158,7 +313,7 @@ export class HarnessHostToolBuilder<
 			QueueInvokes,
 			EmitList,
 			Agents,
-			Workflows & Record<ServiceName, Record<ServiceVersion, Record<Contract['id'], Contract>>>
+			Workflows & Record<string, Record<string, Record<typeof contract.id, typeof contract>>>
 		>
 	}
 

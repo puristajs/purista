@@ -465,7 +465,7 @@ void text
 			join(serviceDir, 'command', 'runSummarize', 'runSummarizeCommandBuilder.ts'),
 			'utf8',
 		)
-		expect(commandProjection).toContain(".canInvokeAgent('User', '1', summarizeAgent.contract)")
+		expect(commandProjection).toContain('.canInvokeAgent(userV1ServiceBuilder.harnessTarget(summarizeAgent.contract))')
 		expect(commandProjection).toContain("context.agent.User['1'][summarizeAgent.contract.id].run")
 		expect(commandProjection).toContain(".exposeAsHttpEndpoint('POST', 'ai/summarize')")
 		expect(commandProjection).toContain('.enableHttpSecurity(true)')
@@ -480,8 +480,10 @@ void text
 		expect(streamProjection).toContain(
 			'parseHarnessUIMessageRequest as (body: unknown, options: { sessionId: string })',
 		)
-		expect(streamProjection).toContain(".canInvokeAgent('User', '1', chatAssistantAgent.contract)")
-		expect(streamProjection).toContain("const target = context.agent.User['1'][chatAssistantAgent.contract.id]")
+		expect(streamProjection).toContain(
+			'.canInvokeAgent(userV1ServiceBuilder.harnessTarget(chatAssistantAgent.contract))',
+		)
+		expect(streamProjection).toContain("const agentClient = context.agent.User['1'][chatAssistantAgent.contract.id]")
 		expect(streamProjection).toContain(".exposeAsHttpStreamEndpoint('POST', 'ai/chat-assistant')")
 		expect(streamProjection).toContain('.enableHttpSecurity(true)')
 		expect(streamProjection).toContain('.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)')
@@ -490,7 +492,7 @@ void text
 		expect(streamProjection).not.toContain('await writer.write(record)')
 		expect(streamProjection).not.toContain('writer.onCancel(')
 		expect(streamProjection).toContain("createHash('sha256')")
-		expect(streamProjection).toContain('await target.stream(input, { sessionId: request.sessionId })')
+		expect(streamProjection).toContain('await agentClient.stream(input, { sessionId: request.sessionId })')
 		expect(streamProjection).not.toContain('resume: request.resume')
 		expect(streamProjection).not.toContain('idempotencyKey')
 		expect(streamProjection).not.toContain('.makeEndpointPublic()')
@@ -531,11 +533,11 @@ void text
 			expect(triageDefinition).not.toContain(term)
 		}
 		const agentTestContent = readFileSync(join(harnessDirPath, 'agent', 'triage', 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain("import { FakeModelProvider } from '@purista/harness/testing'")
+		expect(agentTestContent).toContain("import { FakeModelProvider, textReply } from '@purista/harness/testing'")
 		expect(agentTestContent).not.toContain('@purista/ai')
 		expect(agentTestContent).toContain('runs as a standalone Harness definition')
 		expect(agentTestContent).toContain('const provider = new FakeModelProvider({ strict: true })')
-		expect(agentTestContent).toContain("content: 'hello'")
+		expect(agentTestContent).toContain("provider.enqueueText(textReply('hello'))")
 		expect(agentTestContent).toContain("models: { classification: { provider, model: 'fake' } }")
 		expect(agentTestContent).toContain('session.agents.triage.run')
 		expect(agentTestContent).toContain("expect(outcome.output).toBe('hello')")

@@ -1,6 +1,6 @@
 import { defineAgent, defineHarness, type HarnessTargetRunOutcome, type JsonValue } from '@purista/harness'
 import { createHostOwnerToken } from '@purista/harness/integrator'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { Service } from '../core/Service/Service.impl.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
@@ -307,11 +307,12 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 			agents: { idempotentAgent: { successEvent: 'harness.agent.completed' } },
 		} as unknown as AnyMountPolicy
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { value: 'redelivered' },
-			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ value: 'redelivered' },
+				{ usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+			),
+		)
 		const mounted = await startMounted({
 			definition,
 			policy,
@@ -328,13 +329,14 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 				async () => undefined,
 			)
 			const emitMessage = vi.spyOn(mounted.eventBridge, 'emitMessage')
+			const invocationId = 'idempotent-delivery-1'
 			const request = () =>
 				rootCommandRequest({ value: 'redelivered' }, {
 					definition,
 					policy,
 					targetName: agent.id,
 					sessionId: 'retry-session',
-					parameter: { idempotencyKey: 'delivery-1' },
+					invocationId,
 				} as unknown as Parameters<typeof rootCommandRequest>[1]) as CommandRequest
 			const first = (await mounted.eventBridge.invoke(request())) as { outcome: { status: string; runId: string } }
 			const second = (await mounted.eventBridge.invoke(request())) as { outcome: { status: string; runId: string } }

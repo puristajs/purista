@@ -10,7 +10,7 @@ async function main() {
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canClassify: async () => true },
-		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+		classificationModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])

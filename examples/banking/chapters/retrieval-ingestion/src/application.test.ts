@@ -1,6 +1,6 @@
 import { initDefaultStateStore, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import type { HarnessUIApprovalDescriptor } from '@purista/harness-ai-sdk-ui/v1'
 import {
 	parseJsonEventStream,
@@ -174,25 +174,27 @@ describe('knowledge HTTP application', () => {
 
 	it('returns an approval as HTTP 200, resumes the same agent, and scopes retrieval with the authenticated tenant', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueText({
-			content: '',
-			toolCalls: [
-				{
-					id: 'search-1',
-					name: 'searchKnowledge',
-					arguments: { collectionId: 'customer-help', query: 'international transfer pending time', limit: 4 },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
+		provider.enqueueText(
+			textReply('', {
+				toolCalls: [
+					{
+						id: 'search-1',
+						name: 'searchKnowledge',
+						arguments: { collectionId: 'customer-help', query: 'international transfer pending time', limit: 4 },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
+			}),
+		)
 		provider.enqueueEmbedding({ embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }], usage })
-		provider.enqueueText({
-			content: 'International transfers can remain pending for up to two business days [transfer-guide#0].',
-			toolCalls: [],
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueText(
+			textReply('International transfers can remain pending for up to two business days [transfer-guide#0].', {
+				toolCalls: [],
+				usage,
+				finishReason: 'stop',
+			}),
+		)
 		const { application, repository, storage } = await fixture(provider)
 		try {
 			const token = await login(application)
@@ -269,24 +271,26 @@ describe('knowledge HTTP application', () => {
 
 	it('resumes a rejected approval without querying the repository', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueText({
-			content: '',
-			toolCalls: [
-				{
-					id: 'search-rejected',
-					name: 'searchKnowledge',
-					arguments: { collectionId: 'customer-help', query: 'internal transfer policy', limit: 4 },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueText({
-			content: 'I cannot retrieve evidence because the search was not approved.',
-			toolCalls: [],
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueText(
+			textReply('', {
+				toolCalls: [
+					{
+						id: 'search-rejected',
+						name: 'searchKnowledge',
+						arguments: { collectionId: 'customer-help', query: 'internal transfer policy', limit: 4 },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
+			}),
+		)
+		provider.enqueueText(
+			textReply('I cannot retrieve evidence because the search was not approved.', {
+				toolCalls: [],
+				usage,
+				finishReason: 'stop',
+			}),
+		)
 		const { application, repository, storage } = await fixture(provider)
 		try {
 			const token = await login(application)

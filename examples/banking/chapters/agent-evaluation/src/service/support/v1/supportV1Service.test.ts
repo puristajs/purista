@@ -1,16 +1,17 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { supportV1Service } from './supportV1Service.js'
 
 describe('evaluated support service', () => {
 	it('mounts the same portable agent evaluated by the release gate', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { category: 'card', urgency: 'normal', reason: 'The customer asks about a replacement card.' },
-			usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ category: 'card', urgency: 'normal', reason: 'The customer asks about a replacement card.' },
+				{ usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 }, finishReason: 'stop' },
+			),
+		)
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const policy = { canClassify: vi.fn(async () => true) }

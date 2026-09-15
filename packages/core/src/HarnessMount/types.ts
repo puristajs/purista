@@ -1,6 +1,7 @@
 import type {
 	AnyHarnessTargetContract,
 	HarnessCatalogView,
+	HarnessContracts,
 	HarnessDefinition,
 	HarnessExecutionCaller,
 	HarnessIdentity,
@@ -8,6 +9,7 @@ import type {
 	HarnessTargetOutput,
 	HarnessTargetRunOutcome,
 	HarnessTraceContext,
+	RuntimeRequirements,
 } from '@purista/harness'
 import type { HarnessHostContextRequest, HostedHarnessInstanceConfig } from '@purista/harness/integrator'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
@@ -290,10 +292,10 @@ export type HarnessMountPolicy<
 }>
 
 /** Policy inferred directly from one definition's public root contracts. */
-export type HarnessDefinitionMountPolicy<D, Resources extends Record<string, unknown>> = HarnessMountPolicy<
-	HarnessState<D>,
-	Resources
->
+export type HarnessDefinitionMountPolicy<D, Resources extends Record<string, unknown>> = Readonly<{
+	agents?: HarnessContractPolicies<HarnessDefinitionContracts<D>, 'agents', Resources>
+	workflows?: HarnessContractPolicies<HarnessDefinitionContracts<D>, 'workflows', Resources>
+}>
 
 /** One immutable Harness definition mounted by a service builder. */
 export type HarnessMount<
@@ -305,8 +307,33 @@ export type HarnessMount<
 	projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[]
 }>
 
-/** Builder state carried by a portable Harness definition. */
-export type HarnessState<D> = D extends HarnessDefinition<infer S, infer _Name, infer _Graph> ? S : never
+type HarnessDefinitionContracts<D> =
+	D extends Readonly<{
+		contracts: infer Contracts extends HarnessContracts
+	}>
+		? Contracts
+		: never
+
+type HarnessDefinitionRequirements<D> =
+	D extends Readonly<{
+		requirements: infer Requirements extends RuntimeRequirements
+	}>
+		? Requirements
+		: never
+
+type HarnessContractPolicies<
+	Contracts extends HarnessContracts,
+	Kind extends 'agents' | 'workflows',
+	Resources extends Record<string, unknown>,
+> = Partial<{
+	[K in keyof Contracts[Kind] & string]: HarnessTargetPolicy<Contracts[Kind][K], Resources>
+}>
+
+/** Public type state carried by a portable Harness definition. */
+export type HarnessState<D> = Readonly<{
+	contracts: HarnessDefinitionContracts<D>
+	requirements: HarnessDefinitionRequirements<D>
+}>
 
 /** Inferred input/output catalog carried by a portable Harness definition. */
 export type HarnessTypes<D> = D extends { readonly $infer: infer I } ? I : never
@@ -329,6 +356,6 @@ export type HarnessTypes<D> = D extends { readonly $infer: infer I } ? I : never
  * ```
  */
 export type MountedHarnessRuntimeConfig<D> =
-	D extends HarnessDefinition<infer Catalog, infer _Name, infer _Graph>
-		? HostedHarnessInstanceConfig<Catalog['requirements']>
+	D extends Readonly<{ requirements: infer Requirements extends RuntimeRequirements }>
+		? HostedHarnessInstanceConfig<Requirements>
 		: never

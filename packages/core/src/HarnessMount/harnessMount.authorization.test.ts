@@ -18,7 +18,7 @@ import {
 	type HostedDispatchedTargetRequest,
 	type HostedTargetRequest,
 } from '@purista/harness/integrator'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
@@ -284,12 +284,13 @@ async function startApproval(options: Parameters<typeof approvalDefinition>[0] =
 	const fixture = approvalDefinition(options)
 	const storage = persistentStorage()
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueText({
-		content: '',
-		toolCalls: [{ id: 'reviewed-call', name: fixture.tool.id, arguments: 'approved effect' }],
-		usage,
-		finishReason: 'tool_calls',
-	})
+	provider.enqueueText(
+		textReply('', {
+			toolCalls: [{ id: 'reviewed-call', name: fixture.tool.id, arguments: 'approved effect' }],
+			usage,
+			finishReason: 'tool_calls',
+		}),
+	)
 	const mounted = await startAuthorizationFixture({
 		...fixture,
 		ai: { models: { chat: { provider, model: 'fake' } }, storage },
@@ -405,7 +406,7 @@ describe('P4-004 mounted Harness authorization', () => {
 				return fixture.mounted.hosted.runHosted(request)
 			},
 		})
-		fixture.provider.enqueueText({ content: 'approved', toolCalls: [], usage, finishReason: 'stop' })
+		fixture.provider.enqueueText(textReply('approved', { toolCalls: [], usage, finishReason: 'stop' }))
 		try {
 			const reply = response(await fixture.mounted.command('review')(resumeCommand(fixture)))
 			expect(responsePayload(reply)).toMatchObject({
@@ -614,7 +615,7 @@ describe('P4-004 mounted Harness authorization', () => {
 		},
 	)
 
-	it('disables the receiver and Harness timeout with timeoutMs: 0', async () => {
+	it('disables the receiver and Harness timeout with timeoutMs: false', async () => {
 		const entered = deferred<void>()
 		const release = deferred<void>()
 		const fixture = echoDefinition(async input => {
@@ -627,7 +628,7 @@ describe('P4-004 mounted Harness authorization', () => {
 		try {
 			let settled = false
 			const pending = mounted
-				.command('echo')(commandFor(fixture.definition, undefined, 'echo', { timeoutMs: 0 }))
+				.command('echo')(commandFor(fixture.definition, undefined, 'echo', { timeoutMs: false }))
 				.then(value => {
 					settled = true
 					return response(value)
@@ -893,7 +894,9 @@ describe('P4-004 mounted Harness authorization', () => {
 			}
 			const mounted = await startAuthorizationFixture({ ...fixture, policy })
 			const open = asStream(
-				commandFor(fixture.definition, policy, 'echo', { timeoutMs: interruption === 'deadline' ? 10 : 0 }),
+				commandFor(fixture.definition, policy, 'echo', {
+					timeoutMs: interruption === 'deadline' ? 10 : false,
+				}),
 			)
 			let settled = false
 			let pending: Promise<void> | undefined
@@ -1082,7 +1085,7 @@ describe('P4-004 mounted Harness authorization', () => {
 				await bothEntered.promise
 			},
 		})
-		fixture.provider.enqueueText({ content: 'approved once', toolCalls: [], usage, finishReason: 'stop' })
+		fixture.provider.enqueueText(textReply('approved once', { toolCalls: [], usage, finishReason: 'stop' }))
 		try {
 			const replies = await Promise.all([
 				fixture.mounted.command('review')(resumeCommand(fixture)),

@@ -4,6 +4,7 @@ import {
 	defineWorkflow,
 	type HarnessTargetExecutionEvent,
 	type HarnessTargetExecutionTerminalOutcome,
+	type HarnessTargetRunOutcome,
 	harnessExecutionEventTypesV1,
 	type JsonValue,
 	type ModelSchema,
@@ -122,10 +123,10 @@ describe('address-first Harness invocations', () => {
 				sessionId: harness.root.sessionId,
 				outcome:
 					status === 'completed'
-						? { status, runId: 'harness-run', output: 'done' }
+						? { status, runId: harness.root.invocationId, output: 'done' }
 						: {
 								status,
-								runId: 'harness-run',
+								runId: harness.root.invocationId,
 								interrupt: {
 									type: 'external-wait',
 									id: 'wait',
@@ -163,6 +164,25 @@ describe('address-first Harness invocations', () => {
 		},
 	)
 
+	it('derives a stable target-scoped run id from a host idempotency key', async () => {
+		const invocationIds: string[] = []
+		const invoke = vi.fn(async (_address, _payload, _parameter, harness) => {
+			invocationIds.push(harness.root.invocationId)
+			return {
+				sessionId: harness.root.sessionId,
+				outcome: { status: 'completed' as const, runId: harness.root.invocationId, output: 'done' },
+			}
+		})
+		const proxy = createHarnessInvocationProxy<Client>('agent', invoke as any, vi.fn() as any, undefined, invokes)
+
+		await proxy.Knowledge['1'].answer.run('first', { sessionId: 'session', idempotencyKey: 'same' })
+		await proxy.Knowledge['1'].answer.run('duplicate', { sessionId: 'session', idempotencyKey: 'same' })
+		await proxy.Knowledge['1'].answer.run('different', { sessionId: 'session', idempotencyKey: 'other' })
+
+		expect(invocationIds[1]).toBe(invocationIds[0])
+		expect(invocationIds[2]).not.toBe(invocationIds[0])
+	})
+
 	it('derives an omitted session from a private stable invocation id', async () => {
 		let generatedSessionId: string | undefined
 		let rootKeys: string[] | undefined
@@ -171,14 +191,14 @@ describe('address-first Harness invocations', () => {
 			rootKeys = Object.keys(harness.root)
 			return {
 				sessionId: harness.root.sessionId,
-				outcome: { status: 'completed', runId: 'harness-run', output: 'done' },
+				outcome: { status: 'completed', runId: harness.root.invocationId, output: 'done' },
 			}
 		})
 		const proxy = createHarnessInvocationProxy<Client>('agent', invoke as any, vi.fn() as any, undefined, invokes)
 		const result = await proxy.Knowledge['1'].answer.run('question')
 		expect(result.sessionId).toBe(generatedSessionId)
 		expect(result.sessionId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u)
-		expect(result.sessionId).not.toBe(result.outcome.runId)
+		expect(result.sessionId).toBe(result.outcome.runId)
 		expect(rootKeys).toEqual(['invocationId', 'sessionId'])
 	})
 
@@ -282,7 +302,11 @@ describe('address-first Harness invocations', () => {
 	] as const)('rejects an operational %s aggregate outcome locally', async (status, errorCode) => {
 		const invoke = vi.fn(async (_address, _payload, _parameter, harness) => ({
 			sessionId: harness.root.sessionId,
-			outcome: { status, runId: 'harness-run', error: { code: 'REMOTE', message: `secret remote ${status}` } },
+			outcome: {
+				status,
+				runId: harness.root.invocationId,
+				error: { code: 'REMOTE', message: `secret remote ${status}` },
+			},
 		}))
 		const proxy = createHarnessInvocationProxy<Client>('agent', invoke as any, vi.fn() as any, undefined, invokes)
 		const rejection = await proxy.Knowledge['1'].answer.run('question').catch(error => error)
@@ -317,8 +341,13 @@ describe('address-first Harness invocations', () => {
 			sessionId: harness.root.sessionId,
 			outcome: {
 				status: 'interrupted',
-				runId: 'harness-run',
-				interrupt: { type: 'tool-approval', id: 'approval-batch', revision: '1', requests: [request] },
+				runId: harness.root.invocationId,
+				interrupt: {
+					type: 'tool-approval',
+					id: 'approval-batch',
+					revision: '1',
+					requests: [{ ...request, runId: harness.root.invocationId }],
+				},
 			},
 		}))
 		const proxy = createHarnessInvocationProxy<any>('agent', invoke as any, vi.fn() as any, undefined, approvalInvokes)
@@ -343,8 +372,13 @@ describe('address-first Harness invocations', () => {
 					sessionId: harness.root.sessionId,
 					outcome: {
 						status: 'interrupted',
-						runId: 'harness-run',
-						interrupt: { type: 'tool-approval', id: 'approval-batch', revision: '1', requests: [malformed] },
+						runId: harness.root.invocationId,
+						interrupt: {
+							type: 'tool-approval',
+							id: 'approval-batch',
+							revision: '1',
+							requests: [{ ...malformed, runId: harness.root.invocationId }],
+						},
 					},
 				}),
 			)
@@ -355,25 +389,30 @@ describe('address-first Harness invocations', () => {
 	it.each([
 		[
 			'extra wrapper key',
-			(sessionId: string) => ({
+			(sessionId: string, runId: string) => ({
 				sessionId,
-				outcome: { status: 'completed', runId: 'run', output: 'done' },
+				outcome: { status: 'completed', runId, output: 'done' },
 				extra: true,
 			}),
 		],
 		[
 			'extra outcome key',
-			(sessionId: string) => ({
+			(sessionId: string, runId: string) => ({
 				sessionId,
-				outcome: { status: 'completed', runId: 'run', output: 'done', extra: true },
+				outcome: { status: 'completed', runId, output: 'done', extra: true },
 			}),
 		],
 		[
 			'non-JSON output',
-			(sessionId: string) => ({ sessionId, outcome: { status: 'completed', runId: 'run', output: new Date() } }),
+			(sessionId: string, runId: string) => ({
+				sessionId,
+				outcome: { status: 'completed', runId, output: new Date() },
+			}),
 		],
 	] as const)('rejects %s aggregate responses as protocol failures', async (_label, response) => {
-		const invoke = vi.fn(async (_address, _payload, _parameter, harness) => response(harness.root.sessionId))
+		const invoke = vi.fn(async (_address, _payload, _parameter, harness) =>
+			response(harness.root.sessionId, harness.root.invocationId),
+		)
 		const proxy = createHarnessInvocationProxy<Client>('agent', invoke as any, vi.fn() as any, undefined, invokes)
 		await expect(proxy.Knowledge['1'].answer.run('question')).rejects.toMatchObject({
 			errorCode: StatusCode.InternalServerError,
@@ -383,14 +422,18 @@ describe('address-first Harness invocations', () => {
 	it('exposes exact events and producer-owned terminal result without transport frames', async () => {
 		const open = vi.fn(async (_address, _payload, parameter, harness) => {
 			expect(parameter).toEqual({})
-			const outcome = { status: 'completed' as const, runId: 'harness-run', output: 'done' }
+			const outcome = { status: 'completed' as const, runId: harness.root.invocationId, output: 'done' }
 			expect(harness.root).toEqual({ invocationId: expect.any(String), sessionId: 'stream-session' })
 			return streamHandle(outcome)
 		})
 		const proxy = createHarnessInvocationProxy<Client>('agent', vi.fn() as any, open as any, undefined, invokes)
 		const stream = await proxy.Knowledge['1'].answer.stream('question', { sessionId: 'stream-session' })
-		expectTypeOf(stream.result).toEqualTypeOf<Promise<HarnessTargetExecutionTerminalOutcome<typeof target>>>()
+		expectTypeOf(stream.result).toEqualTypeOf<Promise<HarnessTargetRunOutcome<typeof target>>>()
+		expectTypeOf(stream.terminal).toEqualTypeOf<Promise<HarnessTargetExecutionTerminalOutcome<typeof target>>>()
 		await expect(stream.result).resolves.toMatchObject({ status: 'completed', output: 'done' })
+		const openedInvocation = open.mock.calls[0]?.[3] as { root: { invocationId: string } } | undefined
+		if (openedInvocation === undefined) throw new Error('Expected the Harness stream to open one invocation.')
+		expect(stream.runId).toBe(openedInvocation.root.invocationId)
 		expect(stream.sessionId).toBe('stream-session')
 		const events: HarnessTargetExecutionEvent<typeof target>[] = []
 		for await (const event of stream) events.push(event)
@@ -404,10 +447,10 @@ describe('address-first Harness invocations', () => {
 		}))
 		const proxy = createHarnessInvocationProxy<Client>('agent', badInvoke as any, vi.fn() as any, undefined, invokes)
 		await expect(proxy.Knowledge['1'].answer.run('question')).rejects.toThrow('identity')
-		const open = vi.fn(async () =>
+		const open = vi.fn(async (_address, _payload, _parameter, harness) =>
 			streamHandle(
-				{ status: 'completed', runId: 'harness-run', output: 'first' },
-				{ status: 'completed', runId: 'harness-run', output: 'second' },
+				{ status: 'completed', runId: harness.root.invocationId, output: 'first' },
+				{ status: 'completed', runId: harness.root.invocationId, output: 'second' },
 			),
 		)
 		const streamed = createHarnessInvocationProxy<Client>('agent', vi.fn() as any, open as any, undefined, invokes)
@@ -576,10 +619,10 @@ describe('address-first Harness invocations', () => {
 		)
 		const invoke = vi.fn(async (_address, _payload, _parameter, harness) => ({
 			sessionId: harness.root.sessionId,
-			outcome: { status: 'completed', runId: 'harness-run', output: 'done' },
+			outcome: { status: 'completed', runId: harness.root.invocationId, output: 'done' },
 		}))
-		const open = vi.fn(async (_address, _payload) =>
-			streamHandle({ status: 'completed', runId: 'harness-run', output: 'done' }),
+		const open = vi.fn(async (_address, _payload, _parameter, harness) =>
+			streamHandle({ status: 'completed', runId: harness.root.invocationId, output: 'done' }),
 		)
 		const proxy = createHarnessInvocationProxy<any>(
 			'agent',

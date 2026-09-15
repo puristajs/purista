@@ -5,6 +5,7 @@ import type {
 	ExecutionTerminalOutcome,
 	HarnessTargetExecutionEvent,
 	HarnessTargetExecutionTerminalOutcome,
+	JsonValue,
 } from '@purista/harness'
 import type {
 	AnyHarnessTargetContract,
@@ -162,13 +163,7 @@ export function createEventBridgeHarnessTargetDispatcher(
 			if (!binding || !sameReceipt(binding.receipt, request.route)) {
 				throw new HandledError(StatusCode.Conflict, 'Persisted Harness target route no longer matches its binding.')
 			}
-			return openBinding(
-				options,
-				binding,
-				request.wireInput,
-				request.invocation,
-				Object.freeze({ resume: request.resume }),
-			)
+			return openBinding(options, binding, null, request.invocation, Object.freeze({ resume: request.resume }))
 		},
 	}) as unknown as HarnessTargetDispatcher
 }
@@ -179,7 +174,7 @@ async function openBinding<Target extends AnyHarnessTargetContract>(
 		sender: EBMessageSenderAddress
 	}>,
 	binding: HarnessTargetRouteBinding,
-	input: HarnessTargetInput<Target>,
+	input: HarnessTargetInput<Target> | JsonValue,
 	invocation: HarnessTargetDispatchRequest<Target>['invocation'],
 	parameter: object,
 ): Promise<ExactHarnessTargetDispatchStream<Target>> {

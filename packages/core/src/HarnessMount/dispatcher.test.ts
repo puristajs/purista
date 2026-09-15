@@ -703,7 +703,6 @@ describe('EventBridge Harness target dispatcher', () => {
 		})
 		const base = {
 			route: binding.receipt,
-			wireInput: 'question',
 			resume: {
 				type: 'tool-approval',
 				runId: 'child-run',

@@ -8,6 +8,13 @@ status: published
 
 Create the retrieval path. It asks the repository for ranked matches, exposes the work as a workflow and tool, then provides a service command for callers.
 
+The `searchKnowledge` tool belongs to `knowledgeV1ServiceBuilder`. Its
+`canInvokeWorkflow` declaration therefore uses that same builder's
+`harnessTarget(...)` helper to bind the workflow contract to the caller's
+service address. This gives the tool a typed `context.workflow.Knowledge['1']`
+client and keeps invocation authorization attached to the service that owns
+the tool.
+
 ```ts title="src/service/knowledge/v1/harness/tool/queryKnowledgeRepository/queryKnowledgeRepositoryTool.ts" write
 import { HandledError, StatusCode } from '@purista/core'
 import { knowledgeV1ServiceBuilder } from '../../../knowledgeV1ServiceBuilder.js'

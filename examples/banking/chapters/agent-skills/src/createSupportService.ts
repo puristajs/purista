@@ -6,11 +6,11 @@ import { supportV1Service } from './service/support/v1/supportV1Service.js'
 export function createSupportService(
 	eventBridge: EventBridge,
 	logger: Logger,
-	options: Readonly<{ policy: SupportProcedurePolicy; model: { provider: ModelProvider; model: string } }>,
+	options: Readonly<{ policy: SupportProcedurePolicy; answeringModel: { provider: ModelProvider; model: string } }>,
 ) {
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportProcedurePolicy: options.policy },
-		ai: { models: { answering: options.model }, sandbox: { adapter: inMemorySandbox() } },
+		ai: { models: { answering: options.answeringModel }, sandbox: { adapter: inMemorySandbox() } },
 	})
 }

@@ -89,9 +89,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 			writer.writeLine('.addPayloadSchema(inputSchema)')
 			writer.writeLine('.addParameterSchema(parameterSchema)')
 			writer.writeLine('.addOutputSchema(outputSchema)')
-			writer.writeLine(
-				`.canInvokeAgent(${singleQuoted(serviceName)}, ${singleQuoted(input.serviceVersion)}, ${agentIdentifier}.contract)`,
-			)
+			writer.writeLine(`.canInvokeAgent(${serviceBuilderIdentifier}.harnessTarget(${agentIdentifier}.contract))`)
 			writer.writeLine(`.exposeAsHttpEndpoint('POST', '${names.route}')`)
 			writer.writeLine('.enableHttpSecurity(true)')
 			writer.writeLine('.setCommandFunction(async function (context, payload, _parameter) {')
@@ -110,10 +108,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 					writer.writeLine('{ sessionId },')
 				})
 				writer.writeLine(')')
-				writer.writeLine(
-					"if (result.outcome.status !== 'completed') throw new Error('The generated agent projection only supports completed outcomes.')",
-				)
-				writer.writeLine('return result as AgentResult')
+				writer.writeLine('return result')
 			})
 			writer.writeLine('})')
 		})
@@ -131,9 +126,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 		writer.writeLine('.addParameterSchema(parameterSchema)')
 		writer.writeLine('.addChunkSchema(chunkSchema)')
 		writer.writeLine('.addFinalSchema(finalSchema)')
-		writer.writeLine(
-			`.canInvokeAgent(${singleQuoted(serviceName)}, ${singleQuoted(input.serviceVersion)}, ${agentIdentifier}.contract)`,
-		)
+		writer.writeLine(`.canInvokeAgent(${serviceBuilderIdentifier}.harnessTarget(${agentIdentifier}.contract))`)
 		writer.writeLine(`.exposeAsHttpStreamEndpoint('POST', '${names.route}')`)
 		writer.writeLine('.enableHttpSecurity(true)')
 		writer.writeLine('.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)')
@@ -153,9 +146,9 @@ export const getAgentHttpProjectionFileContent = (input: {
 				"const input = request.lastUserMessage.parts.flatMap(part => part.type === 'text' ? [part.text] : []).join('\\n')",
 			)
 			writer.writeLine(
-				`const target = context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id]`,
+				`const agentClient = context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id]`,
 			)
-			writer.writeLine('const events = await target.stream(input, { sessionId: request.sessionId })')
+			writer.writeLine('const events = await agentClient.stream(input, { sessionId: request.sessionId })')
 			writer.writeLine('await pipeHarnessUIMessageStream(events, writer, request)')
 		})
 		writer.writeLine('})')
@@ -226,15 +219,18 @@ ${
 \t\t}
 \t\tconst harness = createStreamContextMock(${names.builderIdentifier}, { payload, parameter: {} })
 \t\tconst outcome = { status: 'completed', runId: 'run-1', output: 'done' } as const
-\t\tconst events = {
+\t\tconst createEvents = (sessionId: string) => ({
+\t\t\trunId: 'run-1',
+\t\t\tsessionId,
 \t\t\tresult: Promise.resolve(outcome),
+\t\t\tterminal: Promise.resolve(outcome),
 \t\t\tcancel: async (_reason?: string) => undefined,
 \t\t\tasync *[Symbol.asyncIterator]() {
 \t\t\t\tyield { type: 'run.started', eventId: 'event-1', sequence: 1, runId: 'run-1', at: new Date(0).toISOString() }
 \t\t\t\tyield { type: 'run.finished', eventId: 'event-2', sequence: 2, runId: 'run-1', at: new Date(1).toISOString(), outcome }
 \t\t\t},
-\t\t}
-\t\tharness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.resolves(events as never)
+\t\t})
+\t\tharness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.callsFake(async (_input, options) => createEvents(options?.sessionId ?? '') as never)
 
 \t\tawait ${names.builderIdentifier}.getStreamFunction().call({} as never, harness.context, payload, {}, harness.writer)
 
@@ -252,13 +248,22 @@ ${
 \t\t}
 \t\tconst harness = createStreamContextMock(${names.builderIdentifier}, { payload, parameter: {} })
 \t\tlet release: () => void = () => undefined
+\t\tlet settleTerminal: (outcome: { status: 'cancelled'; runId: string }) => void = () => undefined
 \t\tconst cancellationReasons: Array<string | undefined> = []
-\t\tconst events = {
-\t\t\tresult: new Promise<never>(() => undefined),
-\t\t\tcancel: async (reason?: string) => { cancellationReasons.push(reason); release() },
+\t\tconst terminal = new Promise<{ status: 'cancelled'; runId: string }>(resolve => { settleTerminal = resolve })
+\t\tconst createEvents = (sessionId: string) => ({
+\t\t\trunId: 'run-2',
+\t\t\tsessionId,
+\t\t\tresult: terminal,
+\t\t\tterminal,
+\t\t\tcancel: async (reason?: string) => {
+\t\t\t\tcancellationReasons.push(reason)
+\t\t\t\tsettleTerminal({ status: 'cancelled', runId: 'run-2' })
+\t\t\t\trelease()
+\t\t\t},
 \t\t\tasync *[Symbol.asyncIterator]() { await new Promise<void>(resolve => { release = resolve }) },
-\t\t}
-\t\tharness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.resolves(events as never)
+\t\t})
+\t\tharness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.callsFake(async (_input, options) => createEvents(options?.sessionId ?? '') as never)
 \t\tconst execution = ${names.builderIdentifier}.getStreamFunction().call({} as never, harness.context, payload, {}, harness.writer)
 \t\tawait new Promise(resolve => setTimeout(resolve, 0))
 

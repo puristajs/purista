@@ -14,6 +14,7 @@ import type {
 	QueueWorkerHandler,
 	QueueWorkerMode,
 } from '../core/types/queue/QueueWorkerDefinition.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import {
 	type HarnessInvocationContract,
 	type HarnessInvocationSource,
@@ -21,14 +22,13 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
 
 type HarnessSourceOfKind<
 	Source extends HarnessInvocationSource,
 	Kind extends 'agent' | 'workflow',
-> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
 
 type QueueWorkerHarnessInvocationBuilder<
 	S extends QueueWorkerBuilderTypes,
@@ -199,11 +199,11 @@ export class QueueWorkerBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'agent'>,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'agent'>,
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): QueueWorkerHarnessInvocationBuilder<
 		S,
 		BoundQueueName,
@@ -233,11 +233,11 @@ export class QueueWorkerBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): QueueWorkerHarnessInvocationBuilder<
 		S,
 		BoundQueueName,

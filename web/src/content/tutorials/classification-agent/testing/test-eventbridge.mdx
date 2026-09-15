@@ -9,6 +9,10 @@ status: published
 This test starts a real `DefaultEventBridge`, PURISTA service, and mounted
 Harness runtime while keeping model behavior deterministic.
 
+The test-only command is owned by `directCallerBuilder`, so its declared agent
+capability uses `directCallerBuilder.harnessTarget(...)`. The helper binds the
+agent contract to the calling service before the generated client is used.
+
 ```ts title="src/service/support/v1/supportV1Service.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
 import { FakeModelProvider, objectReply } from '@purista/harness/testing'
@@ -27,7 +31,7 @@ const callClassifierCommandBuilder = directCallerBuilder
 	.getCommandBuilder('callClassifier', 'Call the mounted classifier directly')
 	.addPayloadSchema(classifySupportMessageAgent.contract.input)
 	.addOutputSchema(classifySupportMessageAgent.contract.output)
-	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(classifySupportMessageAgent.contract))
+	.canInvokeAgent(directCallerBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setCommandFunction(async function ({ agent }, payload) {
 		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: `direct:${payload.messageId}`,

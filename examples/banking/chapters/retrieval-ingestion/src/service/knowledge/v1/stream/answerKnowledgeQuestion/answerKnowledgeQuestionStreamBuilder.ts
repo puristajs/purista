@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import {
 	AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
 	parseHarnessUIMessageRequest,
@@ -18,22 +20,26 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 	.addParameterSchema(parameterSchema)
 	.addChunkSchema(chunkSchema)
 	.addFinalSchema(finalSchema)
-	.canInvokeAgent('Knowledge', '1', answerKnowledgeQuestionAgent.contract)
+	.canInvokeAgent(knowledgeV1ServiceBuilder.harnessTarget(answerKnowledgeQuestionAgent.contract))
 	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
 	.enableHttpSecurity(true)
 	.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
 	.setOpenApiSummary('Chat with authorized knowledge')
 	.addOpenApiTags('knowledge', 'ai')
 	.setStreamFunction(async function (context, payload, _parameter, writer) {
-		const request = await parseHarnessUIMessageRequest(payload)
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const sessionId = createHash('sha256')
+			.update(JSON.stringify([tenantId, principalId, payload.collectionId, payload.id]))
+			.digest('base64url')
+		const request = await parseHarnessUIMessageRequest(payload, { sessionId })
 		const question = request.lastUserMessage.parts
 			.flatMap((part) => (part.type === 'text' ? [part.text] : []))
 			.join('\n')
-		const events = await context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].stream(
-			{ collectionId: payload.collectionId, question },
+		const target = context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
+		const events =
 			request.resume === undefined
-				? { sessionId: request.sessionId }
-				: { sessionId: request.sessionId, resume: request.resume },
-		)
+				? await target.stream({ collectionId: payload.collectionId, question }, { sessionId: request.sessionId })
+				: await target.resume(request.resume).stream({ sessionId: request.sessionId })
 		await pipeHarnessUIMessageStream(events, writer, request)
 	})

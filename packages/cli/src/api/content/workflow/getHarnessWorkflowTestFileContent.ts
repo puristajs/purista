@@ -33,7 +33,6 @@ export const getHarnessWorkflowTestFileContent = (input: {
 				writer.writeLine("const session = await runtime.getSession('test-session')")
 				writer.writeLine(`const outcome = await session.workflows.${workflowId}.run('hello')`)
 				writer.writeLine("expect(outcome.status).toBe('completed')")
-				writer.writeLine("if (outcome.status !== 'completed') throw new Error('Expected a completed workflow run.')")
 				writer.writeLine("expect(outcome.output).toBe('hello')")
 			})
 			writer.writeLine('} finally {')

@@ -8,7 +8,7 @@ export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
 	.addPayloadSchema(requestCardFreezeInputSchema)
 	.addOutputSchema(reviewRequestResultSchema)
-	.canInvokeWorkflow('Support', '1', reviewSupportActionWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(reviewSupportActionWorkflow.contract))
 	.setBeforeGuardHooks({
 		callerMayRequest: async function (context, payload) {
 			const { tenantId, principalId } = context.message

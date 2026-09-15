@@ -1,7 +1,11 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import type { HarnessTargetExecutionEvent, HarnessTargetExecutionTerminalOutcome } from '@purista/harness'
+import type {
+	HarnessTargetExecutionEvent,
+	HarnessTargetExecutionTerminalOutcome,
+	HarnessTargetRunOutcome,
+} from '@purista/harness'
 
 import { defineAgent, defineHarness, harnessExecutionEventTypesV1 } from '@purista/harness'
 import ts from 'typescript'
@@ -376,11 +380,14 @@ const wrongOutput: typeof supportTargetContract.$infer.output =
 
 	it('rejects copied remote declarations before any transport effects and leaves wire input intact', async () => {
 		const target = contract()
-		const invoke = vi.fn<EventBridge['invoke']>()
-		invoke.mockResolvedValue({
-			sessionId: 'session-1',
-			outcome: { status: 'completed', runId: 'run-1', output: { accepted: true } },
-		})
+		const invoke = vi.fn<EventBridge['invoke']>().mockImplementation(async request => ({
+			sessionId: request.harness?.root?.sessionId,
+			outcome: {
+				status: 'completed',
+				runId: request.harness?.root?.invocationId,
+				output: { accepted: true },
+			},
+		}))
 		const openStream = vi.fn()
 		const enqueue = vi.fn(async request => ({ jobId: 'job-1', queueName: request.queueName }))
 		const transport = { instanceId: 'client-instance', invoke, openStream } as Pick<
@@ -448,51 +455,56 @@ const wrongOutput: typeof supportTargetContract.$infer.output =
 				output: queued.output,
 			},
 		})
-		const outcome = { status: 'completed', runId: 'run-stream', output: { accepted: true } } as const
-		const frames: StreamFrame<
-			HarnessTargetExecutionEvent<typeof unqueued>,
-			HarnessTargetExecutionTerminalOutcome<typeof unqueued>
-		>[] = [
-			{ payload: { frameType: 'start', sequence: 0 } },
-			{
-				payload: {
-					frameType: 'chunk',
-					sequence: 1,
-					chunk: {
-						type: 'run.started',
-						eventId: 'start',
-						sequence: 1,
-						runId: outcome.runId,
-						at: '2026-09-09T00:00:00.000Z',
-					},
-				},
-			},
-			{
-				payload: {
-					frameType: 'chunk',
-					sequence: 2,
-					chunk: {
-						type: 'run.finished',
-						eventId: 'finish',
-						sequence: 2,
-						runId: outcome.runId,
-						at: '2026-09-09T00:00:01.000Z',
-						outcome,
-					},
-				},
-			},
-			{ payload: { frameType: 'complete', sequence: 3, final: outcome } },
-		] as StreamFrame<
-			HarnessTargetExecutionEvent<typeof unqueued>,
-			HarnessTargetExecutionTerminalOutcome<typeof unqueued>
-		>[]
 		const cancel = vi.fn(async () => undefined)
-		const openStream = vi.fn<EventBridge['openStream']>().mockResolvedValue({
-			sessionId: 'transport' as CorrelationId,
-			cancel,
-			async *[Symbol.asyncIterator]() {
-				yield* frames
-			},
+		const openStream = vi.fn<EventBridge['openStream']>().mockImplementation(async request => {
+			const root = request.harness?.root
+			if (root === undefined) throw new Error('missing Harness invocation identity')
+			const runId = root.invocationId
+			const outcome = { status: 'completed', runId, output: { accepted: true } } as const
+			const frames: StreamFrame<
+				HarnessTargetExecutionEvent<typeof unqueued>,
+				HarnessTargetExecutionTerminalOutcome<typeof unqueued>
+			>[] = [
+				{ payload: { frameType: 'start', sequence: 0 } },
+				{
+					payload: {
+						frameType: 'chunk',
+						sequence: 1,
+						chunk: {
+							type: 'run.started',
+							eventId: 'start',
+							sequence: 1,
+							runId,
+							at: '2026-09-09T00:00:00.000Z',
+						},
+					},
+				},
+				{
+					payload: {
+						frameType: 'chunk',
+						sequence: 2,
+						chunk: {
+							type: 'run.finished',
+							eventId: 'finish',
+							sequence: 2,
+							runId,
+							at: '2026-09-09T00:00:01.000Z',
+							outcome,
+						},
+					},
+				},
+				{ payload: { frameType: 'complete', sequence: 3, final: outcome } },
+			] as StreamFrame<
+				HarnessTargetExecutionEvent<typeof unqueued>,
+				HarnessTargetExecutionTerminalOutcome<typeof unqueued>
+			>[]
+			return {
+				sessionId: 'transport' as CorrelationId,
+				cancel,
+				async *[Symbol.asyncIterator]() {
+					yield* frames
+				},
+			}
 		})
 		const client = createRemoteHarnessClient(unqueued, { instanceId: 'client', invoke: vi.fn(), openStream } as Pick<
 			EventBridge,
@@ -500,9 +512,15 @@ const wrongOutput: typeof supportTargetContract.$infer.output =
 		>)
 		expect(client).not.toHaveProperty('enqueue')
 		const stream = await client.stream({ raw: '12' }, { sessionId: 'stream-session' })
-		expectTypeOf(stream.result).toEqualTypeOf<Promise<HarnessTargetExecutionTerminalOutcome<typeof unqueued>>>()
+		expectTypeOf(stream.result).toEqualTypeOf<Promise<HarnessTargetRunOutcome<typeof unqueued>>>()
+		expectTypeOf(stream.terminal).toEqualTypeOf<Promise<HarnessTargetExecutionTerminalOutcome<typeof unqueued>>>()
 		expect(stream.sessionId).toBe('stream-session')
-		expect(await stream.result).toEqual(outcome)
+		expect(stream.runId).toBe(openStream.mock.calls[0]?.[0].harness?.root?.invocationId)
+		expect(await stream.result).toEqual({
+			status: 'completed',
+			runId: stream.runId,
+			output: { accepted: true },
+		})
 		const events = []
 		for await (const event of stream) events.push(event.type)
 		expect(events).toEqual(['run.started', 'run.finished'])

@@ -9,7 +9,7 @@ export const runAnswerKnowledgeQuestionCommandBuilder = knowledgeV1ServiceBuilde
 	.getCommandBuilder('runAnswerKnowledgeQuestion', 'Answer a knowledge question with the protected retrieval agent')
 	.addPayloadSchema(runAnswerKnowledgeQuestionInputSchema)
 	.addOutputSchema(runAnswerKnowledgeQuestionOutputSchema)
-	.canInvokeAgent('Knowledge', '1', answerKnowledgeQuestionAgent.contract)
+	.canInvokeAgent(knowledgeV1ServiceBuilder.harnessTarget(answerKnowledgeQuestionAgent.contract))
 	.exposeAsHttpEndpoint('POST', 'knowledge/answer')
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
@@ -28,11 +28,11 @@ export const runAnswerKnowledgeQuestionCommandBuilder = knowledgeV1ServiceBuilde
 		const sessionId = createHash('sha256')
 			.update(JSON.stringify([tenantId, principalId, payload.conversationId]))
 			.digest('hex')
-		return context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run(
-			{ collectionId: payload.collectionId, question: payload.question },
-			{
-				sessionId: `knowledge-answer:${sessionId}`,
-				...(payload.resume === undefined ? {} : { resume: payload.resume }),
-			},
-		)
+		const agentClient = context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
+		return payload.resume === undefined
+			? agentClient.run(
+					{ collectionId: payload.collectionId, question: payload.question },
+					{ sessionId: `knowledge-answer:${sessionId}` },
+				)
+			: agentClient.resume(payload.resume).run({ sessionId: `knowledge-answer:${sessionId}` })
 	})

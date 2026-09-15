@@ -60,8 +60,8 @@ describe('runAnswerKnowledgeQuestionCommandBuilder', () => {
 	it('forwards a typed approval resume without changing the session', async () => {
 		const resumedPayload = { ...payload, resume: approval }
 		const test = context(resumedPayload)
-		const target = test.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].run
-		target.resolves({
+		const target = test.stubs.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
+		target.resume.continuation.run.resolves({
 			sessionId: 'knowledge-answer:runtime',
 			outcome: {
 				status: 'interrupted',
@@ -90,9 +90,9 @@ describe('runAnswerKnowledgeQuestionCommandBuilder', () => {
 		await runAnswerKnowledgeQuestionCommandBuilder
 			.getCommandFunction()
 			.call({} as never, test.context, resumedPayload, {})
-		expect(target.firstCall.args[1]).toMatchObject({
+		expect(target.resume.calledOnceWithExactly(approval)).toBe(true)
+		expect(target.resume.continuation.run.firstCall.args[0]).toMatchObject({
 			sessionId: expect.stringMatching(/^knowledge-answer:[a-f0-9]{64}$/),
-			resume: approval,
 		})
 	})
 

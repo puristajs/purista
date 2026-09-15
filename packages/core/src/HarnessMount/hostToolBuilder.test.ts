@@ -4,12 +4,13 @@ import { z } from 'zod'
 
 import type { PuristaMetricContext } from '../core/types/PuristaMetrics.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
+import type { HarnessInvocationContract } from './invocation.js'
 
 const serviceInfo = {
 	serviceName: 'Records',
 	serviceVersion: '1',
 	serviceDescription: 'Records service',
-}
+} as const
 
 function descriptorValues(root: unknown): unknown[] {
 	const values: unknown[] = []
@@ -151,9 +152,9 @@ describe('ServiceBuilder.defineTool', () => {
 			output: z.string(),
 		})
 		const invalidAliasArguments: Parameters<typeof targetBuilder.canInvokeAgent> = [
+			// @ts-expect-error target aliases are removed; serviceTarget is always contract.id
 			'Agents',
 			'1',
-			// @ts-expect-error target aliases are removed; serviceTarget is always contract.id
 			'alias',
 			childAgent.contract,
 		]
@@ -184,6 +185,38 @@ describe('ServiceBuilder.defineTool', () => {
 		expect(() => builder.canInvokeWorkflow('Workflows', '1', agent.contract as never)).toThrow(
 			'requires a workflow contract',
 		)
+	})
+
+	it('accepts a service-bound Harness target without repeating its address', () => {
+		const childAgent = defineAgent('localChild', {
+			model: 'chat',
+			input: z.object({ question: z.string() }),
+			output: z.object({ answer: z.string() }),
+			instructions: 'Answer.',
+			prompt: input => ({ role: 'user', content: input.question }),
+		})
+		const builder = new ServiceBuilder(serviceInfo)
+		expectTypeOf(builder.info.serviceName).toEqualTypeOf<'Records'>()
+		expectTypeOf(builder.info.serviceVersion).toEqualTypeOf<'1'>()
+		const target = builder.harnessTarget(childAgent.contract)
+		expectTypeOf<HarnessInvocationContract<typeof target>>().toEqualTypeOf<typeof childAgent.contract>()
+		expectTypeOf(target.address.serviceName).toEqualTypeOf<'Records'>()
+		expectTypeOf(target.address.serviceVersion).toEqualTypeOf<'1'>()
+		const tool = builder
+			.defineTool('askLocalChild', {
+				description: 'Ask the locally mounted child agent.',
+				input: z.object({ question: z.string() }),
+				output: z.object({ answer: z.string() }),
+			})
+			.canInvokeAgent(target)
+			.setHandler(async (context, input) => {
+				const answer = await context.agent.Records['1'].localChild.run(input, { callId: 'local-child' })
+				expectTypeOf(answer.answer).toEqualTypeOf<string>()
+				return answer
+			})
+
+		expect(tool.id).toBe('askLocalChild')
+		expect(Object.isFrozen(tool)).toBe(true)
 	})
 
 	it('rejects schemas that are not a defined model JSON boundary', () => {

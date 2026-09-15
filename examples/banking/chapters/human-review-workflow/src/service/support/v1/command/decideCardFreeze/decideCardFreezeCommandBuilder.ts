@@ -7,7 +7,7 @@ export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('decideCardFreeze', 'Authorize and deliver one human review decision')
 	.addPayloadSchema(decideReviewInputSchema)
 	.addOutputSchema(reviewTerminalSchema)
-	.canInvokeWorkflow('Support', '1', reviewSupportActionWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(reviewSupportActionWorkflow.contract))
 	.setBeforeGuardHooks({
 		reviewerMayDecide: async function (context, payload) {
 			const { tenantId, principalId } = context.message
@@ -31,18 +31,16 @@ export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
 		if (!record.approvalInterruptId || !record.approvalRevision || !record.approvalIds?.length) {
 			throw new HandledError(StatusCode.Conflict, 'Review approval is not available')
 		}
-		const { outcome: resumed } = await context.workflow.Support['1'].reviewSupportAction.run(record.workflowInput, {
-			sessionId: record.sessionId,
-			durable: { runId: record.runId },
-			resume: {
+		const { outcome: resumed } = await context.workflow.Support['1'].reviewSupportAction
+			.resume({
 				type: 'tool-approval',
 				runId: record.runId,
 				interruptId: record.approvalInterruptId,
 				revision: record.approvalRevision,
 				eventId: payload.eventId,
 				decisions: record.approvalIds.map((approvalId) => ({ approvalId, approved: payload.outcome === 'approved' })),
-			},
-		})
+			})
+			.run({ sessionId: record.sessionId })
 		if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
 
 		return { status: record.status, requestId: record.requestId }

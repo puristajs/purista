@@ -1,5 +1,5 @@
 import { inMemoryHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { supportHarness } from '../../supportHarness.js'
 
@@ -8,21 +8,15 @@ const usage = { inputTokens: 10, outputTokens: 5, totalTokens: 15 }
 describe('answerSupportQuestionAgent', () => {
 	it('reuses one session history and keeps another session isolated', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { answer: 'A transfer can remain pending for two business days.' },
-			usage,
-			finishReason: 'stop',
-		})
-		provider.enqueueObject({
-			object: { answer: 'The same transfer is still within that window.' },
-			usage,
-			finishReason: 'stop',
-		})
-		provider.enqueueObject({
-			object: { answer: 'Please tell me which transfer you mean.' },
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+		)
+		provider.enqueueObject(
+			objectReply({ answer: 'The same transfer is still within that window.' }, { usage, finishReason: 'stop' }),
+		)
+		provider.enqueueObject(
+			objectReply({ answer: 'Please tell me which transfer you mean.' }, { usage, finishReason: 'stop' }),
+		)
 		const runtime = await supportHarness.getInstance({
 			models: { answering: { provider, model: 'fake-support' } },
 			storage: inMemoryHarnessStorage(),
@@ -81,7 +75,7 @@ describe('answerSupportQuestionAgent', () => {
 
 	it('clears transcript content without deleting the reusable session id', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({ object: { answer: 'I can help.' }, usage, finishReason: 'stop' })
+		provider.enqueueObject(objectReply({ answer: 'I can help.' }, { usage, finishReason: 'stop' }))
 		const runtime = await supportHarness.getInstance({
 			models: { answering: { provider, model: 'fake-support' } },
 			storage: inMemoryHarnessStorage(),
@@ -107,11 +101,7 @@ describe('answerSupportQuestionAgent', () => {
 	it('retains only the newest eight complete conversation turns', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		for (let index = 1; index <= 9; index += 1) {
-			provider.enqueueObject({
-				object: { answer: `Answer ${index}` },
-				usage,
-				finishReason: 'stop',
-			})
+			provider.enqueueObject(objectReply({ answer: `Answer ${index}` }, { usage, finishReason: 'stop' }))
 		}
 		const runtime = await supportHarness.getInstance({
 			models: { answering: { provider, model: 'fake-support' } },

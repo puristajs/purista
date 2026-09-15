@@ -1,5 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { classifySupportMessageAgent } from './harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
 import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
@@ -15,12 +15,11 @@ const callClassifierCommandBuilder = directCallerBuilder
 	.getCommandBuilder('callClassifier', 'Call the mounted classifier directly')
 	.addPayloadSchema(classifySupportMessageAgent.contract.input)
 	.addOutputSchema(classifySupportMessageAgent.contract.output)
-	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.canInvokeAgent(directCallerBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setCommandFunction(async function ({ agent }, payload) {
 		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: `direct:${payload.messageId}`,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('The classifier was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 const directCallerService = directCallerBuilder
@@ -30,15 +29,16 @@ const directCallerService = directCallerBuilder
 describe('supportV1Service', () => {
 	it('routes the command to the mounted agent through EventBridge', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {
-				category: 'card',
-				urgency: 'normal',
-				reason: 'The message asks about a replacement card without an immediate deadline.',
-			},
-			usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{
+					category: 'card',
+					urgency: 'normal',
+					reason: 'The message asks about a replacement card without an immediate deadline.',
+				},
+				{ usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 }, finishReason: 'stop' },
+			),
+		)
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const policy = { canClassify: vi.fn(async () => true) }

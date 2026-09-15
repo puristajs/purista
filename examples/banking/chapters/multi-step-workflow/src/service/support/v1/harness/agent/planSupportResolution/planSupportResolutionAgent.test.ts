@@ -1,5 +1,5 @@
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { planSupportResolutionAgent } from './planSupportResolutionAgent.js'
 
@@ -8,11 +8,12 @@ const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
 describe('planSupportResolutionAgent', () => {
 	it('returns a schema-validated resolution plan', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'resolutionAgentTest' })
 			.addAgent(planSupportResolutionAgent)
 			.getInstance({ models: { planning: { provider, model: 'resolution-fake' } } })
@@ -25,7 +26,6 @@ describe('planSupportResolutionAgent', () => {
 				handlingLane: 'priority',
 			})
 			expect(outcome.status).toBe('completed')
-			if (outcome.status !== 'completed') throw new Error('Expected a completed resolution plan.')
 			expect(outcome.output.nextAction).toBe('freeze_card')
 			provider.assertExhausted()
 		} finally {

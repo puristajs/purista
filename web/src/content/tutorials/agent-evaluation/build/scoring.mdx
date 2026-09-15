@@ -6,7 +6,7 @@ kind: lesson
 status: published
 ---
 
-The runner creates one native Harness runtime, uses one stable session for each case, releases every session, and closes the runtime. Its one-at-a-time concurrency makes the strict fixture order visible.
+The runner creates one native Harness runtime, uses one stable session for each case, releases every session, and closes the runtime. Its one-at-a-time concurrency makes the strict fixture order visible. The public option is named `model` because it selects the provider's concrete model id; the Harness runtime still binds that selection to the exact `classification` model alias required by the agent.
 
 ```ts title="src/runClassificationEvaluation.ts" write
 import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
@@ -23,7 +23,7 @@ export async function runClassificationEvaluation(
 	options: Readonly<{ runId?: string; model?: string }> = {},
 ): Promise<EvaluationRunResult> {
 	const harness = await supportHarness.getInstance({
-		models: { classification: { provider, model: options.classificationModel ?? 'evaluation-model' } },
+		models: { classification: { provider, model: options.model ?? 'evaluation-model' } },
 	})
 	try {
 		return await runEvaluation<

@@ -1,5 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { createSupportService } from '../../../createSupportService.js'
 
@@ -8,23 +8,25 @@ const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
 describe('Skill-enabled support service', () => {
 	it('authorizes the command and mounted agent before reading the Skill', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: { answer: 'Up to two business days.', method: 'pending_transfer' },
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{},
+				{
+					toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+					usage,
+					finishReason: 'tool_calls',
+				},
+			),
+		)
+		provider.enqueueObject(
+			objectReply({ answer: 'Up to two business days.', method: 'pending_transfer' }, { usage, finishReason: 'stop' }),
+		)
 		const policy = { canAnswer: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const service = await createSupportService(eventBridge, initLogger('fatal'), {
 			policy,
-			model: { provider, model: 'fake-support' },
+			answeringModel: { provider, model: 'fake-support' },
 		})
 		await service.start()
 		try {
@@ -55,7 +57,7 @@ describe('Skill-enabled support service', () => {
 		await eventBridge.start()
 		const service = await createSupportService(eventBridge, initLogger('fatal'), {
 			policy: { canAnswer: vi.fn(async () => false) },
-			model: { provider, model: 'fake-support' },
+			answeringModel: { provider, model: 'fake-support' },
 		})
 		await service.start()
 		try {

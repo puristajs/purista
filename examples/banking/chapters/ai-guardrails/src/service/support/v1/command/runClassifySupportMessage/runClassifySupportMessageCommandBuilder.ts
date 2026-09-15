@@ -10,7 +10,7 @@ export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runClassifySupportMessage', 'Classify one support message with the guarded agent')
 	.addPayloadSchema(classifySupportMessageInputSchema)
 	.addOutputSchema(classifySupportMessageOutputSchema)
-	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setBeforeGuardHooks({
 		messageAccess: async function (context, payload) {
 			await requireSupportClassification(context.resources.supportClassificationPolicy, {
@@ -24,8 +24,5 @@ export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		const result = await context.agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: supportClassificationSessionId(context.message, payload.messageId),
 		})
-		if (result.outcome.status !== 'completed') {
-			throw new Error('Message classification was interrupted unexpectedly.')
-		}
 		return result.outcome.output
 	})

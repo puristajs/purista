@@ -1,20 +1,21 @@
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { classifySupportMessageAgent } from './classifySupportMessageAgent.js'
 
 describe('classifySupportMessageAgent', () => {
 	it('runs the classification agent without PURISTA infrastructure', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {
-				category: 'account_access',
-				urgency: 'urgent',
-				reason: 'The customer is locked out before payroll closes.',
-			},
-			usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{
+					category: 'account_access',
+					urgency: 'urgent',
+					reason: 'The customer is locked out before payroll closes.',
+				},
+				{ usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 }, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'classificationTest' })
 			.addAgent(classifySupportMessageAgent)
 			.getInstance({ models: { classification: { provider, model: 'fake-classifier' } } })
@@ -28,7 +29,6 @@ describe('classifySupportMessageAgent', () => {
 				})
 
 				expect(outcome.status).toBe('completed')
-				if (outcome.status !== 'completed') throw new Error('Expected a completed classification run.')
 				expect(outcome.output).toEqual({
 					category: 'account_access',
 					urgency: 'urgent',

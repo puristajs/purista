@@ -1,5 +1,5 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
@@ -35,16 +35,18 @@ describe('parallel specialist workflow over PURISTA', () => {
 	it('runs both specialists and preserves trusted identity through both guards', async () => {
 		const policy = { canAnalyze: vi.fn(async () => true) }
 		const application = await startService(policy)
-		application.riskProvider.enqueueObject({
-			object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-			usage,
-			finishReason: 'stop',
-		})
-		application.responseProvider.enqueueObject({
-			object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
+		application.riskProvider.enqueueObject(
+			objectReply(
+				{ level: 'high', evidence: ['The customer reports a missing card.'] },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		application.responseProvider.enqueueObject(
+			objectReply(
+				{ customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 
 		try {
 			await expect(

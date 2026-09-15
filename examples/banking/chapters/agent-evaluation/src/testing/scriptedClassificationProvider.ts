@@ -1,4 +1,4 @@
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
@@ -9,7 +9,7 @@ export function passingEvaluationProvider() {
 		{ category: 'transfer', urgency: 'normal', reason: 'The question concerns a scheduled transfer date.' },
 		{ category: 'account_access', urgency: 'urgent', reason: 'Essential access is blocked before a deadline.' },
 	]) {
-		provider.enqueueObject({ object, usage, finishReason: 'stop' })
+		provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
 	}
 	return provider
 }

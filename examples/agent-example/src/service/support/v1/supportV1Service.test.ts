@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { localDurableExecution } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 
 import { IncidentRepository } from '../../../resource/incidentRepository.js'
@@ -17,12 +17,11 @@ const analyzeSignalsForTestCommandBuilder = supportV1Service
 	.getCommandBuilder('analyzeSignalsForTest', 'Exercises the mounted host-tool path')
 	.addPayloadSchema(supportV1SignalAnalysisInputPayloadSchema)
 	.addOutputSchema(supportV1SignalAnalysisOutputPayloadSchema)
-	.canInvokeAgent('Support', '1', analyzeSignalsAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(analyzeSignalsAgent.contract))
 	.setCommandFunction(async function ({ agent }, payload) {
 		const result = await agent.Support['1'][analyzeSignalsAgent.contract.id].run(payload, {
 			sessionId: `incident:${payload.incidentId}`,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('The signal analysis was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 
@@ -34,7 +33,7 @@ describe('supportV1Service', () => {
 		const commandNames = definitions.commands.map(command => command.commandName)
 		expect(Object.keys(supportHarness.contracts.agents)).toEqual(['triageTicket', 'analyzeSignals'])
 		expect(Object.keys(supportHarness.contracts.workflows)).toEqual(['reviewRollback'])
-		expect(supportHarnessPolicy.targets).toEqual({
+		expect(supportHarnessPolicy).toEqual({
 			agents: { triageTicket: {}, analyzeSignals: {} },
 			workflows: { reviewRollback: {} },
 		})
@@ -58,27 +57,31 @@ describe('supportV1Service', () => {
 	it('runs service-owned host tools only through the mounted Harness', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
-		provider.enqueueObject({
-			object: {
-				rootCauseHypothesis: 'Awaiting evidence.',
-				confidence: 'low',
-				evidence: ['pending'],
-				nextDiagnostics: ['pending'],
-			},
-			toolCalls: [
-				{ id: 'snapshot-1', name: 'getIncidentSnapshot', arguments: { incidentId: 'INC-2026-042' } },
-				{ id: 'runbook-1', name: 'getRunbook', arguments: { service: 'checkout-api' } },
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{
+					rootCauseHypothesis: 'Awaiting evidence.',
+					confidence: 'low',
+					evidence: ['pending'],
+					nextDiagnostics: ['pending'],
+				},
+				{
+					toolCalls: [
+						{ id: 'snapshot-1', name: 'getIncidentSnapshot', arguments: { incidentId: 'INC-2026-042' } },
+						{ id: 'runbook-1', name: 'getRunbook', arguments: { service: 'checkout-api' } },
+					],
+					usage,
+					finishReason: 'tool_calls',
+				},
+			),
+		)
 		const expected = {
 			rootCauseHypothesis: 'The gateway rollout broke retry idempotency validation.',
 			confidence: 'high' as const,
 			evidence: ['Error rate increased two minutes after CHG-8821.', 'The runbook calls for rollback above 5%.'],
 			nextDiagnostics: ['Compare the gateway adapter with the previous production version.'],
 		}
-		provider.enqueueObject({ object: expected, usage, finishReason: 'stop' })
+		provider.enqueueObject(objectReply(expected, { usage, finishReason: 'stop' }))
 
 		const root = await mkdtemp(join(tmpdir(), 'purista-agent-example-mounted-'))
 		const execution = localDurableExecution({ root, exec: false })

@@ -30,6 +30,7 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import {
 	type HarnessInvocationContract,
 	type HarnessInvocationSource,
@@ -37,7 +38,6 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -48,7 +48,7 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
 type HarnessSourceOfKind<
 	Source extends HarnessInvocationSource,
 	Kind extends 'agent' | 'workflow',
-> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
 
 type CommandHarnessInvocationBuilder<
 	S extends Service,
@@ -332,11 +332,11 @@ export class CommandDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'agent'>,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): CommandHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'agent'>,
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): CommandHarnessInvocationBuilder<
 		S,
 		C,
@@ -366,11 +366,11 @@ export class CommandDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): CommandHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): CommandHarnessInvocationBuilder<
 		S,
 		C,

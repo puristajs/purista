@@ -1,5 +1,5 @@
 import { defineAgent, defineHarness, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 import { EBMessageType, Service } from '../core/index.js'
@@ -414,11 +414,12 @@ describe('StreamDefinitionBuilder', () => {
 		builder.addStreamDefinition(stream.getDefinition()).mountHarness(harness)
 		const eventBridge = new DefaultEventBridge()
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { value: 'classified' },
-			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ value: 'classified' },
+				{ usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+			),
+		)
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
 			ai: { models: { chat: { provider, model: 'fake' } } },
@@ -491,13 +492,11 @@ describe('StreamDefinitionBuilder', () => {
 		const eventBridge = getEventBridgeMock(sandbox)
 		eventBridge.stubs.invoke.callsFake(async message => ({
 			sessionId: message.harness.root.sessionId,
-			outcome: { status: 'completed', runId: `${message.receiver.serviceTarget}-run`, output: 'done' },
+			outcome: { status: 'completed', runId: message.harness.root.invocationId, output: 'done' },
 		}))
-		eventBridge.stubs.openStream.callsFake(async () => ({
-			sessionId: 'transport-session',
-			cancel: vi.fn(),
-			async *[Symbol.asyncIterator]() {},
-		}))
+		eventBridge.stubs.openStream.callsFake(async message =>
+			remoteHarnessStream(message.harness.root.invocationId, 'done'),
+		)
 		const runtime = new Service({
 			info: {
 				serviceName: 'Caller',
@@ -540,3 +539,41 @@ describe('StreamDefinitionBuilder', () => {
 		expect(eventBridge.stubs.openStream.callCount).toBe(2)
 	})
 })
+
+function remoteHarnessStream(runId: string, output: string) {
+	const outcome = { status: 'completed' as const, runId, output }
+	return {
+		sessionId: 'transport-session',
+		cancel: vi.fn(async () => undefined),
+		async *[Symbol.asyncIterator]() {
+			yield {
+				payload: {
+					frameType: 'chunk' as const,
+					sequence: 1,
+					chunk: {
+						type: 'run.started' as const,
+						eventId: 'start',
+						sequence: 1,
+						runId,
+						at: '2026-09-08T00:00:00.000Z',
+					},
+				},
+			}
+			yield {
+				payload: {
+					frameType: 'chunk' as const,
+					sequence: 2,
+					chunk: {
+						type: 'run.finished' as const,
+						eventId: 'finished',
+						sequence: 2,
+						runId,
+						at: '2026-09-08T00:00:01.000Z',
+						outcome,
+					},
+				},
+			}
+			yield { payload: { frameType: 'complete' as const, sequence: 3, final: outcome } }
+		},
+	}
+}

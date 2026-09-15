@@ -150,8 +150,10 @@ describe('command testing helpers', () => {
 		const outcome = { status: 'completed' as const, runId: 'run-1', output: 'answer' }
 		const cancel = stub<[reason?: string], Promise<void>>().resolves()
 		const stream: HarnessExecutionStream<typeof answer.contract> = {
+			runId: 'run-1',
 			sessionId: 'session-1',
 			result: Promise.resolve(outcome),
+			terminal: Promise.resolve(outcome),
 			cancel,
 			async *[Symbol.asyncIterator]() {
 				yield {

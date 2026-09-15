@@ -1,11 +1,11 @@
 import {
-	AgentAdmissionRejectedError,
 	defineAgent,
 	defineHarness,
 	defineWorkflow,
 	type JsonValue,
-	ModelAdmissionRejectedError,
+	ModelCallConcurrencyRejectedError,
 	type ModelSchema,
+	RunConcurrencyRejectedError,
 } from '@purista/harness'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -175,21 +175,21 @@ describe('createMountedHarnessQueueDefinitions', () => {
 		expect(run).toHaveBeenCalledWith({ value: 'question' }, { sessionId: 'workflow-session' })
 	})
 
-	it('maps admission failures in the generated worker and leaves ordinary failures untouched', async () => {
+	it('maps concurrency failures in the generated worker and leaves ordinary failures untouched', async () => {
 		const worker = await required(createMountedHarnessQueueDefinitions(queuedMount().mount).queueWorkerDefinitions[0])
-		const admission = new ModelAdmissionRejectedError(1_250, {
+		const concurrency = new ModelCallConcurrencyRejectedError(1_250, {
 			providerId: 'provider',
 			model: 'model',
 			credentialScope: 'tenant',
 			operation: 'object',
 		})
-		const run = vi.fn().mockRejectedValueOnce(admission).mockRejectedValueOnce(new Error('failed'))
+		const run = vi.fn().mockRejectedValueOnce(concurrency).mockRejectedValueOnce(new Error('failed'))
 		const context = { agent: { Support: { '1': { answer: { run } } } } }
 		const message = queueMessage(createHarnessQueueDeliveryEnvelope({ sessionId: 'session-1' }, 'invocation-1'))
 
 		await expect(worker.handler(context as never, message as never)).resolves.toEqual({
 			status: 'retry',
-			reason: 'model_admission_rejected',
+			reason: 'model_call_concurrency_rejected',
 			delayMs: 1_250,
 		})
 		await expect(worker.handler(context as never, message as never)).rejects.toThrow('failed')
@@ -256,52 +256,52 @@ describe('Service handler Harness enqueue integration', () => {
 })
 
 describe('toHarnessQueueRetry', () => {
-	it('maps local and EventBridge admission errors to the requested queue delay', () => {
-		const local = new ModelAdmissionRejectedError(1_250, {
+	it('maps local and EventBridge concurrency errors to the requested queue delay', () => {
+		const local = new ModelCallConcurrencyRejectedError(1_250, {
 			providerId: 'provider',
 			model: 'model',
 			credentialScope: 'tenant',
 			operation: 'object',
 		})
 		const remote = new HandledError(StatusCode.TooManyRequests, 'capacity unavailable', {
-			code: 'MODEL_ADMISSION_REJECTED',
+			code: 'MODEL_CALL_CONCURRENCY_REJECTED',
 			retriable: true,
 			retryAfterMs: 2_500,
 		})
 
 		expect(toHarnessQueueRetry(local)).toEqual({
 			status: 'retry',
-			reason: 'model_admission_rejected',
+			reason: 'model_call_concurrency_rejected',
 			delayMs: 1_250,
 		})
 		expect(toHarnessQueueRetry(remote)).toEqual({
 			status: 'retry',
-			reason: 'model_admission_rejected',
+			reason: 'model_call_concurrency_rejected',
 			delayMs: 2_500,
 		})
-		expect(toHarnessQueueRetry(new AgentAdmissionRejectedError({ retryAfterMs: 750 }))).toEqual({
+		expect(toHarnessQueueRetry(new RunConcurrencyRejectedError({ retryAfterMs: 750 }))).toEqual({
 			status: 'retry',
-			reason: 'agent_admission_rejected',
+			reason: 'run_concurrency_rejected',
 			delayMs: 750,
 		})
 		expect(
 			toHarnessQueueRetry(
 				new HandledError(StatusCode.TooManyRequests, 'capacity unavailable', {
-					code: 'AGENT_ADMISSION_REJECTED',
+					code: 'RUN_CONCURRENCY_REJECTED',
 					retriable: true,
 					retryAfterMs: 900,
 				}),
 			),
-		).toEqual({ status: 'retry', reason: 'agent_admission_rejected', delayMs: 900 })
+		).toEqual({ status: 'retry', reason: 'run_concurrency_rejected', delayMs: 900 })
 	})
 
 	it('does not reinterpret unrelated or malformed errors', () => {
 		expect(toHarnessQueueRetry(new Error('failed'))).toBeUndefined()
-		expect(toHarnessQueueRetry(new AgentAdmissionRejectedError())).toBeUndefined()
+		expect(toHarnessQueueRetry(new RunConcurrencyRejectedError())).toBeUndefined()
 		expect(
 			toHarnessQueueRetry(
 				new HandledError(StatusCode.TooManyRequests, 'capacity unavailable', {
-					code: 'MODEL_ADMISSION_REJECTED',
+					code: 'MODEL_CALL_CONCURRENCY_REJECTED',
 					retriable: true,
 					retryAfterMs: -1,
 				}),

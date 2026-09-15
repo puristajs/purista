@@ -1,5 +1,5 @@
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 
 import { triageTicketAgent } from './triageTicketAgent.js'
@@ -7,11 +7,12 @@ import { triageTicketAgent } from './triageTicketAgent.js'
 describe('triageTicketAgent', () => {
 	it('runs as a portable definition with a structured prompt and no credentials', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { priority: 'high', reason: 'The customer cannot sign in before payroll closes.' },
-			usage: { inputTokens: 8, outputTokens: 6, totalTokens: 14 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ priority: 'high', reason: 'The customer cannot sign in before payroll closes.' },
+				{ usage: { inputTokens: 8, outputTokens: 6, totalTokens: 14 }, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'triageTicketTest' })
 			.addAgent(triageTicketAgent)
 			.getInstance({ models: { chat: { provider, model: 'fake' } } })

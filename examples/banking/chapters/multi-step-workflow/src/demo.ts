@@ -1,6 +1,6 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
@@ -8,16 +8,15 @@ const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 async function main() {
 	const classificationProvider = new FakeModelProvider({ strict: true })
 	const resolutionProvider = new FakeModelProvider({ strict: true })
-	classificationProvider.enqueueObject({
-		object: { category: 'card', urgency: 'urgent' },
-		usage,
-		finishReason: 'stop',
-	})
-	resolutionProvider.enqueueObject({
-		object: { summary: 'Verify the caller and secure the missing card.', nextAction: 'freeze_card' },
-		usage,
-		finishReason: 'stop',
-	})
+	classificationProvider.enqueueObject(
+		objectReply({ category: 'card', urgency: 'urgent' }, { usage, finishReason: 'stop' }),
+	)
+	resolutionProvider.enqueueObject(
+		objectReply(
+			{ summary: 'Verify the caller and secure the missing card.', nextAction: 'freeze_card' },
+			{ usage, finishReason: 'stop' },
+		),
+	)
 	const storage = sqliteHarnessStorage({ file: ':memory:' })
 	const logger = initLogger('fatal')
 	const eventBridge = new DefaultEventBridge({ logger })

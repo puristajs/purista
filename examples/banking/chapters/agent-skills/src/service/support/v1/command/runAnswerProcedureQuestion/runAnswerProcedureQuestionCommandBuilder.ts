@@ -7,7 +7,7 @@ export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runAnswerProcedureQuestion', 'Answer a support procedure question using reviewed guidance')
 	.addPayloadSchema(answerProcedureQuestionInputSchema)
 	.addOutputSchema(answerProcedureQuestionOutputSchema)
-	.canInvokeAgent('Support', '1', answerProcedureQuestionAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerProcedureQuestionAgent.contract))
 	.setBeforeGuardHooks({
 		procedureAccess: async function (context, payload) {
 			await requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.message, payload.caseId)
@@ -17,6 +17,5 @@ export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerProcedureQuestion.run(payload, {
 			sessionId: supportProcedureSessionId(context.message, payload.caseId),
 		})
-		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
 		return outcome.output
 	})

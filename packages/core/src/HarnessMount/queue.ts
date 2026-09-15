@@ -110,7 +110,7 @@ export function createMountedHarnessQueueDefinitions(mount: HarnessQueueMount): 
 }
 
 /**
- * Convert Harness provider-admission backpressure into a native queue retry.
+ * Convert Harness concurrency backpressure into a native queue retry.
  *
  * This helper accepts both a local Harness error and the handled error received
  * after an address-first EventBridge invocation. Other failures return
@@ -132,17 +132,23 @@ export function toHarnessQueueRetry(error: unknown): QueueRetry | undefined {
 	if (
 		isHarnessError(error) &&
 		error.retriable === true &&
-		(error.code === 'MODEL_ADMISSION_REJECTED' || error.code === 'AGENT_ADMISSION_REJECTED')
+		(error.code === 'MODEL_CALL_CONCURRENCY_REJECTED' || error.code === 'RUN_CONCURRENCY_REJECTED')
 	) {
 		return retryFromDelay(
 			error.meta?.retryAfterMs,
-			error.code === 'MODEL_ADMISSION_REJECTED' ? 'model_admission_rejected' : 'agent_admission_rejected',
+			error.code === 'MODEL_CALL_CONCURRENCY_REJECTED' ? 'model_call_concurrency_rejected' : 'run_concurrency_rejected',
 		)
 	}
-	if (error instanceof HandledError && error.errorCode === StatusCode.TooManyRequests && isAdmissionData(error.data)) {
+	if (
+		error instanceof HandledError &&
+		error.errorCode === StatusCode.TooManyRequests &&
+		isConcurrencyData(error.data)
+	) {
 		return retryFromDelay(
 			error.data.retryAfterMs,
-			error.data.code === 'MODEL_ADMISSION_REJECTED' ? 'model_admission_rejected' : 'agent_admission_rejected',
+			error.data.code === 'MODEL_CALL_CONCURRENCY_REJECTED'
+				? 'model_call_concurrency_rejected'
+				: 'run_concurrency_rejected',
 		)
 	}
 	return undefined
@@ -157,15 +163,15 @@ function retryFromDelay(value: unknown, reason: string): QueueRetry | undefined 
 	})
 }
 
-function isAdmissionData(value: unknown): value is {
-	code: 'MODEL_ADMISSION_REJECTED' | 'AGENT_ADMISSION_REJECTED'
+function isConcurrencyData(value: unknown): value is {
+	code: 'MODEL_CALL_CONCURRENCY_REJECTED' | 'RUN_CONCURRENCY_REJECTED'
 	retriable: true
 	retryAfterMs: number
 } {
 	if (!value || typeof value !== 'object') return false
 	const data = value as Record<string, unknown>
 	return (
-		(data.code === 'MODEL_ADMISSION_REJECTED' || data.code === 'AGENT_ADMISSION_REJECTED') &&
+		(data.code === 'MODEL_CALL_CONCURRENCY_REJECTED' || data.code === 'RUN_CONCURRENCY_REJECTED') &&
 		data.retriable === true &&
 		typeof data.retryAfterMs === 'number'
 	)

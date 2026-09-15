@@ -1,27 +1,26 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { inMemoryHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
 const provider = new FakeModelProvider({ strict: true })
 const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
-provider.enqueueObject({
-	object: { answer: 'A transfer can remain pending for two business days.' },
-	usage,
-	finishReason: 'stop',
-})
-provider.enqueueObject({
-	object: { answer: 'Yes. The same transfer is still inside that two-day window.' },
-	usage,
-	finishReason: 'stop',
-})
+provider.enqueueObject(
+	objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+)
+provider.enqueueObject(
+	objectReply(
+		{ answer: 'Yes. The same transfer is still inside that two-day window.' },
+		{ usage, finishReason: 'stop' },
+	),
+)
 
 const eventBridge = new DefaultEventBridge({ logger: initLogger('error') })
 await eventBridge.start()
 const storage = inMemoryHarnessStorage()
 const support = await createSupportService(eventBridge, initLogger('error'), {
 	policy: { canAccess: async () => true },
-	model: { provider, model: 'fake-support' },
+	answeringModel: { provider, model: 'fake-support' },
 	storage,
 })
 await support.start()

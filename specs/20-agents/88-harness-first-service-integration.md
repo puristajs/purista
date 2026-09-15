@@ -133,7 +133,7 @@ const support = await supportV1Service.getInstance(eventBridge, {
 graph can use Harness defaults. They become required when compiled durability
 or memory capabilities require them. Supplying either adapter does not grant an
 undeclared agent or workflow capability. MCP bindings, sandbox, durable
-workspace, artifact store, optional agent admission, and model admission appear
+workspace, artifact store, optional run concurrency, and model-call concurrency appear
 only when accepted or required by the definition.
 
 MCP definitions statically require server ids and tool contracts only. The
@@ -1675,7 +1675,7 @@ settles the transport result with that same failed terminal rather than a
 completed result, and publishes no success event. Publication failure can never
 be reported as successful completion.
 
-## 8. Queues and admission
+## 8. Queues and concurrency
 
 Queueing is an explicit PURISTA delivery option on a root. The complete binding
 uses normal queue and worker builders:
@@ -1817,13 +1817,14 @@ operations and do not traverse the durable queue. Queue delivery retains
 trusted identity, tracing, idempotency, retry/defer metadata, and the logical
 input contract.
 
-Harness `AgentAdmission` limits concurrent root execution trees regardless of
+Harness `RunConcurrency` limits concurrent root execution trees regardless of
 direct or queued entry. Descendants with the same `rootRunId` join the
 reentrant reference-counted lease so a parent cannot deadlock waiting for a
 child at capacity one. Parent `maxParallelSubagents` bounds fan-out. Provider
-admission separately controls provider/model/credential rate windows. A queue
-worker may convert `AgentAdmissionRejectedError` into a delayed retry only when
-it is retriable and includes `retryAfterMs`. These are distinct controls.
+`ModelCallConcurrency` separately controls provider/model/credential rate
+windows. A queue worker may convert `RunConcurrencyRejectedError` or
+`ModelCallConcurrencyRejectedError` into a delayed retry only when the error is
+retriable and includes `retryAfterMs`. These are distinct controls.
 
 ## 9. Exported service definitions
 
@@ -2108,7 +2109,7 @@ Core and Hono use one mapping:
 | missing addressed target | handled `404` |
 | target export digest, durable revision, replay, idempotency, session-identity, or stored-run-owner tenant/identity conflict | handled `409` |
 | business guard, permission, or policy denial | handled `403` |
-| agent or model admission rejection | handled `429` with retry metadata |
+| run or model-call concurrency rejection | handled `429` with retry metadata |
 | timeout or expired deadline | handled `504` |
 | interrupted outcome | successful typed outcome / HTTP `200`, never an error |
 | stream cancellation | stream cancel terminal behavior |

@@ -13,7 +13,7 @@ async function main() {
 			canClassify: async ({ tenantId, principalId }) =>
 				tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
-		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+		classificationModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])

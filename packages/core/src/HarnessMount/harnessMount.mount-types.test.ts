@@ -5,9 +5,13 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
+import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { generatedModelSchema, rootCommandRequest } from './harnessMount.test.fixture.js'
+import type { AddressedHarnessInvocationSource, HarnessInvocationContract } from './invocation.js'
 import type { HarnessInvokeParameter } from './invokeTypes.js'
+import { defineHarnessQueueBinding } from './queueBinding.js'
 import type { HarnessState, HarnessTypes, MountedHarnessRuntimeConfig } from './types.js'
 
 const wireSchema = {
@@ -184,6 +188,31 @@ describe('P4-004 public Harness mount inference', () => {
 			.addCommandDefinition(wrapper.getDefinition())
 			.mountHarness(agentHarness)
 		await expect(unmatched.resolveDefinitions()).rejects.toThrow('has no matching mounted target projection')
+	})
+
+	it('binds a queued same-service target without repeating its address and preserves enqueue', async () => {
+		const builder = new ServiceBuilder(serviceInfo)
+		const queue = new QueueDefinitionBuilder('harness.typedEcho', 'Queue typed workflow input')
+		const worker = new QueueWorkerBuilder('harness.typedEcho', 'typed-echo-worker')
+		const binding = defineHarnessQueueBinding(typedWorkflow.contract, queue, worker)
+		const target = builder.harnessTarget(binding.reference)
+		expectTypeOf<HarnessInvocationContract<typeof target>>().toEqualTypeOf<typeof typedWorkflow.contract>()
+		expectTypeOf<typeof target>().toMatchTypeOf<AddressedHarnessInvocationSource>()
+		const wrapper = builder
+			.getCommandBuilder('enqueueTypedEcho', 'Enqueue the locally mounted workflow')
+			.addPayloadSchema(typedWorkflow.contract.input)
+			.addOutputSchema(typedWorkflow.contract.output)
+			.canInvokeWorkflow(target)
+			.setCommandFunction(async function ({ workflow }, payload) {
+				const receipt = await workflow.Harness['1'].typedEcho.enqueue({ raw: String(payload.value) })
+				expectTypeOf(receipt.jobId).toEqualTypeOf<string>()
+				return { label: receipt.jobId }
+			})
+		const policy = builder.defineHarnessPolicy(workflowHarness, {
+			workflows: { typedEcho: { queue: binding } },
+		})
+		const mounted = builder.addCommandDefinition(wrapper.getDefinition()).mountHarness(workflowHarness, policy)
+		await expect(mounted.resolveDefinitions()).resolves.toBeDefined()
 	})
 
 	it('requires the exact model binding for a direct agent at getInstance', async () => {

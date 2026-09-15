@@ -1,5 +1,5 @@
 import { defineAgent, defineHarness, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
 import { z } from 'zod'
@@ -569,11 +569,12 @@ describe('SubscriptionDefinitionBuilder', () => {
 		builder.addSubscriptionDefinition(subscription.getDefinition()).mountHarness(harness)
 		const eventBridge = new DefaultEventBridge()
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { value: 'classified' },
-			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ value: 'classified' },
+				{ usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+			),
+		)
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
 			ai: { models: { chat: { provider, model: 'fake' } } },

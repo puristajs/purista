@@ -30,7 +30,11 @@ rm src/service/support/v1/command/runResolveSupportCase/types.ts
 
 Use `supportV1ServiceBuilder.harnessTarget(...)` to bind the direct workflow
 contract to its service address. The client preserves the Harness result
-envelope until the command checks for completion.
+envelope until the command checks for completion. A workflow run can also
+return an interrupt, so the command narrows `result.outcome.status` before it
+reads `output`. This HTTP wrapper reports an interrupted run as `409 Conflict`
+with the run and interrupt descriptors; a continuation endpoint can use those
+descriptors to resume the same durable root.
 
 ```ts title="src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -63,6 +67,12 @@ export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
 		})
+		if (result.outcome.status !== 'completed') {
+			throw new HandledError(StatusCode.Conflict, 'Support resolution is waiting for continuation', {
+				runId: result.outcome.runId,
+				interrupt: result.outcome.interrupt,
+			})
+		}
 		return result.outcome.output
 	})
 ```

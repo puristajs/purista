@@ -6,7 +6,7 @@ import {
 	type JsonValue,
 	type ModelSchema,
 } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
@@ -341,14 +341,15 @@ describe('P4-004 mounted Harness receivers', () => {
 		builder.mountHarness(definition)
 		const provider = new FakeModelProvider({ strict: true })
 		const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
-		provider.enqueueText({
-			content: '',
-			toolCalls: [{ id: 'invoke-nested-call', name: hostTool.id, arguments: { value: 'from tool' } }],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueText({ content: 'nested response', toolCalls: [], usage, finishReason: 'stop' })
-		provider.enqueueText({ content: 'nested complete', toolCalls: [], usage, finishReason: 'stop' })
+		provider.enqueueText(
+			textReply('', {
+				toolCalls: [{ id: 'invoke-nested-call', name: hostTool.id, arguments: { value: 'from tool' } }],
+				usage,
+				finishReason: 'tool_calls',
+			}),
+		)
+		provider.enqueueText(textReply('nested response', { toolCalls: [], usage, finishReason: 'stop' }))
+		provider.enqueueText(textReply('nested complete', { toolCalls: [], usage, finishReason: 'stop' }))
 		const eventBridge = new DefaultEventBridge()
 		const openStream = vi.spyOn(eventBridge, 'openStream')
 		await eventBridge.start()

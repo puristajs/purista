@@ -7,7 +7,7 @@ export const runAnalyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runAnalyzeSupportCase', 'Run bounded specialist analysis for one support case')
 	.addPayloadSchema(supportCaseInputSchema)
 	.addOutputSchema(supportCaseAnalysisOutputSchema)
-	.canInvokeWorkflow('Support', '1', analyzeSupportCaseWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(analyzeSupportCaseWorkflow.contract))
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
@@ -21,6 +21,5 @@ export const runAnalyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 		const result = await context.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run(payload, {
 			sessionId: supportCaseSessionId(context.message, payload.caseId),
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Support case analysis did not complete.')
 		return result.outcome.output
 	})

@@ -9,7 +9,7 @@ export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runResolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
 	.addOutputSchema(supportResolutionOutputSchema)
-	.canInvokeWorkflow('Support', '1', resolveSupportCaseWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(resolveSupportCaseWorkflow.contract))
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
@@ -28,6 +28,11 @@ export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Support resolution did not complete')
+		if (result.outcome.status !== 'completed') {
+			throw new HandledError(StatusCode.Conflict, 'Support resolution is waiting for continuation', {
+				runId: result.outcome.runId,
+				interrupt: result.outcome.interrupt,
+			})
+		}
 		return result.outcome.output
 	})

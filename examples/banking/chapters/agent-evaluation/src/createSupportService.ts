@@ -8,12 +8,12 @@ export function createSupportService(
 	logger: Logger,
 	options: Readonly<{
 		policy: SupportClassificationPolicy
-		model: { provider: ModelProvider; model: string }
+		classificationModel: { provider: ModelProvider; model: string }
 	}>,
 ) {
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: { models: { classification: options.model } },
+		ai: { models: { classification: options.classificationModel } },
 	})
 }

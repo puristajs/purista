@@ -21,6 +21,7 @@ import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGua
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import {
 	type HarnessInvocationContract,
 	type HarnessInvocationSource,
@@ -28,7 +29,6 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -37,7 +37,7 @@ import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderType
 type HarnessSourceOfKind<
 	Source extends HarnessInvocationSource,
 	Kind extends 'agent' | 'workflow',
-> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
 
 type StreamHarnessInvocationBuilder<
 	S extends Service,
@@ -270,11 +270,11 @@ export class StreamDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'agent'>,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'agent'>,
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
 	canInvokeAgent(
 		...args:
@@ -298,11 +298,11 @@ export class StreamDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
 	canInvokeWorkflow(
 		...args:

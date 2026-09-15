@@ -1,4 +1,4 @@
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { assertClassificationGate } from './changeGate.js'
 import { runClassificationEvaluation } from './runClassificationEvaluation.js'
@@ -28,7 +28,7 @@ describe('classification agent evaluation', () => {
 			{ category: 'transfer', urgency: 'normal', reason: 'Correct fixture.' },
 			{ category: 'account_access', urgency: 'urgent', reason: 'Correct fixture.' },
 		]) {
-			provider.enqueueObject({ object, usage, finishReason: 'stop' })
+			provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
 		}
 		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
 		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)

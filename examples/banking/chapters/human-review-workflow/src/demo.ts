@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import { createReviewApplication } from './createReviewApplication.js'
 
 const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
@@ -14,13 +14,14 @@ async function main() {
 	await eventBridge.start()
 	const effects: string[] = []
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueText({
-		content: '',
-		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueText({ content: 'reviewed', usage, finishReason: 'stop' })
+	provider.enqueueText(
+		textReply('', {
+			toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+			usage,
+			finishReason: 'tool_calls',
+		}),
+	)
+	provider.enqueueText(textReply('reviewed', { usage, finishReason: 'stop' }))
 	const application = await createReviewApplication(
 		eventBridge,
 		logger,

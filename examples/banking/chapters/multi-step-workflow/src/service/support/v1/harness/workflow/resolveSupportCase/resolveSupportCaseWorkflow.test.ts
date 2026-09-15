@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { localDurableExecution } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { supportHarness } from '../../supportHarness.js'
 import { selectHandlingLane } from './resolveSupportCaseWorkflow.js'
@@ -18,16 +18,15 @@ describe('resolveSupportCaseWorkflow', () => {
 	it('replays a completed durable run after a runtime and storage restart', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
-		classificationProvider.enqueueObject({
-			object: { category: 'card', urgency: 'urgent' },
-			usage,
-			finishReason: 'stop',
-		})
-		resolutionProvider.enqueueObject({
-			object: { summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
+		classificationProvider.enqueueObject(
+			objectReply({ category: 'card', urgency: 'urgent' }, { usage, finishReason: 'stop' }),
+		)
+		resolutionProvider.enqueueObject(
+			objectReply(
+				{ summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const directory = await mkdtemp(join(tmpdir(), 'purista-multi-step-'))
 		const input = { caseId: 'case-1', message: 'My card was stolen.' }
 		try {

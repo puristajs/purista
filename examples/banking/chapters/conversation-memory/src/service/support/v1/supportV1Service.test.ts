@@ -1,6 +1,6 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger, ServiceBuilder } from '@purista/core'
 import { inMemoryHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { HarnessConversationHistory } from '../../../resources/HarnessConversationHistory.js'
 import { conversationSessionId } from './conversationSessionId.js'
@@ -23,12 +23,11 @@ const callSupportAgentCommandBuilder = directCallerBuilder
 	.getCommandBuilder('callSupportAgent', 'Call the conversation agent directly')
 	.addPayloadSchema(answerSupportQuestionAgent.contract.input)
 	.addOutputSchema(answerSupportQuestionAgent.contract.output)
-	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
+	.canInvokeAgent(directCallerBuilder.harnessTarget(answerSupportQuestionAgent.contract))
 	.setCommandFunction(async function (context, payload) {
 		const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(payload, {
 			sessionId: conversationSessionId(context.message, payload.conversationId),
 		})
-		if (result.outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 const directCallerService = directCallerBuilder
@@ -53,11 +52,9 @@ const invoke = (
 describe('support conversation service', () => {
 	it('uses one mounted session for the agent and authorized history commands', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { answer: 'A transfer can remain pending for two business days.' },
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+		)
 		const storage = inMemoryHarnessStorage()
 		const policy = { canAccess: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()

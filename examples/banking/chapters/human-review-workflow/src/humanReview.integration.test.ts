@@ -1,6 +1,6 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { InMemorySupportReviewStore } from './resources/InMemorySupportReviewStore.js'
 import { reviewIdentity } from './service/support/v1/reviewIdentity.js'
@@ -24,17 +24,16 @@ class IdempotentCardFreezeExecutor {
 
 function reviewModel() {
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueText({
-		content: '',
-		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
-		usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueText({
-		content: 'reviewed',
-		usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-		finishReason: 'stop',
-	})
+	provider.enqueueText(
+		textReply('', {
+			toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		}),
+	)
+	provider.enqueueText(
+		textReply('reviewed', { usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' }),
+	)
 	return provider
 }
 

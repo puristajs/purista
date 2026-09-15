@@ -7,7 +7,7 @@ export const runAnswerTransactionQuestionCommandBuilder = supportV1ServiceBuilde
 	.getCommandBuilder('runAnswerTransactionQuestion', 'Answer a support question with authorized PURISTA tools')
 	.addPayloadSchema(answerTransactionQuestionInputSchema)
 	.addOutputSchema(answerTransactionQuestionOutputSchema)
-	.canInvokeAgent('Support', '1', answerTransactionQuestionAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerTransactionQuestionAgent.contract))
 	.setBeforeGuardHooks({
 		questionAccess: async function (context, payload) {
 			await requireSupportQuestion(context.resources.supportQuestionPolicy, {
@@ -22,6 +22,5 @@ export const runAnswerTransactionQuestionCommandBuilder = supportV1ServiceBuilde
 		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerTransactionQuestion.run(payload, {
 			sessionId: supportQuestionSessionId(context.message, payload.questionId),
 		})
-		if (outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
 		return outcome.output
 	})

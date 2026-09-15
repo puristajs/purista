@@ -38,7 +38,7 @@ export function createSupportService(
 The `ai.models` map binds both explicit purpose aliases: `riskAssessment` and `responsePlanning`.
 
 The earlier `fanOut(..., { concurrency: 2 })` limit applies only to callbacks
-inside that workflow step. Deployment admission is separate. A larger service
+inside that workflow step. Runtime concurrency is separate. A larger service
 can set `ai.concurrency: { runs, modelCalls }` to limit complete root runs and
 active provider calls. This small deterministic service does not need an
 additional runtime limit.

@@ -9,7 +9,7 @@ export function createSupportService(
 	logger: Logger,
 	options: Readonly<{
 		policy: SupportConversationPolicy
-		model: { provider: ModelProvider; model: string }
+		answeringModel: { provider: ModelProvider; model: string }
 		storage: HarnessStorage
 	}>,
 ) {
@@ -20,7 +20,7 @@ export function createSupportService(
 			supportConversationPolicy: options.policy,
 		},
 		ai: {
-			models: { answering: options.model },
+			models: { answering: options.answeringModel },
 			storage: options.storage,
 		},
 	})

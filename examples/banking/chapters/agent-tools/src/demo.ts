@@ -1,6 +1,6 @@
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportApplication } from './createSupportApplication.js'
 import { invokeSupportQuestion } from './invokeSupportQuestion.js'
 
@@ -9,23 +9,28 @@ const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
 async function main() {
 	const logger = initLogger('fatal')
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueObject({
-		object: {},
-		toolCalls: [
+	provider.enqueueObject(
+		objectReply(
+			{},
 			{
-				id: 'lookup-1',
-				name: 'lookupTransaction',
-				arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+				toolCalls: [
+					{
+						id: 'lookup-1',
+						name: 'lookupTransaction',
+						arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
 			},
-		],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueObject({
-		object: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
-		usage,
-		finishReason: 'stop',
-	})
+		),
+	)
+	provider.enqueueObject(
+		objectReply(
+			{ answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+			{ usage, finishReason: 'stop' },
+		),
+	)
 	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()

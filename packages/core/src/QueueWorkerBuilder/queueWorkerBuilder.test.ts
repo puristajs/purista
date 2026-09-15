@@ -1,5 +1,5 @@
 import { defineAgent, defineHarness, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { expectTypeOf, vi } from 'vitest'
 import { z } from 'zod'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
@@ -184,9 +184,11 @@ describe('QueueWorkerBuilder', () => {
 
 		const invoke = vi.fn(async (_address, _payload, _parameter, harness) => ({
 			sessionId: harness.root.sessionId,
-			outcome: { status: 'completed' as const, runId: 'remote-run', output: 'done' },
+			outcome: { status: 'completed' as const, runId: harness.root.invocationId, output: 'done' },
 		}))
-		const open = vi.fn(async () => streamHandle('done'))
+		const open = vi.fn(async (_address, _payload, _parameter, harness) =>
+			streamHandle('done', harness.root.invocationId),
+		)
 		const enqueue = vi.fn(async () => ({ jobId: 'job-1', queueName: 'remote.answers' }))
 		const proxy = createHarnessInvocationProxy<any>(
 			'agent',
@@ -283,11 +285,12 @@ describe('QueueWorkerBuilder', () => {
 		const eventBridge = new DefaultEventBridge()
 		const queueBridge = new DefaultQueueBridge()
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { value: 'classified' },
-			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ value: 'classified' },
+				{ usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+			),
+		)
 		await eventBridge.start()
 		const service = await builder.getInstance(eventBridge, {
 			ai: { models: { chat: { provider, model: 'fake' } } },
@@ -308,8 +311,8 @@ describe('QueueWorkerBuilder', () => {
 	})
 })
 
-function streamHandle(output: string) {
-	const outcome = { status: 'completed' as const, runId: 'remote-run', output }
+function streamHandle(output: string, runId = 'remote-run') {
+	const outcome = { status: 'completed' as const, runId, output }
 	return {
 		sessionId: 'transport-session',
 		cancel: vi.fn(async () => undefined),

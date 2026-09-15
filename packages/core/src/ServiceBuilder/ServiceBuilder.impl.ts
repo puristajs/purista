@@ -3,9 +3,10 @@ import { fail } from 'node:assert'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type {
 	AnyHarnessTargetContract,
-	HarnessDefinition,
+	HarnessContracts,
 	Schema as HarnessSchema,
 	ModelSchema,
+	RuntimeRequirements,
 } from '@purista/harness'
 import { assertHarnessHostToolOwner, createHostOwnerToken } from '@purista/harness/integrator'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
@@ -67,6 +68,7 @@ import {
 } from '../HarnessMount/invocation.js'
 import { createMountedHarnessTargetProjections } from '../HarnessMount/projection.js'
 import { createMountedHarnessQueueDefinitions } from '../HarnessMount/queue.js'
+import type { QueuedHarnessTargetReference } from '../HarnessMount/queueBinding.js'
 import { canonicalHarnessJson } from '../HarnessMount/remoteTargetContract.js'
 import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
 import type {
@@ -92,10 +94,16 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 
 const emptyMountedServiceEventContracts = Object.freeze({}) as Readonly<Record<string, HarnessTargetJsonSchema>>
 
-// Infer each invariant definition parameter without assigning its graph to an
-// erased HarnessDefinition or leaking Harness's private graph type in declarations.
+// Core consumes only Harness's public contracts and runtime requirements. The
+// Harness integrator authenticates the concrete definition at runtime.
 type HarnessDefinitionBoundary<D> =
-	D extends HarnessDefinition<infer _Catalog, infer _Name, infer _Graph> ? unknown : never
+	D extends Readonly<{
+		kind: 'harness'
+		contracts: HarnessContracts
+		requirements: RuntimeRequirements
+	}>
+		? unknown
+		: never
 
 /** Constructor type accepted by `ServiceBuilder.setCustomClass(...)`. */
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
@@ -135,7 +143,10 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
  *
  * @group Service
  */
-export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, any, any> = ServiceBuilderTypes> {
+export class ServiceBuilder<
+	S extends ServiceBuilderTypes<any, any, any, any, any, any> = ServiceBuilderTypes,
+	const Info extends ServiceInfoType = ServiceInfoType,
+> {
 	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
 	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
@@ -179,7 +190,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	SClass: Newable<S['ServiceClassType'], ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>> = Service
 
 	// eslint-disable-next-line no-useless-constructor
-	constructor(public info: ServiceInfoType) {}
+	constructor(public info: Info) {}
 
 	/** Add a configuration schema and infer typed `serviceConfig` for `getInstance(...)`. */
 	setConfigSchema<T extends Schema>(schema: T) {
@@ -198,7 +209,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 						>
 					>
 				}
-			>
+			>,
+			Info
 		>
 	}
 
@@ -319,7 +331,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			...(mountedPolicy === undefined ? {} : { policy: mountedPolicy }),
 			projections,
 		}) as unknown as HarnessMount<any, any>
-		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>, Info>
 	}
 
 	/**
@@ -330,11 +342,12 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * The helper is available before service composition. Mount finalization
 	 * rejects a target that is not an explicit root of this service's Harness.
 	 */
-	harnessTarget<const C extends AnyHarnessTargetContract>(target: C) {
-		return createServiceBoundHarnessTargetReference(target, {
+	harnessTarget<
+		const Source extends AnyHarnessTargetContract | QueuedHarnessTargetReference<AnyHarnessTargetContract, string>,
+	>(target: Source) {
+		return createServiceBoundHarnessTargetReference<Source, Info['serviceName'], Info['serviceVersion']>(target, {
 			serviceName: this.info.serviceName,
 			serviceVersion: this.info.serviceVersion,
-			serviceTarget: target.id,
 		})
 	}
 
@@ -493,7 +506,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	defineResource<ResourceName extends string, ResourcesType>() {
 		this.requiresResources = true
 		return this as unknown as ServiceBuilder<
-			SetNewTypeValue<S, 'Resources', S['Resources'] & { [K in ResourceName]: InstanceOrType<ResourcesType> }>
+			SetNewTypeValue<S, 'Resources', S['Resources'] & { [K in ResourceName]: InstanceOrType<ResourcesType> }>,
+			Info
 		>
 	}
 
@@ -523,7 +537,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 						ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics'] & { [K in MetricName]: Definition }>
 					>
 				}
-			>
+			>,
+			Info
 		>
 	}
 
@@ -532,7 +547,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>>,
 	) {
 		this.SClass = customClass
-		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>, Info>
 	}
 
 	/** Return the service class constructor currently configured for this builder. */

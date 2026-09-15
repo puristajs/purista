@@ -104,6 +104,7 @@ export function rootEnvelope(
 	policy?: unknown,
 	sessionId = 'session-1',
 	targetName = rootTargetName,
+	invocationId = getNewCorrelationId(),
 ) {
 	const projection = projectionsFor(definition, policy).find(
 		entry => entry.visibility === 'root' && entry.target.id === targetName,
@@ -111,7 +112,7 @@ export function rootEnvelope(
 	if (!projection) throw new Error(`Expected root projection ${targetName}.`)
 	return Object.freeze({
 		contract: Object.freeze({ schemaVersion: 1 as const, exportDigest: projection.exportDigest }),
-		root: Object.freeze({ invocationId: getNewCorrelationId(), sessionId }),
+		root: Object.freeze({ invocationId, sessionId }),
 	})
 }
 
@@ -125,6 +126,7 @@ export function rootCommandRequest(
 		tenantId?: string
 		principalId?: string
 		targetName?: string
+		invocationId?: string
 	}> = {},
 ) {
 	const targetName = options.targetName ?? rootTargetName
@@ -138,6 +140,7 @@ export function rootCommandRequest(
 			options.policy,
 			options.sessionId ?? 'session-1',
 			targetName,
+			options.invocationId,
 		),
 	})
 	const {

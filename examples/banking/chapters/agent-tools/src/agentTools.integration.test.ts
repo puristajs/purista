@@ -1,6 +1,6 @@
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { createSupportApplication } from './createSupportApplication.js'
 
@@ -9,23 +9,28 @@ const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
 describe('mounted PURISTA agent tools', () => {
 	it('lets the model call an authorized PURISTA command with the caller identity', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {},
-			toolCalls: [
+		provider.enqueueObject(
+			objectReply(
+				{},
 				{
-					id: 'lookup-1',
-					name: 'lookupTransaction',
-					arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+					toolCalls: [
+						{
+							id: 'lookup-1',
+							name: 'lookupTransaction',
+							arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+						},
+					],
+					usage,
+					finishReason: 'tool_calls',
 				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueObject({
-			object: { answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
-			usage,
-			finishReason: 'stop',
-		})
+			),
+		)
+		provider.enqueueObject(
+			objectReply(
+				{ answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const supportQuestionPolicy = { canAsk: vi.fn(async () => true) }
 		const accountReadPolicy = { canRead: vi.fn(async () => true) }
 		const transactionSummaryReader = {

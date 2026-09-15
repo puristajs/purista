@@ -386,7 +386,11 @@ export class HarnessMountRuntime {
 		return { envelope, parameter, host, runtime: this.runtime }
 	}
 
-	private activate(message: Command | StreamOpenRequest, timeoutMs?: number, deadline?: number): ActiveInvocation {
+	private activate(
+		message: Command | StreamOpenRequest,
+		timeoutMs?: number | false,
+		deadline?: number,
+	): ActiveInvocation {
 		if (this.active.has(message.correlationId))
 			throw new HandledError(StatusCode.Conflict, 'Harness transport invocation is already active.')
 		const controller = new AbortController()
@@ -397,7 +401,7 @@ export class HarnessMountRuntime {
 		const invocation: ActiveInvocation = { message, controller, completed, finish }
 		const effectiveDeadline = Math.min(
 			deadline ?? Number.POSITIVE_INFINITY,
-			timeoutMs === undefined || timeoutMs === 0 ? Number.POSITIVE_INFINITY : Date.now() + timeoutMs,
+			timeoutMs === undefined || timeoutMs === false ? Number.POSITIVE_INFINITY : Date.now() + timeoutMs,
 		)
 		if (effectiveDeadline <= Date.now())
 			throw new HandledError(StatusCode.GatewayTimeout, 'Harness invocation deadline expired.')
@@ -441,17 +445,25 @@ export class HarnessMountRuntime {
 					await callBusinessGuard(() => this.policyFor(projection)?.beforeGuards?.[key]?.(context, request.input))
 				assertActive(active)
 			}
-		const { resume, ...ordinary } = parameter
-		const options = { ...ordinary, sessionId, signal: active.controller.signal }
+		const { resume, idempotencyKey: _hostIdempotencyKey, durable, ...ordinary } = parameter
+		const hostedDurable = (() => {
+			if (durable === undefined) return undefined
+			const { runId: _hostRunId, ...settings } = durable
+			return settings
+		})()
+		const options = {
+			...ordinary,
+			...(hostedDurable === undefined ? {} : { durable: hostedDurable }),
+			sessionId,
+			signal: active.controller.signal,
+		}
 		const wireInput = message.payload.payload as JsonValue
 		if (resume !== undefined) {
-			const { idempotencyKey: _idempotencyKey, ...resumeOptions } = options
 			return {
 				delivery: 'resume',
 				target: projection.target,
-				wireInput,
 				invokeOptions: {
-					...resumeOptions,
+					...options,
 					resume,
 					...(projection.policy?.durableResume === 'stored-run-owner'
 						? { resumeIdentity: 'stored-run-owner' as const }
@@ -466,6 +478,7 @@ export class HarnessMountRuntime {
 		return {
 			delivery: 'fresh',
 			target: projection.target,
+			invocationId: envelope.root.invocationId,
 			wireInput,
 			input,
 			invokeOptions: options as never,
@@ -526,21 +539,24 @@ export class HarnessMountRuntime {
 			let stream: AsyncIterable<Event> & { result: Promise<Terminal>; cancel(reason?: string): Promise<void> }
 			if (dispatch) {
 				const invocation = Object.freeze({ ...dispatch, signal: active.controller.signal })
-				const base = {
-					target: projection.target,
-					wireInput: message.payload.payload as JsonValue,
-					invocation,
-					hostInvocation: received.host,
-				}
 				const resume = received.parameter.resume
 				const request: HostedDispatchedTargetRequest<AnyHarnessTargetContract, PuristaHostInvocation> =
 					resume === undefined
 						? {
-								...base,
 								delivery: 'fresh',
-								input: await awaitActive(validatedInput(projection, base.wireInput), active),
+								target: projection.target,
+								wireInput: message.payload.payload as JsonValue,
+								input: await awaitActive(validatedInput(projection, message.payload.payload as JsonValue), active),
+								invocation,
+								hostInvocation: received.host,
 							}
-						: { ...base, delivery: 'resume', resume }
+						: {
+								delivery: 'resume',
+								target: projection.target,
+								invocation,
+								resume,
+								hostInvocation: received.host,
+							}
 				assertActive(active)
 				stream = await awaitActive(received.runtime.streamDispatched(request), active)
 			} else
@@ -787,7 +803,8 @@ function parseParameter(value: unknown, nested: boolean): HarnessEventBridgeInvo
 		throw badRequest('Harness resume forbids an idempotency key.')
 	if (
 		value.timeoutMs !== undefined &&
-		(typeof value.timeoutMs !== 'number' || !Number.isSafeInteger(value.timeoutMs) || value.timeoutMs < 0)
+		value.timeoutMs !== false &&
+		(typeof value.timeoutMs !== 'number' || !Number.isSafeInteger(value.timeoutMs) || value.timeoutMs <= 0)
 	)
 		throw badRequest('Harness invocation timeout is invalid.')
 	return value as HarnessEventBridgeInvokeParameter

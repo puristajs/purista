@@ -26,6 +26,7 @@ import type { SubscriptionFunction } from '../core/types/subscription/Subscripti
 import type { SubscriptionTransformInputHook } from '../core/types/subscription/SubscriptionTransformInputHook.js'
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import {
 	type HarnessInvocationContract,
 	type HarnessInvocationSource,
@@ -33,7 +34,6 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -44,7 +44,7 @@ import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitio
 type HarnessSourceOfKind<
 	Source extends HarnessInvocationSource,
 	Kind extends 'agent' | 'workflow',
-> = HarnessInvocationContract<Source>['kind'] extends Kind ? Source : never
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
 
 type SubscriptionHarnessInvocationBuilder<
 	S extends Service,
@@ -247,11 +247,11 @@ export class SubscriptionDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'agent'>,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'agent'>,
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
 	): SubscriptionHarnessInvocationBuilder<
 		S,
 		C,
@@ -281,11 +281,11 @@ export class SubscriptionDefinitionBuilder<
 	>(
 		serviceName: ServiceName,
 		serviceVersion: ServiceVersion,
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
-		source: HarnessSourceOfKind<Source, 'workflow'>,
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
 	): SubscriptionHarnessInvocationBuilder<
 		S,
 		C,
