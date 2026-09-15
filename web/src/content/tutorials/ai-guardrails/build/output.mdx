@@ -31,7 +31,6 @@ export const redactCardLikeDigits = defineGuardrailAction<'output', typeof class
 	},
 })
 ```
-
 Returning `transform` replaces the output value at the `bot_message`
 boundary. Harness validates the resulting agent output contract.
 
@@ -56,7 +55,6 @@ export const classificationGuardrails = defineGuardrails({
 	actionTimeoutMs: 2_000,
 })
 ```
-
 Flow ids refer to the action map in the same definition. Attach the compiled
 guardrails object to a direct agent definition.
 
@@ -74,8 +72,8 @@ export const classifySupportMessageAgent = defineAgent('classifySupportMessage',
 	guardrails: classificationGuardrails,
 })
 ```
-
-The agent owns schemas, instructions, prompt mapping, and content guardrails.
+`classification` is the explicit purpose model alias that runtime composition
+binds under `ai.models`. The agent owns schemas, instructions, prompt mapping, and content guardrails.
 It contains no provider credential and no PURISTA authorization policy.
 
 ```bash title="Check the guarded agent" replay="project"

@@ -126,7 +126,7 @@ export const runIngestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.getCommandBuilder('runIngestKnowledge', 'Run the protected knowledge ingestion workflow')
 	.addPayloadSchema(ingestKnowledgeInputSchema)
 	.addOutputSchema(ingestKnowledgeOutputSchema)
-	.canInvokeWorkflow('Knowledge', '1', ingestKnowledgeWorkflow.contract)
+	.canInvokeWorkflow(knowledgeV1ServiceBuilder.harnessTarget(ingestKnowledgeWorkflow.contract))
 	.exposeAsHttpEndpoint('POST', 'knowledge/documents')
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
@@ -148,7 +148,6 @@ export const runIngestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		const result = await context.workflow.Knowledge['1'][ingestKnowledgeWorkflow.contract.id].run(payload, {
 			sessionId: `knowledge:${sessionId}`,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Knowledge ingestion did not complete')
 		return result.outcome.output
 	})
 ```

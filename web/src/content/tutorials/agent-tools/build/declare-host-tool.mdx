@@ -23,8 +23,6 @@ export const answerTransactionQuestionOutputSchema = z.strictObject({
 	transactionIds: z.array(z.string()),
 })
 ```
-
-
 Define the agent directly with `defineAgent`. The host tool is listed on the
 agent, so the model can choose it during the run. The prompt mapper turns the
 structured question and requested ids into one clear model message.
@@ -51,7 +49,8 @@ export const answerTransactionQuestionAgent = defineAgent('answerTransactionQues
 	}),
 })
 ```
-
+`answering` is the explicit purpose model alias. The application binds that
+exact key under `ai.models`; the definition does not choose a provider.
 
 Build one additive Harness definition and one mount policy. The policy names
 the exact agent target and runs the Support business guard before model work.
@@ -62,35 +61,32 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportQuestion } from '../requireSupportQuestion.js'
 import type { SupportQuestionPolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { answerTransactionQuestionAgent } from './agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
 
 export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
 	answerTransactionQuestionAgent,
 )
-export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			answerTransactionQuestion: {
-				beforeGuards: {
-					mayUseSupportAgent: async (
-						context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
-						input: z.output<typeof answerTransactionQuestionAgent.contract.input>,
-					) =>
-						requireSupportQuestion(context.resources.supportQuestionPolicy, {
-							tenantId: context.identity.tenantId,
-							principalId: context.identity.principalId,
-							accountId: input.accountId,
-							transactionId: input.transactionId,
-						}),
-				},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		answerTransactionQuestion: {
+			beforeGuards: {
+				mayUseSupportAgent: async (
+					context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
+					input: z.output<typeof answerTransactionQuestionAgent.contract.input>,
+				) =>
+					requireSupportQuestion(context.resources.supportQuestionPolicy, {
+						tenantId: context.identity.tenantId,
+						principalId: context.identity.principalId,
+						accountId: input.accountId,
+						transactionId: input.transactionId,
+					}),
 			},
 		},
-		workflows: {},
 	},
-} as const
+	workflows: {},
+})
 ```
-
-
 The policy concerns business authorization. HTTP authentication belongs to a
 transport middleware when the service is exposed over HTTP.
 

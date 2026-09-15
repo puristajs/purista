@@ -33,6 +33,9 @@ export const answerKnowledgeQuestionAgent = defineAgent('answerKnowledgeQuestion
 	durable: true,
 })
 ```
+`answering` is the explicit purpose model alias. Runtime composition must bind
+that exact key under `ai.models`; Harness reserves no default alias.
+
 Check your work: Run `npm run test:rag-retrieval`. The agent test verifies the retrieval-backed answer path.
 
 Continue with [Expose the aggregate answer command](../answer-workflow/).

@@ -37,8 +37,8 @@ export const classifySupportMessageAgent = defineAgent('classifySupportMessage',
 	prompt: (input) => ({ role: 'user', content: `Message ${input.messageId}: ${input.text}` }),
 })
 ```
-
-The schemas make the model boundary explicit. The prompt mapper produces the
+`classification` is the agent's explicit purpose model alias. The composition
+root must bind that exact key under `ai.models`. The schemas make the model boundary explicit. The prompt mapper produces the
 structured user message sent to the provider. The definition contains no
 provider credentials and does not choose a deployment model.
 

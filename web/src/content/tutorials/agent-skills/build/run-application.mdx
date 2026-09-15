@@ -12,7 +12,7 @@ key or network connection.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 import { invokeProcedureAnswer } from './invokeProcedureAnswer.js'
 
@@ -21,25 +21,30 @@ const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
 async function main() {
 	const logger = initLogger('fatal')
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueObject({
-		object: {},
-		toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueObject({
-		object: {
-			answer: 'A pending transfer can remain under review for up to two business days.',
-			method: 'pending_transfer',
-		},
-		usage,
-		finishReason: 'stop',
-	})
+	provider.enqueueObject(
+		objectReply(
+			{},
+			{
+				toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+				usage,
+				finishReason: 'tool_calls',
+			},
+		),
+	)
+	provider.enqueueObject(
+		objectReply(
+			{
+				answer: 'A pending transfer can remain under review for up to two business days.',
+				method: 'pending_transfer',
+			},
+			{ usage, finishReason: 'stop' },
+		),
+	)
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canAnswer: async () => true },
-		model: { provider, model: 'fake-support' },
+		answeringModel: { provider, model: 'fake-support' },
 	})
 	await support.start()
 	try {
@@ -61,8 +66,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
-
 ```bash title="Run the credential-free Skill demo" replay="project"
 npm run demo
 ```
@@ -84,8 +87,6 @@ a published OpenAI adapter.
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
-
-
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
@@ -99,7 +100,7 @@ async function main() {
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canAnswer: async () => true },
-		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+		answeringModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])
@@ -111,8 +112,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
-
 `gracefulShutdown` registers cleanup for the Support service and EventBridge.
 Copy `.env.example` to `.env` and add a key only when you want to use the live
 provider.

@@ -25,8 +25,8 @@ rm src/service/support/v1/command/runAnswerProcedureQuestion/schema.ts
 rm src/service/support/v1/command/runAnswerProcedureQuestion/types.ts
 ```
 
-The three-argument `canInvokeAgent` call declares the service, version, and
-direct agent contract. It creates the typed
+`supportV1ServiceBuilder.harnessTarget(...)` binds the direct agent contract to
+the owning service address. `canInvokeAgent` creates the typed
 `context.agent.Support['1'].answerProcedureQuestion` client.
 
 ```ts title="src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.ts" write
@@ -39,7 +39,7 @@ export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runAnswerProcedureQuestion', 'Answer a support procedure question using reviewed guidance')
 	.addPayloadSchema(answerProcedureQuestionInputSchema)
 	.addOutputSchema(answerProcedureQuestionOutputSchema)
-	.canInvokeAgent('Support', '1', answerProcedureQuestionAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerProcedureQuestionAgent.contract))
 	.setBeforeGuardHooks({
 		procedureAccess: async function (context, payload) {
 			await requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.message, payload.caseId)
@@ -49,12 +49,9 @@ export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
 		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerProcedureQuestion.run(payload, {
 			sessionId: supportProcedureSessionId(context.message, payload.caseId),
 		})
-		if (outcome.status !== 'completed') throw new Error('The procedure answer was interrupted unexpectedly.')
 		return outcome.output
 	})
 ```
-
-
 The before-guard performs business authorization before model work. The
 session id is a SHA-256 digest of a structured tuple containing the trusted
 tenant, principal, and case id. It correlates history without exposing raw
@@ -75,8 +72,6 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(runAnswerProcedureQuestionCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
-
 An HTTP adapter would authenticate a credential and place trusted identity on
 the PURISTA message. The command and mounted-agent guards own business
 authorization.

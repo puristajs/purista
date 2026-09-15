@@ -10,7 +10,7 @@ The local demo is deterministic and needs no credentials. It invokes the distinc
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
@@ -18,16 +18,15 @@ const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 async function main() {
 	const riskProvider = new FakeModelProvider({ strict: true })
 	const responseProvider = new FakeModelProvider({ strict: true })
-	riskProvider.enqueueObject({
-		object: { level: 'high', evidence: ['The customer reports a missing card.'] },
-		usage,
-		finishReason: 'stop',
-	})
-	responseProvider.enqueueObject({
-		object: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
-		usage,
-		finishReason: 'stop',
-	})
+	riskProvider.enqueueObject(
+		objectReply({ level: 'high', evidence: ['The customer reports a missing card.'] }, { usage, finishReason: 'stop' }),
+	)
+	responseProvider.enqueueObject(
+		objectReply(
+			{ customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+			{ usage, finishReason: 'stop' },
+		),
+	)
 	const logger = initLogger('fatal')
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
@@ -64,7 +63,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 Run it now.
 
 ```bash title="Run the credential-free demo" replay="project"
@@ -77,7 +75,6 @@ For an optional live run, keep the provider credential outside source control.
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
-
 The CLI may have created a first-agent environment helper. This project reads the two variables directly in its application entry point, so remove that generated helper before writing the final file.
 
 ```bash title="Remove the unused generated environment helper" replay="project"
@@ -115,7 +112,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 Copy `.env.example` to `.env`, add a valid key, and start the live service only when you want to call OpenAI.
 
 ```bash title="Start the optional live service"

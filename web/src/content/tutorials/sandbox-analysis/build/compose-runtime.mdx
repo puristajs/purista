@@ -35,4 +35,9 @@ export function createAnalysisService(
 	})
 }
 ```
-Tests can inject a strict fake provider and local-directory adapter. Production can inject Docker. Continue with [Run the deterministic demo](../run-application/).
+Tests can inject a strict fake provider and local-directory adapter. Production
+can inject Docker. This agent requests a private sandbox, so the safe default
+needs only `sandbox: { adapter }`. A graph that declares a shared sandbox group
+must bind `sandbox: { adapter, policy }`, where `policy` explicitly authorizes
+declared sharing and any borrowed owner. Continue with [Run the deterministic
+demo](../run-application/).

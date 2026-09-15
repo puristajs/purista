@@ -23,7 +23,6 @@ describe('lookupTransactionTool', () => {
 	})
 })
 ```
-
 ```ts title="src/service/support/v1/harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts" write
 import { describe, expect, it } from 'vitest'
 import { lookupTransactionTool } from '../../tool/lookupTransaction/lookupTransactionTool.js'
@@ -57,7 +56,6 @@ describe('answerTransactionQuestionAgent', () => {
 	})
 })
 ```
-
 The session id must separate trusted identity fields even when one contains a
 delimiter. It must also stay stable for the same caller and question.
 
@@ -75,7 +73,6 @@ describe('supportQuestionSessionId', () => {
 	})
 })
 ```
-
 The focused Transaction command test uses PURISTA context helpers and injected
 resources, so it needs no database, model, or network connection.
 

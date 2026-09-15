@@ -80,7 +80,7 @@ export const searchKnowledgeTool = knowledgeV1ServiceBuilder
 		input: searchKnowledgeInputSchema,
 		output: searchKnowledgeOutputSchema,
 	})
-	.canInvokeWorkflow('Knowledge', '1', retrieveKnowledgeWorkflow.contract)
+	.canInvokeWorkflow(knowledgeV1ServiceBuilder.harnessTarget(retrieveKnowledgeWorkflow.contract))
 	.setHandler(async (context, input) => {
 		await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
 			...context.identity,
@@ -108,7 +108,7 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 	.getCommandBuilder('searchKnowledge', 'Search authorized knowledge chunks for a grounded answer')
 	.addPayloadSchema(searchKnowledgeInputSchema)
 	.addOutputSchema(searchKnowledgeOutputSchema)
-	.canInvokeWorkflow('Knowledge', '1', retrieveKnowledgeWorkflow.contract)
+	.canInvokeWorkflow(knowledgeV1ServiceBuilder.harnessTarget(retrieveKnowledgeWorkflow.contract))
 	.setBeforeGuardHooks({
 		collectionAccess: async function (context, payload) {
 			await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
@@ -129,7 +129,6 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		const result = await context.workflow.Knowledge['1'][retrieveKnowledgeWorkflow.contract.id].run(payload, {
 			sessionId,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Knowledge retrieval did not complete')
 		return result.outcome.output
 	})
 ```

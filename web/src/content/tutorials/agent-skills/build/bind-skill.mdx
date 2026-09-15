@@ -23,7 +23,6 @@ export const supportMethodsSkill = defineSkill('support-methods', {
 	directory: new URL('./', import.meta.url),
 })
 ```
-
 The optional `runtimes` field describes logical availability such as `node`,
 `python`, or `shell`. It does not install software or grant process, network,
 or filesystem access. This Skill has no executable runtime requirement.
@@ -44,7 +43,6 @@ describe('supportMethodsSkill', () => {
 	})
 })
 ```
-
 ```ts title="src/service/support/v1/schema.ts" write
 import { z } from 'zod'
 
@@ -58,7 +56,6 @@ export const answerProcedureQuestionOutputSchema = z.strictObject({
 	method: z.enum(['pending_transfer', 'card_replacement', 'other']),
 })
 ```
-
 ## Give the agent the Skill and read capability
 
 Replace the generated agent file. The agent owns the Skill reference and the
@@ -82,6 +79,8 @@ export const answerProcedureQuestionAgent = defineAgent('answerProcedureQuestion
 	prompt: (input) => ({ role: 'user', content: `Case ${input.caseId}: ${input.question}` }),
 })
 ```
+`answering` is the explicit purpose model alias. Runtime composition binds that
+exact key under `ai.models`; the Skill does not select or grant a model.
 
 `skills: [supportMethodsSkill]` selects the Skill for this agent. It does not
 grant business authorization. `builtInTools.read` lets the model load reviewed

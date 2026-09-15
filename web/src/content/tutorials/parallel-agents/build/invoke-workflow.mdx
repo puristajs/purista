@@ -13,7 +13,9 @@ rm src/service/support/v1/command/runAnalyzeSupportCase/schema.ts
 rm src/service/support/v1/command/runAnalyzeSupportCase/types.ts
 ```
 
-The command declares the workflow address with the service name, version, and workflow contract. Its client then uses that same three-part address. A completed run returns the typed workflow output.
+`supportV1ServiceBuilder.harnessTarget(...)` binds the workflow contract to the
+owning service address. The generated client uses that address, and a completed
+run returns the typed workflow output.
 
 ```ts title="src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.ts" write
 import { supportCaseAnalysisOutputSchema, supportCaseInputSchema } from '../../harness/supportCaseSchemas.js'
@@ -25,7 +27,7 @@ export const runAnalyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runAnalyzeSupportCase', 'Run bounded specialist analysis for one support case')
 	.addPayloadSchema(supportCaseInputSchema)
 	.addOutputSchema(supportCaseAnalysisOutputSchema)
-	.canInvokeWorkflow('Support', '1', analyzeSupportCaseWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(analyzeSupportCaseWorkflow.contract))
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
@@ -39,11 +41,9 @@ export const runAnalyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
 		const result = await context.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run(payload, {
 			sessionId: supportCaseSessionId(context.message, payload.caseId),
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Support case analysis did not complete.')
 		return result.outcome.output
 	})
 ```
-
 Mount the Harness once and register the wrapper command on the same service.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
@@ -55,7 +55,6 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(runAnalyzeSupportCaseCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
 The wrapper guard protects `runAnalyzeSupportCase`. The mount policy protects the workflow again if another allowed service command invokes `Support` version `1` target `analyzeSupportCase`.
 
 ```bash title="Check the wrapper and mounted workflow" replay="project"

@@ -17,6 +17,7 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
 import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 
 export const supportHarness = defineHarness({
@@ -25,32 +26,29 @@ export const supportHarness = defineHarness({
 	defaults: { historyRetention: { maxTurns: 8, maxBytes: 32_000 } },
 }).addAgent(answerSupportQuestionAgent)
 
-export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			answerSupportQuestion: {
-				beforeGuards: {
-					conversationAccess: async (
-						context: HarnessBusinessGuardContext<{
-							supportConversationPolicy: SupportConversationPolicy
-						}>,
-						input: z.output<typeof answerSupportQuestionAgent.contract.input>,
-					) => {
-						await requireSupportConversationAccess(
-							context.resources.supportConversationPolicy,
-							context.identity,
-							input.conversationId,
-							'continue',
-						)
-					},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		answerSupportQuestion: {
+			beforeGuards: {
+				conversationAccess: async (
+					context: HarnessBusinessGuardContext<{
+						supportConversationPolicy: SupportConversationPolicy
+					}>,
+					input: z.output<typeof answerSupportQuestionAgent.contract.input>,
+				) => {
+					await requireSupportConversationAccess(
+						context.resources.supportConversationPolicy,
+						context.identity,
+						input.conversationId,
+						'continue',
+					)
 				},
 			},
 		},
-		workflows: {},
 	},
-} as const
+	workflows: {},
+})
 ```
-
 Generate the wrapper command with the local CLI.
 
 ```bash title="Generate the conversation command" replay="project"
@@ -76,7 +74,7 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('continueSupportConversation', 'Continue a bounded support conversation')
 	.addPayloadSchema(answerSupportQuestionInputSchema)
 	.addOutputSchema(answerSupportQuestionOutputSchema)
-	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerSupportQuestionAgent.contract))
 	.setBeforeGuardHooks({
 		conversationAccess: async function (context, payload) {
 			await requireSupportConversationAccess(
@@ -90,11 +88,9 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 	.setCommandFunction(async function (context, payload) {
 		const sessionId = conversationSessionId(context.message, payload.conversationId)
 		const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(payload, { sessionId })
-		if (result.outcome.status !== 'completed') throw new Error('The support answer was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 ```
-
 The command and target guards perform authorization. Authentication belongs at
 the application boundary that establishes trusted message identity.
 

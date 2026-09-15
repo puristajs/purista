@@ -23,7 +23,6 @@ export const classifySupportMessageOutputSchema = z.strictObject({
 	reason: z.string().trim().min(1).max(240),
 })
 ```
-
 Now define the input action.
 
 ```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classificationInputGuardrail.ts" write
@@ -40,7 +39,6 @@ export const blockInstructionOverride = defineGuardrailAction<'input', typeof cl
 			: { decision: 'allow' },
 })
 ```
-
 `phase: 'input'` runs before the model request. The action returns `allow`
 for ordinary messages and `block` for the tutorial's deterministic pattern.
 `mayTransform: false` makes this rail decision-only.

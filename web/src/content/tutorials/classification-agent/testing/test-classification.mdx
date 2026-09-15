@@ -12,22 +12,23 @@ address. Both use public deterministic helpers and need no credentials.
 
 ```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { classifySupportMessageAgent } from './classifySupportMessageAgent.js'
 
 describe('classifySupportMessageAgent', () => {
 	it('runs the classification agent without PURISTA infrastructure', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: {
-				category: 'account_access',
-				urgency: 'urgent',
-				reason: 'The customer is locked out before payroll closes.',
-			},
-			usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{
+					category: 'account_access',
+					urgency: 'urgent',
+					reason: 'The customer is locked out before payroll closes.',
+				},
+				{ usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 }, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'classificationTest' })
 			.addAgent(classifySupportMessageAgent)
 			.getInstance({ models: { classification: { provider, model: 'fake-classifier' } } })
@@ -41,7 +42,6 @@ describe('classifySupportMessageAgent', () => {
 				})
 
 				expect(outcome.status).toBe('completed')
-				if (outcome.status !== 'completed') throw new Error('Expected a completed classification run.')
 				expect(outcome.output).toEqual({
 					category: 'account_access',
 					urgency: 'urgent',
@@ -62,7 +62,6 @@ describe('classifySupportMessageAgent', () => {
 	})
 })
 ```
-
 The native test borrows a session and releases it in a nested `finally`
 before closing the runtime. It also verifies the prompt that reached the fake
 provider.
@@ -151,7 +150,6 @@ describe('runClassifySupportMessageCommandBuilder', () => {
 	})
 })
 ```
-
 `createCommandContextMock` reads the address declared by
 `canInvokeAgent(...)` and creates the typed invocation stub. The failure case
 proves provider errors are not changed into successful command results.

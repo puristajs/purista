@@ -21,7 +21,6 @@ export function durableResolutionIdentity(tenantId: string, principalId: string,
 	}
 }
 ```
-
 This command uses the shared Harness schemas. Remove its unused generated local schema and type files before writing the builder.
 
 ```bash title="Remove unused command schema placeholders" replay="project"
@@ -29,7 +28,9 @@ rm src/service/support/v1/command/runResolveSupportCase/schema.ts
 rm src/service/support/v1/command/runResolveSupportCase/types.ts
 ```
 
-Declare the workflow with service name, version, and direct contract. The client uses the same three-part address and preserves the Harness result envelope until the command checks for completion.
+Use `supportV1ServiceBuilder.harnessTarget(...)` to bind the direct workflow
+contract to its service address. The client preserves the Harness result
+envelope until the command checks for completion.
 
 ```ts title="src/service/support/v1/command/runResolveSupportCase/runResolveSupportCaseCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -43,7 +44,7 @@ export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runResolveSupportCase', 'Run a durable multi-step support resolution')
 	.addPayloadSchema(supportResolutionInputSchema)
 	.addOutputSchema(supportResolutionOutputSchema)
-	.canInvokeWorkflow('Support', '1', resolveSupportCaseWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(resolveSupportCaseWorkflow.contract))
 	.setBeforeGuardHooks({
 		caseAccess: async function (context, payload) {
 			await requireSupportCaseResolution(context.resources.supportCasePolicy, {
@@ -62,11 +63,9 @@ export const runResolveSupportCaseCommandBuilder = supportV1ServiceBuilder
 			sessionId: identity.sessionId,
 			durable: { runId: identity.runId },
 		})
-		if (result.outcome.status !== 'completed') throw new Error('Support resolution did not complete')
 		return result.outcome.output
 	})
 ```
-
 Register the command and mount the Harness once.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
@@ -78,7 +77,6 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(runResolveSupportCaseCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
 The command guard protects `runResolveSupportCase`. The Harness policy independently protects `resolveSupportCase` when another allowed service target invokes it.
 
 ```bash title="Check the address-first wrapper" replay="project"

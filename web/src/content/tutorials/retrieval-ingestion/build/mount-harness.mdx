@@ -6,13 +6,17 @@ kind: lesson
 status: published
 ---
 
-Create one Harness instance and mount it on the knowledge service. This makes the tools, workflows, and agent available to the service commands.
+Create one Harness definition and mount it on the Knowledge service. The graph
+contains the ingestion and retrieval workflows plus the answer agent and its
+host tool. `defineHarnessPolicy` checks the flat `workflows` and `agents` maps
+against that exact graph before the service is built.
 
 ```ts title="src/service/knowledge/v1/harness/knowledgeHarness.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
 import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import type { KnowledgeCollectionPolicy } from '../KnowledgeResources.js'
+import { knowledgeV1ServiceBuilder } from '../knowledgeV1ServiceBuilder.js'
 import { requireKnowledgeCollectionAccess } from '../requireKnowledgeCollectionAccess.js'
 import type {
 	answerKnowledgeQuestionInputSchema,
@@ -24,57 +28,54 @@ import { ingestKnowledgeWorkflow } from './workflow/ingestKnowledge/ingestKnowle
 import { retrieveKnowledgeWorkflow } from './workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.js'
 
 export const knowledgeHarness = defineHarness({ name: 'knowledge', revision: 'v1' })
-	.addWorkflow(ingestKnowledgeWorkflow)
-	.addWorkflow(retrieveKnowledgeWorkflow)
+	.addWorkflow(ingestKnowledgeWorkflow, retrieveKnowledgeWorkflow)
 	.addAgent(answerKnowledgeQuestionAgent)
 
-export const knowledgeHarnessPolicy = {
-	targets: {
-		workflows: {
-			ingestKnowledge: {
-				beforeGuards: {
-					collectionAccess: async (
-						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
-						input: z.output<typeof ingestKnowledgeInputSchema>,
-					) =>
-						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
-							...context.identity,
-							collectionId: input.collectionId,
-							action: 'edit',
-						}),
-				},
-			},
-			retrieveKnowledge: {
-				beforeGuards: {
-					collectionAccess: async (
-						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
-						input: z.output<typeof retrieveKnowledgeInputSchema>,
-					) =>
-						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
-							...context.identity,
-							collectionId: input.collectionId,
-							action: 'search',
-						}),
-				},
+export const knowledgeHarnessPolicy = knowledgeV1ServiceBuilder.defineHarnessPolicy(knowledgeHarness, {
+	workflows: {
+		ingestKnowledge: {
+			beforeGuards: {
+				collectionAccess: async (
+					context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+					input: z.output<typeof ingestKnowledgeInputSchema>,
+				) =>
+					requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+						...context.identity,
+						collectionId: input.collectionId,
+						action: 'edit',
+					}),
 			},
 		},
-		agents: {
-			answerKnowledgeQuestion: {
-				beforeGuards: {
-					collectionAccess: async (
-						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
-						input: z.output<typeof answerKnowledgeQuestionInputSchema>,
-					) =>
-						requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
-							...context.identity,
-							collectionId: input.collectionId,
-							action: 'search',
-						}),
-				},
+		retrieveKnowledge: {
+			beforeGuards: {
+				collectionAccess: async (
+					context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+					input: z.output<typeof retrieveKnowledgeInputSchema>,
+				) =>
+					requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+						...context.identity,
+						collectionId: input.collectionId,
+						action: 'search',
+					}),
 			},
 		},
 	},
-} as const
+	agents: {
+		answerKnowledgeQuestion: {
+			beforeGuards: {
+				collectionAccess: async (
+					context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
+					input: z.output<typeof answerKnowledgeQuestionInputSchema>,
+				) =>
+					requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
+						...context.identity,
+						collectionId: input.collectionId,
+						action: 'search',
+					}),
+			},
+		},
+	},
+})
 ```
 ```ts title="src/service/knowledge/v1/knowledgeV1Service.ts" write
 import { runAnswerKnowledgeQuestionCommandBuilder } from './command/runAnswerKnowledgeQuestion/runAnswerKnowledgeQuestionCommandBuilder.js'

@@ -10,18 +10,19 @@ The native-agent test uses a strict fake provider. It verifies prompt execution 
 
 ```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
 import { defineHarness } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { classifySupportMessageAgent } from './classifySupportMessageAgent.js'
 
 describe('classifySupportMessageAgent', () => {
 	it('returns a schema-validated classification with a deterministic model', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueObject({
-			object: { category: 'card', urgency: 'urgent', reason: 'The card was stolen and is being used.' },
-			usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 },
-			finishReason: 'stop',
-		})
+		provider.enqueueObject(
+			objectReply(
+				{ category: 'card', urgency: 'urgent', reason: 'The card was stolen and is being used.' },
+				{ usage: { inputTokens: 8, outputTokens: 5, totalTokens: 13 }, finishReason: 'stop' },
+			),
+		)
 		const runtime = await defineHarness({ name: 'classificationEvaluationTest' })
 			.addAgent(classifySupportMessageAgent)
 			.getInstance({ models: { classification: { provider, model: 'classification-fake' } } })
@@ -45,11 +46,10 @@ describe('classifySupportMessageAgent', () => {
 	})
 })
 ```
-
 The evaluation test proves the pass, regression, incomplete, and mismatched-candidate gate behavior.
 
 ```ts title="src/agentEvaluation.test.ts" write
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 import { assertClassificationGate } from './changeGate.js'
 import { runClassificationEvaluation } from './runClassificationEvaluation.js'
@@ -79,7 +79,7 @@ describe('classification agent evaluation', () => {
 			{ category: 'transfer', urgency: 'normal', reason: 'Correct fixture.' },
 			{ category: 'account_access', urgency: 'urgent', reason: 'Correct fixture.' },
 		]) {
-			provider.enqueueObject({ object, usage, finishReason: 'stop' })
+			provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
 		}
 		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
 		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)
@@ -103,7 +103,6 @@ describe('classification agent evaluation', () => {
 	})
 })
 ```
-
 ```bash title="Run native and evaluation tests" replay="project"
 npx vitest run src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/agentEvaluation.test.ts
 ```

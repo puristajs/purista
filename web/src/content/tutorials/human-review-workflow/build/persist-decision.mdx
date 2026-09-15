@@ -67,7 +67,6 @@ export interface SupportReviewPolicy {
 	canReview(input: Readonly<{ tenantId: string; principalId: string; requestId: string }>): Promise<boolean>
 }
 ```
-
 `expectedRevision` and `eventId` make duplicate or stale reviewer submissions
 safe to handle. Later pages use this record to protect the Transaction effect
 and resume the exact Harness run.
@@ -102,7 +101,6 @@ export function reviewIdentity(
 	}
 }
 ```
-
 Use the in-memory store in deterministic tests. Its map belongs to the test
 process, so it is fast and has no local setup.
 
@@ -201,7 +199,6 @@ export class InMemorySupportReviewStore implements SupportReviewStore {
 	}
 }
 ```
-
 The application uses SQLite so a restart can still find the review record that
 belongs to the durable Harness run. The store commits a decision only when the
 record revision still matches.
@@ -406,7 +403,6 @@ export class SqliteSupportReviewStore implements SupportReviewStore {
 	}
 }
 ```
-
 ```bash title="Type-check review storage" replay="project"
 npm run build
 ```

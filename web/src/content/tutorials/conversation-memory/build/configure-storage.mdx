@@ -59,7 +59,6 @@ cd support-conversations
 	}
 }
 ```
-
 ```bash title="Install and scaffold the Support capability" replay="project"
 npm install
 npm run add:service -- support --description "Own support conversations" --non-interactive
@@ -95,9 +94,8 @@ export const answerSupportQuestionAgent = defineAgent('answerSupportQuestion', {
 	prompt: (input) => ({ role: 'user', content: `Conversation ${input.conversationId}: ${input.question}` }),
 })
 ```
-
-The definition contains no provider name or secret. The service binds a model at
-runtime later.
+`answering` is the explicit purpose model alias. The definition contains no
+provider name or secret. The service binds that exact `ai.models` key later.
 
 ```bash title="Check the agent definition" replay="project"
 npm run build

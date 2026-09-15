@@ -47,7 +47,6 @@ export function createSupportService(
 	})
 }
 ```
-
 `classificationModel` and `resolutionModel` exactly match the agent definitions. The resolution binding has a short provider retry budget for temporary server failures. The application-owned workflow step records the handling-lane decision and does not add another retry layer.
 
 Tests may use temporary or in-memory storage. A live process should use storage that survives a restart and must close it during shutdown.

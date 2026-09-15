@@ -11,28 +11,27 @@ The deterministic demo uses an in-memory storage adapter and fake model.
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { inMemoryHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 
 const provider = new FakeModelProvider({ strict: true })
 const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
-provider.enqueueObject({
-	object: { answer: 'A transfer can remain pending for two business days.' },
-	usage,
-	finishReason: 'stop',
-})
-provider.enqueueObject({
-	object: { answer: 'Yes. The same transfer is still inside that two-day window.' },
-	usage,
-	finishReason: 'stop',
-})
+provider.enqueueObject(
+	objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+)
+provider.enqueueObject(
+	objectReply(
+		{ answer: 'Yes. The same transfer is still inside that two-day window.' },
+		{ usage, finishReason: 'stop' },
+	),
+)
 
 const eventBridge = new DefaultEventBridge({ logger: initLogger('error') })
 await eventBridge.start()
 const storage = inMemoryHarnessStorage()
 const support = await createSupportService(eventBridge, initLogger('error'), {
 	policy: { canAccess: async () => true },
-	model: { provider, model: 'fake-support' },
+	answeringModel: { provider, model: 'fake-support' },
 	storage,
 })
 await support.start()
@@ -66,7 +65,6 @@ try {
 	await storage.close()
 }
 ```
-
 ```bash title="Run the credential-free demo" replay="project"
 npm run demo
 ```
@@ -79,7 +77,6 @@ OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 HARNESS_STORAGE_FILE=conversation-history.sqlite
 ```
-
 The live entry point shares one SQLite storage instance between the service and
 history resource. Shutdown stops the service and EventBridge before closing the
 storage adapter.
@@ -103,7 +100,7 @@ async function main() {
 		policy: {
 			canAccess: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
-		model: {
+		answeringModel: {
 			provider: openai({ apiKey }),
 			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
 		},
@@ -119,7 +116,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```bash title="Run the live service" replay="project"
 cp .env.example .env
 # Put your own OPENAI_API_KEY in .env, then run:

@@ -37,7 +37,6 @@ export class HarnessConversationHistory implements SupportConversationHistory {
 	}
 }
 ```
-
 Both commands authorize the requested action and derive the same opaque session
 id used by the agent invocation.
 
@@ -66,7 +65,6 @@ export const getConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		return { messages: await context.resources.supportConversationHistory.list(sessionId) }
 	})
 ```
-
 ```ts title="src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts" write
 import { conversationSessionId } from '../../conversationSessionId.js'
 import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
@@ -93,7 +91,6 @@ export const clearConversationHistoryCommandBuilder = supportV1ServiceBuilder
 		return { cleared: true as const }
 	})
 ```
-
 Mount the Harness once on the final service definition.
 
 ```ts title="src/service/support/v1/supportV1Service.ts" write
@@ -109,7 +106,6 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(clearConversationHistoryCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
 Clearing messages keeps the session naming rule reusable. The next run with the
 same id starts with an empty transcript.
 

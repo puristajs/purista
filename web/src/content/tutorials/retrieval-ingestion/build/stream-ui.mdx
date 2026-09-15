@@ -9,6 +9,8 @@ status: published
 Create the server stream endpoint. It converts the answer agent response into the standard AI SDK UI message stream used by the browser client.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import {
 	AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
 	parseHarnessUIMessageRequest,
@@ -29,31 +31,39 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 	.addParameterSchema(parameterSchema)
 	.addChunkSchema(chunkSchema)
 	.addFinalSchema(finalSchema)
-	.canInvokeAgent('Knowledge', '1', answerKnowledgeQuestionAgent.contract)
+	.canInvokeAgent(knowledgeV1ServiceBuilder.harnessTarget(answerKnowledgeQuestionAgent.contract))
 	.exposeAsHttpStreamEndpoint('POST', 'knowledge/chat')
 	.enableHttpSecurity(true)
 	.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
 	.setOpenApiSummary('Chat with authorized knowledge')
 	.addOpenApiTags('knowledge', 'ai')
 	.setStreamFunction(async function (context, payload, _parameter, writer) {
-		const request = await parseHarnessUIMessageRequest(payload)
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const sessionId = createHash('sha256')
+			.update(JSON.stringify([tenantId, principalId, payload.collectionId, payload.id]))
+			.digest('base64url')
+		const request = await parseHarnessUIMessageRequest(payload, { sessionId })
 		const question = request.lastUserMessage.parts
 			.flatMap((part) => (part.type === 'text' ? [part.text] : []))
 			.join('\n')
-		const events = await context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id].stream(
-			{ collectionId: payload.collectionId, question },
+		const target = context.agent.Knowledge['1'][answerKnowledgeQuestionAgent.contract.id]
+		const events =
 			request.resume === undefined
-				? { sessionId: request.sessionId }
-				: { sessionId: request.sessionId, resume: request.resume },
-		)
+				? await target.stream({ collectionId: payload.collectionId, question }, { sessionId: request.sessionId })
+				: await target.resume(request.resume).stream({ sessionId: request.sessionId })
 		await pipeHarnessUIMessageStream(events, writer, request)
 	})
 ```
-
 The protocol declaration configures direct streaming. The Hono server adds the
 standard AI SDK response headers, while the pipe helper forwards chunks,
 handles disconnect cancellation, writes the completion marker, and closes the
 stream.
+
+The browser never supplies a Harness session id. The server derives it from
+authenticated tenant and principal identity plus the authorized collection and
+UI message id. A new request calls `target.stream(...)`; an approval response
+continues the same run through `target.resume(descriptor).stream(...)`.
 
 Check your work: Run `npm run test:rag-retrieval`. The stream builder test verifies the UI message stream contract.
 

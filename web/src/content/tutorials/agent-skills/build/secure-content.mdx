@@ -21,7 +21,6 @@ export interface SupportProcedurePolicy {
 	canAnswer(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
-
 Use one helper at every reachable boundary. The session id correlates Harness
 history; it does not grant access and does not expose raw identity in a storage
 key.
@@ -55,7 +54,6 @@ export function supportProcedureSessionId(
 	return `support-procedure:${digest}`
 }
 ```
-
 Declare the resource on the owning service builder. The concrete policy is
 provided by the application composition root.
 
@@ -69,7 +67,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support procedure answers',
 }).defineResource<'supportProcedurePolicy', SupportProcedurePolicy>()
 ```
-
 ## Guard the mounted target
 
 Replace the generated Harness composition with one service-owned definition and
@@ -83,29 +80,27 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportProcedureAccess } from '../requireSupportProcedureAccess.js'
 import type { SupportProcedurePolicy } from '../SupportProcedurePolicy.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { answerProcedureQuestionAgent } from './agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
 
 export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
 	answerProcedureQuestionAgent,
 )
 
-export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			answerProcedureQuestion: {
-				beforeGuards: {
-					procedureAccess: async (
-						context: HarnessBusinessGuardContext<{ supportProcedurePolicy: SupportProcedurePolicy }>,
-						input: z.output<typeof answerProcedureQuestionAgent.contract.input>,
-					) => requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.identity, input.caseId),
-				},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		answerProcedureQuestion: {
+			beforeGuards: {
+				procedureAccess: async (
+					context: HarnessBusinessGuardContext<{ supportProcedurePolicy: SupportProcedurePolicy }>,
+					input: z.output<typeof answerProcedureQuestionAgent.contract.input>,
+				) => requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.identity, input.caseId),
 			},
 		},
-		workflows: {},
 	},
-} as const
+	workflows: {},
+})
 ```
-
 The guard is the authorization boundary. The Skill can recommend a safe
 procedure, but it cannot bypass this check, add a command, or execute a script.
 The agent exposes only the read capability, so files under the Skill directory

@@ -19,17 +19,16 @@ export function createSupportService(
 	logger: Logger,
 	options: Readonly<{
 		policy: SupportClassificationPolicy
-		model: { provider: ModelProvider; model: string }
+		classificationModel: { provider: ModelProvider; model: string }
 	}>,
 ) {
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportClassificationPolicy: options.policy },
-		ai: { models: { classification: options.model } },
+		ai: { models: { classification: options.classificationModel } },
 	})
 }
 ```
-
 ```ts title="src/index.ts" write
 import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
 import { openai } from '@purista/harness-openai'
@@ -46,7 +45,7 @@ async function main() {
 			canClassify: async ({ tenantId, principalId }) =>
 				tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
-		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+		classificationModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])
@@ -58,7 +57,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```bash title="Type-check service composition" replay="project"
 npm run build
 ```

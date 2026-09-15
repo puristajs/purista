@@ -13,6 +13,7 @@ import type { HarnessBusinessGuardContext } from '@purista/core'
 import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import type { AnalysisPolicy } from '../AnalysisResources.js'
+import { analysisV1ServiceBuilder } from '../analysisV1ServiceBuilder.js'
 import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
 import { analyzeTransactionsAgent } from './agent/analyzeTransactions/analyzeTransactionsAgent.js'
 
@@ -20,24 +21,22 @@ export const analysisHarness = defineHarness({ name: 'transactionAnalysis', revi
 	analyzeTransactionsAgent,
 )
 
-export const analysisHarnessPolicy = {
-	targets: {
-		agents: {
-			analyzeTransactions: {
-				beforeGuards: {
-					analysisAccess: async (
-						context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
-						input: z.output<typeof analyzeTransactionsAgent.contract.input>,
-					) =>
-						requireTransactionAnalysis(context.resources.analysisPolicy, {
-							...context.identity,
-							analysisId: input.analysisId,
-						}),
-				},
+export const analysisHarnessPolicy = analysisV1ServiceBuilder.defineHarnessPolicy(analysisHarness, {
+	agents: {
+		analyzeTransactions: {
+			beforeGuards: {
+				analysisAccess: async (
+					context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
+					input: z.output<typeof analyzeTransactionsAgent.contract.input>,
+				) =>
+					requireTransactionAnalysis(context.resources.analysisPolicy, {
+						...context.identity,
+						analysisId: input.analysisId,
+					}),
 			},
 		},
 	},
-} as const
+})
 ```
 ```ts title="src/service/analysis/v1/command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -50,7 +49,7 @@ export const runAnalyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 	.getCommandBuilder('runAnalyzeTransactions', 'Run an isolated transaction analysis')
 	.addPayloadSchema(analyzeTransactionsInputSchema)
 	.addOutputSchema(analyzeTransactionsOutputSchema)
-	.canInvokeAgent('Analysis', '1', analyzeTransactionsAgent.contract)
+	.canInvokeAgent(analysisV1ServiceBuilder.harnessTarget(analyzeTransactionsAgent.contract))
 	.setBeforeGuardHooks({
 		analysisAccess: async function (context, payload) {
 			await requireTransactionAnalysis(context.resources.analysisPolicy, {
@@ -67,7 +66,6 @@ export const runAnalyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
 		const { outcome } = await context.agent.Analysis['1'][analyzeTransactionsAgent.contract.id].run(payload, {
 			sessionId: transactionAnalysisSessionId({ tenantId, principalId }, payload.analysisId),
 		})
-		if (outcome.status !== 'completed') throw new Error('Transaction analysis did not complete')
 		return outcome.output
 	})
 ```

@@ -39,8 +39,10 @@ export const classifySupportMessageAgent = defineAgent('classifySupportMessage',
 	prompt: (input) => ({ role: 'user', content: `Message ${input.messageId}: ${input.text}` }),
 })
 ```
-
-An agent is the bounded model loop. It owns the prompt and schemas; routing and authorization stay in PURISTA service files.
+`classification` is the explicit purpose model alias used by both the
+evaluation runtime and mounted service. An agent is the bounded model loop. It
+owns the prompt and schemas; routing and authorization stay in PURISTA service
+files.
 
 ```bash title="Type-check the native agent" replay="project"
 npm run build

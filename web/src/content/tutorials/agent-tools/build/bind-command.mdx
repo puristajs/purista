@@ -50,8 +50,6 @@ export const getTransactionSummaryCommandBuilder = transactionV1ServiceBuilder
 		return result
 	})
 ```
-
-
 Test the command with injected resource doubles. The denied case proves that a
 failed business guard stops before data access.
 
@@ -125,8 +123,6 @@ describe('getTransactionSummary command', () => {
 	})
 })
 ```
-
-
 Add the command definition to the Transaction service.
 
 ```ts title="src/service/transaction/v1/transactionV1Service.ts" write
@@ -137,8 +133,6 @@ export const transactionV1Service = transactionV1ServiceBuilder.addCommandDefini
 	getTransactionSummaryCommandBuilder.getDefinition(),
 )
 ```
-
-
 The successful command result can now cross EventBridge. The agent tool will
 call this public service contract instead of copying the transaction logic.
 

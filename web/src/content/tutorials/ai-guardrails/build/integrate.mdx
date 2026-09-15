@@ -14,7 +14,6 @@ export interface SupportClassificationPolicy {
 	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
 }
 ```
-
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
 import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
@@ -30,7 +29,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.setConfigSchema(supportServiceV1ConfigSchema)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
-
 Centralize the authorization decision and stable session id.
 
 ```ts title="src/service/support/v1/requireSupportClassification.ts" write
@@ -67,7 +65,6 @@ export function supportClassificationSessionId(
 	return `guarded-classification:${digest}`
 }
 ```
-
 Assemble the direct agent and protect its published target.
 
 ```ts title="src/service/support/v1/harness/supportHarness.ts" write
@@ -76,37 +73,35 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
 	classifySupportMessageAgent,
 )
 
-export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			classifySupportMessage: {
-				beforeGuards: {
-					mayClassifySupport: async (
-						context: HarnessBusinessGuardContext<{
-							supportClassificationPolicy: SupportClassificationPolicy
-						}>,
-						input: z.output<typeof classifySupportMessageAgent.contract.input>,
-					) => {
-						await requireSupportClassification(context.resources.supportClassificationPolicy, {
-							...context.identity,
-							messageId: input.messageId,
-						})
-					},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		classifySupportMessage: {
+			beforeGuards: {
+				mayClassifySupport: async (
+					context: HarnessBusinessGuardContext<{
+						supportClassificationPolicy: SupportClassificationPolicy
+					}>,
+					input: z.output<typeof classifySupportMessageAgent.contract.input>,
+				) => {
+					await requireSupportClassification(context.resources.supportClassificationPolicy, {
+						...context.identity,
+						messageId: input.messageId,
+					})
 				},
 			},
 		},
-		workflows: {},
 	},
-} as const
+	workflows: {},
+})
 ```
-
-The `targets` policy publishes `Support / 1 / classifySupportMessage` and
+The flat `agents` policy publishes `Support / 1 / classifySupportMessage` and
 runs business authorization before Harness starts the target. Once allowed,
 the input and output rails still protect model content inside the agent.
 

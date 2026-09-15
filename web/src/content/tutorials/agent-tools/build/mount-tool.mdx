@@ -35,7 +35,6 @@ export interface SupportQuestionPolicy {
 	): Promise<boolean>
 }
 ```
-
 Register that port on the Support service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
@@ -48,7 +47,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support conversations and support automation',
 }).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
 ```
-
 ## Keep identity and authorization server-side
 
 The model may propose account and transaction ids, but it cannot supply trusted
@@ -95,7 +93,6 @@ export function supportQuestionSessionId(
 	return `support-question:${digest}`
 }
 ```
-
 ## Define the service-owned host tool
 
 The model-facing output intentionally omits `tenantId`. The command still
@@ -131,7 +128,6 @@ export const lookupTransactionTool = supportV1ServiceBuilder
 		return summary
 	})
 ```
-
 `.canInvoke(...)` declares the typed address-first capability. The resulting
 `context.service.Transaction['1'].getTransactionSummary(...)` call crosses
 EventBridge and carries the current trusted identity and trace. The handler

@@ -13,7 +13,6 @@ export interface SupportCasePolicy {
 	canResolve(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
-
 Declare that resource on the Support service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
@@ -26,7 +25,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support cases and resolution workflows',
 }).defineResource<'supportCasePolicy', SupportCasePolicy>()
 ```
-
 Use one authorization helper for both public boundaries. Missing trusted identity is unauthenticated; a rejected policy decision is forbidden.
 
 ```ts title="src/service/support/v1/requireSupportCaseResolution.ts" write
@@ -51,7 +49,6 @@ export async function requireSupportCaseResolution(
 	}
 }
 ```
-
 Only the workflow is a mounted Harness root. Its agents remain private children. The target policy runs before the mounted workflow reaches either model.
 
 ```ts title="src/service/support/v1/harness/supportHarness.ts" write
@@ -60,32 +57,30 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportCaseResolution } from '../requireSupportCaseResolution.js'
 import type { SupportCasePolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { resolveSupportCaseWorkflow } from './workflow/resolveSupportCase/resolveSupportCaseWorkflow.js'
 
 export const supportHarness = defineHarness({ name: 'supportResolution', revision: 'v1' }).addWorkflow(
 	resolveSupportCaseWorkflow,
 )
 
-export const supportHarnessPolicy = {
-	targets: {
-		workflows: {
-			resolveSupportCase: {
-				beforeGuards: {
-					caseAccess: async (
-						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
-						input: z.output<typeof resolveSupportCaseWorkflow.contract.input>,
-					) =>
-						requireSupportCaseResolution(context.resources.supportCasePolicy, {
-							...context.identity,
-							caseId: input.caseId,
-						}),
-				},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	workflows: {
+		resolveSupportCase: {
+			beforeGuards: {
+				caseAccess: async (
+					context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+					input: z.output<typeof resolveSupportCaseWorkflow.contract.input>,
+				) =>
+					requireSupportCaseResolution(context.resources.supportCasePolicy, {
+						...context.identity,
+						caseId: input.caseId,
+					}),
 			},
 		},
 	},
-} as const
+})
 ```
-
 ```bash title="Check the resource and mounted-target policy" replay="project"
 npm run build
 ```

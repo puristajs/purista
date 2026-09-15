@@ -24,8 +24,6 @@ export interface AccountReadPolicy {
 	canRead(input: Readonly<{ tenantId: string; principalId: string; accountId: string }>): Promise<boolean>
 }
 ```
-
-
 The command accepts one account and transaction id. Its output includes the
 trusted tenant so an after-guard can verify the returned record still belongs
 to the caller.
@@ -49,8 +47,6 @@ export const getTransactionSummaryOutputSchema = z.strictObject({
 	currency: z.string().length(3),
 })
 ```
-
-
 Register the resources on the versioned service builder.
 
 ```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
@@ -65,8 +61,6 @@ export const transactionV1ServiceBuilder = new ServiceBuilder({
 	.defineResource<'transactionSummaryReader', TransactionSummaryReader>()
 	.defineResource<'accountReadPolicy', AccountReadPolicy>()
 ```
-
-
 These are business resources. The agent will reach them through a PURISTA
 command instead of reading a database directly.
 

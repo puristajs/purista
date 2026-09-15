@@ -31,7 +31,7 @@ export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('requestCardFreeze', 'Create a durable human review request')
 	.addPayloadSchema(requestCardFreezeInputSchema)
 	.addOutputSchema(reviewRequestResultSchema)
-	.canInvokeWorkflow('Support', '1', reviewSupportActionWorkflow.contract)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(reviewSupportActionWorkflow.contract))
 	.setBeforeGuardHooks({
 		callerMayRequest: async function (context, payload) {
 			const { tenantId, principalId } = context.message
@@ -86,7 +86,6 @@ export const requestCardFreezeCommandBuilder = supportV1ServiceBuilder
 		throw new Error('Review workflow did not produce a tool approval interrupt')
 	})
 ```
-
 The caller sees a clear checkpoint: a `waiting` result means a reviewer can
 make the next decision. A 401 or 403 means authentication or authorization
 failed before the workflow ran.

@@ -11,27 +11,28 @@ the output rail has visible work to do.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 import { invokeClassification } from './invokeClassification.js'
 
 async function main() {
 	const logger = initLogger('fatal')
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueObject({
-		object: {
-			category: 'card',
-			urgency: 'normal',
-			reason: 'The message contains card number 4111111111111111.',
-		},
-		usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 },
-		finishReason: 'stop',
-	})
+	provider.enqueueObject(
+		objectReply(
+			{
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The message contains card number 4111111111111111.',
+			},
+			{ usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 }, finishReason: 'stop' },
+		),
+	)
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canClassify: async () => true },
-		model: { provider, model: 'fake-classifier' },
+		classificationModel: { provider, model: 'fake-classifier' },
 	})
 	await support.start()
 
@@ -54,7 +55,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```bash title="Run the credential-free guardrail demo" replay="project"
 npm run demo
 ```
@@ -82,7 +82,7 @@ async function main() {
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canClassify: async () => true },
-		model: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+		classificationModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
 	})
 	await support.start()
 	gracefulShutdown(logger, [support, eventBridge])
@@ -96,12 +96,10 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
-
 The default demo and all tests need no credentials or network. Add a key only
 when you intentionally run the live process.
 

@@ -49,7 +49,6 @@ export async function createSupportApplication(
 	return { support, transaction }
 }
 ```
-
 Keep the outer caller small. It sends trusted tenant and principal fields on
 the PURISTA message and addresses the wrapper command by service, version, and
 target.
@@ -91,7 +90,6 @@ export function invokeSupportQuestion(
 	})
 }
 ```
-
 Model providers, secrets, EventBridge, and storage stay outside the agent
 definition. The Harness API remains provider-neutral. This agent graph is
 intentionally PURISTA-hosted because its tool uses mounted service context.

@@ -16,7 +16,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import { createReviewApplication } from './createReviewApplication.js'
 
 const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
@@ -28,13 +28,14 @@ async function main() {
 	await eventBridge.start()
 	const effects: string[] = []
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueText({
-		content: '',
-		toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueText({ content: 'reviewed', usage, finishReason: 'stop' })
+	provider.enqueueText(
+		textReply('', {
+			toolCalls: [{ id: 'freeze-call', name: 'freezeReviewedCard', arguments: {} }],
+			usage,
+			finishReason: 'tool_calls',
+		}),
+	)
+	provider.enqueueText(textReply('reviewed', { usage, finishReason: 'stop' }))
 	const application = await createReviewApplication(
 		eventBridge,
 		logger,
@@ -103,7 +104,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 Run it without an API key:
 
 ```bash title="Run the deterministic approval demo" replay="project"
@@ -168,7 +168,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 Copy the environment example only if you want to start the optional live
 process. The deterministic demo above does not read these values.
 
@@ -176,7 +175,6 @@ process. The deterministic demo above does not read these values.
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
-
 ```bash title="Start the optional OpenAI-backed process"
 cp .env.example .env
 # Set OPENAI_API_KEY in .env, then run:

@@ -11,27 +11,28 @@ and lifecycle without an API key.
 
 ```ts title="src/demo.ts" write
 import { DefaultEventBridge, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { createSupportService } from './createSupportService.js'
 import { invokeClassification } from './invokeClassification.js'
 
 async function main() {
 	const logger = initLogger('fatal')
 	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueObject({
-		object: {
-			category: 'card',
-			urgency: 'normal',
-			reason: 'The message asks about a replacement card without an immediate deadline.',
-		},
-		usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 },
-		finishReason: 'stop',
-	})
+	provider.enqueueObject(
+		objectReply(
+			{
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The message asks about a replacement card without an immediate deadline.',
+			},
+			{ usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 }, finishReason: 'stop' },
+		),
+	)
 	const eventBridge = new DefaultEventBridge({ logger })
 	await eventBridge.start()
 	const support = await createSupportService(eventBridge, logger, {
 		policy: { canClassify: async () => true },
-		model: { provider, model: 'fake-classifier' },
+		classificationModel: { provider, model: 'fake-classifier' },
 	})
 	await support.start()
 
@@ -54,7 +55,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```bash title="Run the deterministic classification demo" replay="project"
 npm run demo
 ```
@@ -88,7 +88,7 @@ async function main() {
 			canClassify: async ({ tenantId, principalId }) =>
 				tenantId === 'tenant-example' && principalId === 'principal-alex',
 		},
-		model: {
+		classificationModel: {
 			provider: openai({ apiKey }),
 			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
 		},
@@ -103,12 +103,10 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5-mini
 ```
-
 Copy the environment template and add your key only when you want a real
 provider request. The process owns graceful shutdown of the service and bridge.
 

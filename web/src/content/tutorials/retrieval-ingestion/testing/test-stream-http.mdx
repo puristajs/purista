@@ -9,6 +9,7 @@ status: published
 Create stream and application tests. They verify the standard UI message stream endpoint and the protected HTTP application wiring.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts" write
+import { createHash } from 'node:crypto'
 import { createStreamContextMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -16,6 +17,12 @@ import { answerKnowledgeQuestionStreamBuilder } from './answerKnowledgeQuestionS
 
 const sandbox = createSandbox()
 const usage = { inputTokens: 2, outputTokens: 2, totalTokens: 4 }
+
+function trustedSessionId(transportId: string) {
+	return createHash('sha256')
+		.update(JSON.stringify(['mocked-tenant-id', 'mocked-principal-id', 'customer-help', transportId]))
+		.digest('base64url')
+}
 
 afterEach(() => sandbox.restore())
 
@@ -62,7 +69,7 @@ function approvalPayload(approved: boolean) {
 		version: 1,
 		rootRunId: 'run-approval',
 		agentRunId: 'run-approval',
-		sessionId: 'session-approval',
+		sessionId: trustedSessionId('session-approval'),
 		interruptId: 'interrupt-1',
 		revision: 'revision-1',
 		eventId: 'event-approval',
@@ -134,7 +141,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		expect(
 			harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.calledWith(
 				{ collectionId: 'customer-help', question: 'How long\nare transfers pending?' },
-				{ sessionId: 'session-1' },
+				{ sessionId: trustedSessionId('session-1') },
 			),
 		).toBe(true)
 		expect(harness.chunks.at(0)).toMatchObject({ event: 'data', data: { type: 'start', messageId: 'run-1' } })
@@ -154,23 +161,22 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 		const payload = approvalPayload(approved)
 		const harness = createStreamContextMock(answerKnowledgeQuestionStreamBuilder, { payload, parameter: {}, sandbox })
 		const events = completedEvents('run-approval')
-		harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.resolves(events as never)
+		const target = harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion
+		target.resume.continuation.stream.resolves(events as never)
 
 		await answerKnowledgeQuestionStreamBuilder
 			.getStreamFunction()
 			.call({} as never, harness.context, payload, {}, harness.writer)
 
-		const options = harness.stubs.agent.Knowledge['1'].answerKnowledgeQuestion.stream.firstCall.args[1]
-		expect(options).toMatchObject({
-			sessionId: 'session-approval',
-			resume: {
-				type: 'tool-approval',
-				runId: 'run-approval',
-				interruptId: 'interrupt-1',
-				revision: 'revision-1',
-				decisions: [{ approvalId: 'approval-1', approved }],
-			},
+		expect(target.resume.firstCall.args[0]).toMatchObject({
+			type: 'tool-approval',
+			runId: 'run-approval',
+			interruptId: 'interrupt-1',
+			revision: 'revision-1',
+			decisions: [{ approvalId: 'approval-1', approved }],
 		})
+		const options = target.resume.continuation.stream.firstCall.args[0]
+		expect(options).toMatchObject({ sessionId: trustedSessionId('session-approval') })
 		expect(options).not.toHaveProperty('idempotencyKey')
 		expect(harness.chunks.at(0)).toMatchObject({ event: 'data', data: { type: 'start', messageId: 'assistant-1' } })
 		expect(harness.chunks.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
@@ -239,7 +245,7 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 ```ts title="src/application.test.ts" write
 import { initDefaultStateStore, initLogger } from '@purista/core'
 import { sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, textReply } from '@purista/harness/testing'
 import type { HarnessUIApprovalDescriptor } from '@purista/harness-ai-sdk-ui/v1'
 import {
 	parseJsonEventStream,
@@ -413,25 +419,27 @@ describe('knowledge HTTP application', () => {
 
 	it('returns an approval as HTTP 200, resumes the same agent, and scopes retrieval with the authenticated tenant', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueText({
-			content: '',
-			toolCalls: [
-				{
-					id: 'search-1',
-					name: 'searchKnowledge',
-					arguments: { collectionId: 'customer-help', query: 'international transfer pending time', limit: 4 },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
+		provider.enqueueText(
+			textReply('', {
+				toolCalls: [
+					{
+						id: 'search-1',
+						name: 'searchKnowledge',
+						arguments: { collectionId: 'customer-help', query: 'international transfer pending time', limit: 4 },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
+			}),
+		)
 		provider.enqueueEmbedding({ embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }], usage })
-		provider.enqueueText({
-			content: 'International transfers can remain pending for up to two business days [transfer-guide#0].',
-			toolCalls: [],
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueText(
+			textReply('International transfers can remain pending for up to two business days [transfer-guide#0].', {
+				toolCalls: [],
+				usage,
+				finishReason: 'stop',
+			}),
+		)
 		const { application, repository, storage } = await fixture(provider)
 		try {
 			const token = await login(application)
@@ -508,24 +516,26 @@ describe('knowledge HTTP application', () => {
 
 	it('resumes a rejected approval without querying the repository', async () => {
 		const provider = new FakeModelProvider({ strict: true })
-		provider.enqueueText({
-			content: '',
-			toolCalls: [
-				{
-					id: 'search-rejected',
-					name: 'searchKnowledge',
-					arguments: { collectionId: 'customer-help', query: 'internal transfer policy', limit: 4 },
-				},
-			],
-			usage,
-			finishReason: 'tool_calls',
-		})
-		provider.enqueueText({
-			content: 'I cannot retrieve evidence because the search was not approved.',
-			toolCalls: [],
-			usage,
-			finishReason: 'stop',
-		})
+		provider.enqueueText(
+			textReply('', {
+				toolCalls: [
+					{
+						id: 'search-rejected',
+						name: 'searchKnowledge',
+						arguments: { collectionId: 'customer-help', query: 'internal transfer policy', limit: 4 },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
+			}),
+		)
+		provider.enqueueText(
+			textReply('I cannot retrieve evidence because the search was not approved.', {
+				toolCalls: [],
+				usage,
+				finishReason: 'stop',
+			}),
+		)
 		const { application, repository, storage } = await fixture(provider)
 		try {
 			const token = await login(application)

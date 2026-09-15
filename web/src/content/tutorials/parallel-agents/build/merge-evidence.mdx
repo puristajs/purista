@@ -13,7 +13,6 @@ export interface SupportCasePolicy {
 	canAnalyze(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
 }
 ```
-
 Declare the resource on the Support service builder.
 
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
@@ -26,7 +25,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder({
 	serviceDescription: 'Owns support cases and support automation',
 }).defineResource<'supportCasePolicy', SupportCasePolicy>()
 ```
-
 Use one guard helper at both public boundaries. It requires trusted tenant and principal identity before it calls the policy. The session ID hashes a JSON tuple, so values containing separators cannot collide.
 
 ```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts" write
@@ -62,7 +60,6 @@ export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; pri
 	return `support-case:${digest}`
 }
 ```
-
 This separates business authorization from the agents. The agents only analyze valid input; the service decides whether the caller may start that work.
 
 ```bash title="Check the service resource and guard" replay="project"

@@ -16,13 +16,11 @@ export const generalSupportServiceInfo: Omit<ServiceInfoType, 'serviceVersion'> 
 	serviceDescription: 'Classify and route customer support requests',
 }
 ```
-
 ```ts title="src/service/support/v1/SupportResources.ts" write
 export interface SupportClassificationPolicy {
 	canClassify(input: Readonly<{ tenantId: string; principalId: string; messageId: string }>): Promise<boolean>
 }
 ```
-
 ```ts title="src/service/support/v1/supportServiceConfig.ts" write
 import { z } from 'zod'
 
@@ -30,7 +28,6 @@ export const supportServiceV1ConfigSchema = z.object({})
 
 export type SupportServiceV1Config = z.input<typeof supportServiceV1ConfigSchema>
 ```
-
 ```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
 import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
 import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
@@ -46,7 +43,6 @@ export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.setConfigSchema(supportServiceV1ConfigSchema)
 	.defineResource<'supportClassificationPolicy', SupportClassificationPolicy>()
 ```
-
 The policy checks trusted identity from the message. Its stable hash keeps later turns for the same message in the same Harness session.
 
 ```ts title="src/service/support/v1/requireSupportClassification.ts" write
@@ -85,7 +81,6 @@ export function supportClassificationSessionId(
 	return `support-classification:${digest}`
 }
 ```
-
 Compose one service-owned Harness definition and attach the target guard. The guard protects direct addressed execution as well as the command added on the next page.
 
 ```ts title="src/service/support/v1/harness/supportHarness.ts" write
@@ -94,6 +89,7 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportClassification } from '../requireSupportClassification.js'
 import type { SupportClassificationPolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { classifySupportMessageAgent } from './agent/classifySupportMessage/classifySupportMessageAgent.js'
 
 /** One service-owned Harness graph. The evaluation runner uses this same definition directly. */
@@ -101,28 +97,25 @@ export const supportHarness = defineHarness({ name: 'support', revision: 'suppor
 	classifySupportMessageAgent,
 )
 
-export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			classifySupportMessage: {
-				beforeGuards: {
-					mayClassifySupport: async (
-						context: HarnessBusinessGuardContext<{ supportClassificationPolicy: SupportClassificationPolicy }>,
-						input: z.output<typeof classifySupportMessageAgent.contract.input>,
-					) => {
-						await requireSupportClassification(context.resources.supportClassificationPolicy, {
-							...context.identity,
-							messageId: input.messageId,
-						})
-					},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		classifySupportMessage: {
+			beforeGuards: {
+				mayClassifySupport: async (
+					context: HarnessBusinessGuardContext<{ supportClassificationPolicy: SupportClassificationPolicy }>,
+					input: z.output<typeof classifySupportMessageAgent.contract.input>,
+				) => {
+					await requireSupportClassification(context.resources.supportClassificationPolicy, {
+						...context.identity,
+						messageId: input.messageId,
+					})
 				},
 			},
 		},
-		workflows: {},
 	},
-} as const
+	workflows: {},
+})
 ```
-
 ```bash title="Type-check the mounted capability" replay="project"
 npm run build
 ```

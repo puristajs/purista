@@ -27,12 +27,11 @@ const callClassifierCommandBuilder = directCallerBuilder
 	.getCommandBuilder('callClassifier', 'Call the guarded classifier directly')
 	.addPayloadSchema(classifySupportMessageAgent.contract.input)
 	.addOutputSchema(classifySupportMessageAgent.contract.output)
-	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setCommandFunction(async function ({ agent }, payload) {
 		const result = await agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: `direct:${payload.messageId}`,
 		})
-		if (result.outcome.status !== 'completed') throw new Error('The classifier was interrupted unexpectedly.')
 		return result.outcome.output
 	})
 const directCallerService = directCallerBuilder
@@ -121,7 +120,6 @@ describe('guarded support service', () => {
 	})
 })
 ```
-
 The first case passes business authorization, reaches the native input rail,
 and is blocked before the provider. The second case uses an isolated test-only
 wrapper for the same mounted target. Its denied business policy runs before

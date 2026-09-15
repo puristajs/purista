@@ -32,7 +32,7 @@ export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runClassifySupportMessage', 'Classify one support message with the guarded agent')
 	.addPayloadSchema(classifySupportMessageInputSchema)
 	.addOutputSchema(classifySupportMessageOutputSchema)
-	.canInvokeAgent('Support', '1', classifySupportMessageAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(classifySupportMessageAgent.contract))
 	.setBeforeGuardHooks({
 		messageAccess: async function (context, payload) {
 			await requireSupportClassification(context.resources.supportClassificationPolicy, {
@@ -46,15 +46,11 @@ export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
 		const result = await context.agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
 			sessionId: supportClassificationSessionId(context.message, payload.messageId),
 		})
-		if (result.outcome.status !== 'completed') {
-			throw new Error('Message classification was interrupted unexpectedly.')
-		}
 		return result.outcome.output
 	})
 ```
-
-The three-argument declaration uses the imported agent contract. The client is
-addressed by service, version, and that contract id. PURISTA returns a
+`harnessTarget` derives the service, version, and target id from the Support
+builder and imported contract. PURISTA returns a
 `{ sessionId, outcome }` envelope; this wrapper returns the completed output.
 
 Register the wrapper and mount the service-owned Harness once.
@@ -68,5 +64,4 @@ export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(runClassifySupportMessageCommandBuilder.getDefinition())
 	.mountHarness(supportHarness, supportHarnessPolicy)
 ```
-
 Continue with [Compose the runtime](../compose-runtime/).

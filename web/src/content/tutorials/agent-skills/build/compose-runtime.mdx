@@ -23,17 +23,15 @@ import { supportV1Service } from './service/support/v1/supportV1Service.js'
 export function createSupportService(
 	eventBridge: EventBridge,
 	logger: Logger,
-	options: Readonly<{ policy: SupportProcedurePolicy; model: { provider: ModelProvider; model: string } }>,
+	options: Readonly<{ policy: SupportProcedurePolicy; answeringModel: { provider: ModelProvider; model: string } }>,
 ) {
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportProcedurePolicy: options.policy },
-		ai: { models: { answering: options.model }, sandbox: { adapter: inMemorySandbox() } },
+		ai: { models: { answering: options.answeringModel }, sandbox: { adapter: inMemorySandbox() } },
 	})
 }
 ```
-
-
 `inMemorySandbox()` is useful for a read-only, credential-free example. It is
 not process isolation for untrusted code. This agent receives only the read
 tool, so the shell file inside the Skill remains data and cannot execute.
@@ -74,8 +72,6 @@ export function invokeProcedureAnswer(
 	})
 }
 ```
-
-
 Browser or model input may choose the case and question. It must not choose the
 trusted tenant or principal fields.
 

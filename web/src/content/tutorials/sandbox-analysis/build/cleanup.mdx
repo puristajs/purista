@@ -56,7 +56,6 @@ export function transactionAnalysisSandboxCleanup(
 	}
 }
 ```
-
 When adapter administration reports `cleanup_pending`, the helper waits for its retry delay and retries with the same selector and idempotency key. It stops after three retries. On failure it preserves metadata and the configured root instead of hiding evidence with a destructive fallback.
 
 ```bash title="Stop local Compose resources" replay="project"

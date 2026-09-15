@@ -57,7 +57,6 @@ export const decideReviewInputSchema = z.strictObject({
 
 export type ReviewWorkflowInput = z.output<typeof reviewSupportActionInputSchema>
 ```
-
 `actionDigest` binds a stored request to its card and reason without placing
 those business fields in a second workflow schema. The review decision uses an
 optimistic `expectedRevision` so a stale reviewer cannot overwrite a decision.

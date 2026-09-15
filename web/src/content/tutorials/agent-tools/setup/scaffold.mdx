@@ -72,7 +72,6 @@ the project-local CLI. `demo` runs the credential-free application built later.
 	}
 }
 ```
-
 Keep the generated PURISTA project conventions explicit. This example uses the
 Node.js runtime, the default EventBridge, and service-owned source below
 `src/service`.
@@ -89,7 +88,6 @@ Node.js runtime, the default EventBridge, and service-owned source below
 	"servicePath": "src/service"
 }
 ```
-
 Add the local files to `.gitignore` before generating runtime output.
 
 ```gitignore title=".gitignore" write
@@ -98,7 +96,6 @@ dist/
 .env
 agent-tools.sqlite*
 ```
-
 Add a short project README with the commands used to verify and run this
 chapter.
 
@@ -120,7 +117,6 @@ no model key or external service.
 To try the same composition with OpenAI, copy `.env.example`, set
 `OPENAI_API_KEY`, and run `npm start`.
 ```
-
 Create two narrow capability owners. `Support` owns the agent and support
 request. `Transaction` owns transaction data and the authorization rule for
 reading it.

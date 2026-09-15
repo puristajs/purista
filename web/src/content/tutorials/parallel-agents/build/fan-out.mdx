@@ -42,7 +42,6 @@ export const analyzeSupportCaseWorkflow = defineWorkflow('analyzeSupportCase', {
 	},
 })
 ```
-
 `context.fanOut` preserves the input order in its result array. The stable call IDs make each child call identifiable. The response agent may finish first, but `results[0]` is still the risk result and `results[1]` is still the response result. Parsing both values again makes the merge boundary explicit.
 
 Add only the workflow to the service Harness. The mounted target gets the same case authorization check as the wrapper command.
@@ -53,32 +52,30 @@ import { defineHarness } from '@purista/harness'
 import type { z } from 'zod'
 import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
 import type { SupportCasePolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
 import { analyzeSupportCaseWorkflow } from './workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
 
 export const supportHarness = defineHarness({ name: 'supportParallelAnalysis', revision: 'v1' }).addWorkflow(
 	analyzeSupportCaseWorkflow,
 )
 
-export const supportHarnessPolicy = {
-	targets: {
-		workflows: {
-			analyzeSupportCase: {
-				beforeGuards: {
-					caseAccess: async (
-						context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
-						input: z.output<typeof analyzeSupportCaseWorkflow.contract.input>,
-					) =>
-						requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
-							...context.identity,
-							caseId: input.caseId,
-						}),
-				},
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	workflows: {
+		analyzeSupportCase: {
+			beforeGuards: {
+				caseAccess: async (
+					context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+					input: z.output<typeof analyzeSupportCaseWorkflow.contract.input>,
+				) =>
+					requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+						...context.identity,
+						caseId: input.caseId,
+					}),
 			},
 		},
 	},
-} as const
+})
 ```
-
 The child agents have no mounted target entries, so they are not published as PURISTA targets. They remain available only inside the workflow.
 
 ```bash title="Check the bounded workflow and mount policy" replay="project"

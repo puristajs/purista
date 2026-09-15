@@ -49,7 +49,6 @@ export const resolveSupportCaseWorkflow = defineWorkflow('resolveSupportCase', {
 	},
 })
 ```
-
 The managed agent calls already participate in durable execution. Their call IDs, `classify-case` and `plan-resolution`, stay stable across an attempt.
 
 `select-handling-lane-v1` is different: it is an application-owned durable step between the two model calls. Harness stores its priority or standard routing decision. `resolutionPlanInputSchema.parse` validates the value whether it is fresh or replayed.

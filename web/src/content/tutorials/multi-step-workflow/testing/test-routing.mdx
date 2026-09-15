@@ -70,13 +70,12 @@ describe('runResolveSupportCaseCommandBuilder', () => {
 	})
 })
 ```
-
 The integration tests use strict fake providers, SQLite Harness storage, and a real `DefaultEventBridge`. They cover bounded transient provider retry, permanent validation failure, completed-run replay, changed input for an existing run, wrapper-command denial, and mounted-workflow denial before model work.
 
 ```ts title="src/multiStepWorkflow.integration.test.ts" write
 import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
 import { BaseModelProvider, ModelError, sqliteHarnessStorage } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 import { describe, expect, it, vi } from 'vitest'
 import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
@@ -134,16 +133,15 @@ describe('durable multi-step workflow over PURISTA', () => {
 	it('runs the durable workflow through the command and replays it on the next invocation', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new TransientResolutionProvider()
-		classificationProvider.enqueueObject({
-			object: { category: 'card', urgency: 'urgent' },
-			usage,
-			finishReason: 'stop',
-		})
-		resolutionProvider.enqueueObject({
-			object: { summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
-			usage,
-			finishReason: 'stop',
-		})
+		classificationProvider.enqueueObject(
+			objectReply({ category: 'card', urgency: 'urgent' }, { usage, finishReason: 'stop' }),
+		)
+		resolutionProvider.enqueueObject(
+			objectReply(
+				{ summary: 'Verify identity and freeze the affected card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
 		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const policy = { canResolve: vi.fn(async () => true) }
 		const eventBridge = new DefaultEventBridge()
@@ -201,16 +199,12 @@ describe('durable multi-step workflow over PURISTA', () => {
 	it('does not retry a permanent model-output validation failure', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
-		classificationProvider.enqueueObject({
-			object: { category: 'card', urgency: 'normal' },
-			usage,
-			finishReason: 'stop',
-		})
-		resolutionProvider.enqueueObject({
-			object: { summary: '', nextAction: 'unknown' },
-			usage,
-			finishReason: 'stop',
-		})
+		classificationProvider.enqueueObject(
+			objectReply({ category: 'card', urgency: 'normal' }, { usage, finishReason: 'stop' }),
+		)
+		resolutionProvider.enqueueObject(
+			objectReply({ summary: '', nextAction: 'unknown' }, { usage, finishReason: 'stop' }),
+		)
 		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
@@ -251,16 +245,12 @@ describe('durable multi-step workflow over PURISTA', () => {
 	it('rejects changed input for an existing durable run without another model call', async () => {
 		const classificationProvider = new FakeModelProvider({ strict: true })
 		const resolutionProvider = new FakeModelProvider({ strict: true })
-		classificationProvider.enqueueObject({
-			object: { category: 'transfer', urgency: 'normal' },
-			usage,
-			finishReason: 'stop',
-		})
-		resolutionProvider.enqueueObject({
-			object: { summary: 'Check the transfer status.', nextAction: 'reply' },
-			usage,
-			finishReason: 'stop',
-		})
+		classificationProvider.enqueueObject(
+			objectReply({ category: 'transfer', urgency: 'normal' }, { usage, finishReason: 'stop' }),
+		)
+		resolutionProvider.enqueueObject(
+			objectReply({ summary: 'Check the transfer status.', nextAction: 'reply' }, { usage, finishReason: 'stop' }),
+		)
 		const storage = sqliteHarnessStorage({ file: ':memory:' })
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
@@ -345,7 +335,6 @@ describe('durable multi-step workflow over PURISTA', () => {
 	})
 })
 ```
-
 Run the complete credential-free verification.
 
 ```bash title="Verify the complete multi-step project" replay="project"

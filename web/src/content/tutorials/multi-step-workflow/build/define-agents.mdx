@@ -39,7 +39,6 @@ export const supportResolutionOutputSchema = z.strictObject({
 	plan: resolutionPlanSchema,
 })
 ```
-
 The classification agent uses the lower-camel model name `classificationModel` and maps structured input into a clear prompt.
 
 ```ts title="src/service/support/v1/harness/agent/classifySupportCase/classifySupportCaseAgent.ts" write
@@ -57,7 +56,6 @@ export const classifySupportCaseAgent = defineAgent('classifySupportCase', {
 	}),
 })
 ```
-
 The planning agent uses the separate `resolutionModel` binding. Its prompt includes the earlier stage result.
 
 ```ts title="src/service/support/v1/harness/agent/planSupportResolution/planSupportResolutionAgent.ts" write
@@ -75,7 +73,6 @@ export const planSupportResolutionAgent = defineAgent('planSupportResolution', {
 	}),
 })
 ```
-
 Both agents are direct, service-owned Harness definitions. The application chooses their providers later.
 
 ```bash title="Check the two typed agent stages" replay="project"

@@ -32,7 +32,6 @@ export const supportCaseAnalysisOutputSchema = z.strictObject({
 	response: responsePlanSchema,
 })
 ```
-
 The risk agent uses the lower-camel model name `riskModel`.
 
 ```ts title="src/service/support/v1/harness/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
@@ -53,7 +52,6 @@ export const assessSupportRiskAgent = defineAgent('assessSupportRisk', {
 	}),
 })
 ```
-
 The response agent uses `responseModel`. It proposes an action but does not perform it.
 
 ```ts title="src/service/support/v1/harness/agent/planSupportResponse/planSupportResponseAgent.ts" write
@@ -74,7 +72,6 @@ export const planSupportResponseAgent = defineAgent('planSupportResponse', {
 	}),
 })
 ```
-
 The agents are direct Harness definitions owned by Support v1. The application will bind both model names to providers later.
 
 ```bash title="Check the specialist definitions" replay="project"

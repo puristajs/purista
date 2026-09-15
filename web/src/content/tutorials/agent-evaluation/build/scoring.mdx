@@ -23,7 +23,7 @@ export async function runClassificationEvaluation(
 	options: Readonly<{ runId?: string; model?: string }> = {},
 ): Promise<EvaluationRunResult> {
 	const harness = await supportHarness.getInstance({
-		models: { classification: { provider, model: options.model ?? 'evaluation-model' } },
+		models: { classification: { provider, model: options.classificationModel ?? 'evaluation-model' } },
 	})
 	try {
 		return await runEvaluation<
@@ -42,7 +42,6 @@ export async function runClassificationEvaluation(
 					const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
 					try {
 						const outcome = await session.agents.classifySupportMessage.run(target.input)
-						if (outcome.status !== 'completed') throw new Error('Classification evaluation case did not complete')
 						return { output: outcome.output, correlation: { runId: outcome.runId } }
 					} finally {
 						await session.release()
@@ -60,11 +59,10 @@ export async function runClassificationEvaluation(
 	}
 }
 ```
-
 The strict fake provider supplies the three known outputs and reports an unexpected or unused model call.
 
 ```ts title="src/testing/scriptedClassificationProvider.ts" write
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
 
 const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
 
@@ -75,12 +73,11 @@ export function passingEvaluationProvider() {
 		{ category: 'transfer', urgency: 'normal', reason: 'The question concerns a scheduled transfer date.' },
 		{ category: 'account_access', urgency: 'urgent', reason: 'Essential access is blocked before a deadline.' },
 	]) {
-		provider.enqueueObject({ object, usage, finishReason: 'stop' })
+		provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
 	}
 	return provider
 }
 ```
-
 ```ts title="src/runEvaluation.ts" write
 import { assertClassificationGate } from './changeGate.js'
 import { runClassificationEvaluation } from './runClassificationEvaluation.js'
@@ -99,7 +96,6 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-
 ```bash title="Run the credential-free evaluation" replay="project"
 npm run build
 npm run evaluate
