@@ -38,15 +38,18 @@ Migrate in this order:
 2. Mount the immutable definition with
    one `ServiceBuilder.mountHarness(definition, policy)` call. Delete additional
    per-agent mounts and runtimes.
-3. Publish only selected agent/workflow targets.
+3. Publish only selected agent/workflow targets. Define their typed policy with
+   `serviceBuilder.defineHarnessPolicy(definition, { agents, workflows })`;
+   there is no `targets` wrapper.
 4. Bind PURISTA commands or typed host-tool handlers through the mount policy.
-5. Declare consumer dependencies with address-first
-   `canInvokeAgent(service, version, target, contract)` or
-   `canInvokeWorkflow(...)`.
-6. Call `.run(input)` or `.stream(input)`; every call crosses EventBridge.
+5. Bind a same-service contract with `serviceBuilder.harnessTarget(contract)`,
+   then pass it to `canInvokeAgent(target)` or `canInvokeWorkflow(target)`.
+6. Call `.run(input)` or `.stream(input)` for fresh work. Continue an
+   interruption with `.resume(descriptor).run()` or `.stream()`; every call
+   crosses EventBridge.
 7. For durable target delivery, create a `defineHarnessQueueBinding(...)` from
    the target contract plus native queue and worker builders. Put it on the
-   mount policy and declare `binding.contract` only at callers that need
+   mount policy and declare `binding.reference` only at callers that need
    `.enqueue(...)`.
 8. Create ordinary commands and streams only for the application contracts
    that need them. Use `purista add agent` and `purista add workflow` to extend
@@ -54,16 +57,20 @@ Migrate in this order:
 
 `.run` returns a `RunOutcome`. Approval and external waits are
 `interrupted` outcomes, not exceptions. A browser stream uses the separate
-`@purista/harness-ai-sdk-ui/v1` adapter and AI SDK UI Message Stream v1. On a
-PURISTA stream, declare `AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` and use
+`@purista/harness-ai-sdk-ui/v1` adapter and AI SDK UI Message Stream v1.
+Authenticate first, derive a trusted server session ID, and call
+`parseHarnessUIMessageRequest(payload, { sessionId })`. On a PURISTA stream,
+declare `AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` and use
 `pipeHarnessUIMessageStream(events, writer, request)`; Hono supplies the
 standard headers and the adapter owns projection and cancellation.
 
-Concrete models, admission, storage, memory, sandbox adapter and policy,
+Concrete models, concurrency, storage, memory, sandbox adapter and policy,
 workspace, artifacts, logger, and telemetry are supplied under the service
 `ai` instance config. Bind sandbox infrastructure as
 `ai.sandbox: { adapter, policy? }`; private partitions are the default and
-named-group sharing requires `policy.sharing: 'declared'`. PURISTA StateStore is not Harness checkpoint storage,
+named-group sharing requires `policy.sharing: 'declared'`. Bind complete-run
+and provider-call limits as `ai.concurrency: { runs, modelCalls }`. PURISTA
+StateStore is not Harness checkpoint storage,
 and transactional records remain behind database resources.
 
 Every `defineAgent(...)` call must declare a user-chosen purpose model alias.

@@ -37,9 +37,14 @@ Mount once on the final service builder. A root is addressable; an agent or
 workflow only referenced by another definition remains private.
 
 ```ts
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  targets: { agents: { [triageTicketAgent.contract.id]: { beforeGuards: { authorize } } } },
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+  agents: { [triageTicketAgent.contract.id]: { beforeGuards: { authorize } } },
 })
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(
+  supportHarness,
+  supportHarnessPolicy,
+)
 ```
 
 Mount guards authorize the mounted address. HTTP wrapper guards authorize only
@@ -58,7 +63,7 @@ in one process.
 ```ts
 const command = supportV1ServiceBuilder
   .getCommandBuilder('triageTicket', 'Classify a support ticket')
-  .canInvokeAgent('Support', '1', triageTicketAgent.contract)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(triageTicketAgent.contract))
   .setCommandFunction(async function ({ agent }, input) {
     const result = await agent.Support['1'][triageTicketAgent.contract.id].run(input)
     if (result.outcome.status !== 'completed') return result
@@ -68,8 +73,10 @@ const command = supportV1ServiceBuilder
 
 Remote `.run(...)` returns `{ sessionId, outcome }`; remote `.stream(...)`
 returns a cancellable execution stream. An interruption is normal application
-data. Queue delivery requires `defineHarnessQueueBinding(...)` and its queued
-reference; direct contracts never expose `.enqueue(...)`.
+data. Continue it with `target.resume(descriptor).run({ sessionId })` or
+`.stream({ sessionId })`; never add `resume` to fresh invocation options. Queue
+delivery requires `defineHarnessQueueBinding(...)` and its queued reference;
+direct contracts never expose `.enqueue(...)`.
 
 ## Runtime binding and lifecycle
 
@@ -83,6 +90,10 @@ const support = await supportV1Service.getInstance(eventBridge, {
   resources,
   ai: {
     models: { classification: { provider, model: 'provider-model-id' } },
+    concurrency: {
+      runs: runConcurrency,
+      modelCalls: modelCallConcurrency,
+    },
     storage: harnessStorage,
     memory,
     sandbox: {
@@ -94,8 +105,9 @@ const support = await supportV1Service.getInstance(eventBridge, {
 ```
 
 The service owns Harness lifecycle and closes its instance during destruction.
-Use application-owned logical session ids; trusted tenant/principal identity is
-provided by the Framework, never by a payload.
+Derive logical Harness session IDs at the authenticated server boundary from
+trusted tenant/principal identity and an authorized application conversation
+key. Never accept the Harness session ID itself from a browser payload.
 
 The adapter is execution infrastructure. Its policy is optional: private
 partitions are the default. A graph that declares `sandbox: { group: 'name' }`
@@ -118,6 +130,11 @@ standard response headers and direct-stream settings. Use
 `pipeHarnessUIMessageStream(events, writer, request)` so projection,
 completion, closing, and upstream cancellation stay in the adapter instead of
 being reimplemented in the handler.
+
+Call `parseHarnessUIMessageRequest(payload, { sessionId: trustedSessionId })`
+before invoking the target. Start fresh work with `target.stream(input,
+{ sessionId: request.sessionId })`; continue approval with
+`target.resume(request.resume).stream({ sessionId: request.sessionId })`.
 
 Test portable definitions with `FakeModelProvider`. Test host tools and mounted
 targets through deterministic EventBridge/service integration. Test commands,

@@ -87,16 +87,14 @@ it('stops a transfer when approval is rejected', async () => {
 	const request = first.interrupt.requests[0]
 	if (!request) throw new Error('Expected one approval request')
 
-	await session.agents.banker.run(largeTransfer, {
-		resume: {
-			type: 'tool-approval',
-			runId: first.runId,
-			interruptId: first.interrupt.id,
-			revision: first.interrupt.revision,
-			eventId: 'review-rejected-1',
-			decisions: [{ approvalId: request.approvalId, approved: false }],
-		},
-	})
+	await session.agents.banker.resume({
+		type: 'tool-approval',
+		runId: first.runId,
+		interruptId: first.interrupt.id,
+		revision: first.interrupt.revision,
+		eventId: 'review-rejected-1',
+		decisions: [{ approvalId: request.approvalId, approved: false }],
+	}).run()
 
 	expect(transfers).toHaveLength(0)
 })

@@ -82,13 +82,17 @@ Use queue-backed execution when work needs leases, retries, delay, dead-letter h
 Queue workers use the same declared dependency model as other handlers. Declare dependencies before the worker function so the runtime manifest, handler context, and test helpers stay typed and auditable:
 
 ```ts
-const worker = service
+const worker = reconciliationV1ServiceBuilder
 	.getQueueWorkerBuilder('invoiceProcessing', 'Processes invoice jobs')
 	.canInvoke('InvoiceService', '1', 'sendInvoice', sendInvoiceOutputSchema, invoicePayloadSchema)
 	.canConsumeStream('InvoiceService', '1', 'renderInvoice', invoiceChunkSchema, invoicePayloadSchema)
 	.canEnqueue('notificationQueue', notificationPayloadSchema, notificationParameterSchema)
 	.canEmit('invoice.completed', invoiceCompletedEventSchema)
-	.canInvokeAgent('Reconciliation', '1', reconciliationHarness.contracts.agents.reconcile_invoice)
+	.canInvokeAgent(
+		reconciliationV1ServiceBuilder.harnessTarget(
+			reconciliationHarness.contracts.agents.reconcile_invoice,
+		),
+	)
 	.setHandler(async function (context) {
 		const payload = context.message.payload as { invoiceId: string }
 		await context.service.InvoiceService['1'].sendInvoice({ invoiceId: payload.invoiceId })
@@ -161,14 +165,20 @@ command or stream only when the application needs that consumer contract.
 
 ```ts
 const harness = defineHarness({ name: 'support' }).addAgent(triageTicketAgent)
-const support = supportService.mountHarness(harness, {
-	targets: { agents: { [triageTicketAgent.contract.id]: {} } },
+const policy = supportService.defineHarnessPolicy(harness, {
+	agents: { [triageTicketAgent.contract.id]: {} },
 })
+const support = supportService.mountHarness(harness, policy)
 ```
 
 Call `mountHarness(...)` once per service. Compose later root agents and
 workflows into the same definition; tools, Skills, and MCP tools attach to the
 definition that uses them.
+
+Use `serviceBuilder.harnessTarget(contract)` for same-service declarations.
+Pass that authentic address-bound reference to `canInvokeAgent(...)` or
+`canInvokeWorkflow(...)`; this keeps imports acyclic while every invocation
+still crosses EventBridge.
 
 The first `add:agent` or `add:workflow` creates that service Harness and mount.
 Later calls extend the same files. Workflow modules use native Harness workflow

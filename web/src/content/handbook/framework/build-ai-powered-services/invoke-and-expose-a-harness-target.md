@@ -10,6 +10,8 @@ address:
 
 ```ts title="src/service/support/v1/command/runAnswerSupportQuestion/runAnswerSupportQuestionCommandBuilder.ts"
 import type { HarnessTargetRunOutcome } from '@purista/harness'
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
 import { answerSupportQuestionAgent } from '../../harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
@@ -20,7 +22,7 @@ type AgentInterrupt = Extract<AgentOutcome, { status: 'interrupted' }>['interrup
 
 const payloadSchema = z.object({
 	input: z.string().min(1),
-	sessionId: z.string().min(1).optional(),
+	conversationId: z.string().min(1).optional(),
 })
 const interruptSchema = z.json() as unknown as z.ZodType<AgentInterrupt, AgentInterrupt>
 const outputSchema = z.object({
@@ -44,19 +46,33 @@ export const runAnswerSupportQuestionCommandBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(payloadSchema)
 	.addParameterSchema(z.object({}))
 	.addOutputSchema(outputSchema)
-	.canInvokeAgent('Support', '1', answerSupportQuestionAgent.contract)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerSupportQuestionAgent.contract))
 	.exposeAsHttpEndpoint('POST', 'ai/answer-support-question')
 	.enableHttpSecurity(true)
 	.setCommandFunction(async function (context, payload) {
+		if (context.message.principalId === undefined) {
+			throw new HandledError(StatusCode.Unauthorized, 'Authenticated principal identity is required')
+		}
+		const sessionId = createHash('sha256')
+			.update(JSON.stringify([
+				context.message.tenantId ?? '',
+				context.message.principalId,
+				payload.conversationId ?? 'default',
+			]))
+			.digest('base64url')
 		return context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(
 			payload.input,
-			payload.sessionId === undefined ? {} : { sessionId: payload.sessionId },
+			{ sessionId },
 		)
 	})
 ```
 
-[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-adds typed `.run(...)` and `.stream(...)` clients to the handler context. An
+[`harnessTarget(contract)`](/handbook/api/classes/_purista_core.ServiceBuilder/#harnesstarget)
+binds the authentic contract to the service builder's own address. This avoids
+string duplication and does not require the finished service definition, so it
+does not introduce a circular import.
+[`canInvokeAgent(target)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+adds typed `.run(...)`, `.stream(...)`, and `.resume(...)` clients to the handler context. An
 aggregate call returns `{ sessionId, outcome }`. Keep that envelope in the
 public command contract so a client can distinguish completion from an
 approval or another interruption.
@@ -69,17 +85,23 @@ guards then authorize the business action. The agent remains
 transport-independent. The call crosses EventBridge even when caller and target
 run in the same process.
 
-Pass a product-owned `sessionId` when later requests should share context:
+Pass a server-derived `sessionId` when later requests should share context:
 
 ```ts title="Continue one conversation"
 const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(
 	question,
-	{ sessionId: `support:${conversationId}` },
+	{ sessionId: deriveHarnessSessionId(context.message, conversationId) },
 )
 ```
 
-The runtime scopes storage with trusted tenant and principal identity. A
-session id is correlation data, not proof of authorization.
+`deriveHarnessSessionId(...)` is application code. It should create an opaque,
+stable value from the authenticated tenant and principal plus the authorized
+conversation key.
+
+The runtime scopes storage with trusted tenant and principal identity. The
+browser may supply a product conversation key, but the authenticated server
+must bind it to tenant and principal identity and derive the Harness session
+ID. A session ID is correlation data, not proof of authorization.
 
 ## Aggregate HTTP
 
@@ -109,38 +131,51 @@ import {
   parseHarnessUIMessageRequest,
   pipeHarnessUIMessageStream,
 } from '@purista/harness-ai-sdk-ui/v1'
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
+const inputSchema = z.object({ id: z.string().min(1) }).passthrough()
 const chunkSchema = z.object({ event: z.literal('data'), data: z.unknown() })
 
 export const streamAssistantStreamBuilder = supportV1ServiceBuilder
   .getStreamBuilder('streamAssistant', 'Stream assistant UI messages')
-  .addPayloadSchema(z.unknown())
+  .addPayloadSchema(inputSchema)
   .addParameterSchema(z.object({}))
   .addChunkSchema(chunkSchema)
   .addFinalSchema(z.void())
-  .canInvokeAgent('Support', '1', assistantAgent.contract)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(assistantAgent.contract))
   .exposeAsHttpStreamEndpoint('POST', 'ai/assistant')
   .enableHttpSecurity(true)
   .setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
   .setStreamFunction(async function (context, payload, _parameter, writer) {
-    const request = await parseHarnessUIMessageRequest(payload)
+    if (context.message.principalId === undefined) {
+      throw new HandledError(StatusCode.Unauthorized, 'Authenticated principal identity is required')
+    }
+    const trustedSessionId = createHash('sha256')
+      .update(JSON.stringify([
+        context.message.tenantId ?? '',
+        context.message.principalId,
+        payload.id,
+      ]))
+      .digest('base64url')
+    const request = await parseHarnessUIMessageRequest(payload, {
+      sessionId: trustedSessionId,
+    })
     const input = request.lastUserMessage.parts
       .flatMap(part => part.type === 'text' ? [part.text] : [])
       .join('\n')
 
-    const events = await context.agent.Support['1'][assistantAgent.contract.id].stream(
-      input,
-      request.resume === undefined
-        ? { sessionId: request.sessionId }
-        : { sessionId: request.sessionId, resume: request.resume },
-    )
+    const target = context.agent.Support['1'][assistantAgent.contract.id]
+    const events = request.resume === undefined
+      ? await target.stream(input, { sessionId: request.sessionId })
+      : await target.resume(request.resume).stream({ sessionId: request.sessionId })
 
     await pipeHarnessUIMessageStream(events, writer, request)
   })
 ```
 
-[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
+[`canInvokeAgent(target)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
 adds the mounted agent client to this stream handler. The call still crosses
 EventBridge and applies the target policy.
 
@@ -155,9 +190,9 @@ records, writes `[DONE]`, closes a successful stream, and propagates browser
 cancellation to the addressed Harness execution. Cancellation cannot undo
 provider or tool effects that already started.
 
-The CLI generates this projection with `--http stream`. A resume request sends
-`{ sessionId, resume }` to the target and remains a normal HTTP response, so
-approval flows do not become server errors. Browser clients can use AI SDK
+The CLI generates this projection with `--http stream`. A resume request uses
+`target.resume(request.resume).stream(...)` and remains a normal HTTP response,
+so approval flows do not become server errors. Browser clients can use AI SDK
 `useChat` or AI Elements without a PURISTA-specific client library.
 
 HTTP authentication comes from the Hono protect middleware. Target guards still

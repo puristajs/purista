@@ -23,7 +23,9 @@ therefore works when caller and target later run in different processes.
 1. Define agents and workflows with `defineAgent(...)` and `defineWorkflow(...)`.
 2. Compose one service-owned graph with `defineHarness().addAgent(...)` and
    `.addWorkflow(...)`.
-3. Mount it with `ServiceBuilder.mountHarness(definition, policy)`.
+3. Define typed business policy with
+   `serviceBuilder.defineHarnessPolicy(definition, { agents, workflows })`, then
+   mount it once with `mountHarness(definition, policy)`.
 4. Supply concrete runtime adapters under `getInstance(eventBridge, { ai: ... })`.
 5. Start EventBridge and the service through the normal PURISTA lifecycle.
 6. Call the mounted target with an address-first client.
@@ -54,7 +56,7 @@ handled status codes:
 | --- | --- | --- |
 | input or contract validation | `400 Bad Request` | stable `code` and `retriable` only |
 | permission, policy denial, or explicit `DECISION_BLOCKED` | `403 Forbidden` | stable `code` and `retriable` only |
-| model admission rejection | `429 Too Many Requests` | stable code plus `retryAfterMs` |
+| run or model-call concurrency rejection | `429 Too Many Requests` | stable code plus `retryAfterMs` |
 | timeout | `504 Gateway Timeout` | stable `code` and `retriable` only |
 | detector failure, provider failure, invalid output, or unknown error | `500 Internal Server Error` | sanitized handled error |
 

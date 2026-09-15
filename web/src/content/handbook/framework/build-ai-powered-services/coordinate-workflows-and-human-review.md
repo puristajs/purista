@@ -40,13 +40,15 @@ caller imports the workflow definition and declares its address:
 ```ts title="Declare a workflow invocation"
 const reviewCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('reviewRollback', 'Starts or resumes rollback review')
-  .canInvokeWorkflow('Support', '1', reviewRollbackWorkflow.contract)
+  .canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(reviewRollbackWorkflow.contract))
   .setCommandFunction(async function (context, input) {
     return context.workflow.Support['1'][reviewRollbackWorkflow.contract.id].run(input)
   })
 ```
 
-[`canInvokeWorkflow(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeworkflow)
+[`harnessTarget(contract)`](/handbook/api/classes/_purista_core.ServiceBuilder/#harnesstarget)
+binds the contract to this service address before composition.
+[`canInvokeWorkflow(target)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeworkflow)
 adds this workflow's typed run and stream clients to the command context.
 
 The call returns `{ sessionId, outcome }`. An interrupted outcome is normal
@@ -66,20 +68,23 @@ The reviewer may differ from the principal who started the run. Enable that
 case only for the workflow that needs it:
 
 ```ts title="Authorize a cross-principal durable resume"
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  targets: {
-    workflows: {
-      reviewRollback: {
-        durableResume: { identity: 'run-owner' },
-        beforeGuards: { reviewAccess: requireReviewWorkflowAccess },
-      },
+const policy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+  workflows: {
+    reviewRollback: {
+      durableResume: { identity: 'run-owner' },
+      beforeGuards: { reviewAccess: requireReviewWorkflowAccess },
     },
   },
 })
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, policy)
 ```
 
+[`defineHarnessPolicy(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#defineharnesspolicy)
+keeps the guard input and service resources typed.
 [`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
-applies the durable-resume and guard policy at the workflow address.
+applies
+the durable-resume and guard policy at the workflow address.
 
 The guard authorizes the current caller. `run-owner` restores the original run
 owner only after that check. Cross-tenant resume remains rejected. Store the

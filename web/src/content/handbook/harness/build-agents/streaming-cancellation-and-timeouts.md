@@ -109,36 +109,21 @@ import { answerSupport } from '../harness/answerSupport.js'
 import { supportHarness } from '../runtime/supportHarness.js'
 
 export async function postSupportChat(request: Request, sessionId: string): Promise<Response> {
-  const parsed = await parseHarnessUIMessageRequest(await request.json())
-  if (parsed.sessionId !== sessionId) throw new Error('Session is not allowed')
+  const parsed = await parseHarnessUIMessageRequest(await request.json(), { sessionId })
 
   const question = parsed.lastUserMessage.parts
     .filter(part => part.type === 'text')
     .map(part => part.text)
     .join('\n')
   const session = await supportHarness.getSession(sessionId)
-  const runController = new AbortController()
-  const abortRun = () => runController.abort('client disconnected')
-  request.signal.addEventListener('abort', abortRun, { once: true })
-
-  const execution = session.agents[answerSupport.contract.id].stream({ question }, {
-    signal: runController.signal,
-    ...(parsed.resume ? { resume: parsed.resume } : {}),
-  })
-
-  const events = {
-    result: execution.result.finally(async () => {
-      runController.abort('stream closed')
-      request.signal.removeEventListener('abort', abortRun)
-      await session.release()
-    }),
-    cancel: (reason?: string) => execution.cancel(reason),
-    [Symbol.asyncIterator]: () => execution[Symbol.asyncIterator](),
-  }
+  const target = session.agents[answerSupport.contract.id]
+  const events = parsed.resume === undefined
+    ? target.stream({ question })
+    : target.resume(parsed.resume).stream()
 
   return createHarnessUIMessageStreamResponse(events, {
-    sessionId,
-    ...(parsed.assistantMessageId ? { messageId: parsed.assistantMessageId } : {}),
+    request: parsed,
+    onSettled: () => session.release(),
   })
 }
 ```
@@ -168,7 +153,9 @@ its normal approval API. On the next authenticated request,
 returns the typed resume only after every request in the batch has a valid,
 non-conflicting decision.
 
-Pass that resume to the same session and target, as the example does. Keep the
+Pass that resume to `target.resume(descriptor).run()` or `.stream()` on the same
+session and target, as the example does. A fresh run accepts input; a resumed
+run accepts only continuation options. Keep the
 pending review in application storage and authorize the reviewer against its
 tenant, run, revision, expiry, and action digest. An interrupted stream is not
 an HTTP `500`.

@@ -60,22 +60,23 @@ After authorization, supply a `ToolApprovalResume` with the original run,
 interrupt, revision, and one stable event id:
 
 ```ts title="Resume with an approved decision"
-const outcome = await session.agents.banker.run(input, {
-  resume: {
-    type: 'tool-approval',
-    runId: pending.runId,
-    interruptId: pending.interruptId,
-    revision: pending.revision,
-    eventId: decision.id,
-    decisions: pending.requests.map(request => ({
-      approvalId: request.approvalId,
-      approved: true,
-      reason: 'Approved by an authorized reviewer',
-    })),
-  },
-})
+const descriptor = {
+  type: 'tool-approval' as const,
+  runId: pending.runId,
+  interruptId: pending.interruptId,
+  revision: pending.revision,
+  eventId: decision.id,
+  decisions: pending.requests.map(request => ({
+    approvalId: request.approvalId,
+    approved: true,
+    reason: 'Approved by an authorized reviewer',
+  })),
+}
+
+const outcome = await session.agents.banker.resume(descriptor).run()
 ```
-Harness verifies the resume binding and continues from its checkpoint without
+`resume(descriptor)` makes continuation explicit and prevents the caller from
+supplying the original input again. Harness verifies the resume binding and continues from its checkpoint without
 asking the model to repeat the approved tool request. Replaying the same
 decision is idempotent. Rejection uses `approved: false`; the agent receives
 the denied tool result and may finish safely.

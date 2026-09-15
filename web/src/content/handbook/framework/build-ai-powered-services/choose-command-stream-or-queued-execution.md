@@ -53,9 +53,11 @@ const queuedTriage = defineHarnessQueueBinding(
     .setMaxParallelHandlers(3),
 )
 
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  targets: { agents: { [triageTicketAgent.contract.id]: { queue: queuedTriage } } },
+const policy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+  agents: { [triageTicketAgent.contract.id]: { queue: queuedTriage } },
 })
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, policy)
 ```
 
 [`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
@@ -66,7 +68,7 @@ The caller declares the queued reference instead of the plain agent contract:
 ```ts title="Declare queued agent delivery"
 const classifyCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('classifyTicket', 'Queue ticket classification')
-  .canInvokeAgent('Support', '1', queuedTriage.reference)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(queuedTriage.reference))
   .setCommandFunction(async function ({ agent }, input) {
     return agent.Support['1'][queuedTriage.reference.contract.id].enqueue(
       input,
@@ -76,8 +78,12 @@ const classifyCommandBuilder = supportV1ServiceBuilder
   })
 ```
 
-[`canInvokeAgent(service, version, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
-uses the queued reference to expose `.enqueue(...)` on the declared target.
+[`harnessTarget(contract)`](/handbook/api/classes/_purista_core.ServiceBuilder/#harnesstarget)
+binds the authentic contract to this service's address without importing the
+finished service definition.
+[`canInvokeAgent(target)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+uses the queued reference
+to expose `.enqueue(...)` on the declared target.
 
 Enqueue returns an acceptance envelope with identifiers such as `jobId`,
 `queueName`, and `sessionId`. It does not return the agent's final output.
@@ -86,4 +92,5 @@ Enqueue returns an acceptance envelope with identifiers such as `jobId`,
 defines delivery rules, and
 [`getQueueWorkerBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerbuilder)
 defines worker concurrency. The QueueBridge provides durable transport. Model
-admission separately limits active provider calls inside a service instance.
+`ai.concurrency.modelCalls` separately limits active provider calls inside a
+service instance.

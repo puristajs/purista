@@ -23,7 +23,7 @@ flowchart LR
 | --- | --- |
 | Harness definition | Models, schemas, agents, workflows, native tools, skills, guardrails, and portable execution |
 | PURISTA service | Target addresses, business guards, resources, identity propagation, events, queues, and lifecycle |
-| Composition root | Concrete model, storage, sandbox, workspace, admission, and telemetry adapters |
+| Composition root | Exact model-alias bindings plus storage, sandbox, workspace, concurrency, and telemetry adapters |
 | Consumer | Whether it needs one outcome with `.run(...)` or progressive events with `.stream(...)` |
 | HTTP adapter | Authentication, endpoint exposure, and conversion to a documented client protocol |
 
@@ -39,6 +39,7 @@ explicit.
 | Agent | Runs a bounded model loop. Its instructions and allowed tools, skills, guardrails, and child agents define what the model may do. |
 | Workflow | Runs typed orchestration code when the application must control order, branching, retries, parallel work, or approval points. It may call agents and workflows. |
 | Harness definition | Collects the portable AI graph owned by one service version. It has no provider credentials or live adapters. |
+| Model alias | An application-chosen purpose name such as `answering`. The composition root binds that exact key to a provider and provider model ID. Harness reserves no alias. |
 | Mounted root | Gives an added agent or workflow a PURISTA service address. Calls use EventBridge and preserve tenant, principal, trace, and scaling boundaries. |
 | Service runtime binding | Supplies concrete models and optional storage, sandbox, queue, telemetry, and other adapters through `getInstance(..., { ai })`. |
 
@@ -46,7 +47,8 @@ explicit.
 
 1. Use the CLI to create one agent beside the service that owns it.
 2. Define the smallest string-in, string-out agent and add it to a Harness.
-3. Mount the Harness on the service and bind the agent's explicit model alias at startup.
+3. Mount the Harness on the service and bind the agent's explicit model alias
+   in the exact `ai.models` map at startup.
 4. Add a command for an aggregate result or a stream for progressive UI events.
 5. Add input and output schemas when the business contract needs structure.
 6. Add tools, skills, guardrails, child agents, or workflows only when their

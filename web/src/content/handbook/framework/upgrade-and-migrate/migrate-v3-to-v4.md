@@ -48,7 +48,7 @@ export const supportHarness = defineHarness({ name: 'support' })
 ~~~
 
 Mount the definition once on the final service builder. Bind model providers,
-storage, memory, sandbox, admission, telemetry, and other runtime facilities
+storage, memory, sandbox, concurrency, telemetry, and other runtime facilities
 when the service starts; the definition remains portable.
 
 ~~~ts title="src/service/support/v1/supportV1Service.ts"
@@ -67,7 +67,7 @@ target contract with the current address-first helper:
 ~~~ts title="src/service/support/v1/command/triage/triageCommandBuilder.ts"
 export const triageCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('triage', 'Classify one ticket')
-  .canInvokeAgent('Support', '1', triage.contract)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(triage.contract))
   .setCommandFunction(async function (context, payload) {
     const { sessionId, outcome } = await context.agent.Support['1'].triage.run(payload)
     return { sessionId, outcome }
@@ -94,12 +94,17 @@ const triageQueue = defineHarnessQueueBinding(
   triageQueueWorkerBuilder,
 )
 
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  targets: { agents: { triage: { queue: triageQueue } } },
+const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+  agents: { triage: { queue: triageQueue } },
 })
 
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(
+  supportHarness,
+  supportHarnessPolicy,
+)
+
 const enqueueTriage = commandBuilder
-  .canInvokeAgent('Support', '1', triageQueue.reference)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(triageQueue.reference))
   .setCommandFunction(async function (context, payload) {
     return context.agent.Support['1'].triage.enqueue(payload)
   })
@@ -124,9 +129,11 @@ import {
   parseHarnessUIMessageRequest,
   pipeHarnessUIMessageStream,
 } from '@purista/harness-ai-sdk-ui/v1'
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
-const inputSchema = z.unknown()
+const inputSchema = z.object({ id: z.string().min(1) }).passthrough()
 const parameterSchema = z.object({})
 const chunkSchema = z.object({ event: z.literal('data'), data: z.unknown() })
 const finalSchema = z.void()
@@ -137,21 +144,29 @@ export const streamTriage = supportV1ServiceBuilder
   .addParameterSchema(parameterSchema)
   .addChunkSchema(chunkSchema)
   .addFinalSchema(finalSchema)
-  .canInvokeAgent('Support', '1', triage.contract)
+  .canInvokeAgent(supportV1ServiceBuilder.harnessTarget(triage.contract))
   .exposeAsHttpStreamEndpoint('POST', 'ai/triage')
   .enableHttpSecurity(true)
   .setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)
   .setStreamFunction(async function (context, payload, _parameter, writer) {
-    const request = await parseHarnessUIMessageRequest(payload)
+    if (context.message.principalId === undefined) {
+      throw new HandledError(StatusCode.Unauthorized, 'Authenticated principal identity is required')
+    }
+    const trustedSessionId = createHash('sha256')
+      .update(JSON.stringify([
+        context.message.tenantId ?? '',
+        context.message.principalId,
+        payload.id,
+      ]))
+      .digest('base64url')
+    const request = await parseHarnessUIMessageRequest(payload, { sessionId: trustedSessionId })
     const input = request.lastUserMessage.parts
       .flatMap(part => part.type === 'text' ? [part.text] : [])
       .join('\n')
-    const events = await context.agent.Support['1'][triage.contract.id].stream(
-      input,
-      request.resume === undefined
-        ? { sessionId: request.sessionId }
-        : { sessionId: request.sessionId, resume: request.resume },
-    )
+    const target = context.agent.Support['1'][triage.contract.id]
+    const events = request.resume === undefined
+      ? await target.stream(input, { sessionId: request.sessionId })
+      : await target.resume(request.resume).stream({ sessionId: request.sessionId })
     await pipeHarnessUIMessageStream(events, writer, request)
   })
 ~~~
@@ -167,8 +182,11 @@ disconnect cancellation. The Harness definition stays transport-neutral.
 
 ## Move runtime bindings
 
-Construct one runtime instance for the mounted definition with the concrete
-model and optional bindings required by its graph. PURISTA StateStore remains
+Construct one runtime instance for the mounted definition with the exact
+`ai.models` map required by its graph. Configure complete-run and provider-call
+admission under `ai.concurrency: { runs, modelCalls }`. Keep sandbox execution
+and deployment consent together under `ai.sandbox: { adapter, policy }`.
+PURISTA StateStore remains
 for Framework application state; Harness storage and memory own Harness
 sessions, run history, durable steps, and retrieval state. Domain records stay
 behind application resources.

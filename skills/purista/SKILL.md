@@ -38,6 +38,15 @@ same-process calls. Each target has one final output schema; callers choose
 workers, or routes. Use a separate AI SDK UI Message Stream v1 adapter for
 browser clients and keep the internal stream provider-neutral.
 
+Bind same-service contracts before final composition with
+`serviceBuilder.harnessTarget(contract)`, then pass that reference to
+`canInvokeAgent(...)` or `canInvokeWorkflow(...)`. Define resource-aware mount
+policy with `serviceBuilder.defineHarnessPolicy(definition, { agents,
+workflows })`. Bind every application-chosen model alias in the exact
+`ai.models` map. Runtime limits use `ai.concurrency: { runs, modelCalls }`, and
+sandbox infrastructure and deployment consent stay together under
+`ai.sandbox: { adapter, policy }`.
+
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
 - Use the project-local PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.
@@ -54,6 +63,12 @@ browser clients and keep the internal stream provider-neutral.
 - Agents and workflows are native `@purista/harness` definitions mounted by `@purista/core`; provider packages remain app-level dependencies.
 - Standalone Harness definitions use `.addAgent(...)` and `.addWorkflow(...)`; invoke through a session with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
 - Give every agent a user-chosen purpose alias and bind every required alias under the exact `ai.models` key. Harness reserves no alias.
+- Keep fresh and resumed invocations separate. Use `target.run/stream(input,
+  options)` for new work and `target.resume(descriptor).run/stream(options)` for
+  continuation. Never put `resume` in fresh invocation options.
+- Derive Harness session IDs on the authenticated server boundary from trusted
+  tenant/principal identity and an authorized application conversation key.
+  Never accept a Harness session ID from the browser.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.

@@ -149,11 +149,11 @@ For an AI SDK UI stream, the boundary parser supplies the typed continuation;
 pass it unchanged to the next addressed stream invocation:
 
 ~~~ts title="src/http/streamSupport.ts"
-const request = await parseHarnessUIMessageRequest(payload)
-const events = await context.agent.Support['1'].agent.stream(input,
-  request.resume === undefined
-    ? { sessionId: request.sessionId }
-    : { sessionId: request.sessionId, resume: request.resume })
+const request = await parseHarnessUIMessageRequest(payload, { sessionId: trustedSessionId })
+const target = context.agent.Support['1'].agent
+const events = request.resume === undefined
+  ? await target.stream(input, { sessionId: request.sessionId })
+  : await target.resume(request.resume).stream({ sessionId: request.sessionId })
 ~~~
 
 ## 5. Replace split state and adapter contracts

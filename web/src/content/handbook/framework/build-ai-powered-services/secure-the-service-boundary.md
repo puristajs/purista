@@ -22,17 +22,20 @@ const mayAnalyzeIncident = async (context, input) => {
   }
 }
 
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
-  targets: {
-    agents: {
-      analyzeSignals: { beforeGuards: { mayAnalyzeIncident } },
-    },
+const policy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+  agents: {
+    analyzeSignals: { beforeGuards: { mayAnalyzeIncident } },
   },
 })
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, policy)
 ```
 
+[`defineHarnessPolicy(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#defineharnesspolicy)
+keeps the guard input and service resources typed.
 [`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
-attaches these guards to the target's receiving boundary.
+attaches
+the resulting policy to the target's receiving boundary.
 
 The target guard runs with trusted message identity and service resources
 before Harness execution. A protected wrapper still needs this guard because

@@ -9,13 +9,14 @@ and service mount can run with local adapters in development and durable,
 replicated adapters in production.
 
 Provide the concrete model provider, Harness storage, workspace, sandbox,
-admission controller, artifact store, logger, and telemetry configuration
+run and model-call concurrency ports, artifact store, logger, and telemetry configuration
 required by the definition. Use separate service-owned adapter instances unless
 an adapter explicitly supports shared lifecycle.
 
 For load control:
 
-- set Harness admission limits for active runs in each instance;
+- set `ai.concurrency.runs` for complete root execution trees;
+- set `ai.concurrency.modelCalls` for provider operations and rate limits;
 - place a PURISTA queue before long or retryable work;
 - configure worker concurrency for provider quota and fleet size;
 - use provider retry metadata and `toHarnessQueueRetry(...)` for deferred retry;
