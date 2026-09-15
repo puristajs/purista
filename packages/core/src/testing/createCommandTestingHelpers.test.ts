@@ -1,13 +1,188 @@
-import { createSandbox } from 'sinon'
+import { defineAgent, defineWorkflow } from '@purista/harness'
+import { createSandbox, stub } from 'sinon'
 import { z } from 'zod'
+import type { HarnessExecutionStream } from '../HarnessMount/invocation.js'
+import { defineHarnessQueueBinding } from '../HarnessMount/queueBinding.js'
 import { safeBind } from '../helper/safeBind.impl.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
 import { getLoggerMock } from '../mocks/getLogger.mock.js'
+import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { createCommandContextMock } from './createCommandContextMock.js'
 import { createCommandTestHarness } from './createCommandTestHarness.js'
+import { createHarnessInvocationMockProxy } from './sharedContextMocks.js'
 
 describe('command testing helpers', () => {
+	it('stubs first-class Harness continuations through resume.continuation', async () => {
+		type Api = {
+			Review: {
+				'1': {
+					approve: {
+						resume(input: { type: 'tool-approval'; runId: string }): {
+							run(options?: { sessionId?: string }): Promise<{ approved: boolean }>
+							stream(options?: { sessionId?: string }): Promise<AsyncIterable<unknown>>
+						}
+					}
+				}
+			}
+		}
+		const { api, stubs } = createHarnessInvocationMockProxy<Api>()
+		stubs.Review['1'].approve.resume.continuation.run.resolves({ approved: true })
+
+		await expect(api.Review['1'].approve.resume({ type: 'tool-approval', runId: 'run-1' }).run()).resolves.toEqual({
+			approved: true,
+		})
+		expect(stubs.Review['1'].approve.resume.calledOnceWithExactly({ type: 'tool-approval', runId: 'run-1' })).toBe(true)
+		expect(stubs.Review['1'].approve.resume.continuation.run.calledOnceWithExactly()).toBe(true)
+	})
+
+	it('stubs a declared Harness workflow without exposing a model context', async () => {
+		const workflow = defineWorkflow('normalize', {
+			input: z.string(),
+			output: z.string(),
+			handler: async ({ input }) => input.trim(),
+		})
+		const builder = new ServiceBuilder({
+			serviceName: 'Api',
+			serviceVersion: '1',
+			serviceDescription: 'workflow caller test',
+		})
+			.getCommandBuilder('normalize', 'normalize text')
+			.addPayloadSchema(z.string())
+			.canInvokeWorkflow('Knowledge', '1', workflow.contract)
+			.setCommandFunction(async function ({ workflow }, payload) {
+				return workflow.Knowledge['1'].normalize.run(payload)
+			})
+		const { context, stubs } = createCommandContextMock(builder, { payload: ' input ', parameter: {} })
+		const expected = {
+			sessionId: 'session-1',
+			outcome: { status: 'completed' as const, runId: 'run-1', output: 'input' },
+		}
+		stubs.workflow.Knowledge['1'].normalize.run.resolves(expected)
+
+		await expect(builder.getCommandFunction().call({} as never, context, ' input ', {})).resolves.toEqual(expected)
+		expect(stubs.workflow.Knowledge['1'].normalize.run.calledOnceWithExactly(' input ')).toBe(true)
+		expect('model' in context).toBe(false)
+		expect('model' in stubs).toBe(false)
+		// biome-ignore lint/correctness/noConstantCondition: Compile-only removed-surface proof.
+		if (false) {
+			// @ts-expect-error model access was removed from command contexts in v4
+			context.model
+		}
+		expectTypeOf(stubs.workflow.Knowledge['1'].normalize.run.firstCall.args[0]).toEqualTypeOf<
+			typeof workflow.contract.$infer.input
+		>()
+	})
+
+	it('stubs a declared address-first Harness agent without starting a runtime', async () => {
+		const sandbox = createSandbox()
+		try {
+			const answer = defineAgent('answer', {
+				model: 'chat',
+				input: z.object({ question: z.string() }),
+				output: z.object({ answer: z.string() }),
+				instructions: 'Answer the question.',
+				prompt: input => ({ role: 'user', content: input.question }),
+			})
+			const serviceBuilder = new ServiceBuilder({
+				serviceName: 'Api',
+				serviceVersion: '1',
+				serviceDescription: 'agent caller test',
+			})
+			const commandBuilder = serviceBuilder
+				.getCommandBuilder('ask', 'ask an agent')
+				.addPayloadSchema(z.object({ question: z.string() }))
+				.canInvokeAgent('Knowledge', '1', answer.contract)
+				.setCommandFunction(async function ({ agent }, payload) {
+					return agent.Knowledge['1'].answer.run(payload)
+				})
+			const { context, stubs } = createCommandContextMock(commandBuilder, {
+				payload: { question: 'What is PURISTA?' },
+				parameter: {},
+				sandbox,
+			})
+			const expected = {
+				sessionId: 'session-1',
+				outcome: { status: 'completed' as const, runId: 'run-1', output: { answer: 'A framework' } },
+			}
+			stubs.agent.Knowledge['1'].answer.run.resolves(expected)
+
+			await expect(
+				commandBuilder.getCommandFunction().call({} as never, context, { question: 'What is PURISTA?' }, {}),
+			).resolves.toEqual(expected)
+			expect(stubs.agent.Knowledge['1'].answer.run.calledOnce).toBe(true)
+		} finally {
+			sandbox.restore()
+		}
+	})
+
+	it('stubs typed stream and queued target calls without starting a runtime', async () => {
+		const answer = defineAgent('answer', {
+			model: 'chat',
+			instructions: 'Answer the question.',
+		})
+		const queue = defineHarnessQueueBinding(
+			answer.contract,
+			new QueueDefinitionBuilder('knowledge.answer', 'Queue questions'),
+			new QueueWorkerBuilder('knowledge.answer', 'answer-worker'),
+		)
+		const builder = new ServiceBuilder({
+			serviceName: 'Api',
+			serviceVersion: '1',
+			serviceDescription: 'stream and queue caller test',
+		})
+			.getCommandBuilder('ask', 'ask an agent')
+			.addPayloadSchema(z.string())
+			.canInvokeAgent('Knowledge', '1', queue.reference)
+			.setCommandFunction(async function ({ agent }, payload) {
+				const stream = await agent.Knowledge['1'].answer.stream(payload, { sessionId: 'session-1' })
+				let text = ''
+				for await (const event of stream) {
+					if (event.type === 'output.text.delta') text += event.delta
+				}
+				await stream.cancel('test complete')
+				return { text, outcome: await stream.result }
+			})
+		const { context, stubs } = createCommandContextMock(builder, { payload: 'question', parameter: {} })
+		await expect(context.agent.Knowledge['1'].answer.stream('question')).rejects.toThrow('not stubbed')
+		await expect(context.agent.Knowledge['1'].answer.enqueue('question')).rejects.toThrow('not stubbed')
+		const outcome = { status: 'completed' as const, runId: 'run-1', output: 'answer' }
+		const cancel = stub<[reason?: string], Promise<void>>().resolves()
+		const stream: HarnessExecutionStream<typeof answer.contract> = {
+			runId: 'run-1',
+			sessionId: 'session-1',
+			result: Promise.resolve(outcome),
+			terminal: Promise.resolve(outcome),
+			cancel,
+			async *[Symbol.asyncIterator]() {
+				yield {
+					type: 'output.text.delta',
+					eventId: 'event-1',
+					sequence: 1,
+					runId: 'run-1',
+					id: 'text-1',
+					caller: { kind: 'agent', agentId: 'answer' },
+					delta: 'answer',
+				}
+			},
+		}
+		stubs.agent.Knowledge['1'].answer.stream.resolves(stream)
+		const receipt = { jobId: 'job-1', queueName: 'knowledge.answer', sessionId: 'session-1' }
+		stubs.agent.Knowledge['1'].answer.enqueue.resolves(receipt)
+
+		await expect(builder.getCommandFunction().call({} as never, context, 'question', {})).resolves.toEqual({
+			text: 'answer',
+			outcome,
+		})
+		await expect(context.agent.Knowledge['1'].answer.enqueue('question', { sessionId: 'session-1' })).resolves.toEqual(
+			receipt,
+		)
+		expect(cancel.calledOnceWithExactly('test complete')).toBe(true)
+		expect(stubs.agent.Knowledge['1'].answer.stream.lastCall.args).toEqual(['question', { sessionId: 'session-1' }])
+		expect(stubs.agent.Knowledge['1'].answer.enqueue.lastCall.args).toEqual(['question', { sessionId: 'session-1' }])
+	})
+
 	it('creates a typed command context mock for handler-level tests', async () => {
 		const sandbox = createSandbox()
 
@@ -87,6 +262,54 @@ describe('command testing helpers', () => {
 			})
 
 			expect(result.result).toStrictEqual({ greeting: 'Hello Ada' })
+		} finally {
+			await harness.destroy()
+		}
+	})
+
+	it('types and executes the received and returned transform representations', async () => {
+		const serviceBuilder = new ServiceBuilder({
+			serviceName: 'TransformHarnessService',
+			serviceVersion: '1',
+			serviceDescription: 'runtime transform harness',
+		})
+
+		const commandBuilder = serviceBuilder
+			.getCommandBuilder('greetLegacy', 'greet a user from a legacy request')
+			.addPayloadSchema(z.object({ name: z.string() }))
+			.addParameterSchema(z.object({ enthusiastic: z.boolean() }))
+			.addOutputSchema(z.object({ greeting: z.string() }))
+			.setTransformInput(
+				z.string(),
+				z.object({ enthusiastic: z.stringbool() }),
+				async function (_context, name, parameter) {
+					return {
+						payload: { name },
+						parameter,
+					}
+				},
+			)
+			.setTransformOutput(z.string(), async function (_context, result) {
+				return result.greeting
+			})
+			.setCommandFunction(async function (_context, payload, parameter) {
+				return { greeting: `${parameter.enthusiastic ? 'Hello' : 'Hi'} ${payload.name}` }
+			})
+
+		serviceBuilder.addCommandDefinition(commandBuilder.getDefinition())
+
+		const harness = await createCommandTestHarness(serviceBuilder, commandBuilder)
+
+		try {
+			const received = {
+				payload: 'Ada',
+				parameter: { enthusiastic: 'true' },
+			}
+			const response = await harness.run(received)
+
+			expectTypeOf(received).toMatchTypeOf<Parameters<typeof harness.run>[0]>()
+			expectTypeOf(response.result).toEqualTypeOf<string | undefined>()
+			expect(response.result).toBe('Hello Ada')
 		} finally {
 			await harness.destroy()
 		}

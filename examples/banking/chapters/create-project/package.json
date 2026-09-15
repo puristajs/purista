@@ -1,0 +1,42 @@
+{
+  "name": "example-bank",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@purista/core": "^4.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.8",
+    "@purista/cli": "^4.0.0",
+    "@types/node": "^26.2.0",
+    "@types/sinon": "^22.0.0",
+    "sinon": "^22.1.0",
+    "tsx": "^4.23.12",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^4.1.10"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ],
+  "scripts": {
+    "add:service": "purista add service",
+    "add:command": "purista add command",
+    "add:subscription": "purista add subscription",
+    "add:stream": "purista add stream",
+    "add:queue": "purista add queue",
+    "add:queue-worker": "purista add queue-worker",
+    "add:agent": "purista add agent",
+    "add:workflow": "purista add workflow",
+    "add:tool": "purista add tool",
+    "add:skill": "purista add skill",
+    "add:mcp": "purista add mcp",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "tsc --noEmit && vitest run --isolate src",
+    "export:runtime": "purista export runtime-capabilities --out purista-runtime.json",
+    "lint": "npx @biomejs/biome check .",
+    "lint:fix": "npx @biomejs/biome check --write ."
+  }
+}

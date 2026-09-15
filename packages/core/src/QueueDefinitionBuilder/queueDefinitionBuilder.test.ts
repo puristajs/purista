@@ -1,6 +1,14 @@
+import { expectTypeOf } from 'vitest'
+
 import { QueueDefinitionBuilder } from './QueueDefinitionBuilder.impl.js'
 
 describe('QueueDefinitionBuilder', () => {
+	it('retains the exact queue name in its public type', () => {
+		const builder = new QueueDefinitionBuilder('billing.monthlyClosing', 'Monthly closing')
+
+		expectTypeOf(builder.queueName).toEqualTypeOf<'billing.monthlyClosing'>()
+	})
+
 	it('applies long-running execution profile defaults', async () => {
 		const definition = await new QueueDefinitionBuilder('billing.monthlyClosing', 'Monthly closing')
 			.setExecutionProfile('longRunning', { maxRuntimeMs: 6 * 60 * 60_000 })

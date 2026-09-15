@@ -1,0 +1,53 @@
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { assertClassificationGate } from './changeGate.js'
+import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+describe('classification agent evaluation', () => {
+	it('runs the versioned dataset and passes the deterministic change gate', async () => {
+		const provider = passingEvaluationProvider()
+		const result = await runClassificationEvaluation(provider)
+		expect(assertClassificationGate(result)).toEqual({ categoryRate: 1, urgencyRate: 1 })
+		expect(result.cases).toHaveLength(3)
+		expect(result.dimensionAggregates).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ dimensionId: 'category_exact' }),
+				expect.objectContaining({ dimensionId: 'urgency_exact' }),
+			]),
+		)
+		provider.assertExhausted()
+	})
+
+	it('fails the gate when a candidate regresses', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		for (const object of [
+			{ category: 'other', urgency: 'normal', reason: 'Incorrect fixture.' },
+			{ category: 'transfer', urgency: 'normal', reason: 'Correct fixture.' },
+			{ category: 'account_access', urgency: 'urgent', reason: 'Correct fixture.' },
+		]) {
+			provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
+		}
+		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-regression' })
+		expect(() => assertClassificationGate(result)).toThrow(/gate failed/i)
+		provider.assertExhausted()
+	})
+
+	it('rejects incomplete or mismatched candidate evidence', async () => {
+		const provider = passingEvaluationProvider()
+		const result = await runClassificationEvaluation(provider, { runId: 'support-classification-eval-incomplete' })
+		const [firstCase, ...remainingCases] = result.cases
+		if (!firstCase) throw new Error('Expected the deterministic evaluation to produce a case.')
+		const skipped = { ...firstCase, status: 'skipped' as const }
+		expect(() => assertClassificationGate({ ...result, cases: [skipped, ...remainingCases] })).toThrow(
+			/did not complete/i,
+		)
+		const mismatched = { ...firstCase, candidateId: 'other-candidate' }
+		expect(() => assertClassificationGate({ ...result, cases: [mismatched, ...remainingCases] })).toThrow(
+			/different candidate/i,
+		)
+		provider.assertExhausted()
+	})
+})

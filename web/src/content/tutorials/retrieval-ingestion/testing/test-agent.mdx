@@ -1,0 +1,293 @@
+---
+title: Test model selected retrieval
+description: Prove that answerKnowledgeQuestion chooses the guarded searchKnowledge tool and returns validated evidence.
+order: 223
+kind: lesson
+status: published
+---
+
+Create retrieval and agent tests. They prove that matches flow through the query tool, workflow, command, and answer agent.
+
+```ts title="src/service/knowledge/v1/harness/tool/queryKnowledgeRepository/queryKnowledgeRepositoryTool.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import { queryKnowledgeRepositoryTool } from './queryKnowledgeRepositoryTool.js'
+
+const input = { collectionId: 'customer-help', query: 'pending transfer', limit: 3, embedding: [0.1, 0.2, 0.3, 0.4] }
+
+describe('queryKnowledgeRepositoryTool', () => {
+	it('uses trusted tenant identity and the declared embedding profile for the resource query', async () => {
+		const search = vi
+			.fn()
+			.mockResolvedValue([{ documentId: 'transfer-guide', chunkIndex: 0, content: 'Two days.', score: 0.9 }])
+		const signal = new AbortController().signal
+		await expect(
+			queryKnowledgeRepositoryTool.handler(
+				{
+					identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+					resources: {
+						knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 4 },
+						knowledgeRepository: { search },
+					},
+					signal,
+				} as never,
+				input,
+			),
+		).resolves.toEqual({ matches: [{ documentId: 'transfer-guide', chunkIndex: 0, content: 'Two days.', score: 0.9 }] })
+		expect(search).toHaveBeenCalledWith({
+			tenantId: 'tenant-example',
+			collectionId: 'customer-help',
+			embeddingModel: 'fake-embedding',
+			queryEmbedding: input.embedding,
+			limit: 3,
+			signal,
+		})
+	})
+
+	it('rejects missing identity and invalid dimensions before the resource query', async () => {
+		const search = vi.fn()
+		const value = {
+			resources: {
+				knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 4 },
+				knowledgeRepository: { search },
+			},
+			signal: new AbortController().signal,
+		}
+		await expect(
+			queryKnowledgeRepositoryTool.handler({ ...value, identity: {} } as never, input),
+		).rejects.toMatchObject({ errorCode: 401 })
+		await expect(
+			queryKnowledgeRepositoryTool.handler({ ...value, identity: { tenantId: 'tenant-example' } } as never, {
+				...input,
+				embedding: [0.1],
+			}),
+		).rejects.toMatchObject({ errorCode: 400 })
+		expect(search).not.toHaveBeenCalled()
+	})
+})
+```
+```ts title="src/service/knowledge/v1/harness/workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import { retrieveKnowledgeWorkflow } from './retrieveKnowledgeWorkflow.js'
+
+const input = { collectionId: 'customer-help', query: 'How long are transfers pending?', limit: 4 }
+
+describe('retrieveKnowledgeWorkflow', () => {
+	it('embeds once and invokes the repository tool with stable managed call ids', async () => {
+		const embed = vi.fn().mockResolvedValue({ embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }] })
+		const output = {
+			matches: [{ documentId: 'transfer-guide', chunkIndex: 0, content: 'Two business days.', score: 0.9 }],
+		}
+		const run = vi.fn().mockResolvedValue(output)
+
+		await expect(
+			retrieveKnowledgeWorkflow.handler({
+				input,
+				models: { embedding: { embed } },
+				tools: { queryKnowledgeRepository: { run } },
+			} as never),
+		).resolves.toEqual(output)
+		expect(embed).toHaveBeenCalledWith({ input: input.query }, { callId: 'embed-knowledge-query' })
+		expect(run).toHaveBeenCalledWith(
+			{ collectionId: input.collectionId, query: input.query, limit: input.limit, embedding: [0.1, 0.2, 0.3, 0.4] },
+			{ callId: 'query-knowledge-repository' },
+		)
+	})
+
+	it('does not query when the embedding is invalid', async () => {
+		const run = vi.fn()
+		await expect(
+			retrieveKnowledgeWorkflow.handler({
+				input,
+				models: {
+					embedding: { embed: vi.fn().mockResolvedValue({ embeddings: [{ index: 0, vector: [Number.NaN] }] }) },
+				},
+				tools: { queryKnowledgeRepository: { run } },
+			} as never),
+		).rejects.toThrow('The embedding model returned no query vector')
+		expect(run).not.toHaveBeenCalled()
+	})
+})
+```
+```ts title="src/service/knowledge/v1/harness/tool/searchKnowledge/searchKnowledgeTool.test.ts" write
+import { describe, expect, it, vi } from 'vitest'
+import { retrieveKnowledgeWorkflow } from '../../workflow/retrieveKnowledge/retrieveKnowledgeWorkflow.js'
+import { searchKnowledgeTool } from './searchKnowledgeTool.js'
+
+const input = { collectionId: 'customer-help', query: 'How long are transfers pending?', limit: 4 }
+
+describe('searchKnowledgeTool', () => {
+	it('authorizes the actual collection then invokes retrieval address-first', async () => {
+		const canAccess = vi.fn().mockResolvedValue(true)
+		const run = vi.fn().mockResolvedValue({ matches: [] })
+		await expect(
+			searchKnowledgeTool.handler(
+				{
+					identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+					resources: { knowledgeCollectionPolicy: { canAccess } },
+					workflow: { Knowledge: { '1': { [retrieveKnowledgeWorkflow.contract.id]: { run } } } },
+				} as never,
+				input,
+			),
+		).resolves.toEqual({ matches: [] })
+		expect(canAccess).toHaveBeenCalledWith({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			collectionId: input.collectionId,
+			action: 'search',
+		})
+		expect(run).toHaveBeenCalledWith(input, { callId: 'retrieve-knowledge' })
+	})
+
+	it('denies before invoking the nested workflow', async () => {
+		const run = vi.fn()
+		await expect(
+			searchKnowledgeTool.handler(
+				{
+					identity: { tenantId: 'tenant-example', principalId: 'principal-denied' },
+					resources: { knowledgeCollectionPolicy: { canAccess: vi.fn().mockResolvedValue(false) } },
+					workflow: { Knowledge: { '1': { [retrieveKnowledgeWorkflow.contract.id]: { run } } } },
+				} as never,
+				input,
+			),
+		).rejects.toMatchObject({ errorCode: 403 })
+		expect(run).not.toHaveBeenCalled()
+	})
+})
+```
+```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.test.ts" write
+import { createCommandTestHarness, DefaultEventBridge } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { KnowledgeCollectionPolicy } from '../../KnowledgeResources.js'
+import { knowledgeV1Service } from '../../knowledgeV1Service.js'
+import { searchKnowledgeCommandBuilder } from './searchKnowledgeCommandBuilder.js'
+
+const repository = {
+	replaceRevision: vi.fn(),
+	search: vi.fn(async () => [
+		{
+			documentId: 'fees',
+			chunkIndex: 0,
+			content: 'Instant transfers have no Example Bank fee.',
+			score: 0.91,
+		},
+	]),
+}
+
+function options(policy: KnowledgeCollectionPolicy, provider: FakeModelProvider) {
+	const storage = sqliteHarnessStorage({ file: ':memory:' })
+	return {
+		serviceConfig: { embeddingModel: 'fake-embedding', embeddingDimensions: 4 },
+		resources: {
+			knowledgeCollectionPolicy: policy,
+			knowledgeEmbeddingProfile: { model: 'fake-embedding', dimensions: 4 },
+			knowledgeRepository: repository,
+		},
+		ai: {
+			storage,
+			models: {
+				answering: { provider, model: 'fake-chat' },
+				embedding: { provider, model: 'fake-embedding' },
+			},
+		},
+		storage,
+	}
+}
+
+afterEach(() => vi.clearAllMocks())
+
+describe('searchKnowledgeCommandBuilder', () => {
+	it('scopes repository search with the trusted tenant identity', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3, 0.4] }],
+			usage: { inputTokens: 3, outputTokens: 0, totalTokens: 3 },
+		})
+		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => true)
+		const policy = { canAccess }
+		const runtime = options(policy, provider)
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
+			...runtime,
+			eventBridge,
+		})
+		try {
+			await harness.service.start()
+			const { result } = await harness.run({
+				payload: { collectionId: 'customer-help', query: 'Are instant transfers free?', limit: 3 },
+				parameter: {},
+			})
+			expect(result?.matches).toHaveLength(1)
+			expect(canAccess).toHaveBeenCalledWith({
+				tenantId: 'mocked-tenant-id',
+				principalId: 'mocked-principal-id',
+				collectionId: 'customer-help',
+				action: 'search',
+			})
+			expect(repository.search).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tenantId: 'mocked-tenant-id',
+					collectionId: 'customer-help',
+					embeddingModel: 'fake-embedding',
+					queryEmbedding: [0.1, 0.2, 0.3, 0.4],
+					limit: 3,
+				}),
+			)
+			provider.assertExhausted()
+		} finally {
+			await new Promise<void>((resolve) => setImmediate(resolve))
+			await harness.destroy()
+			await eventBridge.destroy()
+			await runtime.storage.close()
+		}
+	})
+
+	it('denies collection access before embedding or repository work', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		const canAccess = vi.fn(async (_input: Parameters<KnowledgeCollectionPolicy['canAccess']>[0]) => false)
+		const runtime = options({ canAccess }, provider)
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const harness = await createCommandTestHarness(knowledgeV1Service, searchKnowledgeCommandBuilder, {
+			...runtime,
+			eventBridge,
+		})
+		try {
+			await harness.service.start()
+			const { result, message } = await harness.run({
+				payload: { collectionId: 'internal-risk', query: 'Show risk rules', limit: 4 },
+				parameter: {},
+			})
+			expect(result).toBeUndefined()
+			expect(message).toMatchObject({ payload: { status: 403, message: 'This knowledge collection is not available' } })
+			provider.assertExhausted()
+			expect(repository.search).not.toHaveBeenCalled()
+		} finally {
+			await new Promise<void>((resolve) => setImmediate(resolve))
+			await harness.destroy()
+			await eventBridge.destroy()
+			await runtime.storage.close()
+		}
+	})
+})
+```
+```ts title="src/service/knowledge/v1/harness/agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.test.ts" write
+import { describe, expect, it } from 'vitest'
+import { searchKnowledgeTool } from '../../tool/searchKnowledge/searchKnowledgeTool.js'
+import { answerKnowledgeQuestionAgent } from './answerKnowledgeQuestionAgent.js'
+
+describe('answerKnowledgeQuestionAgent', () => {
+	it('exposes only the model-selected retrieval tool and requires its approval', () => {
+		expect(answerKnowledgeQuestionAgent.id).toBe('answerKnowledgeQuestion')
+		expect(answerKnowledgeQuestionAgent.model).toBe('answering')
+		expect(answerKnowledgeQuestionAgent.tools).toEqual([searchKnowledgeTool])
+		expect(answerKnowledgeQuestionAgent.contract.interrupts).toEqual(['tool-approval'])
+		expect(answerKnowledgeQuestionAgent.durable).toBe(true)
+	})
+})
+```
+Check your work: Run `npm run test:rag-retrieval`. Vitest reports the retrieval and agent suite passing.
+
+Continue with [Test the aggregate answer command](../test-workflow/).

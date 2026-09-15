@@ -1,0 +1,56 @@
+---
+title: Add deterministic scorers
+description: Score the exact fields that have a stable expected answer.
+order: 296
+kind: lesson
+status: published
+---
+
+Start with deterministic checks. They make an evaluation result reproducible and keep subjective model-quality review separate.
+
+```ts title="src/scorers.ts" write
+import { createDeterministicEvaluationScorer, type EvaluationRunResult } from '@purista/harness'
+import type { ClassificationAssessment } from './dataset.js'
+import type { ClassificationOutput } from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+export const categoryScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
+	id: 'classification-category',
+	version: '1.0.0',
+	dimension: { id: 'category_exact', kind: 'boolean' },
+	evaluate: (observation) => {
+		const passed = observation.assessment?.category === observation.output.category
+		return { outcome: 'scored', dimensionId: 'category_exact', kind: 'boolean', value: passed, passed }
+	},
+})
+
+export const urgencyScorer = createDeterministicEvaluationScorer<ClassificationAssessment, ClassificationOutput>({
+	id: 'classification-urgency',
+	version: '1.0.0',
+	dimension: { id: 'urgency_exact', kind: 'boolean' },
+	evaluate: (observation) => {
+		const passed = observation.assessment?.urgency === observation.output.urgency
+		return { outcome: 'scored', dimensionId: 'urgency_exact', kind: 'boolean', value: passed, passed }
+	},
+})
+
+export function passRate(
+	result: EvaluationRunResult,
+	dimensionId: string,
+	candidate: Readonly<{ id: string; version: string }>,
+) {
+	const aggregate = result.dimensionAggregates.find(
+		(item) =>
+			item.dimensionId === dimensionId &&
+			item.candidateId === candidate.id &&
+			item.candidateVersion === candidate.version &&
+			item.scope.kind === 'all',
+	)
+	if (!aggregate) throw new Error(`Missing evaluation aggregate ${dimensionId}`)
+	return aggregate.passCounts?.rate ?? 0
+}
+```
+```bash title="Type-check the scorers" replay="project"
+npm run build
+```
+
+Continue with [Define the change gate](../change-gate/).

@@ -1,0 +1,106 @@
+---
+title: Run and aggregate evaluation
+description: Run the same native agent for each case with bounded, deterministic execution.
+order: 298
+kind: lesson
+status: published
+---
+
+The runner creates one native Harness runtime, uses one stable session for each case, releases every session, and closes the runtime. Its one-at-a-time concurrency makes the strict fixture order visible. The public option is named `model` because it selects the provider's concrete model id; the Harness runtime still binds that selection to the exact `classification` model alias required by the agent.
+
+```ts title="src/runClassificationEvaluation.ts" write
+import { type EvaluationRunResult, type ModelProvider, runEvaluation } from '@purista/harness'
+import { type ClassificationAssessment, supportClassificationDataset } from './dataset.js'
+import { categoryScorer, urgencyScorer } from './scorers.js'
+import type {
+	ClassificationInput,
+	ClassificationOutput,
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportHarness } from './service/support/v1/harness/supportHarness.js'
+
+export async function runClassificationEvaluation(
+	provider: ModelProvider,
+	options: Readonly<{ runId?: string; model?: string }> = {},
+): Promise<EvaluationRunResult> {
+	const harness = await supportHarness.getInstance({
+		models: { classification: { provider, model: options.model ?? 'evaluation-model' } },
+	})
+	try {
+		return await runEvaluation<
+			ClassificationInput,
+			ClassificationAssessment,
+			Record<string, never>,
+			ClassificationOutput
+		>({
+			runId: options.runId ?? 'support-classification-eval-1',
+			dataset: supportClassificationDataset,
+			candidates: [{ id: 'classify-support-message', version: '1.0.0', config: {} }],
+			task: {
+				id: 'run-classification-agent',
+				version: '1.0.0',
+				async run(target) {
+					const session = await harness.getSession(`evaluation:${target.evaluationRunId}:${target.caseId}`)
+					try {
+						const outcome = await session.agents.classifySupportMessage.run(target.input)
+						return { output: outcome.output, correlation: { runId: outcome.runId } }
+					} finally {
+						await session.release()
+					}
+				},
+			},
+			scorers: [categoryScorer, urgencyScorer],
+			aggregateBy: ['category', 'urgency'],
+			maxConcurrency: 1,
+			failurePolicy: 'continue',
+			timeouts: { runMs: 30_000, taskMs: 10_000, scorerMs: 1_000 },
+		})
+	} finally {
+		await harness.close()
+	}
+}
+```
+The strict fake provider supplies the three known outputs and reports an unexpected or unused model call.
+
+```ts title="src/testing/scriptedClassificationProvider.ts" write
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+export function passingEvaluationProvider() {
+	const provider = new FakeModelProvider({ strict: true })
+	for (const object of [
+		{ category: 'card', urgency: 'urgent', reason: 'The card is stolen and active misuse is reported.' },
+		{ category: 'transfer', urgency: 'normal', reason: 'The question concerns a scheduled transfer date.' },
+		{ category: 'account_access', urgency: 'urgent', reason: 'Essential access is blocked before a deadline.' },
+	]) {
+		provider.enqueueObject(objectReply(object, { usage, finishReason: 'stop' }))
+	}
+	return provider
+}
+```
+```ts title="src/runEvaluation.ts" write
+import { assertClassificationGate } from './changeGate.js'
+import { runClassificationEvaluation } from './runClassificationEvaluation.js'
+import { passingEvaluationProvider } from './testing/scriptedClassificationProvider.js'
+
+async function main() {
+	const provider = passingEvaluationProvider()
+	const result = await runClassificationEvaluation(provider, { model: 'scripted-evaluation-model' })
+	const gate = assertClassificationGate(result)
+	process.stdout.write(`${JSON.stringify({ status: result.status, gate }, null, 2)}\n`)
+	provider.assertExhausted()
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Evaluation failed.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the credential-free evaluation" replay="project"
+npm run build
+npm run evaluate
+```
+
+The output reports `completed` and a passing gate. This proves wiring, not live-model quality.
+
+Continue with [Compose the evaluated service](../compose-runtime/).

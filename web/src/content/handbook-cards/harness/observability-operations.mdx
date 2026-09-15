@@ -1,0 +1,31 @@
+---
+title: Observability & Operations
+description: Observe safe lifecycle evidence and close the bound Harness during shutdown.
+---
+
+Use application-owned logs, metrics, and traces for trusted operational
+diagnostics and `stream(...)` for a consumer-facing execution stream. Do not
+forward prompts, tool values, credentials, or internal records to a browser or
+log sink.
+
+```ts title="Release a session and close the process instance"
+const session = await harness.getSession('support:42', {
+  identity: { tenantId: 'acme', principalId: 'alex' },
+})
+try {
+  const outcome = await session.agents.assistant.run('Summarize the case')
+  if (outcome.status === 'completed') console.info({ runId: outcome.runId })
+} finally {
+  await session.release()
+}
+
+await harness.close()
+```
+
+Release sessions after each bounded interaction. Close the long-lived
+`HarnessInstance` once during application shutdown. Cancellation can stop
+future work but cannot undo a provider call or external side effect already in
+progress; use idempotency and durable receipts for recovery.
+
+Configure telemetry for content-free evidence and record stable ids, outcome,
+duration, and normalized error kinds rather than model or customer content.

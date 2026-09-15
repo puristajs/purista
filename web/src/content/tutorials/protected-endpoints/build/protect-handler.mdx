@@ -1,0 +1,179 @@
+---
+title: Configure Hono protection middleware
+description: Verify a local bearer key and map it to trusted PURISTA principal and tenant metadata.
+order: 20
+kind: lesson
+status: published
+---
+
+The Hono service has a dedicated `setProtectMiddleware` method. Hono runs this
+middleware only for generated endpoints whose command metadata is protected.
+
+For this local chapter, use one fixed key and one fixed identity. Do not use
+this fixture as production authentication.
+
+```ts title="src/demoProtectMiddleware.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { EndpointProtectMiddleware, HonoServiceClass } from '@purista/hono-http-server'
+
+export const DEMO_API_KEY = 'demo-bank-key'
+
+const demoCallers = new Map([
+	[DEMO_API_KEY, { principalId: 'principal-alex', tenantId: 'tenant-example' }],
+])
+
+export const demoProtectMiddleware: EndpointProtectMiddleware<HonoServiceClass> = async function (c, next) {
+	const authorization = c.req.header('authorization')
+	const match = authorization?.match(/^Bearer\s+(.+)$/i)
+	const caller = match ? demoCallers.get(match[1]) : undefined
+
+	if (!caller) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid demo API key is required')
+	}
+
+	c.set('principalId', caller.principalId)
+	c.set('tenantId', caller.tenantId)
+	await next()
+}
+```
+
+The key is used only to look up a trusted identity. The middleware never copies
+`principalId` or `tenantId` from request headers or request JSON. Throwing
+`HandledError` lets the Hono service produce the standard RFC 9457 response;
+the middleware does not build a transport response itself.
+
+Register the middleware before Hono starts. Also describe the bearer scheme in
+OpenAPI so clients can see how protected routes authenticate.
+
+```ts title="src/application.ts" write
+import type { Logger } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { demoProtectMiddleware } from './demoProtectMiddleware.js'
+import { getEventBridge } from './eventbridge.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: ManagedTransactionRepository = new SqliteTransactionRepository(':memory:'),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank API', version: '1.0.0' },
+				components: {
+					securitySchemes: {
+						demoBearer: { type: 'http', scheme: 'bearer' },
+					},
+				},
+			},
+		},
+	})
+
+	http.setProtectMiddleware(demoProtectMiddleware)
+	await bankProfile.start()
+	await transaction.start()
+	http.registerService(bankProfile, transaction)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return { eventBridge, bankProfile, transaction, transactionRepository, http }
+}
+```
+
+Add a focused boundary test now. It proves that public metadata bypasses the
+middleware, protected metadata requires the key, and a valid key reaches the
+generated command.
+
+```ts title="src/protectHandler.test.ts" write
+import { initLogger } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { DEMO_API_KEY } from './demoProtectMiddleware.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+
+test('protects generated transaction endpoints and propagates trusted identity metadata', async () => {
+	const sandbox = createSandbox()
+	const stored = {
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		amountCents: 2599,
+		direction: 'debit' as const,
+		counterparty: 'Northwind Books',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const save = sandbox.stub().resolves(stored)
+	const repository: ManagedTransactionRepository = {
+		name: 'sqliteTransactionRepository',
+		save,
+		findById: sandbox.stub(),
+		destroy: sandbox.stub().resolves(),
+	}
+	const app = await createApplication(initLogger('fatal'), repository)
+
+	try {
+		const profile = await app.http.app.request('/api/v1/profile')
+		expect(profile.status).toBe(200)
+		await profile.json()
+
+		const denied = await app.http.app.request('/api/v1/transactions', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books' }),
+		})
+		expect(denied.status).toBe(401)
+		await denied.json()
+		expect(save.called).toBe(false)
+
+		const allowed = await app.http.app.request('/api/v1/transactions', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				authorization: `Bearer ${DEMO_API_KEY}`,
+			},
+			body: JSON.stringify({ amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books' }),
+		})
+		expect(allowed.status).toBe(200)
+		await allowed.json()
+		expect(save.calledOnce).toBe(true)
+
+		const openApiResponse = await app.http.app.request('/api/openapi.json')
+		const openApi = (await openApiResponse.json()) as {
+			paths: Record<string, Record<string, { security?: unknown; 'x-purista-endpoint-security'?: string }>>
+		}
+		expect(openApi.paths['/api/v1/profile'].get.security).toEqual([])
+		expect(openApi.paths['/api/v1/transactions'].post.security).toEqual([{ demoBearer: [] }])
+		expect(openApi.paths['/api/v1/transactions'].post['x-purista-endpoint-security'])
+			.toBe('protected-with-security-scheme')
+	} finally {
+		await app.http.prepareDestroy().destroy()
+		await app.http.destroy()
+		await app.transaction.destroy()
+		await app.bankProfile.destroy()
+		await app.transactionRepository.destroy()
+		await app.eventBridge.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Type-check the protection boundary" replay="project"
+npx tsc --noEmit
+```
+
+Authentication ends at this boundary. Later business guards will decide
+whether the authenticated principal may perform a specific business action.

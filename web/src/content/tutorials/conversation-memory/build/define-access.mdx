@@ -1,0 +1,144 @@
+---
+title: Define conversation access and identity
+description: Add schemas, action-based authorization, typed resources, and one stable opaque session id.
+order: 222
+kind: lesson
+status: published
+---
+
+A caller supplies a short conversation id. Trusted tenant and principal values
+come from the PURISTA message after authentication.
+
+```ts title="src/service/support/v1/schema.ts" write
+import { z } from 'zod'
+
+export const conversationIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/)
+
+export const conversationHistoryRequestSchema = z.strictObject({ conversationId: conversationIdSchema })
+
+export const conversationHistoryEntrySchema = z.strictObject({
+	role: z.enum(['system', 'user', 'assistant', 'tool']),
+	content: z.string(),
+	timestamp: z.string(),
+})
+
+export const conversationHistorySchema = z.strictObject({
+	messages: z.array(conversationHistoryEntrySchema),
+})
+
+export const clearedConversationHistorySchema = z.strictObject({ cleared: z.literal(true) })
+```
+```ts title="src/service/support/v1/supportServiceConfig.ts" write
+import { z } from 'zod'
+
+export const supportServiceV1ConfigSchema = z.object({})
+```
+The business policy authorizes each action separately. Permission to continue a
+conversation does not imply permission to read or clear its transcript.
+
+```ts title="src/service/support/v1/SupportConversationPolicy.ts" write
+export type SupportConversationAction = 'continue' | 'read' | 'clear'
+
+export interface SupportConversationPolicy {
+	canAccess(input: {
+		tenantId: string
+		principalId: string
+		conversationId: string
+		action: SupportConversationAction
+	}): Promise<boolean>
+}
+```
+The application uses a narrow resource port for transcript access. Its entry
+type comes from the Zod schema, so there is no second handwritten shape.
+
+```ts title="src/service/support/v1/SupportConversationHistory.ts" write
+import type { z } from 'zod'
+import type { conversationHistoryEntrySchema } from './schema.js'
+
+export type SupportConversationHistoryEntry = z.output<typeof conversationHistoryEntrySchema>
+
+export interface SupportConversationHistory {
+	list(sessionId: string): Promise<SupportConversationHistoryEntry[]>
+	clear(sessionId: string): Promise<void>
+}
+```
+```ts title="src/service/support/v1/requireSupportConversationAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportConversationAction, SupportConversationPolicy } from './SupportConversationPolicy.js'
+
+export async function requireSupportConversationAccess(
+	policy: SupportConversationPolicy,
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	conversationId: string,
+	action: SupportConversationAction,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAccess({
+			tenantId: identity.tenantId,
+			principalId: identity.principalId,
+			conversationId,
+			action,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This support conversation is not available')
+	}
+}
+```
+Declare both resources once on the service builder.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
+import type { SupportConversationHistory } from './SupportConversationHistory.js'
+import type { SupportConversationPolicy } from './SupportConversationPolicy.js'
+import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
+
+export const supportServiceInfo = {
+	serviceVersion: '1',
+	...generalSupportServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
+	.setConfigSchema(supportServiceV1ConfigSchema)
+	.defineResource<'supportConversationHistory', SupportConversationHistory>()
+	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
+```
+Derive one stable opaque id from trusted tenant, principal, and conversation
+values. The version label makes a future key change explicit. Never accept this
+session id directly from an untrusted payload.
+
+```ts title="src/service/support/v1/conversationSessionId.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+
+export function conversationSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	conversationId: string,
+) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(
+			JSON.stringify({
+				tenantId: identity.tenantId,
+				principalId: identity.principalId,
+				conversationId,
+				version: 'support-conversation-v1',
+			}),
+		)
+		.digest('hex')
+	return `support-conversation:${digest}`
+}
+```
+The same value will be passed to the agent run and to authorized Harness storage
+operations. There is no second Core storage-id conversion.
+
+```bash title="Check the access contracts" replay="project"
+npm run build
+```
+
+Continue with [Mount and invoke the conversation agent](../use-session/).

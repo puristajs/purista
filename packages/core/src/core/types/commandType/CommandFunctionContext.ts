@@ -1,3 +1,4 @@
+import type { HarnessInvocationClients } from '../../../HarnessMount/invocation.js'
 import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
@@ -44,13 +45,17 @@ export type CommandFunctionContextEnhancements<
 	 * .setCommandFunction(async function (context, payload, _parameter) {
 	 *    const inputPayload = { my: 'input' }
 	 *    const inputParameter = { search: 'for_me' }
-	 *    const result = await context.service.ServiceA[1].test(inputPayload,inputParameter)
+	 *    const result = await context.service.ServiceA['1'].test(inputPayload,inputParameter)
 	 * })
 	 * ```
 	 */
 	service: Invokes
 	/** consumes stream responses from other service stream endpoints */
 	stream: StreamInvokes
+	/** Address-first clients for declared Harness agents. */
+	agent: HarnessInvocationClients<Invokes, 'agent'>
+	/** Address-first clients for declared Harness workflows. */
+	workflow: HarnessInvocationClients<Invokes, 'workflow'>
 	/** typed queue enqueue helpers */
 	queue: QueueContext<QueueInvokes>
 	/**

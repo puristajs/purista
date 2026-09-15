@@ -14,7 +14,7 @@ VitePress provides Syntax Highlighting powered by [Shikiji](https://github.com/a
 **Input**
 
 ````md
-```js{4}
+```js {4}
 export default {
   data () {
     return {
@@ -27,7 +27,7 @@ export default {
 
 **Output**
 
-```js{4}
+```js {4}
 export default {
   data () {
     return {

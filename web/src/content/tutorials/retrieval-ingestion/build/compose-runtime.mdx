@@ -1,0 +1,191 @@
+---
+title: Compose the application
+description: Bind Identity, Knowledge, models, pgvector, Harness storage, Hono, static assets, and ordered shutdown at one root.
+order: 218
+kind: lesson
+status: published
+---
+
+Create the application composition root and HTTP listener. These files assemble both services, resources, middleware, and routes into one server.
+
+```ts title="src/createKnowledgeApplication.ts" write
+import { DefaultEventBridge, initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import { type HarnessStorage, type ModelProvider, sqliteHarnessStorage } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { honoV1Service } from '@purista/hono-http-server'
+import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
+import { identityV1Service } from './service/identity/v1/identityV1Service.js'
+import type { KnowledgeRepository } from './service/knowledge/v1/KnowledgeResources.js'
+import { knowledgeV1Service } from './service/knowledge/v1/knowledgeV1Service.js'
+import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export interface ManagedKnowledgeRepository extends KnowledgeRepository {
+	readonly name: string
+	destroy(): Promise<void>
+}
+
+export type KnowledgeApplicationDependencies = {
+	stateStore: StateStore
+	repository: ManagedKnowledgeRepository
+	models: {
+		answering: { provider: ModelProvider; model: string }
+		embedding: { provider: ModelProvider; model: string }
+	}
+	embeddingDimensions: number
+	storage?: HarnessStorage
+}
+
+function defaultDependencies(
+	logger: Logger,
+	environment: Readonly<Record<string, string | undefined>>,
+): KnowledgeApplicationDependencies {
+	const apiKey = environment.OPENAI_API_KEY?.trim()
+	const databaseUrl = environment.DATABASE_URL?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the knowledge application.')
+	if (!databaseUrl) throw new Error('DATABASE_URL is required to run the knowledge application.')
+	const provider = openai({ apiKey })
+	const embeddingModel = environment.OPENAI_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small'
+	const embeddingDimensions = 1_536
+	return {
+		stateStore: initDefaultStateStore({ logger }),
+		repository: new PgKnowledgeRepository(databaseUrl, embeddingDimensions),
+		models: {
+			answering: { provider, model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+			embedding: { provider, model: embeddingModel },
+		},
+		embeddingDimensions,
+		storage: sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' }),
+	}
+}
+
+export async function createKnowledgeApplication(
+	logger: Logger,
+	dependencies?: KnowledgeApplicationDependencies,
+	environment: Readonly<Record<string, string | undefined>> = process.env,
+) {
+	const resolved = dependencies ?? defaultDependencies(logger, environment)
+	const storage =
+		resolved.storage ?? sqliteHarnessStorage({ file: environment.HARNESS_STORAGE_FILE?.trim() || './harness.sqlite' })
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const identity = await identityV1Service.getInstance(eventBridge, {
+		logger,
+		stateStore: resolved.stateStore,
+		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
+	})
+	const knowledge = await knowledgeV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			embeddingModel: resolved.models.embedding.model,
+			embeddingDimensions: resolved.embeddingDimensions,
+		},
+		resources: {
+			knowledgeCollectionPolicy: {
+				canAccess: async ({ tenantId, principalId, collectionId }) =>
+					tenantId === 'tenant-example' && principalId === 'principal-alex' && collectionId === 'customer-help',
+			},
+			knowledgeEmbeddingProfile: {
+				model: resolved.models.embedding.model,
+				dimensions: resolved.embeddingDimensions,
+			},
+			knowledgeRepository: resolved.repository,
+		},
+		ai: {
+			storage,
+			models: {
+				answering: resolved.models.answering,
+				embedding: {
+					...resolved.models.embedding,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 100,
+						maxDelayMs: 1_000,
+						maxActiveDelayMs: 5_000,
+						maxActiveElapsedMs: 15_000,
+						retryOn: { serverError: true },
+					},
+				},
+			},
+		},
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank knowledge API', version: '1.0.0' },
+				components: { securitySchemes: { sessionBearer: { type: 'http', scheme: 'bearer' } } },
+			},
+		},
+	})
+
+	http.setProtectMiddleware(createSessionProtectMiddleware(http))
+	await identity.start()
+	await knowledge.start()
+	http.registerService(identity, knowledge)
+	registerStaticWebsite(http)
+	await http.start()
+	return {
+		eventBridge,
+		stateStore: resolved.stateStore,
+		repository: resolved.repository,
+		identity,
+		knowledge,
+		http,
+		harnessStorage: storage,
+	}
+}
+```
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function main() {
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const application = await createKnowledgeApplication(logger)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		{ name: 'Harness storage', destroy: async () => application.harnessStorage.close?.() },
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank knowledge application started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Knowledge application could not start.'}\n`)
+	process.exit(1)
+})
+```
+```ts title="src/nodeHttpListener.ts" write
+type ClosableNodeServer = { close(callback: (error?: Error) => void): unknown }
+
+export function createNodeHttpListener(server: ClosableNodeServer) {
+	return {
+		name: 'nodeHttpListener',
+		destroy: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+	}
+}
+```
+Check your work: Run `npm run build:server`. The application composition compiles.
+
+Continue with [Serve static assets](../serve-ui/).

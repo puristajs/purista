@@ -10,10 +10,12 @@ export type ServiceBuilderTypes<
 	Resources extends {} = EmptyObject,
 	ServiceClassType extends ServiceClass<any> = Service<ServiceClassTypes<ConfigType, Resources>>,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
+	Harnesses extends readonly [] | readonly [unknown] = readonly [],
 > = {
 	ConfigType: ConfigType
 	ConfigInputType: ConfigInputType
 	Resources: Resources
 	ServiceClassType: ServiceClassType
 	Metrics: Metrics
+	Harnesses: Harnesses
 }

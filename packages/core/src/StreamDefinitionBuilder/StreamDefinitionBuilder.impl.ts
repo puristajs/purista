@@ -21,10 +21,60 @@ import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGua
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
+import {
+	type HarnessInvocationContract,
+	type HarnessInvocationSource,
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
+
+type HarnessSourceOfKind<
+	Source extends HarnessInvocationSource,
+	Kind extends 'agent' | 'workflow',
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
+
+type StreamHarnessInvocationBuilder<
+	S extends Service,
+	C extends StreamDefinitionBuilderTypes,
+	Source extends HarnessInvocationSource,
+	ServiceName extends string,
+	ServiceVersion extends string,
+> = StreamDefinitionBuilder<
+	S,
+	StreamDefinitionBuilderTypes<
+		C['PayloadSchema'],
+		C['ParamsSchema'],
+		C['ChunkSchema'],
+		C['FinalSchema'],
+		C['Resources'],
+		C['Invokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessInvokeDeclaration<Source>>>
+			>,
+		C['StreamInvokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessStreamDeclaration<Source>>>
+			>,
+		C['EmitList'],
+		C['QueueInvokes']
+	>
+>
+
+const RESERVED_STREAM_RESPONSE_HEADERS = new Set([
+	'cache-control',
+	'connection',
+	'content-length',
+	'content-type',
+	'transfer-encoding',
+])
 
 /**
  * Builds a stream definition for incremental output or aggregate stream results.
@@ -72,6 +122,7 @@ export class StreamDefinitionBuilder<
 	private isSecure = true
 	private errorStatusCodes: StatusCode[] = []
 	private httpStreamProtocol?: { protocol: string; documentationUrl?: string }
+	private httpResponseHeaders?: Readonly<Record<string, string>>
 	private httpStreamingMode: 'stream' | 'aggregate' = 'stream'
 
 	private durable = false
@@ -209,6 +260,62 @@ export class StreamDefinitionBuilder<
 				C['QueueInvokes']
 			>
 		>
+	}
+
+	/** Declare an address-first local Harness agent invocation with aggregate and stream access. */
+	canInvokeAgent<
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness agent invocation. */
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this
+	}
+
+	/** Declare an address-first local Harness workflow invocation with aggregate and stream access. */
+	canInvokeWorkflow<
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness workflow invocation. */
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
+	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this
 	}
 
 	/**
@@ -594,12 +701,55 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
-	/** Set stream protocol metadata for generated OpenAPI/HTTP exposure. */
+	/**
+	 * Set protocol metadata for a direct HTTP stream.
+	 *
+	 * Protocol streams send their chunks directly to the transport, so this also
+	 * selects streaming mode and disables automatic chunk aggregation. HTTP
+	 * server adapters may derive protocol-specific response headers from the
+	 * protocol identifier.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	 * ```
+	 */
 	setHttpStreamProtocol(protocol: string, documentationUrl?: string) {
 		this.httpStreamProtocol = {
 			protocol,
 			documentationUrl,
 		}
+		this.httpStreamingMode = 'stream'
+		this.aggregateChunks = false
+		return this
+	}
+
+	/**
+	 * Set static response headers required by this HTTP stream protocol.
+	 *
+	 * The HTTP server retains control of transport headers such as
+	 * `content-type`, `cache-control`, and `connection`.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.setHttpResponseHeaders({
+	 *   'x-custom-protocol': 'v1',
+	 * })
+	 * ```
+	 */
+	setHttpResponseHeaders(headers: Readonly<Record<string, string>>) {
+		const normalized: Record<string, string> = {}
+		for (const [name, value] of Object.entries(headers)) {
+			const lowerName = name.toLowerCase()
+			if (RESERVED_STREAM_RESPONSE_HEADERS.has(lowerName)) {
+				throw new Error(`HTTP stream response header "${name}" is managed by the server.`)
+			}
+			if (!/^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(name) || /[\r\n]/.test(value)) {
+				throw new Error(`Invalid HTTP stream response header "${name}".`)
+			}
+			normalized[lowerName] = value
+		}
+		this.httpResponseHeaders = Object.freeze(normalized)
 		return this
 	}
 
@@ -760,11 +910,15 @@ export class StreamDefinitionBuilder<
 			metadata.expose.http = this.httpMetadata.expose.http
 			if (metadata.expose.http) {
 				if (this.httpStreamProtocol) {
-					metadata.expose.http.stream = this.httpStreamProtocol
+					metadata.expose.http.stream = {
+						...this.httpStreamProtocol,
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
+					}
 				}
 				if (!metadata.expose.http.stream) {
 					metadata.expose.http.stream = {
 						protocol: 'purista',
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
 					}
 				}
 				if (metadata.expose.http.stream) {

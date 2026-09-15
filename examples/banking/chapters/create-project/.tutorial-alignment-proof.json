@@ -1,0 +1,96 @@
+{
+  "proofVersion": 1,
+  "kind": "retained-alignment",
+  "freshReplay": false,
+  "chapter": "create-project",
+  "baseFreshProofDigest": "734ba74e2550a9ebddc289087ab6f58eca9e43465a9e44908d4e41932005c35c",
+  "packageManifestDigest": "a7424e793f9f001c72893377003981e9ea2240ec8d9994e555e999b3d81a2651",
+  "pages": {
+    "create-project/build/initialize": "bdee28111f0615f32c2e1c821b0a397ff03ad1fec87044eea718957d44504735",
+    "create-project/build/generate-service": "a573210ec4c93759c43292ff49dcb19fc79bd0e6fe4c7099b3b01a438bd8e56a",
+    "create-project/testing/test-command": "66d56874dbafeb336b32ca9200b2bcc4ed73b08d1875a4be792b69c8ebcaf13e"
+  },
+  "files": {
+    ".agents/IMPLEMENTATION.md": "1af56723c4c9e93f0a5a46831c0c750a245de5777bf65003d31bd63c9d87111d",
+    ".agents/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".claude/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".gitignore": "0fb1f8a882b810b2562ad9a7407bbc2fdf94c1772fe0cde95fd37daac40a23fd",
+    "AGENTS.md": "2f76bd45c363fa99c74de668fe7b8d5cd2d3c6804cdfc38a23eb3cee7d378751",
+    "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
+    "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
+    "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
+    "purista.json": "889d83f2f9c9aeb2016eb977642f0072aba40de1ce67631c47cc074a77a72d0b",
+    "src/eventbridge.ts": "26ff7cfd68da9c058b8c225f00e2a3744ef212bf31f1ec6330c8950f0534f9af",
+    "src/index.ts": "96db30c58b385121a5e8282708de57cb0a80743ea2a0bea06e2f8af7a3515dac",
+    "src/service/bankProfile/generalBankProfileServiceInfo.ts": "a4281b2bdae650add577fca950684c1df77c82c57a85151916e36162a9e0ff93",
+    "src/service/bankProfile/v1/bankProfileServiceConfig.ts": "bee1df6d60b46365f1a6c35ea5f8e42c7461a35c71f9ddab319afccaa03cf87f",
+    "src/service/bankProfile/v1/bankProfileV1Service.test.ts": "0f8231cd96e4be0ac95f37cf59c6fd79bc3ac4634f3b1a46d25679386de14d0b",
+    "src/service/bankProfile/v1/bankProfileV1Service.ts": "3b7e0feca24cfb706da26fbac8270a9f2936985157455c38a6181f7e86acdcc4",
+    "src/service/bankProfile/v1/bankProfileV1ServiceBuilder.ts": "140dcca5c5c2d068a365a518c636775b8397d982eac53a13b3b98967b897d042",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts": "910f5b2f37ecae99bdd1999abe16c42e1853863ec4e80c245e8273f8b51b530a",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts": "57d220a723fc9e8fb0a82796385feae951bce8359af969c79f8913fcbd6afe68",
+    "src/service/bankProfile/v1/command/getProfile/schema.ts": "87b379fbceb043ea1c5e60a1c9135f62bac8492d65f7e1b1a2ccb3ee64ffc42b",
+    "src/service/bankProfile/v1/command/getProfile/types.ts": "c5604a1c7d1c9b481c558f6b18954ab3060dd5c91c5a42b5a70b2fc0aed39a25",
+    "src/service/ping/generalPingServiceInfo.ts": "cb6ee5fb114fa1489c80b8df1bd8e02b1e62a5d8779de829af2ef35ebcc72007",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.test.ts": "c78db61354ecc776a2ce00b797f811955b53b396b92738f077ab3ac167905d5e",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.ts": "aeca57ee98bce9f9e132e6639d49388f252e4eacfa2c72758012bd63df68b936",
+    "src/service/ping/v1/command/ping/schema.ts": "5cf48098c50a3651310c701a9f9d0a7fbbf73867d3f1eccbdc267adf0bd62102",
+    "src/service/ping/v1/command/ping/types.ts": "c8182d785a0ddbd565196637ccc6fcc3de361274443836168571cb04bc78c1af",
+    "src/service/ping/v1/pingServiceConfig.ts": "6301f8d8c6ca7a86d1e1c2371ce676acd60466b02ea5bc1c35aad331ea9252e4",
+    "src/service/ping/v1/pingV1Service.test.ts": "19815ceb0bc51b3b364ddc91da39d0ebac792a1cdf626863623cefab110fa532",
+    "src/service/ping/v1/pingV1Service.ts": "1124da1afafc7b74de5e6d081892c1257f1e8ee36c171c655a393cfe1cfa0537",
+    "src/service/ping/v1/pingV1ServiceBuilder.ts": "8a566970219e1ea441c54a74a135ba93ff94746460877cb7ae25a64769791438",
+    "src/service/serviceEvent.enum.ts": "deb3eee4eba43b3b2a738571f5951e355a6cfe292eab518cfa2dacb920cf5d6f",
+    "tsconfig.json": "932445a47e9065e3098d86b6e66496eca4977a24a8e047f6ead9a6166707b4a5"
+  },
+  "actions": [
+    {
+      "page": "create-project/build/initialize",
+      "command": "npm create purista@3.0.0 example-bank -- \\\n  --runtime node --event-bridge default --package-manager npm \\\n  --no-webserver --no-install --defaults --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "write": "tsconfig.json"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "command": "npm install --save-dev @purista/cli@4.0.0 'typescript@npm:@typescript/typescript6@6.0.2'\nnpm install @purista/core@4.0.0 zod@4.4.3\nnpm pkg set 'scripts.test=tsc --noEmit && vitest run src'\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "command": "npm run add:service -- bank-profile --description \"Provide the public Example Bank profile\" --non-interactive\nnpm run add:command -- get-profile --service bankProfile --service-version 1 \\\n  --description \"Describe the fictional bank\" --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/schema.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "README.md"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "command": "npm test\nnpm run build\n"
+    }
+  ],
+  "writeTargets": [
+    "README.md",
+    "src/index.ts",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts",
+    "src/service/bankProfile/v1/command/getProfile/schema.ts",
+    "tsconfig.json"
+  ]
+}

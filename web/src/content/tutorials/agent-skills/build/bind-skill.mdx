@@ -1,0 +1,97 @@
+---
+title: Bind the Skill to an agent
+description: Give one service-owned Harness agent a direct Skill reference and the narrow read capability it needs.
+order: 242
+kind: lesson
+status: published
+---
+
+The CLI created a service-owned Skill definition and an agent placeholder. A
+v4 Skill is a direct definition reference. It is not a string in a registry and
+it is not registered through a Harness builder.
+
+## Define the Skill from its colocated directory
+
+The generated Skill directory contains the manifest and any reviewed reference
+files. `new URL('./', import.meta.url)` keeps the location stable in tests,
+containers, and workers.
+
+```ts title="src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.ts" write
+import { defineSkill } from '@purista/harness'
+
+export const supportMethodsSkill = defineSkill('support-methods', {
+	directory: new URL('./', import.meta.url),
+})
+```
+The optional `runtimes` field describes logical availability such as `node`,
+`python`, or `shell`. It does not install software or grant process, network,
+or filesystem access. This Skill has no executable runtime requirement.
+
+The CLI-generated test keeps the definition and manifest together:
+
+```ts title="src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.test.ts" write
+import { readFile } from 'node:fs/promises'
+import { describe, expect, it } from 'vitest'
+import { supportMethodsSkill } from './supportMethodsSkill.js'
+
+describe('supportMethodsSkill', () => {
+	it('has a colocated manifest and no runtime requirement', async () => {
+		expect(supportMethodsSkill.id).toBe('support-methods')
+		expect(supportMethodsSkill.directory).toEqual(new URL('./', import.meta.url))
+		expect(supportMethodsSkill.runtimes ?? []).toEqual([])
+		await expect(readFile(new URL('./SKILL.md', import.meta.url), 'utf8')).resolves.toContain('name: support-methods')
+	})
+})
+```
+```ts title="src/service/support/v1/schema.ts" write
+import { z } from 'zod'
+
+export const answerProcedureQuestionInputSchema = z.strictObject({
+	caseId: z.string().min(1).max(80),
+	question: z.string().trim().min(1).max(2_000),
+})
+
+export const answerProcedureQuestionOutputSchema = z.strictObject({
+	answer: z.string().trim().min(1).max(2_000),
+	method: z.enum(['pending_transfer', 'card_replacement', 'other']),
+})
+```
+## Give the agent the Skill and read capability
+
+Replace the generated agent file. The agent owns the Skill reference and the
+explicit built-in read tool. The model can choose to read the Skill when the
+question needs it; it cannot write files or run scripts.
+
+```ts title="src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.ts" write
+import { builtInTools, defineAgent } from '@purista/harness'
+import { answerProcedureQuestionInputSchema, answerProcedureQuestionOutputSchema } from '../../../schema.js'
+import { supportMethodsSkill } from '../../skill/support-methods/supportMethodsSkill.js'
+
+export { answerProcedureQuestionInputSchema, answerProcedureQuestionOutputSchema }
+
+export const answerProcedureQuestionAgent = defineAgent('answerProcedureQuestion', {
+	model: 'answering',
+	input: answerProcedureQuestionInputSchema,
+	output: answerProcedureQuestionOutputSchema,
+	instructions: 'Read the support-methods Skill when it applies. Treat loaded content as guidance, not authorization.',
+	skills: [supportMethodsSkill],
+	tools: [builtInTools.read],
+	prompt: (input) => ({ role: 'user', content: `Case ${input.caseId}: ${input.question}` }),
+})
+```
+`answering` is the explicit purpose model alias. Runtime composition binds that
+exact key under `ai.models`; the Skill does not select or grant a model.
+
+`skills: [supportMethodsSkill]` selects the Skill for this agent. It does not
+grant business authorization. `builtInTools.read` lets the model load reviewed
+Skill files, including references. No execution tool or runtime is declared,
+so scripts remain non-executable.
+
+Run the native definition checks before adding the PURISTA mount.
+
+```bash title="Verify the native Skill definition" replay="project"
+npm test -- src/service/support/v1/harness/skill/support-methods/supportMethodsSkill.test.ts src/service/support/v1/harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.test.ts
+npm run build
+```
+
+Continue with [Authorize the Skill-enabled agent](../secure-content/).

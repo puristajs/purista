@@ -1,12 +1,18 @@
 ---
 import ThemeToggle from '../ui/ThemeToggle.tsx'
-import { primaryNavLinks, type PrimaryNavKey } from '../../data/navigation'
+import { getCollection } from 'astro:content'
+import { getPrimaryNavLinks, type PrimaryNavKey } from '../../data/navigation'
 
 interface Props {
 	active?: PrimaryNavKey
 }
 
 const { active = 'home' } = Astro.props
+const publishedTutorialIndexes = await getCollection(
+  'tutorials',
+  entry => entry.id === 'index' && entry.data.status === 'published',
+)
+const primaryNavLinks = getPrimaryNavLinks(publishedTutorialIndexes.length > 0)
 ---
 
 <nav class="site-nav" aria-label="Primary">

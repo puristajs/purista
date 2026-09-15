@@ -1,6 +1,6 @@
 {
 	"name": "@purista/enterprise-billing-cycle",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "PURISTA enterprise interoperability billing-cycle example",
 	"homepage": "https://purista.dev",
 	"private": true,
@@ -26,7 +26,7 @@
 		"typescript": "npm:@typescript/typescript6@^6.0.2"
 	},
 	"dependencies": {
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"zod": "^4.4.3"
 	}
 }

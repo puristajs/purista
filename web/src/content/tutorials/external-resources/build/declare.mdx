@@ -1,0 +1,117 @@
+---
+title: Declare a typed provider resource
+description: Describe the external capability that Transaction needs and declare it on the service builder.
+order: 101
+kind: lesson
+status: published
+---
+
+Start with the smallest interface that the command needs. The domain service
+does not need to know about URLs, HTTP headers, Docker, or response parsing.
+Those details belong to an adapter.
+
+The response schema below describes the provider contract. It is kept beside
+the resource interface because every implementation must return the same
+validated meaning.
+
+```ts title="src/service/transaction/v1/LegacyTransactionClient.ts" write
+import { z } from 'zod'
+
+export const legacyTransactionProviderResponseSchema = z.strictObject({
+	sourceId: z.string().trim().min(1).max(80),
+	record: z.string().trim().min(1).max(240),
+})
+
+export interface LegacyTransactionClient {
+	fetchTransaction(sourceId: string, accessToken: string): Promise<string>
+}
+```
+
+Declare the resource with `defineResource`. This makes
+`context.resources.legacyTransactionClient` typed in every Transaction
+handler. It also makes the resource required when the service is created.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
+import { generalTransactionServiceInfo } from '../generalTransactionServiceInfo.js'
+import type { AccountAccessPolicy } from './AccountAccessPolicy.js'
+import type { LegacyTransactionClient } from './LegacyTransactionClient.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionServiceV1ConfigSchema } from './transactionServiceConfig.js'
+
+export const transactionServiceInfo = {
+	serviceVersion: '1',
+	...generalTransactionServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const transactionV1ServiceBuilder = new ServiceBuilder(transactionServiceInfo)
+	.setConfigSchema(transactionServiceV1ConfigSchema)
+	.defineResource<'transactionRepository', TransactionRepository>()
+	.defineResource<'accountAccessPolicy', AccountAccessPolicy>()
+	.defineResource<'legacyTransactionClient', LegacyTransactionClient>()
+```
+
+Tests that do not exercise the provider still need an object satisfying the
+declared resource contract. Export one test fixture that fails loudly if such a
+test unexpectedly calls the provider.
+
+```ts title="src/service/transaction/v1/testing/unavailableLegacyTransactionClient.ts" write
+import type { LegacyTransactionClient } from '../LegacyTransactionClient.js'
+
+export const unavailableLegacyTransactionClient: LegacyTransactionClient = {
+	async fetchTransaction() {
+		throw new Error('This test did not provide a legacy transaction client')
+	},
+}
+```
+
+This focused test proves that the configured service receives the exact typed
+resource instance. It uses PURISTA's event bridge and logger mocks; no HTTP
+server is involved.
+
+```ts title="src/service/transaction/v1/LegacyTransactionClient.resource.test.ts" write
+import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { localAccountAccessPolicy } from './AccountAccessPolicy.js'
+import type { LegacyTransactionClient } from './LegacyTransactionClient.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionV1ServiceBuilder } from './transactionV1ServiceBuilder.js'
+
+test('accepts the complete typed Transaction resource set', async () => {
+	const sandbox = createSandbox()
+	const legacyTransactionClient: LegacyTransactionClient = {
+		fetchTransaction: sandbox.stub().resolves('debit|25.99|Northwind Books'),
+	}
+	const transactionRepository: TransactionRepository = {
+		save: sandbox.stub(),
+		findById: sandbox.stub(),
+	}
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: {
+			transactionRepository,
+			accountAccessPolicy: localAccountAccessPolicy,
+			legacyTransactionClient,
+		},
+	})
+
+	try {
+		expect(service).toBeDefined()
+		expect(legacyTransactionClient.fetchTransaction).toBeTypeOf('function')
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Test the resource declaration" replay="project"
+npx vitest run src/service/transaction/v1/LegacyTransactionClient.resource.test.ts
+```
+
+`defineResource` does not construct anything and it does not make a network
+request. It records a required service dependency and carries its type into the
+command context. We will choose the concrete implementation at application
+startup.

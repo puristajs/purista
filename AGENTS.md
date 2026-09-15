@@ -65,7 +65,7 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 - Prefer the shared layered catalog there over app-local copies.
 - Specs are the source of truth for framework development. Implementation should follow specs; when they drift, update the specs or mark obsolete material as superseded.
 - User-facing framework skills must not require access to internal specs. They should reflect the current implementation, which should itself follow the specs.
-- The `purista-skill-maintainer` skill is the exception: it may use specs to keep framework skills, docs, examples, and implementation aligned.
+- The internal `purista-skill-maintainer`, `purista-docs-maintainer`, and `purista-tutorial-maintainer` skills are exceptions: they may use specs to keep framework skills, docs, examples, and implementation aligned.
 - When changing skills, specs, AGENTS/CLAUDE guidance, or public knowledge files, run `npm run audit:skills` and `npm run audit:knowledge`.
 - If a planning/spec file is obsolete, replace it with a concise superseded note or update it to match implementation. Do not leave conflicting active guidance behind.
 
@@ -77,4 +77,6 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 
 ## Website Design Guidance
 - For the Astro website in `web/`, load `web/AGENTS.md` and `web/DESIGN.md` before changing layout, visuals, UI components, copy structure, or page storytelling.
+- Use `skills/purista-docs-maintainer/SKILL.md` for website or handbook audits, information architecture, page authoring, navigation, and public documentation coverage.
+- Use `skills/purista-tutorial-maintainer/SKILL.md` for problem-oriented Framework tutorials, beginner-friendly step pages, runnable examples, dependency setup, and demo UI/authentication flows.
 - The website direction is flat, focused, dark-first technical editorial with fewer boxes, reusable layout primitives, and semantic visuals. AI Harness pages should be especially card-light and visual-led.

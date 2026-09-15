@@ -228,15 +228,16 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	protected async execute(method: string, path: string, options?: HttpClientRequestOptions, payload?: unknown) {
 		const startedAt = Date.now()
 		const controller = new AbortController()
+		const requestTimeout = options?.timeout ?? this.timeout
 		const timeout = setTimeout(() => {
 			controller.abort(
-				new UnhandledError(StatusCode.RequestTimeout, `request exceeded ${this.timeout} ms`, {
+				new UnhandledError(StatusCode.RequestTimeout, `request exceeded ${requestTimeout} ms`, {
 					name: this.name,
 					path,
 					method,
 				}),
 			)
-		}, this.timeout)
+		}, requestTimeout)
 
 		let body: string | undefined
 

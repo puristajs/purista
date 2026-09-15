@@ -1,0 +1,81 @@
+---
+title: Define the specialist agents
+description: Give each agent one task, one named model, and one structured output.
+order: 262
+kind: lesson
+status: published
+---
+
+Both agents receive the same support case. They return different structured results, so ordinary TypeScript can combine them later.
+
+```ts title="src/service/support/v1/harness/supportCaseSchemas.ts" write
+import { z } from 'zod'
+
+export const supportCaseInputSchema = z.strictObject({
+	caseId: z.string().trim().min(1).max(80),
+	message: z.string().trim().min(1).max(2_000),
+})
+
+export const riskAssessmentSchema = z.strictObject({
+	level: z.enum(['low', 'medium', 'high']),
+	evidence: z.array(z.string().trim().min(1).max(160)).max(5),
+})
+
+export const responsePlanSchema = z.strictObject({
+	customerReply: z.string().trim().min(1).max(500),
+	nextAction: z.enum(['reply', 'verify_identity', 'freeze_card', 'escalate']),
+})
+
+export const supportCaseAnalysisOutputSchema = z.strictObject({
+	caseId: z.string(),
+	risk: riskAssessmentSchema,
+	response: responsePlanSchema,
+})
+```
+The risk agent uses the lower-camel model name `riskModel`.
+
+```ts title="src/service/support/v1/harness/agent/assessSupportRisk/assessSupportRiskAgent.ts" write
+import { defineAgent } from '@purista/harness'
+import { riskAssessmentSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+export const assessSupportRiskAgent = defineAgent('assessSupportRisk', {
+	model: 'riskAssessment',
+	input: supportCaseInputSchema,
+	output: riskAssessmentSchema,
+	instructions: [
+		'Assess risk in one support message.',
+		'Use only facts in the message and return short evidence statements.',
+	].join(' '),
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}`,
+	}),
+})
+```
+The response agent uses `responseModel`. It proposes an action but does not perform it.
+
+```ts title="src/service/support/v1/harness/agent/planSupportResponse/planSupportResponseAgent.ts" write
+import { defineAgent } from '@purista/harness'
+import { responsePlanSchema, supportCaseInputSchema } from '../../supportCaseSchemas.js'
+
+export const planSupportResponseAgent = defineAgent('planSupportResponse', {
+	model: 'responsePlanning',
+	input: supportCaseInputSchema,
+	output: responsePlanSchema,
+	instructions: [
+		'Plan a short support response.',
+		'Do not claim an action happened. Select the next action for a service to perform.',
+	].join(' '),
+	prompt: (input) => ({
+		role: 'user',
+		content: `Case ${input.caseId}: ${input.message}`,
+	}),
+})
+```
+The agents are direct Harness definitions owned by Support v1. The application will bind both model names to providers later.
+
+```bash title="Check the specialist definitions" replay="project"
+npm run build
+```
+
+Continue with [Add resources and business authorization](../merge-evidence/).

@@ -1,18 +1,14 @@
-import { join } from 'node:path'
 import { z } from 'zod'
 import { addPuristaAgent } from '../api/addPuristaAgent.js'
-import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
 import {
 	baseAddInputSchema,
-	captureMutationSnapshot,
 	createIssuesFromZod,
 	createPendingResolution,
 	createResult,
 	getServiceChoices,
 	getServiceVersionChoices,
-	nonEmptyOptionalStringSchema,
 	requireProjectContext,
 	requirePuristaConfig,
 } from './shared.js'
@@ -20,9 +16,14 @@ import {
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
 	description: z.string().trim().min(1),
+	modelAlias: z
+		.string()
+		.trim()
+		.regex(/^[a-z][A-Za-z0-9]{0,63}$/, 'Model alias must be lower camel case with at most 64 ASCII letters or digits.'),
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
-	responseEventName: nonEmptyOptionalStringSchema,
+	http: z.enum(['none', 'command', 'stream']).default('none'),
+	responseEventName: z.never().optional(),
 })
 
 export type AddAgentInput = z.input<typeof schema>
@@ -36,6 +37,17 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			missing.push({ type: 'input', key: 'name', message: 'Name of the agent', required: true } as const)
 		if (!input.description?.trim())
 			missing.push({ type: 'input', key: 'description', message: 'Description of the agent', required: true } as const)
+		if (!input.modelAlias?.trim())
+			missing.push({
+				type: 'input',
+				key: 'modelAlias',
+				message: 'Model alias for the agent (for example chat)',
+				required: true,
+				validate: (value: string) =>
+					/^[a-z][A-Za-z0-9]{0,63}$/.test(value)
+						? true
+						: 'Use lower camel case with at most 64 ASCII letters or digits.',
+			} as const)
 		if (!input.serviceName?.trim())
 			missing.push({
 				type: 'select',
@@ -60,27 +72,7 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 	execute: async (resolvedInput, context) => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const puristaConfig = requirePuristaConfig(context)
-		if (resolvedInput.responseEventName) {
-			await ensureServiceEvent({
-				projectRootPath: context.cwd,
-				puristaProjectConfig: puristaConfig,
-				puristaProject: projectSnapshot,
-				eventName: resolvedInput.responseEventName,
-				description: `Emitted by ${resolvedInput.serviceName} v${resolvedInput.serviceVersion} agent ${resolvedInput.name}:\n${resolvedInput.description}`,
-			})
-		}
-
-		const mutationSnapshot = captureMutationSnapshot([
-			join(
-				context.cwd,
-				puristaConfig.servicePath ?? 'src/service',
-				resolvedInput.serviceName,
-				`v${resolvedInput.serviceVersion}`,
-				'agent',
-				resolvedInput.name,
-			),
-		])
-		await addPuristaAgent({
+		const mutationSnapshot = await addPuristaAgent({
 			projectRootPath: context.cwd,
 			puristaConfig,
 			puristaProject: projectSnapshot,
@@ -88,10 +80,16 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			serviceVersion: resolvedInput.serviceVersion,
 			agentName: resolvedInput.name,
 			agentDescription: resolvedInput.description,
-			responseEventName: resolvedInput.responseEventName,
+			modelAlias: resolvedInput.modelAlias,
 			codeWriterOptions: context.codeWriterOptions,
+			http: resolvedInput.http,
 		})
 
-		return createResult('add-agent', context.mode, mutationSnapshot)
+		return createResult('add-agent', context.mode, mutationSnapshot, [
+			...mutationSnapshot.warnings,
+			...(resolvedInput.http === 'none'
+				? []
+				: ['Configure the Hono server with setProtectMiddleware(...) before starting the generated HTTP endpoint.']),
+		])
 	},
 }

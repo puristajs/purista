@@ -1,0 +1,91 @@
+---
+title: Generate a service and command
+description: Use project-local CLI scripts, define a command contract, and register the generated service runtime.
+order: 20
+kind: lesson
+status: published
+---
+
+A PURISTA service owns a versioned capability. A command is a validated request
+for that service to perform one action. We will generate both artifacts before
+editing their placeholders.
+
+## Run the project-local CLI
+
+```bash title="Generate BankProfile and getProfile" replay="project"
+npm run add:service -- bank-profile --description "Provide the public Example Bank profile" --non-interactive
+npm run add:command -- get-profile --service bankProfile --service-version 1 \
+  --description "Describe the fictional bank" --non-interactive
+```
+
+The CLI creates `src/service/bankProfile/v1` and registers the new command in
+`bankProfileV1Service.ts`. Do not add the definition a second time.
+
+## Define the command contract
+
+```ts title="src/service/bankProfile/v1/command/getProfile/schema.ts" write
+import { z } from 'zod'
+
+export const bankProfileV1GetProfileInputPayloadSchema = z.undefined()
+export const bankProfileV1GetProfileInputParameterSchema = z.object({})
+export const bankProfileV1GetProfileOutputPayloadSchema = z.object({
+	name: z.string(),
+	currency: z.literal('EUR'),
+})
+```
+
+The command accepts no payload and no parameters. Its validated result has a
+name and the literal currency `EUR`. Runtime schemas protect the boundary where
+TypeScript types alone cannot inspect incoming or outgoing data.
+
+## Implement the handler
+
+```ts title="src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts" write
+import { bankProfileV1ServiceBuilder } from '../../bankProfileV1ServiceBuilder.js'
+import {
+	bankProfileV1GetProfileInputParameterSchema,
+	bankProfileV1GetProfileInputPayloadSchema,
+	bankProfileV1GetProfileOutputPayloadSchema,
+} from './schema.js'
+
+export const getProfileCommandBuilder = bankProfileV1ServiceBuilder
+	.getCommandBuilder('getProfile', 'Describe the fictional bank')
+	.addPayloadSchema(bankProfileV1GetProfileInputPayloadSchema)
+	.addParameterSchema(bankProfileV1GetProfileInputParameterSchema)
+	.addOutputSchema(bankProfileV1GetProfileOutputPayloadSchema)
+	.setCommandFunction(async function () {
+		return { name: 'Example Bank', currency: 'EUR' }
+	})
+```
+
+The builder defines the command boundary. The handler returns domain data. It
+does not know about HTTP, a route, or a response object.
+
+## Start the generated service
+
+```ts title="src/index.ts" write
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+
+async function main() {
+	const logger = initLogger()
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	await bankProfile.start()
+	gracefulShutdown(logger, [bankProfile, eventBridge])
+	logger.info('BankProfile service started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank could not start.\n')
+	process.exit(1)
+})
+```
+
+The composition root creates runtime instances. Builders describe contracts;
+`getInstance` supplies infrastructure; `start` registers the definitions with
+the EventBridge. Shutdown stops the service before its bridge.
+
+The generated command test still expects a placeholder result. Replace it on
+the next page before running the checkpoint.

@@ -1,0 +1,78 @@
+---
+title: Define the Transaction contracts
+description: Add schemas and injected resources for an authorized transaction lookup.
+order: 232
+kind: lesson
+status: published
+---
+
+The Transaction service owns transaction data and the rule that decides who
+may read it. Define small resource interfaces so production code and tests can
+provide different implementations.
+
+```ts title="src/service/transaction/v1/TransactionResources.ts" write
+import type { z } from 'zod'
+import type { getTransactionSummaryOutputSchema } from './command/getTransactionSummary/schema.js'
+
+export type StoredTransactionSummary = z.output<typeof getTransactionSummaryOutputSchema>
+
+export interface TransactionSummaryReader {
+	getById(transactionId: string): Promise<StoredTransactionSummary | undefined>
+}
+
+export interface AccountReadPolicy {
+	canRead(input: Readonly<{ tenantId: string; principalId: string; accountId: string }>): Promise<boolean>
+}
+```
+The command accepts one account and transaction id. Its output includes the
+trusted tenant so an after-guard can verify the returned record still belongs
+to the caller.
+
+```ts title="src/service/transaction/v1/command/getTransactionSummary/schema.ts" write
+import { z } from 'zod'
+
+export const getTransactionSummaryPayloadSchema = z.strictObject({
+	accountId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+	transactionId: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
+})
+
+export const getTransactionSummaryParameterSchema = z.strictObject({})
+
+export const getTransactionSummaryOutputSchema = z.strictObject({
+	transactionId: z.string(),
+	accountId: z.string(),
+	tenantId: z.string(),
+	status: z.enum(['pending', 'booked', 'rejected']),
+	amount: z.number(),
+	currency: z.string().length(3),
+})
+```
+Register the resources on the versioned service builder.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { AccountReadPolicy, TransactionSummaryReader } from './TransactionResources.js'
+
+export const transactionV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Transaction',
+	serviceVersion: '1',
+	serviceDescription: 'Owns transaction records and transaction business rules',
+})
+	.defineResource<'transactionSummaryReader', TransactionSummaryReader>()
+	.defineResource<'accountReadPolicy', AccountReadPolicy>()
+```
+These are business resources. The agent will reach them through a PURISTA
+command instead of reading a database directly.
+
+This tutorial infers types directly from the schemas where they are used, so
+remove the generated type-alias placeholder before continuing.
+
+```bash title="Remove the unused generated type aliases" replay="project"
+rm src/service/transaction/v1/command/getTransactionSummary/types.ts
+```
+
+```bash title="Check the Transaction payload schema" replay="project"
+node --import tsx --input-type=module -e "const { getTransactionSummaryPayloadSchema: schema } = await import('./src/service/transaction/v1/command/getTransactionSummary/schema.ts'); schema.parse({ accountId: 'account-operating', transactionId: 'tx-100' })"
+```
+
+Continue with [Build the guarded Transaction command](../bind-command/).

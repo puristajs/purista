@@ -1,0 +1,49 @@
+{
+	"root": true,
+	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"files": {
+		"includes": ["**", "!**/dist/**/*", "!**/public/**/*", "!**/node_modules/**/*", "!**/*.d.ts"]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": { "useArrowFunction": "off" },
+			"suspicious": { "noExplicitAny": "off" },
+			"style": { "useNodejsImportProtocol": "off" }
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 120,
+		"lineEnding": "lf"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded",
+			"trailingCommas": "all"
+		}
+	},
+	"json": {
+		"formatter": { "trailingCommas": "none" }
+	},
+	"css": {
+		"parser": { "tailwindDirectives": true }
+	},
+	"overrides": [
+		{
+			"includes": ["ui/src/components/ui/**/*.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"useKeyWithClickEvents": "off",
+						"useSemanticElements": "off"
+					}
+				}
+			}
+		}
+	]
+}

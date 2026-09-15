@@ -1,0 +1,146 @@
+---
+/** A high-level, provider-neutral default-loop guardrail lifecycle. */
+import {
+  guardrailsBuildGuarantee,
+  guardrailsOutputRailGuarantee,
+  guardrailsPhasesById,
+} from '../../data/guardrails-content.ts'
+
+const { input, output, retrieval, tool_input: toolInput, tool_output: toolOutput } = guardrailsPhasesById
+---
+
+<figure class="guardrails-architecture" aria-labelledby="guardrails-architecture-title">
+  <figcaption id="guardrails-architecture-title" class="sr-only">
+    Guardrails lifecycle for a default-loop Harness agent.
+  </figcaption>
+
+  <ol class="guardrails-architecture__path" aria-label="Protected default-loop path">
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--before">
+      <span class="guardrails-architecture__timing">Before a model call</span>
+      <strong>Typed input</strong>
+      <span>Schema and application authentication</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--control">
+      <span class="guardrails-architecture__timing">{input.diagramTiming}</span>
+      <strong>{input.label}</strong>
+      <span>{input.diagramDescription}</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--parallel">
+      <span class="guardrails-architecture__timing">{retrieval.diagramTiming}</span>
+      <strong>{retrieval.label}</strong>
+      <span>{retrieval.diagramDescription}</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--model">
+      <span class="guardrails-architecture__timing">Provider boundary</span>
+      <strong>Model call</strong>
+      <span>Provider adapter and normal model span</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--tool">
+      <span class="guardrails-architecture__timing">Only when requested</span>
+      <strong>Tool rails</strong>
+      <span>{toolInput.label} before execution; {toolOutput.label} before the model loop resumes</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--control">
+      <span class="guardrails-architecture__timing">{output.diagramTiming}</span>
+      <strong>{output.label}</strong>
+      <span>{output.diagramDescription}</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--after">
+      <span class="guardrails-architecture__timing">After the final result</span>
+      <strong>Validate and deliver</strong>
+      <span>Schema, persistence, event, or response</span>
+    </li>
+  </ol>
+
+  <div class="guardrails-architecture__evidence" aria-label="Evidence emitted at every guardrail boundary">
+    <span>Every rail decision</span>
+    <strong>Content-free GUARDRAIL span · metric · structured log</strong>
+    <span>{guardrailsOutputRailGuarantee} {guardrailsBuildGuarantee}</span>
+  </div>
+</figure>
+
+<style>
+  .guardrails-architecture {
+    border-block: 1px solid var(--color-line);
+    margin: 0;
+  }
+
+  .guardrails-architecture__path {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .guardrails-architecture__stage {
+    min-height: 11.5rem;
+    padding: 1.15rem;
+    border-inline-end: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .guardrails-architecture__stage:last-child { border-inline-end: 0; }
+
+  .guardrails-architecture__stage { position: relative; }
+  .guardrails-architecture__stage:not(:last-child)::after {
+    background: var(--color-bg);
+    color: var(--color-fg-muted);
+    content: '→';
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    inset-inline-end: -0.55rem;
+    inset-block-start: 50%;
+    line-height: 1;
+    padding: 0.2rem;
+    position: absolute;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .guardrails-architecture__timing {
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .guardrails-architecture__stage strong { font-size: 1rem; line-height: 1.25; }
+  .guardrails-architecture__stage > span:last-child { color: var(--color-fg-muted); font-size: 0.85rem; line-height: 1.45; }
+  .guardrails-architecture__stage--control { background: color-mix(in srgb, var(--color-con) 9%, transparent); }
+  .guardrails-architecture__stage--parallel { background: color-mix(in srgb, var(--color-found) 7%, transparent); }
+  .guardrails-architecture__stage--model { background: color-mix(in srgb, var(--color-pilot) 8%, transparent); }
+  .guardrails-architecture__stage--tool { background: color-mix(in srgb, var(--color-con) 5%, transparent); }
+
+  .guardrails-architecture__evidence {
+    align-items: center;
+    border-top: 1px solid var(--color-line);
+    display: grid;
+    gap: 0.75rem 1.5rem;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    padding: 1rem 1.15rem;
+  }
+
+  .guardrails-architecture__evidence > span { color: var(--color-fg-muted); font-size: 0.84rem; line-height: 1.45; }
+  .guardrails-architecture__evidence > strong { color: var(--color-found-hi); font-family: var(--font-mono); font-size: 0.76rem; grid-column: 2; grid-row: 1; line-height: 1.5; }
+  .guardrails-architecture__evidence > span:last-child { grid-column: 2; }
+
+  @media (max-width: 1050px) {
+    .guardrails-architecture__path { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .guardrails-architecture__stage:nth-child(4) { border-inline-end: 0; }
+    .guardrails-architecture__stage:nth-child(4)::after { display: none; }
+  }
+
+  @media (max-width: 680px) {
+    .guardrails-architecture__path { grid-template-columns: 1fr; }
+    .guardrails-architecture__stage, .guardrails-architecture__stage:nth-child(4) { border-block-end: 1px solid var(--color-line); border-inline-end: 0; min-height: auto; }
+    .guardrails-architecture__stage:not(:last-child)::after { content: '↓'; inset-block: auto -0.7rem; inset-inline: 50%; transform: translateX(-50%); }
+    .guardrails-architecture__stage:last-child { border-block-end: 0; }
+    .guardrails-architecture__evidence { grid-template-columns: 1fr; }
+    .guardrails-architecture__evidence > strong, .guardrails-architecture__evidence > span:last-child { grid-column: auto; grid-row: auto; }
+  }
+</style>

@@ -1,0 +1,161 @@
+---
+title: Test the small classification boundaries
+description: Test the native agent and PURISTA command without starting the complete service.
+order: 187
+kind: lesson
+status: published
+---
+
+Test the two smallest boundaries first. The native test validates the model's
+structured output. The command test checks authorization and the declared
+address. Both use public deterministic helpers and need no credentials.
+
+```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { classifySupportMessageAgent } from './classifySupportMessageAgent.js'
+
+describe('classifySupportMessageAgent', () => {
+	it('runs the classification agent without PURISTA infrastructure', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{
+					category: 'account_access',
+					urgency: 'urgent',
+					reason: 'The customer is locked out before payroll closes.',
+				},
+				{ usage: { inputTokens: 12, outputTokens: 9, totalTokens: 21 }, finishReason: 'stop' },
+			),
+		)
+		const runtime = await defineHarness({ name: 'classificationTest' })
+			.addAgent(classifySupportMessageAgent)
+			.getInstance({ models: { classification: { provider, model: 'fake-classifier' } } })
+
+		try {
+			const session = await runtime.getSession('support-message:MSG-123')
+			try {
+				const outcome = await session.agents.classifySupportMessage.run({
+					messageId: 'MSG-123',
+					text: 'I cannot sign in and payroll closes in one hour.',
+				})
+
+				expect(outcome.status).toBe('completed')
+				expect(outcome.output).toEqual({
+					category: 'account_access',
+					urgency: 'urgent',
+					reason: 'The customer is locked out before payroll closes.',
+				})
+				const request = provider.requests[0]
+				expect(request && 'messages' in request ? request.messages.at(-1) : undefined).toEqual({
+					role: 'user',
+					content: 'Message MSG-123: I cannot sign in and payroll closes in one hour.',
+				})
+				provider.assertExhausted()
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+		}
+	})
+})
+```
+The native test borrows a session and releases it in a nested `finally`
+before closing the runtime. It also verifies the prompt that reached the fake
+provider.
+
+```ts title="src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { classifySupportMessageAgent } from '../../harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { runClassifySupportMessageCommandBuilder } from './runClassifySupportMessageCommandBuilder.js'
+
+const sandbox = createSandbox()
+
+afterEach(() => sandbox.restore())
+
+describe('runClassifySupportMessageCommandBuilder', () => {
+	it('invokes the mounted agent through its declared address', async () => {
+		const payload = {
+			messageId: 'MSG-123',
+			text: 'I cannot sign in and payroll closes in one hour.',
+		}
+		const supportClassificationPolicy = { canClassify: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(runClassifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const expected = {
+			category: 'account_access' as const,
+			urgency: 'urgent' as const,
+			reason: 'The customer is locked out before payroll closes.',
+		}
+		stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.resolves({
+			sessionId: 'support-session',
+			outcome: {
+				status: 'completed',
+				runId: 'run-1',
+				output: expected,
+			},
+		})
+
+		await expect(
+			runClassifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(expected)
+		expect(
+			stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.calledOnceWith(payload, {
+				sessionId: supportClassificationSessionId(context.message, payload.messageId),
+			}),
+		).toBe(true)
+		expect(
+			supportClassificationPolicy.canClassify.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				messageId: 'MSG-123',
+			}),
+		).toBe(true)
+	})
+
+	it('propagates a mounted agent failure', async () => {
+		const payload = { messageId: 'MSG-124', text: 'Please check my card.' }
+		const { context, stubs } = createCommandContextMock(runClassifySupportMessageCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportClassificationPolicy: { canClassify: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		stubs.agent.Support['1'][classifySupportMessageAgent.contract.id].run.rejects(
+			new Error('The model provider is unavailable.'),
+		)
+
+		await expect(
+			runClassifySupportMessageCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('The model provider is unavailable.')
+	})
+})
+```
+`createCommandContextMock` reads the address declared by
+`canInvokeAgent(...)` and creates the typed invocation stub. The failure case
+proves provider errors are not changed into successful command results.
+
+```bash title="Run the focused classification tests" replay="project"
+npm test -- src/service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.test.ts src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.test.ts
+```
+
+Continue with [Test the complete EventBridge route](../test-eventbridge/).

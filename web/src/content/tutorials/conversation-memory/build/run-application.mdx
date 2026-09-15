@@ -1,0 +1,129 @@
+---
+title: Run the conversation application
+description: Try a credential-free demo, then run the service with OpenAI and SQLite-backed history.
+order: 226
+kind: lesson
+status: published
+---
+
+The deterministic demo uses an in-memory storage adapter and fake model.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { inMemoryHarnessStorage } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+
+const provider = new FakeModelProvider({ strict: true })
+const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
+provider.enqueueObject(
+	objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+)
+provider.enqueueObject(
+	objectReply(
+		{ answer: 'Yes. The same transfer is still inside that two-day window.' },
+		{ usage, finishReason: 'stop' },
+	),
+)
+
+const eventBridge = new DefaultEventBridge({ logger: initLogger('error') })
+await eventBridge.start()
+const storage = inMemoryHarnessStorage()
+const support = await createSupportService(eventBridge, initLogger('error'), {
+	policy: { canAccess: async () => true },
+	answeringModel: { provider, model: 'fake-support' },
+	storage,
+})
+await support.start()
+
+const identity = { tenantId: 'tenant-example', principalId: 'principal-alex' }
+const invoke = (serviceTarget: string, payload: unknown) =>
+	eventBridge.invoke(
+		getCommandMessageMock({
+			...identity,
+			receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget },
+			payload: { payload, parameter: {} },
+		}),
+	)
+
+try {
+	const first = await invoke('continueSupportConversation', {
+		conversationId: 'case-demo',
+		question: 'How long can a transfer remain pending?',
+	})
+	const second = await invoke('continueSupportConversation', {
+		conversationId: 'case-demo',
+		question: 'Is the same transfer still inside that window?',
+	})
+	const history = await invoke('getConversationHistory', { conversationId: 'case-demo' })
+
+	process.stdout.write(`${JSON.stringify({ first, second, history }, null, 2)}\n`)
+	provider.assertExhausted()
+} finally {
+	await support.destroy()
+	await eventBridge.destroy()
+	await storage.close()
+}
+```
+```bash title="Run the credential-free demo" replay="project"
+npm run demo
+```
+
+For the live process, keep provider and storage configuration in environment
+variables.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+HARNESS_STORAGE_FILE=conversation-history.sqlite
+```
+The live entry point shares one SQLite storage instance between the service and
+history resource. Shutdown stops the service and EventBridge before closing the
+storage adapter.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the live conversation-history example.')
+	const storage = sqliteHarnessStorage({
+		file: process.env.HARNESS_STORAGE_FILE?.trim() || 'conversation-history.sqlite',
+	})
+	const support = await createSupportService(eventBridge, logger, {
+		policy: {
+			canAccess: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		answeringModel: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+		storage,
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge, { name: 'Harness SQLite storage', destroy: () => storage.close() }])
+	logger.info('Support conversation service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Conversation service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the live service" replay="project"
+cp .env.example .env
+# Put your own OPENAI_API_KEY in .env, then run:
+npm start
+```
+
+The SQLite file keeps transcripts across process restarts. Harness storage also
+owns run receipts, checkpoints, and waits; PURISTA StateStore still owns normal
+application state rather than transcripts.
+
+Continue with [Test native conversation history](../../testing/test-history/).

@@ -1,0 +1,198 @@
+---
+title: Test the agents and parallel workflow
+description: Verify each portable agent and prove the workflow starts both model calls concurrently.
+order: 268
+kind: lesson
+status: published
+---
+
+Test each direct agent with only its own definition and named model. Each test borrows a session, checks the structured result, then releases the session before closing the runtime.
+
+```ts title="src/service/support/v1/harness/agent/assessSupportRisk/assessSupportRiskAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { assessSupportRiskAgent } from './assessSupportRiskAgent.js'
+
+describe('assessSupportRiskAgent', () => {
+	it('runs as a portable agent with the named risk model', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{ level: 'high', evidence: ['The customer reports a missing card.'] },
+				{ usage: { inputTokens: 4, outputTokens: 3, totalTokens: 7 }, finishReason: 'stop' },
+			),
+		)
+		const runtime = await defineHarness({ name: 'riskAgentTest' })
+			.addAgent(assessSupportRiskAgent)
+			.getInstance({ models: { riskAssessment: { provider, model: 'risk-fake' } } })
+		const session = await runtime.getSession('risk-case-1')
+
+		try {
+			const outcome = await session.agents.assessSupportRisk.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+			})
+			expect(outcome.status).toBe('completed')
+			expect(outcome.output).toEqual({
+				level: 'high',
+				evidence: ['The customer reports a missing card.'],
+			})
+			expect(provider.requests).toHaveLength(1)
+			provider.assertExhausted()
+		} finally {
+			await session.release()
+			await runtime.close()
+		}
+	})
+})
+```
+```ts title="src/service/support/v1/harness/agent/planSupportResponse/planSupportResponseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResponseAgent } from './planSupportResponseAgent.js'
+
+describe('planSupportResponseAgent', () => {
+	it('runs as a portable agent with the named response model', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{ customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+				{ usage: { inputTokens: 4, outputTokens: 3, totalTokens: 7 }, finishReason: 'stop' },
+			),
+		)
+		const runtime = await defineHarness({ name: 'responseAgentTest' })
+			.addAgent(planSupportResponseAgent)
+			.getInstance({ models: { responsePlanning: { provider, model: 'response-fake' } } })
+		const session = await runtime.getSession('response-case-1')
+
+		try {
+			const outcome = await session.agents.planSupportResponse.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+			})
+			expect(outcome.status).toBe('completed')
+			expect(outcome.output).toEqual({
+				customerReply: 'We can help secure the card.',
+				nextAction: 'freeze_card',
+			})
+			expect(provider.requests).toHaveLength(1)
+			provider.assertExhausted()
+		} finally {
+			await session.release()
+			await runtime.close()
+		}
+	})
+})
+```
+The workflow test uses a small barrier. Both providers must start before either can complete, which proves real concurrency rather than inspecting configuration. It deliberately lets the response finish first and still expects the merged result in risk-then-response order.
+
+```ts title="src/service/support/v1/harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.test.ts" write
+import { defineHarness, type JsonValue, type ObjectRequest, type ObjectResponse } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { analyzeSupportCaseWorkflow } from './analyzeSupportCaseWorkflow.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+class CoordinatedFakeModelProvider extends FakeModelProvider {
+	public constructor(
+		private readonly beforeObject: () => Promise<void>,
+		private readonly afterObject: () => void,
+	) {
+		super({ strict: true })
+	}
+
+	public override async object<T extends JsonValue = JsonValue>(request: ObjectRequest<T>): Promise<ObjectResponse<T>> {
+		await this.beforeObject()
+		const response = await super.object(request)
+		this.afterObject()
+		return response
+	}
+}
+
+describe('analyzeSupportCaseWorkflow', () => {
+	it('runs both specialists within the declared budget and merges their results', async () => {
+		let starts = 0
+		let releaseBoth: () => void = () => {}
+		let releaseRisk: () => void = () => {}
+		const bothStarted = new Promise<void>((resolve) => {
+			releaseBoth = resolve
+		})
+		const riskMayFinish = new Promise<void>((resolve) => {
+			releaseRisk = resolve
+		})
+		const reachBarrier = async () => {
+			starts += 1
+			if (starts === 2) releaseBoth()
+			await Promise.race([
+				bothStarted,
+				new Promise<void>((_resolve, reject) => {
+					setTimeout(() => reject(new Error('Specialists did not start concurrently.')), 500)
+				}),
+			])
+		}
+		const completionOrder: string[] = []
+		const riskProvider = new CoordinatedFakeModelProvider(
+			async () => {
+				await reachBarrier()
+				await riskMayFinish
+			},
+			() => completionOrder.push('risk'),
+		)
+		const responseProvider = new CoordinatedFakeModelProvider(reachBarrier, () => {
+			completionOrder.push('response')
+			releaseRisk()
+		})
+		riskProvider.enqueueObject(
+			objectReply(
+				{ level: 'high', evidence: ['The customer reports a missing card.'] },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		responseProvider.enqueueObject(
+			objectReply(
+				{ customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		const runtime = await defineHarness({ name: 'parallelWorkflowTest' })
+			.addWorkflow(analyzeSupportCaseWorkflow)
+			.getInstance({
+				models: {
+					riskAssessment: { provider: riskProvider, model: 'risk-fake' },
+					responsePlanning: { provider: responseProvider, model: 'response-fake' },
+				},
+			})
+		const session = await runtime.getSession('parallel-case-1')
+
+		try {
+			const outcome = await session.workflows.analyzeSupportCase.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+			})
+			expect(outcome.status).toBe('completed')
+			expect(outcome.output).toEqual({
+				caseId: 'case-1',
+				risk: { level: 'high', evidence: ['The customer reports a missing card.'] },
+				response: { customerReply: 'We can help secure the card.', nextAction: 'freeze_card' },
+			})
+			expect(starts).toBe(2)
+			expect(completionOrder).toEqual(['response', 'risk'])
+			expect(riskProvider.requests).toHaveLength(1)
+			expect(responseProvider.requests).toHaveLength(1)
+			riskProvider.assertExhausted()
+			responseProvider.assertExhausted()
+		} finally {
+			await session.release()
+			await runtime.close()
+		}
+	})
+})
+```
+```bash title="Run the portable Harness tests" replay="project"
+npm test -- src/service/support/v1/harness
+```
+
+Continue with [Test command and EventBridge routing](../test-routing/).

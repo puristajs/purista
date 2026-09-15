@@ -47,6 +47,14 @@ export class PendingInvocationRegistry<T = unknown> {
 
 	/** Register one invocation and reject it automatically after `timeoutMs`. */
 	register(correlationId: string, timeoutMs: number, traceId: string | undefined) {
+		if (this.pending.has(correlationId)) {
+			throw new UnhandledError(
+				StatusCode.Conflict,
+				'An invocation with the same correlation id is already pending.',
+				undefined,
+				traceId,
+			)
+		}
 		return new Promise<T>((resolve, reject) => {
 			const timeout = setTimeout(() => {
 				const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, traceId)

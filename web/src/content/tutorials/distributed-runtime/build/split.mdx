@@ -1,0 +1,403 @@
+---
+title: Split service processes
+description: Generate one small queue and create independent PURISTA composition roots for Transaction, Monitoring, and Reporting.
+order: 291
+kind: lesson
+status: published
+---
+
+Start from the completed [observability chapter](/tutorials/observability/).
+`Transaction` and `Monitoring` already have narrow ownership. Do not create a
+new application-wide service. Add `Reporting` only because it owns the queue
+contract and worker used to teach the QueueBridge boundary.
+
+## Generate the Reporting queue
+
+Use the project-local PURISTA CLI to create the service.
+
+```bash title="Generate the Reporting service" replay="project"
+npm run add:service -- reporting \
+  --description "Create operational transaction snapshots" --non-interactive
+```
+
+Generate the queue, its worker, and a producer command together.
+
+```bash title="Generate the queue, worker, and producer" replay="project"
+npm run add:queue -- generate-snapshot \
+  --service reporting --service-version 1 \
+  --description "Generate one transaction snapshot" \
+  --worker-name generate-snapshot-worker \
+  --worker-description "Build one transaction snapshot" \
+  --worker-mode continuous --max-parallel-handlers 1 \
+  --with-producer \
+  --producer-command-name request-snapshot \
+  --producer-command-description "Request one transaction snapshot" \
+  --non-interactive
+```
+
+The generated artifacts belong to `Reporting`. They do not turn Reporting into
+an HTTP server or give it access to the Transaction database.
+
+## Define the queue contract
+
+The queue carries only the transaction identifier required by the example.
+
+```ts title="src/service/reporting/v1/queue/generateSnapshot/schema.ts" write
+import { z } from 'zod'
+
+export const reportingV1GenerateSnapshotQueuePayloadSchema = z.strictObject({
+	transactionId: z.uuid(),
+})
+
+export const reportingV1GenerateSnapshotQueueParameterSchema = z.object({})
+```
+
+Request FIFO delivery and a prefetch of one. PURISTA checks these hints against
+the selected QueueBridge when the service starts.
+
+```ts title="src/service/reporting/v1/queue/generateSnapshot/generateSnapshotQueueBuilder.ts" write
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import {
+	reportingV1GenerateSnapshotQueueParameterSchema,
+	reportingV1GenerateSnapshotQueuePayloadSchema,
+} from './schema.js'
+
+export const generateSnapshotQueueBuilder = reportingV1ServiceBuilder
+	.getQueueBuilder('generateSnapshot', 'Generate one transaction snapshot')
+	.addPayloadSchema(reportingV1GenerateSnapshotQueuePayloadSchema)
+	.addParameterSchema(reportingV1GenerateSnapshotQueueParameterSchema)
+	.setLifecycleConfig({ maxAttempts: 3 })
+	.setQueueBridgeConfig({ orderingGuarantee: 'fifo', prefetch: 1 })
+	.setResultPolicy({ mode: 'state', delivery: 'required', ttlMs: 15 * 60 * 1000 })
+```
+
+The worker produces a small operational result. It does not read SQLite and it
+does not copy a transaction record into StateStore.
+
+```ts title="src/service/reporting/v1/queue-worker/generateSnapshotWorker/generateSnapshotWorkerQueueWorkerBuilder.ts" write
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import { reportingV1GenerateSnapshotQueuePayloadSchema } from '../../queue/generateSnapshot/schema.js'
+
+export const generateSnapshotWorkerQueueWorkerBuilder = reportingV1ServiceBuilder
+	.getQueueWorkerBuilder('generateSnapshot', 'Build one transaction snapshot')
+	.setMode('continuous')
+	.setMaxParallelHandlers(1)
+	.setHandler(async function (_context, message) {
+		const payload = reportingV1GenerateSnapshotQueuePayloadSchema.parse(message.payload)
+		return {
+			status: 'success' as const,
+			output: {
+				transactionId: payload.transactionId,
+				result: 'snapshot-ready' as const,
+				generatedAt: new Date().toISOString(),
+			},
+		}
+	})
+```
+
+## Use the generated producer command
+
+The command returns a queue receipt. Repeating the same transaction request
+uses the same idempotency key. Whether that key is enforced depends on the
+QueueBridge capability selected later.
+
+```ts title="src/service/reporting/v1/command/requestSnapshot/schema.ts" write
+import { z } from 'zod'
+
+export const reportingV1RequestSnapshotInputParameterSchema = z.object({})
+export const reportingV1RequestSnapshotInputPayloadSchema = z.strictObject({
+	transactionId: z.uuid(),
+})
+export const reportingV1RequestSnapshotOutputPayloadSchema = z.strictObject({
+	jobId: z.string().min(1),
+	queueName: z.string().min(1),
+	scheduledAt: z.number().int().nonnegative().optional(),
+})
+```
+
+```ts title="src/service/reporting/v1/command/requestSnapshot/requestSnapshotCommandBuilder.ts" write
+import {
+	reportingV1GenerateSnapshotQueueParameterSchema,
+	reportingV1GenerateSnapshotQueuePayloadSchema,
+} from '../../queue/generateSnapshot/schema.js'
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import {
+	reportingV1RequestSnapshotInputParameterSchema,
+	reportingV1RequestSnapshotInputPayloadSchema,
+	reportingV1RequestSnapshotOutputPayloadSchema,
+} from './schema.js'
+
+export const requestSnapshotCommandBuilder = reportingV1ServiceBuilder
+	.getCommandBuilder('requestSnapshot', 'Request one transaction snapshot')
+	.addPayloadSchema(reportingV1RequestSnapshotInputPayloadSchema)
+	.addParameterSchema(reportingV1RequestSnapshotInputParameterSchema)
+	.addOutputSchema(reportingV1RequestSnapshotOutputPayloadSchema)
+	.canEnqueue(
+		'generateSnapshot',
+		reportingV1GenerateSnapshotQueuePayloadSchema,
+		reportingV1GenerateSnapshotQueueParameterSchema,
+	)
+	.setCommandFunction(async function (context, payload) {
+		return context.queue.enqueue.generateSnapshot(payload, {}, {
+			idempotencyKey: `snapshot-${payload.transactionId}`,
+		})
+	})
+```
+
+Replace the generated worker test with a typed lease. A required state result
+is written before PURISTA acknowledges the job.
+
+```ts title="src/service/reporting/v1/queue-worker/generateSnapshotWorker/generateSnapshotWorkerQueueWorkerBuilder.test.ts" write
+import { createQueueWorkerTestHarness } from '@purista/core'
+import { expect, test, vi } from 'vitest'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { generateSnapshotWorkerQueueWorkerBuilder } from './generateSnapshotWorkerQueueWorkerBuilder.js'
+
+test('stores the typed snapshot result and acknowledges the lease', async () => {
+	const transactionId = '3bd00f72-8db0-4f39-875d-fd5e251a7f32'
+	const set = vi.fn().mockResolvedValue(undefined)
+	const harness = await createQueueWorkerTestHarness(
+		reportingV1Service,
+		generateSnapshotWorkerQueueWorkerBuilder,
+		{ queueJobStore: { get: vi.fn(), set } },
+	)
+	try {
+		const result = await harness.run({
+			id: 'job-1', queueName: 'generateSnapshot',
+			payload: { transactionId }, parameter: {}, headers: {},
+			createdAt: Date.now(), attempt: 1, maxAttempts: 3,
+			leaseExpiresAt: Date.now() + 60_000, leaseTtlMs: 60_000,
+		})
+		expect(result.ackCalls).toHaveLength(1)
+		expect(set).toHaveBeenCalledWith(expect.objectContaining({
+			status: 'success',
+			result: expect.objectContaining({ transactionId, result: 'snapshot-ready' }),
+		}), 15 * 60 * 1000)
+	} finally {
+		await harness.destroy()
+	}
+})
+```
+
+Replace the generated producer test with the typed command contract.
+
+```ts title="src/service/reporting/v1/command/requestSnapshot/requestSnapshotCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { requestSnapshotCommandBuilder } from './requestSnapshotCommandBuilder.js'
+
+test('returns the QueueBridge receipt for a typed snapshot request', async () => {
+	const sandbox = createSandbox()
+	const transactionId = '3bd00f72-8db0-4f39-875d-fd5e251a7f32'
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const mocked = createCommandContextMock(requestSnapshotCommandBuilder, {
+			payload: { transactionId }, parameter: {}, sandbox,
+		})
+		mocked.stubs.enqueue.resolves({
+			jobId: 'job-1', queueName: 'generateSnapshot', scheduledAt: 1,
+		})
+		const command = safeBind(requestSnapshotCommandBuilder.getCommandFunction(), service)
+		await expect(command(mocked.context, { transactionId }, {})).resolves.toEqual({
+			jobId: 'job-1', queueName: 'generateSnapshot', scheduledAt: 1,
+		})
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+Test the builder contract and the mediated enqueue call with PURISTA mocks.
+
+```ts title="src/service/reporting/v1/distributedQueueContract.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { requestSnapshotCommandBuilder } from './command/requestSnapshot/requestSnapshotCommandBuilder.js'
+import { generateSnapshotQueueBuilder } from './queue/generateSnapshot/generateSnapshotQueueBuilder.js'
+import { reportingV1Service } from './reportingV1Service.js'
+
+const transactionId = '3bd00f72-8db0-4f39-875d-fd5e251a7f32'
+
+test('requests FIFO delivery from the selected queue bridge', async () => {
+	const definition = await generateSnapshotQueueBuilder.getDefinition()
+	expect(definition.queueBridgeConfig).toEqual({ orderingGuarantee: 'fifo', prefetch: 1 })
+})
+
+test('passes a stable idempotency key through the PURISTA queue context', async () => {
+	const sandbox = createSandbox()
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const mocked = createCommandContextMock(requestSnapshotCommandBuilder, {
+			payload: { transactionId }, parameter: {}, sandbox,
+		})
+		mocked.stubs.enqueue.resolves({
+			jobId: 'job-1', queueName: 'generateSnapshot', scheduledAt: 1,
+		})
+		const command = safeBind(requestSnapshotCommandBuilder.getCommandFunction(), service)
+		await command(mocked.context, { transactionId }, {})
+		expect(mocked.stubs.enqueue.calledOnceWith(
+			'generateSnapshot', { transactionId }, {},
+			sandbox.match({ idempotencyKey: `snapshot-${transactionId}` }),
+		)).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+## Create independent composition roots
+
+A process root receives its adapters. The service remains unaware of whether
+those adapters are in memory or connected to a broker.
+
+```ts title="src/runtime/ProcessRuntime.ts" write
+import type { EventBridge, Service } from '@purista/core'
+
+export interface Destroyable {
+	destroy(): Promise<void>
+}
+
+export interface ProcessRuntime extends Destroyable {
+	role: 'transaction' | 'monitoring' | 'reporting'
+	service: Service
+	eventBridge: EventBridge
+}
+
+export async function destroyInOrder(resources: Destroyable[]) {
+	for (const resource of resources) await resource.destroy()
+}
+```
+
+`Transaction` owns its SQLite repository and closes it after the service stops.
+
+```ts title="src/runtime/startTransactionProcess.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import { SqliteTransactionRepository } from '../resources/SqliteTransactionRepository.js'
+import { transactionV1Service } from '../service/transaction/v1/transactionV1Service.js'
+import { destroyInOrder, type ProcessRuntime } from './ProcessRuntime.js'
+
+export async function startTransactionProcess(
+	logger: Logger,
+	eventBridge: EventBridge,
+	repository = new SqliteTransactionRepository(':memory:'),
+): Promise<ProcessRuntime> {
+	const service = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository: repository },
+	})
+	await service.start()
+	return {
+		role: 'transaction', service, eventBridge,
+		destroy: () => destroyInOrder([service, repository, eventBridge]),
+	}
+}
+```
+
+`Monitoring` receives StateStore because its signal is operational state. The
+service definition is injectable so the distributed profile can request a
+durable subscription without changing the default test profile.
+
+```ts title="src/runtime/startMonitoringProcess.ts" write
+import type { EventBridge, Logger, StateStore } from '@purista/core'
+import { monitoringV1Service } from '../service/monitoring/v1/monitoringV1Service.js'
+import { destroyInOrder, type ProcessRuntime } from './ProcessRuntime.js'
+
+export async function startMonitoringProcess(
+	logger: Logger,
+	eventBridge: EventBridge,
+	stateStore: StateStore,
+	serviceDefinition: typeof monitoringV1Service = monitoringV1Service,
+): Promise<ProcessRuntime> {
+	const service = await serviceDefinition.getInstance(eventBridge, { logger, stateStore })
+	await service.start()
+	return {
+		role: 'monitoring', service, eventBridge,
+		destroy: () => destroyInOrder([service, stateStore, eventBridge]),
+	}
+}
+```
+
+`Reporting` receives QueueBridge and QueueJobStore. The service owns the queue
+worker lifecycle; the application owns the store adapter.
+
+```ts title="src/runtime/startReportingProcess.ts" write
+import type { EventBridge, Logger, QueueBridge, QueueJobStore, StateStore } from '@purista/core'
+import { reportingV1Service } from '../service/reporting/v1/reportingV1Service.js'
+import { destroyInOrder, type ProcessRuntime } from './ProcessRuntime.js'
+
+export async function startReportingProcess(
+	logger: Logger,
+	eventBridge: EventBridge,
+	queueBridge: QueueBridge,
+	stateStore: StateStore,
+	queueJobStore: QueueJobStore,
+): Promise<ProcessRuntime> {
+	const service = await reportingV1Service.getInstance(eventBridge, {
+		logger, queueBridge, stateStore, queueJobStore,
+	})
+	await service.start()
+	return {
+		role: 'reporting', service, eventBridge,
+		destroy: () => destroyInOrder([service, stateStore, eventBridge]),
+	}
+}
+```
+
+The focused composition test keeps default adapters. Each service receives a
+different EventBridge instance, so no composition root imports another running
+service.
+
+```ts title="src/runtime/processes.test.ts" write
+import {
+	DefaultEventBridge,
+	DefaultQueueBridge,
+	createStateStoreQueueJobStore,
+	initDefaultStateStore,
+	initLogger,
+} from '@purista/core'
+import { expect, test } from 'vitest'
+import { SqliteTransactionRepository } from '../resources/SqliteTransactionRepository.js'
+import { startMonitoringProcess } from './startMonitoringProcess.js'
+import { startReportingProcess } from './startReportingProcess.js'
+import { startTransactionProcess } from './startTransactionProcess.js'
+
+test('starts three independently composed service runtimes with default adapters', async () => {
+	const logger = initLogger('fatal')
+	const bridges = [0, 1, 2].map(() => new DefaultEventBridge({ logger }))
+	await Promise.all(bridges.map(bridge => bridge.start()))
+	const monitoringState = initDefaultStateStore({ logger })
+	const reportingState = initDefaultStateStore({ logger })
+	const runtimes = await Promise.all([
+		startTransactionProcess(logger, bridges[0], new SqliteTransactionRepository(':memory:')),
+		startMonitoringProcess(logger, bridges[1], monitoringState),
+		startReportingProcess(
+			logger, bridges[2], new DefaultQueueBridge(), reportingState,
+			createStateStoreQueueJobStore(reportingState, 'example-bank:reporting-job'),
+		),
+	])
+	try {
+		expect(runtimes.map(runtime => runtime.role)).toEqual(['transaction', 'monitoring', 'reporting'])
+		expect(runtimes.every(runtime => runtime.service.isStarted)).toBe(true)
+		expect(new Set(runtimes.map(runtime => runtime.eventBridge.instanceId)).size).toBe(3)
+	} finally {
+		for (const runtime of runtimes.reverse()) await runtime.destroy()
+	}
+})
+```
+
+```bash title="Test the queue and independent composition roots" replay="project"
+npx vitest run src/service/reporting/v1/distributedQueueContract.test.ts src/runtime/processes.test.ts
+npm run build
+```
+
+The default application and its existing tests still use the in-memory
+adapters. Next we add an explicit distributed profile.

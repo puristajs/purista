@@ -1,0 +1,312 @@
+---
+title: Wire OpenTelemetry
+description: Create exporters at the composition root and pass their processor and Meter to every PURISTA component.
+order: 162
+kind: lesson
+status: published
+---
+
+Metric declarations describe what a service may record. They do not choose
+where telemetry goes. The application owns that decision because exporter
+endpoints, credentials, TLS, sampling, and shutdown belong to deployment.
+
+Install the OpenTelemetry packages used directly by this application. Keep the
+versions fixed so the retained tutorial project remains reproducible.
+
+```bash title="Install the OpenTelemetry SDK and OTLP exporters" replay="project"
+npm install --save-exact \
+  @opentelemetry/api@1.9.0 \
+  @opentelemetry/exporter-metrics-otlp-http@0.221.0 \
+  @opentelemetry/exporter-trace-otlp-http@0.221.0 \
+  @opentelemetry/sdk-metrics@2.10.0 \
+  @opentelemetry/sdk-trace-node@2.10.0
+```
+
+## Define the application telemetry contract
+
+Services only need a `SpanProcessor` and a `Meter`. They do not need to know
+which exporter created them.
+
+```ts title="src/observability/ApplicationTelemetry.ts" write
+import type { Meter } from '@opentelemetry/api'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+
+export interface ApplicationTelemetry {
+	spanProcessor: SpanProcessor
+	meter: Meter
+}
+```
+
+Create an OTLP/HTTP implementation. OTLP is the OpenTelemetry Protocol. It lets
+the application send telemetry to a Collector without depending on the
+Collector's final storage backend.
+
+```ts title="src/observability/createOtlpTelemetry.ts" write
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { ApplicationTelemetry } from './ApplicationTelemetry.js'
+
+export interface ManagedTelemetry extends ApplicationTelemetry {
+	name: string
+	forceFlush(): Promise<void>
+	destroy(): Promise<void>
+}
+
+export function createOtlpTelemetry(baseUrl: string): ManagedTelemetry {
+	const endpoint = baseUrl.replace(/\/$/, '')
+	const spanProcessor = new SimpleSpanProcessor(new OTLPTraceExporter({
+		url: `${endpoint}/v1/traces`,
+	}))
+	const meterProvider = new MeterProvider({
+		readers: [new PeriodicExportingMetricReader({
+			exporter: new OTLPMetricExporter({ url: `${endpoint}/v1/metrics` }),
+			exportIntervalMillis: 5_000,
+		})],
+	})
+
+	return {
+		name: 'OpenTelemetry exporters',
+		spanProcessor,
+		meter: meterProvider.getMeter('example-bank'),
+		forceFlush: async () => {
+			await spanProcessor.forceFlush()
+			await meterProvider.forceFlush()
+		},
+		destroy: async () => {
+			await spanProcessor.shutdown()
+			await meterProvider.shutdown()
+		},
+	}
+}
+
+export function createTelemetryFromEnvironment(): ManagedTelemetry | undefined {
+	const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+	return endpoint ? createOtlpTelemetry(endpoint) : undefined
+}
+```
+
+`SimpleSpanProcessor` exports each completed span and keeps this short-lived
+example predictable. A production process normally uses
+`BatchSpanProcessor`. The application starts without an exporter when the
+environment variable is absent, so the basic tutorial does not require Docker.
+
+## Pass telemetry to EventBridge and services
+
+Update the EventBridge factory first.
+
+```ts title="src/eventbridge.ts" write
+import { DefaultEventBridge, type Logger } from '@purista/core'
+import type { ApplicationTelemetry } from './observability/ApplicationTelemetry.js'
+
+export const getEventBridge = async (logger: Logger, telemetry?: ApplicationTelemetry) => {
+	const eventBridge = new DefaultEventBridge({
+		logger,
+		spanProcessor: telemetry?.spanProcessor,
+		metrics: telemetry ? { meter: telemetry.meter } : undefined,
+	})
+	await eventBridge.start()
+	return eventBridge
+}
+```
+
+EventBridge is a separately constructed PURISTA component. Giving telemetry to
+a business service does not instrument the bridge, so pass the same
+application-owned surfaces to both.
+
+```ts title="src/application.ts" write
+import { initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import type { ApplicationTelemetry } from './observability/ApplicationTelemetry.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { monitoringV1Service } from './service/monitoring/v1/monitoringV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository = new SqliteTransactionRepository(':memory:'),
+	monitoringStateStore: StateStore = initDefaultStateStore({ logger }),
+	telemetry?: ApplicationTelemetry,
+) {
+	const eventBridge = await getEventBridge(logger, telemetry)
+	const telemetryOptions = telemetry ? {
+		spanProcessor: telemetry.spanProcessor,
+		metrics: { meter: telemetry.meter },
+	} : {}
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+		...telemetryOptions,
+	})
+	const monitoring = await monitoringV1Service.getInstance(eventBridge, {
+		logger,
+		stateStore: monitoringStateStore,
+		...telemetryOptions,
+	})
+
+	await transaction.start()
+	await monitoring.start()
+
+	return {
+		eventBridge,
+		transaction,
+		transactionRepository,
+		monitoring,
+		monitoringStateStore,
+	}
+}
+```
+
+Wire the optional exporter before creating the application. Put it last in the
+shutdown list so services and EventBridge can finish their final spans first.
+
+```ts title="src/index.ts" write
+import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { createApplication } from './application.js'
+import { createTelemetryFromEnvironment } from './observability/createOtlpTelemetry.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+async function main() {
+	const logger = initLogger()
+	const telemetry = createTelemetryFromEnvironment()
+	const transactionRepository = new SqliteTransactionRepository('var/example-bank.sqlite')
+	const monitoringStateStore = initDefaultStateStore({ logger })
+	const app = await createApplication(logger, transactionRepository, monitoringStateStore, telemetry)
+
+	gracefulShutdown(logger, [
+		app.monitoring,
+		app.transaction,
+		app.monitoringStateStore,
+		app.transactionRepository,
+		app.eventBridge,
+		...(telemetry ? [telemetry] : []),
+	])
+	logger.info('Transaction and Monitoring services started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank could not start.\n')
+	process.exit(1)
+})
+```
+
+## Inspect one successful flow in memory
+
+In-memory exporters give tests the actual OpenTelemetry data without a network
+service. Keep their construction in test support rather than application code.
+
+```ts title="src/observability/testTelemetry.ts" write
+import {
+	AggregationTemporality,
+	InMemoryMetricExporter,
+	MeterProvider,
+	PeriodicExportingMetricReader,
+} from '@opentelemetry/sdk-metrics'
+import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { ApplicationTelemetry } from './ApplicationTelemetry.js'
+
+export function createTestTelemetry(): ApplicationTelemetry & {
+	traceExporter: InMemorySpanExporter
+	metricExporter: InMemoryMetricExporter
+	forceFlush(): Promise<void>
+	destroy(): Promise<void>
+} {
+	const traceExporter = new InMemorySpanExporter()
+	const spanProcessor = new SimpleSpanProcessor(traceExporter)
+	const metricExporter = new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE)
+	const meterProvider = new MeterProvider({
+		readers: [new PeriodicExportingMetricReader({
+			exporter: metricExporter,
+			exportIntervalMillis: 60_000,
+		})],
+	})
+
+	return {
+		spanProcessor,
+		meter: meterProvider.getMeter('example-bank-test'),
+		traceExporter,
+		metricExporter,
+		forceFlush: async () => {
+			await spanProcessor.forceFlush()
+			await meterProvider.forceFlush()
+		},
+		destroy: async () => {
+			await spanProcessor.shutdown()
+			await meterProvider.shutdown()
+		},
+	}
+}
+
+export function metricNames(exporter: InMemoryMetricExporter): string[] {
+	return exporter.getMetrics().flatMap(resource =>
+		resource.scopeMetrics.flatMap(scope => scope.metrics.map(metric => metric.descriptor.name)),
+	)
+}
+```
+
+The application test crosses the real command, named result, EventBridge, and
+subscription boundaries.
+
+```ts title="src/observabilitySuccess.test.ts" write
+import { getCommandMessageMock, initDefaultStateStore, initLogger } from '@purista/core'
+import { afterEach, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { createTestTelemetry, metricNames } from './observability/testTelemetry.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { latestLargeDebitSignalKey } from './service/monitoring/v1/monitoringSignal.js'
+
+let cleanup: (() => Promise<void>) | undefined
+afterEach(async () => cleanup?.())
+
+test('exports successful Framework spans and service-owned metrics', async () => {
+	const logger = initLogger('fatal')
+	const telemetry = createTestTelemetry()
+	const repository = new SqliteTransactionRepository(':memory:')
+	const stateStore = initDefaultStateStore({ logger })
+	const app = await createApplication(logger, repository, stateStore, telemetry)
+	cleanup = async () => {
+		await app.monitoring.destroy()
+		await app.transaction.destroy()
+		await stateStore.destroy()
+		await repository.destroy()
+		await app.eventBridge.destroy()
+		await telemetry.destroy()
+	}
+
+	await app.eventBridge.invoke(getCommandMessageMock({
+		tenantId: 'tenant-example',
+		receiver: { serviceName: 'Transaction', serviceVersion: '1', serviceTarget: 'recordTransaction' },
+		payload: {
+			payload: { amountCents: 12_500, direction: 'debit', counterparty: 'Northwind Books' },
+			parameter: { accountId: 'account-operating' },
+		},
+	}))
+
+	for (let attempt = 0; attempt < 50; attempt += 1) {
+		const state = await stateStore.getState(latestLargeDebitSignalKey)
+		if (state[latestLargeDebitSignalKey]) break
+		await new Promise(resolve => setTimeout(resolve, 10))
+	}
+	await telemetry.forceFlush()
+
+	const spanNames = telemetry.traceExporter.getFinishedSpans().map(span => span.name)
+	expect(spanNames).toEqual(expect.arrayContaining([
+		'purista.command.invoke', 'recordTransaction', 'observeLargeDebit',
+	]))
+	expect(metricNames(telemetry.metricExporter)).toEqual(expect.arrayContaining([
+		'app.transaction.recorded',
+		'app.monitoring.large_debit.signals',
+		'purista.command.executions',
+		'purista.subscription.executions',
+	]))
+})
+```
+
+```bash title="Test OpenTelemetry wiring and the successful flow" replay="project"
+npx vitest run src/observabilitySuccess.test.ts
+npm run build
+```
+
+The same processor and Meter now cover EventBridge, `Transaction`, and
+`Monitoring`. Next we inspect what a controlled failure produces.

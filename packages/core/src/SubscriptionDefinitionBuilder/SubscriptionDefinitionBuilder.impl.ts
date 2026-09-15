@@ -26,12 +26,56 @@ import type { SubscriptionFunction } from '../core/types/subscription/Subscripti
 import type { SubscriptionTransformInputHook } from '../core/types/subscription/SubscriptionTransformInputHook.js'
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
+import {
+	type HarnessInvocationContract,
+	type HarnessInvocationSource,
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
+
+type HarnessSourceOfKind<
+	Source extends HarnessInvocationSource,
+	Kind extends 'agent' | 'workflow',
+> = HarnessInvocationContract<Source>['kind'] extends Kind ? unknown : never
+
+type SubscriptionHarnessInvocationBuilder<
+	S extends Service,
+	C extends SubscriptionDefinitionBuilderTypes,
+	Source extends HarnessInvocationSource,
+	ServiceName extends string,
+	ServiceVersion extends string,
+> = SubscriptionDefinitionBuilder<
+	S,
+	SubscriptionDefinitionBuilderTypes<
+		C['PayloadSchema'],
+		C['ParamsSchema'],
+		C['OutputSchema'],
+		C['TransformInputPayloadSchema'],
+		C['TransformInputParamsSchema'],
+		C['TransformOutputSchema'],
+		C['Resources'],
+		C['Invokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessInvokeDeclaration<Source>>>
+			>,
+		C['StreamInvokes'] &
+			Record<
+				ServiceName,
+				Record<ServiceVersion, Record<HarnessInvocationContract<Source>['id'], HarnessStreamDeclaration<Source>>>
+			>,
+		C['EmitList'],
+		C['QueueInvokes']
+	>
+>
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -193,6 +237,74 @@ export class SubscriptionDefinitionBuilder<
 				C['EmitList']
 			>
 		>
+	}
+
+	/** Declare an address-first local Harness agent invocation. */
+	canInvokeAgent<
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
+	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness agent invocation. */
+	canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'agent'>,
+	): SubscriptionHarnessInvocationBuilder<
+		S,
+		C,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeAgent(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this
+	}
+
+	/** Declare an address-first local Harness workflow invocation. */
+	canInvokeWorkflow<
+		const ServiceName extends string,
+		const ServiceVersion extends string,
+		const Source extends HarnessInvocationSource,
+	>(
+		serviceName: ServiceName,
+		serviceVersion: ServiceVersion,
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
+	): SubscriptionHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
+	/** Declare an address-first generated remote Harness workflow invocation. */
+	canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
+		source: Source & HarnessSourceOfKind<Source, 'workflow'>,
+	): SubscriptionHarnessInvocationBuilder<
+		S,
+		C,
+		Source,
+		Source['address']['serviceName'],
+		Source['address']['serviceVersion']
+	>
+	canInvokeWorkflow(
+		...args:
+			| readonly [source: AddressedHarnessInvocationSource]
+			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
+	): unknown {
+		const registered =
+			args.length === 1
+				? registerHarnessInvocation(this.invokes, this.streamInvokes, args[0])
+				: registerHarnessInvocation(this.invokes, this.streamInvokes, args[0], args[1], args[2])
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this
 	}
 
 	canConsumeStream<
@@ -592,7 +704,9 @@ export class SubscriptionDefinitionBuilder<
 
 	/**
 	 * Set a transform input hook which will encode or transform the input payload and parameters.
-	 * Will be executed as first step before input validation, before guard and the function itself.
+	 * The raw parameter and payload schemas are validated before this hook. The
+	 * returned domain values are then validated by the subscription parameter
+	 * and payload schemas before before-guards and the subscription function run.
 	 * This will change the type of input message payload and input message parameter.
 	 * @param transformInputSchema Input payload validation schema
 	 * @param transformParameterSchema Input parameter validation schema

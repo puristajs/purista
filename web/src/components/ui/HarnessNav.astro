@@ -5,18 +5,19 @@ import { getHarnessCanonicalPath } from '../../data/harness-routes'
 const currentPath = getHarnessCanonicalPath(Astro.url.pathname)
 ---
 
-<div class="w-full border-b border-[var(--color-line)] bg-[var(--color-bg)]">
-  <div class="wrap">
-    <nav class="flex gap-1 overflow-x-auto py-2">
+<div class="harness-nav">
+  <div class="wrap harness-nav__inner">
+    <div class="harness-nav__context site-mono" aria-hidden="true">AI HARNESS</div>
+    <nav class="harness-nav__links" aria-label="AI Harness sections">
       {harnessNavLinks.map((link) => {
         const isActive = currentPath === link.href || (currentPath.startsWith(link.href) && link.href !== '/harness/');
         return (
           <a
             href={link.href}
-            class={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-180 ${
+            class={`harness-nav__link ${
               isActive
-                ? 'text-[var(--color-found)] bg-[var(--color-bg-sunk)]'
-                : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-sunk)]'
+                ? 'harness-nav__link--active'
+                : ''
             }`}
           >
             {link.label}
@@ -26,3 +27,55 @@ const currentPath = getHarnessCanonicalPath(Astro.url.pathname)
     </nav>
   </div>
 </div>
+
+<style>
+  .harness-nav {
+    width: 100%;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg) 76%, transparent);
+  }
+  .harness-nav__inner {
+    display: flex;
+    min-height: var(--site-harness-subnav-height);
+    align-items: center;
+    gap: 1.2rem;
+  }
+  .harness-nav__context {
+    color: var(--color-fg-subtle);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+  }
+  .harness-nav__links {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    gap: 0.1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .harness-nav__links::-webkit-scrollbar { display: none; }
+  .harness-nav__link {
+    border-radius: 0.4rem;
+    color: var(--color-fg-muted);
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+    transition: color 160ms ease, background-color 160ms ease;
+    white-space: nowrap;
+  }
+  .harness-nav__link:hover {
+    color: var(--color-fg);
+    background: var(--color-bg-sunk);
+  }
+  .harness-nav__link--active {
+    color: var(--color-found-hi);
+    background: color-mix(in srgb, var(--color-found) 10%, var(--color-bg-sunk));
+  }
+  @media (max-width: 700px) {
+    .harness-nav__context { display: none; }
+    .harness-nav__inner { gap: 0; }
+  }
+</style>

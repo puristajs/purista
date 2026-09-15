@@ -4,6 +4,43 @@ import type { EBMessageBase } from '../EBMessageBase.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
 import type { Prettify } from '../Prettify.js'
 
+/** Drift-detection contract carried outside public Harness payload and parameters. */
+export type HarnessInvocationContractEnvelope = Readonly<{
+	schemaVersion: 1
+	exportDigest: `sha256:${string}`
+}>
+
+/** Framework-owned session identity for one public root invocation. */
+export type HarnessRootInvocationContext = Readonly<{
+	invocationId: CorrelationId
+	sessionId: CorrelationId
+}>
+
+/** Serializable trusted context for one nested Harness dispatch. */
+export type HarnessDispatchContext = Readonly<{
+	sessionId: string
+	rootRunId: string
+	parentRunId: string
+	invocationId: string
+	depth: number
+	remainingDepth: number
+	deadline?: number
+	idempotencyKey?: string
+}> &
+	(
+		| Readonly<{ parentAgentId: string; parentWorkflowId?: never }>
+		| Readonly<{ parentAgentId?: never; parentWorkflowId: string }>
+	)
+
+/** Reserved Framework transport metadata, never part of logical payload schemas. */
+export type HarnessTransportEnvelope = Readonly<{
+	contract: HarnessInvocationContractEnvelope
+}> &
+	(
+		| Readonly<{ root: HarnessRootInvocationContext; dispatch?: never }>
+		| Readonly<{ root?: never; dispatch: HarnessDispatchContext }>
+	)
+
 /**
  * Command is a event bridge message, which is emitted by sender to event bridge.
  * The event bridge dispatches the event to the receiver.
@@ -24,5 +61,7 @@ export type Command<PayloadType = unknown, ParameterType = unknown> = Prettify<
 			parameter: ParameterType
 			payload: PayloadType
 		}
+		/** @internal Framework-owned Harness metadata outside public schemas. */
+		harness?: HarnessTransportEnvelope
 	} & EBMessageBase
 >

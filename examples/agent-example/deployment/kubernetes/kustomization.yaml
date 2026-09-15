@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-namespaces.yaml
+  - 10-rbac.yaml
+  - 20-sandbox-policy.yaml
+  - 30-application.yaml
+

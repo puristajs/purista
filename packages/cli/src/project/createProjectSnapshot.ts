@@ -28,8 +28,6 @@ export type ServiceVersionSnapshot = {
 export type ProjectSnapshot = {
 	/** Services keyed by service directory name and numeric service version. */
 	services: Record<string, Record<string, ServiceVersionSnapshot>>
-	/** Agents keyed by agent directory name with discovered numeric versions. */
-	agents: Record<string, string[]>
 	/** Known ServiceEvent entries sorted by event value. */
 	eventNames: { name: string; value: string }[]
 	/** ServiceEvent enum/object file name relative to `puristaConfig.servicePath`. */
@@ -53,7 +51,7 @@ const pushUnique = (target: string[], value: string) => {
 }
 
 /**
- * Scan a PURISTA project and return all service, queue, worker, agent, and event metadata.
+ * Scan a PURISTA project and return all service, queue, worker, and event metadata.
  */
 export const createProjectSnapshot = async (
 	puristaConfig: PuristaConfig,
@@ -63,7 +61,6 @@ export const createProjectSnapshot = async (
 	const servicePath = join(projectPath, puristaConfig.servicePath)
 	const result: ProjectSnapshot = {
 		services: {},
-		agents: {},
 		eventNames: [],
 		eventEnumFileName: '',
 	}
@@ -121,26 +118,6 @@ export const createProjectSnapshot = async (
 				pushUnique(versionEntry.queueWorkers, entryName)
 			}
 		}
-	}
-
-	const agentsBasePath = join(projectPath, puristaConfig.agentPath ?? 'src/agents')
-	try {
-		const agentFiles = await readdir(agentsBasePath, { recursive: true })
-		for (const file of agentFiles) {
-			const splitPath = file.split(sep)
-			if (splitPath.length < 2) {
-				continue
-			}
-			const agentName = splitPath[0]
-			const version = splitPath[1].match(matchVersionRegex)?.[1]
-			if (!version) {
-				continue
-			}
-			result.agents[agentName] = result.agents[agentName] ?? []
-			pushUnique(result.agents[agentName], version)
-		}
-	} catch {
-		// Agents are optional.
 	}
 
 	return result

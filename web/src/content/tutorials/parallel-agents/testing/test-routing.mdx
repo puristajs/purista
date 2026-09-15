@@ -1,0 +1,226 @@
+---
+title: Test command and EventBridge routing
+description: Verify address-first invocation, identity-aware authorization, and mounted workflow protection.
+order: 269
+kind: lesson
+status: published
+---
+
+The command unit test checks the generated workflow client address and the stable session ID. It also proves provider failures are not hidden.
+
+```ts title="src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { supportCaseAnalysisOutputSchema } from '../../harness/supportCaseSchemas.js'
+import { analyzeSupportCaseWorkflow } from '../../harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
+import { supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
+import { runAnalyzeSupportCaseCommandBuilder } from './runAnalyzeSupportCaseCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('runAnalyzeSupportCaseCommandBuilder', () => {
+	it('invokes the declared workflow address and returns its completed output', async () => {
+		const payload = { caseId: 'case-1', message: 'My card is missing.' }
+		const policy = { canAnalyze: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(runAnalyzeSupportCaseCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportCasePolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		const output = supportCaseAnalysisOutputSchema.parse({
+			caseId: 'case-1',
+			risk: { level: 'high', evidence: ['The customer reports a missing card.'] },
+			response: { customerReply: 'We can help.', nextAction: 'freeze_card' },
+		})
+		stubs.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run.resolves({
+			sessionId: 'support-session',
+			outcome: { status: 'completed', runId: 'run-1', output },
+		})
+
+		await expect(
+			runAnalyzeSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			stubs.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run.calledOnceWith(payload, {
+				sessionId: supportCaseSessionId(context.message, payload.caseId),
+			}),
+		).toBe(true)
+	})
+
+	it('propagates workflow failures without changing them', async () => {
+		const payload = { caseId: 'case-2', message: 'Please inspect this case.' }
+		const { context, stubs } = createCommandContextMock(runAnalyzeSupportCaseCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportCasePolicy: { canAnalyze: sandbox.stub().resolves(true) } },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		stubs.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run.rejects(
+			new Error('The risk provider is unavailable.'),
+		)
+
+		await expect(
+			runAnalyzeSupportCaseCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).rejects.toThrow('The risk provider is unavailable.')
+	})
+})
+```
+The integration test mounts the real service on `DefaultEventBridge`. Its success case proves trusted identity reaches both guards. Separate denial cases show the wrapper guard and mounted workflow guard both stop the model calls.
+
+```ts title="src/parallelAgents.integration.test.ts" write
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it, vi } from 'vitest'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+const usage = { inputTokens: 8, outputTokens: 5, totalTokens: 13 }
+
+function providers() {
+	const riskProvider = new FakeModelProvider({ strict: true })
+	const responseProvider = new FakeModelProvider({ strict: true })
+	return { riskProvider, responseProvider }
+}
+
+async function startService(policy: {
+	canAnalyze: (input: { tenantId: string; principalId: string; caseId: string }) => Promise<boolean>
+}) {
+	const { riskProvider, responseProvider } = providers()
+	const eventBridge = new DefaultEventBridge()
+	await eventBridge.start()
+	const service = await supportV1Service.getInstance(eventBridge, {
+		logger: initLogger('fatal'),
+		resources: { supportCasePolicy: policy },
+		ai: {
+			models: {
+				riskAssessment: { provider: riskProvider, model: 'risk-fake' },
+				responsePlanning: { provider: responseProvider, model: 'response-fake' },
+			},
+		},
+	})
+	await service.start()
+	return { eventBridge, service, riskProvider, responseProvider }
+}
+
+describe('parallel specialist workflow over PURISTA', () => {
+	it('runs both specialists and preserves trusted identity through both guards', async () => {
+		const policy = { canAnalyze: vi.fn(async () => true) }
+		const application = await startService(policy)
+		application.riskProvider.enqueueObject(
+			objectReply(
+				{ level: 'high', evidence: ['The customer reports a missing card.'] },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		application.responseProvider.enqueueObject(
+			objectReply(
+				{ customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+
+		try {
+			await expect(
+				application.eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnalyzeSupportCase' },
+						payload: {
+							payload: { caseId: 'case-1', message: 'My card is missing.' },
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({
+				caseId: 'case-1',
+				risk: { level: 'high', evidence: ['The customer reports a missing card.'] },
+				response: { customerReply: 'We can help secure the card after verification.', nextAction: 'freeze_card' },
+			})
+			expect(policy.canAnalyze).toHaveBeenCalledTimes(2)
+			expect(policy.canAnalyze).toHaveBeenCalledWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				caseId: 'case-1',
+			})
+			application.riskProvider.assertExhausted()
+			application.responseProvider.assertExhausted()
+		} finally {
+			await application.service.destroy()
+			await application.eventBridge.destroy()
+		}
+	})
+
+	it('blocks the mounted workflow before either model runs', async () => {
+		const policy = {
+			canAnalyze: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
+		}
+		const application = await startService(policy)
+
+		try {
+			await expect(
+				application.eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnalyzeSupportCase' },
+						payload: { payload: { caseId: 'case-denied', message: 'Help' }, parameter: {} },
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canAnalyze).toHaveBeenCalledTimes(2)
+			expect(application.riskProvider.requests).toHaveLength(0)
+			expect(application.responseProvider.requests).toHaveLength(0)
+		} finally {
+			await application.service.destroy()
+			await application.eventBridge.destroy()
+		}
+	})
+
+	it('blocks the wrapper command before either model runs', async () => {
+		const policy = { canAnalyze: vi.fn(async () => false) }
+		const application = await startService(policy)
+
+		try {
+			await expect(
+				application.eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-alex',
+						receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runAnalyzeSupportCase' },
+						payload: { payload: { caseId: 'case-private', message: 'Help' }, parameter: {} },
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(policy.canAnalyze).toHaveBeenCalledTimes(1)
+			expect(application.riskProvider.requests).toHaveLength(0)
+			expect(application.responseProvider.requests).toHaveLength(0)
+		} finally {
+			await application.service.destroy()
+			await application.eventBridge.destroy()
+		}
+	})
+})
+```
+Run the complete credential-free verification.
+
+```bash title="Verify the complete project" replay="project"
+npm run build
+npm test
+npm run lint
+npm run demo
+```
+
+You now have two focused agents running concurrently inside one bounded workflow, exposed through one protected PURISTA command.

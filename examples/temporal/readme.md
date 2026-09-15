@@ -4,6 +4,12 @@ In this example, a PURISTA application integrates [Temporal](https://temporal.io
 
 ## Start
 
+Install the released PURISTA dependencies from this example directory:
+
+```bash
+npm install
+```
+
 ### 1. Start docker containers
 
 Start the required docker containers for NATS, Temporal and Jaeger Tracing:
@@ -21,7 +27,7 @@ npm run dev:worker
 ### 3. Start PURISTA application
 
 ```bash
-npm run dev:worker
+npm run dev
 ```
 
 ### 4. Open browser

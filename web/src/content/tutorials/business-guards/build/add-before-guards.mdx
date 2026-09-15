@@ -1,0 +1,237 @@
+---
+title: Guard effects before the handler
+description: Add account-level before guards that stop denied repository work.
+order: 82
+kind: lesson
+status: published
+---
+
+A before guard runs after PURISTA validates the command input and before the
+handler starts. This is the safe place to reject a business action before it
+can write to the repository.
+
+Both transaction commands now receive the requested account as a path
+parameter. The transaction body cannot choose a tenant. Hono supplies trusted
+identity metadata, and the command handler adds that tenant when it saves the
+record.
+
+Update the record command schemas.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/schema.ts" write
+import { z } from 'zod'
+import { createTransactionSchema, transactionSchema } from '../../transaction.js'
+
+export const transactionV1RecordTransactionInputPayloadSchema = createTransactionSchema
+export const transactionV1RecordTransactionInputParameterSchema = z.object({
+	accountId: z.string().trim().min(1),
+})
+export const transactionV1RecordTransactionOutputPayloadSchema = transactionSchema
+```
+
+Add the account parameter to the read command too. It states the scope the
+caller wants to use; the transaction ID alone is not an authorization rule.
+
+```ts title="src/service/transaction/v1/command/getTransaction/schema.ts" write
+import { z } from 'zod'
+import { transactionSchema } from '../../transaction.js'
+
+export const transactionV1GetTransactionInputPayloadSchema = z.undefined()
+export const transactionV1GetTransactionInputParameterSchema = z.object({
+	accountId: z.string().trim().min(1),
+	transactionId: z.uuid(),
+})
+export const transactionV1GetTransactionOutputPayloadSchema = transactionSchema
+```
+
+Use one small helper to turn a negative policy decision into a controlled
+`403 Forbidden`. The message does not reveal whether an account exists or
+which permission was missing.
+
+```ts title="src/service/transaction/v1/accountAccessGuards.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { AccountAccessPolicy, AccountAccessRequest } from './AccountAccessPolicy.js'
+
+export function requireAccountAction(policy: AccountAccessPolicy, request: AccountAccessRequest) {
+	if (policy.isAllowed(request)) return
+	throw new HandledError(StatusCode.Forbidden, 'Account action is not allowed')
+}
+```
+
+Register a named before guard on `recordTransaction`. It checks the `record`
+action for the requested account. If it throws, PURISTA does not call the
+handler, so `transactionRepository.save` cannot run.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record a synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'accounts/:accountId/transactions')
+	.setBeforeGuardHooks({
+		accountMayRecord: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'record',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload, parameter) {
+		return context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId!,
+		})
+	})
+```
+
+The non-null assertion on `tenantId` describes the lifecycle that the builder
+enforces: the registered guard has already accepted the trusted tenant before
+the handler runs. A direct or broker invocation still passes through the same
+guard.
+
+Add a `read` before guard to `getTransaction`. The handler still owns the
+normal not-found behavior.
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1GetTransactionInputParameterSchema,
+	transactionV1GetTransactionInputPayloadSchema,
+	transactionV1GetTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const getTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('getTransaction', 'Get a transaction by ID')
+	.addPayloadSchema(transactionV1GetTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1GetTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1GetTransactionOutputPayloadSchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/transactions/:transactionId')
+	.setBeforeGuardHooks({
+		accountMayRead: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'read',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const transaction = await context.resources.transactionRepository.findById(parameter.transactionId)
+		if (!transaction) {
+			throw new HandledError(StatusCode.NotFound, 'Transaction not found', {
+				transactionId: parameter.transactionId,
+			})
+		}
+		return transaction
+	})
+```
+
+Test the record command through PURISTA's validated command wrapper. Sam has a
+valid principal and tenant, but the policy denies `record` on the operating
+account. The test also proves the repository sees no denied effect.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { localAccountAccessPolicy } from '../../AccountAccessPolicy.js'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const payload = {
+	amountCents: 2599,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+}
+const parameter = { accountId: 'account-operating' }
+
+async function runAs(principalId: string) {
+	const stored = {
+		...payload,
+		...parameter,
+		tenantId: 'tenant-example',
+		transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+		recordedAt: '2026-09-01T10:00:00.000Z',
+	}
+	const save = sandbox.stub().resolves(stored)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const resources = { transactionRepository, accountAccessPolicy: localAccountAccessPolicy }
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	const mocked = createCommandContextMock(recordTransactionCommandBuilder, {
+		payload,
+		parameter,
+		resources,
+		sandbox,
+	})
+	mocked.context.message = getCommandMessageMock({
+		principalId,
+		tenantId: 'tenant-example',
+		payload: { payload, parameter },
+	})
+	const command = safeBind(recordTransactionCommandBuilder.getCommandFunction(), service)
+	return { command, context: mocked.context, save, service, stored }
+}
+
+describe('recordTransaction before guard', () => {
+	test('allows Alex and supplies trusted scope to the repository', async () => {
+		const fixture = await runAs('principal-alex')
+		try {
+			expect(await fixture.command(fixture.context, payload, parameter)).toEqual(fixture.stored)
+			expect(fixture.save.calledOnceWith({
+				...payload,
+				accountId: 'account-operating',
+				tenantId: 'tenant-example',
+			})).toBe(true)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('denies Sam before the repository effect', async () => {
+		const fixture = await runAs('principal-sam')
+		try {
+			await expect(fixture.command(fixture.context, payload, parameter))
+				.rejects.toThrow('Account action is not allowed')
+			expect(fixture.save.called).toBe(false)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})
+```
+
+Run the focused before-guard tests. This command does not hide or replace the
+guard under test.
+
+```bash title="Test the before guard and denied effect" replay="project"
+npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts
+```

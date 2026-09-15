@@ -2,42 +2,36 @@
 
 set -euo pipefail
 
-# Extract the version from package.json
-NODE_VERSION=$(node -p "require('./package.json').version")
+# Extract the release version from the root manifest.
+RELEASE_VERSION=$(node -p "require('./package.json').version")
 
-# Print the extracted version
-echo "Version from package.json: $NODE_VERSION"
+echo "Version from package.json: $RELEASE_VERSION"
 
-# Create the content to be written to version.ts
-CONTENT="export const puristaVersion = '$NODE_VERSION'"
+# A package directory is defined by package.json. This deliberately ignores
+# stale build directories and other folders matched by packages/*.
+for package_manifest in ./packages/*/package.json; do
+	[ -f "$package_manifest" ] || continue
+	package_dir=${package_manifest%/package.json}
+	package_name=${package_dir##*/}
 
-# Iterate over each subdirectory in the packages directory
-for dir in ./packages/*/; do
-    # Remove trailing slash
-    dir=${dir%*/}
+	echo "Processing package: $package_name"
+	mkdir -p "$package_dir/src"
+	printf '%s\n' '/** PURISTA release version for this package. */' "export const puristaVersion = '$RELEASE_VERSION'" > "$package_dir/src/version.ts"
 
-    # Extract the directory name
-    dirname=${dir##*/}
-
-    # Print the directory name
-    echo "Processing package: $dirname"
-
-    # Write the content to version.ts in the src subdirectory of each package
-    echo "$CONTENT" > "./packages/$dirname/src/version.ts"
-    
-    # Check if jsr.json exists in the current directory
-    if [ -f "./packages/$dirname/jsr.json" ]; then
-        echo "Updating jsr.json in $dirname"
-        
-        # Update the version field in jsr.json
-        node -e "
-        const fs = require('fs');
-        const path = './packages/$dirname/jsr.json';
-        const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-        data.version = '$NODE_VERSION';
-        fs.writeFileSync(path, JSON.stringify(data, null, 2));
-        "
-    else
-        echo "jsr.json not found in $dirname"
-    fi
+	jsr_manifest="$package_dir/jsr.json"
+	if [ -f "$jsr_manifest" ]; then
+		echo "Updating jsr.json in $package_name"
+		node -e '
+			const fs = require("node:fs")
+			const [manifestPath, releaseVersion] = process.argv.slice(1)
+			const source = fs.readFileSync(manifestPath, "utf8")
+			const current = JSON.parse(source)
+			const updated = source.replace(/("version"\s*:\s*)"[^"]+"/, `$1"${releaseVersion}"`)
+			if (updated === source && current.version !== releaseVersion) {
+				throw new Error(`Missing top-level version in ${manifestPath}`)
+			}
+			JSON.parse(updated)
+			fs.writeFileSync(manifestPath, updated)
+		' "$jsr_manifest" "$RELEASE_VERSION"
+	fi
 done

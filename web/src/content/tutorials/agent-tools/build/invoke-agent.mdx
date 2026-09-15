@@ -1,0 +1,76 @@
+---
+title: Add the command that invokes the agent
+description: Expose the mounted agent behind a separate PURISTA command address.
+order: 236
+kind: lesson
+status: published
+---
+
+Use a different target id for the wrapper command and the agent. The command is
+`runAnswerTransactionQuestion`; the mounted agent is
+`answerTransactionQuestion`. This keeps their addresses unambiguous.
+
+The agent already owns the input and output schemas. Remove the generated
+wrapper schema, type aliases, and placeholder unit test so this command reuses
+that single contract. The complete wrapper path is tested through EventBridge.
+
+```bash title="Remove duplicate wrapper placeholders" replay="project"
+rm src/service/support/v1/command/runAnswerTransactionQuestion/schema.ts
+rm src/service/support/v1/command/runAnswerTransactionQuestion/types.ts
+rm src/service/support/v1/command/runAnswerTransactionQuestion/runAnswerTransactionQuestionCommandBuilder.test.ts
+```
+
+`supportV1ServiceBuilder.harnessTarget(...)` combines the imported agent
+contract with the owning service address. `canInvokeAgent` uses that descriptor
+to create the address-first client.
+
+```ts title="src/service/support/v1/command/runAnswerTransactionQuestion/runAnswerTransactionQuestionCommandBuilder.ts" write
+import { answerTransactionQuestionAgent } from '../../harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+import { requireSupportQuestion, supportQuestionSessionId } from '../../requireSupportQuestion.js'
+import { answerTransactionQuestionInputSchema, answerTransactionQuestionOutputSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const runAnswerTransactionQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runAnswerTransactionQuestion', 'Answer a support question with authorized PURISTA tools')
+	.addPayloadSchema(answerTransactionQuestionInputSchema)
+	.addOutputSchema(answerTransactionQuestionOutputSchema)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerTransactionQuestionAgent.contract))
+	.setBeforeGuardHooks({
+		questionAccess: async function (context, payload) {
+			await requireSupportQuestion(context.resources.supportQuestionPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				accountId: payload.accountId,
+				transactionId: payload.transactionId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerTransactionQuestion.run(payload, {
+			sessionId: supportQuestionSessionId(context.message, payload.questionId),
+		})
+		return outcome.output
+	})
+```
+The command returns the completed agent output. It does not return the Harness
+session envelope as part of this business API.
+
+Add the wrapper command, then mount the Harness once on the Support service.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { runAnswerTransactionQuestionCommandBuilder } from './command/runAnswerTransactionQuestion/runAnswerTransactionQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(runAnswerTransactionQuestionCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+Both the command guard and mounted-agent guard receive the identity carried by
+EventBridge. The host tool keeps that identity when it invokes the Transaction
+command.
+
+```bash title="Check the wrapper command" replay="project"
+npm run build
+```
+
+Continue with [Compose the services and runtime](../compose-runtime/).

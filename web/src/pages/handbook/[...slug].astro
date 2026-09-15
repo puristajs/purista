@@ -1,7 +1,8 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content'
+import { getManifestTopicByRoute, getNextTopic, getPreviousTopic, getProductForHandbookRoute } from '../../data/handbook'
 import HandbookLayout from '../../layouts/HandbookLayout.astro'
-import { getHandbookSidebar } from '../../lib/sidebar'
+import { getSidebarItems } from '../../data/handbook'
 
 export async function getStaticPaths() {
 	const entries = await getCollection('handbook')
@@ -17,7 +18,11 @@ type Props = {
 
 const { entry } = Astro.props
 const { Content, headings } = await render(entry)
-const sidebar = await getHandbookSidebar()
+const product = getProductForHandbookRoute(Astro.url.pathname)
+const sidebar = getSidebarItems()
+const topic = getManifestTopicByRoute(Astro.url.pathname)
+const previousTopic = topic?.status === 'canonical' ? getPreviousTopic(topic) : undefined
+const nextTopic = topic?.status === 'canonical' ? getNextTopic(topic) : undefined
 ---
 
 <HandbookLayout
@@ -26,6 +31,33 @@ const sidebar = await getHandbookSidebar()
   sidebar={sidebar}
   currentId={entry.id}
   headings={headings}
+  product={product}
 >
+  <header class="mb-10">
+    <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${product === 'harness' ? 'pilot' : 'found'}-hi)`}>
+      {product === 'harness' ? 'AI Harness' : 'PURISTA Framework'}
+    </p>
+    <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
+      {entry.data.title}
+    </h1>
+    {entry.data.description && <p class="lede max-w-[70ch]">{entry.data.description}</p>}
+  </header>
   <Content />
+
+  {(previousTopic || nextTopic) && (
+    <nav class="mt-12 pt-8 border-t border-[var(--color-line)] flex items-start justify-between gap-6 flex-wrap" aria-label="Handbook page navigation">
+      {previousTopic ? (
+        <a href={previousTopic.canonicalRoute} class="group inline-flex items-center gap-2 text-sm">
+          <span class="text-[var(--color-fg-subtle)]">←</span>
+          <span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{previousTopic.title}</span>
+        </a>
+      ) : <span />}
+      {nextTopic && (
+        <a href={nextTopic.canonicalRoute} class="group inline-flex items-center gap-2 text-sm ml-auto">
+          <span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{nextTopic.title}</span>
+          <span class="text-[var(--color-fg-subtle)]">→</span>
+        </a>
+      )}
+    </nav>
+  )}
 </HandbookLayout>

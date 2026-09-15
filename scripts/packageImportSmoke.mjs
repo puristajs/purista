@@ -1,16 +1,21 @@
 #!/usr/bin/env node
 
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { delimiter, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const packageRoot = join(repoRoot, 'packages')
 
-const packages = readdirSync(packageRoot)
-	.map(name => join(packageRoot, name))
+const extraPackageDirectories = (process.env.PURISTA_PACKAGE_SMOKE_EXTRA_PACKAGE_DIRS ?? '')
+	.split(delimiter)
+	.map(directory => directory.trim())
+	.filter(Boolean)
+
+const packages = [...readdirSync(packageRoot).map(name => join(packageRoot, name)), ...extraPackageDirectories]
+	.filter(dir => existsSync(join(dir, 'package.json')))
 	.map(dir => ({ dir, manifest: JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) }))
 	.filter(({ manifest }) => manifest.private !== true && manifest.name?.startsWith('@purista/'))
 	.sort((left, right) => left.manifest.name.localeCompare(right.manifest.name))

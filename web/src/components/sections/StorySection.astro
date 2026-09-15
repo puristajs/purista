@@ -81,6 +81,7 @@ const splitClass = split === 'balanced' ? 'story-grid--balanced' : ''
               ))}
             </ul>
           )}
+          <slot name="actions" />
         </div>
       ) : (
         <div class:list={['story-grid', splitClass]}>
@@ -102,6 +103,7 @@ const splitClass = split === 'balanced' ? 'story-grid--balanced' : ''
                 ))}
               </ul>
             )}
+            <slot name="actions" />
           </div>
         </div>
       )

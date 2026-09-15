@@ -1,0 +1,97 @@
+---
+title: Define the agent and mount policy
+description: Give a direct Harness agent one service-owned tool and one bounded target policy.
+order: 235
+kind: lesson
+status: published
+---
+
+Keep application input separate from the model prompt. The schemas describe
+the complete application contract.
+
+```ts title="src/service/support/v1/schema.ts" write
+import { z } from 'zod'
+
+export const answerTransactionQuestionInputSchema = z.strictObject({
+	questionId: z.string().min(1),
+	accountId: z.string().min(1),
+	transactionId: z.string().min(1),
+	question: z.string().min(1),
+})
+export const answerTransactionQuestionOutputSchema = z.strictObject({
+	answer: z.string(),
+	transactionIds: z.array(z.string()),
+})
+```
+Define the agent directly with `defineAgent`. The host tool is listed on the
+agent, so the model can choose it during the run. The prompt mapper turns the
+structured question and requested ids into one clear model message.
+
+```ts title="src/service/support/v1/harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.ts" write
+import { defineAgent } from '@purista/harness'
+import { answerTransactionQuestionInputSchema, answerTransactionQuestionOutputSchema } from '../../../schema.js'
+import { lookupTransactionTool } from '../../tool/lookupTransaction/lookupTransactionTool.js'
+
+export { answerTransactionQuestionInputSchema, answerTransactionQuestionOutputSchema }
+export const answerTransactionQuestionAgent = defineAgent('answerTransactionQuestion', {
+	model: 'answering',
+	input: answerTransactionQuestionInputSchema,
+	output: answerTransactionQuestionOutputSchema,
+	instructions: 'Use lookupTransaction for the requested transaction. Return a concise answer and the transaction id.',
+	tools: [lookupTransactionTool],
+	prompt: (input) => ({
+		role: 'user',
+		content: [
+			`Question ${input.questionId}: ${input.question}`,
+			`Account: ${input.accountId}`,
+			`Transaction: ${input.transactionId}`,
+		].join('\n'),
+	}),
+})
+```
+`answering` is the explicit purpose model alias. The application binds that
+exact key under `ai.models`; the definition does not choose a provider.
+
+Build one additive Harness definition and one mount policy. The policy names
+the exact agent target and runs the Support business guard before model work.
+
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import { requireSupportQuestion } from '../requireSupportQuestion.js'
+import type { SupportQuestionPolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
+import { answerTransactionQuestionAgent } from './agent/answerTransactionQuestion/answerTransactionQuestionAgent.js'
+
+export const supportHarness = defineHarness({ name: 'support', revision: 'support-v1' }).addAgent(
+	answerTransactionQuestionAgent,
+)
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		answerTransactionQuestion: {
+			beforeGuards: {
+				mayUseSupportAgent: async (
+					context: HarnessBusinessGuardContext<{ supportQuestionPolicy: SupportQuestionPolicy }>,
+					input: z.output<typeof answerTransactionQuestionAgent.contract.input>,
+				) =>
+					requireSupportQuestion(context.resources.supportQuestionPolicy, {
+						tenantId: context.identity.tenantId,
+						principalId: context.identity.principalId,
+						accountId: input.accountId,
+						transactionId: input.transactionId,
+					}),
+			},
+		},
+	},
+	workflows: {},
+})
+```
+The policy concerns business authorization. HTTP authentication belongs to a
+transport middleware when the service is exposed over HTTP.
+
+```bash title="Check the mounted agent definition" replay="project"
+npm run build
+```
+
+Continue with [Add the command that invokes the agent](../invoke-agent/).

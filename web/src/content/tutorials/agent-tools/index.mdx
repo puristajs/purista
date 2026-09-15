@@ -1,0 +1,51 @@
+---
+title: Use PURISTA commands as agent tools
+description: Let an agent ask a service-owned tool to call a guarded PURISTA command through EventBridge.
+order: 230
+kind: chapter
+group: ai
+status: published
+---
+
+An agent sometimes needs data owned by another service. In this chapter, a
+Support agent asks for one transaction summary. The agent does not open the
+Transaction database. Its tool calls the command that owns that data.
+
+```text title="The request path"
+Support / 1 / runAnswerTransactionQuestion command
+  -> Support / 1 / answerTransactionQuestion agent
+  -> model chooses lookupTransaction
+  -> service-owned PURISTA host tool
+  -> Transaction / 1 / getTransactionSummary command
+  -> business guard and transaction reader
+```
+
+The command and agent have different addresses. The outer command is
+`runAnswerTransactionQuestion`; the mounted agent is
+`answerTransactionQuestion`. The host tool is defined with
+`ServiceBuilder.defineTool(...)` under the owning Support service version.
+
+The model supplies `accountId` and `transactionId` as untrusted input.
+EventBridge carries the trusted tenant and principal. Support checks whether
+the caller may use the agent, and Transaction checks whether the caller may
+read the account.
+
+The required path uses a strict fake model and needs no API key. It uses SQLite
+for Harness storage. The live composition must use a file-backed SQLite store
+when agent sessions must survive a process restart; `:memory:` is suitable only
+for disposable demos and tests.
+
+## What you will do
+
+1. [Create a project and generate the artifacts](./setup/scaffold/).
+2. [Define the Transaction contracts](./build/transaction-resource/).
+3. [Build the guarded Transaction command](./build/bind-command/).
+4. [Define the service-owned host tool](./build/mount-tool/).
+5. [Define the agent and Harness mount policy](./build/declare-host-tool/).
+6. [Add the command that invokes the agent](./build/invoke-agent/).
+7. [Compose the services and runtime](./build/compose-runtime/).
+8. [Run the credential-free and optional live examples](./build/run-application/).
+9. [Check the small boundaries](./testing/test-tools/).
+10. [Test the complete EventBridge path](./testing/test-eventbridge/).
+
+Start with [Create the project and generate the artifacts](./setup/scaffold/).

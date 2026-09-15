@@ -1,0 +1,175 @@
+---
+title: Store opaque session state
+description: Authenticate through a resource and use context.states for expiring operational session data.
+order: 20
+kind: lesson
+status: published
+---
+
+A session is short-lived application state, so PURISTA StateStore is the
+correct tool. The local user fixture is a dependency of Identity and becomes a
+small declared resource. It verifies credentials but does not store sessions or
+authorize transaction actions.
+
+Session keys are namespaced. Every value read from StateStore is validated.
+Missing, corrupt, and expired values fail authentication. Unsafe stored values
+are removed. The command test replaces both the provider and StateStore calls
+with typed PURISTA test helpers.
+
+
+```ts title="src/service/identity/v1/LocalIdentityProvider.ts" write
+export type LocalIdentity = {
+	principalId: string
+	tenantId: string
+	displayName: string
+}
+
+export interface LocalIdentityProvider {
+	authenticate(username: string, password: string): Promise<LocalIdentity | undefined>
+}
+
+export const localIdentityProvider: LocalIdentityProvider = {
+	async authenticate(username, password) {
+		if (username !== 'alex@example.test' || password !== 'demo-password') return undefined
+		return {
+			principalId: 'principal-alex',
+			tenantId: 'tenant-example',
+			displayName: 'Alex Example',
+		}
+	},
+}
+```
+
+```ts title="src/service/identity/v1/identityServiceConfig.ts" write
+import { z } from 'zod'
+
+export const identityServiceV1ConfigSchema = z.object({
+	sessionTtlMs: z.number().int().positive().default(15 * 60 * 1000),
+})
+
+export type IdentityServiceV1Config = z.input<typeof identityServiceV1ConfigSchema>
+```
+
+```ts title="src/service/identity/v1/identityV1ServiceBuilder.ts" write
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
+import { generalIdentityServiceInfo } from '../generalIdentityServiceInfo.js'
+import type { LocalIdentityProvider } from './LocalIdentityProvider.js'
+import { identityServiceV1ConfigSchema } from './identityServiceConfig.js'
+
+export const identityServiceInfo = {
+	serviceVersion: '1',
+	...generalIdentityServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const identityV1ServiceBuilder = new ServiceBuilder(identityServiceInfo)
+	.setConfigSchema(identityServiceV1ConfigSchema)
+	.defineResource<'identityProvider', LocalIdentityProvider>()
+```
+
+```ts title="src/service/identity/v1/session.ts" write
+import { HandledError, StatusCode, type StateStore } from '@purista/core'
+import { z } from 'zod'
+
+export const sessionRecordSchema = z.object({
+	principalId: z.string().min(1),
+	tenantId: z.string().min(1),
+	displayName: z.string().min(1),
+	expiresAt: z.number().int().positive(),
+})
+
+export type SessionRecord = z.infer<typeof sessionRecordSchema>
+
+type SessionStates = Pick<StateStore, 'getState' | 'removeState'>
+
+export const sessionStateKey = (sessionToken: string) => `identity:session:${sessionToken}`
+
+export async function readActiveSession(states: SessionStates, sessionToken: string, now = Date.now()) {
+	const key = sessionStateKey(sessionToken)
+	const values = await states.getState(key)
+	const parsed = sessionRecordSchema.safeParse(values[key])
+
+	if (!parsed.success) {
+		if (values[key] !== undefined) await states.removeState(key)
+		throw new HandledError(StatusCode.Unauthorized, 'Session is missing or invalid')
+	}
+	if (parsed.data.expiresAt <= now) {
+		await states.removeState(key)
+		throw new HandledError(StatusCode.Unauthorized, 'Session has expired')
+	}
+	return parsed.data
+}
+```
+
+```ts title="src/service/identity/v1/sessionCommands.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind, type StateStore } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { loginCommandBuilder } from './command/login/loginCommandBuilder.js'
+import type { LocalIdentityProvider } from './LocalIdentityProvider.js'
+import { identityV1ServiceBuilder } from './identityV1ServiceBuilder.js'
+import { readActiveSession, sessionStateKey } from './session.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+async function loginHandler(provider: LocalIdentityProvider) {
+	const service = await identityV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		serviceConfig: { sessionTtlMs: 60_000 },
+		resources: { identityProvider: provider },
+	})
+	const input = { username: 'alex@example.test', password: 'demo-password' }
+	const mocked = createCommandContextMock(loginCommandBuilder, {
+		payload: input, parameter: {}, resources: { identityProvider: provider }, sandbox,
+	})
+	mocked.stubs.setState.resolves()
+	return { service, input, mocked, handler: safeBind(loginCommandBuilder.getCommandFunction(), service) }
+}
+
+describe('Identity session commands', () => {
+	test('authenticates through the resource and writes only opaque session state', async () => {
+		const provider: LocalIdentityProvider = { authenticate: sandbox.stub().resolves({ principalId: 'principal-alex', tenantId: 'tenant-example', displayName: 'Alex Example' }) }
+		const { service, input, mocked, handler } = await loginHandler(provider)
+		try {
+			const result = await handler(mocked.context, input, {})
+			expect(result.sessionToken).toMatch(/^[0-9a-f-]{36}$/)
+			expect(mocked.stubs.setState.calledOnce).toBe(true)
+			expect(mocked.stubs.setState.firstCall.args[0]).toBe(sessionStateKey(result.sessionToken))
+			expect(mocked.stubs.setState.firstCall.args[1]).toMatchObject({ principalId: 'principal-alex', tenantId: 'tenant-example' })
+		} finally { await service.destroy() }
+	})
+
+	test('does not write state when the provider rejects credentials', async () => {
+		const provider: LocalIdentityProvider = { authenticate: sandbox.stub().resolves(undefined) }
+		const { service, input, mocked, handler } = await loginHandler(provider)
+		try {
+			await expect(handler(mocked.context, input, {})).rejects.toMatchObject({ errorCode: 401 })
+			expect(mocked.stubs.setState.called).toBe(false)
+		} finally { await service.destroy() }
+	})
+
+	test.each([
+		['missing', undefined, false],
+		['corrupt', { principalId: 7 }, true],
+		['expired', { principalId: 'p', tenantId: 't', displayName: 'Alex', expiresAt: Date.now() - 1 }, true],
+	])('rejects %s state and removes unsafe stored values', async (_name, value, shouldRemove) => {
+		const token = crypto.randomUUID()
+		const key = sessionStateKey(token)
+		const removeState = sandbox.stub().resolves()
+		const states = {
+			getState: sandbox.stub().resolves({ [key]: value }),
+			removeState,
+		} as unknown as Pick<StateStore, 'getState' | 'removeState'>
+		await expect(readActiveSession(states, token)).rejects.toMatchObject({ errorCode: 401 })
+		expect(removeState.called).toBe(shouldRemove)
+	})
+})
+```
+
+```bash title="Test Identity state handling" replay="project"
+npx tsc --noEmit
+npx vitest run --config vitest.server.config.ts src/service/identity/v1/sessionCommands.test.ts
+```
+
+Invalid credentials never call setState. Transactions still use the database resource from the previous chapter.

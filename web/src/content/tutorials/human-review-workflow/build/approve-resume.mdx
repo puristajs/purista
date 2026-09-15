@@ -1,0 +1,108 @@
+---
+title: Resume the approved run
+description: Authorize a reviewer, build the exact tool-approval resume value, and continue the stored run.
+order: 258
+kind: lesson
+status: published
+---
+
+The first command stored the approval correlation returned by Harness. A review
+client sends only the business decision, expected review revision, and a unique
+event id. It cannot choose a run id, interrupt id, approval id, or Harness
+revision.
+
+The CLI generated the decision command during setup. Remove its local
+placeholder schemas, then replace its generated function with the typed review
+implementation.
+
+```bash title="Remove the generated decision placeholders" replay="project"
+rm src/service/support/v1/command/decideCardFreeze/schema.ts
+rm src/service/support/v1/command/decideCardFreeze/types.ts
+```
+
+The before-guard authenticates through trusted message fields and asks the
+business policy whether this principal may review this request. The review store
+then checks the tenant, expected revision, and event id before returning the
+saved approval correlation.
+
+```ts title="src/service/support/v1/command/decideCardFreeze/decideCardFreezeCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { reviewSupportActionWorkflow } from '../../harness/workflow/reviewSupportAction/reviewSupportActionWorkflow.js'
+import { decideReviewInputSchema, reviewTerminalSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const decideCardFreezeCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('decideCardFreeze', 'Authorize and deliver one human review decision')
+	.addPayloadSchema(decideReviewInputSchema)
+	.addOutputSchema(reviewTerminalSchema)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(reviewSupportActionWorkflow.contract))
+	.setBeforeGuardHooks({
+		reviewerMayDecide: async function (context, payload) {
+			const { tenantId, principalId } = context.message
+			if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+			if (
+				!(await context.resources.supportReviewPolicy.canReview({
+					tenantId,
+					principalId,
+					requestId: payload.requestId,
+				}))
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'This review decision is not allowed')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { tenantId, principalId } = context.message
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const record = await context.resources.supportReviewStore.decide({ ...payload, tenantId, principalId })
+		if (record.status === 'pending') throw new HandledError(StatusCode.Conflict, 'Review decision was not recorded')
+		if (!record.approvalInterruptId || !record.approvalRevision || !record.approvalIds?.length) {
+			throw new HandledError(StatusCode.Conflict, 'Review approval is not available')
+		}
+		const { outcome: resumed } = await context.workflow.Support['1'].reviewSupportAction
+			.resume({
+				type: 'tool-approval',
+				runId: record.runId,
+				interruptId: record.approvalInterruptId,
+				revision: record.approvalRevision,
+				eventId: payload.eventId,
+				decisions: record.approvalIds.map((approvalId) => ({ approvalId, approved: payload.outcome === 'approved' })),
+			})
+			.run({ sessionId: record.sessionId })
+		if (resumed.status !== 'completed') throw new Error('Review workflow did not reach a terminal result')
+
+		return { status: record.status, requestId: record.requestId }
+	})
+```
+`target.resume(descriptor).run(...)` is the first-class resume path. The
+descriptor uses the standard `ToolApprovalResume` shape and the saved
+`runId`, `interruptId`, `revision`, and `approvalIds`. `eventId` makes one
+reviewer delivery idempotent. A rejection resumes the same run with
+`approved: false`; Harness does not execute the prepared tool call.
+
+The mount uses durable resume identity `run-owner`. Core authenticates the
+current reviewer and requires the stored run owner to belong to the same tenant.
+The mounted workflow guard and host-tool context receive the current reviewer.
+Harness-private execution scopes and nested EventBridge authentication keep the
+stored owner so the resumed run continues with the same trusted owner. The
+decision command separately proves that the current caller may review this
+request.
+
+Register both commands and mount the service-owned Harness once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { decideCardFreezeCommandBuilder } from './command/decideCardFreeze/decideCardFreezeCommandBuilder.js'
+import { requestCardFreezeCommandBuilder } from './command/requestCardFreeze/requestCardFreezeCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(requestCardFreezeCommandBuilder.getDefinition())
+	.addCommandDefinition(decideCardFreezeCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+```bash title="Type-check approval resume" replay="project"
+npm run build
+```
+
+Continue with [Compose the durable runtime](../compose-runtime/).

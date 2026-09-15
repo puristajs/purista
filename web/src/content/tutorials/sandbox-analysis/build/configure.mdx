@@ -1,0 +1,31 @@
+---
+title: "Optional: build the Docker boundary"
+description: Build a small non-root image for process isolation.
+order: 289
+kind: lesson
+status: published
+---
+
+Docker is optional. Build it only when a container boundary is needed. The application, not the model, selects the image and user. Use the immutable image ID returned by Docker before a live run.
+
+```dockerfile title="sandbox.Dockerfile" write
+FROM python:3.13-slim
+RUN useradd --create-home --uid 10001 sandbox
+WORKDIR /workspace
+USER sandbox
+```
+```yaml title="compose.yaml" write
+services:
+  sandbox-image:
+    image: purista-tutorial-sandbox:local
+    build:
+      context: .
+      dockerfile: sandbox.Dockerfile
+    command: ["python3", "--version"]
+```
+```bash title="Build and inspect the local image" replay="project"
+docker compose build sandbox-image
+docker image inspect --format '{{.Id}}' purista-tutorial-sandbox:local
+```
+
+Continue with [Optional live Docker service](../run-live/).

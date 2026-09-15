@@ -1,0 +1,3 @@
+```ts
+harness.addTool(tool)
+```

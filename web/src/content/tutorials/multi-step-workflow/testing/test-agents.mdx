@@ -1,0 +1,81 @@
+---
+title: Test the two agent stages
+description: Run each direct agent with its own strict fake model and structured result.
+order: 278
+kind: lesson
+status: published
+---
+
+Each test creates only the direct definition it needs. It borrows a session, checks typed output, releases the session, and closes the runtime.
+
+```ts title="src/service/support/v1/harness/agent/classifySupportCase/classifySupportCaseAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { classifySupportCaseAgent } from './classifySupportCaseAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('classifySupportCaseAgent', () => {
+	it('returns a schema-validated classification', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(objectReply({ category: 'card', urgency: 'urgent' }, { usage, finishReason: 'stop' }))
+		const runtime = await defineHarness({ name: 'classificationAgentTest' })
+			.addAgent(classifySupportCaseAgent)
+			.getInstance({ models: { classification: { provider, model: 'classification-fake' } } })
+		const session = await runtime.getSession('classification-case-1')
+		try {
+			const outcome = await session.agents.classifySupportCase.run({ caseId: 'case-1', message: 'My card is missing.' })
+			expect(outcome.status).toBe('completed')
+			expect(outcome.output).toEqual({ category: 'card', urgency: 'urgent' })
+			provider.assertExhausted()
+		} finally {
+			await session.release()
+			await runtime.close()
+		}
+	})
+})
+```
+```ts title="src/service/support/v1/harness/agent/planSupportResolution/planSupportResolutionAgent.test.ts" write
+import { defineHarness } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { planSupportResolutionAgent } from './planSupportResolutionAgent.js'
+
+const usage = { inputTokens: 4, outputTokens: 3, totalTokens: 7 }
+
+describe('planSupportResolutionAgent', () => {
+	it('returns a schema-validated resolution plan', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{ summary: 'Verify the caller and secure the card.', nextAction: 'freeze_card' },
+				{ usage, finishReason: 'stop' },
+			),
+		)
+		const runtime = await defineHarness({ name: 'resolutionAgentTest' })
+			.addAgent(planSupportResolutionAgent)
+			.getInstance({ models: { planning: { provider, model: 'resolution-fake' } } })
+		const session = await runtime.getSession('resolution-case-1')
+		try {
+			const outcome = await session.agents.planSupportResolution.run({
+				caseId: 'case-1',
+				message: 'My card is missing.',
+				classification: { category: 'card', urgency: 'urgent' },
+				handlingLane: 'priority',
+			})
+			expect(outcome.status).toBe('completed')
+			expect(outcome.output.nextAction).toBe('freeze_card')
+			provider.assertExhausted()
+		} finally {
+			await session.release()
+			await runtime.close()
+		}
+	})
+})
+```
+```bash title="Run the direct agent tests" replay="project"
+npm test -- src/service/support/v1/harness/agent
+```
+
+Continue with [Test checkpoint reuse after restart](../test-workflow/).

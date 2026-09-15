@@ -1,0 +1,21 @@
+---
+title: Run the live application
+description: Start PostgreSQL, the composed PURISTA services, Hono, the static site, and a live model with ordered shutdown.
+order: 220
+kind: lesson
+status: published
+---
+
+Create the local environment template. It names every value the runtime needs without placing secrets in source control.
+
+```txt title=".env.example" write
+OPENAI_API_KEY=
+HARNESS_STORAGE_FILE=./harness.sqlite
+OPENAI_MODEL=gpt-5-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+DATABASE_URL=postgres://example_bank:local-example-password@127.0.0.1:55432/example_bank
+PORT=3000
+```
+Check your work: Copy it with `cp .env.example .env`, set the required values, then run `npm run start`.
+
+Continue with [Run the deterministic demo](../deterministic-demo/).

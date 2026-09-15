@@ -1,0 +1,38 @@
+---
+title: Persist and manage conversation history
+description: Keep bounded agent transcripts in Harness storage and manage them through authorized PURISTA commands.
+order: 220
+kind: chapter
+group: ai
+status: published
+---
+
+This chapter builds a small Support service whose agent can use earlier messages
+from the same conversation. You can follow it on its own after the create-project
+chapter.
+
+You will keep three responsibilities separate:
+
+- **Harness storage** owns sessions, transcripts, run receipts, durable
+  checkpoints, and waits.
+- **Harness memory** stores facts that an agent or tool writes on purpose. It is
+  separate from the transcript.
+- **PURISTA StateStore** holds application state such as login sessions. It does
+  not hold agent transcripts.
+
+The application derives one opaque session id from trusted tenant, principal,
+and conversation values. The mounted agent and the authorized read and clear
+commands use that same id.
+
+1. [Create the project and agent](./build/configure-storage/)
+2. [Define access and session identity](./build/define-access/)
+3. [Mount and invoke the conversation agent](./build/use-session/)
+4. [Export and clear conversation history](./build/export-and-clear/)
+5. [Compose the runtime](./build/compose-runtime/)
+6. [Run the application](./build/run-application/)
+7. [Test native history](./testing/test-history/)
+8. [Test command behavior](./testing/test-commands/)
+9. [Test the mounted EventBridge path](./testing/test-eventbridge/)
+
+The complete source is in `examples/banking/chapters/conversation-memory`.
+Every automated test uses `FakeModelProvider`, so it needs no API key.

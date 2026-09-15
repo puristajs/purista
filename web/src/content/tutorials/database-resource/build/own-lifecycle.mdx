@@ -1,0 +1,96 @@
+---
+title: Own the database lifecycle
+description: Create the file-backed adapter at startup and close it after the Transaction service during shutdown.
+order: 30
+kind: lesson
+status: published
+---
+
+The production entry point chooses the database filename. Add the local data
+directory to `.gitignore`:
+
+```md title=".gitignore" write
+node_modules
+dist
+.DS_Store
+coverage
+var
+```
+
+Create the resource before the application and add it to shutdown after the
+service that uses it.
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+async function main() {
+	const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const transactionRepository = new SqliteTransactionRepository('var/example-bank.sqlite')
+	const { eventBridge, bankProfile, transaction, http } = await createApplication(logger, transactionRepository)
+	const nodeServer = serve({ fetch: http.app.fetch, hostname: '127.0.0.1', port })
+	const nodeHttpListener = createNodeHttpListener(nodeServer)
+
+	gracefulShutdown(logger, [
+		http.prepareDestroy(),
+		nodeHttpListener,
+		http,
+		transaction,
+		bankProfile,
+		transactionRepository,
+		eventBridge,
+	])
+	logger.info({ port }, 'Example Bank HTTP server started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank HTTP server could not start.\n')
+	process.exit(1)
+})
+```
+
+The order matters. Hono stops accepting work, the listener closes, Hono and the
+business services stop, and only then does `sqliteTransactionRepository` close
+its database handle.
+
+## Prove a file can be reopened
+
+```ts title="src/resources/SqliteTransactionRepository.lifecycle.test.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { expect, test } from 'vitest'
+import { SqliteTransactionRepository } from './SqliteTransactionRepository.js'
+
+test('closes a file database and preserves its transaction for the next connection', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'example-bank-sqlite-'))
+	const filename = join(directory, 'transactions.sqlite')
+	try {
+		const first = new SqliteTransactionRepository(filename)
+		const saved = await first.save({
+			amountCents: 2599,
+			direction: 'debit',
+			counterparty: 'Northwind Books',
+		})
+		await first.destroy()
+		await first.destroy()
+
+		const second = new SqliteTransactionRepository(filename)
+		try {
+			expect(await second.findById(saved.transactionId)).toEqual(saved)
+		} finally {
+			await second.destroy()
+		}
+	} finally {
+		await rm(directory, { recursive: true, force: true })
+	}
+})
+```
+
+To reset local tutorial data, stop the application and delete
+`var/example-bank.sqlite`. Do not delete an open database file.

@@ -1,0 +1,185 @@
+---
+title: Generate Identity session commands
+description: Use the PURISTA CLI and command builders to declare public, protected, and internal session operations.
+order: 10
+kind: lesson
+status: published
+---
+
+Generate one service for the identity capability. BankProfile does not own
+credentials, and Transaction does not own sessions.
+
+The three browser operations are login, current session, and logout. Login is
+explicitly public. Current session and logout keep the builder default, which
+is protected. Resolve session has no HTTP exposure and is available only as an
+internal PURISTA command.
+
+The schemas make the opaque token a parameter of protected Identity commands.
+The handlers use the session support built on the next page, so complete that
+page before running the project.
+
+
+```bash title="Generate the Identity service" replay="project"
+npm run add:service -- identity --description "Authenticate local users and own sessions" --non-interactive
+```
+
+```bash title="Generate the Identity commands" replay="project"
+npm run add:command -- login --service identity --service-version 1 --description "Create a local session" --non-interactive
+npm run add:command -- get-current-session --service identity --service-version 1 --description "Read the current session" --non-interactive
+npm run add:command -- logout --service identity --service-version 1 --description "Remove the current session" --non-interactive
+npm run add:command -- resolve-session --service identity --service-version 1 --description "Resolve an opaque session token" --non-interactive
+```
+
+```ts title="src/service/identity/v1/command/login/schema.ts" write
+import { z } from 'zod'
+
+export const identityV1LoginInputParameterSchema = z.object({})
+export const identityV1LoginInputPayloadSchema = z.object({
+	username: z.string().min(1),
+	password: z.string().min(1),
+})
+export const identityV1LoginOutputPayloadSchema = z.object({
+	sessionToken: z.uuid(),
+	displayName: z.string(),
+	expiresAt: z.number().int().positive(),
+})
+```
+
+```ts title="src/service/identity/v1/command/getCurrentSession/schema.ts" write
+import { z } from 'zod'
+import { sessionRecordSchema } from '../../session.js'
+
+export const identityV1GetCurrentSessionInputParameterSchema = z.object({ sessionToken: z.uuid() })
+export const identityV1GetCurrentSessionInputPayloadSchema = z.undefined()
+export const identityV1GetCurrentSessionOutputPayloadSchema = sessionRecordSchema
+```
+
+```ts title="src/service/identity/v1/command/logout/schema.ts" write
+import { z } from 'zod'
+
+export const identityV1LogoutInputParameterSchema = z.object({ sessionToken: z.uuid() })
+export const identityV1LogoutInputPayloadSchema = z.undefined()
+export const identityV1LogoutOutputPayloadSchema = z.object({ loggedOut: z.literal(true) })
+```
+
+```ts title="src/service/identity/v1/command/resolveSession/schema.ts" write
+import { z } from 'zod'
+import { sessionRecordSchema } from '../../session.js'
+
+export const identityV1ResolveSessionInputParameterSchema = z.object({ sessionToken: z.uuid() })
+export const identityV1ResolveSessionInputPayloadSchema = z.undefined()
+export const identityV1ResolveSessionOutputPayloadSchema = sessionRecordSchema
+```
+
+```ts title="src/service/identity/v1/command/login/loginCommandBuilder.ts" write
+import { randomUUID } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { sessionStateKey } from '../../session.js'
+import {
+	identityV1LoginInputParameterSchema,
+	identityV1LoginInputPayloadSchema,
+	identityV1LoginOutputPayloadSchema,
+} from './schema.js'
+
+export const loginCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('login', 'Create a local session')
+	.addPayloadSchema(identityV1LoginInputPayloadSchema)
+	.addParameterSchema(identityV1LoginInputParameterSchema)
+	.addOutputSchema(identityV1LoginOutputPayloadSchema)
+	.exposeAsHttpEndpoint('POST', 'session/login')
+	.makeEndpointPublic()
+	.setCommandFunction(async function (context, payload) {
+		const identity = await context.resources.identityProvider.authenticate(payload.username, payload.password)
+		if (!identity) throw new HandledError(StatusCode.Unauthorized, 'Invalid local credentials')
+
+		const sessionToken = randomUUID()
+		const expiresAt = Date.now() + this.config.sessionTtlMs
+		await context.states.setState(sessionStateKey(sessionToken), { ...identity, expiresAt })
+		return { sessionToken, displayName: identity.displayName, expiresAt }
+	})
+```
+
+```ts title="src/service/identity/v1/command/getCurrentSession/getCurrentSessionCommandBuilder.ts" write
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { readActiveSession } from '../../session.js'
+import {
+	identityV1GetCurrentSessionInputParameterSchema,
+	identityV1GetCurrentSessionInputPayloadSchema,
+	identityV1GetCurrentSessionOutputPayloadSchema,
+} from './schema.js'
+
+export const getCurrentSessionCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('getCurrentSession', 'Read the current session')
+	.addPayloadSchema(identityV1GetCurrentSessionInputPayloadSchema)
+	.addParameterSchema(identityV1GetCurrentSessionInputParameterSchema)
+	.addOutputSchema(identityV1GetCurrentSessionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'session')
+	.setCommandFunction(async function (context, _payload, parameter) {
+		return readActiveSession(context.states, parameter.sessionToken)
+	})
+```
+
+```ts title="src/service/identity/v1/command/logout/logoutCommandBuilder.ts" write
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { sessionStateKey } from '../../session.js'
+import {
+	identityV1LogoutInputParameterSchema,
+	identityV1LogoutInputPayloadSchema,
+	identityV1LogoutOutputPayloadSchema,
+} from './schema.js'
+
+export const logoutCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('logout', 'Remove the current session')
+	.addPayloadSchema(identityV1LogoutInputPayloadSchema)
+	.addParameterSchema(identityV1LogoutInputParameterSchema)
+	.addOutputSchema(identityV1LogoutOutputPayloadSchema)
+	.exposeAsHttpEndpoint('DELETE', 'session')
+	.setCommandFunction(async function (context, _payload, parameter) {
+		await context.states.removeState(sessionStateKey(parameter.sessionToken))
+		return { loggedOut: true as const }
+	})
+```
+
+```ts title="src/service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.ts" write
+import { identityV1ServiceBuilder } from '../../identityV1ServiceBuilder.js'
+import { readActiveSession } from '../../session.js'
+import {
+	identityV1ResolveSessionInputParameterSchema,
+	identityV1ResolveSessionInputPayloadSchema,
+	identityV1ResolveSessionOutputPayloadSchema,
+} from './schema.js'
+
+export const resolveSessionCommandBuilder = identityV1ServiceBuilder
+	.getCommandBuilder('resolveSession', 'Resolve an opaque session token')
+	.addPayloadSchema(identityV1ResolveSessionInputPayloadSchema)
+	.addParameterSchema(identityV1ResolveSessionInputParameterSchema)
+	.addOutputSchema(identityV1ResolveSessionOutputPayloadSchema)
+	.setCommandFunction(async function (context, _payload, parameter) {
+		return readActiveSession(context.states, parameter.sessionToken)
+	})
+```
+
+```ts title="src/service/identity/v1/identityV1Service.ts" write
+import { getCurrentSessionCommandBuilder } from './command/getCurrentSession/getCurrentSessionCommandBuilder.js'
+import { loginCommandBuilder } from './command/login/loginCommandBuilder.js'
+import { logoutCommandBuilder } from './command/logout/logoutCommandBuilder.js'
+import { resolveSessionCommandBuilder } from './command/resolveSession/resolveSessionCommandBuilder.js'
+import { identityV1ServiceBuilder } from './identityV1ServiceBuilder.js'
+
+export const identityV1Service = identityV1ServiceBuilder.addCommandDefinition(
+	loginCommandBuilder.getDefinition(),
+	getCurrentSessionCommandBuilder.getDefinition(),
+	logoutCommandBuilder.getDefinition(),
+	resolveSessionCommandBuilder.getDefinition(),
+)
+```
+
+Only login calls makeEndpointPublic. Hono will therefore run protection middleware for the other exposed commands.
+
+Replace the generated placeholder tests with the focused state and endpoint
+tests on the following pages:
+
+```bash title="Remove generated Identity placeholder tests" replay="project"
+find src/service/identity -name '*.test.ts' -delete
+```

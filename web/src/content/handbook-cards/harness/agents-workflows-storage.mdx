@@ -1,0 +1,187 @@
+---
+title: Agents, Workflows & Storage
+description: Keep model loops focused and use typed workflows for the application-owned process around them.
+---
+
+## Direct agent or workflow?
+
+Use an agent when one bounded model loop can complete the task. Use a workflow
+when application code must sequence agents, fan out work, checkpoint steps, or
+wait for an external decision.
+
+Definitions are immutable. A workflow receives only the agents listed in its
+`agents` array, and each call needs a stable `callId`.
+
+## Define and run one agent
+
+```ts title="Define and instantiate a claims agent"
+import { defineAgent, defineHarness } from '@purista/harness'
+
+const claimsSupport = defineAgent('claimsSupport', {
+	model: 'answering',
+  input: z.object({ question: z.string().min(1) }),
+  output: z.object({ answer: z.string() }),
+  instructions: 'Answer claims questions from approved information.',
+  prompt: input => ({ role: 'user', content: input.question }),
+})
+
+const definition = defineHarness({ name: 'claims' }).addAgent(claimsSupport)
+const harness = await definition.getInstance({
+  models: { answering: { provider, model: 'provider-model' } },
+})
+```
+
+Use a privacy-safe application session id. One session permits one active run;
+a concurrent call fails with `SessionBusyError`.
+
+```ts title="Run and release a session"
+const session = await harness.getSession(`claims:${claimId}:${conversationId}`)
+try {
+  const outcome = await session.agents.claimsSupport.run(
+    { question },
+    { timeoutMs: 30_000, idempotencyKey: requestId, signal: request.signal },
+  )
+  if (outcome.status === 'completed') return outcome.output
+  return handleInterrupt(outcome.interrupt)
+} finally {
+  await session.release()
+}
+```
+
+A stable idempotency key can replay a completed agent call. A tool or
+application API still needs its own idempotency boundary for external effects.
+Use `session.destroy()` only for deliberate deletion. Close the Harness
+instance during application shutdown.
+
+## Stream without coupling to HTTP
+
+Harness streams portable execution events. The application maps them to HTTP,
+SSE, WebSocket, or another transport.
+
+```ts title="Consume portable run events"
+for await (const event of session.agents.claimsSupport.stream({ question })) {
+  if (event.type === 'tool.started') auditToolStart(event.toolId)
+  if (event.type === 'run.finished') sendToClient(event.outcome)
+}
+```
+
+## Coordinate agents in a workflow
+
+```ts title="Define a typed incident review workflow"
+const facts = defineAgent('facts', {
+  model: 'fast',
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({ facts: z.array(z.string()) }),
+  instructions: 'Extract only concrete, testable facts.',
+})
+
+const risk = defineAgent('risk', {
+  model: 'fast',
+  input: z.object({ facts: z.array(z.string()) }),
+  output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
+  instructions: 'Classify operational risk from the supplied facts only.',
+})
+
+const reviewIncident = defineWorkflow('reviewIncident', {
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({
+    facts: z.array(z.string()),
+    level: z.enum(['low', 'medium', 'high']),
+  }),
+  agents: [facts, risk],
+  agentCalls: { maxCalls: 2, maxParallel: 2 },
+  async handler(context) {
+    const factResult = await context.agents.facts.run(
+      { report: context.input.report },
+      { callId: 'extractFacts' },
+    )
+    const riskResult = await context.agents.risk.run(
+      { facts: factResult.facts },
+      { callId: 'classifyRisk' },
+    )
+    return { ...factResult, ...riskResult }
+  },
+})
+
+const reviewDefinition = defineHarness({ name: 'incidentReview' })
+  .addWorkflow(reviewIncident)
+```
+
+The two agents are private workflow dependencies because only the workflow is
+added as a root. Bind the model alias at runtime:
+
+```ts title="Bind workflow models and invoke the root"
+const reviewHarness = await reviewDefinition.getInstance({
+  models: { fast: { provider, model: 'provider-model' } },
+})
+const reviewSession = await reviewHarness.getSession(`incident:${incidentId}`)
+const outcome = await reviewSession.workflows.reviewIncident.run({ report })
+if (outcome.status === 'completed' && outcome.output.level === 'high') {
+  await incidentService.requestHumanReview(outcome.output)
+}
+```
+
+The workflow makes the deterministic escalation decision. A model does not
+grant business approval.
+
+## Fan out bounded work
+
+```ts title="Review documents with bounded parallel calls"
+const reviewDocuments = defineWorkflow('reviewDocuments', {
+  input: z.object({ documents: z.array(z.string()).min(1) }),
+  output: z.object({ reviews: z.array(z.object({ recommendation: z.string() })) }),
+  agents: [reviewer],
+  agentCalls: { maxCalls: 10, maxParallel: 2 },
+  async handler(context) {
+    const reviews = await context.fanOut(
+      context.input.documents,
+      (document, index) =>
+        context.agents.reviewer.run({ document }, { callId: `review:${index}` }),
+      { concurrency: 2 },
+    )
+    return { reviews }
+  },
+})
+```
+
+`fanOut` preserves input order and clamps concurrency to the workflow limit.
+Use `Promise.allSettled` with a typed partial-result schema when individual
+failure is acceptable.
+
+## Background child tasks
+
+A child task has isolated history and sandbox state. Declare the agent on the
+workflow and start it with a stable call id:
+
+```ts title="Start and retrieve a child task"
+const task = await context.childTasks.start(
+  'reviewer',
+  { documentId: context.input.documentId },
+  { callId: 'backgroundReview', timeoutMs: 60_000 },
+)
+
+// A later request can use the same session.
+const liveTask = await session.childTasks.get(task.id)
+const review = await liveTask?.result()
+```
+
+A continuable child task stays in process. Use a queue or durable workflow for
+work that must survive a restart.
+
+## Storage and lifecycle
+
+Use `HarnessStorage` for sessions, history, runs, events, checkpoints, and
+external waits. Use a `MemoryEngine` for deliberately scoped facts. Use a
+`DurableWorkspace` for resumable files. Supply each required adapter through
+`getInstance(...)`; the definition's inferred requirements make missing
+bindings fail before work starts.
+
+| Need | API or adapter |
+| --- | --- |
+| Release live resources and retain stored history | `session.release()` |
+| Delete a session and its retained data | `session.destroy()` |
+| Recover a workflow after restart | Persistent `HarnessStorage` and a stable durable run id |
+| Continue work after an outage | Application queue or worker |
+| Shut down runtime adapters | `harness.close()` |
+
+Continue with [Guardrails & Governance](/handbook/harness/guardrails-governance/).

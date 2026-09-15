@@ -1,187 +1,413 @@
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-
-import type { Options } from 'code-block-writer'
-import { Project, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
-
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { dirname, join, relative, resolve, sep } from 'node:path'
+import { Node, Project, QuoteKind, SyntaxKind } from 'ts-morph'
+import { z } from 'zod'
+import { generatedDependencyVersion } from '../create/generatedDependencyVersions.js'
 import { camelCase } from './change-case.js'
-import { getAgentBuilderFileContent } from './content/agent/getAgentBuilderFileContent.js'
-import { getAgentTestFileContent } from './content/agent/getAgentTestFileContent.js'
-import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
-import type { PuristaConfig } from './loadPuristaConfig.js'
-import type { PuristaProjectInfo } from './scanPuristaProject.js'
+import {
+	type AgentHttpProjection,
+	getAgentHttpProjectionFileContent,
+	getAgentHttpProjectionNames,
+	getAgentHttpProjectionTestFileContent,
+} from './content/agent/getAgentHttpProjectionFileContent.js'
+import { getHarnessAgentFileContent } from './content/agent/getHarnessAgentFileContent.js'
+import { getHarnessDefinitionTestFileContent } from './content/agent/getHarnessDefinitionTestFileContent.js'
+import {
+	getHarnessPaths,
+	type HarnessScaffoldingInput,
+	importSpecifier,
+	prepareHarnessScaffold,
+	writeHarnessScaffold,
+} from './harnessScaffolding.js'
 
-const addAgentDefinitionToService = async (input: {
-	serviceFile: string
-	importFile: string
-	importDefinition: string
-	serviceBuilderName: string
-}) => {
-	if (!existsSync(input.serviceFile)) {
-		throw new Error(`Service file not found: ${input.serviceFile}`)
-	}
+const packageSchema = z.object({ dependencies: z.record(z.string(), z.string()).optional() }).passthrough()
 
-	const project = new Project({ skipFileDependencyResolution: true, skipLoadingLibFiles: true })
-	const sourceFile = project.addSourceFileAtPathIfExists(input.serviceFile)
-	if (!sourceFile) {
-		throw new Error(`Failed to load service file: ${input.serviceFile}`)
-	}
-
-	const moduleSpecifier = input.importFile.replace(/\.ts$/, '.js')
-	const existingImport = sourceFile.getImportDeclaration(
-		declaration => declaration.getModuleSpecifierValue() === moduleSpecifier,
-	)
-	if (existingImport) {
-		const hasNamedImport = existingImport
-			.getNamedImports()
-			.some(namedImport => namedImport.getName() === input.importDefinition)
-		if (!hasNamedImport) {
-			existingImport.addNamedImport(input.importDefinition)
-		}
-	} else {
-		sourceFile.addImportDeclaration({
-			namedImports: [input.importDefinition],
-			moduleSpecifier,
-		})
-	}
-
-	let arrayDeclaration = sourceFile.getVariableDeclaration('agentDefinitions')
-	if (!arrayDeclaration) {
-		const serviceBuilderImport = sourceFile.getImportDeclaration(declaration =>
-			declaration.getNamedImports().some(namedImport => namedImport.getName() === input.serviceBuilderName),
-		)
-		sourceFile.insertVariableStatement(serviceBuilderImport ? serviceBuilderImport.getChildIndex() + 2 : 0, {
-			declarationKind: VariableDeclarationKind.Const,
-			declarations: [
-				{
-					name: 'agentDefinitions',
-					type: `ReturnType<typeof ${input.importDefinition}['getDefinition']>[]`,
-					initializer: '[]',
-				},
-			],
-		})
-		arrayDeclaration = sourceFile.getVariableDeclarationOrThrow('agentDefinitions')
-	}
-
-	const arrayLiteralExpression = arrayDeclaration.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
-	if (!arrayLiteralExpression) {
-		throw new Error(`Variable "agentDefinitions" is not an array literal in ${input.serviceFile}`)
-	}
-
-	const definitionExpression = `${input.importDefinition}.getDefinition()`
-	const normalizedDefinitionExpression = definitionExpression.replace(/\s+/g, '')
-	const alreadyDefined = arrayLiteralExpression.getElements().some(element => {
-		const normalizedElement = element.getText().replace(/\s+/g, '')
-		return normalizedElement === normalizedDefinitionExpression
+const readTypeScriptFiles = (directory: string): string[] => {
+	if (!existsSync(directory)) return []
+	return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+		const path = join(directory, entry.name)
+		return entry.isDirectory() ? readTypeScriptFiles(path) : entry.isFile() && entry.name.endsWith('.ts') ? [path] : []
 	})
-	if (!alreadyDefined) {
-		arrayLiteralExpression.addElement(definitionExpression)
-	}
-
-	const serviceExport = sourceFile.getVariableDeclaration(
-		declaration =>
-			declaration.getName() !== input.serviceBuilderName &&
-			(declaration.getInitializer()?.getText().startsWith(input.serviceBuilderName) ?? false),
-	)
-	if (serviceExport) {
-		const statement = serviceExport.getVariableStatementOrThrow()
-		const text = statement.getText()
-		if (!text.includes('.addAgentDefinition(...agentDefinitions)')) {
-			statement.replaceWithText(`${text}\n\t.addAgentDefinition(...(await Promise.all(agentDefinitions)))`)
-		}
-	}
-
-	await sourceFile.save()
 }
 
-/**
- * Add an attached AI agent to an existing PURISTA service version.
- *
- * Generates an agent queue builder using `.getAgentQueueBuilder(...)`, a harness
- * test, an index export, and appends the async agent definition to the service.
- */
-export const addPuristaAgent = async (input: {
-	projectRootPath?: string
-	puristaConfig: PuristaConfig
-	puristaProject: PuristaProjectInfo
-	serviceName: string
-	serviceVersion: string
-	/** Logical agent name, for example `support agent`. */
-	agentName: string
-	/** Human-readable agent description used by the agent queue builder. */
-	agentDescription: string
-	/** Optional success event emitted after agent execution. */
-	responseEventName?: string
-	codeWriterOptions?: Partial<Options>
-}) => {
-	const projectPath = input.projectRootPath ?? process.cwd()
-	const serviceBasePath = input.puristaConfig.servicePath ?? 'src/service'
-	const serviceEntry = input.puristaProject.services[input.serviceName][input.serviceVersion]
-	const agentDirName = convertToProjectFileCasing(input.agentName, input.puristaConfig)
-	const serviceBuilderTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
-	const serviceBuilderName = camelCase(serviceBuilderTemplate)
-	const agentPath = join(
-		projectPath,
-		serviceBasePath,
-		input.serviceName,
-		`v${input.serviceVersion}`,
-		'agent',
-		agentDirName,
+const unwrap = (node: Node): Node => {
+	if (
+		Node.isParenthesizedExpression(node) ||
+		Node.isAsExpression(node) ||
+		Node.isNonNullExpression(node) ||
+		Node.isTypeAssertion(node) ||
+		Node.isSatisfiesExpression(node)
 	)
+		return unwrap(node.getExpression())
+	return node
+}
 
-	if (existsSync(agentPath)) {
-		throw new Error(`Agent "${input.agentName}" already exists for ${input.serviceName} v${input.serviceVersion}.`)
+const canonicalBuilderRoot = (
+	node: Node,
+	source: ReturnType<Project['createSourceFile']>,
+	expected: string,
+	seen = new Set<Node>(),
+): boolean => {
+	const value = unwrap(node)
+	if (seen.has(value)) return false
+	seen.add(value)
+	if (Node.isCallExpression(value)) return canonicalBuilderRoot(value.getExpression(), source, expected, seen)
+	if (Node.isPropertyAccessExpression(value) || Node.isElementAccessExpression(value))
+		return canonicalBuilderRoot(value.getExpression(), source, expected, seen)
+	if (!Node.isIdentifier(value)) return false
+	const declarations = value.getSymbol()?.getDeclarations()
+	if (
+		declarations?.some(
+			declaration =>
+				Node.isImportSpecifier(declaration) &&
+				declaration.getName() === expected &&
+				declaration.getImportDeclaration().getModuleSpecifierValue().startsWith('.'),
+		)
+	)
+		return true
+	if (declarations?.length !== 1 || !Node.isVariableDeclaration(declarations[0])) return false
+	const initializer = declarations[0].getInitializer()
+	return initializer !== undefined && declarations[0].getSourceFile() === source
+		? canonicalBuilderRoot(initializer, source, expected, seen)
+		: false
+}
+
+const staticLiteral = (node: Node | undefined) =>
+	node && (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node))
+		? node.getLiteralValue()
+		: undefined
+
+const assertProjectionAvailable = (
+	serviceDirectory: string,
+	serviceBuilderIdentifier: string,
+	targetName: string,
+	route: string,
+	directory: string,
+) => {
+	if (existsSync(directory))
+		throw new Error(`HTTP projection directory already exists: ${directory}. No files were changed.`)
+	for (const path of readTypeScriptFiles(serviceDirectory)) {
+		const content = readFileSync(path, 'utf8')
+		const project = new Project({
+			useInMemoryFileSystem: true,
+			skipFileDependencyResolution: true,
+			skipLoadingLibFiles: true,
+		})
+		const source = project.createSourceFile(path, content)
+		if (source.getPreEmitDiagnostics().some(diagnostic => diagnostic.getCode() >= 1000 && diagnostic.getCode() < 2000))
+			throw new Error(`Cannot safely inspect invalid TypeScript in ${path}. No files were changed.`)
+		for (const call of source.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+			const expression = unwrap(call.getExpression())
+			if (
+				Node.isElementAccessExpression(expression) &&
+				canonicalBuilderRoot(expression, source, serviceBuilderIdentifier)
+			)
+				throw new Error(`Cannot statically prove a service builder member in ${path}. No files were changed.`)
+			if (!Node.isPropertyAccessExpression(expression)) continue
+			const member = expression.getName()
+			if (
+				!['getCommandBuilder', 'getStreamBuilder', 'exposeAsHttpEndpoint', 'exposeAsHttpStreamEndpoint'].includes(
+					member,
+				)
+			)
+				continue
+			if (!canonicalBuilderRoot(expression.getExpression(), source, serviceBuilderIdentifier)) continue
+			if (member === 'getCommandBuilder' || member === 'getStreamBuilder') {
+				const id = staticLiteral(call.getArguments()[0])
+				if (id === undefined)
+					throw new Error(`Cannot statically prove a service target id in ${path}. No files were changed.`)
+				if (id === targetName)
+					throw new Error(`Target id "${targetName}" already exists in ${path}. No files were changed.`)
+			} else {
+				const method = staticLiteral(call.getArguments()[0])
+				const existingRoute = staticLiteral(call.getArguments()[1])
+				if (method === undefined || existingRoute === undefined)
+					throw new Error(`Cannot statically prove an HTTP route in ${path}. No files were changed.`)
+				if (method === 'POST' && existingRoute === route)
+					throw new Error(`HTTP route "POST ${route}" already exists in ${path}. No files were changed.`)
+			}
+		}
 	}
+}
 
-	await mkdir(agentPath, { recursive: true })
-
-	const serviceBuilderFilePath = join(projectPath, serviceBasePath, serviceEntry.builderFile)
-	const serviceBuilderContent = await readFile(serviceBuilderFilePath, 'utf-8')
-	const normalizedBuilderContent = serviceBuilderContent.replace(
-		/export const (\w+) = new ServiceBuilder\(([^)]+)\)\.setConfigSchema\(([^)]+)\)\s*$/m,
-		(_match, builderName: string, serviceInfoName: string, configSchemaName: string) =>
-			`const ${builderName}Instance = new ServiceBuilder(${serviceInfoName})\n${builderName}Instance.setConfigSchema(${configSchemaName})\n\nexport const ${builderName} = ${builderName}Instance`,
-	)
-	if (normalizedBuilderContent !== serviceBuilderContent) {
-		await writeFile(serviceBuilderFilePath, normalizedBuilderContent)
+const assertMountedTargetAvailable = (harnessFile: string, targetName: string) => {
+	if (!existsSync(harnessFile)) return
+	const project = new Project({ skipFileDependencyResolution: true, skipLoadingLibFiles: true })
+	const source = project.addSourceFileAtPath(harnessFile)
+	for (const call of source.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+		const expression = unwrap(call.getExpression())
+		if (!Node.isPropertyAccessExpression(expression) || !['addAgent', 'addWorkflow'].includes(expression.getName()))
+			continue
+		const argument = call.getArguments()[0]
+		if (!argument || !Node.isIdentifier(argument))
+			throw new Error(`Cannot statically prove a mounted Harness target in ${harnessFile}. No files were changed.`)
+		const declaration = argument.getSymbol()?.getDeclarations().find(Node.isImportSpecifier)
+		if (!declaration)
+			throw new Error(`Cannot statically prove a mounted Harness target in ${harnessFile}. No files were changed.`)
+		const moduleSpecifier = declaration.getImportDeclaration().getModuleSpecifierValue()
+		if (!moduleSpecifier.startsWith('.'))
+			throw new Error(`Cannot statically prove a mounted Harness target in ${harnessFile}. No files were changed.`)
+		const targetFile = resolve(dirname(harnessFile), moduleSpecifier.replace(/\.js$/, '.ts'))
+		if (!existsSync(targetFile))
+			throw new Error(`Cannot statically prove a mounted Harness target in ${harnessFile}. No files were changed.`)
+		const targetSource = project.addSourceFileAtPath(targetFile)
+		const targetDeclaration = targetSource.getVariableDeclaration(argument.getText())
+		const targetInitializer = targetDeclaration?.getInitializer()
+		if (!targetInitializer || !Node.isCallExpression(targetInitializer))
+			throw new Error(`Cannot statically prove a mounted Harness target in ${targetFile}. No files were changed.`)
+		const factory = unwrap(targetInitializer.getExpression())
+		if (!Node.isIdentifier(factory) || !['defineAgent', 'defineWorkflow'].includes(factory.getText()))
+			throw new Error(`Cannot statically prove a mounted Harness target in ${targetFile}. No files were changed.`)
+		const id = staticLiteral(targetInitializer.getArguments()[0])
+		if (id === undefined)
+			throw new Error(`Cannot statically prove a mounted Harness target id in ${targetFile}. No files were changed.`)
+		if (id === targetName)
+			throw new Error(
+				`Mounted Harness target id "${targetName}" already exists in ${targetFile}. No files were changed.`,
+			)
 	}
+}
 
-	const agentIdentifier = /agent$/i.test(input.agentName) ? input.agentName : `${input.agentName} agent`
-	const builderFileName = convertToProjectFileCasing(agentIdentifier, input.puristaConfig)
-	const builderImportName = `./${builderFileName}.js`
-	const agentBuilderName = `${camelCase(agentIdentifier)}Builder`
-
-	await writeFile(
-		join(agentPath, `${builderFileName}.ts`),
-		getAgentBuilderFileContent({
-			agentName: input.agentName,
-			agentDescription: input.agentDescription,
-			serviceName: input.serviceName,
-			serviceVersion: input.serviceVersion,
-			responseEventName: input.responseEventName,
-			puristaConfig: input.puristaConfig,
-			codeWriterOptions: input.codeWriterOptions,
-		}),
-	)
-
-	await writeFile(
-		join(agentPath, `${builderFileName}.test.ts`),
-		getAgentTestFileContent({
-			agentName: input.agentName,
-			builderImportName,
-			codeWriterOptions: input.codeWriterOptions,
-		}),
-	)
-
-	await writeFile(join(agentPath, 'index.ts'), `export { ${agentBuilderName} } from './${builderFileName}.js'\n`)
-
-	await addAgentDefinitionToService({
-		serviceFile: join(projectPath, serviceBasePath, serviceEntry.serviceFile),
-		importFile: `./agent/${agentDirName}/${builderFileName}.ts`,
-		importDefinition: agentBuilderName,
-		serviceBuilderName,
+const addProjectionToService = (
+	servicePath: string,
+	content: string,
+	input: { kind: 'command' | 'stream'; builderIdentifier: string; builderFile: string },
+) => {
+	const project = new Project({
+		useInMemoryFileSystem: true,
+		skipFileDependencyResolution: true,
+		skipLoadingLibFiles: true,
+		manipulationSettings: { quoteKind: QuoteKind.Single },
 	})
+	const source = project.createSourceFile(servicePath, content)
+	const arrayName = input.kind === 'command' ? 'commandDefinitions' : 'streamDefinitions'
+	const array = source.getVariableDeclaration(arrayName)?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
+	if (!array)
+		throw new Error(
+			`Variable "${arrayName}" is not a canonical array literal in ${servicePath}. No files were changed.`,
+		)
+	if (
+		source
+			.getImportDeclarations()
+			.some(declaration =>
+				declaration
+					.getNamedImports()
+					.some(named => (named.getAliasNode()?.getText() ?? named.getName()) === input.builderIdentifier),
+			)
+	)
+		throw new Error(
+			`Cannot import ${input.builderIdentifier} in ${servicePath}: that identifier already exists. No files were changed.`,
+		)
+	source.addImportDeclaration({
+		namedImports: [input.builderIdentifier],
+		moduleSpecifier: importSpecifier(dirname(servicePath), input.builderFile),
+	})
+	array.addElement(`${input.builderIdentifier}.getDefinition()`)
+	return source.getFullText().replace(/^ +(?=\t)/gm, '')
+}
 
-	return
+const bootstrapEntrypoint = (
+	entrypoint: string,
+	input: { serviceName: string; serviceVersion: string; modelAlias: string },
+): { content: string; createdProviderBinding: boolean } => {
+	if (!existsSync(entrypoint))
+		throw new Error(`Application entrypoint not found: ${entrypoint}. No files were changed.`)
+	const project = new Project({
+		useInMemoryFileSystem: true,
+		skipFileDependencyResolution: true,
+		skipLoadingLibFiles: true,
+		manipulationSettings: { quoteKind: QuoteKind.Single },
+	})
+	const source = project.createSourceFile(entrypoint, readFileSync(entrypoint, 'utf8'))
+	if (source.getPreEmitDiagnostics().some(diagnostic => diagnostic.getCode() >= 1000 && diagnostic.getCode() < 2000))
+		throw new Error(`Cannot safely edit invalid TypeScript in ${entrypoint}. No files were changed.`)
+	const serviceIdentifier = camelCase(`${input.serviceName} v${input.serviceVersion} service`)
+	const calls = source.getDescendantsOfKind(SyntaxKind.CallExpression).filter(call => {
+		const expression = call.getExpression()
+		return (
+			Node.isPropertyAccessExpression(expression) &&
+			expression.getName() === 'getInstance' &&
+			expression.getExpression().getText() === serviceIdentifier
+		)
+	})
+	if (calls.length !== 1 || ![1, 2].includes(calls[0].getArguments().length))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	if (calls[0].getArguments().length === 1) {
+		for (const name of ['openai', 'env']) {
+			if (source.getDescendantsOfKind(SyntaxKind.Identifier).some(identifier => identifier.getText() === name))
+				throw new Error(
+					`Cannot safely add runtime binding ${name} in ${entrypoint}: the identifier already exists. No files were changed.`,
+				)
+		}
+		source.addImportDeclaration({ namedImports: ['openai'], moduleSpecifier: '@purista/harness-openai' })
+		source.addImportDeclaration({ namedImports: ['env'], moduleSpecifier: './config/env.js' })
+		calls[0].addArgument(`{
+		ai: {
+			models: {
+				${input.modelAlias}: {
+					provider: openai({ apiKey: env.OPENAI_API_KEY }),
+					model: 'gpt-5-mini',
+				},
+			},
+		},
+	}`)
+		return { content: source.getFullText().replace(/^ +(?=\t)/gm, ''), createdProviderBinding: true }
+	}
+
+	const runtimeConfig = unwrap(calls[0].getArguments()[1])
+	if (!Node.isObjectLiteralExpression(runtimeConfig))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const aiProperty = runtimeConfig.getProperty('ai')
+	if (!aiProperty || !Node.isPropertyAssignment(aiProperty))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const ai = unwrap(aiProperty.getInitializerOrThrow())
+	if (!Node.isObjectLiteralExpression(ai))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const modelsProperty = ai.getProperty('models')
+	if (!modelsProperty || !Node.isPropertyAssignment(modelsProperty))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	const models = unwrap(modelsProperty.getInitializerOrThrow())
+	if (!Node.isObjectLiteralExpression(models))
+		throw new Error(`Cannot safely add the canonical ai.models bootstrap to ${entrypoint}. No files were changed.`)
+	if (models.getProperty(input.modelAlias))
+		return { content: readFileSync(entrypoint, 'utf8'), createdProviderBinding: false }
+	const existingBinding = models.getProperties()[0]
+	if (!existingBinding || !Node.isPropertyAssignment(existingBinding))
+		throw new Error(`Cannot safely reuse an existing ai.models binding in ${entrypoint}. No files were changed.`)
+	models.addPropertyAssignment({
+		name: input.modelAlias,
+		initializer: existingBinding.getInitializerOrThrow().getText(),
+	})
+	return { content: source.getFullText().replace(/^ +(?=\t)/gm, ''), createdProviderBinding: false }
+}
+
+const envFileContent = `import { z } from 'zod'
+
+const envSchema = z.object({
+\tOPENAI_API_KEY: z.string().min(1),
+})
+
+export const env = envSchema.parse(process.env)
+`
+
+/** Generate a colocated string agent, optional protected HTTP projection, and exact runtime model bindings. */
+export const addPuristaAgent = async (
+	input: HarnessScaffoldingInput & {
+		agentName: string
+		agentDescription: string
+		modelAlias: string
+		http?: AgentHttpProjection
+	},
+) => {
+	if (!/^[a-z][A-Za-z0-9]{0,63}$/.test(input.modelAlias))
+		throw new Error(
+			'Model alias must be lower camel case with at most 64 ASCII letters or digits. No files were changed.',
+		)
+	const http = input.http ?? 'none'
+	const paths = getHarnessPaths(input)
+	const files = prepareHarnessScaffold(input, {
+		kind: 'Agent',
+		name: input.agentName,
+		content: getHarnessAgentFileContent(input),
+		testContent: importName =>
+			getHarnessDefinitionTestFileContent({
+				agentName: input.agentName,
+				agentImportName: importName,
+				modelAlias: input.modelAlias,
+				codeWriterOptions: input.codeWriterOptions,
+			}),
+	})
+	const packageFile = join(paths.projectPath, 'package.json')
+	const packagePlan = files.find(file => file.path === packageFile)
+	const servicePlan = files.find(file => file.path === paths.serviceFile)
+	if (!packagePlan || !servicePlan)
+		throw new Error('Internal error: incomplete Harness scaffold plan. No files were changed.')
+	const packageJson = packageSchema.parse(JSON.parse(packagePlan.content))
+	packageJson.dependencies = { ...packageJson.dependencies }
+	const warnings: string[] = []
+
+	if (http !== 'none') {
+		const names = getAgentHttpProjectionNames({ agentName: input.agentName, http, puristaConfig: input.puristaConfig })
+		const projectionDirectory = join(dirname(paths.serviceFile), names.kind, names.directoryName)
+		const projectionFile = join(projectionDirectory, `${names.builderFileName}.ts`)
+		assertProjectionAvailable(
+			dirname(paths.serviceFile),
+			paths.serviceBuilderIdentifier,
+			names.targetName,
+			names.route,
+			projectionDirectory,
+		)
+		assertMountedTargetAvailable(paths.harnessFile, names.targetName)
+		const agentFile = files.find(
+			file => file.path.includes(`${sep}harness${sep}agent${sep}`) && !file.path.endsWith('.test.ts'),
+		)?.path
+		if (!agentFile) throw new Error('Internal error: generated agent definition is missing. No files were changed.')
+		files.unshift(
+			{
+				path: projectionFile,
+				content: getAgentHttpProjectionFileContent({
+					...input,
+					http,
+					agentImport: importSpecifier(projectionDirectory, agentFile),
+				}),
+			},
+			{
+				path: projectionFile.replace(/\.ts$/, '.test.ts'),
+				content: getAgentHttpProjectionTestFileContent({
+					serviceName: input.serviceName,
+					serviceVersion: input.serviceVersion,
+					agentName: input.agentName,
+					http,
+					puristaConfig: input.puristaConfig,
+					agentImport: importSpecifier(projectionDirectory, agentFile),
+					codeWriterOptions: input.codeWriterOptions,
+				}),
+			},
+		)
+		servicePlan.content = addProjectionToService(paths.serviceFile, servicePlan.content, {
+			kind: names.kind,
+			builderIdentifier: names.builderIdentifier,
+			builderFile: projectionFile,
+		})
+		if (http === 'stream') {
+			packageJson.dependencies['@purista/harness-ai-sdk-ui'] = generatedDependencyVersion('@purista/harness-ai-sdk-ui')
+			packageJson.dependencies.ai = generatedDependencyVersion('ai')
+		}
+	}
+
+	const entrypoint = join(paths.projectPath, 'src', 'index.ts')
+	if (existsSync(entrypoint)) {
+		const currentEntrypoint = readFileSync(entrypoint, 'utf8')
+		const bootstrap = bootstrapEntrypoint(entrypoint, input)
+		const envFile = join(paths.projectPath, 'src', 'config', 'env.ts')
+		if (bootstrap.createdProviderBinding) {
+			if (existsSync(envFile)) throw new Error(`Environment schema already exists: ${envFile}. No files were changed.`)
+			const envExample = join(paths.projectPath, '.env.example')
+			const currentEnvExample = existsSync(envExample) ? readFileSync(envExample, 'utf8') : ''
+			if (/^OPENAI_API_KEY=/m.test(currentEnvExample))
+				throw new Error(`OPENAI_API_KEY already exists in ${envExample}. No files were changed.`)
+			files.push(
+				{ path: envFile, content: envFileContent },
+				{
+					path: envExample,
+					content: `${currentEnvExample}${currentEnvExample && !currentEnvExample.endsWith('\n') ? '\n' : ''}OPENAI_API_KEY=\n`,
+				},
+			)
+			packageJson.dependencies['@purista/harness-openai'] = generatedDependencyVersion('@purista/harness-openai')
+		}
+		if (bootstrap.content !== currentEntrypoint) files.push({ path: entrypoint, content: bootstrap.content })
+	} else {
+		warnings.push(
+			`No standard src/index.ts entrypoint was found. Configure the mounted service with ai.models.${input.modelAlias} and a model provider before startup.`,
+		)
+	}
+	packagePlan.content = `${JSON.stringify(packageJson, null, '\t')}\n`
+
+	for (const file of files) {
+		if (relative(resolve(paths.projectPath), resolve(file.path)).startsWith('..'))
+			throw new Error(`Generated path is outside the project: ${file.path}. No files were changed.`)
+		if (files.filter(candidate => resolve(candidate.path) === resolve(file.path)).length !== 1)
+			throw new Error(`Generated path collides inside the mutation plan: ${file.path}. No files were changed.`)
+	}
+	return { ...(await writeHarnessScaffold(files)), warnings }
 }

@@ -1,10 +1,19 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import type { AgentInvokeMap, AllowedAgentDefinition } from '../../AgentQueueBuilder/types.js'
+import type { AnyHarnessTargetContract } from '@purista/harness'
+import type { HarnessNestedTargetInvoker } from '@purista/harness/integrator'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
+import { createHarnessInvocationProxy, getHarnessQueueInvokes } from '../../HarnessMount/invocation.js'
+import type {
+	HarnessNestedTargetDeclarations,
+	MountedHarnessTargetProjection,
+	PuristaHostContextRequest,
+	PuristaHostToolRuntimeDefinition,
+	PuristaToolContext,
+} from '../../HarnessMount/types.js'
 import type { Infer, Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import { puristaVersion } from '../../version.js'
@@ -36,7 +45,7 @@ import type { StateGetterFunction } from '../StateStore/types/StateGetterFunctio
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
 import type { ContextBase } from '../types/ContextBase.js'
 import type { CustomMessage } from '../types/CustomMessage.js'
-import type { Command } from '../types/commandType/Command.js'
+import type { Command, HarnessTransportEnvelope } from '../types/commandType/Command.js'
 import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
 import type { CommandDefinitionListResolved } from '../types/commandType/CommandDefinitionList.js'
 import type { CommandFunctionContext } from '../types/commandType/CommandFunctionContext.js'
@@ -60,6 +69,7 @@ import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
 import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
 import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
 import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
+import type { QueueInvokeFunction } from '../types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
 import type { QueueJobStore } from '../types/queue/QueueJobStore.js'
@@ -185,6 +195,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
 	private readonly queueJobStore?: QueueJobStore
 	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
+	private harnessHostTools = new Map<string, PuristaHostToolRuntimeDefinition>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -231,6 +242,46 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 
 	get name() {
 		return `${this.info.serviceName}V${this.info.serviceVersion}`
+	}
+
+	/** @internal Bind service-owned host-tool declarations to exact mounted target projections before Harness starts. */
+	public bindHarnessHostTools(
+		definitions: ReadonlyMap<string, PuristaHostToolRuntimeDefinition>,
+		projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[],
+	): void {
+		for (const [toolId, definition] of definitions) {
+			this.assertHostNestedTargetBindings(toolId, 'agent', definition.agents, projections)
+			this.assertHostNestedTargetBindings(toolId, 'workflow', definition.workflows, projections)
+		}
+		this.harnessHostTools = new Map(definitions)
+	}
+
+	private assertHostNestedTargetBindings(
+		toolId: string,
+		kind: 'agent' | 'workflow',
+		declarations: HarnessNestedTargetDeclarations,
+		projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[],
+	): void {
+		for (const [serviceName, versions] of Object.entries(declarations)) {
+			for (const [serviceVersion, targets] of Object.entries(versions)) {
+				for (const [serviceTarget, contract] of Object.entries(targets)) {
+					const projection = projections.find(
+						entry =>
+							entry.target === contract &&
+							entry.target.kind === kind &&
+							entry.address.serviceName === serviceName &&
+							entry.address.serviceVersion === serviceVersion &&
+							entry.address.serviceTarget === serviceTarget,
+					)
+					if (!projection) {
+						throw new UnhandledError(
+							StatusCode.InternalServerError,
+							`Harness host tool "${toolId}" ${kind} invocation ${serviceName}/${serviceVersion}/${serviceTarget} has no matching mounted projection.`,
+						)
+					}
+				}
+			}
+		}
 	}
 
 	private getServiceMetricAttributes(serviceTarget?: string): PuristaMetricAttributes {
@@ -412,6 +463,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			receiver: EBMessageAddress,
 			invokePayload: Payload,
 			invokeparameter: Parameter,
+			harness?: HarnessTransportEnvelope,
 			contentType = 'application/json',
 			contentEncoding = 'utf-8',
 		): Promise<any> => {
@@ -485,6 +537,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 					},
 					principalId,
 					tenantId,
+					...(harness === undefined ? {} : { harness }),
 				})
 
 				const outputSchema =
@@ -1062,6 +1115,20 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 	}
 
+	private createQueueHeaders(
+		headers: Record<string, string> | undefined,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+	) {
+		const applicationHeaders = { ...headers }
+		delete applicationHeaders['purista.principalId']
+		delete applicationHeaders['purista.tenantId']
+		return {
+			...applicationHeaders,
+			...this.createQueueIdentityHeaders(principalId, tenantId),
+		}
+	}
+
 	private createQueueRuntimeCancellation(
 		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
 		lease: QueueLease,
@@ -1380,6 +1447,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		principalId?: PrincipalId,
 		tenantId?: TenantId,
 		options?: Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter'>,
+		allowRemote = false,
 	): Promise<QueueEnqueueResult> {
 		const descriptor = queueInvokes?.[queueName]
 		if (queueInvokes && !descriptor) {
@@ -1387,7 +1455,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 
 		const queueDefinition = this.getQueueDefinition(queueName)
-		if (!queueDefinition) {
+		if (!queueDefinition && !allowRemote) {
 			throw new UnhandledError(StatusCode.NotFound, `queue "${queueName}" is not registered in this service`)
 		}
 
@@ -1444,7 +1512,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				parameter: normalizedParameter,
 				delayMs: options?.delayMs,
 				idempotencyKey: options?.idempotencyKey,
-				headers: options?.headers,
+				headers: this.createQueueHeaders(options?.headers, principalId, tenantId),
 				maxAttempts: options?.maxAttempts ?? lifecycle.maxAttempts,
 				priority: options?.priority,
 				leaseTtlMs: options?.leaseTtlMs ?? lifecycle.visibilityTimeoutMs,
@@ -1477,6 +1545,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			receiver: EBMessageAddress,
 			streamPayload: Payload,
 			streamParameter: Parameter,
+			harness?: HarnessTransportEnvelope,
 			contentType = 'application/json',
 			contentEncoding = 'utf-8',
 		) => {
@@ -1524,6 +1593,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				},
 				principalId,
 				tenantId,
+				...(harness === undefined ? {} : { harness }),
 			}
 
 			const handle = await this.eventBridge.openStream(message)
@@ -1569,6 +1639,173 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 
 		return consumeStream.bind(this) as OpenStreamFunction
+	}
+
+	private getHarnessInvocationClients(
+		serviceTarget: string,
+		traceId: TraceId | undefined,
+		principalId: PrincipalId | undefined,
+		tenantId: TenantId | undefined,
+		invokes: InvokeList,
+		streamInvokes: StreamInvokeList,
+	) {
+		const invoke = this.getInvokeFunction(serviceTarget, traceId, principalId, tenantId, invokes)
+		const openStream = this.getConsumeStreamFunction(serviceTarget, traceId, principalId, tenantId, streamInvokes)
+		const queueInvokes = getHarnessQueueInvokes(invokes)
+		const enqueue = this.getHarnessQueueEnqueue(queueInvokes, traceId, principalId, tenantId)
+		return {
+			agent: createHarnessInvocationProxy('agent', invoke, openStream, enqueue, invokes),
+			workflow: createHarnessInvocationProxy('workflow', invoke, openStream, enqueue, invokes),
+		}
+	}
+
+	private getHarnessQueueEnqueue(
+		queueInvokes: QueueInvokeList,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+	): QueueInvokeFunction {
+		return (queueName, payload, parameter, options) =>
+			this.enqueueQueue(queueName, payload, parameter, queueInvokes, traceId, principalId, tenantId, options, true)
+	}
+
+	/** @internal Builds the exact allowlisted context for one mounted Harness host-tool call. */
+	public createHarnessHostToolContext(request: PuristaHostContextRequest): PuristaToolContext {
+		const declaration = this.harnessHostTools.get(request.tool.id)
+		if (!declaration) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				`Harness host tool "${request.tool.id}" is not owned by this service.`,
+			)
+		}
+		const { hostInvocation } = request
+		const traceId = hostInvocation.message.traceId
+		const principalId = hostInvocation.identity.principalId
+		const tenantId = hostInvocation.identity.tenantId
+		const invoke = this.getInvokeFunction(request.tool.id, traceId, principalId, tenantId, declaration.invokes)
+		const openStream = this.getConsumeStreamFunction(
+			request.tool.id,
+			traceId,
+			principalId,
+			tenantId,
+			declaration.streamInvokes,
+		)
+		return Object.freeze({
+			message: hostInvocation.message,
+			identity: hostInvocation.identity,
+			resources: this.resources,
+			service: this.createHostInvokeClients(declaration.invokes, invoke),
+			stream: this.createHostStreamClients(declaration.streamInvokes, openStream),
+			queue: this.getQueueNamespace(declaration.queueInvokes, traceId, principalId, tenantId),
+			emit: this.getEmitFunction(request.tool.id, traceId, principalId, tenantId, declaration.emitSchemas),
+			agent: this.createHostNestedTargetClients(declaration.agents, request.nestedTargets),
+			workflow: this.createHostNestedTargetClients(declaration.workflows, request.nestedTargets),
+			step: request.checkpointStep,
+			logger: this.logger,
+			metrics: this.metricContext,
+			signal: request.signal,
+			...(hostInvocation.trace ? { trace: hostInvocation.trace } : {}),
+			tool: Object.freeze({
+				sessionId: request.sessionId,
+				runId: request.runId,
+				toolId: request.tool.id,
+				callId: request.tool.callId,
+				caller: request.caller,
+				...(hostInvocation.idempotencyKey ? { idempotencyKey: hostInvocation.idempotencyKey } : {}),
+			}),
+		}) as PuristaToolContext
+	}
+
+	private createHostInvokeClients(invokes: InvokeList, invoke: ReturnType<Service['getInvokeFunction']>): InvokeList {
+		return this.createHostAddressClients(invokes, (address, payload, parameter) =>
+			invoke(address, payload, parameter as EmptyObject),
+		) as InvokeList
+	}
+
+	private createHostStreamClients(
+		streamInvokes: StreamInvokeList,
+		openStream: ReturnType<Service['getConsumeStreamFunction']>,
+	): StreamInvokeList {
+		return this.createHostAddressClients(streamInvokes, (address, payload, parameter) =>
+			openStream(address, payload, parameter as EmptyObject),
+		) as StreamInvokeList
+	}
+
+	private createHostAddressClients(
+		declarations: Record<string, Record<string, Record<string, object>>>,
+		call: (address: EBMessageAddress, payload: unknown, parameter: unknown) => unknown,
+	): Record<string, Record<string, Record<string, (payload: unknown, parameter: unknown) => unknown>>> {
+		return Object.freeze(
+			Object.fromEntries(
+				Object.entries(declarations).map(([serviceName, versions]) => [
+					serviceName,
+					Object.freeze(
+						Object.fromEntries(
+							Object.entries(versions).map(([serviceVersion, targets]) => [
+								serviceVersion,
+								Object.freeze(
+									Object.fromEntries(
+										Object.keys(targets).map(serviceTarget => [
+											serviceTarget,
+											(payload: unknown, parameter: unknown) =>
+												call({ serviceName, serviceVersion, serviceTarget }, payload, parameter),
+										]),
+									),
+								),
+							]),
+						),
+					),
+				]),
+			),
+		)
+	}
+
+	private createHostNestedTargetClients(
+		declarations: HarnessNestedTargetDeclarations,
+		nestedTargets: HarnessNestedTargetInvoker,
+	): Record<
+		string,
+		Record<
+			string,
+			Record<string, Readonly<{ run: (input: unknown, options: Readonly<{ callId: string }>) => Promise<unknown> }>>
+		>
+	> {
+		return Object.freeze(
+			Object.fromEntries(
+				Object.entries(declarations).map(([serviceName, versions]) => [
+					serviceName,
+					Object.freeze(
+						Object.fromEntries(
+							Object.entries(versions).map(([version, targets]) => [
+								version,
+								Object.freeze(
+									Object.fromEntries(
+										Object.entries(targets).map(([targetName, contract]) => [
+											targetName,
+											Object.freeze({
+												run: (input: unknown, options: Readonly<{ callId: string }>) => {
+													if (
+														!options ||
+														Object.keys(options).length !== 1 ||
+														typeof options.callId !== 'string' ||
+														!options.callId.trim()
+													) {
+														throw new TypeError('Nested Harness target calls require exactly one non-empty callId.')
+													}
+													return nestedTargets.run(contract as AnyHarnessTargetContract, input as never, {
+														callId: options.callId,
+													})
+												},
+											}),
+										]),
+									),
+								),
+							]),
+						),
+					),
+				]),
+			),
+		)
 	}
 
 	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(
@@ -1965,6 +2202,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 									command.streamInvokes,
 								),
 							),
+							...this.getHarnessInvocationClients(
+								command.commandName,
+								traceId,
+								message.principalId,
+								message.tenantId,
+								command.invokes,
+								command.streamInvokes,
+							),
 							resources: this.resources,
 						} as unknown as CommandFunctionContext
 						const call = command.call.bind(this, context)
@@ -2007,6 +2252,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 										message.tenantId,
 										command.streamInvokes,
 									),
+								),
+								...this.getHarnessInvocationClients(
+									command.commandName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									command.invokes,
+									command.streamInvokes,
 								),
 								resources: this.resources,
 							} as unknown as CommandFunctionContext
@@ -2394,29 +2647,16 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			stream: createOpenStreamFunctionProxy(
 				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, worker.streamInvokes),
 			),
-			agent: this.createQueueWorkerAgentInvokeMap(serviceProxy, worker.agentInvokes),
+			...this.getHarnessInvocationClients(
+				worker.name,
+				traceId,
+				principalId,
+				tenantId,
+				worker.invokes,
+				worker.streamInvokes,
+			),
 			resources: this.resources,
 		} as QueueJobContext
-	}
-
-	private createQueueWorkerAgentInvokeMap<Agents extends Record<string, AllowedAgentDefinition>>(
-		serviceProxy: unknown,
-		agents: readonly AllowedAgentDefinition[],
-	): AgentInvokeMap<Agents> {
-		const result: Record<string, { run(payload: unknown, parameter?: unknown): Promise<unknown> }> = {}
-		for (const agent of agents) {
-			const key = `${agent.agentName}.${agent.serviceVersion}`
-			result[key] = {
-				run: async (payload, parameter) => {
-					const serviceMap = serviceProxy as Record<
-						string,
-						Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>
-					>
-					return serviceMap[this.info.serviceName][agent.serviceVersion][agent.agentName](payload, parameter)
-				},
-			}
-		}
-		return result as AgentInvokeMap<Agents>
 	}
 
 	private async handleQueueResult(
@@ -2964,6 +3204,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 							stream.streamInvokes,
 						),
 					),
+					...this.getHarnessInvocationClients(
+						stream.streamName,
+						traceId,
+						message.principalId,
+						message.tenantId,
+						stream.invokes,
+						stream.streamInvokes,
+					),
 					resources: this.resources,
 				}
 
@@ -3157,6 +3405,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 										subscription.streamInvokes,
 									),
 								),
+								...this.getHarnessInvocationClients(
+									subscriptionName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									subscription.invokes,
+									subscription.streamInvokes,
+								),
 								resources: this.resources,
 							} as unknown as SubscriptionFunctionContext
 							const call2 = subscription.call.bind(this, context)
@@ -3258,6 +3514,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 											message.tenantId,
 											subscription.streamInvokes,
 										),
+									),
+									...this.getHarnessInvocationClients(
+										subscription.subscriptionName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										subscription.invokes,
+										subscription.streamInvokes,
 									),
 									resources: this.resources,
 								} as unknown as SubscriptionFunctionContext

@@ -1,0 +1,91 @@
+---
+title: Test the command boundary
+description: Check the business guard and resource boundary before testing the complete agent path.
+order: 239
+kind: lesson
+status: published
+---
+
+Start with small definition tests for the service-owned tool and the agent that
+uses it. They replace the generated placeholders and catch accidental changes
+to ids, tool kind, schemas, or the agent's attached tools.
+
+```ts title="src/service/support/v1/harness/tool/lookupTransaction/lookupTransactionTool.test.ts" write
+import { describe, expect, it } from 'vitest'
+import { lookupTransactionTool, transactionSummaryForAgentSchema } from './lookupTransactionTool.js'
+
+describe('lookupTransactionTool', () => {
+	it('keeps the service-owned tool contract explicit', () => {
+		expect(lookupTransactionTool.id).toBe('lookupTransaction')
+		expect(lookupTransactionTool.kind).toBe('tool')
+		expect(lookupTransactionTool.output).toBe(transactionSummaryForAgentSchema)
+		expect(Object.isFrozen(lookupTransactionTool)).toBe(true)
+	})
+})
+```
+```ts title="src/service/support/v1/harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts" write
+import { describe, expect, it } from 'vitest'
+import { lookupTransactionTool } from '../../tool/lookupTransaction/lookupTransactionTool.js'
+import { answerTransactionQuestionAgent } from './answerTransactionQuestionAgent.js'
+
+describe('answerTransactionQuestionAgent', () => {
+	it('keeps the service-owned transaction tool on the agent definition', () => {
+		expect(answerTransactionQuestionAgent.id).toBe('answerTransactionQuestion')
+		expect(answerTransactionQuestionAgent.tools).toEqual([lookupTransactionTool])
+		expect(Object.isFrozen(answerTransactionQuestionAgent)).toBe(true)
+	})
+
+	it('maps every request field into the model prompt', () => {
+		expect(
+			answerTransactionQuestionAgent.prompt({
+				questionId: 'question-1',
+				question: 'What is this payment?',
+				accountId: 'account-1',
+				transactionId: 'transaction-1',
+			}),
+		).toEqual([
+			{
+				role: 'user',
+				content: [
+					'Question question-1: What is this payment?',
+					'Account: account-1',
+					'Transaction: transaction-1',
+				].join('\n'),
+			},
+		])
+	})
+})
+```
+The session id must separate trusted identity fields even when one contains a
+delimiter. It must also stay stable for the same caller and question.
+
+```ts title="src/service/support/v1/requireSupportQuestion.test.ts" write
+import { describe, expect, it } from 'vitest'
+import { supportQuestionSessionId } from './requireSupportQuestion.js'
+
+describe('supportQuestionSessionId', () => {
+	it('keeps structured identity fields unambiguous', () => {
+		const first = supportQuestionSessionId({ tenantId: 'a:b', principalId: 'c' }, 'question-1')
+		const second = supportQuestionSessionId({ tenantId: 'a', principalId: 'b:c' }, 'question-1')
+
+		expect(first).not.toBe(second)
+		expect(first).toBe(supportQuestionSessionId({ tenantId: 'a:b', principalId: 'c' }, 'question-1'))
+	})
+})
+```
+The focused Transaction command test uses PURISTA context helpers and injected
+resources, so it needs no database, model, or network connection.
+
+```bash title="Run the focused definition and command tests" replay="project"
+npm test -- src/service/support/v1/harness/tool/lookupTransaction/lookupTransactionTool.test.ts src/service/support/v1/harness/agent/answerTransactionQuestion/answerTransactionQuestionAgent.test.ts src/service/support/v1/requireSupportQuestion.test.ts src/service/transaction/v1/command/getTransactionSummary/getTransactionSummaryCommandBuilder.test.ts
+```
+
+The successful case proves the command passes trusted identity to the account
+policy and reads the requested transaction. The denied case proves a `403`
+stops before the reader.
+
+Do not unit-test the service-owned host tool by injecting a made-up standalone
+tool context. A `ServiceBuilder.defineTool` tool depends on mounted PURISTA
+capabilities. Test it through the mounted service and EventBridge instead.
+
+Continue with [Test the complete EventBridge path](../test-eventbridge/).

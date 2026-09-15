@@ -1,0 +1,190 @@
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { conversationSessionId } from '../conversationSessionId.js'
+import { answerSupportQuestionAgent } from '../harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+import { clearConversationHistoryCommandBuilder } from './clearConversationHistory/clearConversationHistoryCommandBuilder.js'
+import { continueSupportConversationCommandBuilder } from './continueSupportConversation/continueSupportConversationCommandBuilder.js'
+import { getConversationHistoryCommandBuilder } from './getConversationHistory/getConversationHistoryCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('support conversation commands', () => {
+	it('creates a stable opaque id from trusted conversation identity', () => {
+		const identity = { tenantId: 'tenant-example', principalId: 'principal-alex' }
+		const sessionId = conversationSessionId(identity, 'case-1')
+
+		expect(sessionId).toMatch(/^support-conversation:[a-f0-9]{64}$/)
+		expect(conversationSessionId(identity, 'case-1')).toBe(sessionId)
+		expect(conversationSessionId({ ...identity, principalId: 'principal-sam' }, 'case-1')).not.toBe(sessionId)
+		expect(sessionId).not.toContain('principal-alex')
+	})
+
+	it('derives the agent session from trusted caller identity', async () => {
+		const payload = { conversationId: 'case-1', question: 'What did we discuss?' }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(continueSupportConversationCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportConversationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		stubs.agent.Support['1'][answerSupportQuestionAgent.contract.id].run.resolves({
+			sessionId: 'support-session',
+			outcome: {
+				status: 'completed',
+				runId: 'run-1',
+				output: { answer: 'We discussed a pending transfer.' },
+			},
+		})
+
+		await expect(
+			continueSupportConversationCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ answer: 'We discussed a pending transfer.' })
+		expect(
+			stubs.agent.Support['1'][answerSupportQuestionAgent.contract.id].run.calledOnceWith(payload, {
+				sessionId: conversationSessionId(context.message, payload.conversationId),
+			}),
+		).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-1',
+				action: 'continue',
+			}),
+		).toBe(true)
+	})
+
+	it('clears only the identity-scoped transcript', async () => {
+		const history = { list: sandbox.stub(), clear: sandbox.stub().resolves() }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const payload = { conversationId: 'case-2' }
+		const { context } = createCommandContextMock(clearConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportConversationHistory: history, supportConversationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			clearConversationHistoryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ cleared: true })
+		expect(history.clear.calledOnceWith(conversationSessionId(context.message, payload.conversationId))).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-2',
+				action: 'clear',
+			}),
+		).toBe(true)
+	})
+
+	it('reads only the identity-scoped transcript', async () => {
+		const history = { list: sandbox.stub().resolves([]), clear: sandbox.stub() }
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const payload = { conversationId: 'case-3' }
+		const { context } = createCommandContextMock(getConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { supportConversationHistory: history, supportConversationPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+
+		await expect(
+			getConversationHistoryCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual({ messages: [] })
+		expect(history.list.calledOnceWith(conversationSessionId(context.message, payload.conversationId))).toBe(true)
+		expect(
+			policy.canAccess.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-alex',
+				conversationId: 'case-3',
+				action: 'read',
+			}),
+		).toBe(true)
+	})
+
+	it('rejects history access without authenticated identity', async () => {
+		const policy = { canAccess: sandbox.stub().resolves(true) }
+		const payload = { conversationId: 'case-4' }
+		const { context } = createCommandContextMock(clearConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: {
+				supportConversationHistory: { list: sandbox.stub(), clear: sandbox.stub() },
+				supportConversationPolicy: policy,
+			},
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: undefined,
+			principalId: undefined,
+			payload: { payload, parameter: {} },
+		})
+
+		const guard = clearConversationHistoryCommandBuilder.getBeforeGuardHook('conversationAccess')
+		await expect(guard.call({} as never, context, payload, {})).rejects.toMatchObject({ errorCode: 401 })
+		expect(policy.canAccess.called).toBe(false)
+	})
+
+	it('rejects denied read and clear actions', async () => {
+		const policy = { canAccess: sandbox.stub().resolves(false) }
+		const payload = { conversationId: 'case-5' }
+		const read = createCommandContextMock(getConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: {
+				supportConversationHistory: { list: sandbox.stub(), clear: sandbox.stub() },
+				supportConversationPolicy: policy,
+			},
+			sandbox,
+		})
+		const clear = createCommandContextMock(clearConversationHistoryCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: {
+				supportConversationHistory: { list: sandbox.stub(), clear: sandbox.stub() },
+				supportConversationPolicy: policy,
+			},
+			sandbox,
+		})
+		for (const context of [read.context, clear.context]) {
+			context.message = getCommandMessageMock({
+				tenantId: 'tenant-example',
+				principalId: 'principal-other',
+				payload: { payload, parameter: {} },
+			})
+		}
+
+		await expect(
+			getConversationHistoryCommandBuilder
+				.getBeforeGuardHook('conversationAccess')
+				.call({} as never, read.context, payload, {}),
+		).rejects.toMatchObject({ errorCode: 403 })
+		await expect(
+			clearConversationHistoryCommandBuilder
+				.getBeforeGuardHook('conversationAccess')
+				.call({} as never, clear.context, payload, {}),
+		).rejects.toMatchObject({ errorCode: 403 })
+		expect(policy.canAccess.firstCall.args[0]).toMatchObject({ action: 'read' })
+		expect(policy.canAccess.secondCall.args[0]).toMatchObject({ action: 'clear' })
+	})
+})

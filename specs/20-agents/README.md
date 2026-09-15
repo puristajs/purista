@@ -1,59 +1,40 @@
-# Agent Specifications
+# Agent specifications
 
-Status: active routing document.
+**Status:** active routing index.
 
-Use [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) as the
-active migration record for PURISTA agent work. Current implementation and
-public handbook/API docs remain the source material for skills and user-facing
-documentation.
+[88-harness-first-service-integration.md](./88-harness-first-service-integration.md)
+is the single authoritative PURISTA contract for Harness v4 integration. This
+directory contains no alternative agent architecture or retained historical
+implementation plan.
 
-## Active Decision
+## Contract summary
 
-PURISTA agent integration moves into `@purista/core`. The unreleased
-`@purista/ai` package is removed rather than wrapped for compatibility.
-`@purista/harness` becomes a direct, provider-neutral dependency of
-`@purista/core`, and provider packages such as `@purista/harness-*` remain
-application-level dependencies only.
+- Native `@purista/harness` factories and immutable catalogs own AI definitions.
+- A service mounts one Harness definition with
+  `ServiceBuilder.mountHarness(...)`; Core owns its lifecycle.
+- `.addAgent(...)`, `.addWorkflow(...)`, and catalog roots define public
+  callable targets. Recursive tools, Skills, MCP servers, agents, and workflows
+  remain dependencies until explicitly promoted to roots.
+- Every PURISTA agent, workflow, and subagent call uses an exact address and the
+  EventBridge. Same-process execution has no local fallback.
+- Harness target contracts carry exact input, validated-input, output, update,
+  and reachable-interrupt inference.
+- Every agent declares a user-chosen model alias; Harness reserves no alias.
+  `ai.models` binds the graph's exact aliases. Storage and memory accept
+  optional production adapters and become mandatory only when compiled
+  requirements demand them.
+- Host-aware tools expose only builder-declared PURISTA resources and
+  operations. Workflows receive only explicitly declared typed tool invokers.
+- Hono protection middleware authenticates and establishes trusted principal
+  and tenant identity. Command, stream, subscription, workflow, mounted-root,
+  and resource guards enforce business authorization.
+- The release is a clean break. Runtime packages contain no compatibility,
+  legacy, or migration path.
 
-Core owns the service builder integration, agent builder/types, queue-backed
-execution wiring, harness runtime integration, and core testing helpers listed
-in the migration plan. Provider-specific packages, Vercel AI SDK adapters,
-OpenAI, Anthropic, Bedrock, MCP SDK, and sandbox driver packages must not become
-core dependencies.
+## Ownership
 
-## Superseded Guidance
-
-All older guidance in `specs/20-agents` is superseded where it conflicts with
-the active plan. In particular, future agents must not follow guidance that:
-
-- keeps PURISTA agent integration in `@purista/ai`
-- preserves `@purista/ai` as an optional integration package
-- keeps agent builders, handler context, manifests, or runtime wiring outside
-  `@purista/core`
-- defines `@purista/ai/protocol` or `AgentProtocolEnvelope` as an active runtime
-  boundary
-- treats `context.ai` as the canonical handler surface
-- emits or depends on `purista-ai:*` run-state artifacts
-- uses `AiSdkProvider`, Vercel AI SDK UI-message streams, or
-  `streamProtocolAdapter` as PURISTA runtime design
-
-The older `77-ai-harness-integration-strategy.md` and
-`78-clean-ai-package-architecture.md` documents are retained only as superseded
-history. Their old package-boundary recommendations have been replaced by
-`80-core-ai-migration-plan.md`.
-
-## Routing
-
-- Framework implementation, architecture, CLI, docs, and examples should use
-  [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) for migration
-  history and current ownership decisions.
-- User-facing skill updates must not reference internal specs. They should use
-  current implementation and public handbook/API docs, then run
-  `npm run audit:skills` and `npm run audit:knowledge`.
-- The `purista-skill-maintainer` workflow is the exception: it may use active
-  specs to keep implementation, public docs, examples, and user-facing skills
-  aligned.
-- Historical documents may be read for rationale only. If they mention
-  `@purista/ai`, `context.ai`, `purista-ai:*`, `AiSdkProvider`, or
-  `streamProtocolAdapter`, treat those references as superseded unless the
-  migration plan explicitly lists the term as removed or forbidden.
+Harness implementation and standalone behavior follow the companion Harness
+specification. PURISTA implementation, CLI generation, service metadata, HTTP
+projection, examples, tutorials, documentation, and tests follow spec 88.
+User-facing skills must be derived from implemented public APIs and handbook
+content rather than requiring this internal specification.

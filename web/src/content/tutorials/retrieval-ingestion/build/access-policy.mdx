@@ -1,0 +1,98 @@
+---
+title: Declare resources and business authorization
+description: Inject the pgvector repository, embedding profile, and collection policy into the Knowledge service.
+order: 203
+kind: lesson
+status: published
+---
+
+Create resource contracts that carry a tenant and collection scope through the retrieval flow. The guard rejects callers who do not supply that scope.
+
+```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
+import type { KnowledgeMatch } from './schema.js'
+
+export type KnowledgeChunkInput = {
+	index: number
+	content: string
+	embedding: number[]
+}
+
+export type KnowledgeEmbeddingProfile = Readonly<{
+	model: string
+	dimensions: number
+}>
+
+export interface KnowledgeRepository {
+	replaceRevision(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			documentId: string
+			revision: number
+			title: string
+			embeddingModel: string
+			chunks: KnowledgeChunkInput[]
+		}>,
+		signal?: AbortSignal,
+	): Promise<void>
+	search(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			embeddingModel: string
+			queryEmbedding: number[]
+			limit: number
+			signal?: AbortSignal
+		}>,
+	): Promise<KnowledgeMatch[]>
+}
+
+export interface KnowledgeCollectionPolicy {
+	canAccess(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			collectionId: string
+			action: 'edit' | 'search'
+		}>,
+	): Promise<boolean>
+}
+
+export class StaleKnowledgeRevisionError extends Error {
+	constructor() {
+		super('Knowledge revision is not newer than the stored revision')
+		this.name = 'StaleKnowledgeRevisionError'
+	}
+}
+```
+```ts title="src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { KnowledgeCollectionPolicy } from './KnowledgeResources.js'
+
+export async function requireKnowledgeCollectionAccess(
+	policy: KnowledgeCollectionPolicy,
+	input: Readonly<{
+		tenantId?: string
+		principalId?: string
+		collectionId: string
+		action: 'edit' | 'search'
+	}>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAccess({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			collectionId: input.collectionId,
+			action: input.action,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This knowledge collection is not available')
+	}
+}
+```
+Check your work: Run `npm run build:server`. The resource guard and service imports resolve.
+
+Continue with [Build the ingestion workflow and command](../ingest/).

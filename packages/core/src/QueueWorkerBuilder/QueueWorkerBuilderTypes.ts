@@ -1,4 +1,3 @@
-import type { AllowedAgentDefinition } from '../AgentQueueBuilder/types.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
@@ -14,7 +13,6 @@ export type QueueWorkerBuilderTypes<
 	StreamInvokes extends StreamInvokeList = StreamInvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 > = {
 	/** Schema that validates the leased queue payload. */
 	PayloadSchema: PayloadSchema
@@ -30,6 +28,4 @@ export type QueueWorkerBuilderTypes<
 	EmitList: EmitList
 	/** Queues this queue worker may enqueue. */
 	QueueInvokes: QueueInvokes
-	/** Same-service agents this queue worker may invoke. */
-	AgentInvokes: AgentInvokes
 }

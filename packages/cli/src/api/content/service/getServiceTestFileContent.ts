@@ -30,9 +30,9 @@ export const getServiceTestFileContent = (input: {
 		.write(`describe('service ${input.serviceName} version ${input.serviceVersion}', () =>`)
 		.block(() => {
 			writer
-				.write(`test('has valid configuration', () =>`)
+				.write(`test('has valid configuration', async () =>`)
 				.block(() => {
-					writer.writeLine('service.testServiceSetup()')
+					writer.writeLine('await service.testServiceSetup()')
 				})
 				.write(')')
 		})

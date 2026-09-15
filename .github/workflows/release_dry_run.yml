@@ -44,7 +44,7 @@ jobs:
         run: ./scripts/releasePrepare.sh ${{ inputs.version }}
 
       - name: Verify workspace publishability (dry-run)
-        run: npm publish --access public --dry-run --workspaces
+        run: node scripts/publishWorkspaces.mjs --dry-run
 
       - name: Upload dry-run artifacts
         uses: actions/upload-artifact@v4

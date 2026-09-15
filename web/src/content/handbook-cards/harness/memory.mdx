@@ -1,0 +1,30 @@
+---
+title: Memory
+description: Keep Harness memory separate from sessions, runs, and application data.
+---
+
+HarnessStorage owns sessions, runs, events, checkpoints, and waits. A
+MemoryEngine owns scoped recall. Application business records remain in the
+application's own data store.
+
+```ts title="Open an identity-scoped session"
+const session = await harness.getSession('claim:42', {
+  identity: { tenantId: 'acme-insurance', principalId: 'adjuster:ada' },
+})
+
+await session.memory.write('locale', 'de-DE')
+const locale = await session.memory.read<string>('locale')
+await session.release()
+```
+
+The identity is part of the session options. It is not supplied as top-level
+tenant or principal fields. Reopening a session with a different identity fails
+before memory or model work starts.
+
+Bind a durable MemoryEngine only when the graph requires one. Its capabilities
+determine whether TTL, text search, vector search, hybrid search, persistence,
+or multi-instance use is available. Test external engines with
+`memoryEngineContract` from `@purista/harness/testing`.
+
+Never treat memory as authorization: authorize the business action before a
+run, and keep credentials, prompts, vectors, and sensitive facts out of logs.

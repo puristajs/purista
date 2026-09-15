@@ -27,9 +27,11 @@ aligned.
 - The skill maintainer workflow may reference specs to reconcile drift.
 - When implementation, public docs, and a spec disagree, fix implementation or
   update/supersede the spec before changing user-facing skills.
-- Obsolete AI package, protocol, and handler-context terms may appear only in
-  migration or superseded AI records. `npm run audit:knowledge` enforces the
-  concrete forbidden-term list.
+- Obsolete AI package, protocol, builder, registry, and handler-context terms
+  are forbidden in active specs. Public migration pages may show the minimum
+  before-source needed to explain a clean break, under an explicit audit
+  allowlist. `npm run audit:knowledge` enforces the concrete forbidden-term
+  list.
 - After changing specs, skills, AGENTS/CLAUDE guidance, or public knowledge
   files, run:
 
@@ -39,8 +41,9 @@ npm run audit:knowledge
 ```
 
 ## Current Active Spec Areas
-- `20-agents/80-core-ai-migration-plan.md`: migration record for core-native
-  agents backed by `@purista/harness`.
+- `20-agents/88-harness-first-service-integration.md`: active Harness v4
+  service-integration, authoring, runtime, CLI, documentation, and release
+  contract.
 - `http-error-rfc9457.md`: proposed RFC 9457 HTTP error response work.
 - `bridge-reliability-hardening.md`: implemented bridge reliability status
   tracker for this monorepo.

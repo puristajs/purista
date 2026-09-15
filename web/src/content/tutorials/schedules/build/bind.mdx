@@ -1,0 +1,185 @@
+---
+title: Bind each occurrence to queued work
+description: Map the schedule event to the existing queue and make repeated-delivery behavior explicit.
+order: 153
+kind: lesson
+status: published
+---
+
+The trigger emits an occurrence fact. The queue owns retryable statement work.
+Connect them with `bindEventToQueue` on the owning `Reporting` service.
+
+The mapper parses the event again at the consumer boundary and selects only the
+fields accepted by `generateStatement`. Trusted principal and tenant metadata
+are copied by PURISTA into reserved queue headers.
+
+```ts title="src/service/reporting/v1/reportingV1Service.ts" write
+import { getStatementStatusCommandBuilder } from './command/getStatementStatus/getStatementStatusCommandBuilder.js'
+import { requestStatementCommandBuilder } from './command/requestStatement/requestStatementCommandBuilder.js'
+import { triggerDailyStatementCommandBuilder } from './command/triggerDailyStatement/triggerDailyStatementCommandBuilder.js'
+import { generateStatementWorkerQueueWorkerBuilder } from './queue-worker/generateStatementWorker/generateStatementWorkerQueueWorkerBuilder.js'
+import { generateStatementQueueBuilder } from './queue/generateStatement/generateStatementQueueBuilder.js'
+import { reportingV1ServiceBuilder } from './reportingV1ServiceBuilder.js'
+import {
+	dailyStatementDueEventName,
+	dailyStatementOccurrenceSchema,
+} from './schedule/dailyStatementOccurrence.js'
+import { dailyStatementSchedule } from './schedule/dailyStatementSchedule.js'
+
+type QueueDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueDefinition']>[number]
+type QueueWorkerDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueWorkerDefinition']>[number]
+
+const commandDefinitions: Parameters<typeof reportingV1ServiceBuilder['addCommandDefinition']>[0][] = [
+	requestStatementCommandBuilder.getDefinition(),
+	getStatementStatusCommandBuilder.getDefinition(),
+	triggerDailyStatementCommandBuilder.getDefinition(),
+]
+const subscriptionDefinitions: Parameters<typeof reportingV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof reportingV1ServiceBuilder['addStreamDefinition']>[0][] = []
+const queueDefinitions: QueueDefinition[] = [generateStatementQueueBuilder.getDefinition()]
+const queueWorkerDefinitions: QueueWorkerDefinition[] = [generateStatementWorkerQueueWorkerBuilder.getDefinition()]
+
+export const reportingV1Service = reportingV1ServiceBuilder
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)
+	.addStreamDefinition(...streamDefinitions)
+	.addQueueDefinition(...queueDefinitions)
+	.addQueueWorkerDefinition(...queueWorkerDefinitions)
+	.addScheduleDefinition(dailyStatementSchedule)
+	.bindEventToQueue(dailyStatementDueEventName, 'generateStatement', {
+		idempotencyMode: 'advisory',
+		idempotencyKey: 'eventField',
+		mapPayload: event => {
+			const occurrence = dailyStatementOccurrenceSchema.parse(event)
+			return {
+				accountId: occurrence.accountId,
+				transactionId: occurrence.transactionId,
+			}
+		},
+		mapParameter: () => ({}),
+		onEnqueueFailure: {
+			reason: 'daily_statement_enqueue_failed',
+			delayMs: 250,
+		},
+	})
+```
+
+The queue declares an object parameter schema, so `mapParameter` supplies the
+required empty object instead of leaving the parameter undefined. `eventField`
+uses the event payload's `id` as the enqueue idempotency key. The
+selected `DefaultQueueBridge` does not enforce uniqueness, so the application
+uses `advisory` mode. Two deliveries can create two jobs. A production adapter
+may use `strict` only when its published capabilities include idempotency
+enforcement; PURISTA then rejects startup if the bridge cannot satisfy it.
+
+Test the generated binding through the subscription callback that the service
+registers with EventBridge. This covers validation, mapping, metadata, repeated
+delivery, and enqueue failure without running a worker.
+
+```ts title="src/service/reporting/v1/schedule/dailyStatementBinding.test.ts" write
+import {
+	getCustomMessageMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	getQueueBridgeMock,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, expect, test } from 'vitest'
+import { reportingV1Service } from '../reportingV1Service.js'
+import { dailyStatementDueEventName } from './dailyStatementOccurrence.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const occurrence = {
+	id: 'daily:2026-09-02:account-operating',
+	scheduledFor: '2026-09-02T04:00:00.000Z',
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+
+async function setup() {
+	const eventBridge = getEventBridgeMock(sandbox)
+	const queueBridge = getQueueBridgeMock(sandbox)
+	const service = await reportingV1Service.getInstance(eventBridge.mock, {
+		logger: getLoggerMock(sandbox).mock,
+		queueBridge: queueBridge.mock,
+	})
+	await service.start()
+	const registration = eventBridge.stubs.registerSubscription.args.find(
+		([subscription]) => subscription.eventName === dailyStatementDueEventName,
+	)
+	if (!registration) throw new Error('Expected the event-to-queue subscription')
+	const deliver = registration[1] as (message: ReturnType<typeof getCustomMessageMessageMock>) => Promise<void>
+	return { service, queueBridge, deliver }
+}
+
+function message() {
+	return getCustomMessageMessageMock(dailyStatementDueEventName, occurrence, {
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+	})
+}
+
+test('maps one validated occurrence and trusted identity to the queue', async () => {
+	const fixture = await setup()
+	try {
+		await fixture.deliver(message())
+		expect(fixture.queueBridge.stubs.enqueue.calledOnce).toBe(true)
+		expect(fixture.queueBridge.stubs.enqueue.firstCall.args[0]).toMatchObject({
+			queueName: 'generateStatement',
+			payload: {
+				accountId: occurrence.accountId,
+				transactionId: occurrence.transactionId,
+			},
+			idempotencyKey: occurrence.id,
+			headers: {
+				'purista.principalId': 'principal-alex',
+				'purista.tenantId': 'tenant-example',
+				'purista.sourceEventName': dailyStatementDueEventName,
+			},
+		})
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('keeps repeated delivery visible in advisory mode', async () => {
+	const fixture = await setup()
+	try {
+		await fixture.deliver(message())
+		await fixture.deliver(message())
+		expect(fixture.queueBridge.stubs.enqueue.callCount).toBe(2)
+		expect(fixture.queueBridge.stubs.enqueue.firstCall.args[0].idempotencyKey).toBe(occurrence.id)
+		expect(fixture.queueBridge.stubs.enqueue.secondCall.args[0].idempotencyKey).toBe(occurrence.id)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('returns retry intent when enqueueing fails', async () => {
+	const fixture = await setup()
+	try {
+		fixture.queueBridge.stubs.enqueue.rejects(new Error('queue unavailable'))
+		await expect(fixture.deliver(message())).rejects.toMatchObject({
+			name: 'SubscriptionConsumerControlError',
+			outcome: 'retry',
+			reason: 'daily_statement_enqueue_failed',
+			delayMs: 250,
+		})
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+```
+
+```bash title="Test the event-to-queue handoff" replay="project"
+npx vitest run src/service/reporting/v1/schedule/dailyStatementBinding.test.ts
+npm run export:schedules
+npm run build:server
+```
+
+The retry result is an instruction to the configured EventBridge. The local
+`DefaultEventBridge` does not persist missed events or guarantee delayed
+redelivery. Durable retry requires an adapter whose capabilities and deployment
+match that requirement.

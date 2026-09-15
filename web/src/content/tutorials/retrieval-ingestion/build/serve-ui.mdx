@@ -1,0 +1,29 @@
+---
+title: Serve static assets with Hono
+description: Keep Hono command and stream exposure separate from the static website handler and Node listener.
+order: 219
+kind: lesson
+status: published
+---
+
+Create the static website helper. It serves the built browser files while leaving API routes to the Hono application.
+
+```ts title="src/staticWebsite.ts" write
+import { serveStatic } from '@hono/node-server/serve-static'
+import type { HonoServiceClass } from '@purista/hono-http-server'
+
+const apiPath = (path: string) => path === '/api' || path.startsWith('/api/')
+
+export function registerStaticWebsite(http: HonoServiceClass) {
+	const indexFile = serveStatic({ path: './public/index.html' })
+	http.app.use('/assets/*', serveStatic({ root: './public' }))
+	http.app.get('/', indexFile)
+	http.app.get('*', async (context, next) => {
+		if (apiPath(context.req.path) || context.req.path === '/health') return next()
+		return indexFile(context, next)
+	})
+}
+```
+Check your work: Run `npm run build:server`. The static-file helper compiles with the HTTP listener.
+
+Continue with [Run the live application](../run/).

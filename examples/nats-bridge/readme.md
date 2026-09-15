@@ -4,6 +4,12 @@ This is an example of PURISTA using the NATS event bridge & NATS state store.
 
 ## Setup
 
+Install the released PURISTA dependencies from this example directory:
+
+```bash
+npm install
+```
+
 ## Start a NATS broker
 
 To start a local NATS broker you can use the npm command.  
@@ -18,6 +24,10 @@ npm run nats:up
 
 As soon as the NATS broker is running, you can start the example.  
 Navigate to [http://localhost:8080/api](http://localhost:8080/api) to open the OpenAPI UI
+
+```bash
+npm start
+```
 
 ## Stop the NATS broker
 

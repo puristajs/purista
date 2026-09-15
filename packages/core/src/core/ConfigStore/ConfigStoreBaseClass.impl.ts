@@ -10,10 +10,10 @@ import type { ConfigStoreCacheMap } from './types/ConfigStoreCacheMap.js'
 /**
  * Base class for config store adapters.
  *
- * The base class enforces operation toggles before delegating to adapter
- * implementations. Adapter authors should implement only the protected `*Impl`
- * methods so capability checks, safe logging, and common error behavior stay
- * consistent.
+ * The base class enforces operation toggles and optional in-process caching
+ * before delegating to adapter implementations. Adapter authors should
+ * implement only the protected `*Impl` methods so capability checks, cache
+ * invalidation, safe logging, and common error behavior stay consistent.
  *
  * The actual store implementation must overwrite the protected methods:
  *
@@ -34,7 +34,7 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 	/** Store name used in logs and diagnostics. */
 	name: string
 
-	/** Optional local cache used by store implementations that opt in. */
+	/** Optional in-process cache used when `enableCache` is true. */
 	cache: ConfigStoreCacheMap = new Map()
 
 	constructor(name: string, config: StoreBaseConfig<ConfigStoreConfigType>) {
@@ -83,7 +83,40 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 			this.logger.error({ err }, err.message)
 			throw err
 		}
-		return this.getConfigImpl(...configNames)
+
+		if (!this.config.enableCache) {
+			return this.getConfigImpl(...configNames)
+		}
+
+		const result: Record<string, unknown | undefined> = {}
+		const toFetch: string[] = []
+
+		for (const configName of configNames) {
+			const cachedValue = this.cache.get(configName)
+			result[configName] = undefined
+			if (!cachedValue) {
+				toFetch.push(configName)
+				continue
+			}
+			if (this.config.cacheTtl !== undefined && cachedValue.createdAt + this.config.cacheTtl < Date.now()) {
+				toFetch.push(configName)
+				continue
+			}
+			result[configName] = cachedValue.value
+		}
+
+		if (!toFetch.length) {
+			return result as ObjectWithKeysFromStringArray<ConfigNames>
+		}
+
+		const freshConfig = await this.getConfigImpl(...toFetch)
+		for (const configName of toFetch) {
+			const value = freshConfig[configName]
+			if (value === undefined) this.cache.delete(configName)
+			else this.cache.set(configName, { value, createdAt: Date.now() })
+		}
+
+		return { ...result, ...freshConfig } as ObjectWithKeysFromStringArray<ConfigNames>
 	}
 
 	/**
@@ -109,6 +142,8 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 			this.logger.error({ err }, err.message)
 			throw err
 		}
+
+		if (this.config.enableCache) this.cache.delete(configName)
 
 		return this.removeConfigImpl(configName)
 	}
@@ -141,7 +176,9 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 			throw err
 		}
 
-		return this.setConfigImpl(configName, configValue)
+		const result = await this.setConfigImpl(configName, configValue)
+		if (this.config.enableCache) this.cache.set(configName, { value: configValue, createdAt: Date.now() })
+		return result
 	}
 
 	/** Shutdown hook for store adapters. */

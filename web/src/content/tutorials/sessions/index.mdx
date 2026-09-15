@@ -1,0 +1,23 @@
+---
+title: Handle sessions with StateStore
+description: Build Identity-owned login, session lookup, and logout commands with PURISTA StateStore.
+order: 70
+kind: chapter
+group: start
+status: published
+---
+
+This chapter replaces the fixed API key with an opaque session. Identity owns
+session creation, lookup, expiry, and removal. Hono reads the bearer token and
+asks Identity to resolve it. Transaction records remain in SQLite because they
+are business records.
+
+1. [Generate the Identity commands](/tutorials/sessions/build/generate-identity/).
+2. [Store opaque session state](/tutorials/sessions/build/store-session/).
+3. [Resolve sessions in Hono](/tutorials/sessions/build/protect-with-session/).
+4. [Use the session commands from React](/tutorials/sessions/build/connect-ui/).
+5. [Test commands, StateStore, and HTTP protection](/tutorials/sessions/testing/test-sessions/).
+
+Start from [Protect generated HTTP endpoints](/tutorials/protected-endpoints/).
+The local username and password are small learning fixtures, not a production
+identity provider.

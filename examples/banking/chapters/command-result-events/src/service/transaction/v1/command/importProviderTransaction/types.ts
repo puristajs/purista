@@ -1,0 +1,14 @@
+import type { z } from 'zod'
+
+import type {
+	transactionV1ImportProviderTransactionInputParameterSchema,
+	transactionV1ImportProviderTransactionInputPayloadSchema,
+	transactionV1ImportProviderTransactionOutputPayloadSchema,
+}
+from './schema.js'
+
+export type TransactionV1ImportProviderTransactionInputParameter = z.input<typeof transactionV1ImportProviderTransactionInputParameterSchema>
+
+export type TransactionV1ImportProviderTransactionInputPayload = z.input<typeof transactionV1ImportProviderTransactionInputPayloadSchema>
+
+export type TransactionV1ImportProviderTransactionOutputPayload = z.output<typeof transactionV1ImportProviderTransactionOutputPayloadSchema>

@@ -1,0 +1,81 @@
+---
+title: Invoke the agent from a command
+description: Declare the mounted agent address and return its completed structured result.
+order: 184
+kind: lesson
+status: published
+---
+
+The mounted agent is a PURISTA capability. Add a normal Support command as the
+aggregate application entry point. Its id is different from the agent id, so
+both targets have unambiguous EventBridge addresses.
+
+```bash title="Generate the classification command" replay="project"
+npm run add:command -- run-classify-support-message --service support --service-version 1 --description "Classify one support message with the mounted agent" --non-interactive
+```
+
+Remove the generated command-local schema placeholders because the command
+reuses the agent contract.
+
+```bash title="Remove unused command schema placeholders" replay="project"
+rm src/service/support/v1/command/runClassifySupportMessage/schema.ts
+rm src/service/support/v1/command/runClassifySupportMessage/types.ts
+```
+
+Replace the command builder.
+
+```ts title="src/service/support/v1/command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.ts" write
+import {
+	classifySupportMessageAgent,
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from '../../harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const runClassifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runClassifySupportMessage', 'Classify one support message with the mounted agent')
+	.addPayloadSchema(classifySupportMessageInputSchema)
+	.addOutputSchema(classifySupportMessageOutputSchema)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(classifySupportMessageAgent.contract))
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const result = await context.agent.Support['1'][classifySupportMessageAgent.contract.id].run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
+		})
+		return result.outcome.output
+	})
+```
+`harnessTarget` combines the imported contract with this builder's service name
+and version. `canInvokeAgent` uses that descriptor to create the typed client at
+`context.agent.Support['1'][classifySupportMessageAgent.contract.id]`.
+PURISTA returns `{ sessionId, outcome }`; this command returns the completed
+agent output as its own result.
+
+Register the command and mount the service-owned Harness once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { runClassifySupportMessageCommandBuilder } from './command/runClassifySupportMessage/runClassifySupportMessageCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(runClassifySupportMessageCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+The command guard protects the normal entry point. The mount guard independently
+protects direct calls to the published agent target.
+
+```bash title="Verify the command and mount" replay="project"
+npm run build
+```
+
+Continue with [Compose the classification runtime](../compose-runtime/).

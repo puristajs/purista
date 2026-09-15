@@ -21,8 +21,18 @@ const mapAddComponentToCommand = (component: string) => {
 			return 'add-queue'
 		case 'queue-worker':
 			return 'add-queue-worker'
+		case 'harness':
+			return 'add-harness'
 		case 'agent':
 			return 'add-agent'
+		case 'workflow':
+			return 'add-workflow'
+		case 'tool':
+			return 'add-tool'
+		case 'skill':
+			return 'add-skill'
+		case 'mcp':
+			return 'add-mcp'
 		default:
 			throw new PuristaCliError(`Unsupported component "${component}".`)
 	}
@@ -57,7 +67,9 @@ const main = async () => {
 	registerGlobalModeOptions(
 		program
 			.command('add')
-			.description('Add a new service, command, subscription, stream, queue, queue worker, or agent.')
+			.description(
+				'Add a new service, command, subscription, stream, queue, queue worker, Harness, agent, workflow, tool, Skill, or MCP server.',
+			)
 			.addArgument(
 				new Argument('[component]', 'Type of component to add').choices([
 					'service',
@@ -66,11 +78,27 @@ const main = async () => {
 					'stream',
 					'queue',
 					'queue-worker',
+					'harness',
 					'agent',
+					'workflow',
+					'tool',
+					'skill',
+					'mcp',
 				]),
 			)
 			.addArgument(new Argument('[name]', 'Name of component'))
 			.option('--description <description>', 'description of the component')
+			.option('--model-alias <modelAlias>', 'model alias used by an agent definition')
+			.addOption(new Option('--http <projection>', 'agent HTTP projection').choices(['none', 'command', 'stream']))
+			.addOption(new Option('--kind <kind>', 'tool ownership kind').choices(['portable', 'purista']))
+			.option(
+				'--runtime <runtime>',
+				'logical Skill runtime requirement (repeatable)',
+				(value, previous: string[] = []) => [...previous, value],
+				[],
+			)
+			.option('--tool <toolName>', 'local MCP tool name')
+			.option('--remote-name <remoteName>', 'exact remote MCP tool name')
 			.option('--service <serviceName>', 'service name')
 			.option('--service-version <serviceVersion>', 'service version')
 			.option('--response-event <eventName>', 'response event name')
@@ -96,6 +124,12 @@ const main = async () => {
 				const result = await engine.runPuristaCommand(commandId, {
 					name,
 					description: options.description,
+					modelAlias: options.modelAlias,
+					http: options.http,
+					kind: options.kind,
+					runtimes: options.runtime,
+					toolName: options.tool,
+					remoteName: options.remoteName,
 					serviceName: options.service,
 					serviceVersion: options.serviceVersion,
 					responseEventName: options.responseEvent,

@@ -6,7 +6,11 @@ import { getErrorName } from './getErrorName.js'
 import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
 import { getQueryDefinition } from './getQueryDefinition.js'
-import { resolveHttpStreamingMode } from './streamTransport.js'
+import {
+	AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS,
+	AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL,
+	resolveHttpStreamingMode,
+} from './streamTransport.js'
 
 /**
  * OpenAPI generation settings needed by HTTP helper functions.
@@ -47,6 +51,7 @@ export const addPathToOpenApi = (
 	owner?: PuristaOpenApiOperationOwner,
 ) => {
 	const expose = metadata.expose
+	const isSecure = expose.http.openApi?.isSecure !== false
 
 	const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 	const httpMode = expose.http.mode ?? 'sync'
@@ -92,6 +97,10 @@ export const addPathToOpenApi = (
 	const isAggregateStream = streamMode === 'aggregate'
 	const streamProtocol = expose.http.stream?.protocol
 	const streamProtocolDoc = expose.http.stream?.documentationUrl
+	const streamResponseHeaders = {
+		...(expose.http.stream?.responseHeaders ?? {}),
+		...(streamProtocol === AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL ? AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS : {}),
+	}
 	const okCode =
 		httpMode === 'async'
 			? StatusCode.Accepted
@@ -105,7 +114,7 @@ export const addPathToOpenApi = (
 		(expose.http.openApi?.additionalStatusCodes ?? []).filter(code => code !== StatusCode.Accepted),
 	)
 
-	if (expose.http.openApi?.isSecure) {
+	if (isSecure) {
 		errorCodes.add(StatusCode.Unauthorized)
 	}
 
@@ -154,7 +163,7 @@ export const addPathToOpenApi = (
 		description: expose.http.openApi?.description,
 		deprecated: expose.deprecated,
 		operationId: expose.http.openApi?.operationId,
-		security: securitySchema.length > 0 && expose.http.openApi?.isSecure ? securitySchema : [],
+		security: securitySchema.length > 0 && isSecure ? securitySchema : [],
 		...getPuristaOperationExtensions({
 			metadata,
 			owner,
@@ -189,6 +198,15 @@ export const addPathToOpenApi = (
 							.filter(Boolean)
 							.join(' ')
 					: getErrorName(okCode),
+				headers: Object.fromEntries(
+					Object.entries(streamResponseHeaders).map(([name, value]) => [
+						name,
+						{
+							description: `Required response header for the ${streamProtocol ?? 'declared'} stream protocol.`,
+							schema: { type: 'string', const: value },
+						},
+					]),
+				),
 				content:
 					okCode === StatusCode.NoContent
 						? undefined
@@ -288,7 +306,7 @@ function getPuristaOperationExtensions(input: {
 	isAggregateStream: boolean
 }): Record<string, unknown> {
 	const expose = input.metadata.expose
-	const isSecure = expose.http.openApi?.isSecure ?? true
+	const isSecure = expose.http.openApi?.isSecure !== false
 	const runtimeMode =
 		expose.http.mode === 'async'
 			? 'async-job'

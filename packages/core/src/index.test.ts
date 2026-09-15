@@ -28,6 +28,7 @@ import {
 	getCustomMessageMessageMock,
 	getErrorMessageForCode,
 	getEventBridgeMock,
+	getHarnessTransportCorrelationId,
 	getLoggerMock,
 	getNewCorrelationId,
 	getNewEBMessageId,
@@ -63,6 +64,7 @@ it('exports core functions', () => {
 	expect(createSuccessResponse).toBeDefined()
 	expect(getCleanedMessage).toBeDefined()
 	expect(getErrorMessageForCode).toBeDefined()
+	expect(getHarnessTransportCorrelationId).toBeDefined()
 	expect(getNewCorrelationId).toBeDefined()
 	expect(getNewEBMessageId).toBeDefined()
 	expect(getNewTraceId).toBeDefined()

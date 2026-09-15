@@ -1,0 +1,43 @@
+---
+title: Apply AI guardrails
+description: Block unsafe agent input and transform unsafe model output without mixing content checks with business authorization.
+order: 190
+kind: chapter
+group: ai
+status: published
+---
+
+This chapter adds content guardrails to one structured Harness agent. An input
+rail blocks a small instruction-override pattern before the provider runs. An
+output rail removes card-like digit sequences before the result leaves Harness.
+
+```text title="Guarded classification path"
+authenticated PURISTA caller
+  -> PURISTA business authorization guard
+  -> mounted Harness agent target
+  -> Harness input rail
+  -> model provider
+  -> Harness output rail
+  -> validated command result
+```
+
+These checks have different jobs. PURISTA guards decide whether a trusted
+caller may use a business capability. Harness guardrails inspect or transform
+content around model and tool work. A content rule must not grant business
+access, and an authorization check must not be presented as model safety.
+
+The example uses a short support-message fixture. Its reusable lesson is how to
+attach provider-neutral rails to a direct agent definition, mount that agent on
+a service, and test every boundary without credentials.
+
+You will:
+
+1. [create the project and install guardrails](./build/install/);
+2. [define an input rail](./build/input/);
+3. [define an output rail and attach both rails](./build/output/);
+4. [protect and mount the agent](./build/integrate/);
+5. [invoke it through a PURISTA command](./build/invoke/);
+6. [compose and run the service](./build/compose-runtime/);
+7. [run a deterministic demo](./build/run-application/);
+8. [test the native and command boundaries](./testing/test-guardrails/); and
+9. [test the complete EventBridge path](./testing/test-eventbridge/).

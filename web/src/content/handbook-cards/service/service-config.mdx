@@ -15,6 +15,7 @@ Use this decision tree to choose the right mechanism:
 - The value is set once during deployment (API URLs, ports, timeouts).
 - The value rarely changes (database connection pool size).
 - The value is infrastructure-related, not business-related.
+- A fixed technical credential is supplied through the deployment platform and kept inside the resource or adapter that needs it.
 
 **Config store** when:
 - The value changes during runtime (feature flags, currency rates).
@@ -22,8 +23,8 @@ Use this decision tree to choose the right mechanism:
 - The value is not confidential.
 
 **Secret store** when:
-- The value is confidential (passwords, tokens, certificates).
-- It must never appear in code, logs, or environment files.
+- The sensitive value is tenant/principal-owned or otherwise managed while the service runs.
+- The service must create, rotate, revoke, or resolve it through an audited runtime boundary.
 
 **State store** when:
 - The value is temporary runtime state (session data, caches).
@@ -39,8 +40,8 @@ Use this decision tree to choose the right mechanism:
 | **Changes apply** | On restart / next deployment | On next usage | On next usage |
 | **Value type** | Object (nested) | Key-value (scalar) | Key-value (string) |
 | **Can be updated by handlers** | No | Yes | Yes |
-| **Safe for secrets** | No | No | Yes |
-| **Use cases** | Third-party URLs, ports, timeouts | Feature flags, currency exchange rates | Passwords, auth tokens, certificates |
+| **Safe for secrets** | Fixed technical values only; keep them behind a narrow resource | No | Yes, for runtime-managed sensitive values |
+| **Use cases** | Third-party URLs, ports, timeouts, bootstrap resource settings | Feature flags, currency exchange rates | Tenant API keys, delegated credentials, rotating certificates |
 
 ## Define a config schema
 

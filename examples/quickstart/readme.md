@@ -2,6 +2,14 @@
 
 This is an example of PURISTA from the quickstart presentation.
 
+Install, verify, and run it from this example directory:
+
+```bash
+npm install
+npm test
+npm start
+```
+
 ## HTTP endpoints
 
 The example exposes two HTTP endpoints via the default HTTP server:

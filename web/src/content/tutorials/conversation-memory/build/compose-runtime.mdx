@@ -1,0 +1,46 @@
+---
+title: Compose the conversation runtime
+description: Bind one model and one shared Harness storage adapter to the mounted Support service.
+order: 225
+kind: lesson
+status: published
+---
+
+Create one composition function for tests, demos, and the live process. The
+`ai.models.answering` binding satisfies the agent's explicit model requirement.
+The same storage instance is bound to the mounted Harness and wrapped by the
+authorized history resource.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
+import { HarnessConversationHistory } from './resources/HarnessConversationHistory.js'
+import type { SupportConversationPolicy } from './service/support/v1/SupportConversationPolicy.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportConversationPolicy
+		answeringModel: { provider: ModelProvider; model: string }
+		storage: HarnessStorage
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			supportConversationHistory: new HarnessConversationHistory(options.storage),
+			supportConversationPolicy: options.policy,
+		},
+		ai: {
+			models: { answering: options.answeringModel },
+			storage: options.storage,
+		},
+	})
+}
+```
+Do not place provider secrets in an agent definition. The caller chooses the
+model provider and storage adapter at the application edge.
+
+Continue with [Run the application](../run-application/).

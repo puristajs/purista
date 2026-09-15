@@ -1,0 +1,27 @@
+---
+title: Run analysis in a sandbox
+description: Give an agent a small tool surface and choose the right execution boundary.
+order: 280
+kind: chapter
+group: ai
+status: published
+---
+
+This chapter builds one protected PURISTA analysis command. The agent can write a CSV file, run one allowed Python command, read the result, and return typed data.
+
+The default path uses a temporary local directory. It proves Harness tool permissions and the agent loop without an API key or Docker. It is process-local and is **not** a process-isolation boundary. The later Docker path is optional and adds a non-root container boundary.
+
+1. [Create the project](./setup/scaffold/)
+2. [Give the agent a small tool surface](./build/define-agent/)
+3. [Authorize an analysis request](./build/authorize-agent/)
+4. [Mount and invoke the agent](./build/invoke-agent/)
+5. [Bind the runtime adapters](./build/compose-runtime/)
+6. [Run the deterministic demo](./build/run-application/)
+7. [Test tools](./testing/test-agent/)
+8. [Test the protected route](./testing/test-routing/)
+9. [Optional: build the Docker boundary](./build/configure/)
+10. [Optional: run a live Docker service](./build/run-live/)
+11. [Clean up retained containers](./build/cleanup/)
+12. [Optional: test Docker isolation](./testing/test-docker/)
+
+Start with [Create the project](./setup/scaffold/).

@@ -1,0 +1,47 @@
+---
+title: Declare scheduled work
+description: Describe when work is due, expose an explicit trigger, and hand each occurrence to a PURISTA queue.
+order: 15
+kind: chapter
+group: services
+status: published
+---
+
+A schedule answers **when** an action should happen. It does not perform the
+action itself. PURISTA stores provider-neutral schedule metadata in service
+definitions so an external scheduler can trigger the declared target.
+
+This chapter schedules the existing `Reporting.generateStatement` queue. The
+small Example Bank fixture asks for one daily transaction statement. The
+Framework lessons are schedule declaration, contract export, explicit
+triggering, event-to-queue handoff, and delivery semantics.
+
+```text title="The scheduling boundary"
+external scheduler owns time
+  -> Reporting schedule contract
+  -> explicit trigger emits one occurrence event
+  -> event-to-queue binding
+  -> generateStatement queue and worker
+```
+
+PURISTA does not start an in-process cron timer. This example runs without a
+scheduler product because tests trigger a fixed occurrence explicitly.
+
+## What you will build
+
+1. Declare a suspended daily schedule with a timezone and overlap policy.
+2. Export the schedule manifest with the PURISTA CLI.
+3. Generate a protected command that emits a validated occurrence.
+4. Bind that event to the existing queue with an advisory idempotency key.
+5. Test fixed time, repeated delivery, enqueue failure, and the generated HTTP
+   trigger.
+
+## Prerequisite
+
+Start from [Process work with queues](/tutorials/queue-processing/). Its
+retained application already contains `Reporting`, `generateStatement`, its
+worker, session protection, and a database-backed `Transaction` service.
+
+## Continue
+
+[Declare the schedule](/tutorials/schedules/build/declare/).

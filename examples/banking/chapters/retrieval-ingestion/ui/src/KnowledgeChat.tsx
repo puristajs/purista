@@ -1,0 +1,238 @@
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai'
+import { useMemo, useState } from 'react'
+import {
+	Confirmation,
+	ConfirmationAction,
+	ConfirmationActions,
+	ConfirmationRequest,
+} from '@/components/ai-elements/confirmation'
+import {
+	Conversation,
+	ConversationContent,
+	ConversationEmptyState,
+	ConversationScrollButton,
+} from '@/components/ai-elements/conversation'
+import { Message, MessageContent, MessageResponse } from '@/components/ai-elements/message'
+import {
+	PromptInput,
+	type PromptInputMessage,
+	PromptInputSubmit,
+	PromptInputTextarea,
+} from '@/components/ai-elements/prompt-input'
+import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool'
+
+type RetrievalMatch = {
+	documentId: string
+	chunkIndex: number
+	content?: string
+	score?: number
+}
+
+type ChatSource = { href?: string; title: string }
+
+function retrievalMatches(value: unknown): RetrievalMatch[] {
+	if (!value || typeof value !== 'object' || !('matches' in value) || !Array.isArray(value.matches)) return []
+	return value.matches.filter(
+		(match): match is RetrievalMatch =>
+			!!match &&
+			typeof match === 'object' &&
+			'documentId' in match &&
+			typeof match.documentId === 'string' &&
+			'chunkIndex' in match &&
+			typeof match.chunkIndex === 'number',
+	)
+}
+
+function messageSources(parts: ReadonlyArray<{ type: string }>): ChatSource[] {
+	return parts.flatMap((part): ChatSource[] => {
+		if (part.type === 'source-url' && 'url' in part && typeof part.url === 'string') {
+			return [{ href: part.url, title: 'title' in part && typeof part.title === 'string' ? part.title : part.url }]
+		}
+		if (part.type === 'source-document' && 'sourceId' in part && typeof part.sourceId === 'string') {
+			return [
+				{
+					title: 'title' in part && typeof part.title === 'string' ? part.title : part.sourceId,
+				},
+			]
+		}
+		if (part.type === 'dynamic-tool' && 'state' in part && part.state === 'output-available' && 'output' in part) {
+			return retrievalMatches(part.output).map((source) => ({
+				title: `[${source.documentId}#${source.chunkIndex}]`,
+			}))
+		}
+		return []
+	})
+}
+
+function statusDescription(status: unknown): string | undefined {
+	if (!status || typeof status !== 'object' || !('phase' in status) || typeof status.phase !== 'string')
+		return undefined
+	return {
+		started: 'Preparing the grounded answer.',
+		'tool-running': 'Searching the authorized knowledge collection.',
+		'subagent-started': 'A supporting agent is working.',
+		'subagent-completed': 'A supporting agent completed its work.',
+		'subagent-failed': 'A supporting agent could not complete its work.',
+		'media-progress': 'Processing media.',
+		completed: 'The answer is complete.',
+		interrupted: 'The answer needs a review decision.',
+		failed: 'The answer failed.',
+		cancelled: 'The answer was cancelled.',
+	}[status.phase]
+}
+
+export function KnowledgeChat({
+	sessionToken,
+	knowledgeReady = true,
+}: {
+	sessionToken: string
+	knowledgeReady?: boolean
+}) {
+	const [text, setText] = useState('')
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport({
+				api: '/api/v1/knowledge/chat',
+				headers: { authorization: `Bearer ${sessionToken}` },
+				body: { collectionId: 'customer-help' },
+			}),
+		[sessionToken],
+	)
+	const { addToolApprovalResponse, error, messages, sendMessage, status, stop } = useChat({
+		transport,
+		sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+	})
+
+	function submit(message: PromptInputMessage) {
+		if (!message.text.trim() || !sessionToken || !knowledgeReady) return
+		sendMessage({ text: message.text })
+		setText('')
+	}
+
+	return (
+		<section className="flex h-[36rem] flex-col rounded-xl border bg-card p-4 shadow-sm" aria-label="Knowledge chat">
+			<p className="mb-2 text-sm text-muted-foreground" aria-live="polite">
+				{status === 'submitted'
+					? 'The question was submitted.'
+					: status === 'streaming'
+						? 'The answer is streaming.'
+						: status === 'error'
+							? 'The answer failed.'
+							: 'Ready for a question.'}
+			</p>
+			{error ? (
+				<p className="mb-2 text-sm text-destructive" role="alert">
+					{error.message}
+				</p>
+			) : null}
+			<Conversation>
+				<ConversationContent>
+					{messages.length === 0 ? (
+						<ConversationEmptyState
+							title="Ask Example Bank"
+							description="Answers use the authorized customer-help collection."
+						/>
+					) : (
+						messages.map((message) => {
+							const sources = messageSources(message.parts)
+							return (
+								<Message from={message.role} key={message.id}>
+									<MessageContent>
+										{message.parts.map((part) => {
+											if (part.type === 'text') {
+												return <MessageResponse key={`${message.id}-text-${part.text}`}>{part.text}</MessageResponse>
+											}
+											if (part.type === 'dynamic-tool') {
+												const awaitingManualApproval = part.state === 'approval-requested' && !part.approval.isAutomatic
+												return (
+													<Tool key={`${message.id}-tool-${part.toolCallId}`}>
+														<ToolHeader type={part.type} state={part.state} toolName={part.toolName} />
+														<ToolContent>
+															<ToolInput input={part.input} />
+															<ToolOutput
+																output={'output' in part ? part.output : undefined}
+																errorText={'errorText' in part ? part.errorText : undefined}
+															/>
+															{awaitingManualApproval ? (
+																<Confirmation approval={part.approval} state={part.state}>
+																	<ConfirmationRequest>
+																		{part.approval.requestReason ?? `Allow ${part.toolName} to use this request?`}
+																	</ConfirmationRequest>
+																	<ConfirmationActions>
+																		<ConfirmationAction
+																			onClick={() => addToolApprovalResponse({ id: part.approval.id, approved: false })}
+																			variant="outline"
+																		>
+																			Reject
+																		</ConfirmationAction>
+																		<ConfirmationAction
+																			onClick={() => addToolApprovalResponse({ id: part.approval.id, approved: true })}
+																		>
+																			Approve
+																		</ConfirmationAction>
+																	</ConfirmationActions>
+																</Confirmation>
+															) : null}
+														</ToolContent>
+													</Tool>
+												)
+											}
+											if (part.type === 'source-url' || part.type === 'source-document') return null
+											if (part.type === 'data-status') {
+												const description = statusDescription(part.data)
+												return description ? (
+													<p className="text-sm text-muted-foreground" key={`${message.id}-status`}>
+														{description}
+													</p>
+												) : null
+											}
+											return null
+										})}
+									</MessageContent>
+									{sources.length > 0 ? (
+										<Sources>
+											<SourcesTrigger count={sources.length} />
+											<SourcesContent>
+												{sources.map((source) =>
+													source.href ? (
+														<Source href={source.href} key={`${message.id}-${source.href}`} title={source.title} />
+													) : (
+														<span className="font-medium" key={`${message.id}-${source.title}`}>
+															{source.title}
+														</span>
+													),
+												)}
+											</SourcesContent>
+										</Sources>
+									) : null}
+								</Message>
+							)
+						})
+					)}
+				</ConversationContent>
+				<ConversationScrollButton />
+			</Conversation>
+			<PromptInput onSubmit={submit} className="mt-4">
+				<PromptInputTextarea
+					aria-label="Knowledge question"
+					value={text}
+					onChange={(event) => setText(event.currentTarget.value)}
+					placeholder={
+						!sessionToken
+							? 'Sign in first'
+							: knowledgeReady
+								? 'Ask how long an international transfer can remain pending'
+								: 'Ingest the source first'
+					}
+				/>
+				<PromptInputSubmit
+					disabled={status === 'ready' && (!text.trim() || !sessionToken || !knowledgeReady)}
+					onStop={stop}
+					status={status}
+				/>
+			</PromptInput>
+		</section>
+	)
+}

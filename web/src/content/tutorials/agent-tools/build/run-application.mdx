@@ -1,0 +1,198 @@
+---
+title: Run the credential-free and live examples
+description: Exercise the complete path with a strict fake model or an optional OpenAI model.
+order: 238
+kind: lesson
+status: published
+---
+
+Start with the credential-free demo. Its strict fake model chooses the real
+host tool, then returns a structured answer. File-backed SQLite supplies the
+persistent Harness storage required by the hosted tool.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { createSupportApplication } from './createSupportApplication.js'
+import { invokeSupportQuestion } from './invokeSupportQuestion.js'
+
+const usage = { inputTokens: 5, outputTokens: 4, totalTokens: 9 }
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject(
+		objectReply(
+			{},
+			{
+				toolCalls: [
+					{
+						id: 'lookup-1',
+						name: 'lookupTransaction',
+						arguments: { accountId: 'account-operating', transactionId: 'tx-100' },
+					},
+				],
+				usage,
+				finishReason: 'tool_calls',
+			},
+		),
+	)
+	provider.enqueueObject(
+		objectReply(
+			{ answer: 'Transaction tx-100 is pending for EUR 42.', transactionIds: ['tx-100'] },
+			{ usage, finishReason: 'stop' },
+		),
+	)
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const { support, transaction } = await createSupportApplication(
+		eventBridge,
+		logger,
+		{
+			supportQuestionPolicy: { canAsk: async () => true },
+			accountReadPolicy: { canRead: async () => true },
+			transactionSummaryReader: {
+				getById: async (transactionId) => ({
+					transactionId,
+					accountId: 'account-operating',
+					tenantId: 'tenant-example',
+					status: 'pending',
+					amount: 42,
+					currency: 'EUR',
+				}),
+			},
+		},
+		{ provider, model: 'fake-support' },
+		storage,
+	)
+
+	try {
+		const answer = await invokeSupportQuestion(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{
+				questionId: 'demo-question-1',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+				question: 'What is the status and amount of this transaction?',
+			},
+		)
+		process.stdout.write(`${JSON.stringify(answer, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await transaction.destroy()
+		await eventBridge.destroy()
+		await storage.close()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the credential-free demo" replay="project"
+npm run demo
+```
+
+```json title="Expected demo result" expect="json"
+{
+  "answer": "Transaction tx-100 is pending for EUR 42.",
+  "transactionIds": ["tx-100"]
+}
+```
+
+The optional live process uses the same service composition and a published
+OpenAI adapter.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { sqliteHarnessStorage } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { createSupportApplication } from './createSupportApplication.js'
+import { invokeSupportQuestion } from './invokeSupportQuestion.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const storage = sqliteHarnessStorage({ file: 'agent-tools.sqlite' })
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const { support, transaction } = await createSupportApplication(
+		eventBridge,
+		logger,
+		{
+			supportQuestionPolicy: {
+				canAsk: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-alex',
+			},
+			accountReadPolicy: {
+				canRead: async ({ tenantId, principalId, accountId }) =>
+					tenantId === 'tenant-example' && principalId === 'principal-alex' && accountId === 'account-operating',
+			},
+			transactionSummaryReader: {
+				getById: async (transactionId) =>
+					transactionId === 'tx-100'
+						? {
+								transactionId,
+								accountId: 'account-operating',
+								tenantId: 'tenant-example',
+								status: 'pending',
+								amount: 42,
+								currency: 'EUR',
+							}
+						: undefined,
+			},
+		},
+		{
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+		storage,
+	)
+
+	try {
+		const answer = await invokeSupportQuestion(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{
+				questionId: 'live-question-1',
+				accountId: 'account-operating',
+				transactionId: 'tx-100',
+				question: 'What is the status and amount of this transaction?',
+			},
+		)
+		process.stdout.write(`${JSON.stringify(answer, null, 2)}\n`)
+	} finally {
+		await support.destroy()
+		await transaction.destroy()
+		await eventBridge.destroy()
+		await storage.close()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Agent tool services could not start.'}\n`)
+	process.exit(1)
+})
+```
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+Copy `.env.example` to `.env`, add a key, and run `npm start` only when you want
+the live provider.
+
+```bash title="Run the optional live model"
+cp .env.example .env
+npm start
+```
+
+Both programs destroy the Support service, Transaction service, EventBridge,
+and SQLite storage in `finally`. That cleanup is also important in tests and
+long-running processes.
+
+Continue with [Test the command boundary](../../testing/test-tools/).

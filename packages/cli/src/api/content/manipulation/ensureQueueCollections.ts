@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { Project, SyntaxKind } from 'ts-morph'
+import { IndentationText, Project, QuoteKind, SyntaxKind } from 'ts-morph'
 import { camelCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
@@ -15,7 +15,14 @@ export const ensureQueueCollections = async (input: EnsureQueueCollectionsInput)
 		throw new Error(`Service file not found: ${input.serviceFile}`)
 	}
 
-	const project = new Project({ skipFileDependencyResolution: true, skipLoadingLibFiles: true })
+	const project = new Project({
+		manipulationSettings: {
+			indentationText: IndentationText.Tab,
+			quoteKind: QuoteKind.Single,
+		},
+		skipFileDependencyResolution: true,
+		skipLoadingLibFiles: true,
+	})
 	const sourceFile = project.addSourceFileAtPathIfExists(input.serviceFile)
 	if (!sourceFile) {
 		throw new Error(`Failed to load service file: ${input.serviceFile}`)

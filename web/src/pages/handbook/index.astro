@@ -1,27 +1,30 @@
 ---
 import HandbookCard from '../../components/handbook/HandbookCard.astro'
-import { getSidebarItems, handbookSections } from '../../data/handbook'
+import { getHandbookProduct, getProductChapterTopics, getSidebarItems, type HandbookProduct } from '../../data/handbook'
 import HandbookLayout from '../../layouts/HandbookLayout.astro'
 
 /**
  * Handbook overview — uses the same shell as every other handbook page:
  * left sidebar for navigation, right sidebar as a chapter TOC.
- * Content is a short intro (split layout with code preview) followed
- * by all sections and their cards.
+ * Content is a short intro (split layout with code preview), then an explicit
+ * entry point into each independently navigable handbook product.
  */
 
 const sidebar = getSidebarItems()
+const products: HandbookProduct[] = ['framework', 'harness']
+const productSections = products.map(product => ({
+	product,
+	definition: getHandbookProduct(product),
+	chapters: getProductChapterTopics(product),
+	color: product === 'framework' ? 'found' : 'pilot' as const,
+}))
 
-// Generate heading entries for the right-side TOC from the section list
-const headings = handbookSections.map(s => ({
+// The right-side TOC deliberately exposes the two product boundaries first.
+const headings = productSections.map(({ product, definition }) => ({
 	depth: 2,
-	slug: s.id,
-	text: `${String(s.num).padStart(2, '0')} — ${s.title}`,
-})).concat({
-	depth: 2,
-	slug: 'api-documentation',
-	text: 'API Documentation',
-})
+	slug: product,
+	text: definition.title,
+}))
 ---
 
 <HandbookLayout
@@ -46,27 +49,27 @@ const headings = handbookSections.map(s => ({
         <span class="hb-accent">handbook.</span>
       </h1>
       <p class="text-[var(--color-fg-muted)] text-base leading-relaxed mb-8" style="max-width: 48ch">
-        Start with the 15-minute tutorial, then go as deep as you need — from
-        core mental models to enterprise patterns and live operations. Every
-        chapter has builder-pattern examples in real TypeScript.
+        Choose the framework track to build production services, or the AI
+        Harness track to add governed agents and workflows. Each track has its
+        own reading flow, navigation, and reference material.
       </p>
       <div class="flex flex-wrap gap-3">
         <a
-          href="/handbook/learn/getting-started/"
+          href="/handbook/framework/"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
                  bg-[var(--color-fg)] text-[var(--color-bg)]
                  hover:bg-[var(--color-fg-strong)] transition-colors"
         >
-          Start: 15-minute tour
+          Framework handbook
         </a>
         <a
-          href="/handbook/learn/from-zero-to-production/"
+          href="/handbook/harness/"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
                  border border-[var(--color-line-strong)] text-[var(--color-fg-muted)]
                  hover:border-[var(--color-line-vivid)] hover:text-[var(--color-fg)]
                  transition-colors"
         >
-          Zero to production
+          AI Harness handbook
         </a>
       </div>
     </div>
@@ -124,78 +127,51 @@ const headings = handbookSections.map(s => ({
 
   </div>
 
-  {/* ── All chapters ── */}
+  {/* ── Product tracks and their canonical chapters ── */}
   <div class="hb-overview-chapters">
-    {handbookSections.map((section) => (
-      <section id={section.id} class="hb-overview-section">
+    {productSections.map(({ product, definition, chapters, color }) => (
+      <section id={product} class="hb-overview-section">
         <header class="hb-overview-section-head">
           <span
             class="font-mono text-[0.68rem] tracking-[0.14em] uppercase"
-            style={`color: var(--color-${section.color}-hi)`}
+            style={`color: var(--color-${color}-hi)`}
           >
-            {String(section.num).padStart(2, '0')}
+            {product === 'framework' ? '01' : '02'}
           </span>
           <div>
             <a
-              href={`/handbook/${section.id}/`}
+              href={definition.canonicalRoute}
               class="hb-overview-section-title"
-              style={`--sec-color: var(--color-${section.color}-hi)`}
+              style={`--sec-color: var(--color-${color}-hi)`}
             >
-              {section.title}
+              {definition.title}
             </a>
             <p class="text-[var(--color-fg-muted)] text-sm leading-snug mt-1">
-              {section.subtitle}
+              {definition.description}
             </p>
+            <a
+              href={definition.canonicalRoute}
+              class="inline-flex mt-3 text-sm font-semibold hover:underline"
+              style={`color: var(--color-${color}-hi)`}
+            >
+              Open the {definition.title} →
+            </a>
           </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-5">
-          {section.cards.map((card) => (
+          {chapters.map((chapter) => (
             <HandbookCard
-              title={card.title}
-              description={card.description}
-              icon={card.icon}
-              href={`/handbook/${section.id}/${card.id}/`}
-              color={section.color}
-              featured={card.featured}
+              title={chapter.title}
+              description={chapter.description}
+              icon={chapter.icon ?? 'help'}
+              href={chapter.canonicalRoute}
+              color={color}
             />
           ))}
         </div>
       </section>
     ))}
-
-    <section id="api-documentation" class="hb-overview-section">
-      <header class="hb-overview-section-head">
-        <span
-          class="font-mono text-[0.68rem] tracking-[0.14em] uppercase"
-          style="color: var(--color-pilot-hi)"
-        >
-          API
-        </span>
-        <div>
-          <a
-            href="/handbook/api/"
-            class="hb-overview-section-title"
-            style="--sec-color: var(--color-pilot-hi)"
-          >
-            API Documentation
-          </a>
-          <p class="text-[var(--color-fg-muted)] text-sm leading-snug mt-1">
-            Handbook-native reference generated from the public PURISTA TypeScript packages.
-          </p>
-        </div>
-      </header>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-5">
-        <HandbookCard
-          title="Integrated API Reference"
-          description="Browse package exports, classes, interfaces, functions, and TypeScript signatures inside the handbook UI."
-          icon="api"
-          href="/handbook/api/"
-          color="pilot"
-        />
-      </div>
-    </section>
   </div>
 
 </HandbookLayout>

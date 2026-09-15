@@ -1,0 +1,35 @@
+{
+	"skill_name": "purista-docs-maintainer",
+	"evals": [
+		{
+			"id": "command-lifecycle-refactor",
+			"prompt": "Rework the PURISTA Commands handbook so a newcomer can build a command and an existing developer can quickly find success events, canEnqueue, context capabilities, HTTP exposure, and tests.",
+			"expected_output": "Verifies and diagrams the command runtime lifecycle, creates reader-task page ownership, preserves per-content-unit evidence, and tests both newcomer and exact-lookup journeys.",
+			"files": ["SKILL.md", "references/topic-lifecycle-and-task-flow.md", "references/coverage-and-traceability.md"]
+		},
+		{
+			"id": "concept-rehoming",
+			"prompt": "Understand the Framework contains deployment, retry, handler-context, and builder procedures that also appear in task guides. Refactor it without losing information.",
+			"expected_output": "Keeps stable mental models in the concept chapter, maps each procedure to one exact task owner, lands destinations before redirects, and preserves direct-entry context.",
+			"files": ["SKILL.md", "references/topic-lifecycle-and-task-flow.md", "references/structure-governance.md"]
+		},
+		{
+			"id": "autonomous-handbook-plan",
+			"prompt": "Plan a whole-handbook refactor for parallel low-cost agents without content loss, file collisions, or navigation drift.",
+			"expected_output": "Creates evidence-first waves, pilots one primitive, gives bounded tickets with halt conditions, and assigns shared manifest/routes/navigation to one integrator.",
+			"files": ["SKILL.md", "references/topic-lifecycle-and-task-flow.md", "references/structure-governance.md"]
+		},
+		{
+			"id": "casual-missing-topic",
+			"prompt": "our command docs feel messy, can u make enqueue and emitted events easy to find but dont lose any old details",
+			"expected_output": "Finds the command lifecycle and current content units, uses reader-facing task titles, retains verified detail, and avoids empty symmetry pages.",
+			"files": ["SKILL.md", "references/topic-lifecycle-and-task-flow.md"]
+		},
+		{
+			"id": "near-miss-runtime-implementation",
+			"prompt": "Change the CommandDefinitionBuilder execution order so after guards run after output transformation.",
+			"expected_output": "Does not use the documentation-maintenance skill as the primary implementation workflow; routes runtime behavior changes to the PURISTA implementation/spec workflow and updates docs only after behavior is approved and implemented.",
+			"files": []
+		}
+	]
+}

@@ -1,0 +1,64 @@
+---
+title: Compose the evaluated service
+description: Bind the chosen model and business policy when creating the Support service.
+order: 299
+kind: lesson
+status: published
+---
+
+The factory supplies application-owned policy and the exact `ai.models.classification` binding. The server entry point selects OpenAI only for the optional live service.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		classificationModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: { models: { classification: options.classificationModel } },
+	})
+}
+```
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: {
+			canClassify: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		classificationModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Evaluated Support classification service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Evaluation service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Type-check service composition" replay="project"
+npm run build
+```
+
+Continue with [Run the mounted classifier](../run-application/).

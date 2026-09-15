@@ -18,15 +18,25 @@ export const main = async () => {
 	// try to shut down as clean as possible
 	gracefulShutdown(logger, [
 		honoService.prepareDestroy(),
-		eventBridge,
-		...services,
 		{
 			name: `${honoService.serviceInfo.serviceName} ${honoService.serviceInfo.serviceVersion} close socket`,
-			destroy: async () => {
-				serverInstance.close()
-			},
+			destroy: () =>
+				new Promise<void>((resolve, reject) => {
+					serverInstance.close(error => (error ? reject(error) : resolve()))
+				}),
 		},
-		honoService,
+		...services.map(service => ({
+			name: `${service.serviceInfo.serviceName} ${service.serviceInfo.serviceVersion}`,
+			destroy: () => service.destroy(),
+		})),
+		{
+			name: `${honoService.serviceInfo.serviceName} ${honoService.serviceInfo.serviceVersion}`,
+			destroy: () => honoService.destroy(),
+		},
+		{
+			name: eventBridge.name,
+			destroy: () => eventBridge.destroy(),
+		},
 	])
 }
 

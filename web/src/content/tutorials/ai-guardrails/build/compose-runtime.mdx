@@ -1,0 +1,76 @@
+---
+title: Compose the guarded runtime
+description: Supply the business policy and exact classification model binding at startup.
+order: 196
+kind: lesson
+status: published
+---
+
+Create one composition root for the service's runtime dependencies.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		classificationModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: { models: { classification: options.classificationModel } },
+	})
+}
+```
+The `ai.models.classification` value supplies the provider and model to the mounted
+Harness. Credentials remain outside the portable agent and guardrail files.
+
+Create an address-first terminal caller for the wrapper command.
+
+```ts title="src/invokeClassification.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from './service/support/v1/harness/agent/classifySupportMessage/schema.js'
+
+type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
+type Classification = z.infer<typeof classifySupportMessageOutputSchema>
+
+export function invokeClassification(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: ClassificationInput,
+) {
+	return eventBridge.invoke<Classification>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'classify',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
+		payload: { payload, parameter: {} },
+	})
+}
+```
+Trusted identity stays in PURISTA message metadata. The input rail inspects only
+the classified content and cannot use payload fields as proof of authority.
+
+```bash title="Verify runtime composition" replay="project"
+npm run build
+```
+
+Continue with [Run the guarded application](../run-application/).

@@ -1,0 +1,18 @@
+---
+title: Migrating to Harness 3
+description: Migrate Harness 2.1.1 source, adapters and data with explicit verification and rollback boundaries.
+---
+
+Use the current migration guides in order:
+
+1. [Adopt the Harness 3 clean-break API](/handbook/harness/upgrade-and-migrate/migrate-to-v3/)
+   for registration, invocation, session cleanup, schemas and optional controls.
+2. [Migrate adapters and data](/handbook/harness/upgrade-and-migrate/adapter-and-data-compatibility/)
+   for the storage, memory, sandbox and durable-record boundaries.
+3. [Verify rollout and rollback](/handbook/harness/upgrade-and-migrate/verification-and-rollback/)
+   before changing production traffic or retained data.
+
+The baseline is the [published 2.1.1 source](https://github.com/puristajs/harness/tree/v2.1.1).
+PURISTA's general-purpose `stateStore` remains separate from
+Harness storage; follow the [Framework integration guide](/handbook/framework/build-ai-powered-services/)
+for application runtime wiring.

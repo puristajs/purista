@@ -1,0 +1,24 @@
+---
+title: Expose commands as REST endpoints
+description: Generate a Transaction service, inject a repository contract, and let Hono project validated commands as REST endpoints.
+order: 40
+kind: chapter
+group: start
+status: published
+---
+
+This chapter introduces the `Transaction` service because the application now
+needs transaction behavior. It owns two commands: record one synthetic
+transaction and read one by ID. Hono turns their builder metadata into REST
+endpoints and OpenAPI paths.
+
+The commands depend on a `TransactionRepository` resource. A small in-memory
+adapter lets the chapter run, but the service never stores transaction records
+in StateStore. The next chapter will replace that adapter with a database.
+
+## Build
+
+1. [Define the transaction and repository contracts](/tutorials/rest-endpoints/build/model-contract/).
+2. [Generate and expose the commands](/tutorials/rest-endpoints/build/generate-commands/).
+3. [Call the generated endpoints from React](/tutorials/rest-endpoints/build/connect-ui/).
+4. [Test command and HTTP contracts](/tutorials/rest-endpoints/testing/test-endpoints/).

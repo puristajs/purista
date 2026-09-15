@@ -1,0 +1,38 @@
+---
+title: Evaluate agent behavior
+description: Build a deterministic Harness evaluation and a guarded PURISTA service for a small support classifier.
+order: 290
+kind: chapter
+group: ai
+status: published
+---
+
+An evaluation answers a practical question: did this candidate produce the behavior your application expects? In this chapter you build a versioned dataset, run the native Harness agent for every case, score its structured output, and fail a change gate when the result regresses.
+
+The Example Bank supplies three short support messages. The framework pieces are the focus: the agent belongs to the Support service version, the model is bound at startup, and the production command reaches the mounted target by its address through EventBridge.
+
+```text title="Evaluation and application paths"
+versioned dataset -> native Harness agent -> scorers -> change gate
+                                      \\
+PURISTA command -> Support / 1 / runClassifySupportMessage -> same agent
+```
+
+The default provider is a strict fake. It needs no credentials and proves the evaluation pipeline. A separate live command can measure a named provider candidate. A scripted provider cannot measure model quality.
+
+Follow these pages:
+
+1. [Create the project and agent](./setup/scaffold/).
+2. [Create the evaluation dataset](./build/dataset/).
+3. [Define the native agent](./build/define-agent/).
+4. [Authorize and mount the target](./build/authorize-agent/).
+5. [Invoke it from a PURISTA command](./build/invoke-agent/).
+6. [Add deterministic scorers and a gate](./build/deterministic-checks/).
+7. [Define the release change gate](./build/change-gate/).
+8. [Run and aggregate the evaluation](./build/scoring/).
+9. [Compose the evaluated service](./build/compose-runtime/).
+10. [Run the mounted classifier](./build/run-application/).
+11. [Run a live candidate](./build/run-live/).
+12. [Test the native evaluation](./testing/test-evaluation/).
+13. [Test Framework integration](./testing/test-framework/).
+
+The complete source is in `examples/banking/chapters/agent-evaluation`. Start with [Create the project and agent](./setup/scaffold/).

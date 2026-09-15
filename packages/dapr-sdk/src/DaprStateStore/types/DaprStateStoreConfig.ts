@@ -12,5 +12,5 @@ export type DaprStateStoreConfig = {
 	/**
 	 * Dapr sidecar client settings.
 	 */
-	clientConfig?: DaprClientConfig
+	clientConfig?: Partial<DaprClientConfig>
 }

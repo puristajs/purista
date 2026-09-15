@@ -1,0 +1,39 @@
+---
+title: Add a classification agent
+description: Define, mount, invoke, and test a structured AI classifier with native Harness and PURISTA.
+order: 180
+kind: chapter
+group: ai
+status: published
+---
+
+This chapter adds one focused AI capability to a PURISTA service. A native
+Harness agent turns a support message into a typed classification. A normal
+Support command invokes that mounted agent through EventBridge.
+
+```text title="Classification execution path"
+PURISTA command
+  -> Support / 1 / classifySupportMessage
+  -> mounted native Harness agent
+  -> model supplied at service startup
+  -> validated structured result
+```
+
+The support message is only a small input example. The useful pattern is the
+boundary: the agent owns AI behavior, the service owns the mount and business
+policy, and application startup supplies the model. The required path uses
+`FakeModelProvider`, so it needs no API key, HTTP server, or database.
+
+You will:
+
+1. [create a project and generate Support plus its agent](./build/scaffold/);
+2. [define the structured classifier](./build/define/);
+3. [protect and mount the agent](./build/mount/);
+4. [invoke it from a PURISTA command](./build/invoke/);
+5. [compose the runtime and an address-first caller](./build/compose-runtime/);
+6. [run a deterministic demo](./build/run-application/);
+7. [test the native and command boundaries](./testing/test-classification/); and
+8. [test the complete EventBridge route](./testing/test-eventbridge/).
+
+Every `write` block contains a complete file. The finished source is in
+`examples/banking/chapters/classification-agent`.

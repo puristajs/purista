@@ -137,7 +137,7 @@ describe('Service', () => {
 			.setAfterGuardHooks({
 				invoke: async function (context) {
 					// @ts-expect-error intentionally invalid payload shape to verify runtime validation
-					await context.service.OtherService[1].otherCommand({ invalid: true }, {})
+					await context.service.OtherService['1'].otherCommand({ invalid: true }, {})
 				},
 			})
 			.setSubscriptionFunction(async function () {

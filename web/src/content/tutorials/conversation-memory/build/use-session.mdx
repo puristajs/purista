@@ -1,0 +1,101 @@
+---
+title: Mount and invoke the conversation agent
+description: Add bounded retention, a target policy, and an address-first PURISTA command wrapper.
+order: 223
+kind: lesson
+status: published
+---
+
+Compose the direct agent into one service-owned Harness definition. Retention
+keeps the newest eight complete turns and also limits stored bytes. The target
+policy protects direct agent calls with the same business authorization used by
+the wrapper command.
+
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import { requireSupportConversationAccess } from '../requireSupportConversationAccess.js'
+import type { SupportConversationPolicy } from '../SupportConversationPolicy.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
+import { answerSupportQuestionAgent } from './agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+
+export const supportHarness = defineHarness({
+	name: 'supportConversations',
+	revision: 'support-v1',
+	defaults: { historyRetention: { maxTurns: 8, maxBytes: 32_000 } },
+}).addAgent(answerSupportQuestionAgent)
+
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	agents: {
+		answerSupportQuestion: {
+			beforeGuards: {
+				conversationAccess: async (
+					context: HarnessBusinessGuardContext<{
+						supportConversationPolicy: SupportConversationPolicy
+					}>,
+					input: z.output<typeof answerSupportQuestionAgent.contract.input>,
+				) => {
+					await requireSupportConversationAccess(
+						context.resources.supportConversationPolicy,
+						context.identity,
+						input.conversationId,
+						'continue',
+					)
+				},
+			},
+		},
+	},
+	workflows: {},
+})
+```
+Generate the wrapper command with the local CLI.
+
+```bash title="Generate the conversation command" replay="project"
+npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
+```
+
+The builder declares the exact agent contract it may call. Runtime access is
+address-first: service name, service version, then the direct definition id.
+Core returns a result envelope containing the session id and run outcome, so the
+command only returns output from a completed run.
+
+```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts" write
+import { conversationSessionId } from '../../conversationSessionId.js'
+import {
+	answerSupportQuestionAgent,
+	answerSupportQuestionInputSchema,
+	answerSupportQuestionOutputSchema,
+} from '../../harness/agent/answerSupportQuestion/answerSupportQuestionAgent.js'
+import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('continueSupportConversation', 'Continue a bounded support conversation')
+	.addPayloadSchema(answerSupportQuestionInputSchema)
+	.addOutputSchema(answerSupportQuestionOutputSchema)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerSupportQuestionAgent.contract))
+	.setBeforeGuardHooks({
+		conversationAccess: async function (context, payload) {
+			await requireSupportConversationAccess(
+				context.resources.supportConversationPolicy,
+				context.message,
+				payload.conversationId,
+				'continue',
+			)
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		const result = await context.agent.Support['1'][answerSupportQuestionAgent.contract.id].run(payload, { sessionId })
+		return result.outcome.output
+	})
+```
+The command and target guards perform authorization. Authentication belongs at
+the application boundary that establishes trusted message identity.
+
+```bash title="Check the mounted invocation" replay="project"
+npm run build
+```
+
+Continue with [Export and clear conversation history](../export-and-clear/).

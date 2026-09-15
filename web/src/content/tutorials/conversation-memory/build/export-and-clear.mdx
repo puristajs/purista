@@ -1,0 +1,112 @@
+---
+title: Export and clear conversation history
+description: Add authorized PURISTA commands that use the same Harness storage and opaque session id.
+order: 224
+kind: lesson
+status: published
+---
+
+History management is an application capability. Expose it through normal
+PURISTA commands instead of giving transcript deletion to the model.
+
+```bash title="Generate history commands" replay="project"
+npm run add:command -- get-conversation-history --service support --service-version 1 --description "Export the caller support conversation history" --non-interactive
+npm run add:command -- clear-conversation-history --service support --service-version 1 --description "Clear the caller support conversation transcript" --non-interactive
+```
+
+This adapter gives the service narrow access to the same Harness storage used by
+the mounted agent.
+
+```ts title="src/resources/HarnessConversationHistory.ts" write
+import type { HarnessStorage } from '@purista/harness'
+import type { SupportConversationHistory } from '../service/support/v1/SupportConversationHistory.js'
+
+export class HarnessConversationHistory implements SupportConversationHistory {
+	public constructor(private readonly storage: HarnessStorage) {}
+
+	public async list(sessionId: string) {
+		return (await this.storage.listMessages(sessionId)).map(({ role, content, timestamp }) => ({
+			role,
+			content,
+			timestamp,
+		}))
+	}
+
+	public async clear(sessionId: string) {
+		await this.storage.clearMessages(sessionId)
+	}
+}
+```
+Both commands authorize the requested action and derive the same opaque session
+id used by the agent invocation.
+
+```ts title="src/service/support/v1/command/getConversationHistory/getConversationHistoryCommandBuilder.ts" write
+import { conversationSessionId } from '../../conversationSessionId.js'
+import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
+import { conversationHistoryRequestSchema, conversationHistorySchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const getConversationHistoryCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('getConversationHistory', "Export the current caller's support conversation history")
+	.addPayloadSchema(conversationHistoryRequestSchema)
+	.addOutputSchema(conversationHistorySchema)
+	.setBeforeGuardHooks({
+		conversationAccess: async function (context, payload) {
+			await requireSupportConversationAccess(
+				context.resources.supportConversationPolicy,
+				context.message,
+				payload.conversationId,
+				'read',
+			)
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		return { messages: await context.resources.supportConversationHistory.list(sessionId) }
+	})
+```
+```ts title="src/service/support/v1/command/clearConversationHistory/clearConversationHistoryCommandBuilder.ts" write
+import { conversationSessionId } from '../../conversationSessionId.js'
+import { requireSupportConversationAccess } from '../../requireSupportConversationAccess.js'
+import { clearedConversationHistorySchema, conversationHistoryRequestSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const clearConversationHistoryCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('clearConversationHistory', "Clear the current caller's support conversation transcript")
+	.addPayloadSchema(conversationHistoryRequestSchema)
+	.addOutputSchema(clearedConversationHistorySchema)
+	.setBeforeGuardHooks({
+		conversationAccess: async function (context, payload) {
+			await requireSupportConversationAccess(
+				context.resources.supportConversationPolicy,
+				context.message,
+				payload.conversationId,
+				'clear',
+			)
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const sessionId = conversationSessionId(context.message, payload.conversationId)
+		await context.resources.supportConversationHistory.clear(sessionId)
+		return { cleared: true as const }
+	})
+```
+Mount the Harness once on the final service definition.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { clearConversationHistoryCommandBuilder } from './command/clearConversationHistory/clearConversationHistoryCommandBuilder.js'
+import { continueSupportConversationCommandBuilder } from './command/continueSupportConversation/continueSupportConversationCommandBuilder.js'
+import { getConversationHistoryCommandBuilder } from './command/getConversationHistory/getConversationHistoryCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(continueSupportConversationCommandBuilder.getDefinition())
+	.addCommandDefinition(getConversationHistoryCommandBuilder.getDefinition())
+	.addCommandDefinition(clearConversationHistoryCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+Clearing messages keeps the session naming rule reusable. The next run with the
+same id starts with an empty transcript.
+
+Continue with [Compose the runtime](../compose-runtime/).

@@ -1,0 +1,101 @@
+import {
+	EBMessageType,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isCommandErrorResponse,
+	isCommandSuccessResponse,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1Service } from '../../transactionV1Service.js'
+import { recordingStartedEventName } from './recordingStartedEvent.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const input = { amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books' }
+const parameter = { accountId: 'account-operating' }
+const stored = {
+	...input,
+	...parameter,
+	tenantId: 'tenant-example',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+}
+
+async function setup(save: TransactionRepository['save']) {
+	const eventBridge = getEventBridgeMock(sandbox)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const service = await transactionV1Service.getInstance(eventBridge.mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: transactionTestResources(transactionRepository),
+	})
+	await service.start()
+	const message = getCommandMessageMock({
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		receiver: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+		},
+		payload: { payload: input, parameter },
+	})
+	return { service, message, emitMessage: eventBridge.stubs.emitMessage }
+}
+
+describe('recordTransaction event semantics', () => {
+	test('returns one named success response and emits one distinct custom event', async () => {
+		const fixture = await setup(sandbox.stub().resolves(stored))
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandSuccessResponse(response)).toBe(true)
+			if (!isCommandSuccessResponse(response)) throw new Error('Expected a success response')
+
+			expect(response.eventName).toBe('transaction.recorded.v1')
+			expect(response.messageType).toBe(EBMessageType.CommandSuccessResponse)
+			expect(response.sender).toMatchObject({
+				serviceName: 'Transaction', serviceVersion: '1', serviceTarget: 'recordTransaction',
+			})
+			expect(response.principalId).toBe('principal-alex')
+			expect(response.tenantId).toBe('tenant-example')
+			expect(response.payload).toEqual(stored)
+
+			const customMessages = fixture.emitMessage.args
+				.map(([message]) => message)
+				.filter(message => message.messageType === EBMessageType.CustomMessage)
+			expect(customMessages).toHaveLength(1)
+			expect(customMessages[0]).toMatchObject({
+				messageType: EBMessageType.CustomMessage,
+				eventName: recordingStartedEventName,
+				principalId: 'principal-alex',
+				tenantId: 'tenant-example',
+				payload: { accountId: 'account-operating' },
+			})
+			expect(customMessages[0].eventName).not.toBe('transaction.recorded.v1')
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('has no named success response when saving fails', async () => {
+		const fixture = await setup(sandbox.stub().rejects(new Error('database unavailable')))
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandErrorResponse(response)).toBe(true)
+			expect(response.eventName).toBeUndefined()
+
+			// The earlier started fact is still a different, truthful event.
+			const customMessages = fixture.emitMessage.args
+				.map(([message]) => message)
+				.filter(message => message.messageType === EBMessageType.CustomMessage)
+			expect(customMessages).toHaveLength(1)
+			expect(customMessages[0].eventName).toBe(recordingStartedEventName)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})

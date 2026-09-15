@@ -1,0 +1,195 @@
+---
+title: Implement the bounded reaction
+description: Store one deterministic operational signal in StateStore when a matching debit crosses a threshold.
+order: 124
+kind: lesson
+status: published
+---
+
+A subscription should perform a small, bounded reaction. This example checks one
+threshold and replaces one operational signal. It does not start a compliance
+case, make a money-laundering claim, or copy transactions into StateStore.
+
+## Define the derived signal
+
+```ts title="src/service/monitoring/v1/monitoringSignal.ts" write
+import { z } from 'zod'
+
+export const largeDebitThresholdCents = 10_000
+export const latestLargeDebitSignalKey = 'monitoring:tenant-example:latest-large-debit'
+
+export const largeDebitSignalSchema = z.strictObject({
+	transactionId: z.uuid(),
+	accountId: z.string().trim().min(1),
+	amountCents: z.number().int().positive(),
+})
+
+export type LargeDebitSignal = z.output<typeof largeDebitSignalSchema>
+```
+
+The fixed key describes replaceable application state: the latest qualifying
+signal for the example tenant. The database remains the source of truth for the
+transaction itself.
+
+## Implement the handler
+
+Replace the empty function at the end of the subscription builder:
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts" write
+import { EBMessageType } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import {
+	largeDebitSignalSchema,
+	largeDebitThresholdCents,
+	latestLargeDebitSignalKey,
+} from '../../monitoringSignal.js'
+import { monitoringV1ServiceBuilder } from '../../monitoringV1ServiceBuilder.js'
+import {
+	monitoringV1ObserveLargeDebitInputParameterSchema,
+	monitoringV1ObserveLargeDebitInputPayloadSchema,
+} from './schema.js'
+
+export const observeLargeDebitSubscriptionBuilder = monitoringV1ServiceBuilder
+	.getSubscriptionBuilder('observeLargeDebit', 'Observe large recorded debit transactions')
+	.subscribeToEvent(ServiceEvent.TransactionRecordedV1)
+	.filterForMessageType(EBMessageType.CommandSuccessResponse)
+	.filterSentFrom('Transaction', '1', 'recordTransaction', undefined)
+	.filterTenantId('tenant-example')
+	.addPayloadSchema(monitoringV1ObserveLargeDebitInputPayloadSchema)
+	.addParameterSchema(monitoringV1ObserveLargeDebitInputParameterSchema)
+	.setSubscriptionFunction(async function (context, payload, _parameter) {
+		if (payload.direction !== 'debit' || payload.amountCents < largeDebitThresholdCents) return
+
+		const signal = largeDebitSignalSchema.parse({
+			transactionId: payload.transactionId,
+			accountId: payload.accountId,
+			amountCents: payload.amountCents,
+		})
+		await context.states.setState(latestLargeDebitSignalKey, signal)
+	})
+```
+
+The handler awaits `setState`, so a store failure is visible to PURISTA. Sending
+the same event again writes the same key and value. This deterministic replace
+behavior is safe for this derived signal; it is not a claim that every
+subscription effect is automatically idempotent.
+
+## Test the handler and StateStore boundary
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts" write
+import {
+	createSubscriptionContextMock,
+	getCommandSuccessMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, expect, test } from 'vitest'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import {
+	latestLargeDebitSignalKey,
+} from '../../monitoringSignal.js'
+import { monitoringV1Service } from '../../monitoringV1Service.js'
+import { observeLargeDebitSubscriptionBuilder } from './observeLargeDebitSubscriptionBuilder.js'
+import type { MonitoringV1ObserveLargeDebitInputPayload } from './types.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const qualifying = {
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	accountId: 'account-operating',
+	amountCents: 12_500,
+	direction: 'debit' as const,
+}
+
+async function setup(payload: MonitoringV1ObserveLargeDebitInputPayload = qualifying) {
+	const service = await monitoringV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	const message = getCommandSuccessMessageMock(payload, {
+		eventName: ServiceEvent.TransactionRecordedV1,
+		tenantId: 'tenant-example',
+		sender: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+			instanceId: 'transaction-instance',
+		},
+	})
+	const mocked = createSubscriptionContextMock(observeLargeDebitSubscriptionBuilder, {
+		message,
+		sandbox,
+	})
+	mocked.stubs.setState.resolves()
+	const observe = safeBind(observeLargeDebitSubscriptionBuilder.getSubscriptionFunction(), service)
+	return { service, mocked, observe }
+}
+
+test('stores one narrow signal for a qualifying debit', async () => {
+	const fixture = await setup()
+	try {
+		await fixture.observe(fixture.mocked.context, qualifying, undefined)
+		expect(fixture.mocked.stubs.setState.calledOnceWith(
+			latestLargeDebitSignalKey,
+			{
+				transactionId: qualifying.transactionId,
+				accountId: qualifying.accountId,
+				amountCents: qualifying.amountCents,
+			},
+		)).toBe(true)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('does not write for a credit or an amount below the threshold', async () => {
+	for (const payload of [
+		{ ...qualifying, direction: 'credit' as const },
+		{ ...qualifying, amountCents: 9_999 },
+	]) {
+		const fixture = await setup(payload)
+		try {
+			await fixture.observe(fixture.mocked.context, payload, undefined)
+			expect(fixture.mocked.stubs.setState.called).toBe(false)
+		} finally {
+			await fixture.service.destroy()
+			sandbox.resetHistory()
+		}
+	}
+})
+
+test('replaces the same signal deterministically on repeated delivery', async () => {
+	const fixture = await setup()
+	try {
+		await fixture.observe(fixture.mocked.context, qualifying, undefined)
+		await fixture.observe(fixture.mocked.context, qualifying, undefined)
+		expect(fixture.mocked.stubs.setState.callCount).toBe(2)
+		expect(fixture.mocked.stubs.setState.firstCall.args).toEqual(
+			fixture.mocked.stubs.setState.secondCall.args,
+		)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('surfaces a StateStore failure', async () => {
+	const fixture = await setup()
+	fixture.mocked.stubs.setState.rejects(new Error('state store unavailable'))
+	try {
+		await expect(fixture.observe(fixture.mocked.context, qualifying, undefined))
+			.rejects.toThrow('state store unavailable')
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+```
+
+```bash title="Test the subscription handler" replay="project"
+npx vitest run src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts
+npm run build
+```
+
+The direct test proves the handler's decisions and its StateStore effect without
+starting a broker or hiding the store behind an application fixture.

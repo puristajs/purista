@@ -13,9 +13,9 @@ export const getStreamTestFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const serviceTemplate = `${input.serviceName} v${input.serviceVersion} service`
+	const serviceTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
 	const serviceFileName = convertToProjectFileCasing(serviceTemplate, input.puristaConfig)
-	const serviceName = camelCase(serviceTemplate)
+	const serviceBuilderName = camelCase(serviceTemplate)
 	const streamBuilderFileName = convertToProjectFileCasing(`${input.streamName} stream builder`, input.puristaConfig)
 	const streamBuilderName = camelCase(`${input.streamName} stream builder`)
 	const typePrefix = pascalCase(`${input.serviceName} v${input.serviceVersion} ${input.streamName}`)
@@ -25,7 +25,7 @@ export const getStreamTestFileContent = (input: {
 	writer.writeLine(`import { describe, expect, test } from '${testLib}'`)
 	writer.writeLine(`import { createStreamTestHarness } from '@purista/core'`)
 	writer.blankLine()
-	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
+	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceFileName}.js'`)
 	writer.writeLine(`import { ${streamBuilderName} } from './${streamBuilderFileName}.js'`)
 	writer.writeLine(
 		`import type { ${typePrefix}FinalPayload, ${typePrefix}InputParameter, ${typePrefix}InputPayload } from './types.js'`,
@@ -44,7 +44,7 @@ export const getStreamTestFileContent = (input: {
 					writer.blankLine()
 					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
-					writer.writeLine(`const harness = await createStreamTestHarness(${serviceName}, ${streamBuilderName})`)
+					writer.writeLine(`const harness = await createStreamTestHarness(${serviceBuilderName}, ${streamBuilderName})`)
 					writer.blankLine()
 					writer.writeLine('try {')
 					writer.withIndentationLevel(1, () => {

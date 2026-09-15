@@ -1,0 +1,58 @@
+---
+title: Bind storage and named models
+description: Supply durable storage, the business policy, and separate model bindings at application composition.
+order: 276
+kind: lesson
+status: published
+---
+
+The workflow stays portable. The application supplies storage and both named model bindings.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { HarnessStorage, ModelProvider } from '@purista/harness'
+import type { SupportCasePolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		supportCasePolicy: SupportCasePolicy
+		storage: HarnessStorage
+		classificationModel: { provider: ModelProvider; model: string }
+		resolutionModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportCasePolicy: options.supportCasePolicy },
+		ai: {
+			storage: options.storage,
+			models: {
+				classification: options.classificationModel,
+				planning: {
+					...options.resolutionModel,
+					retry: {
+						maxAttempts: 2,
+						minDelayMs: 1,
+						maxDelayMs: 10,
+						maxActiveDelayMs: 100,
+						maxActiveElapsedMs: 1_000,
+						retryOn: { serverError: true },
+					},
+				},
+			},
+		},
+	})
+}
+```
+`classificationModel` and `resolutionModel` exactly match the agent definitions. The resolution binding has a short provider retry budget for temporary server failures. The application-owned workflow step records the handling-lane decision and does not add another retry layer.
+
+Tests may use temporary or in-memory storage. A live process should use storage that survives a restart and must close it during shutdown.
+
+```bash title="Check runtime composition" replay="project"
+npm run build
+```
+
+Continue with [Run the demo and live service](../run-application/).

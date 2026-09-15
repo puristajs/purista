@@ -1,0 +1,33 @@
+---
+title: Call an external HTTP provider
+description: Declare an outbound provider port, implement it with PURISTA HttpClient, resolve its secret, and test both sides of the boundary.
+order: 100
+kind: chapter
+group: start
+status: published
+---
+
+The database chapter already taught the common resource pattern: declare a
+narrow interface, inject its implementation at startup, and replace it in unit
+tests. This chapter does not repeat that lesson. It applies the same pattern to
+an outbound HTTP dependency and focuses on the parts that are different:
+timeouts, provider response validation, secrets, failure mapping, and a mocked
+external process.
+
+This chapter adds a small external transaction provider:
+
+- `Transaction` declares a narrow `LegacyTransactionClient` resource;
+- an adapter uses PURISTA `HttpClient` with a bounded timeout;
+- the composition root supplies the provider URL and a local `SecretStore`;
+- command tests use typed fakes instead of starting HTTP;
+- one separate integration test uses the Docker Compose provider.
+
+The provider returns one synthetic legacy text record. The existing parser,
+business guard, and repository remain responsible for their own boundaries.
+
+1. [Declare a typed provider resource](/tutorials/external-resources/build/declare/).
+2. [Implement the local HTTP adapter](/tutorials/external-resources/build/implement/).
+3. [Use the resource from a command](/tutorials/external-resources/build/use/).
+4. [Mock the resource and test the real boundary](/tutorials/external-resources/testing/test-resources/).
+
+Start from [Transform command input and output](/tutorials/command-transforms/).

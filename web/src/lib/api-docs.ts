@@ -159,6 +159,15 @@ function slugify(value: string): string {
 		.replace(/^-+|-+$/g, '')
 }
 
+/**
+ * API member links are used from task-focused handbook pages. Reflection IDs
+ * change when TypeDoc is regenerated, so member fragments intentionally use
+ * the stable public member name instead.
+ */
+function memberFragment(name: string): string {
+	return slugify(name).toLowerCase()
+}
+
 function textFromParts(parts: TypeDocCommentPart[] = []): string {
 	return parts
 		.map(part => part.text ?? '')
@@ -349,7 +358,7 @@ function memberToItem(reflection: TypeDocReflection, module: TypeDocReflection):
 		name: reflection.name,
 		slug: slugify(`${module.name}.${reflection.name}.${reflection.id}`),
 		route: 'members',
-		href: `#${slugify(`${reflection.name}-${reflection.id}`)}`,
+		href: `#${memberFragment(reflection.name)}`,
 		label: memberKindLabel(reflection.kind),
 		packageName: module.name,
 		summary: summaryOf(reflection.signatures?.[0] ?? reflection),

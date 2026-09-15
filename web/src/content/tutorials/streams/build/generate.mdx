@@ -1,0 +1,283 @@
+---
+title: Generate a stream
+description: Create the Analysis service, its read-only resource contract, and typed stream definition.
+order: 131
+kind: lesson
+status: published
+---
+
+A PURISTA stream belongs to a versioned service. Create a narrow `Analysis`
+service because this capability reads transaction data and produces summaries.
+
+```bash title="Generate the Analysis service" replay="project"
+npm run add:service -- analysis \
+  --description "Read transaction projections and produce bounded summaries" \
+  --non-interactive
+```
+
+Generate the stream with the project-local CLI:
+
+```bash title="Generate the transaction summary stream" replay="project"
+npm run add:stream -- summarize-transactions \
+  --service analysis --service-version 1 \
+  --description "Stream progress while summarizing recent transactions" \
+  --non-interactive
+```
+
+The CLI creates the schemas, inferred types, builder, starter test, and service
+registration. We will now replace the permissive generated contracts.
+
+## Define the read model and resource
+
+`Analysis` owns the shape it needs. It does not import the Transaction service.
+
+```ts title="src/service/analysis/v1/transactionAnalysis.ts" write
+import { z } from 'zod'
+
+export const analysisTransactionSchema = z.strictObject({
+	transactionId: z.uuid(),
+	amountCents: z.number().int().positive(),
+	direction: z.enum(['credit', 'debit']),
+	counterparty: z.string().trim().min(2).max(80),
+	recordedAt: z.iso.datetime(),
+})
+
+export type AnalysisTransaction = z.output<typeof analysisTransactionSchema>
+
+export type TransactionAnalysisScope = {
+	tenantId: string
+	principalId: string
+	accountId: string
+}
+```
+
+```ts title="src/service/analysis/v1/TransactionAnalysisReader.ts" write
+import type { AnalysisTransaction, TransactionAnalysisScope } from './transactionAnalysis.js'
+
+export interface TransactionAnalysisReader {
+	canReadAccount(scope: TransactionAnalysisScope): Promise<boolean>
+	listRecent(
+		scope: TransactionAnalysisScope,
+		limit: number,
+		signal?: AbortSignal,
+	): Promise<AnalysisTransaction[]>
+}
+```
+
+The service receives this interface as a PURISTA resource. The application will
+choose the SQLite implementation later.
+
+```ts title="src/service/analysis/v1/analysisV1ServiceBuilder.ts" write
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
+import { generalAnalysisServiceInfo } from '../generalAnalysisServiceInfo.js'
+import type { TransactionAnalysisReader } from './TransactionAnalysisReader.js'
+import { analysisServiceV1ConfigSchema } from './analysisServiceConfig.js'
+
+export const analysisServiceInfo = {
+	serviceVersion: '1',
+	...generalAnalysisServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const analysisV1ServiceBuilder = new ServiceBuilder(analysisServiceInfo)
+	.setConfigSchema(analysisServiceV1ConfigSchema)
+	.defineResource<'transactionAnalysisReader', TransactionAnalysisReader>()
+```
+
+## Implement the local database adapter
+
+The adapter owns a small read projection. It seeds three invented rows so this
+standalone chapter works immediately. The service can only call the read
+methods declared above.
+
+```ts title="src/resources/SqliteTransactionAnalysisReader.ts" write
+import { randomUUID } from 'node:crypto'
+import { mkdirSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
+import type { TransactionAnalysisReader } from '../service/analysis/v1/TransactionAnalysisReader.js'
+import {
+	analysisTransactionSchema,
+	type TransactionAnalysisScope,
+} from '../service/analysis/v1/transactionAnalysis.js'
+
+type Row = {
+	transaction_id: string
+	amount_cents: number
+	direction: string
+	counterparty: string
+	recorded_at: string
+}
+
+export class SqliteTransactionAnalysisReader implements TransactionAnalysisReader {
+	readonly name = 'sqliteTransactionAnalysisReader' as const
+	readonly #database: DatabaseSync
+	#closed = false
+
+	constructor(filename = ':memory:') {
+		if (filename !== ':memory:') mkdirSync(dirname(filename), { recursive: true })
+		this.#database = new DatabaseSync(filename)
+		this.#database.exec(`
+			CREATE TABLE IF NOT EXISTS transaction_analysis_projection (
+				transaction_id TEXT PRIMARY KEY,
+				tenant_id TEXT NOT NULL,
+				principal_id TEXT NOT NULL,
+				account_id TEXT NOT NULL,
+				amount_cents INTEGER NOT NULL,
+				direction TEXT NOT NULL,
+				counterparty TEXT NOT NULL,
+				recorded_at TEXT NOT NULL
+			)
+		`)
+		const existing = this.#database.prepare(
+			'SELECT COUNT(*) AS count FROM transaction_analysis_projection',
+		).get() as { count: number }
+		if (existing.count === 0) this.#seed()
+	}
+
+	#seed() {
+		const insert = this.#database.prepare(`
+			INSERT INTO transaction_analysis_projection (
+				transaction_id, tenant_id, principal_id, account_id,
+				amount_cents, direction, counterparty, recorded_at
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`)
+		for (const row of [
+			[2_500, 'debit', 'Northwind Books', '2026-01-03T10:00:00.000Z'],
+			[8_000, 'credit', 'Example Payroll', '2026-01-02T10:00:00.000Z'],
+			[1_200, 'debit', 'City Transit', '2026-01-01T10:00:00.000Z'],
+		] as const) {
+			insert.run(
+				randomUUID(), 'tenant-example', 'principal-alex', 'account-operating', ...row,
+			)
+		}
+	}
+
+	async canReadAccount(scope: TransactionAnalysisScope) {
+		const row = this.#database.prepare(`
+			SELECT 1 AS allowed FROM transaction_analysis_projection
+			WHERE tenant_id = ? AND principal_id = ? AND account_id = ? LIMIT 1
+		`).get(scope.tenantId, scope.principalId, scope.accountId)
+		return row !== undefined
+	}
+
+	async listRecent(scope: TransactionAnalysisScope, limit: number, signal?: AbortSignal) {
+		signal?.throwIfAborted()
+		const rows = this.#database.prepare(`
+			SELECT transaction_id, amount_cents, direction, counterparty, recorded_at
+			FROM transaction_analysis_projection
+			WHERE tenant_id = ? AND principal_id = ? AND account_id = ?
+			ORDER BY recorded_at DESC LIMIT ?
+		`).all(scope.tenantId, scope.principalId, scope.accountId, limit) as Row[]
+		signal?.throwIfAborted()
+		return rows.map(row => analysisTransactionSchema.parse({
+			transactionId: row.transaction_id,
+			amountCents: row.amount_cents,
+			direction: row.direction,
+			counterparty: row.counterparty,
+			recordedAt: row.recorded_at,
+		}))
+	}
+
+	async destroy() {
+		if (this.#closed) return
+		this.#database.close()
+		this.#closed = true
+	}
+}
+```
+
+## Replace the stream schemas
+
+The payload is empty because this will be a `GET` endpoint. The account id is a
+path parameter. Chunks report progress; the final value contains the summary.
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/schema.ts" write
+import { z } from 'zod'
+
+export const analysisV1SummarizeTransactionsInputParameterSchema = z.object({
+	accountId: z.string().trim().min(1),
+})
+export const analysisV1SummarizeTransactionsInputPayloadSchema = z.undefined()
+export const analysisV1SummarizeTransactionsFinalPayloadSchema = z.strictObject({
+	accountId: z.string().trim().min(1),
+	transactionCount: z.number().int().nonnegative(),
+	creditCents: z.number().int().nonnegative(),
+	debitCents: z.number().int().nonnegative(),
+	netCents: z.number().int(),
+})
+export const analysisV1SummarizeTransactionsChunkPayloadSchema = z.discriminatedUnion('stage', [
+	z.strictObject({
+		stage: z.enum(['loading', 'summarizing']),
+		completed: z.number().int().nonnegative(),
+		total: z.number().int().nonnegative(),
+	}),
+	z.strictObject({
+		stage: z.literal('complete'),
+		completed: z.number().int().nonnegative(),
+		total: z.number().int().nonnegative(),
+		summary: analysisV1SummarizeTransactionsFinalPayloadSchema,
+	}),
+])
+```
+
+Keep the generated `types.ts`; it already infers all four types from these
+export names. Replace the builder with a typed placeholder:
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.ts" write
+import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
+import {
+	analysisV1SummarizeTransactionsChunkPayloadSchema,
+	analysisV1SummarizeTransactionsFinalPayloadSchema,
+	analysisV1SummarizeTransactionsInputParameterSchema,
+	analysisV1SummarizeTransactionsInputPayloadSchema,
+} from './schema.js'
+
+export const summarizeTransactionsStreamBuilder = analysisV1ServiceBuilder
+	.getStreamBuilder('summarizeTransactions', 'Stream progress while summarizing recent transactions')
+	.addPayloadSchema(analysisV1SummarizeTransactionsInputPayloadSchema)
+	.addParameterSchema(analysisV1SummarizeTransactionsInputParameterSchema)
+	.addChunkSchema(analysisV1SummarizeTransactionsChunkPayloadSchema)
+	.addFinalSchema(analysisV1SummarizeTransactionsFinalPayloadSchema)
+	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+		await writer.close({
+			accountId: 'not-implemented', transactionCount: 0,
+			creditCents: 0, debitCents: 0, netCents: 0,
+		})
+	})
+```
+
+Replace the generated starter test at the same checkpoint because the schemas
+are no longer empty.
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.test.ts" write
+import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { analysisV1Service } from '../../analysisV1Service.js'
+
+test('registers the generated stream when Analysis starts', async () => {
+	const sandbox = createSandbox()
+	const bridge = getEventBridgeMock(sandbox)
+	const reader = { canReadAccount: async () => true, listRecent: async () => [] }
+	const service = await analysisV1Service.getInstance(bridge.mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: { transactionAnalysisReader: reader },
+	})
+	try {
+		await service.start()
+		expect(bridge.stubs.registerStream.calledOnce).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Compile the generated stream and resource" replay="project"
+npx vitest run src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.test.ts
+npm run build:server
+```
+
+The stream is registered and typed. The next page adds the business access
+guard and real writer behavior.

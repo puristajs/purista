@@ -249,10 +249,6 @@
 								"contentEncodingRequest": "utf-8",
 								"contentTypeResponse": "application/json",
 								"contentEncodingResponse": "utf-8",
-								"inputPayload": {
-									"nullable": true,
-									"title": "delete input payload schema"
-								},
 								"parameter": {
 									"type": "object",
 									"properties": {},

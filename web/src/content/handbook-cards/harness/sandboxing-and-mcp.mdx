@@ -1,0 +1,39 @@
+---
+title: Sandboxing & MCP
+description: Declare narrow MCP tools and bind their transport and sandbox at runtime.
+---
+
+An MCP definition declares the model-facing tools. It does not contain a URL,
+token, command, environment, or transport.
+
+```ts title="Declare one remote MCP tool"
+import { defineAgent, defineHarness, defineMcpServer } from '@purista/harness'
+import { z } from 'zod'
+
+const knowledge = defineMcpServer('knowledge', {
+  tools: {
+    searchKnowledge: {
+      remoteName: 'search_knowledge',
+      description: 'Search approved knowledge.',
+      input: z.object({ query: z.string().min(1) }),
+      output: z.object({ results: z.array(z.string()) }),
+    },
+  },
+})
+
+const assistant = defineAgent('assistant', {
+	model: 'answering',
+  tools: [knowledge.tools.searchKnowledge],
+  instructions: 'Use approved knowledge when it answers the question.',
+})
+const definition = defineHarness({ name: 'support' }).addAgent(assistant)
+```
+
+At instance creation, bind `mcp.knowledge` to an HTTP or stdio transport. Keep
+HTTP credentials in the application-owned binding. Stdio additionally requires
+a spawn-capable isolating sandbox. Select only the MCP tool definitions an
+agent or workflow needs.
+
+Built-in filesystem and process tools are ordinary definitions such as
+`builtInTools.read`; add them explicitly to `tools` and bind a sandbox that
+advertises their required capability. A sandbox is not authorization.

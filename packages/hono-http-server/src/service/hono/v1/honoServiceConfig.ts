@@ -78,7 +78,6 @@ export const ProblemDetailsObjectSchema = z.object({
  * unless the application opts in.
  */
 export const honoServiceV1ConfigSchema = z.object({
-	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
 	streamRequestTimeoutMs: z.number().int().positive().optional().default(300000),
 	/**
@@ -114,7 +113,7 @@ export const honoServiceV1ConfigSchema = z.object({
 			tags: z.array(TagObjectSchema).optional(),
 			paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
 		})
-		.optional(),
+		.default({ openapi: '3.1.0', enabled: true, info: OPENAPI_DEFAULT_INFO }),
 })
 
 /**

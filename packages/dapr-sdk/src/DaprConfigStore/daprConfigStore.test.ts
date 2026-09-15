@@ -27,6 +27,15 @@ describe('DaprConfigStore', () => {
 	})
 
 	describe('getConfig', () => {
+		it('uses the default configuration component when no name is supplied', async () => {
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get').resolves([])
+			const daprConfigStore = new DaprConfigStore()
+
+			await daprConfigStore.getConfig('healthcheck')
+
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0-alpha1/configuration/configStore')
+		})
+
 		it('should throw an error if enableGet is false', async () => {
 			const daprConfigStore = new DaprConfigStore({
 				...config,

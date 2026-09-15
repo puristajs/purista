@@ -1,0 +1,33 @@
+---
+title: Run specialist agents in parallel
+description: Run two focused agents together, then merge their typed results in one protected workflow.
+order: 260
+kind: chapter
+group: ai
+status: published
+---
+
+One support case can need more than one kind of analysis. In this chapter, a risk specialist and a response specialist work at the same time. A workflow gives both agents the same case and merges their typed results in a fixed order.
+
+You will learn how to:
+
+- give each agent one clear job and one named model;
+- use `fanOut` with explicit call and concurrency limits;
+- keep result order stable even when agents finish in a different order;
+- protect both the PURISTA command and the mounted workflow;
+- invoke the workflow through its three-part PURISTA address; and
+- test real parallel execution without calling an external model.
+
+The complete example uses a small support case so the framework behavior stays clear. The tests and local demo use strict fake model providers and need no API key.
+
+1. [Create the project and generate its boundaries](./setup/scaffold/)
+2. [Define the two specialist agents](./build/define-specialists/)
+3. [Add resources and business authorization](./build/merge-evidence/)
+4. [Run bounded work in parallel](./build/fan-out/)
+5. [Invoke the workflow from a PURISTA command](./build/invoke-workflow/)
+6. [Bind the named models](./build/compose-runtime/)
+7. [Run the demo and live service](./build/run-application/)
+8. [Test the agents and parallel workflow](./testing/test-parallel/)
+9. [Test command and EventBridge routing](./testing/test-routing/)
+
+Start with [Create the parallel-agent project](./setup/scaffold/).

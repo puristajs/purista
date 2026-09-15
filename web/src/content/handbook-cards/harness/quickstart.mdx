@@ -1,0 +1,41 @@
+---
+title: Quickstart
+description: Define one agent, bind one provider, and invoke it through a session.
+---
+
+Install the standalone runtime and a provider adapter:
+
+```sh title="Install Harness and the OpenAI adapter"
+npm install @purista/harness @purista/harness-openai zod
+```
+
+```ts title="Define and run one portable agent"
+import { defineAgent, defineHarness } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { z } from 'zod'
+
+const answer = defineAgent('answer', {
+	model: 'answering',
+  input: z.object({ question: z.string().min(1) }),
+  output: z.object({ answer: z.string() }),
+  prompt: input => ({ role: 'user', content: input.question }),
+  instructions: 'Answer briefly and factually.',
+})
+const definition = defineHarness({ name: 'support' }).addAgent(answer)
+const harness = await definition.getInstance({
+  models: { answering: { provider: openai({ apiKey: process.env.OPENAI_API_KEY }), model: 'gpt-5-mini' } },
+})
+
+const session = await harness.getSession('support-demo')
+try {
+  const outcome = await session.agents.answer.run({ question: 'What is a Harness definition?' })
+  if (outcome.status === 'completed') console.log(outcome.output.answer)
+} finally {
+  await session.release()
+  await harness.close()
+}
+```
+
+Definitions are portable. Providers, credentials, storage, MCP transport, and
+the sandbox adapter and policy are runtime configuration. Use `FakeModelProvider` from
+`@purista/harness/testing` for deterministic tests without credentials.

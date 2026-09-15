@@ -1,0 +1,69 @@
+---
+title: Privacy Detectors
+description: Bind one explicit detector and inline sensitive-data policy to the exact guardrail fields that need inspection.
+---
+
+Sensitive-data detection is optional, provider-neutral, and fail-closed. A
+detector sees only the selected text supplied by a guardrail action. It never
+creates a provider, scans arbitrary prompts/files/JSON, or records inspected
+content in operational evidence.
+
+| Detector | Select it for | Boundary |
+| --- | --- | --- |
+| Native privacy | Common local syntax: email, phone, card, IP, IBAN, US SSN, URL | Native prebuild; no remote, WASM, or model fallback |
+| Presidio | An existing private Analyzer with governed recognizers or languages | Application-owned authenticated `POST /analyze` endpoint |
+| Local NER | Provisioned local model labels such as person, organization, location | Pinned files, explicit label map, startup `warmup()` |
+
+## Bind the policy in TypeScript
+
+The policy belongs in the same typed composition as the selected detector and
+action map. Every policy has a nonempty, unique uppercase `entities` list,
+`maskToken`, and `scoreThreshold` from `0` to `1`.
+
+```ts title="src/guardrails/privacy.ts"
+import { createSensitiveDataActions, defineGuardrails } from '@purista/harness-guardrails'
+import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
+
+const detector = createNativePrivacyDetector({ id: 'support-privacy-v1' })
+const actions = createSensitiveDataActions({ detector })
+
+export const privacyRails = defineGuardrails({
+	config: {
+		rails: {
+			input: { flows: ['mask sensitive data on input'] },
+			output: { flows: ['mask sensitive data on output'] },
+		},
+		sensitiveData: {
+			input: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
+			output: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
+		},
+	},
+	actions,
+})
+```
+
+Use the `detect sensitive data …` actions to block on findings and the `mask`
+actions to replace detected spans before the next boundary. A configured entity
+must be supported by the selected detector or composition fails before any
+request is sent.
+
+## Choose deployment-safe construction
+
+Presidio is injected with the application-owned endpoint, authentication, and
+language. Use HTTPS or protected internal networking and alert only on its
+stable failure kind. Local NER accepts an absolute model path, SHA-256 asset
+manifest, and explicit label map; it never downloads at runtime. A missing peer,
+asset, manifest, or warmup failure stops readiness.
+
+For structured tool data, use `sensitiveDataToolRail(...)` with a nonempty tool
+selector, exact `valueSchema`, and a reviewed `SensitiveDataValueCodec`. The
+codec extracts and replaces only approved text fields. Guardrails never recurse
+through arbitrary tool JSON.
+
+## Verify the failure boundary
+
+Use `FakeSensitiveDataDetector`, `FakePresidioSidecar`, or
+`FakeLocalNerRuntime` from the related testing export. Script allow, finding,
+and failure outcomes. Assert that a blocked path never calls the model or tool
+and that logs/traces contain only stable decision/failure fields. These tests
+prove wiring; they do not establish detector recall or model quality.

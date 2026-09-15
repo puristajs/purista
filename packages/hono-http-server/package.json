@@ -1,6 +1,6 @@
 {
 	"name": "@purista/hono-http-server",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "A http server service based on Hono for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -36,13 +36,14 @@
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
 		"@hono/swagger-ui": "^0.6.1",
+		"ai": "^7.0.0",
 		"sinon": "^22.1.0",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"hono": "^4.13.1"
 	},
 	"peerDependenciesMeta": {},

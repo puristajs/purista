@@ -1,0 +1,218 @@
+---
+title: Scaffold the RAG project
+description: Create a published PURISTA v4 project and prepare the service owned RAG boundaries.
+order: 201
+kind: lesson
+status: published
+---
+
+Start in a directory where you keep tutorial projects. Pinning the creator makes
+the generated starting point reproducible.
+
+```bash title="Create the tutorial project" replay="parent"
+npm create purista@3.0.0 example-rag -- --runtime node --event-bridge default --non-interactive --defaults
+cd example-rag
+```
+
+Replace the generated project configuration with these files. The scripts keep
+server, UI, focused retrieval tests, and PostgreSQL tests separate.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-complete-rag",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:subscription": "purista add subscription",
+		"add:stream": "purista add stream",
+		"add:queue": "purista add queue",
+		"add:queue-worker": "purista add queue-worker",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"add:tool": "purista add tool",
+		"add:skill": "purista add skill",
+		"add:mcp": "purista add mcp",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"demo": "node --env-file-if-exists=.env --import tsx src/demo.ts",
+		"build": "npm run build:server && npm run build:ui",
+		"build:server": "tsc --noEmit",
+		"build:ui": "tsc -p ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
+		"lint": "biome check .",
+		"test": "npm run test:server && npm run test:ui",
+		"test:server": "vitest run src/application.test.ts src/ingestion.integration.test.ts src/service",
+		"test:rag-ingestion": "vitest run src/service/knowledge/v1/chunkKnowledgeText.test.ts src/service/knowledge/v1/harness src/service/knowledge/v1/command/runIngestKnowledge src/ingestion.integration.test.ts",
+		"test:rag-retrieval": "vitest run src/service/knowledge/v1/harness src/service/knowledge/v1/command/runIngestKnowledge src/service/knowledge/v1/command/searchKnowledge src/service/knowledge/v1/command/runAnswerKnowledgeQuestion src/service/knowledge/v1/stream src/service/knowledge/v1/chunkKnowledgeText.test.ts src/ingestion.integration.test.ts src/application.test.ts",
+		"test:postgres": "vitest run src/resources/PgKnowledgeRepository.postgres.test.ts",
+		"test:ui": "vitest run --config ui/vitest.config.ts"
+	},
+	"dependencies": {
+		"@purista/core": "^4.0.0",
+		"@purista/harness": "^4.0.0",
+		"@purista/harness-ai-sdk-ui": "^4.0.0",
+		"@purista/harness-openai": "^4.0.0",
+		"@purista/hono-http-server": "^4.0.0",
+		"@hono/node-server": "^2.1.0",
+		"@ai-sdk/react": "4.0.93",
+		"@radix-ui/react-collapsible": "1.1.20",
+		"@radix-ui/react-dialog": "1.1.23",
+		"@radix-ui/react-dropdown-menu": "2.1.24",
+		"@radix-ui/react-hover-card": "1.1.23",
+		"@radix-ui/react-select": "2.3.7",
+		"@radix-ui/react-separator": "1.1.15",
+		"@radix-ui/react-slot": "1.3.3",
+		"@radix-ui/react-tooltip": "1.2.16",
+		"@streamdown/cjk": "1.0.3",
+		"@streamdown/code": "1.1.1",
+		"@streamdown/math": "1.0.2",
+		"@streamdown/mermaid": "1.0.2",
+		"ai": "7.0.90",
+		"class-variance-authority": "0.7.1",
+		"clsx": "2.1.1",
+		"cmdk": "1.1.1",
+		"lucide-react": "1.39.0",
+		"nanoid": "6.0.1",
+		"pg": "8.23.0",
+		"react": "19.2.8",
+		"react-dom": "19.2.8",
+		"shiki": "4.4.3",
+		"streamdown": "2.6.0",
+		"tailwind-merge": "3.6.0",
+		"use-stick-to-bottom": "1.1.6",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.8",
+		"@testing-library/jest-dom": "6.9.1",
+		"@testing-library/react": "16.3.2",
+		"@purista/cli": "^4.0.0",
+		"@tailwindcss/vite": "4.3.3",
+		"@types/node": "^26.2.0",
+		"@types/pg": "8.23.1",
+		"@types/react": "19.2.18",
+		"@types/react-dom": "19.2.4",
+		"jsdom": "27.4.0",
+		"@types/sinon": "^22.0.0",
+		"sinon": "^22.1.0",
+		"tsx": "^4.23.12",
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
+		"vite": "8.2.1",
+		"@vitejs/plugin-react": "6.0.5",
+		"tailwindcss": "4.3.3",
+		"vitest": "^4.1.10"
+	}
+}
+```
+```json title="tsconfig.json" write
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "vitest/globals"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
+```
+```json title="biome.json" write
+{
+	"root": true,
+	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"files": {
+		"includes": ["**", "!**/dist/**/*", "!**/public/**/*", "!**/node_modules/**/*", "!**/*.d.ts"]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": { "useArrowFunction": "off" },
+			"suspicious": { "noExplicitAny": "off" },
+			"style": { "useNodejsImportProtocol": "off" }
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 120,
+		"lineEnding": "lf"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded",
+			"trailingCommas": "all"
+		}
+	},
+	"json": {
+		"formatter": { "trailingCommas": "none" }
+	},
+	"css": {
+		"parser": { "tailwindDirectives": true }
+	},
+	"overrides": [
+		{
+			"includes": ["ui/src/components/ui/**/*.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"useKeyWithClickEvents": "off",
+						"useSemanticElements": "off"
+					}
+				}
+			}
+		}
+	]
+}
+```
+```json title="purista.json" write
+{
+	"$schema": "https://purista.dev/schemas/purista.schema.json",
+	"runtime": "node",
+	"eventBridge": "default"
+}
+```
+Install every dependency by its public npm package name.
+
+```bash title="Install the published dependencies" replay="project"
+npm install
+```
+
+Use the PURISTA CLI to generate the two services and their public boundaries.
+The following lessons replace the generated placeholders with the complete
+implementations and keep every Harness definition inside the Knowledge service.
+
+```bash title="Generate the service owned boundaries" replay="project"
+npm run add:service -- identity --description "Authenticate users and resolve sessions" --non-interactive
+npm run add:service -- knowledge --description "Own knowledge ingestion and retrieval" --non-interactive
+npm run add:command -- login --service identity --service-version 1 --description "Create an opaque session" --non-interactive
+npm run add:command -- resolve-session --service identity --service-version 1 --description "Resolve an opaque session" --non-interactive
+npm run add:command -- run-ingest-knowledge --service knowledge --service-version 1 --description "Run the protected ingestion workflow" --non-interactive
+npm run add:command -- search-knowledge --service knowledge --service-version 1 --description "Search one authorized knowledge collection" --non-interactive
+npm run add:command -- run-answer-knowledge-question --service knowledge --service-version 1 --description "Run the protected answer agent" --non-interactive
+npm run add:workflow -- ingest-knowledge --service knowledge --service-version 1 --description "Chunk, embed, and store a knowledge source" --non-interactive
+npm run add:workflow -- retrieve-knowledge --service knowledge --service-version 1 --description "Embed a query and find matching chunks" --non-interactive
+npm run add:agent -- answer-knowledge-question --service knowledge --service-version 1 --description "Answer with model selected retrieval" --non-interactive --model-alias answering
+npm run add:tool -- query-knowledge-repository --service knowledge --service-version 1 --description "Query the tenant scoped vector repository" --non-interactive
+npm run add:tool -- search-knowledge --service knowledge --service-version 1 --description "Search knowledge for the answer agent" --non-interactive
+npm run add:tool -- store-knowledge-chunks --service knowledge --service-version 1 --description "Store embedded knowledge chunks" --non-interactive
+npm run add:stream -- stream-answer-knowledge-question --service knowledge --service-version 1 --description "Stream a grounded answer" --non-interactive
+```
+
+Check that the generated project and configuration compile before adding the RAG logic.
+
+```bash title="Check the scaffold" replay="project"
+npm run build:server
+```
+
+Continue with [Define the RAG schemas](../../build/configure-harness/).

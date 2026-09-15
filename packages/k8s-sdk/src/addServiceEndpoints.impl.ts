@@ -57,7 +57,7 @@ export const addServiceEndpoints = (
 			const metadata = definition.metadata as HttpExposedServiceMeta
 			if (!isHttpExposedServiceMeta(metadata)) {
 				logger.debug('...skip exposing function')
-				return
+				continue
 			}
 
 			const data = metadata.expose

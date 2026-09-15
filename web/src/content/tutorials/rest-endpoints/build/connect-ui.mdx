@@ -1,0 +1,102 @@
+---
+title: Call the generated endpoints from React
+description: Add a small form that records a transaction through the generated command route and renders Problem Details.
+order: 30
+kind: lesson
+status: published
+---
+
+Add a small transaction form to the existing page. The browser sends command
+input to `POST /api/v1/transactions`. It does not reproduce the Zod business
+rules; the generated endpoint remains the validation boundary.
+
+```tsx title="ui/src/App.tsx" write
+import { AlertCircle, Building2, Landmark, Radio, ReceiptText } from 'lucide-react'
+import { type FormEvent, useEffect, useState } from 'react'
+import { Alert } from '@/components/ui/alert'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+
+type BankProfile = { name: string; currency: string }
+type Transaction = {
+	transactionId: string
+	amountCents: number
+	direction: 'credit' | 'debit'
+	counterparty: string
+	reference?: string
+	recordedAt: string
+}
+
+export function App() {
+	const [profile, setProfile] = useState<BankProfile>()
+	const [profileError, setProfileError] = useState(false)
+	const [result, setResult] = useState<Transaction>()
+	const [submitError, setSubmitError] = useState<string>()
+	const [submitting, setSubmitting] = useState(false)
+
+	useEffect(() => {
+		fetch('/api/v1/profile')
+			.then(async response => {
+				if (!response.ok) throw new Error('profile failed')
+				return response.json() as Promise<BankProfile>
+			})
+			.then(setProfile)
+			.catch(() => setProfileError(true))
+	}, [])
+
+	async function recordTransaction(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		const form = event.currentTarget
+		setSubmitting(true)
+		setSubmitError(undefined)
+		setResult(undefined)
+		const data = new FormData(form)
+		const response = await fetch('/api/v1/transactions', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				amountCents: Number(data.get('amountCents')),
+				direction: data.get('direction'),
+				counterparty: data.get('counterparty'),
+				reference: data.get('reference') || undefined,
+			}),
+		})
+		if (!response.ok) {
+			const problem = (await response.json()) as { detail?: string; title?: string }
+			setSubmitError(problem.detail ?? problem.title ?? 'The transaction was rejected.')
+			setSubmitting(false)
+			return
+		}
+		setResult((await response.json()) as Transaction)
+		setSubmitting(false)
+		form.reset()
+	}
+
+	return (
+		<div className="min-h-screen bg-background text-foreground">
+			<header className="border-b bg-card/80 backdrop-blur"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4"><a className="flex items-center gap-3 font-semibold" href="/" aria-label="Example Bank home"><span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><Landmark className="size-5" /></span>Example Bank</a><nav aria-label="Primary navigation"><a className={buttonVariants({ variant: 'outline', size: 'sm' })} href="/api/openapi.json">API contract</a></nav></div></header>
+			<main className="mx-auto grid max-w-6xl gap-8 px-5 py-12 lg:grid-cols-[0.8fr_1.2fr]">
+				<section className="space-y-5" aria-labelledby="welcome-title"><div className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm text-muted-foreground"><Radio className="size-3.5 text-emerald-600" /> PURISTA application online</div><h1 id="welcome-title" className="text-4xl font-semibold tracking-tight sm:text-5xl">Generated endpoints, visible in one small interface.</h1><Card aria-label="Public bank profile"><CardHeader><CardDescription>Public profile</CardDescription>{!profile && !profileError ? <Skeleton className="h-7 w-44" aria-label="Loading public profile" /> : null}{profile ? <CardTitle className="flex items-center gap-2"><Building2 className="size-5" />{profile.name}</CardTitle> : null}</CardHeader><CardContent>{profile ? <p className="text-2xl font-semibold">{profile.currency}</p> : null}{profileError ? <Alert>The public profile is unavailable.</Alert> : null}</CardContent></Card></section>
+			<Card>
+				<CardHeader><CardDescription>Transaction command</CardDescription><CardTitle className="flex items-center gap-2 text-2xl"><ReceiptText className="size-5" /> Record a transaction</CardTitle></CardHeader>
+				<CardContent className="space-y-5">
+					<form className="grid gap-4 sm:grid-cols-2" onSubmit={recordTransaction} aria-label="Record transaction">
+						<label className="grid gap-2 text-sm font-medium">Amount in cents<input className="h-10 rounded-md border bg-background px-3 font-normal" name="amountCents" inputMode="numeric" /></label>
+						<label className="grid gap-2 text-sm font-medium">Direction<select className="h-10 rounded-md border bg-background px-3 font-normal" name="direction"><option value="debit">Debit</option><option value="credit">Credit</option></select></label>
+						<label className="grid gap-2 text-sm font-medium sm:col-span-2">Counterparty<input className="h-10 rounded-md border bg-background px-3 font-normal" name="counterparty" /></label>
+						<label className="grid gap-2 text-sm font-medium sm:col-span-2">Reference <span className="sr-only">optional</span><input className="h-10 rounded-md border bg-background px-3 font-normal" name="reference" /></label>
+						<Button className="sm:col-span-2" disabled={submitting} type="submit">{submitting ? 'Recording…' : 'Record transaction'}</Button>
+					</form>
+					{submitError ? <Alert><span className="flex items-center gap-2"><AlertCircle className="size-4" />{submitError}</span></Alert> : null}
+					{result ? <div className="rounded-lg border bg-muted/40 p-4" aria-live="polite"><p className="text-sm text-muted-foreground">Recorded transaction</p><p className="mt-1 font-mono text-sm">{result.transactionId}</p><p className="mt-3 text-2xl font-semibold">{result.amountCents} cents</p></div> : null}
+				</CardContent>
+			</Card>
+			</main>
+		</div>
+	)
+}
+```
+
+Submitting invalid values produces the Problem Details response from Hono. The
+UI displays that response and leaves the domain rules in the command schemas.

@@ -1,3 +1,4 @@
+import type { HarnessInvocationClients } from '../../../HarnessMount/invocation.js'
 import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
@@ -23,6 +24,8 @@ export type StreamFunctionContextEnhancements<
 	emit: EmitCustomMessageFunction<EmitList>
 	service: Invokes
 	stream: StreamInvokes
+	agent: HarnessInvocationClients<Invokes, 'agent'>
+	workflow: HarnessInvocationClients<Invokes, 'workflow'>
 	queue: QueueContext<QueueInvokes>
 	resources: Resources
 }

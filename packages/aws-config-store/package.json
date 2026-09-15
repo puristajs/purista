@@ -1,6 +1,6 @@
 {
 	"name": "@purista/aws-config-store",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "State store adapter for AWS System Manager",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -43,7 +43,7 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-ssm": "^3.1107.0",
-		"@purista/core": "*"
+		"@purista/core": "^4.0.0"
 	},
 	"peerDependenciesMeta": {},
 	"types": "./dist/index.d.ts"

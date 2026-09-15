@@ -1,0 +1,49 @@
+---
+title: Block unsafe agent input
+description: Define a typed input rail that stops a request before provider work.
+order: 192
+kind: lesson
+status: published
+---
+
+First define the shared agent input and output schemas. Each guardrail action
+uses the same contract as the boundary it checks.
+
+```ts title="src/service/support/v1/harness/agent/classifySupportMessage/schema.ts" write
+import { z } from 'zod'
+
+export const classifySupportMessageInputSchema = z.strictObject({
+	messageId: z.string().trim().min(1).max(80),
+	text: z.string().trim().min(1).max(2_000),
+})
+
+export const classifySupportMessageOutputSchema = z.strictObject({
+	category: z.enum(['account_access', 'card', 'transfer', 'other']),
+	urgency: z.enum(['normal', 'urgent']),
+	reason: z.string().trim().min(1).max(240),
+})
+```
+Now define the input action.
+
+```ts title="src/service/support/v1/harness/agent/classifySupportMessage/classificationInputGuardrail.ts" write
+import { defineGuardrailAction } from '@purista/harness-guardrails'
+import { classifySupportMessageInputSchema } from './schema.js'
+
+export const blockInstructionOverride = defineGuardrailAction<'input', typeof classifySupportMessageInputSchema>({
+	phase: 'input',
+	valueSchema: classifySupportMessageInputSchema,
+	mayTransform: false,
+	evaluate: ({ value }) =>
+		/ignore (all )?previous instructions/i.test(value.text)
+			? { decision: 'block', reasonCode: 'instruction_override' }
+			: { decision: 'allow' },
+})
+```
+`phase: 'input'` runs before the model request. The action returns `allow`
+for ordinary messages and `block` for the tutorial's deterministic pattern.
+`mayTransform: false` makes this rail decision-only.
+
+The rule inspects content. It does not know the tenant or decide whether the
+caller may use Support; that remains a PURISTA business policy.
+
+Continue with [Transform unsafe model output](../output/).

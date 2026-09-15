@@ -1,11 +1,52 @@
+import { defineAgent, defineWorkflow, harnessExecutionEventTypesV1 } from '@purista/harness'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
 import { Service } from '../core/index.js'
+import { createHarnessInvocationProxy } from '../HarnessMount/invocation.js'
+import { defineHarnessQueueBinding } from '../HarnessMount/queueBinding.js'
+import {
+	computeHarnessTargetExportDigest,
+	createGeneratedHarnessSchema,
+	createRemoteHarnessTargetContract,
+} from '../HarnessMount/remoteTargetContract.js'
 import { safeBind } from '../helper/index.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
+import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { createCommandContextMock } from '../testing/createCommandContextMock.js'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
+
+function createRemoteTarget<const Kind extends 'agent' | 'workflow', const Id extends string>(kind: Kind, id: Id) {
+	const schema = { type: 'string' } as const
+	const address = { serviceName: 'RemoteAi', serviceVersion: '2', serviceTarget: id } as const
+	const target = {
+		targetName: id,
+		kind,
+		inputSchema: schema,
+		validatedInputSchema: schema,
+		outputSchema: schema,
+		updateSchema: false as const,
+		interruptSchema: false as const,
+		invocation: { aggregate: true as const, stream: true as const, resumableInterrupts: [] as const },
+		stream: {
+			protocol: 'harness-execution-events-v1' as const,
+			eventTypes: harnessExecutionEventTypesV1,
+			outputUpdates: [] as const,
+		},
+	}
+	return createRemoteHarnessTargetContract({
+		schemaVersion: 1,
+		address,
+		target: { ...target, exportDigest: computeHarnessTargetExportDigest({ address, target }) },
+		schemas: {
+			input: createGeneratedHarnessSchema<string>(schema),
+			validatedInput: createGeneratedHarnessSchema<string>(schema),
+			output: createGeneratedHarnessSchema<string>(schema),
+		},
+	})
+}
 
 describe('CommandDefinitionBuilder', () => {
 	const sandbox = createSandbox()
@@ -157,7 +198,7 @@ describe('CommandDefinitionBuilder', () => {
 		)
 		.canEmit('some', z.object({ example: z.string() }))
 		.setCommandFunction(async function (context, payload, parameter) {
-			const result = await context.service.OtherService[2].testCommand(payload, parameter)
+			const result = await context.service.OtherService['2'].testCommand(payload, parameter)
 
 			const response: {
 				result: {
@@ -374,4 +415,169 @@ describe('CommandDefinitionBuilder', () => {
 
 		expect(Object.keys(definition.invokes.OtherService[1]).sort()).toStrictEqual(['first', 'second'])
 	})
+
+	it('derives local Harness addresses from authentic targets and keeps them fail-closed until resolution', async () => {
+		const cleanBuilder = new CommandDefinitionBuilder('cleanSurface', 'No direct model capability')
+		// @ts-expect-error Model providers belong to mounted Harness runtime configuration.
+		void cleanBuilder.canUseHarnessModel
+		expect((cleanBuilder as any).canUseHarnessModel).toBeUndefined()
+		const localAgent = defineAgent('localAgent', {
+			model: 'chat',
+			instructions: 'Answer.',
+		})
+		const localWorkflow = defineWorkflow('localWorkflow', {
+			async handler({ input }) {
+				return input
+			},
+		})
+		const queueBinding = defineHarnessQueueBinding(
+			localAgent.contract,
+			new QueueDefinitionBuilder('local-agent-jobs', 'Local agent jobs'),
+			new QueueWorkerBuilder('local-agent-jobs', 'local-agent-worker'),
+		)
+		const localBuilder = new CommandDefinitionBuilder('localCaller', 'Call local Harness targets')
+			.canInvokeAgent('LocalAi', '1', queueBinding.reference)
+			.canInvokeWorkflow('LocalAi', '1', localWorkflow.contract)
+			.setCommandFunction(async function (context) {
+				// @ts-expect-error Providers are configured on the mounted Harness, not exposed to handlers.
+				void context.model
+				expectTypeOf(context.agent.LocalAi['1'].localAgent.run).toBeFunction()
+				expectTypeOf(context.agent.LocalAi['1'].localAgent.stream).toBeFunction()
+				expectTypeOf(context.agent.LocalAi['1'].localAgent.enqueue).toBeFunction()
+				expectTypeOf(context.workflow.LocalAi['1'].localWorkflow.run).toBeFunction()
+				expectTypeOf(context.workflow.LocalAi['1'].localWorkflow.stream).toBeFunction()
+				return undefined
+			})
+
+		const definition = await localBuilder.getDefinition()
+		new CommandDefinitionBuilder('wrongKind', 'Reject wrong kind').canInvokeAgent(
+			'LocalAi',
+			'1',
+			// @ts-expect-error An agent declaration rejects workflow contracts.
+			localWorkflow.contract,
+		)
+		expect(Object.keys(definition.invokes.LocalAi['1']).sort()).toEqual(['localAgent', 'localWorkflow'])
+		expect(Object.keys(definition.streamInvokes.LocalAi['1']).sort()).toEqual(['localAgent', 'localWorkflow'])
+
+		const invoke = vi.fn()
+		const client = createHarnessInvocationProxy<any>('agent', invoke, vi.fn(), vi.fn(), definition.invokes)
+		await expect(client.LocalAi['1'].localAgent.run('question')).rejects.toThrow('incomplete')
+		expect(invoke).not.toHaveBeenCalled()
+
+		expect(() =>
+			new CommandDefinitionBuilder('copied', 'Reject copied target').canInvokeAgent('LocalAi', '1', {
+				...localAgent.contract,
+			} as never),
+		).toThrow('authentic')
+	})
+
+	it('runs and streams generated remote agents and workflows through a real command context', async () => {
+		const remoteAgent = createRemoteTarget('agent', 'remoteAgent')
+		const remoteWorkflow = createRemoteTarget('workflow', 'remoteWorkflow')
+		// @ts-expect-error A workflow declaration rejects generated agent contracts.
+		new CommandDefinitionBuilder('wrongRemoteKind', 'Reject wrong remote kind').canInvokeWorkflow(remoteAgent)
+		expect(() =>
+			new CommandDefinitionBuilder('copiedRemote', 'Reject copied remote target').canInvokeAgent({
+				...remoteAgent,
+			} as never),
+		).toThrow('service-bound')
+		const remoteBuilder = new CommandDefinitionBuilder('remoteCaller', 'Call generated remote Harness targets')
+			.canInvokeAgent(remoteAgent)
+			.canInvokeWorkflow(remoteWorkflow)
+			.setCommandFunction(async function (context) {
+				const agentRun = await context.agent.RemoteAi['2'].remoteAgent.run('agent-run', {
+					sessionId: 'agent-run-session',
+				})
+				const agentStream = await context.agent.RemoteAi['2'].remoteAgent.stream('agent-stream', {
+					sessionId: 'agent-stream-session',
+				})
+				const workflowRun = await context.workflow.RemoteAi['2'].remoteWorkflow.run('workflow-run', {
+					sessionId: 'workflow-run-session',
+				})
+				const workflowStream = await context.workflow.RemoteAi['2'].remoteWorkflow.stream('workflow-stream', {
+					sessionId: 'workflow-stream-session',
+				})
+				expectTypeOf(agentRun.outcome).not.toBeAny()
+				expectTypeOf(workflowRun.outcome).not.toBeAny()
+				return {
+					runSessions: [agentRun.sessionId, workflowRun.sessionId],
+					streamSessions: [agentStream.sessionId, workflowStream.sessionId],
+				}
+			})
+		const definition = await remoteBuilder.getDefinition()
+		const eventBridge = getEventBridgeMock(sandbox)
+		eventBridge.stubs.invoke.callsFake(async message => ({
+			sessionId: message.harness.root.sessionId,
+			outcome: { status: 'completed', runId: message.harness.root.invocationId, output: 'done' },
+		}))
+		eventBridge.stubs.openStream.callsFake(async message =>
+			remoteHarnessStream(message.harness.root.invocationId, 'done'),
+		)
+		const runtime = new Service({
+			info: {
+				serviceName: 'Caller',
+				serviceVersion: '1',
+				serviceDescription: 'Command builder Harness test',
+			},
+			commandDefinitionList: [definition],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			logger: getLoggerMock(sandbox).mock,
+			eventBridge: eventBridge.mock,
+			config: {},
+		})
+		await runtime.registerCommand(definition)
+
+		const response = await runtime.executeCommand(
+			getCommandMessageMock({
+				receiver: { serviceName: 'Caller', serviceVersion: '1', serviceTarget: 'remoteCaller' },
+				payload: { payload: {}, parameter: {} },
+			}),
+		)
+
+		expect(response.payload).toEqual({
+			runSessions: ['agent-run-session', 'workflow-run-session'],
+			streamSessions: ['agent-stream-session', 'workflow-stream-session'],
+		})
+		expect(eventBridge.stubs.invoke.callCount).toBe(2)
+		expect(eventBridge.stubs.openStream.callCount).toBe(2)
+	})
 })
+
+function remoteHarnessStream(runId: string, output: string) {
+	const outcome = { status: 'completed' as const, runId, output }
+	return {
+		sessionId: 'transport-session',
+		cancel: vi.fn(async () => undefined),
+		async *[Symbol.asyncIterator]() {
+			yield {
+				payload: {
+					frameType: 'chunk' as const,
+					sequence: 1,
+					chunk: {
+						type: 'run.started' as const,
+						eventId: 'start',
+						sequence: 1,
+						runId,
+						at: '2026-09-08T00:00:00.000Z',
+					},
+				},
+			}
+			yield {
+				payload: {
+					frameType: 'chunk' as const,
+					sequence: 2,
+					chunk: {
+						type: 'run.finished' as const,
+						eventId: 'finished',
+						sequence: 2,
+						runId,
+						at: '2026-09-08T00:00:01.000Z',
+						outcome,
+					},
+				},
+			}
+			yield { payload: { frameType: 'complete' as const, sequence: 3, final: outcome } }
+		},
+	}
+}

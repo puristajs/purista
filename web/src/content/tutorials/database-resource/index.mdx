@@ -1,0 +1,23 @@
+---
+title: Persist data with a database resource
+description: Replace the temporary repository with application-owned SQLite and manage its persistence and lifecycle.
+order: 50
+kind: chapter
+group: start
+status: published
+---
+
+The `Transaction` commands already depend on a repository resource. This
+chapter replaces the temporary in-memory adapter with SQLite while leaving the
+service builder, command builders, schemas, and HTTP routes unchanged.
+
+SQLite is an application resource. The composition root creates it, injects it
+through `getInstance`, and closes it after the `Transaction` service stops.
+Transaction records never use StateStore.
+
+## Build
+
+1. [Implement the SQLite adapter](/tutorials/database-resource/build/implement-sqlite/).
+2. [Inject the database resource](/tutorials/database-resource/build/wire-resource/).
+3. [Own the database lifecycle](/tutorials/database-resource/build/own-lifecycle/).
+4. [Mock and integrate the resource](/tutorials/database-resource/testing/test-resource/).

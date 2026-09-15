@@ -1,0 +1,25 @@
+---
+title: Create a PURISTA project
+description: Use the PURISTA CLI to create a TypeScript project, generate a service and command, and test the command contract.
+order: 10
+kind: chapter
+group: start
+status: published
+---
+
+This chapter teaches the generated PURISTA project structure before adding an
+HTTP server or user interface. You will create a project, generate a versioned
+service and command, implement its schemas and handler, and test it with the
+Framework helpers.
+
+Example Bank supplies one small result: `getProfile` returns a fictional name
+and currency. There is no transaction, account, database, or authentication.
+
+## Build
+
+1. [Initialize the project](/tutorials/create-project/build/initialize/).
+2. [Generate a service and command](/tutorials/create-project/build/generate-service/).
+3. [Test the command with PURISTA helpers](/tutorials/create-project/testing/test-command/).
+
+The completed source is retained under
+`examples/banking/chapters/create-project` after the clean replay passes.

@@ -1,6 +1,7 @@
 export * from './Constructor.js'
 export * from './FullDefinition.js'
 export * from './FullServiceDefinition.js'
+export * from './HarnessServiceDefinition.js'
 export * from './InstanceOrType.js'
 export * from './IsConstructor.js'
 export * from './NonEmptyString.js'

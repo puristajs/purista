@@ -1,0 +1,30 @@
+---
+title: Test approval through PURISTA
+description: Exercise the mounted workflow, trusted resume correlation, denial paths, and cleanup.
+order: 263
+kind: lesson
+status: published
+---
+
+The integration file introduced in [Test the workflow](../test-workflow/) also
+covers the failure and concurrency cases. Run the whole file now rather than
+only its happy path.
+
+The cases prove the behavior that matters at the service boundary:
+
+- a same-tenant reviewer approves the stored request and one effect runs;
+- delivering the same decision event again returns the same result and does not
+  repeat the effect;
+- rejection reaches a terminal result without running the effect;
+- a denied reviewer cannot record a decision;
+- another tenant cannot find or resume the review;
+- stale revisions and conflicting terminal decisions fail closed.
+
+Every started service and EventBridge is destroyed in `finally`. No credentials,
+network access, custom UI, or custom approval protocol are needed.
+
+```bash title="Verify the human-review chapter" replay="project"
+npm run build
+npm test
+npm run lint
+```

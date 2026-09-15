@@ -1,17 +1,48 @@
 ---
 import HandbookCard from '../../../components/handbook/HandbookCard.astro'
-import { getSidebarItems, handbookSections } from '../../../data/handbook'
+import { getHandbookProduct, getProductCardTopics, getProductChapterTopics, getSidebarItems, handbookSections } from '../../../data/handbook'
 import HandbookLayout from '../../../layouts/HandbookLayout.astro'
 
 export async function getStaticPaths() {
-	return handbookSections.map(section => ({
+	return [
+		...handbookSections.filter(section => section.id !== 'harness').map(section => ({
 		params: { section: section.id },
 		props: { section },
-	}))
+		})),
+		{ params: { section: 'framework' }, props: { productLanding: 'framework' as const } },
+		{ params: { section: 'harness' }, props: { productLanding: 'harness' as const } },
+	]
 }
 
-const { section } = Astro.props
+const { section: sectionProp, productLanding } = Astro.props
+const product = productLanding ?? (sectionProp.id === 'harness' ? 'harness' : 'framework')
+const section = productLanding
+	? {
+		id: product,
+		num: 0,
+		title: getHandbookProduct(product).title,
+		subtitle: getHandbookProduct(product).description,
+		color: (product === 'framework' ? 'found' : 'pilot') as const,
+		cards: getProductCardTopics(product).map(topic => ({
+			id: topic.cardId!,
+			title: topic.title,
+			description: topic.description,
+			icon: topic.icon ?? 'help',
+			featured: topic.featured,
+		})),
+	}
+	: sectionProp
 const sidebar = getSidebarItems()
+const cards = productLanding
+	? getProductChapterTopics(product).map(topic => ({
+		id: topic.topicId,
+		title: topic.title,
+		description: topic.description,
+		icon: 'help',
+		featured: false,
+		canonicalRoute: topic.canonicalRoute,
+	}))
+	: section.cards.map(card => ({ ...card, canonicalRoute: `/handbook/${section.id}/${card.id}/` }))
 ---
 
 <HandbookLayout
@@ -20,10 +51,11 @@ const sidebar = getSidebarItems()
   sidebar={sidebar}
   currentId={section.id}
   prose={false}
+  product={product}
 >
   <div class="mb-12">
     <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-3" style={`color: var(--color-${section.color}-hi)`}>
-      {String(section.num).padStart(2, '0')} — {section.title}
+      {productLanding ? `${product === 'framework' ? 'Framework' : 'AI Harness'} handbook` : `${String(section.num).padStart(2, '0')} — ${section.title}`}
     </p>
     <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
       {section.title}
@@ -33,14 +65,14 @@ const sidebar = getSidebarItems()
     </p>
   </div>
 
-  {section.cards.length > 0 ? (
+  {cards.length > 0 ? (
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {section.cards.map((card) => (
+      {cards.map((card) => (
         <HandbookCard
           title={card.title}
           description={card.description}
-          icon={card.icon}
-          href={`/handbook/${section.id}/${card.id}/`}
+          icon={card.icon ?? 'help'}
+          href={card.canonicalRoute}
           color={section.color}
           featured={card.featured}
         />

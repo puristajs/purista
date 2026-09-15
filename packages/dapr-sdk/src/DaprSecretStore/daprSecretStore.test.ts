@@ -30,6 +30,15 @@ describe('DaprSecretStore', () => {
 	})
 
 	describe('getSecret', () => {
+		it('uses the default secret component when no name is supplied', async () => {
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get').resolves({})
+			const secretStore = new DaprSecretStore()
+
+			await secretStore.getSecret('healthcheck')
+
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/secrets/secretStore/healthcheck')
+		})
+
 		it('should fetch secrets from the Dapr secret store', async () => {
 			const secretName1 = 'mySecret1'
 			const secretName2 = 'mySecret2'

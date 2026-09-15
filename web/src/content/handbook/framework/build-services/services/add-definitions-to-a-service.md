@@ -1,0 +1,78 @@
+---
+title: Add definitions to a service
+description: Register the service's declared capabilities once, bind event-to-queue work deliberately, and resolve the aggregate only after it is complete.
+order: 313
+---
+
+The service aggregate is a small registration index. It owns no business logic;
+it tells the runtime which focused definitions form this versioned service.
+Add every definition before a service is instantiated, tested, or explicitly
+resolved.
+
+```ts title="src/service/invoice/v1/invoiceV1Service.ts"
+export const invoiceV1Service = invoiceV1ServiceBuilder
+  .addCommandDefinition(createInvoiceCommandBuilder.getDefinition())
+  .addSubscriptionDefinition(invoicePaidSubscriptionBuilder.getDefinition())
+  .addStreamDefinition(invoiceProgressStreamBuilder.getDefinition())
+  .addQueueDefinition(generateInvoiceQueueBuilder.getDefinition())
+  .addQueueWorkerDefinition(generateInvoiceWorkerBuilder.getDefinition())
+```
+
+| Builder call | Registers | Keep detailed options in |
+| --- | --- | --- |
+| [`addCommandDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addcommanddefinition) | Request/response operations | [Commands](/handbook/framework/build-services/commands/) |
+| [`addSubscriptionDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addsubscriptiondefinition) | Event reactions | [Subscriptions](/handbook/framework/build-services/subscriptions/) |
+| [`addStreamDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addstreamdefinition) | Progressive response producers | [Streams](/handbook/framework/build-services/streams/) |
+| [`addQueueDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueuedefinition) / [`addQueueWorkerDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueueworkerdefinition) | Durable job contract and executable worker | [Queues and workers](/handbook/framework/build-services/queues-and-workers/) |
+| [`addScheduleDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addscheduledefinition) | Scheduler contract metadata | [Schedule work](/handbook/framework/build-services/schedule-work/) |
+| [`mountHarness(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness) | Selected native Harness agent and workflow targets plus mount policy | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
+
+[`bindEventToQueue(eventName, queueName, options?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#bindeventtoqueue) creates a bounded
+event-to-queue handoff. Use it when an event must become durable work without
+putting queue access in a subscription. Its options control idempotency mode/key,
+payload/parameter mapping, and enqueue-failure behavior; configure and test
+them in [Queues and workers](/handbook/framework/build-services/queues-and-workers/).
+
+| `bindEventToQueue` option | Default / accepted value | Use it for |
+| --- | --- | --- |
+| `idempotencyMode` | `'advisory'`; also `'strict'` | State whether the handoff can proceed when the selected queue bridge cannot honor its idempotency key. Choose `strict` only when a supported bridge and a stable key are a deployment prerequisite. |
+| `idempotencyKey` | Omitted; `'none'`, `'messageId'`, `'correlationId'`, `'eventField'`, or a function of the incoming event | Produce a stable queue deduplication key. Use an explicit function when none of the built-in identity strategies matches the business effect. |
+| `mapPayload` | Omitted; the event payload is passed through | Map a narrow event fact to the queue contract. Keep the mapper deterministic and validate the resulting queue payload. |
+| `mapParameter` | Omitted | Derive a queue parameter from the event when the queue contract requires one. |
+| `onEnqueueFailure` | Omitted; enqueue failure follows the generated subscription error path | Supply a static `QueueRetryRequest` or `{ status: 'fail', reason }`. It is not a callback. PURISTA uses this value when enqueueing fails. |
+
+## Resolve only after assembly is complete
+
+All add calls accept definitions or promises of definitions. The first
+[`resolveDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#resolvedefinitions), [`getInstance(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getinstance), [`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup), or full
+definition lookup resolves them, caches the results, and clears the pending
+lists. Every later `add…Definition(...)` and `bindEventToQueue(...)` call
+throws. This makes a service definition immutable for a running instance.
+
+Do not conditionally add a feature after application startup. Build a complete
+aggregate for each intended service shape, then construct and start it.
+
+[`getFullServiceDefinition()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getfullservicedefinition)
+is the aggregate-inspection entry point after resolution. The individual
+post-resolution accessors are:
+
+| Resolved accessor | Returns |
+| --- | --- |
+| [`getCommandDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommanddefinitions) | Command definitions |
+| [`getSubscriptionDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getsubscriptiondefinitions) | Subscription definitions |
+| [`getStreamDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getstreamdefinitions) | Stream definitions |
+| [`getQueueDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueuedefinitions) | Queue contracts |
+| [`getQueueWorkerDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getqueueworkerdefinitions) | Executable queue workers |
+| [`getScheduleDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#getscheduledefinitions) | External scheduler contracts |
+| [`getEventToQueueBindings()`](/handbook/api/classes/_purista_core.ServiceBuilder/#geteventtoqueuebindings) | Event-to-queue handoff metadata |
+
+Each accessor throws before definitions are resolved. They inspect the
+completed aggregate; they do not register or start a service. Prefer
+[`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup)
+for validation. The deprecated
+[`validateCommandDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#validatecommanddefinitions)
+and
+[`validateSubscriptionDefinitions()`](/handbook/api/classes/_purista_core.ServiceBuilder/#validatesubscriptiondefinitions)
+only print a migration warning and perform no validation.
+
+For signatures, see [ServiceBuilder](/handbook/api/classes/_purista_core.ServiceBuilder/).

@@ -132,10 +132,10 @@ Every event bridge can be paired with a queue bridge for pull-based background w
 | Event Bridge | Recommended Queue Bridge | Notes |
 |---|---|---|
 | `DefaultEventBridge` | `DefaultQueueBridge` (built-in) | In-memory; local dev and testing only |
-| `AmqpBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) | Redis provides durable leased queues alongside RabbitMQ events |
-| `NatsBridge` | [`@purista/nats-queue-bridge`](/handbook/ecosystem/queue-bridges/nats/) | JetStream as queue backend on the same NATS cluster |
-| `MqttBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) | Redis handles worker queues; MQTT handles IoT events |
-| `DaprEventBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) or [`@purista/nats-queue-bridge`](/handbook/ecosystem/queue-bridges/nats/) | Choose based on what your Dapr components expose |
+| `AmqpBridge` | [`@purista/redis-queue-bridge`](/handbook/bridges/queue-bridges/#redis-queue-bridge) | Redis provides durable leased queues alongside RabbitMQ events |
+| `NatsBridge` | [`@purista/nats-queue-bridge`](/handbook/bridges/queue-bridges/#nats-jetstream-queue-bridge) | JetStream as queue backend on the same NATS cluster |
+| `MqttBridge` | [`@purista/redis-queue-bridge`](/handbook/bridges/queue-bridges/#redis-queue-bridge) | Redis handles worker queues; MQTT handles IoT events |
+| `DaprEventBridge` | [`@purista/redis-queue-bridge`](/handbook/bridges/queue-bridges/#redis-queue-bridge) or [`@purista/nats-queue-bridge`](/handbook/bridges/queue-bridges/#nats-jetstream-queue-bridge) | Choose based on what your Dapr components expose |
 
 See the [Queue Bridges](/handbook/bridges/queue-bridges/) page for setup details, lifecycle diagrams, and capability comparisons.
 

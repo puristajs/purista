@@ -1,0 +1,24 @@
+---
+title: Authorize actions with guards
+description: Enforce account-level read and record permissions inside Transaction commands.
+order: 80
+kind: chapter
+group: start
+status: published
+---
+
+A valid session tells us who called. It does not tell us which account that
+person may use. This chapter adds business authorization to the `Transaction`
+service with PURISTA command guards.
+
+The example stays small. Alex may read and record transactions for the
+operating account. Sam may read that account but may not record transactions
+for it. Sam has full access to the review account. Both people are valid users.
+The command guard makes the business decision.
+
+1. [Define a small account policy](/tutorials/business-guards/build/define-policy/).
+2. [Guard effects before the handler](/tutorials/business-guards/build/add-before-guards/).
+3. [Guard returned account scope](/tutorials/business-guards/build/add-output-guard/).
+4. [Test guards and the complete lifecycle](/tutorials/business-guards/testing/test-guards/).
+
+Start from [Handle sessions with StateStore](/tutorials/sessions/).

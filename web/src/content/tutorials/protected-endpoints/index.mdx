@@ -1,0 +1,39 @@
+---
+title: Protect generated HTTP endpoints
+description: Authenticate requests at the Hono boundary and pass trusted identity metadata to PURISTA commands.
+order: 60
+kind: chapter
+group: start
+status: published
+---
+
+In this chapter, you will protect generated PURISTA endpoints with Hono's
+dedicated protection middleware. The public bank profile stays anonymous. The
+transaction commands require a small local demo key.
+
+You will learn how to:
+
+1. mark a generated command endpoint as public or protected;
+2. register one protection middleware with the Hono service;
+3. turn a verified credential into trusted `principalId` and `tenantId`
+   message metadata;
+4. send the credential from React without letting the browser choose identity
+   metadata; and
+5. prove that denied requests never invoke the `Transaction` service.
+
+This chapter uses one fixed key so the protection boundary is easy to see. It
+does not add sessions, roles, or business permissions. Those are separate
+Framework capabilities in later chapters.
+
+## Before you begin
+
+Complete [Persist data with a database resource](/tutorials/database-resource/). This
+chapter starts from that verified checkpoint.
+
+## What you will build
+
+`GET /api/v1/profile` remains public. The generated transaction endpoints
+require `Authorization: Bearer demo-bank-key`. Hono verifies the key and puts
+the mapped principal and tenant on the PURISTA command message.
+
+Start with [Declare public and protected endpoints](/tutorials/protected-endpoints/build/mark-security/).

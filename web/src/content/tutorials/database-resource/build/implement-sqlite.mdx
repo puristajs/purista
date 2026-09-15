@@ -1,0 +1,146 @@
+---
+title: Implement the SQLite adapter
+description: Implement TransactionRepository with Node SQLite, prepared statements, validation, and explicit cleanup.
+order: 10
+kind: lesson
+status: published
+---
+
+Node.js includes SQLite, so this chapter needs no new package. The adapter
+implements the repository contract introduced in the previous chapter and owns
+one database connection.
+
+## Define the managed resource shape
+
+Commands need only `TransactionRepository`. Application startup also needs a
+name and a cleanup function.
+
+```ts title="src/resources/ManagedTransactionRepository.ts" write
+import type { TransactionRepository } from '../service/transaction/v1/TransactionRepository.js'
+
+export interface ManagedTransactionRepository extends TransactionRepository {
+	readonly name: 'sqliteTransactionRepository'
+	destroy(): Promise<void>
+}
+```
+
+Keeping lifecycle methods in this application-level type prevents command
+handlers from becoming responsible for opening or closing infrastructure.
+
+## Implement SQLite
+
+```ts title="src/resources/SqliteTransactionRepository.ts" write
+import { randomUUID } from 'node:crypto'
+import { mkdirSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
+import type { CreateTransaction, Transaction } from '../service/transaction/v1/transaction.js'
+import { createTransactionSchema, transactionSchema } from '../service/transaction/v1/transaction.js'
+import type { ManagedTransactionRepository } from './ManagedTransactionRepository.js'
+
+type TransactionRow = {
+	transaction_id: string
+	amount_cents: number
+	direction: string
+	counterparty: string
+	reference: string | null
+	recorded_at: string
+}
+
+export class SqliteTransactionRepository implements ManagedTransactionRepository {
+	readonly name = 'sqliteTransactionRepository' as const
+	readonly #database: DatabaseSync
+	#closed = false
+
+	constructor(filename = ':memory:') {
+		if (filename !== ':memory:') mkdirSync(dirname(filename), { recursive: true })
+		this.#database = new DatabaseSync(filename)
+		this.#database.exec(`
+			CREATE TABLE IF NOT EXISTS transactions (
+				transaction_id TEXT PRIMARY KEY,
+				amount_cents INTEGER NOT NULL CHECK (amount_cents > 0),
+				direction TEXT NOT NULL CHECK (direction IN ('credit', 'debit')),
+				counterparty TEXT NOT NULL,
+				reference TEXT,
+				recorded_at TEXT NOT NULL
+			)
+		`)
+	}
+
+	async save(input: CreateTransaction) {
+		const validatedInput = createTransactionSchema.parse(input)
+		const transaction = transactionSchema.parse({
+			...validatedInput,
+			transactionId: randomUUID(),
+			recordedAt: new Date().toISOString(),
+		})
+		this.#database.prepare(`
+			INSERT INTO transactions (
+				transaction_id, amount_cents, direction, counterparty, reference, recorded_at
+			) VALUES (?, ?, ?, ?, ?, ?)
+		`).run(
+			transaction.transactionId,
+			transaction.amountCents,
+			transaction.direction,
+			transaction.counterparty,
+			transaction.reference ?? null,
+			transaction.recordedAt,
+		)
+		return transaction
+	}
+
+	async findById(transactionId: string) {
+		const row = this.#database.prepare(`
+			SELECT transaction_id, amount_cents, direction, counterparty, reference, recorded_at
+			FROM transactions
+			WHERE transaction_id = ?
+		`).get(transactionId) as TransactionRow | undefined
+		if (!row) return undefined
+		return transactionSchema.parse({
+			transactionId: row.transaction_id,
+			amountCents: row.amount_cents,
+			direction: row.direction,
+			counterparty: row.counterparty,
+			reference: row.reference ?? undefined,
+			recordedAt: row.recorded_at,
+		})
+	}
+
+	async destroy() {
+		if (this.#closed) return
+		this.#database.close()
+		this.#closed = true
+	}
+}
+```
+
+Prepared statements keep values separate from SQL. The adapter validates both
+the value entering storage and the value leaving it. `destroy` is idempotent,
+so repeated cleanup does not close the connection twice.
+
+## Test the adapter in memory
+
+```ts title="src/resources/SqliteTransactionRepository.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { SqliteTransactionRepository } from './SqliteTransactionRepository.js'
+
+describe('SqliteTransactionRepository', () => {
+	test('saves, reads, and misses transactions in a real SQLite database', async () => {
+		const repository = new SqliteTransactionRepository(':memory:')
+		try {
+			const saved = await repository.save({
+				amountCents: 2599,
+				direction: 'debit',
+				counterparty: 'Northwind Books',
+			})
+			expect(await repository.findById(saved.transactionId)).toEqual(saved)
+			expect(await repository.findById(crypto.randomUUID())).toBeUndefined()
+		} finally {
+			await repository.destroy()
+		}
+	})
+})
+```
+
+This is an adapter test. It uses actual SQLite but stays fast and isolated
+because `:memory:` creates no file.

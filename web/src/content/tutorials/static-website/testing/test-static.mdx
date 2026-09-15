@@ -1,0 +1,184 @@
+---
+title: Test the website and server together
+description: Prove the production files, browser fallback, generated API, and React states without adding another backend.
+order: 10
+kind: lesson
+status: published
+---
+
+This chapter adds two useful test boundaries:
+
+- the server test proves Hono serves production files while generated PURISTA
+  endpoints keep their own routes;
+- the browser test renders React in JSDOM and sends its request to the real
+  `BankProfile` command through Hono.
+
+## Extend the Hono integration test
+
+```ts title="src/application.test.ts" write
+import { serve } from '@hono/node-server'
+import { initLogger } from '@purista/core'
+import { once } from 'node:events'
+import { describe, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function destroyApplication(app: Awaited<ReturnType<typeof createApplication>>) {
+	await app.http.prepareDestroy().destroy()
+	await app.http.destroy()
+	await app.bankProfile.destroy()
+	await app.eventBridge.destroy()
+}
+
+describe('Hono application boundary', () => {
+	test('serves the website without taking ownership of API paths', async () => {
+		const app = await createApplication(initLogger('fatal'))
+		try {
+			const home = await app.http.app.request('/')
+			expect(home.status).toBe(200)
+			expect(home.headers.get('content-type')).toContain('text/html')
+			const html = await home.text()
+			expect(html).toContain('<div id="root"></div>')
+
+			const assetPath = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1]
+			expect(assetPath).toBeDefined()
+			const asset = await app.http.app.request(assetPath ?? '')
+			expect(asset.status).toBe(200)
+			expect(asset.headers.get('content-type')).toContain('javascript')
+
+			const browserPath = await app.http.app.request('/overview')
+			expect(browserPath.status).toBe(200)
+			expect(browserPath.headers.get('content-type')).toContain('text/html')
+
+			const api = await app.http.app.request('/api/v1/profile')
+			expect(api.status).toBe(200)
+			expect(await api.json()).toEqual({ name: 'Example Bank', currency: 'EUR' })
+
+			const missingApi = await app.http.app.request('/api/v1/missing')
+			expect(missingApi.status).toBe(404)
+			expect(missingApi.headers.get('content-type')).toContain('application/problem+json')
+		} finally {
+			await destroyApplication(app)
+		}
+	})
+
+	test('serves through Node and releases the listener', async () => {
+		const app = await createApplication(initLogger('fatal'))
+		const nodeServer = serve({ fetch: app.http.app.fetch, hostname: '127.0.0.1', port: 0 })
+		await once(nodeServer, 'listening')
+		const address = nodeServer.address()
+		expect(address).not.toBeNull()
+		expect(typeof address).not.toBe('string')
+		if (!address || typeof address === 'string') throw new Error('Expected a TCP listener')
+
+		try {
+			const response = await fetch(`http://127.0.0.1:${address.port}/`)
+			expect(response.status).toBe(200)
+			expect(response.headers.get('content-type')).toContain('text/html')
+		} finally {
+			await app.http.prepareDestroy().destroy()
+			await createNodeHttpListener(nodeServer).destroy()
+			await app.http.destroy()
+			await app.bankProfile.destroy()
+			await app.eventBridge.destroy()
+		}
+
+		expect(nodeServer.listening).toBe(false)
+	})
+})
+```
+
+## Render React against the real command boundary
+
+```ts title="ui/vitest.config.ts" write
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+	root: fileURLToPath(new URL('.', import.meta.url)),
+	resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+	test: {
+		environment: 'jsdom',
+		setupFiles: ['./src/test/setup.ts'],
+		include: ['./src/**/*.test.tsx'],
+	},
+})
+```
+
+```ts title="ui/src/test/setup.ts" write
+import '@testing-library/jest-dom/vitest'
+```
+
+```tsx title="ui/src/App.test.tsx" write
+import { initLogger } from '@purista/core'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { createApplication } from '../../src/application.js'
+import { App } from './App'
+
+let application: Awaited<ReturnType<typeof createApplication>>
+
+beforeAll(async () => {
+	application = await createApplication(initLogger('fatal'))
+})
+
+afterEach(() => {
+	cleanup()
+	vi.unstubAllGlobals()
+})
+
+afterAll(async () => {
+	await application.http.prepareDestroy().destroy()
+	await application.http.destroy()
+	await application.bankProfile.destroy()
+	await application.eventBridge.destroy()
+})
+
+describe('Example Bank browser shell', () => {
+	test('shows the loading state and then the real command result', async () => {
+		vi.stubGlobal('fetch', (input: string | URL | Request) =>
+			application.http.app.request(typeof input === 'string' ? input : input.toString()),
+		)
+		render(<App />)
+
+		expect(screen.getByLabelText('Loading public profile')).toBeInTheDocument()
+		expect(await screen.findByRole('heading', { name: 'Example Bank' })).toBeInTheDocument()
+		expect(screen.getByText('EUR')).toBeInTheDocument()
+		expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument()
+	})
+
+	test('shows a useful error when the command cannot be reached', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+		render(<App />)
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('The public profile is unavailable.')
+	})
+})
+```
+
+The first browser test does not copy the profile into a fixture. Its `fetch`
+request crosses the real Hono projection and executes the real command. The
+second test isolates the browser's failure state.
+
+## Run every check and try the page
+
+```bash title="Build and test the server and browser" replay="project"
+npm test
+npm run build
+```
+
+```bash title="Start the application with its website" replay="server"
+npm start
+```
+
+```bash title="Read the generated profile endpoint" replay="request"
+curl --fail-with-body --silent http://127.0.0.1:3000/api/v1/profile
+```
+
+```json title="Expected profile response" expect="json"
+{"name":"Example Bank","currency":"EUR"}
+```
+
+Open `http://127.0.0.1:3000/` in a browser. The page and `/api/v1/profile`
+come from one process, but they keep distinct owners: React owns presentation,
+Hono owns HTTP transport, and `BankProfile` owns public profile behavior.

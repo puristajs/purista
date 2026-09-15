@@ -1,0 +1,166 @@
+---
+title: Create the project and generate the artifacts
+description: Start from an empty directory and let the PURISTA CLI create the services, commands, and Harness agent.
+order: 231
+kind: lesson
+status: published
+---
+
+Start in an empty parent directory. This chapter creates a complete application
+named `support-agent-tools`; it does not depend on another tutorial project.
+
+```bash title="Create and enter the project" replay="parent"
+npm create purista@3.0.0 support-agent-tools -- --runtime node --event-bridge default --non-interactive --defaults
+cd support-agent-tools
+```
+
+All commands on the remaining pages run inside `support-agent-tools`.
+
+Install the published Framework, Harness, provider adapter, and test packages.
+The tutorial uses the public v4 package ranges.
+
+```bash title="Install the tutorial dependencies" replay="project"
+npm install @purista/core@^4.0.0 @purista/harness@^4.0.0 @purista/harness-openai@^4.0.0 zod@^4.4.3
+npm install --save-dev @purista/cli@^4.0.0 @biomejs/biome@^2.5.8 @types/node@^26.2.0 @types/sinon@^22.0.0 sinon@^22.1.0 tsx@^4.23.12 typescript@npm:@typescript/typescript6@^6.0.2 vitest@^4.1.10
+```
+
+Replace `package.json` with the complete file below. The `add:*` scripts call
+the project-local CLI. `demo` runs the credential-free application built later.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-agent-tools",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:subscription": "purista add subscription",
+		"add:stream": "purista add stream",
+		"add:queue": "purista add queue",
+		"add:queue-worker": "purista add queue-worker",
+		"add:agent": "purista add agent",
+		"add:workflow": "purista add workflow",
+		"add:tool": "purista add tool",
+		"add:skill": "purista add skill",
+		"add:mcp": "purista add mcp",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@purista/core": "^4.0.0",
+		"@purista/harness": "^4.0.0",
+		"@purista/harness-openai": "^4.0.0",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.8",
+		"@purista/cli": "^4.0.0",
+		"@types/node": "^26.2.0",
+		"@types/sinon": "^22.0.0",
+		"sinon": "^22.1.0",
+		"tsx": "^4.23.12",
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
+		"vitest": "^4.1.10"
+	}
+}
+```
+Keep the generated PURISTA project conventions explicit. This example uses the
+Node.js runtime, the default EventBridge, and service-owned source below
+`src/service`.
+
+```json title="purista.json" write
+{
+	"$schema": "https://purista.dev/schemas/1.12.0/schema.json",
+	"runtime": "node",
+	"eventBridge": "default",
+	"fileConvention": "camel",
+	"eventConvention": "dot",
+	"linter": "biome",
+	"formatter": "biome",
+	"servicePath": "src/service"
+}
+```
+Add the local files to `.gitignore` before generating runtime output.
+
+```gitignore title=".gitignore" write
+node_modules/
+dist/
+.env
+agent-tools.sqlite*
+```
+Add a short project README with the commands used to verify and run this
+chapter.
+
+```md title="README.md" write
+# PURISTA agent tools tutorial source
+
+This focused project shows how a PURISTA service-owned Harness tool uses
+address-first PURISTA capabilities. The model can request a transaction summary,
+and the tool invokes a guarded `Transaction` command through EventBridge.
+Trusted tenant and principal identity come from the PURISTA message.
+
+Run `npm install`, then use `npm run build`, `npm test`, and `npm run lint` to
+verify the project. Run `npm run demo` for the credential-free example.
+
+The default demo and tests use a strict fake model. The integration test also
+uses a real `DefaultEventBridge`, so the complete model-tool-command path needs
+no model key or external service.
+
+To try the same composition with OpenAI, copy `.env.example`, set
+`OPENAI_API_KEY`, and run `npm start`.
+```
+Create two narrow capability owners. `Support` owns the agent and support
+request. `Transaction` owns transaction data and the authorization rule for
+reading it.
+
+```bash title="Generate the Support and Transaction services" replay="project"
+npm run add:service -- support --description "Own support conversations and support automation" --non-interactive
+npm run add:service -- transaction --description "Own transaction records and transaction business rules" --non-interactive
+```
+
+Generate the agent, its PURISTA host tool, and the commands. The CLI records
+the service name and version on every generated artifact. `--kind purista`
+creates a service-owned tool whose handler receives PURISTA context.
+
+```bash title="Generate the agent and commands" replay="project"
+npm run add:agent -- answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized transaction data" --non-interactive --model-alias answering
+npm run add:tool -- lookup-transaction --service support --service-version 1 --kind purista --description "Look up one transaction the current caller may read" --non-interactive
+npm run add:command -- get-transaction-summary --service transaction --service-version 1 --description "Read an authorized transaction summary" --non-interactive
+npm run add:command -- run-answer-transaction-question --service support --service-version 1 --description "Answer a support question with authorized PURISTA tools" --non-interactive
+```
+
+The generated Harness files are service-owned. The agent definition, its test,
+the host tool, and the Support policy live below the Support service:
+
+```text title="Files created by the PURISTA CLI"
+src/
+└── service/
+    ├── support/v1/
+    │   ├── command/runAnswerTransactionQuestion/
+    │   ├── harness/
+    │   │   ├── agent/answerTransactionQuestion/
+    │   │   ├── supportHarness.ts
+    │   │   └── tool/lookupTransaction/
+    │   └── supportV1Service.ts
+    └── transaction/v1/
+        ├── command/getTransactionSummary/
+        └── transactionV1Service.ts
+```
+
+Run the generated tests before changing the contracts. This checkpoint proves
+the CLI produced a valid project and gives you a known starting point.
+
+```bash title="Verify the generated checkpoint" replay="project"
+npm run build
+npm test
+```
+
+Continue with [Define the Transaction service boundary](../../build/transaction-resource/).

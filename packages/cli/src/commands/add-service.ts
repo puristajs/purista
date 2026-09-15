@@ -16,6 +16,8 @@ export type AddServiceInput = {
 	name?: string
 	description?: string
 	version?: string
+	/** CLI spelling used by `purista add service --service-version`. */
+	serviceVersion?: string
 }
 
 const schema = z.object({
@@ -40,7 +42,7 @@ export const addServiceCommand: PuristaExecutableCommand<AddServiceInput, z.infe
 			} as const)
 		}
 
-		const parsed = schema.safeParse({ ...input, version: input.version ?? '1' })
+		const parsed = schema.safeParse({ ...input, version: input.version ?? input.serviceVersion ?? '1' })
 		if (!parsed.success) {
 			return createPendingResolution('add-service', input, missing, createIssuesFromZod(parsed.error))
 		}

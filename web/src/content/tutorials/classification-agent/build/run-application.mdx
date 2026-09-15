@@ -1,0 +1,118 @@
+---
+title: Run the classification application
+description: Prove the EventBridge path with a fake model, then optionally bind OpenAI.
+order: 186
+kind: lesson
+status: published
+---
+
+Start with a strict fake model. This proves routing, authorization, validation,
+and lifecycle without an API key.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+import { invokeClassification } from './invokeClassification.js'
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject(
+		objectReply(
+			{
+				category: 'card',
+				urgency: 'normal',
+				reason: 'The message asks about a replacement card without an immediate deadline.',
+			},
+			{ usage: { inputTokens: 10, outputTokens: 11, totalTokens: 21 }, finishReason: 'stop' },
+		),
+	)
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canClassify: async () => true },
+		classificationModel: { provider, model: 'fake-classifier' },
+	})
+	await support.start()
+
+	try {
+		const result = await invokeClassification(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{ messageId: 'MSG-200', text: 'How do I replace an expiring card?' },
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the deterministic classification demo" replay="project"
+npm run demo
+```
+
+```json title="Expected classification" expect="json"
+{
+	"category": "card",
+	"urgency": "normal",
+	"reason": "The message asks about a replacement card without an immediate deadline."
+}
+```
+
+The result crossed the wrapper command address and mounted agent address before
+returning as validated command output.
+
+For an optional live process, bind OpenAI only at startup.
+
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required. Use npm run demo for the credential-free example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: {
+			canClassify: async ({ tenantId, principalId }) =>
+				tenantId === 'tenant-example' && principalId === 'principal-alex',
+		},
+		classificationModel: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
+		},
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Support classification service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Classification service could not start.'}\n`)
+	process.exit(1)
+})
+```
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+Copy the environment template and add your key only when you want a real
+provider request. The process owns graceful shutdown of the service and bridge.
+
+```bash title="Start the optional live classification service"
+cp .env.example .env
+npm start
+```
+
+Continue with [Test the small classification boundaries](../../testing/test-classification/).

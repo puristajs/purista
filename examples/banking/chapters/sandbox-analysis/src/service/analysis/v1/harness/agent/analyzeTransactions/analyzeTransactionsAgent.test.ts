@@ -1,0 +1,207 @@
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { localDirectorySandbox } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { scriptedAnalysisProvider } from '../../../../../../testing/scriptedAnalysisProvider.js'
+import { analysisHarness } from '../../analysisHarness.js'
+
+describe('analyzeTransactionsAgent', () => {
+	it('runs the declared write, bash, and read loop', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-'))
+		const provider = scriptedAnalysisProvider()
+		const runtime = await analysisHarness.getInstance({
+			models: { analysis: { provider, model: 'analysis-fake' } },
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
+		})
+
+		try {
+			const session = await runtime.getSession('analysis-1')
+			try {
+				await expect(
+					session.agents.analyzeTransactions.run({
+						analysisId: 'analysis-1',
+						transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+					}),
+				).resolves.toMatchObject({
+					status: 'completed',
+					output: { analysisId: 'analysis-1', flaggedTransactionIds: ['tx-1'] },
+				})
+				const toolResults = provider.requests.slice(1, 4).map((request) => {
+					if (!('messages' in request)) return undefined
+					const message = request.messages.filter((candidate) => candidate.role === 'tool').at(-1)
+					return message ? JSON.parse(message.content) : undefined
+				})
+				expect(toolResults[0]).toMatchObject({ bytesWritten: expect.any(Number) })
+				expect(toolResults[1]).toMatchObject({ exitCode: 0, stdout: '' })
+				expect(toolResults[2]).toMatchObject({ content: '{"flagged": ["tx-1"]}' })
+				provider.assertExhausted()
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+			await rm(root, { recursive: true, force: true })
+		}
+	})
+
+	it('releases the session and terminates the sandbox after a model failure', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-failure-'))
+		const provider = new FakeModelProvider({ strict: true })
+		let sandboxSessionClosed = false
+		const baseSandbox = localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } })
+		const sandbox = new Proxy(baseSandbox, {
+			get(target, property, receiver) {
+				if (property !== 'open') return Reflect.get(target, property, receiver)
+				return async (options: Parameters<typeof target.open>[0]) => {
+					const opened = await target.open(options)
+					const close = opened.session.close.bind(opened.session)
+					return {
+						...opened,
+						session: {
+							...opened.session,
+							close: async () => {
+								sandboxSessionClosed = true
+								await close()
+							},
+						},
+					}
+				}
+			},
+		})
+		const runtime = await analysisHarness.getInstance({
+			models: { analysis: { provider, model: 'analysis-fake' } },
+			sandbox: { adapter: sandbox },
+		})
+
+		try {
+			const session = await runtime.getSession('analysis-failure')
+			try {
+				await expect(
+					session.agents.analyzeTransactions.run({
+						analysisId: 'analysis-failure',
+						transactions: [{ id: 'tx-1', amount: 10, country: 'DE' }],
+					}),
+				).rejects.toThrow('Harness target execution failed.')
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+		}
+		expect(sandboxSessionClosed).toBe(true)
+		await rm(root, { recursive: true, force: true })
+	})
+
+	it('returns a denied tool result for a write outside the workspace', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-denied-'))
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{},
+				{
+					toolCalls: [{ id: 'write-denied', name: 'write', arguments: { path: '/outside.txt', content: 'denied' } }],
+					usage: { inputTokens: 2, outputTokens: 1, totalTokens: 3 },
+					finishReason: 'tool_calls',
+				},
+			),
+		)
+		provider.enqueueObject(
+			objectReply(
+				{
+					analysisId: 'analysis-denied',
+					flaggedTransactionIds: [],
+					summary: 'The requested file operation was denied.',
+				},
+				{ usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 }, finishReason: 'stop' },
+			),
+		)
+		const runtime = await analysisHarness.getInstance({
+			models: { analysis: { provider, model: 'analysis-fake' } },
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
+		})
+
+		try {
+			const session = await runtime.getSession('analysis-denied')
+			try {
+				await expect(
+					session.agents.analyzeTransactions.run({
+						analysisId: 'analysis-denied',
+						transactions: [{ id: 'tx-1', amount: 10, country: 'DE' }],
+					}),
+				).resolves.toMatchObject({
+					status: 'completed',
+					output: { analysisId: 'analysis-denied', flaggedTransactionIds: [] },
+				})
+				const secondRequest = provider.requests[1]
+				const toolMessage =
+					secondRequest && 'messages' in secondRequest
+						? secondRequest.messages.find((message) => message.role === 'tool')
+						: undefined
+				expect(JSON.parse(toolMessage?.content ?? '{}')).toMatchObject({ error: { code: 'PERMISSION_DENIED' } })
+				provider.assertExhausted()
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+			await rm(root, { recursive: true, force: true })
+		}
+	})
+
+	it('keeps the adapter command allow-list separate from agent permissions', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-native-sandbox-adapter-denied-'))
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply(
+				{},
+				{
+					toolCalls: [
+						{
+							id: 'bash-denied',
+							name: 'bash',
+							arguments: { command: 'node -e "process.stdout.write(1)"', cwd: '/workspace' },
+						},
+					],
+					usage: { inputTokens: 2, outputTokens: 1, totalTokens: 3 },
+					finishReason: 'tool_calls',
+				},
+			),
+		)
+		provider.enqueueObject(
+			objectReply(
+				{ analysisId: 'analysis-adapter-denied', flaggedTransactionIds: [], summary: 'The command was denied.' },
+				{ usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 }, finishReason: 'stop' },
+			),
+		)
+		const runtime = await analysisHarness.getInstance({
+			models: { analysis: { provider, model: 'analysis-fake' } },
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
+		})
+
+		try {
+			const session = await runtime.getSession('analysis-adapter-denied')
+			try {
+				await expect(
+					session.agents.analyzeTransactions.run({
+						analysisId: 'analysis-adapter-denied',
+						transactions: [{ id: 'tx-1', amount: 10, country: 'DE' }],
+					}),
+				).resolves.toMatchObject({ status: 'completed', output: { flaggedTransactionIds: [] } })
+				const secondRequest = provider.requests[1]
+				const toolMessage =
+					secondRequest && 'messages' in secondRequest
+						? secondRequest.messages.find((message) => message.role === 'tool')
+						: undefined
+				expect(JSON.parse(toolMessage?.content ?? '{}')).toMatchObject({ error: { meta: { reason: 'exec_failed' } } })
+				provider.assertExhausted()
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+			await rm(root, { recursive: true, force: true })
+		}
+	})
+})

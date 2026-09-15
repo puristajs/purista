@@ -1,0 +1,64 @@
+---
+title: Invoke the workflow from a PURISTA command
+description: Add a protected wrapper command and mount the workflow on the Support service.
+order: 265
+kind: lesson
+status: published
+---
+
+The generated command directory also contains local schema and type placeholders. This chapter uses the shared Harness schemas, so remove those unused files before writing the command.
+
+```bash title="Remove unused command placeholders" replay="project"
+rm src/service/support/v1/command/runAnalyzeSupportCase/schema.ts
+rm src/service/support/v1/command/runAnalyzeSupportCase/types.ts
+```
+
+`supportV1ServiceBuilder.harnessTarget(...)` binds the workflow contract to the
+owning service address. The generated client uses that address, and a completed
+run returns the typed workflow output.
+
+```ts title="src/service/support/v1/command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.ts" write
+import { supportCaseAnalysisOutputSchema, supportCaseInputSchema } from '../../harness/supportCaseSchemas.js'
+import { analyzeSupportCaseWorkflow } from '../../harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
+import { requireSupportCaseAnalysis, supportCaseSessionId } from '../../requireSupportCaseAnalysis.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const runAnalyzeSupportCaseCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runAnalyzeSupportCase', 'Run bounded specialist analysis for one support case')
+	.addPayloadSchema(supportCaseInputSchema)
+	.addOutputSchema(supportCaseAnalysisOutputSchema)
+	.canInvokeWorkflow(supportV1ServiceBuilder.harnessTarget(analyzeSupportCaseWorkflow.contract))
+	.setBeforeGuardHooks({
+		caseAccess: async function (context, payload) {
+			await requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				caseId: payload.caseId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const result = await context.workflow.Support['1'][analyzeSupportCaseWorkflow.contract.id].run(payload, {
+			sessionId: supportCaseSessionId(context.message, payload.caseId),
+		})
+		return result.outcome.output
+	})
+```
+Mount the Harness once and register the wrapper command on the same service.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { runAnalyzeSupportCaseCommandBuilder } from './command/runAnalyzeSupportCase/runAnalyzeSupportCaseCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(runAnalyzeSupportCaseCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+The wrapper guard protects `runAnalyzeSupportCase`. The mount policy protects the workflow again if another allowed service command invokes `Support` version `1` target `analyzeSupportCase`.
+
+```bash title="Check the wrapper and mounted workflow" replay="project"
+npm run build
+```
+
+Continue with [Bind the named models](../compose-runtime/).

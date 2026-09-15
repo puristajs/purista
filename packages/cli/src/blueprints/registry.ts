@@ -1,5 +1,6 @@
 import type { TsConfigJson } from 'type-fest'
 import type { PuristaConfig } from '../api/loadPuristaConfig.js'
+import { generatedDependencyVersion } from '../create/generatedDependencyVersions.js'
 import type { PKG } from '../create/getPackageJson.js'
 import {
 	createAgentImplementationFile,
@@ -22,14 +23,14 @@ import type { ProjectBlueprint } from './types.js'
 const baseTsConfig: TsConfigJson = {
 	compilerOptions: {
 		outDir: 'dist',
+		rootDir: 'src',
 		strict: true,
-		ignoreDeprecations: '6.0',
-		module: 'es2022',
+		module: 'NodeNext',
 		declaration: false,
 		removeComments: false,
 		emitDecoratorMetadata: true,
 		experimentalDecorators: true,
-		moduleResolution: 'Node',
+		moduleResolution: 'NodeNext',
 		allowSyntheticDefaultImports: true,
 		target: 'es2022',
 		sourceMap: true,
@@ -50,7 +51,6 @@ const baseTsConfig: TsConfigJson = {
 const basePuristaConfig: Partial<PuristaConfig> = {
 	$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
 	servicePath: 'src/service',
-	agentPath: 'src/agents',
 }
 
 const basePackage: PKG = {
@@ -63,16 +63,20 @@ const basePackage: PKG = {
 		'add:queue': 'purista add queue',
 		'add:queue-worker': 'purista add queue-worker',
 		'add:agent': 'purista add agent',
+		'add:workflow': 'purista add workflow',
+		'add:tool': 'purista add tool',
+		'add:skill': 'purista add skill',
+		'add:mcp': 'purista add mcp',
 	},
 	dependencies: {
-		'@purista/core': 'latest',
-		zod: 'latest',
+		'@purista/core': generatedDependencyVersion('@purista/core'),
+		zod: generatedDependencyVersion('zod'),
 	},
 	devDependencies: {
-		'@purista/cli': 'latest',
-		'@types/sinon': 'latest',
-		sinon: 'latest',
-		typescript: 'latest',
+		'@purista/cli': generatedDependencyVersion('@purista/cli'),
+		'@types/sinon': generatedDependencyVersion('@types/sinon'),
+		sinon: generatedDependencyVersion('sinon'),
+		typescript: generatedDependencyVersion('typescript'),
 	},
 	trustedDependencies: [],
 }
@@ -82,13 +86,13 @@ const runtimeNodePackage: PKG = {
 		start: 'tsx src/index.ts',
 		build: 'tsc',
 		dev: 'tsx watch src/index.ts',
-		test: 'tsc --noEmit && vitest run',
+		test: 'tsc --noEmit && vitest run src',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
 	},
 	devDependencies: {
-		'@types/node': 'latest',
-		tsx: 'latest',
-		vitest: 'latest',
+		'@types/node': generatedDependencyVersion('@types/node'),
+		tsx: generatedDependencyVersion('tsx'),
+		vitest: generatedDependencyVersion('vitest'),
 	},
 	trustedDependencies: [],
 }
@@ -102,7 +106,7 @@ const runtimeBunPackage: PKG = {
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
 	},
 	devDependencies: {
-		'@types/bun': 'latest',
+		'@types/bun': generatedDependencyVersion('@types/bun'),
 	},
 	trustedDependencies: [],
 }
@@ -113,7 +117,7 @@ const biomePackage: PKG = {
 		'lint:fix': 'npx @biomejs/biome check --write .',
 	},
 	devDependencies: {
-		'@biomejs/biome': 'latest',
+		'@biomejs/biome': generatedDependencyVersion('@biomejs/biome'),
 	},
 	trustedDependencies: ['@biomejs/biome'],
 }
@@ -124,10 +128,10 @@ const eslintPackage: PKG = {
 		'lint:fix': 'eslint . --fix',
 	},
 	devDependencies: {
-		'@eslint/js': '^9.20.0',
-		eslint: '^9.20.1',
-		globals: '^15.15.0',
-		'typescript-eslint': '^8.24.0',
+		'@eslint/js': generatedDependencyVersion('@eslint/js'),
+		eslint: generatedDependencyVersion('eslint'),
+		globals: generatedDependencyVersion('globals'),
+		'typescript-eslint': generatedDependencyVersion('typescript-eslint'),
 	},
 	trustedDependencies: [],
 }
@@ -218,7 +222,7 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [{ path: 'src/config/amqp.ts', content: createAmqpConfigFile() }],
 			packageJson: {
 				dependencies: {
-					'@purista/amqpbridge': 'latest',
+					'@purista/amqpbridge': generatedDependencyVersion('@purista/amqpbridge'),
 				},
 				devDependencies: {},
 				trustedDependencies: [],
@@ -233,7 +237,7 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [{ path: 'src/config/mqtt.ts', content: createMqttConfigFile() }],
 			packageJson: {
 				dependencies: {
-					'@purista/mqttbridge': 'latest',
+					'@purista/mqttbridge': generatedDependencyVersion('@purista/mqttbridge'),
 				},
 				devDependencies: {},
 				trustedDependencies: [],
@@ -248,7 +252,7 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [{ path: 'src/config/nats.ts', content: createNatsConfigFile() }],
 			packageJson: {
 				dependencies: {
-					'@purista/natsbridge': 'latest',
+					'@purista/natsbridge': generatedDependencyVersion('@purista/natsbridge'),
 				},
 				devDependencies: {},
 				trustedDependencies: [],
@@ -263,7 +267,7 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [{ path: 'src/config/dapr.ts', content: createDaprConfigFile() }],
 			packageJson: {
 				dependencies: {
-					'@purista/dapr-sdk': 'latest',
+					'@purista/dapr-sdk': generatedDependencyVersion('@purista/dapr-sdk'),
 				},
 				devDependencies: {},
 				trustedDependencies: [],
@@ -283,11 +287,11 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			],
 			packageJson: {
 				dependencies: {
-					'@purista/hono-http-server': 'latest',
-					'@scalar/hono-api-reference': 'latest',
+					'@purista/hono-http-server': generatedDependencyVersion('@purista/hono-http-server'),
+					'@scalar/hono-api-reference': generatedDependencyVersion('@scalar/hono-api-reference'),
 				},
 				devDependencies: {
-					'@hono/node-server': 'latest',
+					'@hono/node-server': generatedDependencyVersion('@hono/node-server'),
 				},
 				trustedDependencies: [],
 			},
@@ -306,9 +310,9 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			],
 			packageJson: {
 				dependencies: {
-					'@purista/hono-http-server': 'latest',
-					'@scalar/hono-api-reference': 'latest',
-					hono: 'latest',
+					'@purista/hono-http-server': generatedDependencyVersion('@purista/hono-http-server'),
+					'@scalar/hono-api-reference': generatedDependencyVersion('@scalar/hono-api-reference'),
+					hono: generatedDependencyVersion('hono'),
 				},
 				devDependencies: {},
 				trustedDependencies: [],

@@ -1,0 +1,66 @@
+---
+title: Add metrics and tracing
+description: Declare typed business metrics and export safe PURISTA traces and metrics through OpenTelemetry.
+order: 16
+kind: chapter
+group: services
+status: published
+---
+
+Observability helps you answer two different questions:
+
+- **Metrics** show how often something happens and how that changes over time.
+- **Traces** show the path taken by one command, event, or subscription.
+
+PURISTA already records Framework metrics and creates spans around commands,
+subscriptions, and EventBridge work. Your services can add a few business
+metrics that the Framework cannot infer. The application composition root owns
+the OpenTelemetry SDK, exporters, and shutdown order.
+
+This chapter uses the small producer and consumer from
+[React to events with subscriptions](/tutorials/subscriptions/). `Transaction` records a
+transaction and publishes its successful result. `Monitoring` reacts to that
+result. We add one metric to each existing capability and follow one controlled
+subscription failure.
+
+```text title="Ownership of telemetry"
+Transaction and Monitoring
+  -> declare and record business metrics
+
+application composition root
+  -> creates OpenTelemetry exporters
+  -> passes a SpanProcessor and Meter to PURISTA
+  -> flushes telemetry after services stop
+
+OpenTelemetry Collector
+  -> removes restricted trace attributes
+  -> forwards safe evidence to a backend
+```
+
+No new domain service is needed. Observability is behavior of the existing
+services and infrastructure owned by the application.
+
+## What you will build
+
+You will:
+
+1. declare typed, low-cardinality metrics with `ServiceBuilder.defineMetric`;
+2. record them through `context.metrics` only after the relevant result;
+3. pass an application-owned processor and Meter into EventBridge and both services;
+4. inspect a successful flow with in-memory OpenTelemetry exporters;
+5. follow a failed subscription and verify its error span and metrics; and
+6. send the same evidence through a local Collector started by Docker Compose.
+
+The Collector is a local dependency for the last test. The normal application
+still starts without it because telemetry export is enabled only when
+`OTEL_EXPORTER_OTLP_ENDPOINT` is set.
+
+## Boundaries
+
+The example does not add a dashboard or alerting product. It never uses
+transaction, message, principal, session, or tenant identifiers as custom
+metric attributes. Tests check that transaction IDs, counterparty text, and
+payload fields are absent from exported evidence. Telemetry reports a failure;
+it does not retry or repair business work.
+
+Start with [Declare typed metrics](./build/declare/).

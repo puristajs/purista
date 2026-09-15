@@ -1,0 +1,83 @@
+---
+title: Invoke the Skill-enabled agent
+description: Add a PURISTA command that authorizes callers and uses the typed mounted-agent client.
+order: 244
+kind: lesson
+status: published
+---
+
+Application callers address a normal Support command through EventBridge.
+Inside that command, PURISTA's typed mounted-agent client invokes the agent
+target. Give the two targets different ids: `runAnswerProcedureQuestion` wraps
+the agent target `answerProcedureQuestion`.
+
+Use the local CLI to create the command files.
+
+```bash title="Generate the wrapper command" replay="project"
+npm run add:command -- run-answer-procedure-question --service support --service-version 1 --description "Answer a support procedure question using reviewed guidance" --non-interactive
+```
+
+The agent already owns the input and output schemas. Remove the unused command
+schema and type placeholders before replacing the builder.
+
+```bash title="Remove duplicate command placeholders" replay="project"
+rm src/service/support/v1/command/runAnswerProcedureQuestion/schema.ts
+rm src/service/support/v1/command/runAnswerProcedureQuestion/types.ts
+```
+
+`supportV1ServiceBuilder.harnessTarget(...)` binds the direct agent contract to
+the owning service address. `canInvokeAgent` creates the typed
+`context.agent.Support['1'].answerProcedureQuestion` client.
+
+```ts title="src/service/support/v1/command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.ts" write
+import { answerProcedureQuestionAgent } from '../../harness/agent/answerProcedureQuestion/answerProcedureQuestionAgent.js'
+import { requireSupportProcedureAccess, supportProcedureSessionId } from '../../requireSupportProcedureAccess.js'
+import { answerProcedureQuestionInputSchema, answerProcedureQuestionOutputSchema } from '../../schema.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const runAnswerProcedureQuestionCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('runAnswerProcedureQuestion', 'Answer a support procedure question using reviewed guidance')
+	.addPayloadSchema(answerProcedureQuestionInputSchema)
+	.addOutputSchema(answerProcedureQuestionOutputSchema)
+	.canInvokeAgent(supportV1ServiceBuilder.harnessTarget(answerProcedureQuestionAgent.contract))
+	.setBeforeGuardHooks({
+		procedureAccess: async function (context, payload) {
+			await requireSupportProcedureAccess(context.resources.supportProcedurePolicy, context.message, payload.caseId)
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const { sessionId: _sessionId, outcome } = await context.agent.Support['1'].answerProcedureQuestion.run(payload, {
+			sessionId: supportProcedureSessionId(context.message, payload.caseId),
+		})
+		return outcome.output
+	})
+```
+The before-guard performs business authorization before model work. The
+session id is a SHA-256 digest of a structured tuple containing the trusted
+tenant, principal, and case id. It correlates history without exposing raw
+identity or allowing delimiter collisions.
+
+The aggregate agent call returns `{ sessionId, outcome }`. This command returns
+only a completed structured answer. An unexpected interruption is not treated
+as a successful business result.
+
+Register the wrapper command and mount the Harness once.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { runAnswerProcedureQuestionCommandBuilder } from './command/runAnswerProcedureQuestion/runAnswerProcedureQuestionCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarness.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(runAnswerProcedureQuestionCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+An HTTP adapter would authenticate a credential and place trusted identity on
+the PURISTA message. The command and mounted-agent guards own business
+authorization.
+
+```bash title="Check the wrapper command and mount" replay="project"
+npm run build
+```
+
+Continue with [Compose the Skill-enabled runtime](../compose-runtime/).

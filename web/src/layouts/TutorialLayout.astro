@@ -1,0 +1,31 @@
+---
+import HandbookLayout from './HandbookLayout.astro'
+import type { SidebarItem } from '../lib/sidebar'
+
+interface Props {
+	title: string
+	description?: string
+	sidebar?: SidebarItem[]
+	currentId?: string
+	headings?: { depth: number; slug: string; text: string }[]
+	prose?: boolean
+}
+
+const { title, description, sidebar, currentId, headings, prose } = Astro.props
+---
+
+<!-- Tutorials intentionally reuse the established documentation shell. -->
+<HandbookLayout
+	title={title}
+	description={description}
+	sidebar={sidebar}
+	currentId={currentId}
+	headings={headings}
+	prose={prose}
+	sectionTitle="Tutorials"
+	sectionRoot="/tutorials"
+	active="tutorials"
+	recursiveSidebar
+>
+	<slot />
+</HandbookLayout>

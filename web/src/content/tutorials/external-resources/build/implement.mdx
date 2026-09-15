@@ -1,0 +1,221 @@
+---
+title: Implement the local HTTP adapter
+description: Use PURISTA HttpClient for a bounded provider call and run a reproducible local fixture with Docker Compose.
+order: 102
+kind: lesson
+status: published
+---
+
+The tutorial dependency is a separate HTTP process with synthetic data. It
+accepts one deliberately public fixture token and exposes controlled success,
+invalid-response, missing-record, and timeout paths.
+
+```ts title="src/resources/mockLegacyTransactionProvider.ts" write
+import { createServer } from 'node:http'
+import { pathToFileURL } from 'node:url'
+
+const fixtureToken = 'example-bank-tutorial-token'
+
+export function createMockLegacyTransactionProvider() {
+	return createServer(async (request, response) => {
+		const send = (status: number, body: unknown) => {
+			response.writeHead(status, { 'content-type': 'application/json' })
+			response.end(JSON.stringify(body))
+		}
+		const url = new URL(request.url ?? '/', 'http://provider.local')
+		if (request.method !== 'GET') return send(405, { error: 'Use GET' })
+		if (url.pathname === '/health') return send(200, { status: 'ok' })
+		if (request.headers.authorization !== `Bearer ${fixtureToken}`) {
+			return send(401, { error: 'Unknown fixture token' })
+		}
+
+		const match = /^\/transactions\/([a-zA-Z0-9_-]+)$/.exec(url.pathname)
+		if (!match) return send(404, { error: 'Unknown route' })
+		const sourceId = match[1]
+		if (sourceId === 'missing') return send(404, { error: 'No such fixture' })
+		if (sourceId === 'slow') {
+			await new Promise<void>(resolve => {
+				const timer = setTimeout(resolve, 500)
+				response.once('close', () => {
+					clearTimeout(timer)
+					resolve()
+				})
+			})
+			if (response.destroyed) return
+		}
+		if (sourceId === 'malformed') return send(200, { sourceId, record: { amount: '25.99' } })
+		if (sourceId === 'mismatch') {
+			return send(200, { sourceId: 'another-record', record: 'debit|25.99|Northwind Books' })
+		}
+		if (sourceId !== 'provider-1001' && sourceId !== 'slow') {
+			return send(404, { error: 'No such fixture' })
+		}
+		return send(200, {
+			sourceId,
+			record: 'debit|25.99|Northwind Books|Provider 1001',
+		})
+	})
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	const server = createMockLegacyTransactionProvider()
+	const host = process.env.MOCK_HOST ?? '127.0.0.1'
+	const port = Number(process.env.MOCK_PORT ?? 4010)
+	server.listen(port, host, () => process.stdout.write('Mock legacy transaction provider is ready\n'))
+	process.once('SIGTERM', () => server.close())
+	process.once('SIGINT', () => server.close())
+}
+```
+
+Run the fixture in a pinned, unprivileged container. The source file and
+container filesystem are read-only, all Linux capabilities are dropped, and
+the published port binds only to loopback.
+
+```yaml title="compose.yaml" write
+services:
+  legacy-transaction-provider:
+    image: node:24-bookworm@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
+    user: node
+    working_dir: /app
+    command: ["node", "/app/mockLegacyTransactionProvider.ts"]
+    environment:
+      MOCK_HOST: 0.0.0.0
+      MOCK_PORT: "4010"
+    volumes:
+      - ./src/resources/mockLegacyTransactionProvider.ts:/app/mockLegacyTransactionProvider.ts:ro
+    ports:
+      - "127.0.0.1:4010:4010"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4010/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+```
+
+```bash title="Check the isolated provider with Docker Compose" replay="project"
+docker compose -p example-bank-provider up -d --wait
+trap 'docker compose -p example-bank-provider down --volumes' EXIT
+node -e "fetch('http://127.0.0.1:4010/transactions/provider-1001',{headers:{authorization:'Bearer example-bank-tutorial-token'}}).then(async r=>{if(!r.ok)process.exit(1);const value=await r.json();if(value.sourceId!=='provider-1001')process.exit(1)})"
+docker compose -p example-bank-provider down --volumes
+trap - EXIT
+```
+
+Now implement the application adapter with PURISTA `HttpClient`. The adapter
+owns the URL, timeout, HTTP header, and provider-response validation. Its public
+method returns the validated text record required by the domain command.
+
+```ts title="src/resources/HttpLegacyTransactionClient.ts" write
+import { HandledError, HttpClient, StatusCode, UnhandledError, type Logger } from '@purista/core'
+import {
+	legacyTransactionProviderResponseSchema,
+	type LegacyTransactionClient,
+} from '../service/transaction/v1/LegacyTransactionClient.js'
+
+export type HttpLegacyTransactionClientOptions = {
+	baseUrl: string
+	logger: Logger
+	timeoutMs?: number
+}
+
+export class HttpLegacyTransactionClient implements LegacyTransactionClient {
+	private readonly http: HttpClient
+
+	constructor({ baseUrl, logger, timeoutMs = 750 }: HttpLegacyTransactionClientOptions) {
+		this.http = new HttpClient({
+			name: 'LegacyTransactionProvider',
+			baseUrl,
+			defaultTimeout: timeoutMs,
+			logger,
+		})
+	}
+
+	async fetchTransaction(sourceId: string, accessToken: string): Promise<string> {
+		try {
+			const response = await this.http.get<unknown>(`transactions/${encodeURIComponent(sourceId)}`, {
+				headers: {
+					accept: 'application/json',
+					authorization: `Bearer ${accessToken}`,
+				},
+			})
+			const parsed = legacyTransactionProviderResponseSchema.safeParse(response)
+			if (!parsed.success || parsed.data.sourceId !== sourceId) {
+				throw new HandledError(StatusCode.BadGateway, 'The transaction provider returned invalid data')
+			}
+			return parsed.data.record
+		} catch (error) {
+			if (error instanceof HandledError) throw error
+			if (error instanceof UnhandledError && error.errorCode === StatusCode.RequestTimeout) {
+				throw new HandledError(StatusCode.GatewayTimeout, 'The transaction provider timed out')
+			}
+			if (error instanceof UnhandledError && error.errorCode === StatusCode.NotFound) {
+				throw new HandledError(StatusCode.NotFound, 'The provider transaction was not found')
+			}
+			throw new HandledError(StatusCode.BadGateway, 'The transaction provider request failed')
+		}
+	}
+}
+```
+
+The access token is resolved later and supplied only for this request. It is
+not placed in the URL, application logs, command payload, event metadata, or a
+long-lived default-header object. Provider error bodies are not returned to the
+caller.
+
+Test the adapter against the same mock server without Docker. This is a fast
+adapter test; the separate Compose-backed test comes after the command is wired.
+
+```ts title="src/resources/HttpLegacyTransactionClient.test.ts" write
+import { initLogger, StatusCode } from '@purista/core'
+import { once } from 'node:events'
+import type { AddressInfo } from 'node:net'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { HttpLegacyTransactionClient } from './HttpLegacyTransactionClient.js'
+import { createMockLegacyTransactionProvider } from './mockLegacyTransactionProvider.js'
+
+let server: ReturnType<typeof createMockLegacyTransactionProvider>
+let baseUrl: string
+
+beforeEach(async () => {
+	server = createMockLegacyTransactionProvider()
+	server.listen(0, '127.0.0.1')
+	await once(server, 'listening')
+	baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+})
+
+afterEach(async () => {
+	server.closeAllConnections()
+	await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
+})
+
+describe('HttpLegacyTransactionClient', () => {
+	test('returns a validated provider record', async () => {
+		const client = new HttpLegacyTransactionClient({ baseUrl, logger: initLogger('fatal'), timeoutMs: 100 })
+		await expect(client.fetchTransaction('provider-1001', 'example-bank-tutorial-token'))
+			.resolves.toBe('debit|25.99|Northwind Books|Provider 1001')
+	})
+
+	test('maps malformed and mismatched responses to a safe gateway error', async () => {
+		const client = new HttpLegacyTransactionClient({ baseUrl, logger: initLogger('fatal'), timeoutMs: 100 })
+		await expect(client.fetchTransaction('malformed', 'example-bank-tutorial-token'))
+			.rejects.toMatchObject({ errorCode: StatusCode.BadGateway })
+		await expect(client.fetchTransaction('mismatch', 'example-bank-tutorial-token'))
+			.rejects.toMatchObject({ errorCode: StatusCode.BadGateway })
+	})
+
+	test('maps the bounded request timeout without exposing provider data', async () => {
+		const client = new HttpLegacyTransactionClient({ baseUrl, logger: initLogger('fatal'), timeoutMs: 25 })
+		await expect(client.fetchTransaction('slow', 'example-bank-tutorial-token'))
+			.rejects.toMatchObject({
+				errorCode: StatusCode.GatewayTimeout,
+				message: 'The transaction provider timed out',
+			})
+	})
+})
+```
+
+```bash title="Test the HTTP adapter" replay="project"
+npx vitest run src/resources/HttpLegacyTransactionClient.test.ts
+```

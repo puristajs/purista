@@ -1,0 +1,48 @@
+x-agent: &agent
+  build:
+    context: ../../..
+    dockerfile: examples/agent-example/Dockerfile
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+  environment: &agent-environment
+    PURISTA_AI_EXECUTION: postgres-local
+    DATABASE_URL: postgresql://purista:purista-local-only@postgres:5432/purista
+    OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in the shell}
+    OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+  healthcheck:
+    test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+    interval: 10s
+    timeout: 3s
+    retries: 12
+    start_period: 20s
+
+services:
+  postgres:
+    image: postgres:16.4-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: purista
+      POSTGRES_USER: purista
+      # Development-only value. Production uses an external secret manager.
+      POSTGRES_PASSWORD: purista-local-only
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U purista -d purista"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app-a:
+    <<: *agent
+    ports: ["3000:3000"]
+
+  app-b:
+    <<: *agent
+    ports: ["3001:3000"]
+
+volumes:
+  postgres-data:
+

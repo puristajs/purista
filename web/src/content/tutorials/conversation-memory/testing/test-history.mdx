@@ -1,0 +1,158 @@
+---
+title: Test native conversation history
+description: Prove history reuse, session isolation, clearing, retention, and explicit session cleanup without PURISTA infrastructure.
+order: 227
+kind: lesson
+status: published
+---
+
+Start at the native Harness boundary. `FakeModelProvider` records each model
+request, so the second request can prove that the first answer entered model
+context. Another session must remain isolated.
+
+```ts title="src/service/support/v1/harness/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts" write
+import { inMemoryHarnessStorage } from '@purista/harness'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { describe, expect, it } from 'vitest'
+import { supportHarness } from '../../supportHarness.js'
+
+const usage = { inputTokens: 10, outputTokens: 5, totalTokens: 15 }
+
+describe('answerSupportQuestionAgent', () => {
+	it('reuses one session history and keeps another session isolated', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(
+			objectReply({ answer: 'A transfer can remain pending for two business days.' }, { usage, finishReason: 'stop' }),
+		)
+		provider.enqueueObject(
+			objectReply({ answer: 'The same transfer is still within that window.' }, { usage, finishReason: 'stop' }),
+		)
+		provider.enqueueObject(
+			objectReply({ answer: 'Please tell me which transfer you mean.' }, { usage, finishReason: 'stop' }),
+		)
+		const runtime = await supportHarness.getInstance({
+			models: { answering: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const first = await runtime.getSession('support:tenant-example:principal-alex:case-1', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			try {
+				await first.agents.answerSupportQuestion.run({
+					conversationId: 'case-1',
+					question: 'How long can it stay pending?',
+				})
+				await first.agents.answerSupportQuestion.run({
+					conversationId: 'case-1',
+					question: 'What about the same transfer?',
+				})
+
+				const secondRequest = provider.requests[1]
+				expect('messages' in secondRequest ? secondRequest.messages : []).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({ role: 'assistant', content: expect.stringContaining('two business days') }),
+					]),
+				)
+				expect(await first.history.list()).toHaveLength(4)
+
+				const isolated = await runtime.getSession('support:tenant-example:principal-alex:case-2', {
+					identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+				})
+				try {
+					await isolated.agents.answerSupportQuestion.run({
+						conversationId: 'case-2',
+						question: 'What about the same transfer?',
+					})
+					const isolatedRequest = provider.requests[2]
+					expect('messages' in isolatedRequest ? isolatedRequest.messages : []).not.toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								role: 'assistant',
+								content: expect.stringContaining('two business days'),
+							}),
+						]),
+					)
+					provider.assertExhausted()
+				} finally {
+					await isolated.release()
+				}
+			} finally {
+				await first.release()
+			}
+		} finally {
+			await runtime.close()
+		}
+	})
+
+	it('clears transcript content without deleting the reusable session id', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject(objectReply({ answer: 'I can help.' }, { usage, finishReason: 'stop' }))
+		const runtime = await supportHarness.getInstance({
+			models: { answering: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const session = await runtime.getSession('support:tenant-example:principal-alex:case-3', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			try {
+				await session.agents.answerSupportQuestion.run({ conversationId: 'case-3', question: 'Can you help?' })
+				expect(await session.history.list()).not.toHaveLength(0)
+				await session.clearHistory()
+				expect(await session.history.list()).toEqual([])
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+		}
+	})
+
+	it('retains only the newest eight complete conversation turns', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		for (let index = 1; index <= 9; index += 1) {
+			provider.enqueueObject(objectReply({ answer: `Answer ${index}` }, { usage, finishReason: 'stop' }))
+		}
+		const runtime = await supportHarness.getInstance({
+			models: { answering: { provider, model: 'fake-support' } },
+			storage: inMemoryHarnessStorage(),
+		})
+
+		try {
+			const session = await runtime.getSession('support:tenant-example:principal-alex:case-retention', {
+				identity: { tenantId: 'tenant-example', principalId: 'principal-alex' },
+			})
+			try {
+				for (let index = 1; index <= 9; index += 1) {
+					await session.agents.answerSupportQuestion.run({
+						conversationId: 'case-retention',
+						question: `Question ${index}`,
+					})
+				}
+
+				const history = await session.history.list()
+				expect(history).toHaveLength(16)
+				expect(history[0]).toMatchObject({ role: 'user', content: expect.stringContaining('Question 2') })
+				expect(history.at(-1)).toMatchObject({ role: 'assistant', content: expect.stringContaining('Answer 9') })
+				provider.assertExhausted()
+			} finally {
+				await session.release()
+			}
+		} finally {
+			await runtime.close()
+		}
+	})
+})
+```
+Each session is borrowed from the runtime. Its nested `finally` calls
+`session.release()` before the outer `finally` calls `runtime.close()`. Releasing
+a session frees live resources without deleting its persisted transcript.
+
+```bash title="Run native conversation tests" replay="project"
+npm test -- src/service/support/v1/harness/agent/answerSupportQuestion/answerSupportQuestionAgent.test.ts
+```
+
+Continue with [Test the PURISTA commands](../test-commands/).

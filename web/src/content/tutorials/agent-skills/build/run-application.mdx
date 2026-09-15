@@ -1,0 +1,124 @@
+---
+title: Run the Skill-enabled application
+description: Prove lazy Skill reading with a strict fake model, then optionally bind OpenAI.
+order: 246
+kind: lesson
+status: published
+---
+
+Start with the deterministic path. The strict fake model first chooses the
+`read` tool for `SKILL.md`, then returns a structured answer. It needs no API
+key or network connection.
+
+```ts title="src/demo.ts" write
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { FakeModelProvider, objectReply } from '@purista/harness/testing'
+import { createSupportService } from './createSupportService.js'
+import { invokeProcedureAnswer } from './invokeProcedureAnswer.js'
+
+const usage = { inputTokens: 8, outputTokens: 9, totalTokens: 17 }
+
+async function main() {
+	const logger = initLogger('fatal')
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueObject(
+		objectReply(
+			{},
+			{
+				toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/support-methods/SKILL.md' } }],
+				usage,
+				finishReason: 'tool_calls',
+			},
+		),
+	)
+	provider.enqueueObject(
+		objectReply(
+			{
+				answer: 'A pending transfer can remain under review for up to two business days.',
+				method: 'pending_transfer',
+			},
+			{ usage, finishReason: 'stop' },
+		),
+	)
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canAnswer: async () => true },
+		answeringModel: { provider, model: 'fake-support' },
+	})
+	await support.start()
+	try {
+		const result = await invokeProcedureAnswer(
+			eventBridge,
+			{ tenantId: 'tenant-example', principalId: 'principal-alex' },
+			{ caseId: 'case-104', question: 'How long can a transfer stay pending?' },
+		)
+		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+		provider.assertExhausted()
+	} finally {
+		await support.destroy()
+		await eventBridge.destroy()
+	}
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'The demo failed.'}\n`)
+	process.exit(1)
+})
+```
+```bash title="Run the credential-free Skill demo" replay="project"
+npm run demo
+```
+
+```json title="Expected demo result" expect="json"
+{
+  "answer": "A pending transfer can remain under review for up to two business days.",
+  "method": "pending_transfer"
+}
+```
+
+The demo destroys the Support service and EventBridge in `finally`, including
+failure paths after startup.
+
+The optional live process uses the same service, guard, Skill, and sandbox with
+a published OpenAI adapter.
+
+```dotenv title=".env.example" write
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+```
+```ts title="src/index.ts" write
+import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
+import { openai } from '@purista/harness-openai'
+import { createSupportService } from './createSupportService.js'
+
+async function main() {
+	const logger = initLogger()
+	const apiKey = process.env.OPENAI_API_KEY?.trim()
+	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the live example.')
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const support = await createSupportService(eventBridge, logger, {
+		policy: { canAnswer: async () => true },
+		answeringModel: { provider: openai({ apiKey }), model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
+	})
+	await support.start()
+	gracefulShutdown(logger, [support, eventBridge])
+	logger.info('Support Skill service started')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'Skill service could not start.'}\n`)
+	process.exit(1)
+})
+```
+`gracefulShutdown` registers cleanup for the Support service and EventBridge.
+Copy `.env.example` to `.env` and add a key only when you want to use the live
+provider.
+
+```bash title="Run the optional live model"
+cp .env.example .env
+npm start
+```
+
+Continue with [Test the Skill definitions](../../testing/test-skills/).

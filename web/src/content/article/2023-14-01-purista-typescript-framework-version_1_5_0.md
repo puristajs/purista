@@ -22,7 +22,7 @@ The application can:
 
 ::: tip Awesome!
 **All this is possible from one code base, with low overhead and without touching business logic.**
-See: [Deployment in handbook](../handbook/5_deploy_and_scale/)
+See: [Deployment in handbook](/handbook/5_deploy_and_scale/)
 :::
 
 ![PURISTA typescript Framework 1.5](/graphic/advertise_large.svg)

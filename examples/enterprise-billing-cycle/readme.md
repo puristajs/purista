@@ -10,16 +10,12 @@ This example shows the recommended enterprise interoperability storyline with on
 6. the worker emits a typed result event
 7. a result subscription records the completed cycle
 
-Run it from the repository root:
+Install, validate, and run it from this example directory:
 
 ```bash
-npm run start -w examples/enterprise-billing-cycle
-```
-
-Validate the example:
-
-```bash
-npm run test -w examples/enterprise-billing-cycle
+npm install
+npm test
+npm start
 ```
 
 The queue and event bridge are `DefaultQueueBridge` and `DefaultEventBridge`, so no broker, database, scheduler, or HTTP server is required.

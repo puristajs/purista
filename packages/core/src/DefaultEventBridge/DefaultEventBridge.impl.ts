@@ -18,7 +18,7 @@ import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../core/helper/createInfoMessage.impl.js'
 import { getCleanedMessage } from '../core/helper/getCleanedMessage.impl.js'
 import { getCommandQueueName } from '../core/helper/getCommandQueueName.impl.js'
-import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
+import { getHarnessTransportCorrelationId } from '../core/helper/getHarnessTransportCorrelationId.impl.js'
 import { getNewEBMessageId } from '../core/helper/getNewEBMessageId.impl.js'
 import { getSubscriptionQueueName } from '../core/helper/getSubscriptionQueueName.impl.js'
 import { deserializeOtp, serializeOtp } from '../core/helper/serializeOtp.impl.js'
@@ -456,7 +456,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 					timestamp: Date.now(),
 					traceId: message.traceId,
 					instanceId: this.instanceId,
-					otp: serializeOtp(),
+					otp: message.otp ?? serializeOtp(),
 				})
 
 				span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
@@ -485,7 +485,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		const context = deserializeOtp(this.logger, input.otp)
 
 		return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async _span => {
-			const correlationId = getNewCorrelationId()
+			const correlationId = getHarnessTransportCorrelationId(input)
 
 			const command: Command = Object.freeze({
 				...input,
@@ -524,7 +524,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		commandTimeout = this.defaultCommandTimeout,
 	): Promise<StreamHandle<Chunk, Final>> {
-		const correlationId = getNewCorrelationId()
+		const correlationId = getHarnessTransportCorrelationId(input)
 		const session = this.pendingStreams.register(correlationId, commandTimeout, input.traceId)
 
 		const sendCancel = async (reason?: string) => {
@@ -559,6 +559,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		const streamOpenMessage: Omit<StreamOpenRequest, 'id' | 'timestamp'> = {
 			messageType: EBMessageType.Stream,
+			...(input.harness === undefined ? {} : { harness: input.harness }),
+			...(input.otp === undefined ? {} : { otp: input.otp }),
 			sender: {
 				...input.sender,
 				instanceId: this.instanceId,

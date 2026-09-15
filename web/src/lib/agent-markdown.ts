@@ -19,9 +19,11 @@ export function stripFrontmatter(markdown: string): string {
 	return markdown.replace(/^---\n[\s\S]*?\n---\n?/, '').trim()
 }
 
-export async function readContentMarkdown(collection: string, id: string, extension: 'md' | 'mdx' = 'md') {
-	const primaryRelativePath = path.join(collection, `${id}.${extension}`)
-	const fallbackRelativePath = path.join(collection, id, `index.${extension}`)
+export async function readContentMarkdown(
+	collection: string,
+	id: string,
+	extension: 'md' | 'mdx' | 'auto' = 'md',
+) {
 	const normalizedRoot = path.resolve(contentRoot)
 
 	async function readSafe(relativePath: string) {
@@ -36,18 +38,25 @@ export async function readContentMarkdown(collection: string, id: string, extens
 		}
 	}
 
-	let result: { markdown: string; relativePath: string }
-	try {
-		result = await readSafe(primaryRelativePath)
-	} catch (error) {
-		if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') throw error
-		result = await readSafe(fallbackRelativePath)
+	const extensions = extension === 'auto' ? ['md', 'mdx'] : [extension]
+	for (const currentExtension of extensions) {
+		for (const relativePath of [
+			path.join(collection, `${id}.${currentExtension}`),
+			path.join(collection, id, `index.${currentExtension}`),
+		]) {
+			try {
+				const result = await readSafe(relativePath)
+				return {
+					body: stripFrontmatter(result.markdown),
+					sourcePath: `web/src/content/${result.relativePath}`,
+				}
+			} catch (error) {
+				if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') throw error
+			}
+		}
 	}
 
-	return {
-		body: stripFrontmatter(result.markdown),
-		sourcePath: `web/src/content/${result.relativePath}`,
-	}
+	throw new Error(`Content entry not found: ${collection}/${id}`)
 }
 
 export function renderAgentMarkdown(document: AgentMarkdownDocument): string {

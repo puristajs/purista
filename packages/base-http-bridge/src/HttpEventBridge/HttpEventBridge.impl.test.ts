@@ -78,11 +78,16 @@ describe('HttpEventBridge lifecycle', () => {
 				traceId: 'trace-1',
 				principalId: 'principal',
 				tenantId: 'tenant',
-			},
+				harness: {
+					contract: { schemaVersion: 1, exportDigest: `sha256:${'a'.repeat(64)}` },
+					root: { invocationId: 'harness-root-invocation', sessionId: 'harness-session' },
+				},
+			} as never,
 			321,
 		)
 
 		expect(invoke).toHaveBeenCalledTimes(1)
+		expect(invoke.mock.calls[0]?.[0]).toMatchObject({ correlationId: 'harness-root-invocation' })
 		expect(invoke.mock.calls[0]?.[2]).toBe(321)
 	})
 

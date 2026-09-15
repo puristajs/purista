@@ -117,33 +117,86 @@ export const createInvokeProxy = <Invokes extends InvokeList | StreamInvokeList 
 	}
 }
 
-export const createAgentInvokeProxy = <AgentInvokes extends Record<string, unknown>>(sandbox?: SinonSandbox) => {
-	const agentMocks: Record<string, { run: SinonStub }> = {}
+/** Preserve declared Harness addresses and method signatures while exposing Sinon stub controls. */
+export type HarnessInvocationMock<T> = T extends (...args: infer Arguments) => infer Result
+	? SinonStub<Arguments, Result>
+	: T extends { resume: infer Resume }
+		? Omit<{ [Key in keyof T]: HarnessInvocationMock<T[Key]> }, 'resume'> & {
+				resume: HarnessResumeInvocationMock<Resume>
+			}
+		: { [Key in keyof T]: HarnessInvocationMock<T[Key]> }
 
-	const api = new Proxy(
-		{},
-		{
-			get(_target: object, name) {
-				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
-					return undefined
-				}
+/** A resume stub whose continuation controls mirror the returned target resumer. */
+export type HarnessResumeInvocationMock<T> = T extends (...args: infer Arguments) => infer Result
+	? SinonStub<Arguments, Result> & Readonly<{ continuation: HarnessInvocationMock<Result> }>
+	: never
 
-				if (!agentMocks[name]) {
-					agentMocks[name] = {
-						run: sandbox?.stub() ?? stub(),
+type HarnessTargetMock = {
+	run: SinonStub
+	stream: SinonStub
+	enqueue: SinonStub
+	resume: SinonStub & Readonly<{ continuation: { run: SinonStub; stream: SinonStub } }>
+}
+
+/** Creates address-first Harness target clients with controllable invocation stubs. */
+export const createHarnessInvocationMockProxy = <TApi>(sandbox?: SinonSandbox) => {
+	const targetMocks: Record<string, Record<string, Record<string, HarnessTargetMock>>> = {}
+
+	const getProxy = (
+		address: EBMessageAddress = { serviceName: '', serviceVersion: '', serviceTarget: '' },
+		level = 0,
+	) =>
+		new Proxy(
+			{},
+			{
+				get(_target, property) {
+					if (typeof property !== 'string' || property === 'then' || property === 'catch' || property === 'finally') {
+						return undefined
 					}
-					agentMocks[name].run.rejects(new Error(`agent invocation ${name} is not stubbed`))
-				}
-
-				return agentMocks[name]
+					if (level === 0) {
+						targetMocks[property] ??= {}
+						return getProxy({ ...address, serviceName: property }, level + 1)
+					}
+					if (level === 1) {
+						targetMocks[address.serviceName][property] ??= {}
+						return getProxy({ ...address, serviceVersion: property }, level + 1)
+					}
+					if (level === 2) {
+						const targets = targetMocks[address.serviceName][address.serviceVersion]
+						if (targets[property] === undefined) {
+							const continuation = {
+								run: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.resume(...).run is not stubbed`),
+								),
+								stream: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.resume(...).stream is not stubbed`),
+								),
+							}
+							const resume = Object.assign(
+								(sandbox?.stub() ?? stub()).callsFake(() => continuation),
+								{
+									continuation,
+								},
+							)
+							targets[property] = {
+								run: (sandbox?.stub() ?? stub()).rejects(new Error(`Harness target ${property}.run is not stubbed`)),
+								stream: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.stream is not stubbed`),
+								),
+								enqueue: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.enqueue is not stubbed`),
+								),
+								resume,
+							}
+						}
+						return targets[property]
+					}
+					return undefined
+				},
 			},
-		},
-	) as AgentInvokes
+		)
 
-	return {
-		api,
-		stubs: agentMocks,
-	}
+	return { api: getProxy() as TApi, stubs: getProxy() as HarnessInvocationMock<TApi> }
 }
 
 export const createEmitStubMap = <EmitList extends Record<string, Schema>>(

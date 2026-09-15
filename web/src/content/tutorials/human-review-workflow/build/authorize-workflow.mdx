@@ -1,0 +1,66 @@
+---
+title: Define Support resources and authorization
+description: Use trusted identity and the Support review record to authorize both a fresh workflow call and its resume.
+order: 254
+kind: lesson
+status: published
+---
+
+The request command protects its business action, but the mounted workflow also
+needs a business guard. The guard reads the Support-owned review record using
+the trusted tenant and principal carried by EventBridge. It never accepts a
+tenant or principal from the model input.
+
+The service builder declares the two Support resources once. Commands, the
+mounted workflow policy, and tests receive the same typed resource names.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support review requests and support automation',
+})
+	.defineResource<'supportReviewStore', SupportReviewStore>()
+	.defineResource<'supportReviewPolicy', SupportReviewPolicy>()
+```
+```ts title="src/service/support/v1/requireReviewWorkflowAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportReviewPolicy, SupportReviewStore } from './SupportReviewResources.js'
+import type { ReviewWorkflowInput } from './schema.js'
+
+export async function requireReviewWorkflowAccess(
+	resources: Readonly<{ supportReviewPolicy: SupportReviewPolicy; supportReviewStore: SupportReviewStore }>,
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	input: ReviewWorkflowInput,
+) {
+	const { tenantId, principalId } = identity
+	if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+
+	const record = await resources.supportReviewStore.get(tenantId, input.requestId)
+	if (!record || record.actionDigest !== input.actionDigest) {
+		throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+	}
+
+	const allowed =
+		record.principalId === principalId
+			? await resources.supportReviewPolicy.canRequest({ tenantId, principalId, cardId: record.cardId })
+			: await resources.supportReviewPolicy.canReview({ tenantId, principalId, requestId: record.requestId })
+	if (!allowed) throw new HandledError(StatusCode.Forbidden, 'This review workflow is not available')
+}
+```
+Authentication resolves the identity. This guard authorizes a requester or a
+reviewer for one stored review. Keep those jobs separate: a valid token does
+not automatically allow a card freeze.
+
+The `durableResume` policy lets a same-tenant reviewer resume the durable run
+while Harness keeps the stored owner in its private execution scopes. The
+before guard receives the current reviewer and still runs on every resume.
+
+```bash title="Check the workflow guard" replay="project"
+npm run build
+```
+
+Continue with [Protect the Transaction effect](../protect-effect/).

@@ -1,0 +1,79 @@
+---
+title: Compose the classification runtime
+description: Supply the policy and exact classification model binding through one service factory.
+order: 185
+kind: lesson
+status: published
+---
+
+The definitions are infrastructure-independent. This composition root supplies
+the concrete policy, model provider, EventBridge, and logger.
+
+```ts title="src/createSupportService.ts" write
+import type { EventBridge, Logger } from '@purista/core'
+import type { ModelProvider } from '@purista/harness'
+import type { SupportClassificationPolicy } from './service/support/v1/SupportResources.js'
+import { supportV1Service } from './service/support/v1/supportV1Service.js'
+
+export function createSupportService(
+	eventBridge: EventBridge,
+	logger: Logger,
+	options: Readonly<{
+		policy: SupportClassificationPolicy
+		classificationModel: { provider: ModelProvider; model: string }
+	}>,
+) {
+	return supportV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { supportClassificationPolicy: options.policy },
+		ai: { models: { classification: options.classificationModel } },
+	})
+}
+```
+The `ai.models.classification` binding matches the mounted agent's explicit alias.
+Credentials stay at application startup, outside the agent definition.
+
+Create a terminal adapter that sends a normal PURISTA command message to
+`Support / 1 / runClassifySupportMessage`.
+
+```ts title="src/invokeClassification.ts" write
+import { type EventBridge, getNewInstanceId } from '@purista/core'
+import type { z } from 'zod'
+import type {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from './service/support/v1/harness/agent/classifySupportMessage/classifySupportMessageAgent.js'
+
+type ClassificationInput = z.infer<typeof classifySupportMessageInputSchema>
+type Classification = z.infer<typeof classifySupportMessageOutputSchema>
+
+export function invokeClassification(
+	eventBridge: EventBridge,
+	identity: Readonly<{ tenantId: string; principalId: string }>,
+	payload: ClassificationInput,
+) {
+	return eventBridge.invoke<Classification>({
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+		sender: {
+			serviceName: 'TutorialClient',
+			serviceVersion: '1',
+			serviceTarget: 'classify',
+			instanceId: getNewInstanceId(),
+		},
+		receiver: { serviceName: 'Support', serviceVersion: '1', serviceTarget: 'runClassifySupportMessage' },
+		payload: { payload, parameter: {} },
+	})
+}
+```
+The identity values represent trusted server-side identity. An HTTP transport
+would authenticate a credential before placing them on the PURISTA message.
+Payload fields never grant authority.
+
+```bash title="Verify the classification composition" replay="project"
+npm run build
+```
+
+Continue with [Run the classification application](../run-application/).

@@ -10,10 +10,11 @@ import { mergeServiceDefinition } from '../helper/exportServiceDefinitions.js'
 import { convertToCamelCase } from '../helper/string/convertToCamelCase.impl.js'
 import type { FullDefinition } from '../helper/types/FullDefinition.js'
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
-import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
+import type { ServiceDefinitions } from '../helper/types/ServiceDefinitions.js'
 
 import { puristaVersion } from '../version.js'
 import { getWriter } from './getWriter.impl.js'
+import { generateHarnessClientArtifacts, publishHarnessClientArtifacts } from './harnessCodegen.js'
 import { mergeIntoServiceDefinition } from './mergeIntoServiceDefinition.impl.js'
 import { metaToFunctionBridge } from './metaToFunctionBridge.impl.js'
 import { metaToFunctionHttp } from './metaToFunctionHttp.impl.js'
@@ -100,12 +101,14 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	/**
 	 * Gets the definitions from the provided service builders
 	 */
-	async getDefinitionsFromServiceBuilders(serviceBuilders: ServiceBuilder[]) {
-		const services: FullServiceDefinition = {}
+	async getDefinitionsFromServiceBuilders(
+		serviceBuilders: readonly { getFullServiceDefinition(): Promise<ServiceDefinitions> }[],
+	) {
+		let services: FullServiceDefinition = {}
 
 		for (const builder of serviceBuilders) {
 			const definition = await builder.getFullServiceDefinition()
-			mergeServiceDefinition(services, definition)
+			services = mergeServiceDefinition(services, definition)
 		}
 
 		return services
@@ -702,20 +705,35 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * @param serviceDefinition
 	 */
 	async generateEventBridgeClient(serviceDefinition: FullServiceDefinition) {
-		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
-		const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_eventbridge_client.ts'))
+		const harness = generateHarnessClientArtifacts(serviceDefinition, this.config.eventBridgeClient.clientName)
+		const clientChunks: string[] = []
+		const typeChunks: string[] = []
+		const clientStream = { write: (text: string) => clientChunks.push(text) }
+		const typeStream = { write: (text: string) => typeChunks.push(text) }
 
 		const clientWriter = getWriter()
 
 		clientWriter
-			.writeLine(`import type { EventBridge } from '@purista/core'`)
+			.writeLine(
+				`import { createRemoteHarnessClient, type EventBridge, type QueueBridge, type RemoteHarnessClientOptions } from '@purista/core'`,
+			)
+			.writeLine(harness.imports)
 			.blankLine()
 			.writeLine(`import * as ClientType from './types_eventbridge_client.js'`)
+			.blankLine()
+			.writeLine(
+				'/** Trusted identity propagated to every generated Harness root. The generated sender name is fixed. */',
+			)
+			.writeLine("export type HarnessClientOptions = Omit<RemoteHarnessClientOptions, 'senderName'>")
 			.blankLine()
 			.writeLine(`export class ${this.config.eventBridgeClient.clientName} {`)
 			.blankLine()
 			.withIndentationLevel(1, () => {
-				clientWriter.write('constructor(public __eventBridge__: EventBridge)').block(() => {})
+				clientWriter
+					.write(
+						"constructor(\n\t\tpublic __eventBridge__: EventBridge,\n\t\tpublic __queueBridge__?: Pick<QueueBridge, 'enqueue'>,\n\t\tpublic readonly __harnessClientOptions__: HarnessClientOptions = {},\n\t)",
+					)
+					.block(() => {})
 			})
 
 		clientStream.write(clientWriter.toString())
@@ -732,12 +750,11 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 
 		await this.generateEventBridgeClientSource(clientStream, typeStream, serviceDefinition)
 
+		clientStream.write(harness.members)
 		clientStream.write('}')
-
-		await Promise.all([
-			new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
-			new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
-		])
+		harness.files.set('eventbridge_client.ts', clientChunks.join(''))
+		harness.files.set('types_eventbridge_client.ts', typeChunks.join(''))
+		await publishHarnessClientArtifacts(this.getOutputPath(), harness.files)
 	}
 
 	/**
@@ -748,8 +765,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	private generateEventBridgeClientSource(
-		clientStream: WriteStream,
-		typeStream: WriteStream,
+		clientStream: { write(text: string): unknown },
+		typeStream: { write(text: string): unknown },
 		serviceDefinitions: FullServiceDefinition,
 	) {
 		for (const [serviceName, serviceDefinition] of Object.entries(serviceDefinitions)) {

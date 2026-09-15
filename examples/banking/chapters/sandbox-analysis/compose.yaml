@@ -1,0 +1,7 @@
+services:
+  sandbox-image:
+    image: purista-tutorial-sandbox:local
+    build:
+      context: .
+      dockerfile: sandbox.Dockerfile
+    command: ["python3", "--version"]

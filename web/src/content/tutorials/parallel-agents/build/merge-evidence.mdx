@@ -1,0 +1,69 @@
+---
+title: Add resources and business authorization
+description: Give the Support service one policy resource and one reusable authorization check.
+order: 263
+kind: lesson
+status: published
+---
+
+Model output does not decide who may analyze a support case. A PURISTA resource owns that business decision.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportCasePolicy {
+	canAnalyze(input: Readonly<{ tenantId: string; principalId: string; caseId: string }>): Promise<boolean>
+}
+```
+Declare the resource on the Support service builder.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support cases and support automation',
+}).defineResource<'supportCasePolicy', SupportCasePolicy>()
+```
+Use one guard helper at both public boundaries. It requires trusted tenant and principal identity before it calls the policy. The session ID hashes a JSON tuple, so values containing separators cannot collide.
+
+```ts title="src/service/support/v1/requireSupportCaseAnalysis.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportCasePolicy } from './SupportResources.js'
+
+export async function requireSupportCaseAnalysis(
+	policy: SupportCasePolicy,
+	input: Readonly<{ tenantId?: string; principalId?: string; caseId: string }>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAnalyze({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			caseId: input.caseId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'Support case analysis is not allowed')
+	}
+}
+
+export function supportCaseSessionId(identity: Readonly<{ tenantId?: string; principalId?: string }>, caseId: string) {
+	if (!identity.tenantId || !identity.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-case-v1', identity.tenantId, identity.principalId, caseId]))
+		.digest('hex')
+	return `support-case:${digest}`
+}
+```
+This separates business authorization from the agents. The agents only analyze valid input; the service decides whether the caller may start that work.
+
+```bash title="Check the service resource and guard" replay="project"
+npm run build
+```
+
+Continue with [Run bounded work in parallel](../fan-out/).

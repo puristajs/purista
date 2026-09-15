@@ -61,7 +61,21 @@ export const metaToFunctionHttp = (
 	}
 
 	let returnType = 'void'
-	if (meta.expose.outputPayload) {
+	if (meta.expose.http.mode === 'async') {
+		returnType = `${typeNamePrefix}ReturnType`
+		typeWriter
+			.blankLine()
+			.writeLine(
+				`/** Queue acceptance returned by async ${functionName} on ${serviceName} version ${serviceVersion}. */`,
+			)
+			.write(`export type ${returnType} = `)
+			.block(() => {
+				typeWriter.writeLine('jobId: string,')
+				typeWriter.writeLine('queueName: string,')
+				typeWriter.writeLine('scheduledAt?: number,')
+				typeWriter.writeLine('runId?: string,')
+			})
+	} else if (meta.expose.outputPayload) {
 		const typeFromSchema = schemaObjectToTsType(meta.expose.outputPayload)
 
 		const genType = typeFromSchema.trim().toLowerCase()
@@ -75,7 +89,17 @@ export const metaToFunctionHttp = (
 		}
 	}
 
-	let hasPayload = ['post', 'patch', 'put', 'delete'].includes(meta.expose.http.method.toLocaleLowerCase())
+	const method = meta.expose.http.method.toLocaleLowerCase()
+	let hasPayload = ['post', 'patch', 'put'].includes(method)
+
+	if (method === 'delete' && meta.expose.inputPayload) {
+		const inputType = schemaObjectToTsType(meta.expose.inputPayload).trim().toLowerCase()
+		if (inputType !== 'undefined' && inputType !== 'void') {
+			throw new Error(
+				`Cannot generate DELETE client for ${serviceName} ${serviceVersion} ${functionName}: PURISTA Hono DELETE endpoints do not accept request bodies. Move input to path or query parameters.`,
+			)
+		}
+	}
 
 	let payloadType = 'unknown'
 	const payloadTypeName = `${typeNamePrefix}PayloadType`

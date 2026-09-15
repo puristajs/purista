@@ -52,7 +52,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/use-cases': {
 		title: 'Use Cases | AI Harness | PURISTA',
-		description: 'Production AI patterns — from RAG and triage to human review gates, parallel agents, and living wikis.',
+		description: 'Production AI patterns — from RAG and triage to governed tool approvals, parallel agents, and living wikis.',
 		accent: 'coral',
 	},
 	'harness/architecture': {
@@ -62,7 +62,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/security': {
 		title: 'Security & Production Readiness | AI Harness | PURISTA',
-		description: 'Sandboxed execution, human review gates, content privacy, and the full production checklist.',
+		description: 'Sandboxed execution, application-owned review workflows, content privacy, and the production checklist.',
 		accent: 'blue',
 	},
 	'harness/observability': {
@@ -78,7 +78,7 @@ const landingPages: Record<string, PageMeta> = {
 	'harness/testing': {
 		title: 'Testing | AI Harness | PURISTA',
 		description:
-			'Test AI Harness applications without calling external model providers: fake providers, contracts, streams, and review gates.',
+			'Test AI Harness applications without calling external model providers: fake providers, contracts, streams, and governance decisions.',
 		accent: 'blue',
 	},
 	'harness/evaluations': {
@@ -89,7 +89,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/memory': {
 		title: 'Memory | AI Harness | PURISTA',
-		description: 'Agent memory scopes, the memory facade, sandbox defaults, TTL, search, and custom MemoryAdapter implementations.',
+		description: 'Agent memory scopes, the memory facade, local defaults, durable engines, TTL, semantic recall, and custom MemoryEngine implementations.',
 		accent: 'coral',
 	},
 	'harness/adapters': {
@@ -160,7 +160,8 @@ for (const section of handbookSections) {
 		if (card.items) {
 			for (const item of card.items) {
 				const slug = item.id.split('/').pop()!
-				setPage(`handbook/${section.id}/${card.id}/${slug}`, {
+				const route = item.href ?? `/handbook/${section.id}/${card.id}/${slug}`
+				setPage(route, {
 					title: item.title,
 					description: card.description,
 					accent: 'mint',
@@ -214,18 +215,24 @@ export const { getStaticPaths, GET } = await OGImageRoute({
 			side: 'inline-start',
 		},
 		padding: 64,
+		fonts: [
+			'../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff',
+			'../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff',
+		],
 		font: {
 			title: {
 				color: [255, 252, 242],
 				size: 56,
 				weight: 'Bold',
 				lineHeight: 1.08,
+				families: ['Inter'],
 			},
 			description: {
 				color: [214, 220, 226],
 				size: 28,
 				weight: 'Normal',
 				lineHeight: 1.3,
+				families: ['Inter'],
 			},
 		},
 		format: 'PNG',

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PURISTA Tutorial Maintainer"
+  short_description: "Build clear tutorials with runnable Framework examples"
+  default_prompt: "Use $purista-tutorial-maintainer to create or maintain this PURISTA tutorial and its runnable example."

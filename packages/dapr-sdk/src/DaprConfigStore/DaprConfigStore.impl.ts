@@ -25,15 +25,21 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 	 * @param config - Store name, logger and Dapr sidecar client settings.
 	 */
 	constructor(config?: StoreBaseConfig<DaprConfigStoreConfig>) {
-		super(config?.configStoreName ?? 'DaprConfigStore', { ...config })
-		const logger = this.logger
-		const conf = {
+		const storeConfig = {
 			configStoreName: 'configStore',
-			logger,
 			...config,
+		}
+
+		super(storeConfig.configStoreName, storeConfig)
+		const logger = this.logger
+		const clientConfig = {
+			...getDefaultClientConfig(),
+			...config?.clientConfig,
+		}
+		const conf = {
+			...storeConfig,
 			clientConfig: {
-				...getDefaultClientConfig(),
-				...config?.clientConfig,
+				...clientConfig,
 			},
 		}
 

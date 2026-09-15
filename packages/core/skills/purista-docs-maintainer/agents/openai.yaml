@@ -1,0 +1,4 @@
+interface:
+  display_name: "PURISTA Docs Maintainer"
+  short_description: "Maintain the PURISTA website and handbook"
+  default_prompt: "Use $purista-docs-maintainer to audit and improve this PURISTA documentation area."

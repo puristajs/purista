@@ -1,0 +1,105 @@
+---
+title: Run the deterministic demo
+description: Exercise the real Knowledge services, guards, pgvector repository, Hono endpoints, and stream with fake models.
+order: 221
+kind: lesson
+status: published
+---
+
+Create a credential-free demo entry point. It exercises the retrieval flow with deterministic data so a learner can observe the core behavior without an LLM key.
+
+```ts title="src/demo.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { Pool } from 'pg'
+import { z } from 'zod'
+import { createKnowledgeApplication } from './createKnowledgeApplication.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
+
+const dimensions = 1_536
+const vector = Array.from({ length: dimensions }, (_, index) => (index === 0 ? 1 : 0))
+const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
+
+async function resetScriptedFixture(databaseUrl: string) {
+	const pool = new Pool({ connectionString: databaseUrl, max: 1 })
+	try {
+		await pool.query(
+			`DELETE FROM knowledge_documents
+			 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+			['tenant-example', 'customer-help', 'transfer-guide'],
+		)
+	} finally {
+		await pool.end()
+	}
+}
+
+async function main() {
+	const logger = initLogger()
+	const databaseUrl = process.env.DATABASE_URL?.trim()
+	if (!databaseUrl) throw new Error('DATABASE_URL is required. Copy .env.example and start Docker Compose.')
+	await resetScriptedFixture(databaseUrl)
+	const provider = new FakeModelProvider({ strict: true })
+	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
+	provider.enqueueTextStream([
+		{
+			kind: 'tool_call',
+			call: {
+				id: 'search-1',
+				name: 'searchKnowledge',
+				arguments: {
+					collectionId: 'customer-help',
+					query: 'How long can an international transfer remain pending?',
+					limit: 4,
+				},
+			},
+		},
+		{ kind: 'finish', usage, finishReason: 'tool_calls' },
+	])
+	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
+	provider.enqueueTextStream([
+		{ kind: 'delta', text: 'Up to two business days ' },
+		{ kind: 'delta', text: '[transfer-guide#0].' },
+		{ kind: 'finish', usage, finishReason: 'stop' },
+	])
+	const stateStore = initDefaultStateStore({ logger })
+	const repository = new PgKnowledgeRepository(databaseUrl, dimensions)
+	const application = await createKnowledgeApplication(logger, {
+		stateStore,
+		repository,
+		models: {
+			answering: { provider, model: 'scripted-chat' },
+			embedding: { provider, model: 'scripted-embedding' },
+		},
+		embeddingDimensions: dimensions,
+	})
+	const port = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(65_535)
+		.parse(process.env.PORT ?? 3000)
+	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
+	gracefulShutdown(logger, [
+		application.http.prepareDestroy(),
+		createNodeHttpListener(server),
+		application.http,
+		application.knowledge,
+		application.identity,
+		application.repository,
+		application.stateStore,
+		{ name: 'Harness storage', destroy: async () => application.harnessStorage.close?.() },
+		application.eventBridge,
+	])
+	logger.info({ port }, 'Scripted RAG demo started; ingest once, then ask the suggested question')
+}
+
+main().catch((error: unknown) => {
+	process.stderr.write(`${error instanceof Error ? error.message : 'RAG demo could not start.'}\n`)
+	process.exit(1)
+})
+```
+Check your work: Run `npm run demo`. The terminal prints the deterministic retrieval result.
+
+Continue with [Test ingestion and retrieval](../../testing/test-rag/).

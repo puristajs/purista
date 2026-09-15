@@ -1,0 +1,59 @@
+---
+title: Pause a workflow for human review
+description: Return a typed tool-approval interruption, authorize a reviewer, resume the same durable run, and freeze a card once.
+order: 250
+kind: chapter
+group: ai
+status: published
+---
+
+A support request sometimes needs a person to approve a sensitive action. In
+this chapter, the Support service asks to freeze a card. A model proposes the
+service-owned tool, Harness pauses with a typed approval interruption, and a
+reviewer later approves or rejects that exact run.
+
+```text title="Human-review execution path"
+request command
+  -> request business guard
+  -> typed mounted workflow client
+  -> approval-required agent tool
+  -> typed tool-approval interruption
+
+decision command
+  -> reviewer business guard
+  -> resume the same durable run
+  -> approved Support host tool
+  -> guarded Transaction freeze command, once
+```
+
+The interruption is ordinary data. It is not a server error and it is not a
+custom browser protocol. The request command returns `waiting` with the run
+and approval identifiers that the decision command needs. Harness storage owns
+the durable run. The Support review store owns the business request and the
+reviewer decision. Transaction owns the card freeze.
+
+Authentication establishes the trusted tenant and principal on the message.
+Support guards decide who may request or review a card freeze. Transaction has
+its own guard before it changes a card. A prompt and a Skill never make those
+decisions.
+
+Follow the pages in order:
+
+1. [Scaffold the project](./setup/scaffold/).
+2. [Define the review contracts](./build/model-review/).
+3. [Store review state and identity](./build/persist-decision/).
+4. [Define Support resources and authorization](./build/authorize-workflow/).
+5. [Protect the Transaction effect](./build/protect-effect/).
+6. [Compose the agent and durable workflow](./build/define-workflow/).
+7. [Request a review](./build/request-review/).
+8. [Resume an approved or rejected run](./build/approve-resume/).
+9. [Compose the runtime](./build/compose-runtime/).
+10. [Run the example](./build/run-application/).
+11. [Test the workflow](./testing/test-workflow/).
+12. [Test command boundaries](./testing/test-commands/).
+13. [Test the routed review](./testing/test-review/).
+
+The complete runnable project is in
+`examples/banking/chapters/human-review-workflow`.
+
+Start with [Scaffold the human-review project](./setup/scaffold/).

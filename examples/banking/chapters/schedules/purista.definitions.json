@@ -1,0 +1,732 @@
+{
+  "version": "3.2.4",
+  "services": {
+    "Reporting": {
+      "1": {
+        "description": "Generate background reports",
+        "deprecated": false,
+        "commands": {
+          "requestStatement": {
+            "commandName": "requestStatement",
+            "commandDescription": "Accept statement generation",
+            "eventBridgeConfig": {
+              "durable": false,
+              "autoacknowledge": true,
+              "shared": true
+            },
+            "schedules": [],
+            "metadata": {
+              "expose": {
+                "contentTypeRequest": "application/json",
+                "contentEncodingRequest": "utf-8",
+                "contentTypeResponse": "application/json",
+                "contentEncodingResponse": "utf-8",
+                "inputPayload": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "accountId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "transactionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "accountId",
+                    "transactionId"
+                  ],
+                  "additionalProperties": false
+                },
+                "parameter": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false
+                },
+                "outputPayload": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "queueName": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "scheduledAt": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "queueName"
+                  ],
+                  "additionalProperties": false
+                },
+                "deprecated": false,
+                "http": {
+                  "method": "POST",
+                  "path": "reports/statements",
+                  "mode": "async",
+                  "openApi": {
+                    "description": "Accept statement generation",
+                    "summary": "requestStatement",
+                    "isSecure": true,
+                    "query": [],
+                    "tags": [],
+                    "additionalStatusCodes": [
+                      202
+                    ],
+                    "operationId": "requestStatement"
+                  }
+                }
+              }
+            },
+            "hooks": {
+              "beforeGuard": {},
+              "afterGuard": {}
+            },
+            "invokes": {},
+            "streamInvokes": {},
+            "emitList": {},
+            "queueInvokes": {
+              "generateStatement": {
+                "payloadSchema": {
+                  "def": {
+                    "type": "object",
+                    "shape": {
+                      "accountId": {
+                        "def": {
+                          "type": "string",
+                          "checks": [
+                            {},
+                            {}
+                          ]
+                        },
+                        "type": "string",
+                        "format": null,
+                        "minLength": 1,
+                        "maxLength": null
+                      },
+                      "transactionId": {
+                        "def": {
+                          "type": "string",
+                          "format": "uuid",
+                          "check": "string_format",
+                          "abort": false,
+                          "pattern": {}
+                        },
+                        "type": "string",
+                        "format": "uuid",
+                        "minLength": null,
+                        "maxLength": null
+                      }
+                    },
+                    "catchall": {
+                      "def": {
+                        "type": "never"
+                      },
+                      "type": "never"
+                    }
+                  },
+                  "type": "object"
+                },
+                "parameterSchema": {
+                  "def": {
+                    "type": "object",
+                    "shape": {}
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "getStatementStatus": {
+            "commandName": "getStatementStatus",
+            "commandDescription": "Read one statement job result",
+            "eventBridgeConfig": {
+              "durable": false,
+              "autoacknowledge": true,
+              "shared": true
+            },
+            "schedules": [],
+            "metadata": {
+              "expose": {
+                "contentTypeRequest": "application/json",
+                "contentEncodingRequest": "utf-8",
+                "contentTypeResponse": "application/json",
+                "contentEncodingResponse": "utf-8",
+                "inputPayload": {
+                  "type": "null"
+                },
+                "parameter": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "jobId"
+                  ],
+                  "additionalProperties": false
+                },
+                "outputPayload": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "failed",
+                        "cancelled",
+                        "dead-lettered",
+                        "progress"
+                      ]
+                    },
+                    "statement": {
+                      "type": "object",
+                      "properties": {
+                        "accountId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "transactionId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "amountCents": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "direction": {
+                          "type": "string",
+                          "enum": [
+                            "credit",
+                            "debit"
+                          ]
+                        },
+                        "counterparty": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 80
+                        },
+                        "generatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "accountId",
+                        "transactionId",
+                        "amountCents",
+                        "direction",
+                        "counterparty",
+                        "generatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "deprecated": false,
+                "http": {
+                  "method": "GET",
+                  "path": "reports/statements/:jobId",
+                  "mode": "sync",
+                  "openApi": {
+                    "description": "Read one statement job result",
+                    "summary": "getStatementStatus",
+                    "isSecure": true,
+                    "query": [],
+                    "tags": [],
+                    "additionalStatusCodes": [],
+                    "operationId": "getStatementStatus"
+                  }
+                }
+              }
+            },
+            "hooks": {
+              "beforeGuard": {},
+              "afterGuard": {}
+            },
+            "invokes": {},
+            "streamInvokes": {},
+            "emitList": {},
+            "queueInvokes": {}
+          },
+          "triggerDailyStatement": {
+            "commandName": "triggerDailyStatement",
+            "commandDescription": "Emit one daily statement occurrence",
+            "eventBridgeConfig": {
+              "durable": false,
+              "autoacknowledge": true,
+              "shared": true
+            },
+            "schedules": [],
+            "metadata": {
+              "expose": {
+                "contentTypeRequest": "application/json",
+                "contentEncodingRequest": "utf-8",
+                "contentTypeResponse": "application/json",
+                "contentEncodingResponse": "utf-8",
+                "inputPayload": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "scheduledFor": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "accountId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "transactionId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "scheduledFor",
+                    "accountId",
+                    "transactionId"
+                  ],
+                  "additionalProperties": false
+                },
+                "parameter": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false
+                },
+                "outputPayload": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "occurrenceId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "occurrenceId"
+                  ],
+                  "additionalProperties": false
+                },
+                "deprecated": false,
+                "http": {
+                  "method": "POST",
+                  "path": "reports/statements/daily-trigger",
+                  "mode": "sync",
+                  "openApi": {
+                    "description": "Emit one daily statement occurrence",
+                    "summary": "triggerDailyStatement",
+                    "isSecure": true,
+                    "query": [],
+                    "tags": [],
+                    "additionalStatusCodes": [],
+                    "operationId": "triggerDailyStatement"
+                  }
+                }
+              }
+            },
+            "hooks": {
+              "beforeGuard": {},
+              "afterGuard": {}
+            },
+            "invokes": {},
+            "streamInvokes": {},
+            "emitList": {
+              "reporting.daily-statement.due.v1": {
+                "def": {
+                  "type": "object",
+                  "shape": {
+                    "id": {
+                      "def": {
+                        "type": "string",
+                        "checks": [
+                          {},
+                          {}
+                        ]
+                      },
+                      "type": "string",
+                      "format": null,
+                      "minLength": 1,
+                      "maxLength": null
+                    },
+                    "scheduledFor": {
+                      "def": {
+                        "type": "string",
+                        "format": "datetime",
+                        "check": "string_format",
+                        "offset": false,
+                        "local": false,
+                        "precision": null,
+                        "pattern": {}
+                      },
+                      "type": "string",
+                      "format": "datetime",
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "accountId": {
+                      "def": {
+                        "type": "string",
+                        "checks": [
+                          {},
+                          {}
+                        ]
+                      },
+                      "type": "string",
+                      "format": null,
+                      "minLength": 1,
+                      "maxLength": null
+                    },
+                    "transactionId": {
+                      "def": {
+                        "type": "string",
+                        "format": "uuid",
+                        "check": "string_format",
+                        "abort": false,
+                        "pattern": {}
+                      },
+                      "type": "string",
+                      "format": "uuid",
+                      "minLength": null,
+                      "maxLength": null
+                    }
+                  },
+                  "catchall": {
+                    "def": {
+                      "type": "never"
+                    },
+                    "type": "never"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "queueInvokes": {}
+          }
+        },
+        "subscriptions": {},
+        "streams": {},
+        "queues": {
+          "generateStatement": {
+            "queueName": "generateStatement",
+            "description": "Generate one transaction statement",
+            "payloadSchema": {
+              "def": {
+                "type": "object",
+                "shape": {
+                  "accountId": {
+                    "def": {
+                      "type": "string",
+                      "checks": [
+                        {},
+                        {}
+                      ]
+                    },
+                    "type": "string",
+                    "format": null,
+                    "minLength": 1,
+                    "maxLength": null
+                  },
+                  "transactionId": {
+                    "def": {
+                      "type": "string",
+                      "format": "uuid",
+                      "check": "string_format",
+                      "abort": false,
+                      "pattern": {}
+                    },
+                    "type": "string",
+                    "format": "uuid",
+                    "minLength": null,
+                    "maxLength": null
+                  }
+                },
+                "catchall": {
+                  "def": {
+                    "type": "never"
+                  },
+                  "type": "never"
+                }
+              },
+              "type": "object"
+            },
+            "parameterSchema": {
+              "def": {
+                "type": "object",
+                "shape": {}
+              },
+              "type": "object"
+            },
+            "lifecycle": {
+              "visibilityTimeoutMs": 900000,
+              "maxLeaseExtensions": 3,
+              "heartbeatIntervalMs": 300000,
+              "retryWindowMs": 86400000,
+              "autoHeartbeat": true,
+              "maxAttempts": 3,
+              "poisonMessageFailureThreshold": 0,
+              "poisonMessageAction": "none",
+              "retryStrategy": {
+                "initialDelayMs": 1000,
+                "maxDelayMs": 120000,
+                "multiplier": 2,
+                "jitterFactor": 0.25
+              }
+            },
+            "resultPolicy": {
+              "delivery": "required",
+              "eventId": "jobIdAndStatus",
+              "mode": "state",
+              "ttlMs": 900000
+            },
+            "schedules": [],
+            "tags": [],
+            "deprecated": false,
+            "queueBridgeConfig": {
+              "prefetch": 1,
+              "orderingGuarantee": "fifo"
+            },
+            "workers": []
+          }
+        },
+        "queueWorkers": {
+          "Build one transaction statement": {
+            "name": "Build one transaction statement",
+            "queueName": "generateStatement",
+            "mode": "continuous",
+            "maxParallelHandlers": 1,
+            "beforeGuards": {},
+            "afterGuards": {},
+            "invokes": {
+              "Transaction": {
+                "1": {
+                  "getTransaction": {
+                    "outputSchema": {
+                      "def": {
+                        "type": "object",
+                        "shape": {
+                          "amountCents": {
+                            "def": {
+                              "type": "number",
+                              "checks": [
+                                {
+                                  "def": {
+                                    "type": "number",
+                                    "check": "number_format",
+                                    "abort": false,
+                                    "format": "safeint"
+                                  },
+                                  "type": "number",
+                                  "minValue": -9007199254740991,
+                                  "maxValue": 9007199254740991,
+                                  "isInt": true,
+                                  "isFinite": true,
+                                  "format": "safeint"
+                                },
+                                {}
+                              ]
+                            },
+                            "type": "number",
+                            "minValue": 0,
+                            "maxValue": 9007199254740991,
+                            "isInt": true,
+                            "isFinite": true,
+                            "format": "safeint"
+                          },
+                          "direction": {
+                            "def": {
+                              "type": "enum",
+                              "entries": {
+                                "credit": "credit",
+                                "debit": "debit"
+                              }
+                            },
+                            "type": "enum",
+                            "enum": {
+                              "credit": "credit",
+                              "debit": "debit"
+                            },
+                            "options": [
+                              "credit",
+                              "debit"
+                            ]
+                          },
+                          "counterparty": {
+                            "def": {
+                              "type": "string",
+                              "checks": [
+                                {},
+                                {},
+                                {}
+                              ]
+                            },
+                            "type": "string",
+                            "format": null,
+                            "minLength": 2,
+                            "maxLength": 80
+                          },
+                          "reference": {
+                            "def": {
+                              "type": "optional",
+                              "innerType": {
+                                "def": {
+                                  "type": "string",
+                                  "checks": [
+                                    {},
+                                    {},
+                                    {}
+                                  ]
+                                },
+                                "type": "string",
+                                "format": null,
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "type": "optional"
+                          },
+                          "transactionId": {
+                            "def": {
+                              "type": "string",
+                              "format": "uuid",
+                              "check": "string_format",
+                              "abort": false,
+                              "pattern": {}
+                            },
+                            "type": "string",
+                            "format": "uuid",
+                            "minLength": null,
+                            "maxLength": null
+                          },
+                          "recordedAt": {
+                            "def": {
+                              "type": "string",
+                              "format": "datetime",
+                              "check": "string_format",
+                              "offset": false,
+                              "local": false,
+                              "precision": null,
+                              "pattern": {}
+                            },
+                            "type": "string",
+                            "format": "datetime",
+                            "minLength": null,
+                            "maxLength": null
+                          }
+                        },
+                        "catchall": {
+                          "def": {
+                            "type": "never"
+                          },
+                          "type": "never"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "payloadSchema": {
+                      "def": {
+                        "type": "undefined"
+                      },
+                      "type": "undefined"
+                    },
+                    "parameterSchema": {
+                      "def": {
+                        "type": "object",
+                        "shape": {
+                          "transactionId": {
+                            "def": {
+                              "type": "string",
+                              "format": "uuid",
+                              "check": "string_format",
+                              "abort": false,
+                              "pattern": {}
+                            },
+                            "type": "string",
+                            "format": "uuid",
+                            "minLength": null,
+                            "maxLength": null
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "streamInvokes": {},
+            "emitList": {},
+            "queueInvokes": {},
+            "agentInvokes": []
+          }
+        },
+        "schedules": {
+          "dailyStatement": {
+            "name": "dailyStatement",
+            "description": "Emit one daily statement occurrence",
+            "targetKind": "event",
+            "targetName": "reporting.daily-statement.due.v1",
+            "expression": {
+              "kind": "cron",
+              "value": "0 6 * * *"
+            },
+            "timezone": "Europe/Berlin",
+            "concurrencyPolicy": "forbid",
+            "missedRunPolicy": "skip",
+            "idempotencyKey": "event.id",
+            "enabledByDefault": false,
+            "targetServiceName": "Reporting",
+            "targetServiceVersion": "1"
+          }
+        },
+        "eventToQueueBindings": [
+          {
+            "eventName": "reporting.daily-statement.due.v1",
+            "queueName": "generateStatement",
+            "idempotencyMode": "advisory",
+            "idempotencyKey": "eventField",
+            "onEnqueueFailure": {
+              "reason": "daily_statement_enqueue_failed",
+              "delayMs": 250
+            }
+          }
+        ]
+      }
+    }
+  }
+}

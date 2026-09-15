@@ -1,6 +1,6 @@
 {
 	"name": "@purista/nats-queue-bridge",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "Queue bridge implementation backed by NATS JetStream",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -38,7 +38,7 @@
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
-		"@purista/core": "*",
+		"@purista/core": "^4.0.0",
 		"nats": "^2.29.3"
 	},
 	"peerDependenciesMeta": {},

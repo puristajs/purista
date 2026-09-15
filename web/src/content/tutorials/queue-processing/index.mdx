@@ -1,0 +1,38 @@
+---
+title: Process work with queues
+description: Accept background work, process it with a PURISTA worker, and retrieve a small stored result.
+order: 14
+kind: chapter
+group: services
+status: published
+---
+
+Use a queue when a caller needs an immediate acceptance receipt while the work
+continues independently. PURISTA separates the producer, queue contract,
+QueueBridge, worker, retry policy, and result storage.
+
+This chapter adds the narrow `Reporting` service. It creates one short statement
+for an existing synthetic transaction. The statement keeps the result visible;
+report formatting is outside this lesson.
+
+```text title="The queue boundary"
+protected HTTP command
+  -> business account guard
+  -> typed queue receipt (202 Accepted)
+  -> QueueBridge lease
+  -> worker guard
+  -> Transaction command invocation
+  -> StateStore-backed operational result
+  -> protected status command
+```
+
+Build the capability in this order:
+
+1. [Generate the queue and first worker](/tutorials/queue-processing/build/generate/).
+2. [Enqueue trusted work from a command](/tutorials/queue-processing/build/enqueue/).
+3. [Implement the worker and result lookup](/tutorials/queue-processing/build/work/).
+4. [Test settlement, retry, dead letters, and HTTP](/tutorials/queue-processing/testing/test-queue/).
+
+The chapter starts from Sessions so authentication is already available.
+`Reporting` owns report jobs and result status. `Transaction` still owns
+transaction reads. Example Bank remains only the application fixture.

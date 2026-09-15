@@ -170,6 +170,7 @@ describe('openapi helpers', () => {
 						mode: 'stream',
 						protocol: 'custom-event-stream',
 						documentationUrl: 'https://example.com/stream-events',
+						responseHeaders: { 'x-stream-protocol': 'v1' },
 					},
 					openApi: {
 						isSecure: false,
@@ -185,6 +186,7 @@ describe('openapi helpers', () => {
 		const endpoint = spec.paths?.['/api/v1/stream']?.post
 		const okResponse = endpoint?.responses?.['200'] as {
 			content?: Record<string, { schema?: Record<string, unknown>; [key: string]: unknown }>
+			headers?: Record<string, unknown>
 		}
 
 		expect(endpoint?.requestBody).toBeDefined()
@@ -195,6 +197,9 @@ describe('openapi helpers', () => {
 		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol-docs']).toBe(
 			'https://example.com/stream-events',
 		)
+		expect(okResponse.headers?.['x-stream-protocol']).toMatchObject({
+			schema: { type: 'string', const: 'v1' },
+		})
 	})
 
 	it('adds PURISTA operation extensions and 202 schema for async endpoints', () => {

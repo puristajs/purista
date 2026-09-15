@@ -25,6 +25,8 @@ export default defineConfig({
 		},
 		include: ['**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 		exclude: [
+			'**/banking/chapters/**',
+			'**/banking/baselines/**',
 			...configDefaults.exclude,
 			'**/test/**',
 			'**/node_modules/**',

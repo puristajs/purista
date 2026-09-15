@@ -24,6 +24,8 @@ node_modules/
 
 temp
 build
+!web/src/content/tutorials/**/build/
+!web/src/content/tutorials/**/build/**
 
 lab
 

@@ -1,0 +1,144 @@
+---
+title: Define a service-owned host tool
+description: Define a service-owned Harness tool that calls a guarded PURISTA command and protect the mounted agent.
+order: 234
+kind: lesson
+status: published
+---
+
+The Support service owns the Harness agent and its host tool. The tool
+definition is attached to the agent, while `ServiceBuilder.defineTool(...)`
+supplies PURISTA resources and an address-first command call.
+
+```text title="Service-owned Harness definition and PURISTA binding"
+Support Harness definition       Support service builder
+--------------------------       ----------------------
+agent tool reference        ->   service-owned host tool
+answerTransactionQuestion   ->   mounted EventBridge target
+lookupTransaction           ->   Transaction / 1 / getTransactionSummary
+```
+
+## Declare the Support resource
+
+Create the business policy port used by the outer command and the mounted agent
+guard. The concrete policy is injected when the service starts.
+
+```ts title="src/service/support/v1/SupportResources.ts" write
+export interface SupportQuestionPolicy {
+	canAsk(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			accountId: string
+			transactionId: string
+		}>,
+	): Promise<boolean>
+}
+```
+Register that port on the Support service builder.
+
+```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
+import { ServiceBuilder } from '@purista/core'
+import type { SupportQuestionPolicy } from './SupportResources.js'
+
+export const supportV1ServiceBuilder = new ServiceBuilder({
+	serviceName: 'Support',
+	serviceVersion: '1',
+	serviceDescription: 'Owns support conversations and support automation',
+}).defineResource<'supportQuestionPolicy', SupportQuestionPolicy>()
+```
+## Keep identity and authorization server-side
+
+The model may propose account and transaction ids, but it cannot supply trusted
+tenant or principal identity. Derive the session id from the trusted message and
+use the policy before model or database work starts.
+
+```ts title="src/service/support/v1/requireSupportQuestion.ts" write
+import { createHash } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
+import type { SupportQuestionPolicy } from './SupportResources.js'
+
+export async function requireSupportQuestion(
+	policy: SupportQuestionPolicy,
+	input: Readonly<{
+		tenantId?: string
+		principalId?: string
+		accountId: string
+		transactionId: string
+	}>,
+) {
+	if (!input.tenantId || !input.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	if (
+		!(await policy.canAsk({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			accountId: input.accountId,
+			transactionId: input.transactionId,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This transaction question is not allowed')
+	}
+}
+
+export function supportQuestionSessionId(
+	identity: Readonly<{ tenantId?: string; principalId?: string }>,
+	questionId: string,
+) {
+	if (!identity.tenantId || !identity.principalId)
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	const digest = createHash('sha256')
+		.update(JSON.stringify(['support-question-v1', identity.tenantId, identity.principalId, questionId]))
+		.digest('hex')
+	return `support-question:${digest}`
+}
+```
+## Define the service-owned host tool
+
+The model-facing output intentionally omits `tenantId`. The command still
+returns it so the Transaction after-guard can verify the record scope. Derive
+the public tool schema from the command schema instead of duplicating it.
+
+```ts title="src/service/support/v1/harness/tool/lookupTransaction/lookupTransactionTool.ts" write
+import {
+	getTransactionSummaryOutputSchema,
+	getTransactionSummaryParameterSchema,
+	getTransactionSummaryPayloadSchema,
+} from '../../../../../transaction/v1/command/getTransactionSummary/schema.js'
+import { supportV1ServiceBuilder } from '../../../supportV1ServiceBuilder.js'
+
+export const transactionSummaryForAgentSchema = getTransactionSummaryOutputSchema.omit({ tenantId: true })
+
+export const lookupTransactionTool = supportV1ServiceBuilder
+	.defineTool('lookupTransaction', {
+		description: 'Look up one transaction the current caller may read.',
+		input: getTransactionSummaryPayloadSchema,
+		output: transactionSummaryForAgentSchema,
+	})
+	.canInvoke(
+		'Transaction',
+		'1',
+		'getTransactionSummary',
+		getTransactionSummaryOutputSchema,
+		getTransactionSummaryPayloadSchema,
+		getTransactionSummaryParameterSchema,
+	)
+	.setHandler(async (context, input) => {
+		const { tenantId: _tenantId, ...summary } = await context.service.Transaction['1'].getTransactionSummary(input, {})
+		return summary
+	})
+```
+`.canInvoke(...)` declares the typed address-first capability. The resulting
+`context.service.Transaction['1'].getTransactionSummary(...)` call crosses
+EventBridge and carries the current trusted identity and trace. The handler
+never accepts identity from model input.
+
+Hosted tools require persistent Harness storage because a host-tool graph is
+durable. The next runtime page supplies a persistent adapter; this page only
+defines the service and tool contracts.
+
+```bash title="Verify the mounted tool contracts" replay="project"
+npm run build
+```
+
+Continue with [Define the agent and Harness mount policy](../declare-host-tool/).

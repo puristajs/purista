@@ -1,0 +1,29 @@
+---
+import type { SidebarItem } from '../../lib/sidebar'
+
+interface Props { items: SidebarItem[]; currentId: string; depth?: number }
+const { items, currentId, depth = 0 } = Astro.props
+const normalized = currentId.replace(/\/index$/, '')
+const active = (item: SidebarItem) => item.id === normalized
+const containsCurrent = (item: SidebarItem): boolean =>
+  active(item) || normalized.startsWith(`${item.id}/`) || (item.items?.some(containsCurrent) ?? false)
+---
+
+<ul class:list={['space-y-1', { 'ml-3 border-l border-[var(--color-line)] pl-3 mt-1': depth > 0 }]}>
+  {items.map(item => (
+    <li>
+      {item.kind === 'sectionHeader' ? (
+        <p class="pt-4 pb-2 px-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-subtle)]">{item.title}</p>
+      ) : item.items?.length ? (
+        <details open={containsCurrent(item)}>
+          <summary class="cursor-pointer py-1 text-sm leading-snug text-[var(--color-fg-muted)]">
+            <a href={item.href} aria-current={active(item) ? 'page' : undefined} class:list={['hover:text-[var(--color-found)]', { 'font-semibold text-[var(--color-found)]': active(item), 'text-[var(--color-fg-strong)]': containsCurrent(item) && !active(item) }]}>{item.title}</a>
+          </summary>
+          <Astro.self items={item.items} currentId={currentId} depth={depth + 1} />
+        </details>
+      ) : (
+        <a href={item.href} aria-current={active(item) ? 'page' : undefined} class:list={['block py-1 text-sm leading-snug hover:text-[var(--color-found)]', { 'font-semibold text-[var(--color-found)]': active(item), 'text-[var(--color-fg-muted)]': !active(item) }]}>{item.title}</a>
+      )}
+    </li>
+  ))}
+</ul>

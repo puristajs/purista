@@ -1,0 +1,85 @@
+---
+title: Run bounded work in parallel
+description: Use a workflow fan-out with stable call IDs, explicit limits, and a deterministic merge.
+order: 264
+kind: lesson
+status: published
+---
+
+The workflow is the only Harness root in this service. Its `agents` list allows the two child agents, and `agentCalls` limits the whole run to two calls with at most two active at once.
+
+```ts title="src/service/support/v1/harness/workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.ts" write
+import { defineWorkflow } from '@purista/harness'
+import { assessSupportRiskAgent } from '../../agent/assessSupportRisk/assessSupportRiskAgent.js'
+import { planSupportResponseAgent } from '../../agent/planSupportResponse/planSupportResponseAgent.js'
+import {
+	responsePlanSchema,
+	riskAssessmentSchema,
+	supportCaseAnalysisOutputSchema,
+	supportCaseInputSchema,
+} from '../../supportCaseSchemas.js'
+
+export const analyzeSupportCaseWorkflow = defineWorkflow('analyzeSupportCase', {
+	input: supportCaseInputSchema,
+	output: supportCaseAnalysisOutputSchema,
+	agents: [assessSupportRiskAgent, planSupportResponseAgent],
+	agentCalls: { maxCalls: 2, maxParallel: 2 },
+	handler: async (context) => {
+		const results = await context.fanOut(
+			['risk', 'response'],
+			async (focus) =>
+				focus === 'risk'
+					? context.agents.assessSupportRisk.run(context.input, { callId: 'assess-risk' })
+					: context.agents.planSupportResponse.run(context.input, { callId: 'plan-response' }),
+			{ concurrency: 2 },
+		)
+
+		return {
+			caseId: context.input.caseId,
+			risk: riskAssessmentSchema.parse(results[0]),
+			response: responsePlanSchema.parse(results[1]),
+		}
+	},
+})
+```
+`context.fanOut` preserves the input order in its result array. The stable call IDs make each child call identifiable. The response agent may finish first, but `results[0]` is still the risk result and `results[1]` is still the response result. Parsing both values again makes the merge boundary explicit.
+
+Add only the workflow to the service Harness. The mounted target gets the same case authorization check as the wrapper command.
+
+```ts title="src/service/support/v1/harness/supportHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import { requireSupportCaseAnalysis } from '../requireSupportCaseAnalysis.js'
+import type { SupportCasePolicy } from '../SupportResources.js'
+import { supportV1ServiceBuilder } from '../supportV1ServiceBuilder.js'
+import { analyzeSupportCaseWorkflow } from './workflow/analyzeSupportCase/analyzeSupportCaseWorkflow.js'
+
+export const supportHarness = defineHarness({ name: 'supportParallelAnalysis', revision: 'v1' }).addWorkflow(
+	analyzeSupportCaseWorkflow,
+)
+
+export const supportHarnessPolicy = supportV1ServiceBuilder.defineHarnessPolicy(supportHarness, {
+	workflows: {
+		analyzeSupportCase: {
+			beforeGuards: {
+				caseAccess: async (
+					context: HarnessBusinessGuardContext<{ supportCasePolicy: SupportCasePolicy }>,
+					input: z.output<typeof analyzeSupportCaseWorkflow.contract.input>,
+				) =>
+					requireSupportCaseAnalysis(context.resources.supportCasePolicy, {
+						...context.identity,
+						caseId: input.caseId,
+					}),
+			},
+		},
+	},
+})
+```
+The child agents have no mounted target entries, so they are not published as PURISTA targets. They remain available only inside the workflow.
+
+```bash title="Check the bounded workflow and mount policy" replay="project"
+npm run build
+```
+
+Continue with [Invoke the workflow from a PURISTA command](../invoke-workflow/).

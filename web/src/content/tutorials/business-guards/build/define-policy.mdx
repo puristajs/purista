@@ -1,0 +1,508 @@
+---
+title: Define a small account policy
+description: Add an injectable business policy and account scope to transaction records.
+order: 81
+kind: lesson
+status: published
+---
+
+Authentication and authorization answer different questions:
+
+- `Identity` authenticates the username and creates a session.
+- Hono resolves that session and supplies trusted `principalId` and `tenantId`
+  metadata.
+- `Transaction` authorizes an action for a requested account.
+
+We will use two account actions: `read` and `record`. The local policy is a
+small fixture, but its interface is a normal PURISTA resource. A production
+adapter could read the same decision from another database or policy service.
+
+Create the policy beside the service that owns the decision.
+
+```ts title="src/service/transaction/v1/AccountAccessPolicy.ts" write
+export type AccountAction = 'read' | 'record'
+
+export type AccountAccessRequest = {
+	accountId: string
+	action: AccountAction
+	principalId?: string
+	tenantId?: string
+}
+
+export interface AccountAccessPolicy {
+	isAllowed(request: AccountAccessRequest): boolean
+}
+
+type AccountRule = {
+	tenantId: string
+	permissions: Readonly<Record<string, readonly AccountAction[]>>
+}
+
+const accountRules: Readonly<Record<string, AccountRule>> = Object.freeze({
+	'account-operating': {
+		tenantId: 'tenant-example',
+		permissions: {
+			'principal-alex': ['read', 'record'],
+			'principal-sam': ['read'],
+		},
+	},
+	'account-review': {
+		tenantId: 'tenant-example',
+		permissions: {
+			'principal-sam': ['read', 'record'],
+		},
+	},
+})
+
+export const localAccountAccessPolicy: AccountAccessPolicy = {
+	isAllowed({ accountId, action, principalId, tenantId }) {
+		const rule = accountRules[accountId]
+		if (!rule || !principalId || !tenantId || rule.tenantId !== tenantId) return false
+		return rule.permissions[principalId]?.includes(action) ?? false
+	},
+}
+```
+
+The fixture contains both allow and deny results. Sam is authenticated and may
+read `account-operating`, but the same principal may not record there. Alex is
+authenticated and may use `account-operating`, but has no access to
+`account-review`. This is business authorization, not a check that a user
+exists.
+
+Declare the policy as a second `Transaction` resource. PURISTA now includes it
+in the typed context of every Transaction command.
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
+import { generalTransactionServiceInfo } from '../generalTransactionServiceInfo.js'
+import type { AccountAccessPolicy } from './AccountAccessPolicy.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionServiceV1ConfigSchema } from './transactionServiceConfig.js'
+
+export const transactionServiceInfo = {
+	serviceVersion: '1',
+	...generalTransactionServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const transactionV1ServiceBuilder = new ServiceBuilder(transactionServiceInfo)
+	.setConfigSchema(transactionServiceV1ConfigSchema)
+	.defineResource<'transactionRepository', TransactionRepository>()
+	.defineResource<'accountAccessPolicy', AccountAccessPolicy>()
+```
+
+The account and tenant are stored with each transaction. They are server-owned
+scope fields. The caller still supplies only the transaction details.
+
+```ts title="src/service/transaction/v1/transaction.ts" write
+import { z } from 'zod'
+
+export const createTransactionSchema = z.strictObject({
+	amountCents: z.number().int().positive(),
+	direction: z.enum(['credit', 'debit']),
+	counterparty: z.string().trim().min(2).max(80),
+	reference: z.string().trim().min(1).max(120).optional(),
+})
+
+export const transactionSchema = createTransactionSchema.extend({
+	accountId: z.string().trim().min(1),
+	tenantId: z.string().trim().min(1),
+	transactionId: z.uuid(),
+	recordedAt: z.iso.datetime(),
+})
+
+export type CreateTransaction = z.input<typeof createTransactionSchema>
+export type Transaction = z.output<typeof transactionSchema>
+export type StoreTransaction = CreateTransaction & Pick<Transaction, 'accountId' | 'tenantId'>
+```
+
+Update the repository contract so the handler must pass the trusted scope when
+it saves a transaction.
+
+```ts title="src/service/transaction/v1/TransactionRepository.ts" write
+import type { StoreTransaction, Transaction } from './transaction.js'
+
+export interface TransactionRepository {
+	save(input: StoreTransaction): Promise<Transaction>
+	findById(transactionId: string): Promise<Transaction | undefined>
+}
+```
+
+SQLite remains the owner of transaction records. StateStore is still used only
+for Identity sessions.
+
+```ts title="src/resources/SqliteTransactionRepository.ts" write
+import { randomUUID } from 'node:crypto'
+import { mkdirSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
+import type { StoreTransaction, Transaction } from '../service/transaction/v1/transaction.js'
+import { transactionSchema } from '../service/transaction/v1/transaction.js'
+import type { ManagedTransactionRepository } from './ManagedTransactionRepository.js'
+
+type TransactionRow = {
+	transaction_id: string
+	account_id: string
+	tenant_id: string
+	amount_cents: number
+	direction: string
+	counterparty: string
+	reference: string | null
+	recorded_at: string
+}
+
+export class SqliteTransactionRepository implements ManagedTransactionRepository {
+	readonly name = 'sqliteTransactionRepository' as const
+	readonly #database: DatabaseSync
+	#closed = false
+
+	constructor(filename = ':memory:') {
+		if (filename !== ':memory:') mkdirSync(dirname(filename), { recursive: true })
+		this.#database = new DatabaseSync(filename)
+		this.#database.exec(`
+			CREATE TABLE IF NOT EXISTS transactions (
+				transaction_id TEXT PRIMARY KEY,
+				account_id TEXT NOT NULL,
+				tenant_id TEXT NOT NULL,
+				amount_cents INTEGER NOT NULL CHECK (amount_cents > 0),
+				direction TEXT NOT NULL CHECK (direction IN ('credit', 'debit')),
+				counterparty TEXT NOT NULL,
+				reference TEXT,
+				recorded_at TEXT NOT NULL
+			)
+		`)
+		const columns = new Set(
+			(this.#database.prepare('PRAGMA table_info(transactions)').all() as Array<{ name: string }>)
+				.map(column => column.name),
+		)
+		if (!columns.has('account_id')) {
+			this.#database.exec("ALTER TABLE transactions ADD COLUMN account_id TEXT NOT NULL DEFAULT 'account-operating'")
+		}
+		if (!columns.has('tenant_id')) {
+			this.#database.exec("ALTER TABLE transactions ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'tenant-example'")
+		}
+	}
+
+	async save(input: StoreTransaction) {
+		const transaction = transactionSchema.parse({
+			...input,
+			transactionId: randomUUID(),
+			recordedAt: new Date().toISOString(),
+		})
+		this.#database.prepare(`
+			INSERT INTO transactions (
+				transaction_id, account_id, tenant_id, amount_cents, direction,
+				counterparty, reference, recorded_at
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`).run(
+			transaction.transactionId,
+			transaction.accountId,
+			transaction.tenantId,
+			transaction.amountCents,
+			transaction.direction,
+			transaction.counterparty,
+			transaction.reference ?? null,
+			transaction.recordedAt,
+		)
+		return transaction
+	}
+
+	async findById(transactionId: string) {
+		const row = this.#database.prepare(`
+			SELECT transaction_id, account_id, tenant_id, amount_cents, direction,
+				counterparty, reference, recorded_at
+			FROM transactions
+			WHERE transaction_id = ?
+		`).get(transactionId) as TransactionRow | undefined
+		if (!row) return undefined
+		return transactionSchema.parse({
+			transactionId: row.transaction_id,
+			accountId: row.account_id,
+			tenantId: row.tenant_id,
+			amountCents: row.amount_cents,
+			direction: row.direction,
+			counterparty: row.counterparty,
+			reference: row.reference ?? undefined,
+			recordedAt: row.recorded_at,
+		})
+	}
+
+	async destroy() {
+		if (this.#closed) return
+		this.#database.close()
+		this.#closed = true
+	}
+}
+```
+
+Inject the local policy at the application composition root. The service does
+not import the fixture directly, so a test can replace it with a small fake.
+
+```ts title="src/application.ts" write
+import { initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import {
+	localIdentityProvider,
+	type LocalIdentityProvider,
+} from './service/identity/v1/LocalIdentityProvider.js'
+import { identityV1Service } from './service/identity/v1/identityV1Service.js'
+import {
+	localAccountAccessPolicy,
+	type AccountAccessPolicy,
+} from './service/transaction/v1/AccountAccessPolicy.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: ManagedTransactionRepository = new SqliteTransactionRepository(':memory:'),
+	identityProvider: LocalIdentityProvider = localIdentityProvider,
+	identityStateStore: StateStore = initDefaultStateStore({ logger }),
+	accountAccessPolicy: AccountAccessPolicy = localAccountAccessPolicy,
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const identity = await identityV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
+		resources: { identityProvider },
+		stateStore: identityStateStore,
+	})
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository, accountAccessPolicy },
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank API', version: '1.0.0' },
+				components: {
+					securitySchemes: {
+						demoBearer: { type: 'http', scheme: 'bearer' },
+					},
+				},
+			},
+		},
+	})
+
+	http.setProtectMiddleware(createSessionProtectMiddleware(http))
+	await bankProfile.start()
+	await identity.start()
+	await transaction.start()
+	http.registerService(bankProfile, identity, transaction)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return { eventBridge, bankProfile, identity, identityStateStore, transaction, transactionRepository, http }
+}
+```
+
+Add a second valid local user so we can observe an authorization denial after
+authentication succeeds.
+
+```ts title="src/service/identity/v1/LocalIdentityProvider.ts" write
+export type LocalIdentity = {
+	principalId: string
+	tenantId: string
+	displayName: string
+}
+
+export interface LocalIdentityProvider {
+	authenticate(username: string, password: string): Promise<LocalIdentity | undefined>
+}
+
+const identities: Readonly<Record<string, LocalIdentity>> = {
+	'alex@example.test': {
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		displayName: 'Alex Example',
+	},
+	'sam@example.test': {
+		principalId: 'principal-sam',
+		tenantId: 'tenant-example',
+		displayName: 'Sam Example',
+	},
+}
+
+export const localIdentityProvider: LocalIdentityProvider = {
+	async authenticate(username, password) {
+		if (password !== 'demo-password') return undefined
+		return identities[username]
+	},
+}
+```
+
+Test the pure policy before adding it to command execution.
+
+```ts title="src/service/transaction/v1/AccountAccessPolicy.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { localAccountAccessPolicy } from './AccountAccessPolicy.js'
+
+const request = {
+	tenantId: 'tenant-example',
+	accountId: 'account-operating',
+} as const
+
+describe('localAccountAccessPolicy', () => {
+	test('allows Alex to read and record the operating account', () => {
+		expect(localAccountAccessPolicy.isAllowed({ ...request, principalId: 'principal-alex', action: 'read' })).toBe(true)
+		expect(localAccountAccessPolicy.isAllowed({ ...request, principalId: 'principal-alex', action: 'record' })).toBe(true)
+	})
+
+	test('allows Sam to read but denies recording on the operating account', () => {
+		expect(localAccountAccessPolicy.isAllowed({ ...request, principalId: 'principal-sam', action: 'read' })).toBe(true)
+		expect(localAccountAccessPolicy.isAllowed({ ...request, principalId: 'principal-sam', action: 'record' })).toBe(false)
+	})
+
+	test('denies an account outside the principal or tenant scope', () => {
+		expect(localAccountAccessPolicy.isAllowed({ ...request, accountId: 'account-review', principalId: 'principal-alex', action: 'read' })).toBe(false)
+		expect(localAccountAccessPolicy.isAllowed({ ...request, tenantId: 'tenant-other', principalId: 'principal-alex', action: 'read' })).toBe(false)
+	})
+})
+```
+
+Update the focused schema and SQLite tests for the new server-owned scope.
+
+```ts title="src/service/transaction/v1/transaction.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { createTransactionSchema, transactionSchema } from './transaction.js'
+
+const validInput = {
+	amountCents: 2599,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+	reference: 'Order 1042',
+}
+
+describe('transaction schemas', () => {
+	test('accepts caller-owned transaction input', () => {
+		expect(createTransactionSchema.parse(validInput)).toEqual(validInput)
+	})
+
+	test('rejects invalid cents and server-owned scope fields', () => {
+		expect(createTransactionSchema.safeParse({ ...validInput, amountCents: 0 }).success).toBe(false)
+		expect(createTransactionSchema.safeParse({ ...validInput, tenantId: 'tenant-other' }).success).toBe(false)
+	})
+
+	test('requires account, tenant, and record fields in a stored transaction', () => {
+		expect(transactionSchema.safeParse(validInput).success).toBe(false)
+	})
+})
+```
+
+```ts title="src/resources/SqliteTransactionRepository.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { SqliteTransactionRepository } from './SqliteTransactionRepository.js'
+
+describe('SqliteTransactionRepository', () => {
+	test('saves, reads, and misses account-scoped transactions', async () => {
+		const repository = new SqliteTransactionRepository(':memory:')
+		try {
+			const saved = await repository.save({
+				accountId: 'account-operating',
+				tenantId: 'tenant-example',
+				amountCents: 2599,
+				direction: 'debit',
+				counterparty: 'Northwind Books',
+			})
+			expect(await repository.findById(saved.transactionId)).toEqual(saved)
+			expect(await repository.findById(crypto.randomUUID())).toBeUndefined()
+		} finally {
+			await repository.destroy()
+		}
+	})
+})
+```
+
+The file-backed lifecycle test needs the same server-owned scope. It still
+proves that closing and reopening the application resource preserves data.
+
+```ts title="src/resources/SqliteTransactionRepository.lifecycle.test.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
+import { expect, test } from 'vitest'
+import { SqliteTransactionRepository } from './SqliteTransactionRepository.js'
+
+test('closes a file database and preserves its scoped transaction for the next connection', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'example-bank-sqlite-'))
+	const filename = join(directory, 'transactions.sqlite')
+	try {
+		const first = new SqliteTransactionRepository(filename)
+		const saved = await first.save({
+			accountId: 'account-operating',
+			tenantId: 'tenant-example',
+			amountCents: 2599,
+			direction: 'debit',
+			counterparty: 'Northwind Books',
+		})
+		await first.destroy()
+		await first.destroy()
+
+		const second = new SqliteTransactionRepository(filename)
+		try {
+			expect(await second.findById(saved.transactionId)).toEqual(saved)
+		} finally {
+			await second.destroy()
+		}
+	} finally {
+		await rm(directory, { recursive: true, force: true })
+	}
+})
+
+test('adds account scope to a database created by the earlier chapter', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'example-bank-sqlite-migration-'))
+	const filename = join(directory, 'transactions.sqlite')
+	const transactionId = '3bd00f72-8db0-4f39-875d-fd5e251a7f32'
+	try {
+		const legacy = new DatabaseSync(filename)
+		legacy.exec(`
+			CREATE TABLE transactions (
+				transaction_id TEXT PRIMARY KEY,
+				amount_cents INTEGER NOT NULL,
+				direction TEXT NOT NULL,
+				counterparty TEXT NOT NULL,
+				reference TEXT,
+				recorded_at TEXT NOT NULL
+			);
+			INSERT INTO transactions (
+				transaction_id, amount_cents, direction, counterparty, recorded_at
+			) VALUES (
+				'3bd00f72-8db0-4f39-875d-fd5e251a7f32', 2599, 'debit', 'Northwind Books', '2026-09-01T10:00:00.000Z'
+			);
+		`)
+		legacy.close()
+
+		const repository = new SqliteTransactionRepository(filename)
+		try {
+			expect(await repository.findById(transactionId)).toMatchObject({
+				accountId: 'account-operating',
+				tenantId: 'tenant-example',
+			})
+		} finally {
+			await repository.destroy()
+		}
+	} finally {
+		await rm(directory, { recursive: true, force: true })
+	}
+})
+```
+
+Run only the focused policy, schema, and repository tests. The command files
+still use the old contract; the next page changes them before the complete test
+suite runs.
+
+```bash title="Test the account policy and stored scope" replay="project"
+npx vitest run src/service/transaction/v1/AccountAccessPolicy.test.ts src/service/transaction/v1/transaction.test.ts src/resources/SqliteTransactionRepository.test.ts src/resources/SqliteTransactionRepository.lifecycle.test.ts
+```

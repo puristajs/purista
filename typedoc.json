@@ -44,7 +44,7 @@
 		]
 	},
 	"tsconfig": "tsconfig.typedoc.json",
-	"json": "web/src/generated/purista-api.json",
+	"json": "web/src/generated/purista-framework-api.json",
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,
 	"includeVersion": true,
@@ -52,7 +52,7 @@
 	"excludeExternals": true,
 	"exclude": [
 		"**/**/*.(test).ts",
-		"**/*+(index|.spec|.e2e|.test).ts",
+		"**/*+(.spec|.e2e|.test).ts",
 		"dist/**",
 		"lib/**",
 		"/examples/**/*",

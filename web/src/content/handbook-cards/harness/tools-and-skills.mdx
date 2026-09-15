@@ -1,0 +1,48 @@
+---
+title: Tools & Skills
+description: Give the model narrow typed tools and reviewed on-demand instructions.
+---
+
+A portable tool uses only Harness context and closure-injected application
+dependencies. The application still owns authentication, authorization,
+idempotency, and domain transactions.
+
+```ts title="Define a portable tool"
+import { builtInTools, defineAgent, defineHarness, defineSkill, defineTool } from '@purista/harness'
+import { z } from 'zod'
+
+const lookupOrder = defineTool('lookupOrder', {
+  description: 'Read an order visible to the authenticated application caller.',
+  input: z.object({ orderId: z.string().min(1) }),
+  output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+  handler: async (_context, input) => orderService.getPublicStatus(input.orderId),
+})
+
+const support = defineAgent('support', {
+	model: 'answering',
+  tools: [lookupOrder],
+  instructions: 'Use lookupOrder only when the customer supplied an order id.',
+})
+```
+
+A Skill is a reviewed directory. Its id is manifest-compatible kebab case; the
+directory must contain `SKILL.md`.
+
+```ts title="Attach a reviewed Skill and the read definition"
+const returnPolicy = defineSkill('return-policy', {
+  directory: new URL('./skills/return-policy/', import.meta.url),
+})
+
+const returnsAgent = defineAgent('returnsAgent', {
+	model: 'answering',
+  skills: [returnPolicy],
+  tools: [builtInTools.read, lookupOrder],
+  instructions: 'Read the return-policy Skill before answering return questions.',
+})
+const definition = defineHarness({ name: 'support' }).addAgent(returnsAgent)
+```
+
+`builtInTools.read` is a normal tool definition. Bind a sandbox with the needed
+filesystem capability at instance creation. Add MCP tools through
+`tools: [server.tools.toolId]`; keep MCP transport URLs, tokens, commands, and
+environment in runtime bindings.

@@ -1,0 +1,208 @@
+---
+title: Provide an explicit trigger
+description: Generate a protected command that validates and emits one fixed schedule occurrence.
+order: 152
+kind: lesson
+status: published
+---
+
+An external scheduler needs an explicit adapter into the application. For the
+local example, use a normal generated PURISTA command. Hono exposes the command
+from its builder metadata and applies the existing session protection.
+
+```bash title="Generate the schedule trigger command" replay="project"
+npm run add:command -- trigger-daily-statement \
+  --service reporting --service-version 1 \
+  --description "Emit one daily statement occurrence" --non-interactive
+```
+
+Reuse the occurrence schema as command input. A caller cannot add principal or
+tenant fields because the strict schema does not contain them.
+
+```ts title="src/service/reporting/v1/command/triggerDailyStatement/schema.ts" write
+import { z } from 'zod'
+import { dailyStatementOccurrenceSchema } from '../../schedule/dailyStatementOccurrence.js'
+
+export const reportingV1TriggerDailyStatementInputParameterSchema = z.object({})
+export const reportingV1TriggerDailyStatementInputPayloadSchema = dailyStatementOccurrenceSchema
+export const reportingV1TriggerDailyStatementOutputPayloadSchema = z.strictObject({
+	occurrenceId: z.string().trim().min(1),
+})
+```
+
+The command performs two Framework-level jobs. Its business guard authorizes
+the requested account using trusted message identity. Its handler emits the
+declared occurrence event. It does not call the worker or database directly.
+
+```ts title="src/service/reporting/v1/command/triggerDailyStatement/triggerDailyStatementCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { canGenerateStatement } from '../../reportAccess.js'
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import {
+	dailyStatementDueEventName,
+	dailyStatementOccurrenceSchema,
+} from '../../schedule/dailyStatementOccurrence.js'
+import {
+	reportingV1TriggerDailyStatementInputParameterSchema,
+	reportingV1TriggerDailyStatementInputPayloadSchema,
+	reportingV1TriggerDailyStatementOutputPayloadSchema,
+} from './schema.js'
+
+export const triggerDailyStatementCommandBuilder = reportingV1ServiceBuilder
+	.getCommandBuilder('triggerDailyStatement', 'Emit one daily statement occurrence')
+	.addPayloadSchema(reportingV1TriggerDailyStatementInputPayloadSchema)
+	.addParameterSchema(reportingV1TriggerDailyStatementInputParameterSchema)
+	.addOutputSchema(reportingV1TriggerDailyStatementOutputPayloadSchema)
+	.canEmit(dailyStatementDueEventName, dailyStatementOccurrenceSchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'reports/statements/daily-trigger')
+	.setBeforeGuardHooks({
+		accountMayRunDailyStatement: async function (context, payload) {
+			const allowed = canGenerateStatement({
+				tenantId: context.message.tenantId ?? '',
+				principalId: context.message.principalId ?? '',
+				accountId: payload.accountId,
+			})
+			if (!allowed) {
+				throw new HandledError(StatusCode.Forbidden, 'Daily statements are not allowed for this account')
+			}
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		await context.emit(dailyStatementDueEventName, payload)
+		return { occurrenceId: payload.id }
+	})
+```
+
+Register the generated command without changing application composition.
+
+```ts title="src/service/reporting/v1/reportingV1Service.ts" write
+import { getStatementStatusCommandBuilder } from './command/getStatementStatus/getStatementStatusCommandBuilder.js'
+import { requestStatementCommandBuilder } from './command/requestStatement/requestStatementCommandBuilder.js'
+import { triggerDailyStatementCommandBuilder } from './command/triggerDailyStatement/triggerDailyStatementCommandBuilder.js'
+import { generateStatementWorkerQueueWorkerBuilder } from './queue-worker/generateStatementWorker/generateStatementWorkerQueueWorkerBuilder.js'
+import { generateStatementQueueBuilder } from './queue/generateStatement/generateStatementQueueBuilder.js'
+import { reportingV1ServiceBuilder } from './reportingV1ServiceBuilder.js'
+import { dailyStatementSchedule } from './schedule/dailyStatementSchedule.js'
+
+type QueueDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueDefinition']>[number]
+type QueueWorkerDefinition = Parameters<typeof reportingV1ServiceBuilder['addQueueWorkerDefinition']>[number]
+
+const commandDefinitions: Parameters<typeof reportingV1ServiceBuilder['addCommandDefinition']>[0][] = [
+	requestStatementCommandBuilder.getDefinition(),
+	getStatementStatusCommandBuilder.getDefinition(),
+	triggerDailyStatementCommandBuilder.getDefinition(),
+]
+const subscriptionDefinitions: Parameters<typeof reportingV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof reportingV1ServiceBuilder['addStreamDefinition']>[0][] = []
+const queueDefinitions: QueueDefinition[] = [generateStatementQueueBuilder.getDefinition()]
+const queueWorkerDefinitions: QueueWorkerDefinition[] = [generateStatementWorkerQueueWorkerBuilder.getDefinition()]
+
+export const reportingV1Service = reportingV1ServiceBuilder
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)
+	.addStreamDefinition(...streamDefinitions)
+	.addQueueDefinition(...queueDefinitions)
+	.addQueueWorkerDefinition(...queueWorkerDefinitions)
+	.addScheduleDefinition(dailyStatementSchedule)
+```
+
+Test the business guard and event declaration with PURISTA helpers. A denied
+business action never calls the emitter.
+
+```ts title="src/service/reporting/v1/command/triggerDailyStatement/triggerDailyStatementCommandBuilder.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isHttpExposedServiceMeta,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, expect, test } from 'vitest'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { dailyStatementDueEventName } from '../../schedule/dailyStatementOccurrence.js'
+import { triggerDailyStatementCommandBuilder } from './triggerDailyStatementCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const occurrence = {
+	id: 'daily:2026-09-02:account-operating',
+	scheduledFor: '2026-09-02T04:00:00.000Z',
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+
+async function setup(principalId: string) {
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	const mocked = createCommandContextMock(triggerDailyStatementCommandBuilder, {
+		payload: occurrence,
+		parameter: {},
+		sandbox,
+	})
+	mocked.context.message = getCommandMessageMock({
+		tenantId: 'tenant-example',
+		principalId,
+		payload: { payload: occurrence, parameter: {} },
+	})
+	return { service, ...mocked }
+}
+
+test('declares one protected generated endpoint and one custom event', async () => {
+	const definition = await triggerDailyStatementCommandBuilder.getDefinition()
+	expect(isHttpExposedServiceMeta(definition.metadata)).toBe(true)
+	if (!isHttpExposedServiceMeta(definition.metadata)) throw new Error('Expected HTTP metadata')
+	expect(definition.metadata.expose.http).toMatchObject({
+		method: 'POST',
+		path: 'reports/statements/daily-trigger',
+		openApi: { isSecure: true },
+	})
+	expect(Object.keys(definition.emitList)).toEqual([dailyStatementDueEventName])
+})
+
+test('emits the validated fixed occurrence for an allowed account', async () => {
+	const fixture = await setup('principal-alex')
+	try {
+		const guard = safeBind(
+			triggerDailyStatementCommandBuilder.getBeforeGuardHook('accountMayRunDailyStatement'),
+			fixture.service,
+		)
+		await expect(guard(fixture.context, occurrence, {})).resolves.toBeUndefined()
+		const handler = safeBind(triggerDailyStatementCommandBuilder.getCommandFunction(), fixture.service)
+		await expect(handler(fixture.context, occurrence, {})).resolves.toEqual({ occurrenceId: occurrence.id })
+		expect(fixture.stubs.emit[dailyStatementDueEventName].calledOnceWith(
+			dailyStatementDueEventName,
+			occurrence,
+		)).toBe(true)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+
+test('denies the account action before the event is emitted', async () => {
+	const fixture = await setup('principal-other')
+	try {
+		const guard = safeBind(
+			triggerDailyStatementCommandBuilder.getBeforeGuardHook('accountMayRunDailyStatement'),
+			fixture.service,
+		)
+		await expect(guard(fixture.context, occurrence, {})).rejects.toMatchObject({ errorCode: 403 })
+		expect(fixture.stubs.emit[dailyStatementDueEventName].called).toBe(false)
+	} finally {
+		await fixture.service.destroy()
+	}
+})
+```
+
+```bash title="Test the explicit trigger command" replay="project"
+npx vitest run src/service/reporting/v1/command/triggerDailyStatement
+npm run build:server
+```
+
+The command is useful for local tests and for an HTTP-based scheduler adapter.
+It remains a normal PURISTA command: Hono supplies transport and
+authentication, while the guard makes the account-level business decision.

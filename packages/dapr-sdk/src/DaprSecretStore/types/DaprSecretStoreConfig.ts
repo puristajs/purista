@@ -12,7 +12,7 @@ export type DaprSecretStoreConfig = {
 	/**
 	 * Dapr sidecar client settings.
 	 */
-	clientConfig?: DaprClientConfig
+	clientConfig?: Partial<DaprClientConfig>
 
 	/**
 	 * Dapr secret store request metadata.

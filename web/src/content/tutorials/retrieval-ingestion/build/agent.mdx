@@ -1,0 +1,41 @@
+---
+title: Give the model a searchKnowledge tool
+description: Let the answer agent choose retrieval through a service owned host tool with a direct business guard.
+order: 208
+kind: lesson
+status: published
+---
+
+Create the answer agent. It can use the retrieval tool and returns a cited answer only from the knowledge matches it receives.
+
+```ts title="src/service/knowledge/v1/harness/agent/answerKnowledgeQuestion/answerKnowledgeQuestionAgent.ts" write
+import { defineAgent } from '@purista/harness'
+import { z } from 'zod'
+import { answerKnowledgeQuestionInputSchema } from '../../../schema.js'
+import { searchKnowledgeTool } from '../../tool/searchKnowledge/searchKnowledgeTool.js'
+
+export const answerKnowledgeQuestionAgent = defineAgent('answerKnowledgeQuestion', {
+	model: 'answering',
+	input: answerKnowledgeQuestionInputSchema,
+	output: z.string(),
+	instructions:
+		'Answer only from retrieved evidence. Cite sources as [documentId#chunkIndex]. If evidence is insufficient, say so.',
+	prompt: (input) => ({ role: 'user', content: `${input.question}\nCollection: ${input.collectionId}` }),
+	tools: [searchKnowledgeTool],
+	governance: ({ native, rule }) => ({
+		policies: [
+			native({
+				id: 'knowledgeAnswerApproval',
+				rules: [rule({ id: 'searchKnowledgeApproval', tools: ['searchKnowledge'], effect: 'require_approval' })],
+			}),
+		],
+	}),
+	durable: true,
+})
+```
+`answering` is the explicit purpose model alias. Runtime composition must bind
+that exact key under `ai.models`; Harness reserves no default alias.
+
+Check your work: Run `npm run test:rag-retrieval`. The agent test verifies the retrieval-backed answer path.
+
+Continue with [Expose the aggregate answer command](../answer-workflow/).

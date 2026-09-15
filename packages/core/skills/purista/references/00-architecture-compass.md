@@ -83,7 +83,7 @@ For enterprise-grade systems, compose small primitives:
 
 ### User-Facing Request With Side Effects
 1. Hono HTTP endpoint exposes a command.
-2. Command validates payload/parameter, checks guards, writes canonical state through resources.
+2. Command validates payload/parameter, checks business guards, writes canonical state through PURISTA stores or declared resources according to the required guarantees.
 3. Command emits a business event on success.
 4. Subscriptions react independently.
 5. Heavy reactions enqueue durable work.

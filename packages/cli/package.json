@@ -1,6 +1,6 @@
 {
 	"name": "@purista/cli",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "cli helper for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -12,7 +12,7 @@
 	"main": "./dist/api/index.js",
 	"type": "module",
 	"bin": {
-		"purista": "./dist/bin.js"
+		"purista": "dist/bin.js"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -28,6 +28,7 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
+		"@purista/harness": "^4.0.0",
 		"@types/minimist": "^1.2.5",
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
@@ -36,6 +37,7 @@
 		"type-fest": "^5.8.0"
 	},
 	"dependencies": {
+		"@purista/core": "^4.0.0",
 		"@inquirer/confirm": "^6.1.1",
 		"@inquirer/input": "^5.1.2",
 		"@inquirer/select": "^5.2.1",

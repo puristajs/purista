@@ -1,0 +1,81 @@
+---
+title: Mount and invoke the agent
+description: Expose one guarded wrapper command and one guarded mounted target.
+order: 284
+kind: lesson
+status: published
+---
+
+The agent definition stays in the Analysis service version. `runAnalyzeTransactions` is distinct from `analyzeTransactions`, so the wrapper cannot collide with the agent target. The command declares the remote address first and invokes the typed client.
+
+```ts title="src/service/analysis/v1/harness/analysisHarness.ts" write
+import type { HarnessBusinessGuardContext } from '@purista/core'
+import { defineHarness } from '@purista/harness'
+import type { z } from 'zod'
+import type { AnalysisPolicy } from '../AnalysisResources.js'
+import { analysisV1ServiceBuilder } from '../analysisV1ServiceBuilder.js'
+import { requireTransactionAnalysis } from '../requireTransactionAnalysis.js'
+import { analyzeTransactionsAgent } from './agent/analyzeTransactions/analyzeTransactionsAgent.js'
+
+export const analysisHarness = defineHarness({ name: 'transactionAnalysis', revision: 'v1' }).addAgent(
+	analyzeTransactionsAgent,
+)
+
+export const analysisHarnessPolicy = analysisV1ServiceBuilder.defineHarnessPolicy(analysisHarness, {
+	agents: {
+		analyzeTransactions: {
+			beforeGuards: {
+				analysisAccess: async (
+					context: HarnessBusinessGuardContext<{ analysisPolicy: AnalysisPolicy }>,
+					input: z.output<typeof analyzeTransactionsAgent.contract.input>,
+				) =>
+					requireTransactionAnalysis(context.resources.analysisPolicy, {
+						...context.identity,
+						analysisId: input.analysisId,
+					}),
+			},
+		},
+	},
+})
+```
+```ts title="src/service/analysis/v1/command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
+import { analyzeTransactionsAgent } from '../../harness/agent/analyzeTransactions/analyzeTransactionsAgent.js'
+import { analyzeTransactionsInputSchema, analyzeTransactionsOutputSchema } from '../../harness/analysisSchemas.js'
+import { requireTransactionAnalysis, transactionAnalysisSessionId } from '../../requireTransactionAnalysis.js'
+
+export const runAnalyzeTransactionsCommandBuilder = analysisV1ServiceBuilder
+	.getCommandBuilder('runAnalyzeTransactions', 'Run an isolated transaction analysis')
+	.addPayloadSchema(analyzeTransactionsInputSchema)
+	.addOutputSchema(analyzeTransactionsOutputSchema)
+	.canInvokeAgent(analysisV1ServiceBuilder.harnessTarget(analyzeTransactionsAgent.contract))
+	.setBeforeGuardHooks({
+		analysisAccess: async function (context, payload) {
+			await requireTransactionAnalysis(context.resources.analysisPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				analysisId: payload.analysisId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const tenantId = context.message.tenantId
+		const principalId = context.message.principalId
+		if (!tenantId || !principalId) throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+		const { outcome } = await context.agent.Analysis['1'][analyzeTransactionsAgent.contract.id].run(payload, {
+			sessionId: transactionAnalysisSessionId({ tenantId, principalId }, payload.analysisId),
+		})
+		return outcome.output
+	})
+```
+```ts title="src/service/analysis/v1/analysisV1Service.ts" write
+import { analysisV1ServiceBuilder } from './analysisV1ServiceBuilder.js'
+import { runAnalyzeTransactionsCommandBuilder } from './command/runAnalyzeTransactions/runAnalyzeTransactionsCommandBuilder.js'
+import { analysisHarness, analysisHarnessPolicy } from './harness/analysisHarness.js'
+
+export const analysisV1Service = analysisV1ServiceBuilder
+	.addCommandDefinition(runAnalyzeTransactionsCommandBuilder.getDefinition())
+	.mountHarness(analysisHarness, analysisHarnessPolicy)
+```
+The command guard protects the public entry point. The mounted policy independently protects the agent if another target reaches it. Continue with [Bind the runtime adapters](../compose-runtime/).

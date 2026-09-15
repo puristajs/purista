@@ -1,0 +1,164 @@
+---
+title: Guard returned account scope
+description: Recheck a loaded transaction before PURISTA returns it to the caller.
+order: 83
+kind: lesson
+status: published
+---
+
+The read before guard authorizes the account in the request path. The
+repository then loads a transaction by ID. A broken query or adapter must not
+return a transaction from another account or tenant.
+
+An after guard sees the validated handler result before PURISTA creates the
+success response. Add one named guard to compare the returned record with both
+the requested account and the trusted tenant.
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1GetTransactionInputParameterSchema,
+	transactionV1GetTransactionInputPayloadSchema,
+	transactionV1GetTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const getTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('getTransaction', 'Get a transaction by ID')
+	.addPayloadSchema(transactionV1GetTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1GetTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1GetTransactionOutputPayloadSchema)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/transactions/:transactionId')
+	.setBeforeGuardHooks({
+		accountMayRead: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'read',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setAfterGuardHooks({
+		returnedTransactionScope: async function (context, result, _payload, parameter) {
+			if (result.accountId !== parameter.accountId || result.tenantId !== context.message.tenantId) {
+				throw new HandledError(StatusCode.Forbidden, 'Account action is not allowed')
+			}
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: result.accountId,
+				action: 'read',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const transaction = await context.resources.transactionRepository.findById(parameter.transactionId)
+		if (!transaction) {
+			throw new HandledError(StatusCode.NotFound, 'Transaction not found', {
+				transactionId: parameter.transactionId,
+			})
+		}
+		return transaction
+	})
+```
+
+The output schema runs before this after guard, so `result` is a valid
+transaction. Schema validity alone cannot prove account access. The after guard
+adds that policy check.
+
+This command only reads data. An after guard runs after the handler and cannot
+undo handler effects. Use a before guard for authorization that must stop a
+write, as we did for `recordTransaction`.
+
+Test the after guard directly. The foreign transaction is schema-valid, but it
+belongs to another account. The guard must reject it.
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { localAccountAccessPolicy } from '../../AccountAccessPolicy.js'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionSchema } from '../../transaction.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import { getTransactionCommandBuilder } from './getTransactionCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const parameter = {
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+
+async function setup() {
+	const transactionRepository: TransactionRepository = {
+		save: sandbox.stub(),
+		findById: sandbox.stub(),
+	}
+	const resources = { transactionRepository, accountAccessPolicy: localAccountAccessPolicy }
+	const service = await transactionV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources,
+	})
+	const mocked = createCommandContextMock(getTransactionCommandBuilder, {
+		payload: undefined,
+		parameter,
+		resources,
+		sandbox,
+	})
+	mocked.context.message = getCommandMessageMock({
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		payload: { payload: undefined, parameter },
+	})
+	const hook = getTransactionCommandBuilder.getAfterGuardHook('returnedTransactionScope')
+	if (!hook) throw new Error('Expected returnedTransactionScope guard')
+	return { guard: safeBind(hook, service), context: mocked.context, service }
+}
+
+const transaction = transactionSchema.parse({
+	accountId: 'account-operating',
+	tenantId: 'tenant-example',
+	transactionId: parameter.transactionId,
+	amountCents: 2599,
+	direction: 'debit',
+	counterparty: 'Northwind Books',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+})
+
+describe('getTransaction after guard', () => {
+	test('accepts the requested account and trusted tenant', async () => {
+		const fixture = await setup()
+		try {
+			await expect(fixture.guard(fixture.context, transaction, undefined, parameter)).resolves.toBeUndefined()
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('denies a schema-valid transaction from another account', async () => {
+		const fixture = await setup()
+		try {
+			const foreign = transactionSchema.parse({ ...transaction, accountId: 'account-review' })
+			await expect(fixture.guard(fixture.context, foreign, undefined, parameter))
+				.rejects.toThrow('Account action is not allowed')
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})
+```
+
+```bash title="Test the returned account guard" replay="project"
+npx vitest run src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts
+```

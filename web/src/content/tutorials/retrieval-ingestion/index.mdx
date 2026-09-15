@@ -1,0 +1,60 @@
+---
+title: Build a complete RAG pipeline
+description: Build a service owned RAG feature with pgvector, model selected retrieval, protected commands, and an AI SDK stream.
+order: 200
+kind: chapter
+group: ai
+status: published
+---
+
+RAG means retrieval augmented generation. The application first stores a source as searchable chunks. Later, a model can choose a retrieval tool and answer from the matching chunks.
+
+This chapter teaches the PURISTA boundaries that make that path reviewable:
+
+```text title="Service owned RAG path"
+Identity StateStore -> opaque session -> ProtectMiddleware
+Knowledge command -> guard -> Knowledge service resource
+runIngestKnowledge -> ingestKnowledge workflow -> embeddings -> pgvector
+answerKnowledgeQuestion agent -> searchKnowledge host tool -> retrieveKnowledge workflow
+  -> queryKnowledgeRepository -> tenant scoped matches
+runAnswerKnowledgeQuestion / streamAnswerKnowledgeQuestion -> Hono
+```
+
+The Example Bank contributes one small help document. The framework concepts are the important part: schemas describe data, resources own external state, guards authorize business actions, and address first calls cross service boundaries through EventBridge.
+
+The required path is CLI first. Start with a published PURISTA project, replace the generated placeholders with the service owned source, run each focused check, and finish at the composed HTTP application. The optional React pages remain separate from this backend path.
+
+Follow the pages in order:
+
+1. [Scaffold the RAG project](./setup/scaffold/)
+2. [Define the RAG schemas](./build/configure-harness/)
+3. [Declare resources and business authorization](./build/access-policy/)
+4. [Build the ingestion workflow and command](./build/ingest/)
+5. [Start PostgreSQL with pgvector](./build/store/)
+6. [Implement the vector repository](./build/repository/)
+7. [Build retrieval workflows and commands](./build/retrieve/)
+8. [Give the model a searchKnowledge tool](./build/agent/)
+9. [Expose the aggregate answer command](./build/answer-workflow/)
+10. [Assemble one Knowledge Harness](./build/mount-harness/)
+11. [Expose the AI SDK UI Message Stream](./build/stream-ui/)
+12. [Store Identity sessions](./build/identity-sessions/)
+13. [Protect Hono endpoints](./build/authenticate-http/)
+14. [Compose the application](./build/compose-runtime/)
+15. [Serve static assets](./build/serve-ui/)
+16. [Run the live application](./build/run/)
+17. [Run the deterministic demo](./build/deterministic-demo/)
+18. [Test ingestion and retrieval](./testing/test-rag/)
+19. [Test model selected retrieval](./testing/test-agent/)
+20. [Test the aggregate answer command](./testing/test-workflow/)
+21. [Test the stream and authentication](./testing/test-stream-http/)
+22. [Test pgvector storage](./testing/test-storage/)
+
+The UI pages continue from the stream and authentication steps, but they are optional:
+
+- [Create the React application shell](./build/ui-shell/)
+- [Build the ingestion interface](./build/ingest-ui/)
+- [Build the standard chat interface](./build/ui/)
+- [Assemble login, ingestion, and chat](./build/assemble-ui/)
+- [Test the browser client](./testing/test-ui/)
+
+Start with [Scaffold the RAG project](./setup/scaffold/).

@@ -1,0 +1,23 @@
+---
+title: Serve a static React website
+description: Build a small React client, serve its production files through Hono, and keep application data in a PURISTA command.
+order: 30
+kind: chapter
+group: start
+status: published
+---
+
+This chapter adds a browser interface to the Hono application. React owns the
+presentation, Hono serves the built files, and `BankProfile` still owns the
+public profile data. The browser reads the same generated command endpoint that
+you tested in the previous chapter.
+
+The result is a read-only application shell. Login and transactions come later,
+after the course has introduced the Framework boundaries they need.
+
+## Build
+
+1. [Create the React client](/tutorials/static-website/build/create-ui/).
+2. [Serve the built files from Hono](/tutorials/static-website/build/serve-assets/).
+3. [Read the generated command endpoint](/tutorials/static-website/build/connect-read/).
+4. [Test the website and server together](/tutorials/static-website/testing/test-static/).

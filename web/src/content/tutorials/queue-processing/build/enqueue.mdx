@@ -1,0 +1,182 @@
+---
+title: Enqueue trusted work from a command
+description: Generate a protected producer command, add a business guard, and return a 202 queue receipt.
+order: 142
+kind: lesson
+status: published
+---
+
+A queue has no HTTP endpoint by itself. Generate a command that accepts the web
+request and declares permission to enqueue `generateStatement`.
+
+```bash title="Generate the producer command" replay="project"
+npm run add:command -- request-statement \
+  --service reporting --service-version 1 \
+  --description "Accept statement generation" --non-interactive
+```
+
+## Define the acceptance contract
+
+```ts title="src/service/reporting/v1/command/requestStatement/schema.ts" write
+import { z } from 'zod'
+
+export const reportingV1RequestStatementInputParameterSchema = z.object({})
+export const reportingV1RequestStatementInputPayloadSchema = z.strictObject({
+	accountId: z.string().trim().min(1),
+	transactionId: z.uuid(),
+})
+export const reportingV1RequestStatementOutputPayloadSchema = z.strictObject({
+	jobId: z.string().min(1),
+	queueName: z.string().min(1),
+	scheduledAt: z.number().int().nonnegative().optional(),
+})
+```
+
+The output is a queue receipt, not the finished statement. Hono maps a command
+with async endpoint metadata to `202 Accepted`.
+
+```ts title="src/service/reporting/v1/command/requestStatement/requestStatementCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { canGenerateStatement } from '../../reportAccess.js'
+import { reportingV1GenerateStatementQueueParameterSchema, reportingV1GenerateStatementQueuePayloadSchema } from '../../queue/generateStatement/schema.js'
+import { reportingV1ServiceBuilder } from '../../reportingV1ServiceBuilder.js'
+import {
+	reportingV1RequestStatementInputParameterSchema,
+	reportingV1RequestStatementInputPayloadSchema,
+	reportingV1RequestStatementOutputPayloadSchema,
+} from './schema.js'
+
+export const requestStatementCommandBuilder = reportingV1ServiceBuilder
+	.getCommandBuilder('requestStatement', 'Accept statement generation')
+	.addPayloadSchema(reportingV1RequestStatementInputPayloadSchema)
+	.addParameterSchema(reportingV1RequestStatementInputParameterSchema)
+	.addOutputSchema(reportingV1RequestStatementOutputPayloadSchema)
+	.canEnqueue(
+		'generateStatement',
+		reportingV1GenerateStatementQueuePayloadSchema,
+		reportingV1GenerateStatementQueueParameterSchema,
+	)
+	.exposeAsHttpEndpoint(
+		'POST', 'reports/statements', 'application/json', 'utf-8',
+		'application/json', 'utf-8', { mode: 'async' },
+	)
+	.setBeforeGuardHooks({
+		accountMayGenerateStatement: async function (context, payload) {
+			const allowed = canGenerateStatement({
+				tenantId: context.message.tenantId ?? '',
+				principalId: context.message.principalId ?? '',
+				accountId: payload.accountId,
+			})
+			if (!allowed) throw new HandledError(StatusCode.Forbidden, 'Statements are not allowed for this account')
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		return context.queue.enqueue.generateStatement(payload, {}, {
+			idempotencyKey: `${context.message.tenantId}:${payload.transactionId}`,
+			headers: {
+				'purista.tenantId': context.message.tenantId ?? '',
+				'purista.principalId': context.message.principalId ?? '',
+			},
+		})
+	})
+```
+
+`canEnqueue` gives the handler a typed `context.queue.enqueue.generateStatement`
+client and validates the job contract. The named guard authorizes an account
+action. It is separate from Hono authentication.
+
+The command copies tenant and principal from trusted message metadata into
+reserved queue headers. It never reads identity from the request body. Those
+headers let the worker recheck authorization and let PURISTA attach ownership
+to the stored result. The idempotency key is advisory with
+`DefaultQueueBridge`; it is not an exactly-once promise.
+
+```ts title="src/service/reporting/v1/command/requestStatement/requestStatementCommandBuilder.test.ts" write
+import {
+	createCommandContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isHttpExposedServiceMeta,
+	safeBind,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { reportingV1Service } from '../../reportingV1Service.js'
+import { requestStatementCommandBuilder } from './requestStatementCommandBuilder.js'
+
+const payload = {
+	accountId: 'account-operating',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+}
+
+test('declares a protected asynchronous HTTP command', async () => {
+	const definition = await requestStatementCommandBuilder.getDefinition()
+	expect(isHttpExposedServiceMeta(definition.metadata)).toBe(true)
+	if (!isHttpExposedServiceMeta(definition.metadata)) throw new Error('Expected HTTP metadata')
+	expect(definition.metadata.expose.http).toMatchObject({
+		method: 'POST', path: 'reports/statements', mode: 'async', openApi: { isSecure: true },
+	})
+})
+
+test('uses trusted message identity in queue metadata', async () => {
+	const sandbox = createSandbox()
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const { context, stubs } = createCommandContextMock(requestStatementCommandBuilder, {
+			payload, parameter: {}, sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example', principalId: 'principal-alex',
+			payload: { payload, parameter: {} },
+		})
+		stubs.enqueue.resolves({ jobId: 'job-1', queueName: 'generateStatement', scheduledAt: 1 })
+		const command = safeBind(requestStatementCommandBuilder.getCommandFunction(), service)
+		await expect(command(context, payload, {})).resolves.toEqual({
+			jobId: 'job-1', queueName: 'generateStatement', scheduledAt: 1,
+		})
+		expect(stubs.enqueue.calledOnceWith(
+			'generateStatement', payload, {},
+			sandbox.match({
+				idempotencyKey: `tenant-example:${payload.transactionId}`,
+				headers: {
+					'purista.tenantId': 'tenant-example',
+					'purista.principalId': 'principal-alex',
+				},
+			}),
+		)).toBe(true)
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+
+test('denies a valid user who may not request this account', async () => {
+	const sandbox = createSandbox()
+	const service = await reportingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const { context } = createCommandContextMock(requestStatementCommandBuilder, { payload, parameter: {}, sandbox })
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example', principalId: 'principal-other',
+			payload: { payload, parameter: {} },
+		})
+		const guard = safeBind(requestStatementCommandBuilder.getBeforeGuardHook('accountMayGenerateStatement'), service)
+		await expect(guard(context, payload, {})).rejects.toMatchObject({ errorCode: 403 })
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+The focused tests prove the async HTTP metadata, trusted queue headers, and a
+denied business action. The denied guard test never calls the handler.
+
+```bash title="Test the producer command" replay="project"
+npx vitest run src/service/reporting/v1/command/requestStatement
+npm run build:server
+```
