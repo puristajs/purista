@@ -25,7 +25,12 @@ import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
 import type { Schema } from '../schema/index.js'
 import { adaptHarnessTransportStream } from './dispatcher.js'
-import type { HarnessInvokeParameter } from './invokeTypes.js'
+import type {
+	HarnessEventBridgeInvokeParameter,
+	HarnessInvokeParameter,
+	HarnessResumeParameter,
+	HarnessTargetResume,
+} from './invokeTypes.js'
 import {
 	createHarnessQueueDeliveryEnvelope,
 	harnessQueueDeliveryEnvelopeSchema,
@@ -44,7 +49,19 @@ import {
 type TargetKind = AnyHarnessTargetContract['kind']
 type AnyTargetContract = AnyHarnessTargetContract
 type AnyQueuedLocalTargetReference = QueuedHarnessTargetReference<AnyTargetContract, string>
-export type HarnessInvocationSource = AnyTargetContract | AnyQueuedLocalTargetReference
+declare class ServiceBoundHarnessTargetAuthenticity {
+	private readonly serviceBound: true
+}
+export type ServiceBoundHarnessTargetReference<C extends AnyTargetContract> = C &
+	ServiceBoundHarnessTargetAuthenticity &
+	Readonly<{ address: Readonly<{ serviceName: string; serviceVersion: string; serviceTarget: C['id'] }> }>
+export type AddressedHarnessInvocationSource =
+	| AnyRemoteHarnessTargetContract
+	| ServiceBoundHarnessTargetReference<AnyTargetContract>
+export type HarnessInvocationSource =
+	| AnyTargetContract
+	| AnyQueuedLocalTargetReference
+	| ServiceBoundHarnessTargetReference<AnyTargetContract>
 
 export type HarnessInvocationContract<Source> =
 	Source extends QueuedHarnessTargetReference<infer C, string> ? C : Source extends AnyTargetContract ? Source : never
@@ -58,6 +75,23 @@ type HarnessInvocationRecord = Readonly<{
 
 const invocationDeclarations = new WeakMap<object, HarnessInvocationRecord>()
 const invocationBindings = new WeakMap<object, HarnessInvocationRecord & { exportDigest: `sha256:${string}` }>()
+const serviceBoundReferences = new WeakMap<object, HarnessInvocationRecord>()
+
+/** Bind an authentic local target to one service address before mount finalization. */
+export function createServiceBoundHarnessTargetReference<const C extends AnyTargetContract>(
+	target: C,
+	address: Readonly<{ serviceName: string; serviceVersion: string; serviceTarget: string }>,
+): ServiceBoundHarnessTargetReference<C> {
+	assertInvocationTargetDeclaration(target, address)
+	const boundAddress = Object.freeze({ ...address }) as Readonly<{
+		serviceName: string
+		serviceVersion: string
+		serviceTarget: C['id']
+	}>
+	const reference = Object.freeze({ ...target, address: boundAddress }) as ServiceBoundHarnessTargetReference<C>
+	serviceBoundReferences.set(reference, Object.freeze({ target, address: boundAddress, queueName: null }))
+	return reference
+}
 
 /** Framework-owned aggregate result carrying the stable public session identity. */
 export type HarnessTargetRunResult<C extends AnyTargetContract> = Readonly<{
@@ -92,8 +126,12 @@ export interface HarnessExecutionStream<C extends AnyTargetContract> extends Har
 }
 
 type DirectHarnessTargetClient<C extends AnyTargetContract> = Readonly<{
-	run(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter): Promise<HarnessTargetRunResult<C>>
-	stream(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter): Promise<HarnessExecutionStream<C>>
+	run(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter<C>): Promise<HarnessTargetRunResult<C>>
+	stream(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter<C>): Promise<HarnessExecutionStream<C>>
+	resume(resume: HarnessTargetResume<C>): Readonly<{
+		run(options?: HarnessResumeParameter<C>): Promise<HarnessTargetRunResult<C>>
+		stream(options?: HarnessResumeParameter<C>): Promise<HarnessExecutionStream<C>>
+	}>
 }>
 
 export type HarnessTargetClient<Source extends HarnessInvocationSource> = DirectHarnessTargetClient<
@@ -103,7 +141,7 @@ export type HarnessTargetClient<Source extends HarnessInvocationSource> = Direct
 		? Readonly<{
 				enqueue(
 					input: HarnessTargetInput<HarnessInvocationContract<Source>>,
-					parameter?: HarnessInvokeParameter,
+					parameter?: HarnessInvokeParameter<HarnessInvocationContract<Source>>,
 					options?: HarnessEnqueueOptions,
 				): Promise<HarnessTargetQueueEnqueueResult>
 			}>
@@ -136,7 +174,7 @@ export type HarnessInvocationClients<Invokes extends InvokeList, Kind extends Ta
 }
 
 /** Register aggregate and streaming capabilities for one exact Harness target. */
-export function registerHarnessInvocation<Source extends AnyRemoteHarnessTargetContract>(
+export function registerHarnessInvocation<Source extends AddressedHarnessInvocationSource>(
 	invokes: InvokeList,
 	streamInvokes: StreamInvokeList,
 	source: Source,
@@ -152,7 +190,7 @@ export function registerHarnessInvocation(
 	invokes: InvokeList,
 	streamInvokes: StreamInvokeList,
 	...args:
-		| readonly [source: AnyRemoteHarnessTargetContract]
+		| readonly [source: AddressedHarnessInvocationSource]
 		| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 ): { invokes: InvokeList; streamInvokes: StreamInvokeList } {
 	const resolved = resolveInvocationDeclaration(args)
@@ -209,18 +247,24 @@ export function registerHarnessInvocation(
 
 function resolveInvocationDeclaration(
 	args:
-		| readonly [source: AnyRemoteHarnessTargetContract]
+		| readonly [source: AddressedHarnessInvocationSource]
 		| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource],
 ): HarnessInvocationRecord {
 	if (args.length === 1) {
 		const source = args[0]
-		const remote = requireRemoteHarnessTargetContract(source)
-		return Object.freeze({
-			target: source,
-			address: remote.address,
-			queueName: remote.queueName,
-			...(remote.queueName === null ? {} : { queuePayloadSchema: source.input }),
-		})
+		if (isRemoteHarnessTargetContract(source)) {
+			const remote = requireRemoteHarnessTargetContract(source)
+			return Object.freeze({
+				target: source,
+				address: remote.address,
+				queueName: remote.queueName,
+				...(remote.queueName === null ? {} : { queuePayloadSchema: source.input }),
+			})
+		}
+		const bound = serviceBoundReferences.get(source)
+		if (!bound)
+			throw new UnhandledError(StatusCode.InternalServerError, 'Harness target reference is not service-bound.')
+		return bound
 	}
 
 	const [serviceName, serviceVersion, source] = args
@@ -453,22 +497,29 @@ export function createHarnessInvocationProxy<T>(
 				assertInvocationTargetDeclaration(declarationRecord.target, targetAddress, kind)
 				return declarationRecord
 			}
+			const run = async (input: unknown, options: HarnessEventBridgeInvokeParameter = {}) => {
+				const binding = requireTarget()
+				const prepared = prepareInvocation(options, binding.exportDigest)
+				const response = await invoke<unknown>(targetAddress, input, prepared.parameter, prepared.harness)
+				return await validateAggregateResponse(binding.target, response, prepared.sessionId, prepared.expectedRunId)
+			}
+			const stream = async (input: unknown, options: HarnessEventBridgeInvokeParameter = {}) => {
+				const binding = requireTarget()
+				const prepared = prepareInvocation(options, binding.exportDigest)
+				const raw = await openStream<
+					HarnessTargetExecutionEvent<typeof binding.target>,
+					HarnessTargetExecutionTerminalOutcome<typeof binding.target>
+				>(targetAddress, input, prepared.parameter, prepared.harness)
+				return toHarnessExecutionStream(raw, binding.target, prepared.sessionId, prepared.expectedRunId)
+			}
 			return Object.freeze({
-				run: async (input: unknown, options: HarnessInvokeParameter = {}) => {
-					const binding = requireTarget()
-					const prepared = prepareInvocation(options, binding.exportDigest)
-					const response = await invoke<unknown>(targetAddress, input, prepared.parameter, prepared.harness)
-					return await validateAggregateResponse(binding.target, response, prepared.sessionId, prepared.expectedRunId)
-				},
-				stream: async (input: unknown, options: HarnessInvokeParameter = {}) => {
-					const binding = requireTarget()
-					const prepared = prepareInvocation(options, binding.exportDigest)
-					const raw = await openStream<
-						HarnessTargetExecutionEvent<typeof binding.target>,
-						HarnessTargetExecutionTerminalOutcome<typeof binding.target>
-					>(targetAddress, input, prepared.parameter, prepared.harness)
-					return toHarnessExecutionStream(raw, binding.target, prepared.sessionId, prepared.expectedRunId)
-				},
+				run,
+				stream,
+				resume: (resume: HarnessTargetResume<AnyTargetContract>) =>
+					Object.freeze({
+						run: (options: HarnessResumeParameter = {}) => run(undefined, { ...options, resume } as never),
+						stream: (options: HarnessResumeParameter = {}) => stream(undefined, { ...options, resume } as never),
+					}),
 				...(queueName && enqueue
 					? {
 							enqueue: async (
@@ -567,7 +618,7 @@ function replaceInvocationDescriptor<T extends InvokeList | StreamInvokeList>(
 	} as T
 }
 
-function prepareInvocation(options: HarnessInvokeParameter, exportDigest: `sha256:${string}`) {
+function prepareInvocation(options: HarnessEventBridgeInvokeParameter, exportDigest: `sha256:${string}`) {
 	const { invocationId, sessionId, parameter } = prepareRootInvocation(options, false)
 	const harness: HarnessTransportEnvelope = Object.freeze({
 		contract: Object.freeze({ schemaVersion: 1 as const, exportDigest }),
@@ -577,7 +628,11 @@ function prepareInvocation(options: HarnessInvokeParameter, exportDigest: `sha25
 	return { expectedRunId, sessionId, parameter: Object.freeze(parameter), harness }
 }
 
-function prepareQueueInvocation(options: HarnessInvokeParameter, queueName: string, idempotencyKey?: string) {
+function prepareQueueInvocation(
+	options: HarnessEventBridgeInvokeParameter,
+	queueName: string,
+	idempotencyKey?: string,
+) {
 	return prepareRootInvocation(
 		options,
 		true,
@@ -586,7 +641,7 @@ function prepareQueueInvocation(options: HarnessInvokeParameter, queueName: stri
 }
 
 function prepareRootInvocation(
-	options: HarnessInvokeParameter,
+	options: HarnessEventBridgeInvokeParameter,
 	includeSession: boolean,
 	defaultInvocationId?: CorrelationId,
 ) {

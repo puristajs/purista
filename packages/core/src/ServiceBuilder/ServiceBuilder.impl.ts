@@ -1,7 +1,12 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { HarnessDefinition, Schema as HarnessSchema, ModelSchema } from '@purista/harness'
+import type {
+	AnyHarnessTargetContract,
+	HarnessDefinition,
+	Schema as HarnessSchema,
+	ModelSchema,
+} from '@purista/harness'
 import { assertHarnessHostToolOwner, createHostOwnerToken } from '@purista/harness/integrator'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
@@ -56,7 +61,10 @@ import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.imp
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
-import { finalizeRegisteredHarnessInvocations } from '../HarnessMount/invocation.js'
+import {
+	createServiceBoundHarnessTargetReference,
+	finalizeRegisteredHarnessInvocations,
+} from '../HarnessMount/invocation.js'
 import { createMountedHarnessTargetProjections } from '../HarnessMount/projection.js'
 import { createMountedHarnessQueueDefinitions } from '../HarnessMount/queue.js'
 import { canonicalHarnessJson } from '../HarnessMount/remoteTargetContract.js'
@@ -312,6 +320,30 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			projections,
 		}) as unknown as HarnessMount<any, any>
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
+	}
+
+	/**
+	 * Bind an authentic target contract to this builder's service address. Pass
+	 * the reference to a one-argument
+	 * `canInvokeAgent(...)` or `canInvokeWorkflow(...)` declaration.
+	 *
+	 * The helper is available before service composition. Mount finalization
+	 * rejects a target that is not an explicit root of this service's Harness.
+	 */
+	harnessTarget<const C extends AnyHarnessTargetContract>(target: C) {
+		return createServiceBoundHarnessTargetReference(target, {
+			serviceName: this.info.serviceName,
+			serviceVersion: this.info.serviceVersion,
+			serviceTarget: target.id,
+		})
+	}
+
+	/** Preserve resource-aware contextual typing for one Harness mount policy. */
+	defineHarnessPolicy<const D>(
+		_definition: D & HarnessDefinitionBoundary<D>,
+		policy: HarnessDefinitionMountPolicy<D, S['Resources']>,
+	): HarnessDefinitionMountPolicy<D, S['Resources']> {
+		return policy
 	}
 
 	/**
@@ -666,8 +698,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			const start = service.start.bind(service)
 			service.start = async () => {
 				try {
-					await runtime.start()
 					await start()
+					await runtime.start()
 				} catch (error) {
 					await cleanupAndRethrow(error, () => service.destroy(), logger, 'service startup')
 				}
@@ -1032,21 +1064,17 @@ function snapshotHarnessMountPolicy<D, Resources extends Record<string, unknown>
 ): HarnessDefinitionMountPolicy<D, Resources> | undefined {
 	if (policy === undefined) return undefined
 	return snapshotPolicyRecord(policy, 'Harness mount policy', (key, value) =>
-		key === 'targets' && value !== undefined
-			? snapshotPolicyRecord(value, 'Harness mount target policy', (_kind, group) =>
-					group === undefined
-						? undefined
-						: snapshotPolicyRecord(group, 'Harness target policy group', (_target, targetPolicy) =>
-								snapshotPolicyRecord(targetPolicy, 'Harness target policy', (field, fieldValue) => {
-									if ((field === 'beforeGuards' || field === 'afterGuards') && fieldValue !== undefined) {
-										return snapshotPolicyRecord(fieldValue, `Harness target policy ${field}`)
-									}
-									if (field === 'durableResume' && fieldValue !== undefined) {
-										return snapshotPolicyRecord(fieldValue, 'Harness durable resume policy')
-									}
-									return fieldValue
-								}),
-							),
+		(key === 'agents' || key === 'workflows') && value !== undefined
+			? snapshotPolicyRecord(value, 'Harness target policy group', (_target, targetPolicy) =>
+					snapshotPolicyRecord(targetPolicy, 'Harness target policy', (field, fieldValue) => {
+						if ((field === 'beforeGuards' || field === 'afterGuards') && fieldValue !== undefined) {
+							return snapshotPolicyRecord(fieldValue, `Harness target policy ${field}`)
+						}
+						if (field === 'durableResume' && fieldValue !== undefined) {
+							return snapshotPolicyRecord(fieldValue, 'Harness durable resume policy')
+						}
+						return fieldValue
+					}),
 				)
 			: value,
 	) as HarnessDefinitionMountPolicy<D, Resources>

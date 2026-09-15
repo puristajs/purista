@@ -35,7 +35,7 @@ import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamMessage } from '../core/types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import { createEventBridgeHarnessTargetDispatcher } from './dispatcher.js'
-import type { HarnessInvokeParameter } from './invokeTypes.js'
+import type { HarnessEventBridgeInvokeParameter } from './invokeTypes.js'
 import { canonicalHarnessJson } from './remoteTargetContract.js'
 import type {
 	HarnessBusinessGuardContext,
@@ -334,8 +334,8 @@ export class HarnessMountRuntime {
 		if (projection.visibility !== 'root') return undefined
 		return (
 			projection.target.kind === 'agent'
-				? this.mount.policy?.targets?.agents?.[projection.target.id]
-				: this.mount.policy?.targets?.workflows?.[projection.target.id]
+				? this.mount.policy?.agents?.[projection.target.id]
+				: this.mount.policy?.workflows?.[projection.target.id]
 		) as TargetPolicy | undefined
 	}
 
@@ -456,7 +456,7 @@ export class HarnessMountRuntime {
 					...(projection.policy?.durableResume === 'stored-run-owner'
 						? { resumeIdentity: 'stored-run-owner' as const }
 						: {}),
-				},
+				} as never,
 				hostInvocation: host,
 				authorize,
 			}
@@ -468,7 +468,7 @@ export class HarnessMountRuntime {
 			target: projection.target,
 			wireInput,
 			input,
-			invokeOptions: options,
+			invokeOptions: options as never,
 			hostInvocation: host,
 			authorize,
 		}
@@ -780,7 +780,7 @@ function parseEnvelope(value: unknown): HarnessTransportEnvelope {
 	return value as HarnessTransportEnvelope
 }
 
-function parseParameter(value: unknown, nested: boolean): HarnessInvokeParameter {
+function parseParameter(value: unknown, nested: boolean): HarnessEventBridgeInvokeParameter {
 	if (!plainFields(value, [], nested ? ['resume'] : ['idempotencyKey', 'timeoutMs', 'metadata', 'durable', 'resume']))
 		throw badRequest('Harness invocation parameters are invalid.')
 	if (Object.hasOwn(value, 'resume') && (value.resume === undefined || Object.hasOwn(value, 'idempotencyKey')))
@@ -790,7 +790,7 @@ function parseParameter(value: unknown, nested: boolean): HarnessInvokeParameter
 		(typeof value.timeoutMs !== 'number' || !Number.isSafeInteger(value.timeoutMs) || value.timeoutMs < 0)
 	)
 		throw badRequest('Harness invocation timeout is invalid.')
-	return value as HarnessInvokeParameter
+	return value as HarnessEventBridgeInvokeParameter
 }
 
 function createHostInvocation(message: Command | StreamOpenRequest, idempotencyKey?: string): PuristaHostInvocation {

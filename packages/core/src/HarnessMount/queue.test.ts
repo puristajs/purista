@@ -220,7 +220,7 @@ describe('createMountedHarnessQueueDefinitions', () => {
 		const copied = queuedMount()
 		const copiedMount = {
 			...copied.mount,
-			policy: { targets: { agents: { answer: { queue: { ...copied.binding } } } } },
+			policy: { agents: { answer: { queue: { ...copied.binding } } } },
 		}
 		expect(() => createMountedHarnessQueueDefinitions(copiedMount as never)).toThrow(
 			'Harness target queue binding is not the exact factory-created binding for this contract.',
@@ -247,7 +247,7 @@ describe('Service handler Harness enqueue integration', () => {
 			serviceName: 'Support',
 			serviceVersion: '1',
 			serviceDescription: 'Concurrent queued export',
-		}).mountHarness(definition, { targets: { agents: { answer: { queue: fixture.binding } } } })
+		}).mountHarness(definition, { agents: { answer: { queue: fixture.binding } } })
 		const [first, second] = await Promise.all([builder.getFullServiceDefinition(), builder.getFullServiceDefinition()])
 		expect(first.queues).toHaveLength(1)
 		expect(second.queueWorkers).toHaveLength(1)
@@ -314,7 +314,7 @@ function queuedMount() {
 	const queue = new QueueDefinitionBuilder('support.answer', 'Queue support answers')
 	const worker = new QueueWorkerBuilder('support.answer', 'support-answer-worker').setMaxParallelHandlers(4)
 	const binding = defineHarnessQueueBinding(root.contract, queue, worker)
-	const policy = { targets: { agents: { answer: { queue: binding } } } }
+	const policy = { agents: { answer: { queue: binding } } }
 	const projections = createMountedHarnessTargetProjections(definition, {
 		serviceName: 'Support',
 		serviceVersion: '1',
@@ -330,7 +330,7 @@ function queuedWorkflowMount(): Parameters<typeof createMountedHarnessQueueDefin
 	const queue = new QueueDefinitionBuilder('support.summarize', 'Queue support summaries')
 	const worker = new QueueWorkerBuilder('support.summarize', 'support-summary-worker')
 	const binding = defineHarnessQueueBinding(workflow.contract, queue, worker)
-	const policy = { targets: { workflows: { summarize: { queue: binding } } } }
+	const policy = { workflows: { summarize: { queue: binding } } }
 	const projections = createMountedHarnessTargetProjections(workflowDefinition, {
 		serviceName: 'Support',
 		serviceVersion: '1',

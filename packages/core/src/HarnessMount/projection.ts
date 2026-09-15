@@ -207,9 +207,7 @@ type RuntimeTargetPolicy = Readonly<{
 
 function policyFor(policy: unknown, target: AnyHarnessTargetContract): RuntimeTargetPolicy | undefined {
 	if (policy === undefined) return undefined
-	const targets = dataProperty(policy as object, 'targets')
-	if (targets === undefined) return undefined
-	const group = dataProperty(targets as object, target.kind === 'agent' ? 'agents' : 'workflows')
+	const group = dataProperty(policy as object, target.kind === 'agent' ? 'agents' : 'workflows')
 	if (group === undefined) return undefined
 	return dataProperty(group as object, target.id) as RuntimeTargetPolicy | undefined
 }
@@ -240,12 +238,9 @@ function assertMountPolicy(
 	rootIds: Readonly<{ agents: ReadonlySet<string>; workflows: ReadonlySet<string> }>,
 ): void {
 	if (policy === undefined) return
-	assertPlainRecord(policy, ['targets'], 'Harness mount policy')
-	const targets = dataProperty(policy, 'targets')
-	if (targets === undefined) return
-	assertPlainRecord(targets, ['agents', 'workflows'], 'Harness mount target policy')
+	assertPlainRecord(policy, ['agents', 'workflows'], 'Harness mount policy')
 	for (const kind of ['agents', 'workflows'] as const) {
-		const group = dataProperty(targets, kind)
+		const group = dataProperty(policy, kind)
 		if (group === undefined) continue
 		assertPlainRecord(group, [...rootIds[kind]], `Harness ${kind} policy`)
 		for (const id of Object.keys(group)) assertTargetPolicy(dataProperty(group, id), `${kind}.${id}`)

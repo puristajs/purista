@@ -7,7 +7,8 @@ import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { generatedModelSchema, rootCommandRequest } from './harnessMount.test.fixture.js'
-import type { HarnessDefinitionMountPolicy, HarnessState, HarnessTypes, MountedHarnessRuntimeConfig } from './types.js'
+import type { HarnessInvokeParameter } from './invokeTypes.js'
+import type { HarnessState, HarnessTypes, MountedHarnessRuntimeConfig } from './types.js'
 
 const wireSchema = {
 	type: 'object',
@@ -61,38 +62,44 @@ const serviceInfo = {
 }
 
 describe('P4-004 public Harness mount inference', () => {
+	it('keeps continuation input out of normal run and stream parameters', () => {
+		const fresh: HarnessInvokeParameter<typeof typedWorkflow.contract> = {
+			sessionId: 'session-1',
+			// @ts-expect-error Continuations use target.resume(...), never fresh options.
+			resume: { type: 'external-wait', runId: 'run-1' },
+		}
+		void fresh
+	})
+
 	it('mounts a concrete workflow and preserves validated guard input and completed outcome types', async () => {
 		const observations: string[] = []
-		const policy = {
-			targets: {
-				workflows: {
-					typedEcho: {
-						beforeGuards: {
-							validate(context, input) {
-								expectTypeOf(input).not.toBeAny()
-								expectTypeOf(input).toExtend<{ value: number }>()
-								expectTypeOf<{ value: number }>().toExtend<typeof input>()
-								expectTypeOf(context.resources.suffix).toEqualTypeOf<string>()
-								observations.push(`before:${input.value}:${context.resources.suffix}`)
-							},
+		const builder = new ServiceBuilder(serviceInfo).defineResource<'suffix', string>()
+		const policy = builder.defineHarnessPolicy(workflowHarness, {
+			workflows: {
+				typedEcho: {
+					beforeGuards: {
+						validate(context, input) {
+							expectTypeOf(input).not.toBeAny()
+							expectTypeOf(input).toExtend<{ value: number }>()
+							expectTypeOf<{ value: number }>().toExtend<typeof input>()
+							expectTypeOf(context.resources.suffix).toEqualTypeOf<string>()
+							observations.push(`before:${input.value}:${context.resources.suffix}`)
 						},
-						afterGuards: {
-							audit(_context, outcome) {
-								if (outcome.status === 'completed') {
-									expectTypeOf(outcome.output).not.toBeAny()
-									expectTypeOf(outcome.output).toExtend<{ label: string }>()
-									expectTypeOf<{ label: string }>().toExtend<typeof outcome.output>()
-									observations.push(`after:${outcome.output.label}`)
-								}
-							},
+					},
+					afterGuards: {
+						audit(_context, outcome) {
+							if (outcome.status === 'completed') {
+								expectTypeOf(outcome.output).not.toBeAny()
+								expectTypeOf(outcome.output).toExtend<{ label: string }>()
+								expectTypeOf<{ label: string }>().toExtend<typeof outcome.output>()
+								observations.push(`after:${outcome.output.label}`)
+							}
 						},
 					},
 				},
 			},
-		} satisfies HarnessDefinitionMountPolicy<typeof workflowHarness, { suffix: string }>
-		const builder = new ServiceBuilder(serviceInfo)
-			.defineResource<'suffix', string>()
-			.mountHarness(workflowHarness, policy)
+		})
+		const mounted = builder.mountHarness(workflowHarness, policy)
 		expectTypeOf<HarnessState<typeof workflowHarness>['contracts']['workflows']['typedEcho']>().toEqualTypeOf<
 			typeof typedWorkflow.contract
 		>()
@@ -109,7 +116,7 @@ describe('P4-004 public Harness mount inference', () => {
 
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
-		const service = await builder.getInstance(eventBridge, { ai: {}, resources: { suffix: 'checked' } })
+		const service = await mounted.getInstance(eventBridge, { ai: {}, resources: { suffix: 'checked' } })
 		try {
 			await service.start()
 			await expect(
@@ -128,24 +135,22 @@ describe('P4-004 public Harness mount inference', () => {
 
 	it('infers inline policy callbacks and rejects a second mount and foreign definitions', () => {
 		const mounted = new ServiceBuilder(serviceInfo).mountHarness(workflowHarness, {
-			targets: {
-				workflows: {
-					typedEcho: {
-						beforeGuards: {
-							validate(_context, input) {
-								expectTypeOf(input).not.toBeAny()
-								expectTypeOf(input).toExtend<{ value: number }>()
-								expectTypeOf<{ value: number }>().toExtend<typeof input>()
-							},
+			workflows: {
+				typedEcho: {
+					beforeGuards: {
+						validate(_context, input) {
+							expectTypeOf(input).not.toBeAny()
+							expectTypeOf(input).toExtend<{ value: number }>()
+							expectTypeOf<{ value: number }>().toExtend<typeof input>()
 						},
-						afterGuards: {
-							audit(_context, outcome) {
-								if (outcome.status === 'completed') {
-									expectTypeOf(outcome.output).not.toBeAny()
-									expectTypeOf(outcome.output).toExtend<{ label: string }>()
-									expectTypeOf<{ label: string }>().toExtend<typeof outcome.output>()
-								}
-							},
+					},
+					afterGuards: {
+						audit(_context, outcome) {
+							if (outcome.status === 'completed') {
+								expectTypeOf(outcome.output).not.toBeAny()
+								expectTypeOf(outcome.output).toExtend<{ label: string }>()
+								expectTypeOf<{ label: string }>().toExtend<typeof outcome.output>()
+							}
 						},
 					},
 				},
@@ -159,6 +164,26 @@ describe('P4-004 public Harness mount inference', () => {
 			// @ts-expect-error A structural imitation has no authentic Harness definition brand.
 			new ServiceBuilder(serviceInfo).mountHarness({ kind: 'harness', name: 'foreign' })
 		}).toThrow('Hosted Harness definition is invalid')
+	})
+
+	it('binds a same-service target before composition and validates it against the final mount', async () => {
+		const builder = new ServiceBuilder(serviceInfo)
+		const target = builder.harnessTarget(typedWorkflow.contract)
+		const wrapper = builder
+			.getCommandBuilder('invokeTypedEcho', 'Invoke the locally mounted workflow')
+			.addPayloadSchema(typedWorkflow.contract.input)
+			.addOutputSchema(typedWorkflow.contract.output)
+			.canInvokeWorkflow(target)
+			.setCommandFunction(async function () {
+				return { label: 'bound' }
+			})
+		const mounted = builder.addCommandDefinition(wrapper.getDefinition()).mountHarness(workflowHarness)
+		await expect(mounted.resolveDefinitions()).resolves.toBeDefined()
+
+		const unmatched = new ServiceBuilder(serviceInfo)
+			.addCommandDefinition(wrapper.getDefinition())
+			.mountHarness(agentHarness)
+		await expect(unmatched.resolveDefinitions()).rejects.toThrow('has no matching mounted target projection')
 	})
 
 	it('requires the exact model binding for a direct agent at getInstance', async () => {

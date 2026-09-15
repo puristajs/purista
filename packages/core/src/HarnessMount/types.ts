@@ -285,10 +285,8 @@ export type HarnessMountPolicy<
 	S extends HarnessCatalogView,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 > = Readonly<{
-	targets?: Readonly<{
-		agents?: HarnessTargetPolicies<S, 'agents', Resources>
-		workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
-	}>
+	agents?: HarnessTargetPolicies<S, 'agents', Resources>
+	workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
 }>
 
 /** Policy inferred directly from one definition's public root contracts. */

@@ -114,6 +114,24 @@ async function stopAfterPendingMessages(mounted: Awaited<ReturnType<typeof start
 }
 
 describe('mounted Harness lifecycle and completed-event semantics', () => {
+	it('starts ordinary service receivers before mounted Harness roots', async () => {
+		const ordinaryStart = vi.spyOn(Service.prototype, 'start')
+		const harnessStart = vi.spyOn(HarnessMountRuntime.prototype, 'start')
+		const mounted = await mountedLifecycleService('normal')
+		try {
+			await mounted.service.start()
+			expect(ordinaryStart).toHaveBeenCalledOnce()
+			expect(harnessStart).toHaveBeenCalledOnce()
+			expect(ordinaryStart.mock.invocationCallOrder[0]).toBeLessThan(harnessStart.mock.invocationCallOrder[0])
+		} finally {
+			await mounted.service.destroy()
+			await new Promise<void>(resolve => setImmediate(resolve))
+			await mounted.eventBridge.destroy()
+			ordinaryStart.mockRestore()
+			harnessStart.mockRestore()
+		}
+	})
+
 	it('publishes only the strongly typed completed root outcome after after-guards and registers no event receiver', async () => {
 		const order: string[] = []
 		const audit = vi.fn((_context: unknown, outcome: HarnessTargetRunOutcome<typeof rootWorkflow.contract>) => {
@@ -121,7 +139,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 			order.push(outcome.status)
 		})
 		const policy = {
-			targets: { workflows: { [rootTargetName]: { afterGuards: { audit }, successEvent: 'harness.echo.completed' } } },
+			workflows: { [rootTargetName]: { afterGuards: { audit }, successEvent: 'harness.echo.completed' } },
 		} as unknown as AnyMountPolicy
 		const mounted = await startMounted({ policy })
 		try {
@@ -162,7 +180,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 
 	it('registers completed roots as command/stream receivers and dependency targets as stream-only receivers', async () => {
 		const policy = {
-			targets: { workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } } },
+			workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } },
 		} as unknown as AnyMountPolicy
 		const eventBridge = new DefaultEventBridge()
 		const registerCommand = vi.spyOn(eventBridge, 'registerCommand')
@@ -182,7 +200,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 
 	it('sanitizes aggregate publication failure to a 500 response', async () => {
 		const policy = {
-			targets: { workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } } },
+			workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } },
 		} as unknown as AnyMountPolicy
 		const mounted = await startMounted({ policy })
 		try {
@@ -202,7 +220,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 
 	it('replaces a post-start publication failure with one failed terminal and matching complete final', async () => {
 		const policy = {
-			targets: { workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } } },
+			workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } },
 		} as unknown as AnyMountPolicy
 		const mounted = await startMounted({ policy })
 		try {
@@ -286,7 +304,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 			agent,
 		)
 		const policy = {
-			targets: { agents: { idempotentAgent: { successEvent: 'harness.agent.completed' } } },
+			agents: { idempotentAgent: { successEvent: 'harness.agent.completed' } },
 		} as unknown as AnyMountPolicy
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
@@ -388,7 +406,7 @@ describe('mounted Harness lifecycle and completed-event semantics', () => {
 
 	it('rejects a boolean-false ordinary event collision before runtime startup and shuts down only once', async () => {
 		const policy = {
-			targets: { workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } } },
+			workflows: { [rootTargetName]: { successEvent: 'harness.echo.completed' } },
 		} as unknown as AnyMountPolicy
 		const bridge = getEventBridgeMock()
 		const logger = getLoggerMock()

@@ -3,14 +3,14 @@ import { randomUUID } from 'node:crypto'
 import type { JsonValue } from '@purista/harness'
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
 
-import type { HarnessInvokeParameter } from './invokeTypes.js'
+import type { HarnessEventBridgeInvokeParameter } from './invokeTypes.js'
 
 /** @internal Closed serializable parameter stored with one Harness queue job. */
 export type HarnessQueueDeliveryEnvelope = Readonly<{
 	schemaVersion: 1
 	invocationId: string
 	sessionId: string
-	parameter: Omit<HarnessInvokeParameter, 'sessionId'>
+	parameter: Omit<HarnessEventBridgeInvokeParameter, 'sessionId'>
 }>
 
 /** @internal Authenticated root identity restored by the generated queue worker. */
@@ -76,7 +76,7 @@ export const harnessQueueDeliveryEnvelopeSchema: StandardSchemaV1<
  * workers only validate and consume this closed envelope.
  */
 export function createHarnessQueueDeliveryEnvelope(
-	parameter: HarnessInvokeParameter = {},
+	parameter: HarnessEventBridgeInvokeParameter = {},
 	invocationId: string = randomUUID(),
 ): HarnessQueueDeliveryEnvelope {
 	if (!nonempty(invocationId)) throw invalidDeliveryEnvelope()
@@ -88,7 +88,7 @@ export function createHarnessQueueDeliveryEnvelope(
 	const { sessionId: requestedSessionId, ...invocationParameter } = parameter
 	const sessionId = requestedSessionId ?? invocationId
 	if (!nonempty(sessionId)) throw invalidDeliveryEnvelope()
-	const serializableParameter = freezeJson(invocationParameter) as Omit<HarnessInvokeParameter, 'sessionId'>
+	const serializableParameter = freezeJson(invocationParameter) as Omit<HarnessEventBridgeInvokeParameter, 'sessionId'>
 	return Object.freeze({
 		schemaVersion: 1,
 		invocationId,
@@ -124,7 +124,9 @@ export function requireHarnessQueueDeliveryEnvelope(value: unknown): HarnessQueu
  * @internal The returned frozen object is the only value recognized by
  * `readHarnessQueueInvocationIdentity`.
  */
-export function createHarnessQueueDeliveryInvokeParameter(value: HarnessQueueDeliveryEnvelope): HarnessInvokeParameter {
+export function createHarnessQueueDeliveryInvokeParameter(
+	value: HarnessQueueDeliveryEnvelope,
+): HarnessEventBridgeInvokeParameter {
 	const envelope = requireHarnessQueueDeliveryEnvelope(value)
 	const parameter = Object.freeze({ ...envelope.parameter, sessionId: envelope.sessionId })
 	restoredInvocationIdentities.set(
@@ -136,7 +138,7 @@ export function createHarnessQueueDeliveryInvokeParameter(value: HarnessQueueDel
 
 /** @internal Read identity only from an exact worker-restored options object. */
 export function readHarnessQueueInvocationIdentity(
-	parameter: HarnessInvokeParameter,
+	parameter: HarnessEventBridgeInvokeParameter,
 ): HarnessQueueInvocationIdentity | undefined {
 	return typeof parameter === 'object' && parameter !== null ? restoredInvocationIdentities.get(parameter) : undefined
 }

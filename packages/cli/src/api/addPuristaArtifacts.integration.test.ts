@@ -469,15 +469,19 @@ void text
 		expect(commandProjection).toContain("context.agent.User['1'][summarizeAgent.contract.id].run")
 		expect(commandProjection).toContain(".exposeAsHttpEndpoint('POST', 'ai/summarize')")
 		expect(commandProjection).toContain('.enableHttpSecurity(true)')
-		expect(commandProjection).toContain('input: z.string(), sessionId: z.string().min(1).optional()')
+		expect(commandProjection).toContain('input: z.string(), conversationId: z.string().min(1).optional()')
+		expect(commandProjection).toContain("createHash('sha256')")
+		expect(commandProjection).toContain('context.message.principalId')
 		expect(commandProjection).not.toContain('.makeEndpointPublic()')
 		const streamProjection = readFileSync(
 			join(serviceDir, 'stream', 'streamChatAssistant', 'streamChatAssistantStreamBuilder.ts'),
 			'utf8',
 		)
-		expect(streamProjection).toContain('await parseHarnessUIMessageRequest(payload)')
+		expect(streamProjection).toContain(
+			'parseHarnessUIMessageRequest as (body: unknown, options: { sessionId: string })',
+		)
 		expect(streamProjection).toContain(".canInvokeAgent('User', '1', chatAssistantAgent.contract)")
-		expect(streamProjection).toContain("context.agent.User['1'][chatAssistantAgent.contract.id].stream")
+		expect(streamProjection).toContain("const target = context.agent.User['1'][chatAssistantAgent.contract.id]")
 		expect(streamProjection).toContain(".exposeAsHttpStreamEndpoint('POST', 'ai/chat-assistant')")
 		expect(streamProjection).toContain('.enableHttpSecurity(true)')
 		expect(streamProjection).toContain('.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)')
@@ -485,8 +489,9 @@ void text
 		expect(streamProjection).not.toContain('.setHttpResponseHeaders(')
 		expect(streamProjection).not.toContain('await writer.write(record)')
 		expect(streamProjection).not.toContain('writer.onCancel(')
-		expect(streamProjection).toContain('? { sessionId: request.sessionId }')
-		expect(streamProjection).toContain('resume: request.resume')
+		expect(streamProjection).toContain("createHash('sha256')")
+		expect(streamProjection).toContain('await target.stream(input, { sessionId: request.sessionId })')
+		expect(streamProjection).not.toContain('resume: request.resume')
 		expect(streamProjection).not.toContain('idempotencyKey')
 		expect(streamProjection).not.toContain('.makeEndpointPublic()')
 		const generatedPackage = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf8')) as {

@@ -7,7 +7,7 @@ import type { QueueHandlerResult } from '../core/types/queue/QueueHandlerResult.
 import type { AnyQueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinitionList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { finalizeHarnessInvocationBinding } from './invocation.js'
-import type { HarnessInvokeParameter } from './invokeTypes.js'
+import type { HarnessEventBridgeInvokeParameter } from './invokeTypes.js'
 import { requireHarnessTargetQueueBinding } from './queueBinding.js'
 import {
 	createHarnessQueueDeliveryInvokeParameter,
@@ -26,10 +26,8 @@ type StagedQueue = Readonly<{
 
 type HarnessQueueMount = Readonly<{
 	policy?: Readonly<{
-		targets?: Readonly<{
-			agents?: Readonly<Record<string, Readonly<{ queue?: unknown }> | undefined>>
-			workflows?: Readonly<Record<string, Readonly<{ queue?: unknown }> | undefined>>
-		}>
+		agents?: Readonly<Record<string, Readonly<{ queue?: unknown }> | undefined>>
+		workflows?: Readonly<Record<string, Readonly<{ queue?: unknown }> | undefined>>
 	}>
 	projections: readonly MountedHarnessTargetProjection<AnyHarnessTargetContract>[]
 }>
@@ -79,7 +77,7 @@ export function createMountedHarnessQueueDefinitions(mount: HarnessQueueMount): 
 			const namespace = projection.target.kind === 'agent' ? context.agent : context.workflow
 			const client = (namespace as any)[projection.address.serviceName][projection.address.serviceVersion][
 				projection.address.serviceTarget
-			] as { run(input: unknown, parameter: HarnessInvokeParameter): Promise<unknown> }
+			] as { run(input: unknown, parameter: HarnessEventBridgeInvokeParameter): Promise<unknown> }
 			try {
 				const output = await client.run(message.payload, createHarnessQueueDeliveryInvokeParameter(envelope))
 				return { status: 'success', output }
@@ -216,8 +214,7 @@ function queueBindingFor(
 	mount: HarnessQueueMount,
 	projection: MountedHarnessTargetProjection<AnyHarnessTargetContract>,
 ) {
-	const targets = mount.policy?.targets
-	const group = projection.target.kind === 'agent' ? targets?.agents : targets?.workflows
+	const group = projection.target.kind === 'agent' ? mount.policy?.agents : mount.policy?.workflows
 	return (group as Record<string, { queue?: unknown } | undefined> | undefined)?.[projection.target.id]?.queue
 }
 

@@ -15,7 +15,11 @@ import {
 	type HarnessTargetRunResult,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { HarnessInvokeParameter } from '../HarnessMount/invokeTypes.js'
+import type {
+	HarnessInvokeParameter,
+	HarnessResumeParameter,
+	HarnessTargetResume,
+} from '../HarnessMount/invokeTypes.js'
 import {
 	type AnyQueuedRemoteHarnessTargetContract,
 	type AnyRemoteHarnessTargetContract,
@@ -30,14 +34,18 @@ export type RemoteHarnessClientOptions = Readonly<{
 
 /** Exact run/stream surface and nominally granted enqueue capability of a generated root. */
 export type RemoteHarnessClient<C extends AnyRemoteHarnessTargetContract> = Readonly<{
-	run(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter): Promise<HarnessTargetRunResult<C>>
-	stream(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter): Promise<HarnessExecutionStream<C>>
+	run(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter<C>): Promise<HarnessTargetRunResult<C>>
+	stream(input: HarnessTargetInput<C>, options?: HarnessInvokeParameter<C>): Promise<HarnessExecutionStream<C>>
+	resume(resume: HarnessTargetResume<C>): Readonly<{
+		run(options?: HarnessResumeParameter<C>): Promise<HarnessTargetRunResult<C>>
+		stream(options?: HarnessResumeParameter<C>): Promise<HarnessExecutionStream<C>>
+	}>
 }> &
 	(C extends AnyQueuedRemoteHarnessTargetContract
 		? Readonly<{
 				enqueue(
 					input: HarnessTargetInput<C>,
-					parameter?: HarnessInvokeParameter,
+					parameter?: HarnessInvokeParameter<C>,
 					options?: HarnessEnqueueOptions,
 				): Promise<HarnessTargetQueueEnqueueResult>
 			}>

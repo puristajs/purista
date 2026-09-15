@@ -75,14 +75,12 @@ describe('createMountedHarnessTargetProjections', () => {
 			serviceName: 'Support',
 			serviceVersion: '1',
 			policy: {
-				targets: {
-					agents: {
-						answer: {
-							beforeGuards: { authorize: before },
-							afterGuards: { audit: after },
-							successEvent: 'support.answer.completed',
-							queue: queueBinding,
-						},
+				agents: {
+					answer: {
+						beforeGuards: { authorize: before },
+						afterGuards: { audit: after },
+						successEvent: 'support.answer.completed',
+						queue: queueBinding,
 					},
 				},
 			},
@@ -148,7 +146,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			serviceName: 'Support',
 			serviceVersion: '1',
 			policy: {
-				targets: { agents: { answer: { successEvent: 'support.answer.completed' } } },
+				agents: { answer: { successEvent: 'support.answer.completed' } },
 			},
 		})
 		const rootProjection = required(projection)
@@ -231,7 +229,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(advancedHarness, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: { targets: { agents: { advanced: { successEvent: 'advanced.completed' } } } },
+				policy: { agents: { advanced: { successEvent: 'advanced.completed' } } },
 			})
 		const [projection] = project()
 		expect(project).not.toThrow()
@@ -363,7 +361,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(definition, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: { targets: { agents: { answer: { successEvent: 'done' } } } },
+				policy: { agents: { answer: { successEvent: 'done' } } },
 			})[0],
 		)
 		const queueBinding = defineHarnessQueueBinding(
@@ -375,7 +373,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(definition, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: { targets: { agents: { answer: { queue: queueBinding } } } },
+				policy: { agents: { answer: { queue: queueBinding } } },
 			})[0],
 		)
 		const changedSchemaAgent = defineAgent('answer', {
@@ -454,9 +452,7 @@ describe('createMountedHarnessTargetProjections', () => {
 				createMountedHarnessTargetProjections(definition, {
 					serviceName: 'Support',
 					serviceVersion: '1',
-					policy: {
-						targets: { agents: { answer: { queue: queue as never } } },
-					},
+					policy: { agents: { answer: { queue: queue as never } } },
 				}),
 			).toThrow('exact factory-created binding')
 		}
@@ -469,7 +465,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(definition, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: { targets: { agents: { answer: { queue: mutableBinding } } } },
+				policy: { agents: { answer: { queue: mutableBinding } } },
 			}),
 		).toThrow('exact factory-created binding')
 
@@ -479,7 +475,7 @@ describe('createMountedHarnessTargetProjections', () => {
 		const stableProjection = createMountedHarnessTargetProjections(definition, {
 			serviceName: 'Support',
 			serviceVersion: '1',
-			policy: { targets: { agents: { answer: { queue: stableBinding } } } },
+			policy: { agents: { answer: { queue: stableBinding } } },
 		})[0]
 		;(stableQueue as unknown as { queueName: string }).queueName = 'support.changed'
 		expect(stableProjection?.policy?.queueName).toBe('support.answer')
@@ -541,11 +537,9 @@ describe('createMountedHarnessTargetProjections', () => {
 				serviceName: 'Support',
 				serviceVersion: '1',
 				policy: {
-					targets: {
-						agents: {
-							// @ts-expect-error dependency-only agents cannot receive root policy
-							lookup: {},
-						},
+					agents: {
+						// @ts-expect-error dependency-only agents cannot receive root policy
+						lookup: {},
 					},
 				},
 			})
@@ -554,7 +548,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(definition, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: { targets: { agents: { lookup: {} } } } as never,
+				policy: { agents: { lookup: {} } } as never,
 			}),
 		).toThrow('unknown field')
 	})
@@ -590,9 +584,7 @@ describe('createMountedHarnessTargetProjections', () => {
 		const [projection] = createMountedHarnessTargetProjections(reviewHarness, {
 			serviceName: 'Support',
 			serviceVersion: '1',
-			policy: {
-				targets: { agents: { review: { beforeGuards, durableResume: { identity: 'run-owner' } } } },
-			},
+			policy: { agents: { review: { beforeGuards, durableResume: { identity: 'run-owner' } } } },
 		})
 		expect(projection?.policy?.durableResume).toBe('stored-run-owner')
 
@@ -601,11 +593,9 @@ describe('createMountedHarnessTargetProjections', () => {
 				serviceName: 'Support',
 				serviceVersion: '1',
 				policy: {
-					targets: {
-						agents: {
-							// @ts-expect-error durable resume requires a business before guard
-							review: { durableResume: { identity: 'run-owner' } },
-						},
+					agents: {
+						// @ts-expect-error durable resume requires a business before guard
+						review: { durableResume: { identity: 'run-owner' } },
 					},
 				},
 			})
@@ -614,9 +604,7 @@ describe('createMountedHarnessTargetProjections', () => {
 			createMountedHarnessTargetProjections(reviewHarness, {
 				serviceName: 'Support',
 				serviceVersion: '1',
-				policy: {
-					targets: { agents: { review: { durableResume: { identity: 'run-owner' } } } },
-				} as never,
+				policy: { agents: { review: { durableResume: { identity: 'run-owner' } } } } as never,
 			}),
 		).toThrow('requires a root with reachable tool approval and a before guard')
 
@@ -625,11 +613,9 @@ describe('createMountedHarnessTargetProjections', () => {
 				serviceName: 'Support',
 				serviceVersion: '1',
 				policy: {
-					targets: {
-						agents: {
-							// @ts-expect-error a non-interrupting root cannot enable durable resume
-							answer: { beforeGuards, durableResume: { identity: 'run-owner' } },
-						},
+					agents: {
+						// @ts-expect-error a non-interrupting root cannot enable durable resume
+						answer: { beforeGuards, durableResume: { identity: 'run-owner' } },
 					},
 				},
 			})

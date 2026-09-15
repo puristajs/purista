@@ -122,7 +122,7 @@ describe('ClientBuilder Harness convergence', () => {
 			serviceName: 'Local',
 			serviceVersion: '1',
 			serviceDescription: 'Local service',
-		}).mountHarness(definition, { targets: { agents: { answer: { queue: binding } } } })
+		}).mountHarness(definition, { agents: { answer: { queue: binding } } })
 		const builder = new ClientBuilder()
 		const stored = await builder.getDefinitionsFromServiceBuilders([service])
 		expect(stored.Local['1'].agents?.answer.queue?.name).toBe('answer-jobs')

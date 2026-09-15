@@ -120,14 +120,27 @@ export const createInvokeProxy = <Invokes extends InvokeList | StreamInvokeList 
 /** Preserve declared Harness addresses and method signatures while exposing Sinon stub controls. */
 export type HarnessInvocationMock<T> = T extends (...args: infer Arguments) => infer Result
 	? SinonStub<Arguments, Result>
-	: { [Key in keyof T]: HarnessInvocationMock<T[Key]> }
+	: T extends { resume: infer Resume }
+		? Omit<{ [Key in keyof T]: HarnessInvocationMock<T[Key]> }, 'resume'> & {
+				resume: HarnessResumeInvocationMock<Resume>
+			}
+		: { [Key in keyof T]: HarnessInvocationMock<T[Key]> }
+
+/** A resume stub whose continuation controls mirror the returned target resumer. */
+export type HarnessResumeInvocationMock<T> = T extends (...args: infer Arguments) => infer Result
+	? SinonStub<Arguments, Result> & Readonly<{ continuation: HarnessInvocationMock<Result> }>
+	: never
+
+type HarnessTargetMock = {
+	run: SinonStub
+	stream: SinonStub
+	enqueue: SinonStub
+	resume: SinonStub & Readonly<{ continuation: { run: SinonStub; stream: SinonStub } }>
+}
 
 /** Creates address-first Harness target clients with controllable invocation stubs. */
 export const createHarnessInvocationMockProxy = <TApi>(sandbox?: SinonSandbox) => {
-	const targetMocks: Record<
-		string,
-		Record<string, Record<string, { run: SinonStub; stream: SinonStub; enqueue: SinonStub }>>
-	> = {}
+	const targetMocks: Record<string, Record<string, Record<string, HarnessTargetMock>>> = {}
 
 	const getProxy = (
 		address: EBMessageAddress = { serviceName: '', serviceVersion: '', serviceTarget: '' },
@@ -150,14 +163,31 @@ export const createHarnessInvocationMockProxy = <TApi>(sandbox?: SinonSandbox) =
 					}
 					if (level === 2) {
 						const targets = targetMocks[address.serviceName][address.serviceVersion]
-						targets[property] ??= {
-							run: (sandbox?.stub() ?? stub()).rejects(new Error(`Harness target ${property}.run is not stubbed`)),
-							stream: (sandbox?.stub() ?? stub()).rejects(
-								new Error(`Harness target ${property}.stream is not stubbed`),
-							),
-							enqueue: (sandbox?.stub() ?? stub()).rejects(
-								new Error(`Harness target ${property}.enqueue is not stubbed`),
-							),
+						if (targets[property] === undefined) {
+							const continuation = {
+								run: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.resume(...).run is not stubbed`),
+								),
+								stream: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.resume(...).stream is not stubbed`),
+								),
+							}
+							const resume = Object.assign(
+								(sandbox?.stub() ?? stub()).callsFake(() => continuation),
+								{
+									continuation,
+								},
+							)
+							targets[property] = {
+								run: (sandbox?.stub() ?? stub()).rejects(new Error(`Harness target ${property}.run is not stubbed`)),
+								stream: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.stream is not stubbed`),
+								),
+								enqueue: (sandbox?.stub() ?? stub()).rejects(
+									new Error(`Harness target ${property}.enqueue is not stubbed`),
+								),
+								resume,
+							}
 						}
 						return targets[property]
 					}

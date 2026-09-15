@@ -11,13 +11,11 @@ export const supportHarness = defineHarness({ name: 'support', revision: 'suppor
 	.addWorkflow(reviewRollbackWorkflow)
 
 export const supportHarnessPolicy = {
-	targets: {
-		agents: {
-			triageTicket: {},
-			analyzeSignals: {},
-		},
-		workflows: {
-			reviewRollback: {},
-		},
+	agents: {
+		triageTicket: {},
+		analyzeSignals: {},
+	},
+	workflows: {
+		reviewRollback: {},
 	},
 } as const

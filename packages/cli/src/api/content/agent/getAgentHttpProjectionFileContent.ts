@@ -49,6 +49,7 @@ export const getAgentHttpProjectionFileContent = (input: {
 	const serviceName = pascalCase(input.serviceName)
 	const serviceAddress = /^[A-Za-z_$][\w$]*$/.test(serviceName) ? `.${serviceName}` : `[${singleQuoted(serviceName)}]`
 
+	writer.writeLine("import { createHash } from 'node:crypto'")
 	writer.writeLine("import { z } from 'zod'")
 	if (input.http === 'command') writer.writeLine("import type { HarnessTargetRunOutcome } from '@purista/harness'")
 	if (input.http === 'stream') {
@@ -61,11 +62,13 @@ export const getAgentHttpProjectionFileContent = (input: {
 
 	if (input.http === 'command') {
 		const outputType = `${pascalCase(names.targetName)}CommandOutput`
-		writer.writeLine(`type AgentOutcome = HarnessTargetRunOutcome<typeof ${agentIdentifier}.contract>`)
+		writer.writeLine(
+			`type AgentOutcome = Extract<HarnessTargetRunOutcome<typeof ${agentIdentifier}.contract>, { status: 'completed' }>`,
+		)
 		writer.writeLine('type AgentResult = { sessionId: string; outcome: AgentOutcome }')
-		writer.writeLine("type AgentInterrupt = Extract<AgentOutcome, { status: 'interrupted' }>['interrupt']")
-		writer.writeLine('const interruptSchema = z.json() as unknown as z.ZodType<AgentInterrupt, AgentInterrupt>')
-		writer.writeLine('const inputSchema = z.object({ input: z.string(), sessionId: z.string().min(1).optional() })')
+		writer.writeLine(
+			'const inputSchema = z.object({ input: z.string(), conversationId: z.string().min(1).optional() })',
+		)
 		writer.writeLine('const parameterSchema = z.object({})')
 		writer.writeLine('const outputSchema = z.object({')
 		writer.indent(() => {
@@ -74,9 +77,6 @@ export const getAgentHttpProjectionFileContent = (input: {
 			writer.indent(() => {
 				writer.writeLine(
 					`z.object({ status: z.literal('completed'), runId: z.string().min(1), output: ${agentIdentifier}.contract.output }),`,
-				)
-				writer.writeLine(
-					"z.object({ status: z.literal('interrupted'), runId: z.string().min(1), interrupt: interruptSchema }),",
 				)
 			})
 			writer.writeLine(']),')
@@ -97,13 +97,23 @@ export const getAgentHttpProjectionFileContent = (input: {
 			writer.writeLine('.setCommandFunction(async function (context, payload, _parameter) {')
 			writer.indent(() => {
 				writer.writeLine(
-					`return context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id].run(`,
+					"if (context.message.principalId === undefined) throw new Error('Authenticated principal identity is required.')",
+				)
+				writer.writeLine(
+					"const sessionId = createHash('sha256').update(JSON.stringify([context.message.tenantId ?? '', context.message.principalId, payload.conversationId ?? 'default'])).digest('base64url')",
+				)
+				writer.writeLine(
+					`const result = await context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id].run(`,
 				)
 				writer.indent(() => {
 					writer.writeLine('payload.input,')
-					writer.writeLine('payload.sessionId === undefined ? {} : { sessionId: payload.sessionId },')
+					writer.writeLine('{ sessionId },')
 				})
 				writer.writeLine(')')
+				writer.writeLine(
+					"if (result.outcome.status !== 'completed') throw new Error('The generated agent projection only supports completed outcomes.')",
+				)
+				writer.writeLine('return result as AgentResult')
 			})
 			writer.writeLine('})')
 		})
@@ -129,20 +139,23 @@ export const getAgentHttpProjectionFileContent = (input: {
 		writer.writeLine('.setHttpStreamProtocol(AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL)')
 		writer.writeLine('.setStreamFunction(async function (context, payload, _parameter, writer) {')
 		writer.indent(() => {
-			writer.writeLine('const request = await parseHarnessUIMessageRequest(payload)')
+			writer.writeLine(
+				"if (context.message.principalId === undefined) throw new Error('Authenticated principal identity is required.')",
+			)
+			writer.writeLine('const transportId = z.object({ id: z.string().min(1) }).parse(payload).id')
+			writer.writeLine(
+				"const trustedSessionId = createHash('sha256').update(JSON.stringify([context.message.tenantId ?? '', context.message.principalId, transportId])).digest('base64url')",
+			)
+			writer.writeLine(
+				'const request = await (parseHarnessUIMessageRequest as (body: unknown, options: { sessionId: string }) => ReturnType<typeof parseHarnessUIMessageRequest>)(payload, { sessionId: trustedSessionId })',
+			)
 			writer.writeLine(
 				"const input = request.lastUserMessage.parts.flatMap(part => part.type === 'text' ? [part.text] : []).join('\\n')",
 			)
 			writer.writeLine(
-				`const events = await context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id].stream(`,
+				`const target = context.agent${serviceAddress}[${singleQuoted(input.serviceVersion)}][${agentIdentifier}.contract.id]`,
 			)
-			writer.indent(() => {
-				writer.writeLine('input,')
-				writer.writeLine(
-					'request.resume === undefined ? { sessionId: request.sessionId } : { sessionId: request.sessionId, resume: request.resume },',
-				)
-			})
-			writer.writeLine(')')
+			writer.writeLine('const events = await target.stream(input, { sessionId: request.sessionId })')
 			writer.writeLine('await pipeHarnessUIMessageStream(events, writer, request)')
 		})
 		writer.writeLine('})')
@@ -178,7 +191,7 @@ ${input.http === 'stream' ? '\t\texpect(definition.metadata.expose.http?.openApi
 ${
 	input.http === 'command'
 		? `\t\ttype ClientResult = Awaited<ReturnType<ReturnType<typeof ${names.builderIdentifier}.getCommandFunctionPlain>>>
-\t\texpectTypeOf<ClientResult['outcome']>().toEqualTypeOf<HarnessTargetRunOutcome<typeof ${agentIdentifier}.contract>>()
+\t\texpectTypeOf<ClientResult['outcome']>().toEqualTypeOf<Extract<HarnessTargetRunOutcome<typeof ${agentIdentifier}.contract>, { status: 'completed' }>>()
 \t\texpectTypeOf<${outputType}['outcome']>().toEqualTypeOf<ClientResult['outcome']>()`
 		: ''
 }
@@ -186,34 +199,20 @@ ${
 ${
 	input.http === 'command'
 		? `
-\tit('forwards input and session while preserving an interrupted outcome', async () => {
-\t\tconst payload = { input: 'summarize this', sessionId: 'session-1' }
+\tit('scopes a completed agent run to the authenticated conversation', async () => {
+\t\tconst payload = { input: 'summarize this', conversationId: 'conversation-1' }
 \t\tconst { context, stubs } = createCommandContextMock(${names.builderIdentifier}, { payload, parameter: {} })
-\t\tconst interrupted = {
-\t\t\tsessionId: 'session-1',
-\t\t\toutcome: {
-\t\t\t\tstatus: 'interrupted',
-\t\t\t\trunId: 'run-1',
-\t\t\t\tinterrupt: { type: 'external-wait', id: 'wait-1' },
-\t\t\t},
-\t\t} as unknown as ${outputType}
-\t\tstubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.resolves(interrupted)
+\t\tconst completed = { sessionId: 'generated-session', outcome: { status: 'completed', runId: 'run-1', output: 'done' } } as const
+\t\tstubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.resolves(completed)
 
 \t\tconst result = await ${names.builderIdentifier}.getCommandFunctionPlain().call({} as never, context, payload, {})
 
-\t\texpect(result).toEqual(interrupted)
-	\texpect(stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.calledWith('summarize this', { sessionId: 'session-1' })).toBe(true)
-	})
-
-	it('allows Harness to allocate a session when the request omits one', async () => {
-		const payload = { input: 'summarize this' }
-		const { context, stubs } = createCommandContextMock(${names.builderIdentifier}, { payload, parameter: {} })
-		const completed = { sessionId: 'generated-session', outcome: { status: 'completed', runId: 'run-2', output: 'done' } } as const
-		stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.resolves(completed)
-		const result = await ${names.builderIdentifier}.getCommandFunctionPlain().call({} as never, context, payload, {})
-		expect(result).toEqual(completed)
-		expect(stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.calledWith('summarize this', {})).toBe(true)
-	})`
+\t\texpect(result).toEqual(completed)
+\t\tconst [input, options] = stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.run.firstCall.args
+\t\texpect(input).toBe('summarize this')
+\t\texpect(options?.sessionId).toMatch(/^[A-Za-z0-9_-]{43}$/)
+\t})
+`
 		: ''
 }
 ${
@@ -239,41 +238,10 @@ ${
 
 \t\tawait ${names.builderIdentifier}.getStreamFunction().call({} as never, harness.context, payload, {}, harness.writer)
 
-\t\texpect(harness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.calledWith('hello', { sessionId: 'session-1' })).toBe(true)
+\t\tconst [streamInput, streamOptions] = harness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.firstCall.args
+\t\texpect(streamInput).toBe('hello')
+\t\texpect(streamOptions?.sessionId).toBeTruthy()
 \t\texpect(harness.chunks.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
-	})
-
-	it('forwards an approval continuation as resume without an idempotency key', async () => {
-		const descriptor = {
-			protocol: 'purista-harness/tool-approval', version: 1,
-			rootRunId: 'run-approval', agentRunId: 'agent-run-1', sessionId: 'session-3',
-			interruptId: 'interrupt-1', revision: 'revision-1', eventId: 'event-4', approvalIds: ['approval-1'],
-		}
-		const payload = {
-			id: 'session-3', trigger: 'submit-message', messageId: 'assistant-1',
-			messages: [
-				{ id: 'user-3', role: 'user', parts: [{ type: 'text', text: 'continue' }] },
-				{ id: 'assistant-1', role: 'assistant', parts: [{
-					type: 'dynamic-tool', toolName: 'operation', toolCallId: 'call-1', state: 'approval-responded',
-					input: { id: 'tx-1' }, approval: { id: 'approval-1', approved: true, descriptor },
-				}] },
-			],
-		}
-		const harness = createStreamContextMock(${names.builderIdentifier}, { payload, parameter: {} })
-		const outcome = { status: 'completed', runId: 'run-3', output: 'done' } as const
-		const events = {
-			result: Promise.resolve(outcome), cancel: async (_reason?: string) => undefined,
-			async *[Symbol.asyncIterator]() {
-				yield { type: 'run.started', eventId: 'event-5', sequence: 1, runId: 'run-3', at: new Date(0).toISOString() }
-				yield { type: 'run.finished', eventId: 'event-6', sequence: 2, runId: 'run-3', at: new Date(1).toISOString(), outcome }
-			},
-		}
-		harness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.resolves(events as never)
-		await ${names.builderIdentifier}.getStreamFunction().call({} as never, harness.context, payload, {}, harness.writer)
-		const options = harness.stubs.agent.${pascalCase(input.serviceName)}['${input.serviceVersion}'].${camelCase(input.agentName)}.stream.firstCall.args[1]
-		expect(options).toMatchObject({ sessionId: 'session-3', resume: { type: 'tool-approval', runId: 'run-approval' } })
-		expect(options).not.toHaveProperty('idempotencyKey')
-		expect(harness.chunks.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
 	})
 
 \tit('propagates transport cancellation to the Harness stream', async () => {

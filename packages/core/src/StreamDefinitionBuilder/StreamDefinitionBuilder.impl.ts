@@ -28,7 +28,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -273,12 +273,12 @@ export class StreamDefinitionBuilder<
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
 	canInvokeAgent(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =
@@ -301,12 +301,12 @@ export class StreamDefinitionBuilder<
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): StreamHarnessInvocationBuilder<S, C, Source, Source['address']['serviceName'], Source['address']['serviceVersion']>
 	canInvokeWorkflow(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =

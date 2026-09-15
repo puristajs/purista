@@ -37,7 +37,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -335,7 +335,7 @@ export class CommandDefinitionBuilder<
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): CommandHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): CommandHarnessInvocationBuilder<
 		S,
@@ -346,7 +346,7 @@ export class CommandDefinitionBuilder<
 	>
 	canInvokeAgent(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =
@@ -369,7 +369,7 @@ export class CommandDefinitionBuilder<
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): CommandHarnessInvocationBuilder<S, C, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): CommandHarnessInvocationBuilder<
 		S,
@@ -380,7 +380,7 @@ export class CommandDefinitionBuilder<
 	>
 	canInvokeWorkflow(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =

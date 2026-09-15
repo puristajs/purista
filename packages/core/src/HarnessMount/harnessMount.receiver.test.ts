@@ -159,13 +159,11 @@ function instrumentedDefinition() {
 	})
 	const definition = defineHarness({ name: 'receiverEffects', revision: 'receiver-effects-r1' }).addWorkflow(workflow)
 	const policy = {
-		targets: {
-			workflows: {
-				guardedRoot: {
-					beforeGuards: {
-						count: () => {
-							effects.guards += 1
-						},
+		workflows: {
+			guardedRoot: {
+				beforeGuards: {
+					count: () => {
+						effects.guards += 1
 					},
 				},
 			},
@@ -219,7 +217,7 @@ function scriptedHostedStream(events: readonly Event[], result: Terminal = proto
 async function startProtocolFixture() {
 	const eventBridge = new InspectableEventBridge()
 	await eventBridge.start()
-	const policy = { targets: { workflows: { echo: { successEvent: 'protocol.completed' } } } }
+	const policy = { workflows: { echo: { successEvent: 'protocol.completed' } } }
 	const definition = mountedHarness as HarnessMount['definition']
 	const mountedPolicy = policy as HarnessMount['policy']
 	const runtime = new HarnessMountRuntime({
@@ -361,13 +359,11 @@ describe('P4-004 mounted Harness receiver matrix', () => {
 		const before = vi.fn()
 		const after = vi.fn()
 		const policy = {
-			targets: {
-				workflows: {
-					echo: {
-						beforeGuards: { authorize: before },
-						afterGuards: { audit: after },
-						successEvent: 'echo.completed',
-					},
+			workflows: {
+				echo: {
+					beforeGuards: { authorize: before },
+					afterGuards: { audit: after },
+					successEvent: 'echo.completed',
 				},
 			},
 		} satisfies AnyMountPolicy

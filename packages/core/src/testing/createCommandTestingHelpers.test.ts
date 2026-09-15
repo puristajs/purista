@@ -11,8 +11,32 @@ import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.imp
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { createCommandContextMock } from './createCommandContextMock.js'
 import { createCommandTestHarness } from './createCommandTestHarness.js'
+import { createHarnessInvocationMockProxy } from './sharedContextMocks.js'
 
 describe('command testing helpers', () => {
+	it('stubs first-class Harness continuations through resume.continuation', async () => {
+		type Api = {
+			Review: {
+				'1': {
+					approve: {
+						resume(input: { type: 'tool-approval'; runId: string }): {
+							run(options?: { sessionId?: string }): Promise<{ approved: boolean }>
+							stream(options?: { sessionId?: string }): Promise<AsyncIterable<unknown>>
+						}
+					}
+				}
+			}
+		}
+		const { api, stubs } = createHarnessInvocationMockProxy<Api>()
+		stubs.Review['1'].approve.resume.continuation.run.resolves({ approved: true })
+
+		await expect(api.Review['1'].approve.resume({ type: 'tool-approval', runId: 'run-1' }).run()).resolves.toEqual({
+			approved: true,
+		})
+		expect(stubs.Review['1'].approve.resume.calledOnceWithExactly({ type: 'tool-approval', runId: 'run-1' })).toBe(true)
+		expect(stubs.Review['1'].approve.resume.continuation.run.calledOnceWithExactly()).toBe(true)
+	})
+
 	it('stubs a declared Harness workflow without exposing a model context', async () => {
 		const workflow = defineWorkflow('normalize', {
 			input: z.string(),

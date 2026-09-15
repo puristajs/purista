@@ -52,7 +52,7 @@ describe('P4-046 queued mounted Harness receiver integration', () => {
 		const queue = new QueueDefinitionBuilder(queueName, 'Normalize queued Harness input')
 		const worker = new QueueWorkerBuilder(queueName, 'normalize-worker')
 		const binding = defineHarnessQueueBinding(workflow.contract, queue, worker)
-		const policy = { targets: { workflows: { normalize: { queue: binding } } } } as const
+		const policy = { workflows: { normalize: { queue: binding } } } as const
 		const builder = new ServiceBuilder({
 			serviceName: 'QueuedHarness',
 			serviceVersion: '1',

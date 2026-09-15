@@ -21,7 +21,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
-import type { AnyRemoteHarnessTargetContract } from '../HarnessMount/remoteTargetContract.js'
+import type { AddressedHarnessInvocationSource } from '../HarnessMount/invocation.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
 
@@ -202,7 +202,7 @@ export class QueueWorkerBuilder<
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness agent invocation. */
-	canInvokeAgent<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeAgent<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'agent'>,
 	): QueueWorkerHarnessInvocationBuilder<
 		S,
@@ -213,7 +213,7 @@ export class QueueWorkerBuilder<
 	>
 	canInvokeAgent(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =
@@ -236,7 +236,7 @@ export class QueueWorkerBuilder<
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): QueueWorkerHarnessInvocationBuilder<S, BoundQueueName, Source, ServiceName, ServiceVersion>
 	/** Declare an address-first generated remote Harness workflow invocation. */
-	canInvokeWorkflow<const Source extends AnyRemoteHarnessTargetContract>(
+		canInvokeWorkflow<const Source extends AddressedHarnessInvocationSource>(
 		source: HarnessSourceOfKind<Source, 'workflow'>,
 	): QueueWorkerHarnessInvocationBuilder<
 		S,
@@ -247,7 +247,7 @@ export class QueueWorkerBuilder<
 	>
 	canInvokeWorkflow(
 		...args:
-			| readonly [source: AnyRemoteHarnessTargetContract]
+			| readonly [source: AddressedHarnessInvocationSource]
 			| readonly [serviceName: string, serviceVersion: string, source: HarnessInvocationSource]
 	): unknown {
 		const registered =

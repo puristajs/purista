@@ -385,7 +385,7 @@ describe('P4-004 mounted Harness receivers', () => {
 	})
 
 	it('rejects malformed policy, a mixed root/dispatch envelope, and an export-digest mismatch before target execution', async () => {
-		expect(() => projections({ targets: { workflows: { missing: {} } } } as never)).toThrow()
+		expect(() => projections({ workflows: { missing: {} } } as never)).toThrow()
 		const mounted = await startMounted()
 		try {
 			const mixed = {
@@ -421,15 +421,13 @@ describe('P4-004 mounted Harness receivers', () => {
 		transforms = 0
 		const order: string[] = []
 		const policy = {
-			targets: {
-				workflows: {
-					echo: {
-						beforeGuards: {
-							authorize: (context: any, input: { value: string }) =>
-								order.push(`before:${context.identity.principalId}:${input.value}`),
-						},
-						afterGuards: { audit: (_context: any, outcome: any) => order.push(`after:${outcome.status}`) },
+			workflows: {
+				echo: {
+					beforeGuards: {
+						authorize: (context: any, input: { value: string }) =>
+							order.push(`before:${context.identity.principalId}:${input.value}`),
 					},
+					afterGuards: { audit: (_context: any, outcome: any) => order.push(`after:${outcome.status}`) },
 				},
 			},
 		} as const
@@ -477,12 +475,10 @@ describe('P4-004 mounted Harness receivers', () => {
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const policy = {
-			targets: {
-				workflows: {
-					echo: {
-						afterGuards: { audit: () => received.push('after') },
-						successEvent: 'harness.echo.completed',
-					},
+			workflows: {
+				echo: {
+					afterGuards: { audit: () => received.push('after') },
+					successEvent: 'harness.echo.completed',
 				},
 			},
 		} as const

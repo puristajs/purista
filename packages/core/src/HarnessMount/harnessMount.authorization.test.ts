@@ -126,17 +126,15 @@ function approvalDefinition(
 	})
 	const after = vi.fn((_context: GuardContext, _outcome: HarnessTargetRunOutcome<typeof agent.contract>) => {})
 	const policy = {
-		targets: {
-			agents: {
-				review: {
-					beforeGuards: { authorize: before },
-					afterGuards: { audit: after },
-					...(options.storedOwner === false ? {} : { durableResume: { identity: 'run-owner' as const } }),
-				},
+		agents: {
+			review: {
+				beforeGuards: { authorize: before },
+				afterGuards: { audit: after },
+				...(options.storedOwner === false ? {} : { durableResume: { identity: 'run-owner' as const } }),
 			},
 		},
 	}
-	policy.targets.agents.review satisfies HarnessTargetPolicy<typeof agent.contract, Record<string, unknown>>
+	policy.agents.review satisfies HarnessTargetPolicy<typeof agent.contract, Record<string, unknown>>
 	return { definition, agent, tool, policy, before, after, effects, ...input }
 }
 
@@ -361,12 +359,9 @@ describe('P4-004 mounted Harness authorization', () => {
 			},
 		)
 		const policy = {
-			targets: { workflows: { echo: { beforeGuards: { authorize: before }, afterGuards: { audit: after } } } },
+			workflows: { echo: { beforeGuards: { authorize: before }, afterGuards: { audit: after } } },
 		}
-		policy.targets.workflows.echo satisfies HarnessTargetPolicy<
-			typeof fixture.workflow.contract,
-			Record<string, unknown>
-		>
+		policy.workflows.echo satisfies HarnessTargetPolicy<typeof fixture.workflow.contract, Record<string, unknown>>
 		const mounted = await startAuthorizationFixture({ ...fixture, policy })
 		let sentInput: unknown
 		let authorizedInput: unknown
@@ -516,11 +511,9 @@ describe('P4-004 mounted Harness authorization', () => {
 							: new Error('private guard credential')
 					})
 					const policy = {
-						targets: {
-							workflows: {
-								echo: {
-									...(phase === 'before' ? { beforeGuards: { authorize: guard } } : { afterGuards: { audit: guard } }),
-								},
+						workflows: {
+							echo: {
+								...(phase === 'before' ? { beforeGuards: { authorize: guard } } : { afterGuards: { audit: guard } }),
 							},
 						},
 					}
@@ -571,7 +564,7 @@ describe('P4-004 mounted Harness authorization', () => {
 		async status => {
 			const fixture = echoDefinition()
 			const after = vi.fn()
-			const policy = { targets: { workflows: { echo: { afterGuards: { audit: after } } } } }
+			const policy = { workflows: { echo: { afterGuards: { audit: after } } } }
 			const mounted = await startAuthorizationFixture({ ...fixture, policy })
 			const terminal: Terminal = {
 				status,
@@ -660,7 +653,7 @@ describe('P4-004 mounted Harness authorization', () => {
 			entered.resolve()
 			await release.promise
 		})
-		const policy = { targets: { workflows: { echo: { beforeGuards: { authorize } } } } }
+		const policy = { workflows: { echo: { beforeGuards: { authorize } } } }
 		const mounted = await startAuthorizationFixture({ ...fixture, policy, ai: { storage } })
 		vi.useFakeTimers()
 		try {
@@ -700,13 +693,11 @@ describe('P4-004 mounted Harness authorization', () => {
 			const before = vi.fn()
 			const after = vi.fn()
 			const policy = {
-				targets: {
-					workflows: {
-						echo: {
-							beforeGuards: { authorize: before },
-							afterGuards: { audit: after },
-							successEvent: 'authorization.completed',
-						},
+				workflows: {
+					echo: {
+						beforeGuards: { authorize: before },
+						afterGuards: { audit: after },
+						successEvent: 'authorization.completed',
 					},
 				},
 			}
@@ -828,12 +819,10 @@ describe('P4-004 mounted Harness authorization', () => {
 		})
 		const laterGuard = vi.fn()
 		const policy = {
-			targets: {
-				workflows: {
-					echo: {
-						afterGuards: { block: after, later: laterGuard },
-						successEvent: 'authorization.completed',
-					},
+			workflows: {
+				echo: {
+					afterGuards: { block: after, later: laterGuard },
+					successEvent: 'authorization.completed',
 				},
 			},
 		}
@@ -895,12 +884,10 @@ describe('P4-004 mounted Harness authorization', () => {
 			)
 			const laterGuard = vi.fn()
 			const policy = {
-				targets: {
-					workflows: {
-						echo: {
-							afterGuards: { block: after, later: laterGuard },
-							successEvent: 'authorization.completed',
-						},
+				workflows: {
+					echo: {
+						afterGuards: { block: after, later: laterGuard },
+						successEvent: 'authorization.completed',
 					},
 				},
 			}
@@ -991,7 +978,7 @@ describe('P4-004 mounted Harness authorization', () => {
 	it('turns an elapsed post-start stream deadline into failed OPERATION_TIMEOUT and cancels the hosted stream', async () => {
 		const fixture = echoDefinition()
 		const after = vi.fn()
-		const policy = { targets: { workflows: { echo: { afterGuards: { audit: after } } } } }
+		const policy = { workflows: { echo: { afterGuards: { audit: after } } } }
 		const mounted = await startAuthorizationFixture({ ...fixture, policy })
 		const blocked = deferred<void>()
 		const cancel = vi.fn(async () => {
