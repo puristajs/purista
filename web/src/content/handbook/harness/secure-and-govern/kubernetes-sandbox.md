@@ -12,7 +12,7 @@ const { sandbox, workspace } = kubernetesSandbox({ namespace: 'harness-support' 
 const definition = defineHarness({ name: 'support' }).addWorkflow(workflow)
 const harness = await definition.getInstance({
   models: { answering: answeringModel },
-  sandbox,
+  sandbox: { adapter: sandbox },
   workspace,
   storage,
 })

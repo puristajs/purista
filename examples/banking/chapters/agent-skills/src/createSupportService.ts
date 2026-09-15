@@ -11,6 +11,6 @@ export function createSupportService(
 	return supportV1Service.getInstance(eventBridge, {
 		logger,
 		resources: { supportProcedurePolicy: options.policy },
-		ai: { models: { answering: options.model }, sandbox: inMemorySandbox() },
+		ai: { models: { answering: options.model }, sandbox: { adapter: inMemorySandbox() } },
 	})
 }

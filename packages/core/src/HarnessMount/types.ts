@@ -316,6 +316,19 @@ export type HarnessTypes<D> = D extends { readonly $infer: infer I } ? I : never
 /**
  * Exact runtime AI configuration required by the service's mounted Harness definition.
  * Every model alias declared by an agent is inferred as a required key of `models`.
+ * Sandbox infrastructure and deployment policy are configured together under
+ * `sandbox`; named sharing groups are declared by the mounted graph and enabled
+ * with `sandbox.policy.sharing`.
+ *
+ * @example
+ * ```ts
+ * const ai: MountedHarnessRuntimeConfig<typeof supportHarness> = {
+ *   models: { answering: { provider, model: 'provider-model-id' } },
+ *   sandbox: {
+ *     adapter: sandbox,
+ *   },
+ * }
+ * ```
  */
 export type MountedHarnessRuntimeConfig<D> =
 	D extends HarnessDefinition<infer Catalog, infer _Name, infer _Graph>

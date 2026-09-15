@@ -66,7 +66,7 @@ run or session capability needs it.
 | `id` | Application-owned logical session key. | Keep it stable for one conversation and unique across unrelated conversations. Store the mapping in the application, not in a prompt. |
 | `identity.tenantId` | Optional verified tenant dimension. | Supply it from the application authentication boundary. Business authorization must already allow this caller to use the requested session. The value becomes part of the immutable session binding. |
 | `identity.principalId` | Optional verified principal dimension. | Supply it when memory, sandbox, or policy needs a principal scope. Omit the field rather than setting it to `undefined`. |
-| `sandboxOwner` | Advanced attachment to an existing immutable sandbox owner. | Use only with an application-owned `authorizeOwner` callback configured on the `sandbox` binding passed to `getInstance(...)`. It is not a shortcut for sharing by session ID. |
+| `sandboxOwner` | Advanced attachment to an existing immutable sandbox owner. | Use only with an application-owned `authorizeBorrowedOwner` callback configured in `ai.sandbox.policy`. It is not a shortcut for sharing by session ID. |
 
 Identity is immutable for the lifetime of a persisted session record. Every
 later `getSession(...)` call must provide the same identity, including the same

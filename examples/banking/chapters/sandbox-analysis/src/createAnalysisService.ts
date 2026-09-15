@@ -19,7 +19,7 @@ export function createAnalysisService(
 		resources: { analysisPolicy: options.analysisPolicy },
 		ai: {
 			models: { analysis: options.analysisModel },
-			sandbox: options.sandbox,
+			sandbox: { adapter: options.sandbox },
 		},
 	})
 }

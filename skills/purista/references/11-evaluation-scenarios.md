@@ -167,8 +167,9 @@ Expected behavior:
   only the authorized upload into the agent workspace
 - does not recommend `bashSandbox()` or local host-directory execution as the
   production isolation boundary
-- wires a custom Harness sandbox adapter through the `ai.sandbox` runtime
-  binding and uses `setSandboxPolicy(...)` only to select its sharing partition
+- wires a custom Harness sandbox adapter through
+  `ai.sandbox: { adapter, policy }`; a named group is declared in the Harness
+  graph and runtime sharing is enabled with `policy.sharing: 'declared'`
 - requires a spawn-capable isolating runtime with default-deny egress,
   unprivileged identity, workload limits, per-run/tenant mounts, cancellation,
   and cleanup

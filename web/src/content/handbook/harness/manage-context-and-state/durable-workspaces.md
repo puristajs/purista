@@ -17,7 +17,7 @@ const local = localDurableExecution({ root: './.harness' })
 const harness = await definition.getInstance({
   storage: local.storage,
   workspace: local.workspace,
-  sandbox: local.sandbox,
+  sandbox: { adapter: local.sandbox },
 })
 ```
 The local bundle is for a trusted single host and restart tests. PostgreSQL

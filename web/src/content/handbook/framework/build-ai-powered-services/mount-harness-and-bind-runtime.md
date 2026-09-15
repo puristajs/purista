@@ -51,8 +51,9 @@ const support = await supportV1Service.getInstance(eventBridge, {
     models: { answering: { provider: modelProvider, model: 'provider-model-id' } },
     admission: modelAdmission,
     storage: harnessStorage,
-    sandbox,
-    sandboxBinding,
+    sandbox: {
+      adapter: sandbox,
+    },
     workspace,
   },
 })
@@ -62,6 +63,10 @@ Every agent declares a user-chosen purpose alias. Bind every alias under the
 exact matching `ai.models` key; Harness reserves no alias. Configure only the
 adapters required by the graph. Startup checks those requirements before the
 service accepts work.
+
+`sandbox.adapter` supplies the execution infrastructure. Omit `policy` for the
+safe private default. Configure it only when a definition declares a named
+shared group or a deployment permits borrowing an owner.
 
 `modelAdmission` implements Harness `ModelAdmission`: `acquire(request)` waits
 for or rejects capacity and returns a lease with `release()`. It controls active

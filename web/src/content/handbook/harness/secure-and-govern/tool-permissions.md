@@ -22,7 +22,7 @@ const agent = defineAgent('support', {
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
 const harness = await definition.getInstance({
   models: { answering: answeringModel },
-  sandbox,
+  sandbox: { adapter: sandbox },
 })
 ```
 Omitting a built-in definition disables it. `read` is non-mutating and has no

@@ -13,7 +13,7 @@ describe('analyzeTransactionsAgent', () => {
 		const provider = scriptedAnalysisProvider()
 		const runtime = await analysisHarness.getInstance({
 			models: { analysis: { provider, model: 'analysis-fake' } },
-			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 		})
 
 		try {
@@ -72,7 +72,7 @@ describe('analyzeTransactionsAgent', () => {
 		})
 		const runtime = await analysisHarness.getInstance({
 			models: { analysis: { provider, model: 'analysis-fake' } },
-			sandbox,
+			sandbox: { adapter: sandbox },
 		})
 
 		try {
@@ -114,7 +114,7 @@ describe('analyzeTransactionsAgent', () => {
 		})
 		const runtime = await analysisHarness.getInstance({
 			models: { analysis: { provider, model: 'analysis-fake' } },
-			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 		})
 
 		try {
@@ -167,7 +167,7 @@ describe('analyzeTransactionsAgent', () => {
 		})
 		const runtime = await analysisHarness.getInstance({
 			models: { analysis: { provider, model: 'analysis-fake' } },
-			sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 		})
 
 		try {

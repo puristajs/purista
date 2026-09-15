@@ -59,9 +59,11 @@ PURISTA stream, declare `AI_SDK_UI_MESSAGE_STREAM_V1_PROTOCOL` and use
 `pipeHarnessUIMessageStream(events, writer, request)`; Hono supplies the
 standard headers and the adapter owns projection and cancellation.
 
-Concrete models, admission, storage, memory, sandbox, sandbox binding,
+Concrete models, admission, storage, memory, sandbox adapter and policy,
 workspace, artifacts, logger, and telemetry are supplied under the service
-`ai` instance config. PURISTA StateStore is not Harness checkpoint storage,
+`ai` instance config. Bind sandbox infrastructure as
+`ai.sandbox: { adapter, policy? }`; private partitions are the default and
+named-group sharing requires `policy.sharing: 'declared'`. PURISTA StateStore is not Harness checkpoint storage,
 and transactional records remain behind database resources.
 
 Every `defineAgent(...)` call must declare a user-chosen purpose model alias.

@@ -110,7 +110,7 @@ Installing or operating a policy engine alone does not wire it into Harness.
 
 | Feature | Package or peer | What enables it | Missing or incompatible behavior |
 | --- | --- | --- | --- |
-| Files-and-search in-memory sandbox | Included in core | Pass `sandbox: inMemorySandbox()` to `getInstance(...)` or use the auto-detected fallback | Declares `sandbox.fs` and `sandbox.text_search`; execution methods are unavailable. |
+| Files-and-search in-memory sandbox | Included in core | Pass `sandbox: { adapter: inMemorySandbox() }` to `getInstance(...)` or use the auto-detected fallback | Declares `sandbox.fs` and `sandbox.text_search`; execution methods are unavailable. |
 | Emulated Bash sandbox | Optional `just-bash@^3.4.1` peer | Install the peer and register `bashSandbox()` or allow auto-detection | Explicit `bashSandbox()` fails with an actionable configuration error when the peer is absent. |
 | Docker sandbox | `@purista/harness-sandbox-docker` | Provision Docker/OrbStack, register the adapter, and prepare a compatible image | Package installation alone does not grant daemon access or isolation. See [local Docker sandbox](/handbook/harness/secure-and-govern/local-docker-sandbox/). |
 | Kubernetes sandbox/workspace | `@purista/harness-sandbox-kubernetes` | Provision namespaced RBAC, restricted image, quota/limits/network policy, PVC CSI support, and optional snapshots; register the returned adapters | Package installation does not grant cluster authority or make a CSI driver available. See [Kubernetes sandbox](/handbook/harness/secure-and-govern/kubernetes-sandbox/). |

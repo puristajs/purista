@@ -12,7 +12,7 @@ describe('createAiExecution', () => {
 			const runtime = createAiExecution({ PURISTA_LOCAL_RUNTIME_ROOT: root })
 			expect(runtime.mode).toBe('local')
 			expect(runtime.ai.storage.capabilities).toContain('storage.persistent')
-			expect(runtime.ai.sandbox.capabilities).toContain('sandbox.text_search')
+			expect(runtime.ai.sandbox.adapter.capabilities).toContain('sandbox.text_search')
 			expect(runtime.ai.workspace?.capabilities).toContain('workspace.durable')
 			await Promise.all([runtime.close(), runtime.close()])
 		} finally {

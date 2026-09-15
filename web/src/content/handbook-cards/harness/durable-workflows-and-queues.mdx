@@ -53,7 +53,7 @@ const definition = defineHarness({ name: 'claimsReviewWorker' })
 	.addWorkflow(recoverClaims)
 const harness = await definition.getInstance({
 	storage: durable.storage,
-	sandbox: durable.sandbox,
+	sandbox: { adapter: durable.sandbox },
 	workspace: durable.workspace,
 })
 ```

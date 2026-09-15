@@ -85,8 +85,9 @@ const support = await supportV1Service.getInstance(eventBridge, {
     models: { classification: { provider, model: 'provider-model-id' } },
     storage: harnessStorage,
     memory,
-    sandbox,
-    sandboxBinding,
+    sandbox: {
+      adapter: sandbox,
+    },
     workspace,
   },
 })
@@ -95,6 +96,12 @@ const support = await supportV1Service.getInstance(eventBridge, {
 The service owns Harness lifecycle and closes its instance during destruction.
 Use application-owned logical session ids; trusted tenant/principal identity is
 provided by the Framework, never by a payload.
+
+The adapter is execution infrastructure. Its policy is optional: private
+partitions are the default. A graph that declares `sandbox: { group: 'name' }`
+needs `policy: { sharing: 'declared' }`; no runtime group list is repeated.
+Use `authorizeBorrowedOwner` only when an application intentionally permits an
+existing owner to be attached after its own authorization decision.
 
 ## Tools, streaming, and tests
 

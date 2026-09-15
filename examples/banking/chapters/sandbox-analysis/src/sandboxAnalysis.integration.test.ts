@@ -24,7 +24,7 @@ describe('sandbox analysis over PURISTA', () => {
 			resources: { analysisPolicy: policy },
 			ai: {
 				models: { analysis: { provider, model: 'analysis-fake' } },
-				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+				sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 			},
 		})
 		await service.start()
@@ -73,7 +73,7 @@ describe('sandbox analysis over PURISTA', () => {
 			resources: { analysisPolicy: { canRun: vi.fn(async () => false) } },
 			ai: {
 				models: { analysis: { provider, model: 'analysis-fake' } },
-				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+				sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 			},
 		})
 		await service.start()
@@ -113,7 +113,7 @@ describe('sandbox analysis over PURISTA', () => {
 			resources: { analysisPolicy: policy },
 			ai: {
 				models: { analysis: { provider, model: 'analysis-fake' } },
-				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+				sandbox: { adapter: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }) },
 			},
 		})
 		await service.start()

@@ -12,7 +12,7 @@ capabilities backed by real tests.
 const definition = defineHarness({ name: 'custom-sandbox' }).addAgent(agent)
 const harness = await definition.getInstance({
   models: { answering: answeringModel },
-  sandbox: customSandbox,
+  sandbox: { adapter: customSandbox },
 })
 ```
 Run the shared sandbox contract plus platform tests for path traversal,

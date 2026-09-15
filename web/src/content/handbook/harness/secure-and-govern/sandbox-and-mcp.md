@@ -31,7 +31,7 @@ const agent = defineAgent('claimsReview', {
 const definition = defineHarness({ name: 'claims' }).addAgent(agent)
 const harness = await definition.getInstance({
   models: { review: reviewModel },
-  sandbox,
+  sandbox: { adapter: sandbox },
   mcp: {
     claims: { transport: 'http', url: process.env.CLAIMS_MCP_URL! },
   },

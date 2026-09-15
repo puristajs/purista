@@ -11,7 +11,7 @@ bind the adapter at instance creation.
 import { dockerSandbox } from '@purista/harness-sandbox-docker'
 const sandbox = dockerSandbox({ image: 'support-runner:approved', network: 'none' })
 const definition = defineHarness({ name: 'support' }).addAgent(agent)
-const harness = await definition.getInstance({ models: { answering: answeringModel }, sandbox })
+const harness = await definition.getInstance({ models: { answering: answeringModel }, sandbox: { adapter: sandbox } })
 ```
 A Docker daemon is an operational dependency. Configure filesystem mounts,
 network egress, CPU/memory limits, credentials, cleanup, and image provenance.

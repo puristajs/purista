@@ -1,5 +1,5 @@
 import { defineAgent, defineHarness, defineWorkflow } from '@purista/harness'
-import { FakeModelProvider } from '@purista/harness/testing'
+import { FakeModelProvider, FakeSandbox } from '@purista/harness/testing'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import type { EmptyObject } from '../core/types/EmptyObject.js'
@@ -41,6 +41,15 @@ const agentHarness = defineHarness({ name: 'typedAgent' }).addAgent(
 	defineAgent('answer', {
 		model: 'chat',
 		instructions: 'Answer the user.',
+		input: generatedModelSchema<string, string>({ type: 'string' }),
+		output: generatedModelSchema<string, string>({ type: 'string' }),
+	}),
+)
+const sandboxedAgentHarness = defineHarness({ name: 'sandboxedTypedAgent' }).addAgent(
+	defineAgent('review', {
+		model: 'chat',
+		instructions: 'Review the supplied input.',
+		sandbox: { group: 'reviewers' },
 		input: generatedModelSchema<string, string>({ type: 'string' }),
 		output: generatedModelSchema<string, string>({ type: 'string' }),
 	}),
@@ -181,6 +190,62 @@ describe('P4-004 public Harness mount inference', () => {
 		} finally {
 			await service.destroy()
 			// This test starts and stops without an invocation to drain registration events.
+			await new Promise<void>(resolve => setImmediate(resolve))
+			await eventBridge.destroy()
+		}
+	})
+
+	it('projects a declared sandbox group as one nested adapter and policy binding', async () => {
+		const builder = new ServiceBuilder(serviceInfo).mountHarness(sandboxedAgentHarness)
+		const eventBridge = new DefaultEventBridge()
+		const provider = new FakeModelProvider()
+		const adapter = new FakeSandbox()
+		const config = {
+			models: { chat: { provider, model: 'fake' } },
+			sandbox: {
+				adapter,
+				policy: {
+					sharing: 'declared',
+					default: { group: 'reviewers' },
+					authorizeBorrowedOwner: async () => true,
+				},
+			},
+		} satisfies MountedHarnessRuntimeConfig<typeof sandboxedAgentHarness>
+		const assertRejectedConfigs = () => {
+			// @ts-expect-error The adapter is nested below ai.sandbox.
+			void builder.getInstance(eventBridge, { ai: { models: config.models, sandbox: adapter } })
+			// @ts-expect-error A graph-declared group requires explicit deployment consent.
+			void builder.getInstance(eventBridge, { ai: { models: config.models, sandbox: { adapter } } })
+			void builder.getInstance(eventBridge, {
+				ai: {
+					models: config.models,
+					sandbox: { adapter, policy: { sharing: 'declared' } },
+					// @ts-expect-error Legacy sandboxBinding is no longer a runtime configuration field.
+					sandboxBinding: { groups: ['reviewers'] },
+				},
+			})
+			void builder.getInstance(eventBridge, {
+				ai: {
+					models: config.models,
+					sandbox: {
+						adapter,
+						policy: {
+							sharing: 'declared',
+							// @ts-expect-error Runtime group approval comes from the compiled graph, not a duplicated list.
+							groups: ['reviewers'],
+						},
+					},
+				},
+			})
+		}
+		void assertRejectedConfigs
+
+		await eventBridge.start()
+		const service = await builder.getInstance(eventBridge, { ai: config })
+		try {
+			await service.start()
+		} finally {
+			await service.destroy()
 			await new Promise<void>(resolve => setImmediate(resolve))
 			await eventBridge.destroy()
 		}

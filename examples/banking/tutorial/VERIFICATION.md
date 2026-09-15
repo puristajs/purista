@@ -10,7 +10,7 @@ From the repository root, run:
 
 ```sh
 npm run check:tutorials --prefix examples/banking
-npm run build -w @purista/web
+npm run build --prefix web
 npm run test:tutorials --prefix examples/banking
 ```
 

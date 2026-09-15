@@ -17,7 +17,7 @@ import {
 
 export type AiExecutionAdapters = {
 	readonly storage: HarnessStorage
-	readonly sandbox: Sandbox
+	readonly sandbox: { readonly adapter: Sandbox }
 	readonly workspace?: DurableWorkspace
 }
 
@@ -43,7 +43,7 @@ export function createAiExecution(
 		})
 		return {
 			mode: 'local',
-			ai: { storage: local.storage, sandbox: local.sandbox, workspace: local.workspace },
+			ai: { storage: local.storage, sandbox: { adapter: local.sandbox }, workspace: local.workspace },
 			reviewRepository: new InMemoryRollbackReviewRepository(),
 			close: once(() => local.close()),
 		}
@@ -58,7 +58,7 @@ export function createAiExecution(
 			mode: 'postgres-local',
 			ai: {
 				storage,
-				sandbox: inMemorySandbox(),
+				sandbox: { adapter: inMemorySandbox() },
 			},
 			reviewRepository: new PostgresRollbackReviewRepository(pool),
 			close: once(() => pool.end()),
@@ -90,7 +90,7 @@ export function createAiExecution(
 
 	return {
 		mode: 'kubernetes',
-		ai: { storage, sandbox: execution.sandbox, workspace: execution.workspace },
+		ai: { storage, sandbox: { adapter: execution.sandbox }, workspace: execution.workspace },
 		reviewRepository: new PostgresRollbackReviewRepository(pool),
 		close: once(async () => closeProductionRuntime(pool, execution)),
 	}

@@ -30,7 +30,7 @@ const instance = await definition.getInstance({
   storage: v4Storage,
   memory: v4Memory,
   workspace: v4Workspace,
-  sandbox: v4Sandbox,
+  sandbox: { adapter: v4Sandbox },
 })
 ~~~
 

@@ -26,7 +26,7 @@ const createReviewWorkflow = (reports: Reports) => defineWorkflow('durableReview
 export async function createReviewHarness(reports: Reports) {
   const local = localDurableExecution({ root: './.harness' })
   const definition = defineHarness({ name: 'durable-review' }).addWorkflow(createReviewWorkflow(reports))
-  return definition.getInstance({ storage: local.storage, workspace: local.workspace, sandbox: local.sandbox })
+  return definition.getInstance({ storage: local.storage, workspace: local.workspace, sandbox: { adapter: local.sandbox } })
 }
 ```
 Step IDs are part of the replay contract. Keep side effects inside a step with
