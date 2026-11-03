@@ -47,7 +47,7 @@
 	},
 	"peerDependenciesMeta": {},
 	"optionalDependencies": {
-		"@hono/node-server": "^2.1.0"
+		"@hono/node-server": "^2.1.6"
 	},
 	"types": "./dist/index.d.ts"
 }
