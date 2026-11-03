@@ -35,6 +35,6 @@
 		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@purista/core": "*",
 		"@purista/dapr-sdk": "*",
-		"zod": "^4.4.3"
+		"zod": "^4.6.7"
 	}
 }
