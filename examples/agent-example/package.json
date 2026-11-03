@@ -35,6 +35,6 @@
 		"@purista/hono-http-server": "*",
 		"@scalar/hono-api-reference": "^0.11.13",
 		"dotenv": "^17.4.2",
-		"zod": "^4.4.3"
+		"zod": "^4.6.7"
 	}
 }
