@@ -43,7 +43,7 @@
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
-		"@azure/identity": "^4.13.1",
+		"@azure/identity": "^4.14.1",
 		"@azure/keyvault-secrets": "^4.11.2",
 		"@purista/core": "*"
 	},
